@@ -33,7 +33,7 @@ jobs:
 
     - name: Install GStreamer build and runtime dependencies (Windows)
       if: runner.os == 'Windows'
-      run: C:\msys64\usr\bin\env MSYSTEM=MINGW64 C:\msys64\usr\bin\bash -l -c "pacman -S --noconfirm mingw-w64-x86_64-rust pkg-config mingw-w64-x86_64-gstreamer mingw-w64-x86_64-gst-plugins-base mingw-w64-x86_64-gst-plugins-good"
+      run: C:\msys64\usr\bin\env MSYSTEM=MINGW64 C:\msys64\usr\bin\bash -l -c "pacman -Syu --noconfirm mingw-w64-x86_64-rust pkg-config mingw-w64-x86_64-gstreamer mingw-w64-x86_64-gst-plugins-base mingw-w64-x86_64-gst-plugins-good"
 
     - name: Install GStreamer build and runtime dependencies (macOS)
       if: runner.os == 'macOS'
