@@ -23,11 +23,14 @@ jobs:
       run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good
     - name: Install GStreamer build and runtime dependencies (Windows)
       if: runner.os == 'Windows'
-      run: choco install gstreamer
+      run: |
+        choco install pkgconfiglite
+        choco install gstreamer
+        echo "::set-env name=PKG_CONFIG_PATH::c:\\gstreamer\\1.0\\x86_64\\lib\\pkgconfig$PKG_CONFIG_PATH"
     - name: Install GStreamer build and runtime dependencies (macOS)
       if: runner.os == 'macOS'
       run: brew install gstreamer gst-plugins-base gst-plugins-good
-    - name: Install latest Rust nightly toolchain
+    - name: Install latest Rust stable toolchain
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
@@ -41,4 +44,12 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --verbose --release
+        args: --release
+    - name: Strip debugging symbols from binary
+      if: runner.os == 'Linux' || runner.os == 'macOS'
+      run: strip target/release/packsquash
+    - name: Upload executable artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'PackSquash executable'
+        path: target/release/packsquash
