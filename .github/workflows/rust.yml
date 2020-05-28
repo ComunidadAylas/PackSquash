@@ -30,11 +30,33 @@ jobs:
       if: runner.os == 'Linux'
       run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good
 
-    - name: Install GStreamer build and runtime dependencies (Windows)
+    - name: Download GStreamer build dependencies (Windows)
+      if: runner.os == 'Windows'
+      uses: wei/curl@master
+      with:
+        args: https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi
+
+    - name: Download GStreamer runtime dependencies (Windows)
+      if: runner.os == 'Windows'
+      uses: wei/curl@master
+      with:
+        args: https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-msvc-x86_64-1.16.2.msi
+
+    - name: Install pkgconfiglite (Windows)
+      if: runner.os == 'Windows'
+      run: choco install pkgconfiglite
+
+    - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
       env:
         GSTREAMER_1_0_ROOT_X86_64: C:\\gstreamer\\1.0\\x86_64
-      run: choco install pkgconfiglite gstreamer
+      run: msiexec /i gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi
+
+    - name: Install GStreamer runtime dependencies (Windows)
+      if: runner.os == 'Windows'
+      env:
+        GSTREAMER_1_0_ROOT_X86_64: C:\\gstreamer\\1.0\\x86_64
+      run: msiexec /i gstreamer-1.0-msvc-x86_64-1.16.2.msi
 
     - name: Install GStreamer build and runtime dependencies (macOS)
       if: runner.os == 'macOS'
