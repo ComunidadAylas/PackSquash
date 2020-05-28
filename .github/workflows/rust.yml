@@ -4,7 +4,6 @@ on: [ push, pull_request ]
 
 env:
   CARGO_TERM_COLOR: always
-  GSTREAMER_1_0_ROOT_X86_64: C:\gstreamer\1.0\x86_64
 
 jobs:
   build:
