@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install GStreamer build dependencies (Linux)
       if: runner.os == 'Linux'
-      run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+      run: sudo apt-get install rust-gstreamer-audio-sys
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -32,4 +32,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Release build
-      run: cargo build --verbose --release
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --verbose --release
