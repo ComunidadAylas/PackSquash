@@ -42,7 +42,7 @@ jobs:
       uses: actions-rs/clippy-check@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        args: -- -D warnings
+        args: -- -A clippy::pedantic -D warnings
     - name: Strip debugging symbols from binary (Unix)
       if: runner.os == 'Linux' || runner.os == 'macOS'
       run: strip target/release/packsquash
