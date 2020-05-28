@@ -29,7 +29,7 @@ jobs:
       run: brew install gstreamer gst-plugins-base gst-plugins-good
     - name: Install latest Clang (Linux)
       if: runner.os == 'Linux'
-      run: sudo apt-get install clang-9
+      run: sudo apt-get install clang clang-9
     - name: Install latest Clang (Windows)
       if: runner.os == 'Windows'
       run: scoop install llvm --global
