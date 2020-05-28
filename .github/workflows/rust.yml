@@ -18,9 +18,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install GStreamer build dependencies (Linux)
+    - name: Install GStreamer build and runtime dependencies (Linux)
       if: runner.os == 'Linux'
       run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+    - name: Install GStreamer build and runtime dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: choco install gstreamer
+    - name: Install GStreamer build and runtime dependencies (MacOS)
+      if: runner.os == 'macOS'
+      run: brew install gstreamer gst-plugins-base gst-plugins-good
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
