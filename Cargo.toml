@@ -1,0 +1,28 @@
+[package]
+name = "packsquash"
+version = "0.1.0"
+authors = ["AlexTMjugador"]
+edition = "2018"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+
+[dependencies]
+lazy_static = "1.4.0"
+clap = "2.33.1"
+simple-error = "0.2.1"
+pbr = "1.0.2"
+num_cpus = "1.13.0"
+threadpool = "1.8.1"
+tempfile = "3.1.0"
+serde_json = "1.0.53"
+lodepng = "2.5.0"
+rgb = "0.8"
+imagequant = "2.12.5"
+oxipng = "3.0.0"
+gstreamer = "0.15.5"
+gstreamer-app = "0.15.4"
+crc32fast = "1.2.0"
+zopfli = "0.4.0"
