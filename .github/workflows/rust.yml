@@ -33,9 +33,6 @@ jobs:
     - name: Install latest Clang (Windows)
       if: runner.os == 'Windows'
       run: scoop install llvm --global
-    - name: Install latest Clang (macOS)
-      if: runner.os == 'macOS'
-      run: sudo xcode-select -switch /Applications/Xcode_9.app
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
