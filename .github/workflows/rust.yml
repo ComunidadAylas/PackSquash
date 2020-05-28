@@ -45,8 +45,18 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         args: -- -D warnings -A clippy::unreadable_literal 
 
-    - name: Release build
+    - name: Release build (Unix)
+      if: runner.os != 'Windows'
       uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release
+
+    - name: Release build (Windows)
+      if: runner.os == 'Windows'
+      uses: actions-rs/cargo@v1
+      env:
+        PKG_CONFIG_PATH: C:\\gstreamer\\1.0\\x86_64\\lib\\pkgconfig
       with:
         command: build
         args: --release
@@ -59,12 +69,12 @@ jobs:
       if: runner.os != 'Windows'
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable'
+        name: 'PackSquash executable (${{ runner.os }})'
         path: target/release/packsquash
 
     - name: Upload executable artifact (Windows)
       if: runner.os == 'Windows'
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable'
+        name: 'PackSquash executable (${{ runner.os }})'
         path: target/release/packsquash.exe
