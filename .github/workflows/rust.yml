@@ -24,9 +24,18 @@ jobs:
     - name: Install GStreamer build and runtime dependencies (Windows)
       if: runner.os == 'Windows'
       run: choco install gstreamer
-    - name: Install GStreamer build and runtime dependencies (MacOS)
+    - name: Install GStreamer build and runtime dependencies (macOS)
       if: runner.os == 'macOS'
       run: brew install gstreamer gst-plugins-base gst-plugins-good
+    - name: Install latest Clang (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt-get install clang-9
+    - name: Install latest Clang (Windows)
+      if: runner.os == 'Windows'
+      run: scoop install llvm --global
+    - name: Install latest Clang (macOS)
+      if: runner.os == 'macOS'
+      run: sudo xcode-select -switch /Applications/Xcode_9.app
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -39,6 +48,9 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Release build
       uses: actions-rs/cargo@v1
+      env:
+        CC: clang
+        CXX: clang++
       with:
         command: build
         args: --verbose --release
