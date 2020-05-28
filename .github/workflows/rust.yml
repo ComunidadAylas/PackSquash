@@ -36,11 +36,11 @@ jobs:
 
     - name: Download GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
-      run: https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi
+      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi
 
     - name: Download GStreamer runtime dependencies (Windows)
       if: runner.os == 'Windows'
-      run: https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-msvc-x86_64-1.16.2.msi
+      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-msvc-x86_64-1.16.2.msi
 
     - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
