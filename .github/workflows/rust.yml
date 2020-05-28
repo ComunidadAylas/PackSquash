@@ -33,17 +33,17 @@ jobs:
     - name: Install GStreamer build and runtime dependencies (macOS)
       if: runner.os == 'macOS'
       run: brew install gstreamer gst-plugins-base gst-plugins-good
-    - name: Release build
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --release
     - name: Clippy check (Linux)
       if: runner.os == 'Linux'
       uses: actions-rs/clippy-check@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         args: -- -A clippy::pedantic -D warnings
+    - name: Release build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release
     - name: Strip debugging symbols from binary (Unix)
       if: runner.os == 'Linux' || runner.os == 'macOS'
       run: strip target/release/packsquash
