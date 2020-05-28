@@ -38,7 +38,7 @@ jobs:
       uses: actions-rs/clippy-check@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        args: -- -A clippy::pedantic -D warnings
+        args: -- -A clippy::unreadable_literal -D warnings
     - name: Release build
       uses: actions-rs/cargo@v1
       with:
