@@ -32,6 +32,8 @@ jobs:
 
     - name: Install GStreamer build and runtime dependencies (Windows)
       if: runner.os == 'Windows'
+      env:
+        GSTREAMER_1_0_ROOT_X86_64: C:\\gstreamer\\1.0\\x86_64
       run: choco install pkgconfiglite gstreamer
 
     - name: Install GStreamer build and runtime dependencies (macOS)
