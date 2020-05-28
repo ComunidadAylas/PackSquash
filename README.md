@@ -10,6 +10,9 @@ PackSquash analyzes all the resource pack files in a directory, applying file ty
 
 In addition to these techniques, all files are compressed in the generated ZIP file using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, but tests with ~200 files resource packs show that it is still fast enough.
 
+## Download
+To get PackSquash, you can build it yourself, like the CI action in this repository does. Alternatively, you can get a pre-built release for 64-bit Windows, Linux and macOS systems from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
+
 ## Usage
 ```
 PackSquash 0.1.0
