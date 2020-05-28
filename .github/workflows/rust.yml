@@ -4,6 +4,7 @@ on: [ push, pull_request ]
 
 env:
   CARGO_TERM_COLOR: always
+  GSTREAMER_1_0_ROOT_X86_64: C:\gstreamer\1.0\x86_64
 
 jobs:
   build:
@@ -28,7 +29,7 @@ jobs:
 
     - name: Install GStreamer build and runtime dependencies (Linux)
       if: runner.os == 'Linux'
-      run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+      run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
     - name: Install Curl and pkgconfiglite (Windows)
       if: runner.os == 'Windows'
@@ -36,27 +37,15 @@ jobs:
 
     - name: Download GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
-      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi
-
-    - name: Download GStreamer runtime dependencies (Windows)
-      if: runner.os == 'Windows'
-      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-msvc-x86_64-1.16.2.msi
+      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi --output gstreamer-1.0-devel-msvc-x86_64.msi
 
     - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
-      env:
-        GSTREAMER_1_0_ROOT_X86_64: C:\\gstreamer\\1.0\\x86_64
-      run: msiexec /i gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi
-
-    - name: Install GStreamer runtime dependencies (Windows)
-      if: runner.os == 'Windows'
-      env:
-        GSTREAMER_1_0_ROOT_X86_64: C:\\gstreamer\\1.0\\x86_64
-      run: msiexec /i gstreamer-1.0-msvc-x86_64-1.16.2.msi
+      run: msiexec /i gstreamer-1.0-devel-msvc-x86_64.msi /qn
 
     - name: Install GStreamer build and runtime dependencies (macOS)
       if: runner.os == 'macOS'
-      run: brew install gstreamer gst-plugins-base gst-plugins-good
+      run: brew install gstreamer gst-plugins-base
 
     - name: Clippy check (Linux)
       if: runner.os == 'Linux'
@@ -76,7 +65,7 @@ jobs:
       if: runner.os == 'Windows'
       uses: actions-rs/cargo@v1
       env:
-        PKG_CONFIG_PATH: C:\\gstreamer\\1.0\\x86_64\\lib\\pkgconfig
+        PKG_CONFIG_PATH: C:\gstreamer\1.0\x86_64\lib\pkgconfig
       with:
         command: build
         args: --release

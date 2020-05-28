@@ -75,6 +75,7 @@ impl ZipCompressionMethod {
 				(compressed_data, Some(crc)) => (compressed_data, crc),
 				(_, None) => panic!("Assertion failed")
 			};
+
 		let stored_data = match ZipCompressionMethod::STORE.compress(data, false) {
 			(passthrough_data, None) => passthrough_data,
 			_ => panic!("Assertion failed")
@@ -105,7 +106,7 @@ impl ZipFileType {
 	fn to_ms_dos_attributes(&self) -> u8 {
 		match self {
 			ZipFileType::RegularFile => 0x01 // FILE_ATTRIBUTE_READONLY
-			                                 //ZipFileType::Folder => 0x10 // FILE_ATTRIBUTE_DIRECTORY (16)
+			//ZipFileType::Folder => 0x10    // FILE_ATTRIBUTE_DIRECTORY (16)
 		}
 	}
 }
@@ -317,7 +318,7 @@ pub struct MicroZip {
 impl MicroZip {
 	pub fn new(file_count_estimate: usize, use_zip_obfuscation: bool) -> MicroZip {
 		MicroZip {
-			temp_out_file: RwLock::new(SpooledTempFile::new(32 * 1024 * 1024)), // 32 MiB
+			temp_out_file: RwLock::new(SpooledTempFile::new(64 * 1024 * 1024)), // 64 MiB
 			stored_file_paths: RwLock::new(HashSet::with_capacity(file_count_estimate)),
 			partial_central_directory_entries: RwLock::new(Vec::with_capacity(file_count_estimate)),
 			obfuscate: use_zip_obfuscation,
@@ -382,7 +383,9 @@ impl MicroZip {
 							(compressed_data, Some(crc)) => {
 								(ZipCompressionMethod::STORE, compressed_data, crc)
 							}
-							_ => panic!("The contract of compress was violated")
+							_ => return Err(Box::new(
+								SimpleError::new("The contract of compress was violated"))
+							)
 						}
 					} else {
 						ZipCompressionMethod::best_compress(data)
