@@ -27,13 +27,10 @@ jobs:
     - name: Install GStreamer build and runtime dependencies (macOS)
       if: runner.os == 'macOS'
       run: brew install gstreamer gst-plugins-base gst-plugins-good
-    - name: Install GCC 9 (Linux)
-      if: runner.os == 'Linux'
-      run: sudo apt-get install gcc-9
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: nightly
+        toolchain: stable
         override: true
         components: rustfmt, clippy
     - name: Clippy check
