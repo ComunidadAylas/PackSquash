@@ -1,13 +1,11 @@
 use std::error::Error;
 use std::ffi::OsStr;
 use std::fs::{self, File};
-use std::io::{BufReader, Write};
+use std::io::BufReader;
 use std::path::PathBuf;
 use std::sync::{Arc, Once, RwLock};
 
 use simple_error::SimpleError;
-
-use pbr::ProgressBar;
 
 use imagequant::Attributes;
 use imagequant::Image;
@@ -33,11 +31,11 @@ lazy_static! {
 
 static GSTREAMER_INIT: Once = Once::new();
 
-pub trait ResourcePackFile<T: Write> {
-	/// Processes this resource pack file, returning its processed byte contents
-	/// and updating the progress status. A descriptive string containing the performed
-	/// action with the file is also returned in the tuple.
-	fn process(&self, progress: &mut ProgressBar<T>) -> Result<(Vec<u8>, String), Box<dyn Error>>;
+pub trait ResourcePackFile {
+	/// Processes this resource pack file, returning its processed byte contents.
+	/// A descriptive string containing the performed action with the file is also
+	/// returned in the tuple.
+	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>>;
 
 	/// Returns the canonical extension for this resource pack file, to use for
 	/// the resulting ZIP file.
@@ -49,11 +47,11 @@ pub trait ResourcePackFile<T: Write> {
 }
 
 /// Converts a path to a resource pack file object.
-pub fn path_to_resource_pack_file<T: Write>(
+pub fn path_to_resource_pack_file(
 	path: &PathBuf,
 	skip_pack_icon: bool,
 	path_in_root: bool
-) -> Option<Box<dyn ResourcePackFile<T>>> {
+) -> Option<Box<dyn ResourcePackFile>> {
 	let empty_os_str = OsStr::new("");
 	let extension = path.extension().unwrap_or(empty_os_str);
 
@@ -62,8 +60,7 @@ pub fn path_to_resource_pack_file<T: Write>(
 			path: path.to_path_buf()
 		}))
 	} else if extension == "png" {
-		if path_in_root && skip_pack_icon && path.file_name().unwrap_or(empty_os_str) == "pack.png"
-		{
+		if path_in_root && skip_pack_icon && path.file_name().unwrap_or(empty_os_str) == "pack.png" {
 			// Ignore pack.png if desired, as it is not visible for server resource packs
 			None
 		} else {
@@ -71,8 +68,7 @@ pub fn path_to_resource_pack_file<T: Write>(
 				path: path.to_path_buf()
 			}))
 		}
-	} else if extension == "ogg" || extension == "oga" || extension == "flac" || extension == "wav"
-	{
+	} else if extension == "ogg" || extension == "oga" || extension == "flac" || extension == "wav" {
 		Some(Box::new(OggFile {
 			path: path.to_path_buf()
 		}))
@@ -98,12 +94,11 @@ struct JsonFile {
 	path: PathBuf
 }
 
-impl<T: Write> ResourcePackFile<T> for JsonFile {
-	fn process(&self, progress: &mut ProgressBar<T>) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+impl ResourcePackFile for JsonFile {
+	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
 		// Parse the JSON so we know how to serialize it again in a compact manner
 		let json_value: Value = serde_json::from_reader(BufReader::new(File::open(&self.path)?))?;
 
-		progress.tick();
 		Ok((
 			json_value.to_string().into_bytes(),
 			JSON_COMPACTED.to_string()
@@ -124,12 +119,11 @@ struct PngFile {
 	path: PathBuf
 }
 
-impl<T: Write> ResourcePackFile<T> for PngFile {
-	fn process(&self, progress: &mut ProgressBar<T>) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+impl ResourcePackFile for PngFile {
+	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
 		// Read the image to a memory struct
 		let image = lodepng::decode32_file(&self.path)?;
 		let image_bytes = image.buffer.as_ref();
-		progress.tick();
 
 		let mut compression_attributes = Attributes::new();
 		compression_attributes.set_max_colors(256);
@@ -143,7 +137,6 @@ impl<T: Write> ResourcePackFile<T> for PngFile {
 			image.height,
 			0.0
 		)?;
-		progress.tick();
 
 		// Quantize the image and remap it, so it uses the computed palette
 		let mut quantization_result = compression_attributes.quantize(&image)?;
@@ -151,7 +144,6 @@ impl<T: Write> ResourcePackFile<T> for PngFile {
 		let (palette, image_bytes) = quantization_result.remapped(&mut image)?;
 		let mut encoder = Encoder::new();
 		let color_mode = encoder.info_raw_mut();
-		progress.tick();
 
 		// Store used palette information
 		color_mode.colortype = ColorType::PALETTE;
@@ -161,9 +153,8 @@ impl<T: Write> ResourcePackFile<T> for PngFile {
 		}
 
 		let encoded_png = encoder.encode(&image_bytes, image.width(), image.height())?;
-		progress.tick();
 
-		// Init OxiPNG optimization settings settings
+		// Init OxiPNG optimization settings
 		let mut alpha_optimizations = IndexSet::with_capacity(6);
 		alpha_optimizations.insert(AlphaOptim::Black);
 		alpha_optimizations.insert(AlphaOptim::Down);
@@ -179,8 +170,6 @@ impl<T: Write> ResourcePackFile<T> for PngFile {
 		optimization_filters.insert(3);
 		optimization_filters.insert(4);
 		optimization_filters.insert(5);
-
-		progress.tick();
 
 		// Optimize the palette reduced PNG with Zopfli
 		// compression and more things that LodePNG and imagequant
@@ -207,7 +196,6 @@ impl<T: Write> ResourcePackFile<T> for PngFile {
 			}
 		)?;
 
-		progress.tick();
 		Ok((
 			optimized_png,
 			format!(
@@ -231,8 +219,8 @@ struct OggFile {
 	path: PathBuf
 }
 
-impl<T: Write> ResourcePackFile<T> for OggFile {
-	fn process(&self, progress: &mut ProgressBar<T>) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+impl ResourcePackFile for OggFile {
+	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
 		GSTREAMER_INIT.call_once(|| {
 			gstreamer::init().unwrap();
 		});
@@ -263,8 +251,6 @@ impl<T: Write> ResourcePackFile<T> for OggFile {
 		let sink_element = gstreamer::ElementFactory::make("appsink", None)?;
 		sink_element.set_property("sync", &false)?; // Output at max speed, not realtime
 
-		progress.tick();
-
 		let gstreamer_pipeline = gstreamer::Pipeline::new(None);
 
 		gstreamer_pipeline.add_many(&[
@@ -288,8 +274,6 @@ impl<T: Write> ResourcePackFile<T> for OggFile {
 		downsample_filter_element.link(&enc_element)?;
 		enc_element.link(&mux_element)?;
 		mux_element.link(&sink_element)?;
-
-		progress.tick();
 
 		// Handle the demuxer receiving a source pad
 		let dec_element_weak = dec_element.downgrade();
@@ -370,25 +354,21 @@ impl<T: Write> ResourcePackFile<T> for OggFile {
 
 		gstreamer_pipeline.set_state(gstreamer::State::Playing)?;
 
-		progress.tick();
-
 		// Handle errors and end of stream
 		let bus = gstreamer_pipeline.get_bus().unwrap();
 		for msg in bus.iter_timed(gstreamer::CLOCK_TIME_NONE) {
-			match msg.view() {
-				MessageView::Eos(..) => break,
-				MessageView::Error(err) => {
-					gstreamer_pipeline.set_state(gstreamer::State::Null)?;
+			let message_view = msg.view();
 
-					return Err(Box::new(SimpleError::new(
-						err.get_debug().unwrap_or_else(|| String::from("unknown"))
-					)));
-				}
-				_ => progress.tick()
+			if let MessageView::Eos(..) = message_view {
+				break;
+			} else if let MessageView::Error(err) = message_view {
+				gstreamer_pipeline.set_state(gstreamer::State::Null)?;
+
+				return Err(Box::new(SimpleError::new(
+					err.get_debug().unwrap_or_else(|| String::from("unknown"))
+				)));
 			}
 		}
-
-		progress.tick();
 
 		// Clean up state before returning
 		gstreamer_pipeline.set_state(gstreamer::State::Null)?;
@@ -420,8 +400,8 @@ struct PassthroughFile<'a> {
 	is_compressed: bool
 }
 
-impl<'a, T: Write> ResourcePackFile<T> for PassthroughFile<'a> {
-	fn process(&self, _progress: &mut ProgressBar<T>) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+impl<'a> ResourcePackFile for PassthroughFile<'a> {
+	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
 		// Just copy file contents to memory
 		Ok((fs::read(&self.path)?, String::from(self.message)))
 	}

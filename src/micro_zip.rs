@@ -15,8 +15,6 @@ use simple_error::SimpleError;
 
 use crc32fast::Hasher;
 
-use pbr::ProgressBar;
-
 /// Compression methods supported by Minecraft in a ZIP file.
 enum ZipCompressionMethod {
 	DEFLATE,
@@ -106,7 +104,7 @@ impl ZipFileType {
 	fn to_ms_dos_attributes(&self) -> u8 {
 		match self {
 			ZipFileType::RegularFile => 0x01 // FILE_ATTRIBUTE_READONLY
-			//ZipFileType::Folder => 0x10    // FILE_ATTRIBUTE_DIRECTORY (16)
+			                                 //ZipFileType::Folder => 0x10    // FILE_ATTRIBUTE_DIRECTORY (16)
 		}
 	}
 }
@@ -153,7 +151,7 @@ struct CentralDirectoryFileHeader {
 impl Default for CentralDirectoryFileHeader {
 	fn default() -> CentralDirectoryFileHeader {
 		CentralDirectoryFileHeader {
-			signature: 0x02014b50,         // Magic number from the spec
+			signature: 0x02014B50,         // Magic number from the spec
 			version_made_by: 20,           // MS-DOS OS, 2.0 ZIP spec compliance
 			version_needed_to_extract: 20, // MS-DOS OS. Zip spec version may be higher than actually needed
 			general_purpose_bit_flag: 0,   // Irrelevant metadata, always 0
@@ -225,7 +223,7 @@ struct LocalFileHeader<'a> {
 impl<'a> Default for LocalFileHeader<'a> {
 	fn default() -> LocalFileHeader<'a> {
 		LocalFileHeader {
-			signature: 0x04034b50, // Magic number from the spec
+			signature: 0x04034B50, // Magic number from the spec
 			version_needed_to_extract: 20,
 			general_purpose_bit_flag: 0,
 			last_mod_time: 0,
@@ -277,7 +275,7 @@ struct CentralDirectoryEndRecord {
 impl Default for CentralDirectoryEndRecord {
 	fn default() -> CentralDirectoryEndRecord {
 		CentralDirectoryEndRecord {
-			signature: 0x06054b50,           // Magic number from the spec
+			signature: 0x06054B50,           // Magic number from the spec
 			disk_number: 0,                  // No multi-disk support
 			central_directory_start_disk: 0, // No multi-disk support
 			comment_length: 0,               // No comments
@@ -328,13 +326,12 @@ impl MicroZip {
 
 	/// Adds a file to the to-be-finished ZIP file represented by this struct,
 	/// returning an error if something went wrong during the operation.
-	pub fn add_file<W: Write>(
+	pub fn add_file(
 		&self,
 		relativized_path: &PathBuf,
 		file_type: ZipFileType,
 		data: &[u8],
-		skip_compression: bool,
-		progress: &mut ProgressBar<W>
+		skip_compression: bool
 	) -> Result<(), Box<dyn Error>> {
 		if self.writing_central_directory.load(Ordering::SeqCst) {
 			return Err(Box::new(SimpleError::new(
@@ -383,9 +380,11 @@ impl MicroZip {
 							(compressed_data, Some(crc)) => {
 								(ZipCompressionMethod::STORE, compressed_data, crc)
 							}
-							_ => return Err(Box::new(
-								SimpleError::new("The contract of compress was violated"))
-							)
+							_ => {
+								return Err(Box::new(SimpleError::new(
+									"The contract of compress was violated"
+								)))
+							}
 						}
 					} else {
 						ZipCompressionMethod::best_compress(data)
@@ -399,8 +398,6 @@ impl MicroZip {
 					"The compressed data is too big for ZIP32"
 				)));
 			}
-
-			progress.tick();
 
 			// Generate the local file header
 			let actual_path_str = path_str_arc.as_ref().as_bytes();
@@ -453,8 +450,6 @@ impl MicroZip {
 						)))
 					}
 				};
-
-			progress.tick();
 
 			partial_central_directory_entries.push(PartialCentralDirectoryFileHeader {
 				compression_method: zip_compression_method_field,
