@@ -56,7 +56,7 @@ fn run(parameters: ArgMatches) -> Result<(), Box<dyn Error>> {
 	let threads = cmp::max(
 		match parameters.value_of("number of threads") {
 			Some(threads_string) => threads_string.parse(),
-			None => Ok(num_cpus::get() * 2)
+			None => Ok(num_cpus::get())
 		}?,
 		1
 	);
