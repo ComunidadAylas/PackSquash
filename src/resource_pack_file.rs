@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::error::Error;
 use std::ffi::OsStr;
 use std::fs::{self, File};
@@ -21,12 +22,15 @@ use gstreamer::caps::Caps;
 use gstreamer::prelude::*;
 use gstreamer::MessageView;
 
+use java_properties::{PropertiesIter, PropertiesWriter, LineEnding};
+
 use lazy_static::lazy_static;
 
 lazy_static! {
 	static ref JSON_COMPACTED: String = String::from("JSON compacted");
 	static ref OGG_COMPRESSED: String =
 		String::from("OGG compressed. Consider removing tags for extra savings");
+	static ref PROPERTIES_COMPACTED: String = String::from("Properties compacted");
 }
 
 static GSTREAMER_INIT: Once = Once::new();
@@ -50,7 +54,8 @@ pub trait ResourcePackFile {
 pub fn path_to_resource_pack_file(
 	path: &PathBuf,
 	skip_pack_icon: bool,
-	path_in_root: bool
+	path_in_root: bool,
+	process_mod_files: bool
 ) -> Option<Box<dyn ResourcePackFile>> {
 	let empty_os_str = OsStr::new("");
 	let extension = path.extension().unwrap_or(empty_os_str);
@@ -83,6 +88,11 @@ pub fn path_to_resource_pack_file(
 			path: path.to_path_buf(),
 			message: "Copied",
 			is_compressed: false
+		}))
+	} else if extension == "properties" && process_mod_files {
+		// These files are used for OptiFine resource packs
+		Some(Box::new(PropertiesFile {
+			path: path.to_path_buf()
 		}))
 	} else {
 		// Unknown file type
@@ -391,6 +401,43 @@ impl ResourcePackFile for OggFile {
 
 	fn is_compressed(&self) -> bool {
 		true
+	}
+}
+
+struct PropertiesFile {
+	path: PathBuf
+}
+
+impl ResourcePackFile for PropertiesFile {
+	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+		let estimated_result_size = match fs::metadata(&self.path) {
+			Ok(file_meta) => file_meta.len().try_into().unwrap_or(0),
+			_ => 0
+		};
+
+		let mut compacted_properties = Vec::with_capacity(estimated_result_size);
+		let mut compacted_properties_writer = PropertiesWriter::new(&mut compacted_properties);
+
+		// Normalize line endings and separators
+		compacted_properties_writer.set_line_ending(LineEnding::LF);
+		compacted_properties_writer.set_kv_separator("=")?;
+
+		// Read key-value pairs from the input file, and write them without comments
+		// in the tersest way possible
+		PropertiesIter::new(BufReader::new(File::open(&self.path)?)).read_into(|key, value| {
+			compacted_properties_writer.write(&key, &value).unwrap();
+		})?;
+
+		Ok((compacted_properties, PROPERTIES_COMPACTED.to_string()))
+	}
+
+	fn canonical_extension(&self) -> &str {
+		// Passthrough
+		self.path.extension().unwrap().to_str().unwrap()
+	}
+
+	fn is_compressed(&self) -> bool {
+		false
 	}
 }
 
