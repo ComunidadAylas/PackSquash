@@ -28,7 +28,7 @@ jobs:
 
     - name: Install GStreamer build and runtime dependencies (Linux)
       if: runner.os == 'Linux'
-      run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+      run: sudo apt-get update && sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
     - name: Install Curl and pkgconfiglite (Windows)
       if: runner.os == 'Windows'
