@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Packsquash : A fast Minecraft resource pack lossy compressor. It is able to reduce resource pack ZIP file sizes up to 7 times, which allows for efficient distribution and slightly improved game performance.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Packsquash</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ComunidadAylas/PackSquash">View on GitHub</a>
+
+          <h1 id="project_title">Packsquash</h1>
+          <h2 id="project_tagline">A fast Minecraft resource pack lossy compressor. It is able to reduce resource pack ZIP file sizes up to 7 times, which allows for efficient distribution and slightly improved game performance.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/ComunidadAylas/PackSquash/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/ComunidadAylas/PackSquash/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="packsquash" class="anchor" href="#packsquash" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>PackSquash</h1>
+<p>A fast Minecraft resource pack lossy compressor. It is able to reduce resource pack ZIP file sizes up to 7 times, which allows for efficient distribution and slightly improved game performance.</p>
+<h2>
+<a id="how-does-it-work" class="anchor" href="#how-does-it-work" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How does it work?</h2>
+<p>PackSquash analyzes all the resource pack files in a directory, applying file type specific compression techniques to each one. Currently, these techniques are:</p>
+<ul>
+<li>For PNG images: color quantization and palette generation (up to 256 colors), coupled with lossless bit depth, compression and color type reduction techniques. These operations are performed by the well known <code>imagequant</code> (used in <code>pngquant</code>) and <code>oxipng</code> libraries. For Minecraft style textures, up to 16x16 pixels in size, this results in dramatic size savings without any visual quality loss. The space savings also traslate to bigger textures, but they may incur in a slight visual quality loss, depending on how many colors it uses.</li>
+<li>For OGG, FLAC, WAV and OGA sounds: downmixing to mono, resampling to 32 kHz and reencoding to OGG with a 40-96 kbit/s bitrate. These settings are good enough for in-game audio, and may improve game performance. Downmixing to mono also has the added benefit of allowing better 3D sound positioning for some use cases.</li>
+<li>For JSON files: minification, by removing unneeded whitespace. As a side bonus, because minification requires parsing the JSON first, PackSquash also acts as a JSON file validator.</li>
+<li>For Java property files (only if the -m flag is used): minification, by removing unneeded whitespace. As with JSON files, performing minification requires parsing the file, so PackSquash will show any validation error.</li>
+</ul>
+<p>In addition to these techniques, all files are compressed in the generated ZIP file using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, but tests with ~200 files resource packs show that it is still fast enough.</p>
+<h2>
+<a id="download" class="anchor" href="#download" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Download</h2>
+<p>To get PackSquash, you can build it yourself, like the CI action in this repository does. You will also need to install both the development and runtime GStreamer libraries manually.</p>
+<p>You can get a pre-built release for 64-bit Windows, Linux and macOS systems from <a href="https://github.com/ComunidadAylas/PackSquash/releases/latest">here</a>.</p>
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+<pre><code>PackSquash 0.1.2
+AlexTMjugador
+Lossily compresses and prepares Minecraft resource packs for distribution
+
+USAGE:
+    packsquash [FLAGS] [OPTIONS] &lt;resource pack directory&gt; [result ZIP file]
+
+FLAGS:
+    -c, --compress-compressed
+            If specified, resource files that are already compressed by design (like PNG and OGG files) will be
+            losslessly compressed again in the result ZIP file, unless that yields no significant space savings. This is
+            disabled by default, as it is expected that compressing already compressed file formats yields marginal
+            space savings that do not outweigh the time cost.
+    -a, --do-not-ignore-system-and-hiden-files
+            If specified, filenames which start with a dot or are likely generated by a software system (Windows,
+            VCS...) won't be skipped without a message.
+    -m, --include-mod-files
+            If specified, resource pack files ignored by vanilla Minecraft clients, but used by modified clients, will
+            be included and processed. Currently, setting this option enables processing and including OptiFine property
+            files in the output ZIP.
+    -o, --zip-obfuscation
+            If provided, the generated ZIP file will not be able to be read by some common programs, like WinRAR, 7-Zip
+            or unzip, but will function normally within Minecraft. It will also not duplicate some metadata in the ZIP
+            file, reducing its size a bit more. You shouldn't rely on this feature to keep the resources safe from
+            unauthorized ripping, and there is a low possibility that a future version of Minecraft rejects these ZIP
+            files. Therefore, it is disabled by default.
+    -h, --help                                    Prints help information.
+    -n, --skip-pack-icon
+            If specified, the pack icon in pack.png will be skipped and not included in the resulting file.
+
+    -V, --version                                 Prints version information
+
+OPTIONS:
+    -t, --threads &lt;THREADS&gt;    The number of resource pack files to process in parallel, in different threads. By
+                               default, a value appropriate to the CPU the program is running on is used, but you might
+                               want to decrease it to reduce memory usage.
+
+ARGS:
+    &lt;resource pack directory&gt;    The directory where the resource pack to process is.
+    &lt;result ZIP file&gt;            The path to the resulting ZIP file, ready to be distributed.
+</code></pre>
+<h2>
+<a id="potentials-for-improvement" class="anchor" href="#potentials-for-improvement" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Potentials for improvement</h2>
+<p>These are some tweaks to the application which could further improve the compression it achieves, but are not scheduled for a release. Feel free to submit a PR with some (or all) of these changes!</p>
+<ul>
+<li>Determine unused assets (models, textures, sounds...) by analyzing JSON files, and skip them from the result ZIP file.</li>
+<li>Understand the OGG format more, to remove metadata from it.</li>
+<li>Implement TTF minification.</li>
+<li>Implement an "append mode", which only adds to a result ZIP file resource pack files which are newer than it (so the entire ZIP file isn't generated again if a single file changes).</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Packsquash maintained by <a href="https://github.com/ComunidadAylas">ComunidadAylas</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
