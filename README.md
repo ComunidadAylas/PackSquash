@@ -1,22 +1,24 @@
-# PackSquash
-A fast Minecraft resource pack lossy compressor. It is able to reduce resource pack ZIP file sizes up to 7 times, which allows for efficient distribution and slightly improved game performance.
+# PackSquash ![Rust CI](https://github.com/ComunidadAylas/PackSquash/workflows/Rust%20CI/badge.svg) ![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version) ![GitHub Releases downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/latest/total?label=Downloads)
+A Minecraft resource pack compressor which aims to achieve the best possible compression, at good speed. According to internal usage in a production Minecraft server, it is able to reduce resource pack ZIP file sizes 10 times, which allows for efficient distribution and slightly improved load times in the game, in a couple of minutes.
 
-## How does it work?
-PackSquash analyzes all the resource pack files in a directory, applying file type specific compression techniques to each one. Currently, these techniques are:
+## 🔎 How does it work?
+PackSquash walks through the resource pack files in a directory, applying lossy and lossless compression techniques specific to each file type, and builds a ZIP file with the results that can be used by Minecraft directly. Currently, it does the following compression techniques:
 
-* For PNG images: color quantization and palette generation (up to 256 colors), coupled with lossless bit depth, compression and color type reduction techniques. These operations are performed by the well known `imagequant` (used in `pngquant`) and `oxipng` libraries. For Minecraft style textures, up to 16x16 pixels in size, this results in dramatic size savings without any visual quality loss. The space savings also traslate to bigger textures, but they may incur in a slight visual quality loss, depending on how many colors it uses.
-* For OGG, FLAC, WAV and OGA sounds: downmixing to mono, resampling to 32 kHz and reencoding to OGG with a 40-96 kbit/s bitrate. These settings are good enough for in-game audio, and may improve game performance. Downmixing to mono also has the added benefit of allowing better 3D sound positioning for some use cases.
-* For JSON files: minification, by removing unneeded whitespace. As a side bonus, because minification requires parsing the JSON first, PackSquash also acts as a JSON file validator.
-* For Java property files (only if the -m flag is used): minification, by removing unneeded whitespace. As with JSON files, performing minification requires parsing the file, so PackSquash will show any validation error.
+* For PNG images: color quantization and palette generation (up to 256 colors), coupled with lossless bit depth, compression and color type reduction techniques. These operations are performed by the well known `imagequant` (used in `pngquant`) and `oxipng` libraries. For Minecraft style textures, up to 16x16 pixels in size, this results in dramatic size savings without any visual quality loss. The space savings also translate to bigger textures, but a slight visual quality loss may occur if they use more than 256 colors.
+* For OGG, FLAC, WAV and OGA sounds: downmixing to mono, resampling to 32 kHz and reencoding to OGG with a 40-96 kbit/s bitrate. These settings are good enough for in-game audio, and most listeners won't notice any difference. The downmix to mono may change how the Minecraft sound engine applies positional effects to it. See the [MC-146721](https://bugs.mojang.com/browse/MC-146721) bug for more details.
+* For JSON files: minification, by removing unneeded whitespace. As a side bonus, because minification requires parsing the JSON first, PackSquash also acts as a JSON file validator. However, don't rely on it catching errors that are not against the JSON format but will nevertheless confuse Minecraft, like duplicated entries in an object.
+* For Java property files (only if the `-m` flag is used): minification, by removing unneeded whitespace. As with JSON files, performing minification requires parsing the file, so PackSquash will show basic validation errors.
 
-In addition to these techniques, all files are compressed in the generated ZIP file using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, but tests with ~200 files resource packs show that it is still fast enough.
+In addition to these techniques, all files are compressed using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, whilst being compatible with every DEFLATE decoder.
 
-## Download
+## 🔗 Download
 To get PackSquash, you can build it yourself, like the CI action in this repository does. You will also need to install both the development and runtime GStreamer libraries manually.
 
-You can get a pre-built release for 64-bit Windows, Linux and macOS systems from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
+Alternatively, you can get a pre-built executable for 64-bit Windows, Linux and macOS systems from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
 
-## Usage
+## 📝 Usage
+PackSquash is a command line application, so it must be executed from a command prompt, a shortcut, a command-line shell or a script. You can customize what it does by launching it with these parameters:
+
 ```
 PackSquash 0.1.2
 AlexTMjugador
@@ -60,10 +62,16 @@ ARGS:
     <result ZIP file>            The path to the resulting ZIP file, ready to be distributed.
 ```
 
-## Potentials for improvement
+## 💡 Potentials for improvement
 These are some tweaks to the application which could further improve the compression it achieves, but are not scheduled for a release. Feel free to submit a PR with some (or all) of these changes!
 
-* Determine unused assets (models, textures, sounds...) by analyzing JSON files, and skip them from the result ZIP file.
-* Understand the OGG format more, to remove metadata from it.
-* Implement TTF minification.
 * Implement an "append mode", which only adds to a result ZIP file resource pack files which are newer than it (so the entire ZIP file isn't generated again if a single file changes).
+* Determine unused assets (models, textures, sounds...) by analyzing JSON files, and skip them from the result ZIP file.
+* Add a way to allow skipping the downmix to mono, ideally with file or folder granularity.
+* Never generate [Vorbis comments](https://en.wikipedia.org/wiki/Vorbis_comment) in OGG files. Currently, PackSquash passes through the input file metadata.
+* Implement TTF minification.
+
+## ✉️ Contact and support
+Like the license says, this software is provided without any warranty, with the hope that you find it useful. But that doesn't mean I don't welcome constructive feedback, suggestions, congratulations or assisting you on your usage of PackSquash (if I can and want to). If you wish to drop me a line for whatever reason related to PackSquash, you can contact me on Discord: _AlexTMjugador#5124_.
+
+Also, if you speak Spanish, you may find that _Comunidad Aylas_, our Spanish-speaking community, suits you well. You can join us on Discord: https://discord.gg/RVAgQRS. Don't forget to introduce yourself!
