@@ -66,6 +66,7 @@ ARGS:
 These are some tweaks to the application which could further improve the compression it achieves, but are not scheduled for a release. Feel free to submit a PR with some (or all) of these changes!
 
 * Implement an "append mode", which only adds to a result ZIP file resource pack files which are newer than it (so the entire ZIP file isn't generated again if a single file changes).
+* Add a TOML settings file that allows customizing the compression that each file experiments. This would be useful to disable sound downmixing when it is not desired, among other things.
 * Determine unused assets (models, textures, sounds...) by analyzing JSON files, and skip them from the result ZIP file.
 * Add a way to allow skipping the downmix to mono, ideally with file or folder granularity.
 * Never generate [Vorbis comments](https://en.wikipedia.org/wiki/Vorbis_comment) in OGG files. Currently, PackSquash passes through the input file metadata.
