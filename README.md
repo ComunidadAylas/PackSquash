@@ -67,8 +67,8 @@ These are some tweaks to the application which could further improve the compres
 
 * Implement an "append mode", which only adds to a result ZIP file resource pack files which are newer than it (so the entire ZIP file isn't generated again if a single file changes).
 * Add a TOML settings file that allows customizing the compression that each file experiments. This would be useful to disable sound downmixing when it is not desired, among other things.
+* Support more popular audio containers that Gstreamer can read, like MP3 (although MP3 uses a codec that was shown to be worse than OGG and Opus at a comparable bitrate, and people should probably use newer codecs for encoding new audio files).
 * Determine unused assets (models, textures, sounds...) by analyzing JSON files, and skip them from the result ZIP file.
-* Add a way to allow skipping the downmix to mono, ideally with file or folder granularity.
 * Never generate [Vorbis comments](https://en.wikipedia.org/wiki/Vorbis_comment) in OGG files. Currently, PackSquash passes through the input file metadata.
 * Implement TTF minification.
 
