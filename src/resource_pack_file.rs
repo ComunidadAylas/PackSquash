@@ -331,7 +331,7 @@ impl ResourcePackFile for OggFile {
 			.dynamic_cast::<gstreamer_app::AppSink>()
 			.unwrap()
 			.set_callbacks(
-				gstreamer_app::AppSinkCallbacks::new()
+				gstreamer_app::AppSinkCallbacks::builder()
 					.new_sample(move |sink| {
 						// Get the incoming sample (container for audio data)
 						let sample = sink.pull_sample().map_err(|_| gstreamer::FlowError::Eos)?;
