@@ -16,6 +16,7 @@ use oxipng::{optimize_from_memory, AlphaOptim, Deflaters, Headers, IndexSet, Opt
 use lodepng::ffi::ColorType;
 use lodepng::Encoder;
 
+use json_comments::StripComments;
 use serde_json::value::Value;
 
 use gstreamer::prelude::*;
@@ -132,8 +133,11 @@ struct JsonFile {
 
 impl ResourcePackFile for JsonFile {
 	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
-		// Parse the JSON so we know how to serialize it again in a compact manner
-		let json_value: Value = serde_json::from_reader(BufReader::new(File::open(&self.path)?))?;
+		// Parse the JSON so we know how to serialize it again in a compact manner.
+		// Also, pass it through a comment stripper so we ignore comments
+		let json_value: Value = serde_json::from_reader(StripComments::new(
+			BufReader::new(File::open(&self.path)?)
+		))?;
 
 		Ok((
 			json_value.to_string().into_bytes(),
