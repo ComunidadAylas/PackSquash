@@ -99,7 +99,7 @@ pub fn path_to_resource_pack_file(
 				path: path.to_path_buf()
 			}))
 		}
-	} else if extension == "ogg" || extension == "oga" || extension == "flac" || extension == "wav" {
+	} else if extension == "ogg" || extension == "oga" || extension == "mp3" || extension == "flac" || extension == "wav" {
 		Some(Box::new(OggFile {
 			path: path.to_path_buf(),
 			encoding_settings: ogg_encoding_settings
@@ -328,8 +328,7 @@ impl ResourcePackFile for OggFile {
 
 			if let Some(sampling_frequency) = self.encoding_settings.sampling_frequency {
 				// Now add and link the channel mixing elements with the resampling elements
-				let (resampler, resampler_filter) =
-					create_resampler_and_filter(&sampling_frequency)?;
+				let (resampler, resampler_filter) = create_resampler_and_filter(&sampling_frequency)?;
 
 				gstreamer_pipeline.add_many(&[
 					&converter,
