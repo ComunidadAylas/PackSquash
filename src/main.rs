@@ -14,6 +14,8 @@ use threadpool::ThreadPool;
 use clap::{App, ArgMatches};
 use simple_error::SimpleError;
 
+use resource_pack_file::OggEncodingSettings;
+
 use micro_zip::MicroZip;
 use micro_zip::ZipFileType;
 
@@ -175,7 +177,13 @@ fn process_directory(
 						&path,
 						skip_pack_icon,
 						path_in_root,
-						process_mod_files
+						process_mod_files,
+						OggEncodingSettings {
+							channels: Some(1),
+							sampling_frequency: Some(32000),
+							minimum_bitrate: 40000,
+							maximum_bitrate: 96000
+						}
 					) {
 						let result = resource_pack_file.process();
 
