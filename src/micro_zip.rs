@@ -32,7 +32,7 @@ impl ZipCompressionMethod {
 	/// Compresses the given data, optionally returning its CRC too.
 	fn compress(&self, data: &[u8], calculate_crc: bool) -> (Vec<u8>, Option<u32>) {
 		// Consider a 95% compression ratio for initial buffer sizing.
-		// That should not be wasteful, but improve reallocation performance
+		// That should not be wasteful and improve reallocation performance
 		let mut vec_buffer = Vec::with_capacity(data.len() / 20);
 		let calculated_crc;
 
@@ -79,8 +79,8 @@ impl ZipCompressionMethod {
 			_ => panic!("Assertion failed")
 		};
 
-		if deflated_data.len() <= (stored_data.len() / 50) * 49 {
-			// Consider DEFLATE better if its savings are better than 2% (~20 KiB per MiB)
+		if deflated_data.len() < stored_data.len() {
+			// Consider DEFLATE better if it saves at least one byte
 			(
 				ZipCompressionMethod::DEFLATE,
 				deflated_data,
@@ -97,14 +97,13 @@ impl ZipCompressionMethod {
 }
 
 pub enum ZipFileType {
-	RegularFile //Folder
+	RegularFile
 }
 
 impl ZipFileType {
 	fn to_ms_dos_attributes(&self) -> u8 {
 		match self {
 			ZipFileType::RegularFile => 0x01 // FILE_ATTRIBUTE_READONLY
-			                                 //ZipFileType::Folder => 0x10    // FILE_ATTRIBUTE_DIRECTORY (16)
 		}
 	}
 }
@@ -371,7 +370,6 @@ impl MicroZip {
 
 		// Only proceed if the file is not already stored
 		if !already_stored {
-			// If it is a folder, make sure we add its parent folders are also included
 			// Get the best compression for this file
 			let (zip_compression_method, compressed_data, crc) = match file_type {
 				ZipFileType::RegularFile => {
@@ -389,7 +387,7 @@ impl MicroZip {
 					} else {
 						ZipCompressionMethod::best_compress(data)
 					}
-				} //ZipFileType::Folder => (ZipCompressionMethod::STORE, Vec::new(), 0)
+				}
 			};
 			let zip_compression_method_field = zip_compression_method.to_bitstream_field();
 
