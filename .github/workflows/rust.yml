@@ -19,12 +19,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install latest Rust stable toolchain (Unix)
+    - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
+        toolchain: nightly
         override: true
-        components: rustfmt, clippy
+        components: rustfmt, clippy, rust-src
 
     - name: Install GStreamer build and runtime dependencies (Linux)
       if: runner.os == 'Linux'
@@ -36,7 +36,7 @@ jobs:
 
     - name: Download GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
-      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi --output gstreamer-1.0-devel-msvc-x86_64.msi
+      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/msvc/gstreamer-1.0-devel-msvc-x86_64-1.18.0.msi --output gstreamer-1.0-devel-msvc-x86_64.msi
 
     - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
@@ -51,14 +51,14 @@ jobs:
       uses: actions-rs/clippy-check@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        args: -- -D warnings -A clippy::unreadable_literal 
+        args: -- -D warnings
 
     - name: Release build (Unix)
-      if: runner.os != 'Windows'
+      if: runner.os == 'Linux'
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release
+        args: --release -Z build-std --target x86_64-unknown-linux-gnu -Z strip=symbols
 
     - name: Release build (Windows)
       if: runner.os == 'Windows'
@@ -67,11 +67,14 @@ jobs:
         PKG_CONFIG_PATH: C:\gstreamer\1.0\x86_64\lib\pkgconfig
       with:
         command: build
-        args: --release
+        args: --release -Z build-std --target x86_64-pc-windows-msvc
 
-    - name: Strip debugging symbols from binary (Unix)
-      if: runner.os != 'Windows'
-      run: strip target/release/packsquash
+    - name: Release build (macOS)
+      if: runner.os == 'macOS'
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release -Z build-std --target x86_64-apple-darwin -Z strip=symbols
 
     - name: Upload executable artifact (Unix)
       if: runner.os != 'Windows'
