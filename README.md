@@ -1,6 +1,6 @@
 <p align="center"><img src="https://user-images.githubusercontent.com/7822554/96335786-5f403f80-107b-11eb-8aa8-d0e0b6e1aae9.png" alt="PackSquash logo" width="300" height="300"></p>
 
-# PackSquash ![Rust CI](https://github.com/ComunidadAylas/PackSquash/workflows/Rust%20CI/badge.svg) ![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version) ![GitHub Releases downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/latest/total?label=Downloads)
+# PackSquash [![Rust CI](https://github.com/ComunidadAylas/PackSquash/workflows/Rust%20CI/badge.svg)](https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3A%22Rust+CI%22) [![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version)](https://github.com/ComunidadAylas/PackSquash/releases/latest) ![GitHub Releases downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/latest/total?label=Downloads)
 A Minecraft resource pack compressor which aims to achieve the best possible compression, which allows for efficient distribution and slightly improved load times in the game, at good speed. Anecdotal evidence shows that it is able to reduce the size of the _Witchcraft & Wizardary_ resource pack by Floo Network (version 1.6.2) from 118 MiB (when compressed as usual) to 57 MiB, a 48.3% size reduction.
 
 ## 🔎 How does it work?
@@ -14,9 +14,9 @@ PackSquash walks through the resource pack files that it recognizes in a directo
 In addition to these techniques, the files that are not already compressed by design (like OGG and PNG images) are compressed using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, whilst being compatible with every DEFLATE decoder. For even higher savings it is possible to try to compress already compressed files, but this is very likely to yield marginal savings, if at all.
 
 ## 🔗 Download
-To get PackSquash, you can build it yourself, like the CI action in this repository does. You will also need to install both the development and runtime GStreamer libraries manually.
+You can get the executable for the latest stable release from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
 
-Alternatively, you can get a pre-built executable for 64-bit Windows, Linux and macOS systems from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
+Alternatively, if you are into these sort of things, you can download the latest unstable build from [GitHub Actions](https://github.com/ComunidadAylas/PackSquash/actions), or build the source yourself.
 
 ## 📝 Usage
 PackSquash is a command line application, so it must be executed from a command prompt, a shortcut, a command-line shell or a script. You can customize how it works by means of a settings file, which contains per-file compression settings and several other parameters. If no settings file is specified, or if it is a dash ("-"), the settings will be read from the standard input stream (usually, your keyboard or the output of another command). The syntax of the arguments accepted by PackSquash is as follows:
@@ -30,6 +30,8 @@ Options:
     -v, --version       Prints version information of the application and
                         exits
 ```
+
+For more information about the format of the settings file, check the wiki article about it.
 
 ## ✉️ Contact and support
 Like the license says, this software is provided without any warranty, with the hope that you find it useful. But that doesn't mean I don't welcome constructive feedback, suggestions, congratulations or assisting you on your usage of PackSquash (if I can and want to). If you wish to drop me a line for whatever reason related to PackSquash, you can contact me on Discord: _AlexTMjugador#5124_.
