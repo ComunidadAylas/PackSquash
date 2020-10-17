@@ -58,7 +58,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release -Z build-std --target x86_64-unknown-linux-gnu -Z strip=symbols
+        args: --features strip --release --target x86_64-unknown-linux-gnu -Z build-std -Z strip=symbols
 
     - name: Release build (Windows)
       if: runner.os == 'Windows'
@@ -67,14 +67,14 @@ jobs:
         PKG_CONFIG_PATH: C:\gstreamer\1.0\x86_64\lib\pkgconfig
       with:
         command: build
-        args: --release -Z build-std --target x86_64-pc-windows-msvc
+        args: --release --target x86_64-pc-windows-msvc -Z build-std
 
     - name: Release build (macOS)
       if: runner.os == 'macOS'
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release -Z build-std --target x86_64-apple-darwin
+        args: --release --target x86_64-apple-darwin -Z build-std
 
     - name: Strip symbols from binary (macOS)
       if: runner.os != 'macOS'
