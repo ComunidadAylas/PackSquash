@@ -112,16 +112,16 @@ fn main() {
 			println!("Copyright (C) {} {}", env!("BUILD_YEAR"), env!("CARGO_PKG_AUTHORS"));
 			println!();
 			println!("This program is free software: you can redistribute it and/or modify");
-			println!("it under the terms of the GNU General Public License as published by");
-			println!("the Free Software Foundation, either version 3 of the License, or");
-			println!("(at your option) any later version.");
+			println!("it under the terms of the GNU Affero General Public License as");
+			println!("published by the Free Software Foundation, either version 3 of the");
+			println!("License, or (at your option) any later version.");
 			println!();
 			println!("This program is distributed free of charge in the hope that it will");
 			println!("be useful, but WITHOUT ANY WARRANTY; without even the implied warranty");
 			println!("of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
-			println!("GNU General Public License for more details.");
+			println!("GNU Affero General Public License for more details.");
 			println!();
-			println!("You should have received a copy of the GNU General Public License");
+			println!("You should have received a copy of the GNU Affero General Public License");
 			println!("along with this program. If not, see <https://www.gnu.org/licenses/>.");
 		}
 
