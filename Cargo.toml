@@ -1,3 +1,5 @@
+cargo-features = ["strip"]
+
 [package]
 name = "packsquash"
 description = "Lossily compresses and prepares Minecraft resource packs for distribution"
@@ -12,6 +14,7 @@ edition = "2018"
 opt-level = 3
 lto = "fat"
 codegen-units = 1
+strip = "symbols"
 
 [dependencies]
 lazy_static = "1.4.0"

@@ -58,7 +58,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release -Z build-std --target x86_64-unknown-linux-gnu -Z strip=symbols
+        args: --release -Z build-std --target x86_64-unknown-linux-gnu
 
     - name: Release build (Windows)
       if: runner.os == 'Windows'
@@ -74,7 +74,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release -Z build-std --target x86_64-apple-darwin -Z strip=symbols
+        args: --release -Z build-std --target x86_64-apple-darwin
 
     - name: Upload executable artifact (Unix)
       if: runner.os != 'Windows'
