@@ -152,15 +152,13 @@ pub fn path_to_resource_pack_file<'a>(
 		if path_in_root && skip_pack_icon && path.file_name().unwrap_or(&EMPTY_OS_STR) == "pack.png" {
 			// Ignore pack.png if desired, as it is not visible for server resource packs
 			Ok(None)
+		} else if PngFile::are_file_settings_valid(&file_settings) {
+			Ok(Some(Box::new(PngFile {
+				path: path.to_path_buf(),
+				settings: file_settings
+			})))
 		} else {
-			if PngFile::are_file_settings_valid(&file_settings) {
-				Ok(Some(Box::new(PngFile {
-					path: path.to_path_buf(),
-					settings: file_settings
-				})))
-			} else {
-				Err(Box::new(SimpleError::new("The provided settings are not appropriate for PNG files")))
-			}
+			Err(Box::new(SimpleError::new("The provided settings are not appropriate for PNG files")))
 		}
 	} else if extension == "ogg" || extension == "oga" || extension == "mp3" || extension == "flac" || extension == "wav" {
 		if AudioFile::are_file_settings_valid(&file_settings) {
