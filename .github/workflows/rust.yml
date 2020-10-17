@@ -76,16 +76,8 @@ jobs:
         command: build
         args: --release -Z build-std --target x86_64-apple-darwin
 
-    - name: Upload executable artifact (Unix)
-      if: runner.os != 'Windows'
+    - name: Upload executable artifacts
       uses: actions/upload-artifact@v2
       with:
         name: 'PackSquash executable (${{ runner.os }})'
-        path: target/release/packsquash
-
-    - name: Upload executable artifact (Windows)
-      if: runner.os == 'Windows'
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'PackSquash executable (${{ runner.os }})'
-        path: target/release/packsquash.exe
+        path: target
