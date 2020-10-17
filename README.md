@@ -1,3 +1,5 @@
+<p align="center"><img src="https://user-images.githubusercontent.com/7822554/96335786-5f403f80-107b-11eb-8aa8-d0e0b6e1aae9.png" alt="PackSquash logo" width="300" height="300"></p>
+
 # PackSquash ![Rust CI](https://github.com/ComunidadAylas/PackSquash/workflows/Rust%20CI/badge.svg) ![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version) ![GitHub Releases downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/latest/total?label=Downloads)
 A Minecraft resource pack compressor which aims to achieve the best possible compression, which allows for efficient distribution and slightly improved load times in the game, at good speed. Anecdotal evidence shows that it is able to reduce the size of the _Witchcraft & Wizardary_ resource pack by Floo Network (version 1.6.2) from 118 MiB (when compressed as usual) to 57 MiB, a 48.3% size reduction.
 
