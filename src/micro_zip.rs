@@ -148,8 +148,8 @@ struct CentralDirectoryFileHeader {
 }
 
 impl Default for CentralDirectoryFileHeader {
-	fn default() -> CentralDirectoryFileHeader {
-		CentralDirectoryFileHeader {
+	fn default() -> Self {
+		Self {
 			signature: 0x02014B50,         // Magic number from the spec
 			version_made_by: 20,           // MS-DOS OS, 2.0 ZIP spec compliance
 			version_needed_to_extract: 20, // MS-DOS OS. Zip spec version may be higher than actually needed
@@ -220,8 +220,8 @@ struct LocalFileHeader<'a> {
 }
 
 impl<'a> Default for LocalFileHeader<'a> {
-	fn default() -> LocalFileHeader<'a> {
-		LocalFileHeader {
+	fn default() -> Self {
+		Self {
 			signature: 0x04034B50, // Magic number from the spec
 			version_needed_to_extract: 20,
 			general_purpose_bit_flag: 0,
@@ -272,8 +272,8 @@ struct CentralDirectoryEndRecord {
 }
 
 impl Default for CentralDirectoryEndRecord {
-	fn default() -> CentralDirectoryEndRecord {
-		CentralDirectoryEndRecord {
+	fn default() -> Self {
+		Self {
 			signature: 0x06054B50,           // Magic number from the spec
 			disk_number: 0,                  // No multi-disk support
 			central_directory_start_disk: 0, // No multi-disk support
@@ -380,7 +380,7 @@ impl MicroZip {
 							}
 							_ => {
 								return Err(Box::new(SimpleError::new(
-									"The contract of compress was violated"
+									"An internal contract of the application was violated"
 								)))
 							}
 						}
@@ -398,7 +398,7 @@ impl MicroZip {
 			}
 
 			// Generate the local file header
-			let actual_path_str = path_str_arc.as_ref().as_bytes();
+			let actual_path_str = path_str_arc.as_bytes();
 			let local_file_header = LocalFileHeader {
 				compression_method: zip_compression_method_field,
 				crc_32: crc,
@@ -552,7 +552,7 @@ impl MicroZip {
 					)))
 				}
 			});
-			result_string.push_str("/");
+			result_string.push('/');
 		}
 
 		// Remove trailing dash

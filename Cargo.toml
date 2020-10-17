@@ -1,7 +1,11 @@
 [package]
 name = "packsquash"
+description = "Lossily compresses and prepares Minecraft resource packs for distribution"
 version = "0.1.2"
-authors = ["AlexTMjugador"]
+authors = ["Alejandro \"AlexTMjugador\" González"]
+repository = "https://github.com/ComunidadAylas/PackSquash"
+license = "GPL-3.0"
+publish = false
 edition = "2018"
 
 [profile.release]
@@ -11,19 +15,31 @@ codegen-units = 1
 
 [dependencies]
 lazy_static = "1.4.0"
-clap = "2.33.3"
+getopts = "0.2.21"
 simple-error = "0.2.2"
 num_cpus = "1.13.0"
 threadpool = "1.8.1"
 tempfile = "3.1.0"
+enumflags2 = { version = "0.6.4", features = ["serde"] }
+serde = { version = "1.0.116", features = ["derive"] }
+toml = "0.5.7"
+globset = "0.4.5"
+indexmap = { version = "1.6.0", default-features = false, features = ["serde-1"] }
 serde_json = "1.0.59"
 json_comments = "0.2.0"
 lodepng = "3.2.2"
 rgb = "0.8.25"
 imagequant = "2.12.5"
-oxipng = "3.0.1"
+oxipng = { version = "3.0.1", default-features = false }
 gstreamer = "0.16.4"
 gstreamer-app = "0.16.3"
 crc32fast = "1.2.0"
 zopfli = "0.4.0"
 java-properties = "1.2.0"
+
+[build-dependencies]
+vergen = "3.1.0"
+time = "0.2.22"
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1.11"

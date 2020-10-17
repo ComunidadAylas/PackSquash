@@ -1,10 +1,14 @@
 use std::convert::TryInto;
 use std::error::Error;
-use std::ffi::OsStr;
 use std::fs::{self, File};
 use std::io::BufReader;
 use std::path::PathBuf;
 use std::sync::{Arc, Once, RwLock};
+
+use super::EMPTY_OS_STR;
+
+use serde::Deserialize;
+use enumflags2::BitFlags;
 
 use simple_error::SimpleError;
 
@@ -28,10 +32,13 @@ use java_properties::{LineEnding, PropertiesIter, PropertiesWriter};
 use lazy_static::lazy_static;
 
 lazy_static! {
-	static ref JSON_COMPACTED: String = String::from("JSON compacted");
-	static ref OGG_COMPRESSED: String =
-		String::from("OGG compressed. Consider removing tags for extra savings");
-	static ref PROPERTIES_COMPACTED: String = String::from("Properties compacted");
+	static ref JSON_COMPACTED: String = String::from("Compacted");
+	static ref AUDIO_TRANSCODED: String = String::from("Transcoded. Consider removing tags for extra savings");
+	static ref OGG_COPIED: String = String::from("Copied due to file settings");
+	static ref PROPERTIES_COMPACTED: String = String::from("Compacted");
+	static ref LOSSLESS: String = String::from("lossless");
+	static ref DEFAULT_AUDIO_TRANSCODING_SETTINGS: AudioTranscodingSettings = AudioTranscodingSettings::default();
+	static ref DEFAULT_PNG_OPTIMIZATION_SETTINGS: PngOptimizationSettings = PngOptimizationSettings::default();
 }
 
 static GSTREAMER_INIT: Once = Once::new();
@@ -51,12 +58,32 @@ pub trait ResourcePackFile {
 	fn is_compressed(&self) -> bool;
 }
 
-pub struct OggEncodingSettings {
+#[derive(BitFlags, Copy, Clone, Deserialize)]
+#[repr(u8)]
+pub enum Mod {
+    OPTIFINE = 0b1
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub enum FileSettings {
+	/// The settings for transcoding audio files to a more space-efficient format that
+	/// is accepted by Minecraft.
+	AudioSettings(AudioTranscodingSettings),
+	/// The settings for optimizing PNG files.
+	PngSettings(PngOptimizationSettings)
+}
+
+#[derive(Deserialize)]
+pub struct AudioTranscodingSettings {
+	/// If false, OGG files will be passed through as they are to the output ZIP file,
+	/// so that PackSquash will just copy them without any transcoding or modifications.
+	transcode_ogg: Option<bool>,
 	/// The number of audio channels that the resulting file will have.
 	/// Mono files take 2 times less space that stereo ones, but for music
 	/// stereo channels can be noticeable and desired.
-	/// If None, the channels present in the source file are kept
-	pub channels: Option<i32>,
+	/// If None, the channels present in the source file are kept.
+	channels: Option<i32>,
 	/// The sampling frequency of the resulting file, which determines the
 	/// number of audio samples per second that it contains. As per Nyquist-Shannon
 	/// theorem, for a given sampling frequency of x Hz only frequencies up to
@@ -67,63 +94,103 @@ pub struct OggEncodingSettings {
 	/// Therefore, in any case, a frequency greater than 40 kHz (or 44.1 kHz, due to
 	/// technical reasons) is wasteful for encoding audio that is going to be heard
 	/// by humans and not meant to be edited further.
-	/// If none, the source audio is not resampled, and the frequency is kept as-is
-	pub sampling_frequency: Option<i32>,
-	/// The minimum bps that the OGG encoder will try to use to store audio
-	pub minimum_bitrate: i32,
-	/// The maximum bps that the OGG encoder will try to use to store audio
-	pub maximum_bitrate: i32
+	/// If none, the source audio is not resampled, and the frequency is kept as-is.
+	sampling_frequency: Option<i32>,
+	/// The minimum bps that the OGG encoder will try to use to store audio.
+	minimum_bitrate: Option<i32>,
+	/// The maximum bps that the OGG encoder will try to use to store audio.
+	maximum_bitrate: Option<i32>
 }
 
-/// Converts a path to a resource pack file object.
-pub fn path_to_resource_pack_file(
+impl Default for AudioTranscodingSettings {
+    fn default() -> Self {
+        Self {
+			transcode_ogg: Some(true),
+			channels: Some(1),
+			sampling_frequency: Some(32000),
+			minimum_bitrate: Some(40000),
+			maximum_bitrate: Some(96000)
+		}
+    }
+}
+
+#[derive(Deserialize)]
+pub struct PngOptimizationSettings {
+	/// If true, color quantization will be performed to reduce the palette to 256 colors,
+	/// in order to save space. Note that this setting has no effect in textures that are
+	/// 16x16 pixels or less, and vanilla Minecraft textures are usually 16x16, because
+	/// they contain at most 256 colors.
+	quantize_image: Option<bool>
+}
+
+impl Default for PngOptimizationSettings {
+    fn default() -> Self {
+        Self {
+			quantize_image: Some(true)
+		}
+    }
+}
+
+/// Converts a path to a resource pack file. If the conversion is unsuccessful, because the
+/// provided file settings are invalid, an error is returned. If the path is not a resource
+/// pack file, no resource pack file is returned successfully. No settings are valid for
+/// every resource pack file type.
+pub fn path_to_resource_pack_file<'a>(
 	path: &PathBuf,
-	skip_pack_icon: bool,
 	path_in_root: bool,
-	process_mod_files: bool,
-	ogg_encoding_settings: OggEncodingSettings
-) -> Option<Box<dyn ResourcePackFile>> {
-	let empty_os_str = OsStr::new("");
-	let extension = path.extension().unwrap_or(empty_os_str);
+	skip_pack_icon: bool,
+	allowed_mods: &BitFlags<Mod>,
+	file_settings: Option<&'a FileSettings>
+) -> Result<Option<Box<dyn ResourcePackFile + 'a>>, Box<dyn Error>> {
+	let extension = path.extension().unwrap_or(&EMPTY_OS_STR).to_string_lossy().to_lowercase();
 
 	if extension == "json" || extension == "mcmeta" {
-		Some(Box::new(JsonFile {
+		Ok(Some(Box::new(JsonFile {
 			path: path.to_path_buf()
-		}))
+		})))
 	} else if extension == "png" {
-		if path_in_root && skip_pack_icon && path.file_name().unwrap_or(empty_os_str) == "pack.png" {
+		if path_in_root && skip_pack_icon && path.file_name().unwrap_or(&EMPTY_OS_STR) == "pack.png" {
 			// Ignore pack.png if desired, as it is not visible for server resource packs
-			None
+			Ok(None)
 		} else {
-			Some(Box::new(PngFile {
-				path: path.to_path_buf()
-			}))
+			if PngFile::are_file_settings_valid(&file_settings) {
+				Ok(Some(Box::new(PngFile {
+					path: path.to_path_buf(),
+					settings: file_settings
+				})))
+			} else {
+				Err(Box::new(SimpleError::new("The provided settings are not appropriate for PNG files")))
+			}
 		}
 	} else if extension == "ogg" || extension == "oga" || extension == "mp3" || extension == "flac" || extension == "wav" {
-		Some(Box::new(OggFile {
-			path: path.to_path_buf(),
-			encoding_settings: ogg_encoding_settings
-		}))
+		if AudioFile::are_file_settings_valid(&file_settings) {
+			Ok(Some(Box::new(AudioFile {
+				path: path.to_path_buf(),
+				is_ogg: extension == "ogg" || extension == "oga",
+				settings: file_settings
+			})))
+		} else {
+			Err(Box::new(SimpleError::new("The provided settings are not appropriate for audio files")))
+		}
 	} else if extension == "ttf" {
-		Some(Box::new(PassthroughFile {
+		Ok(Some(Box::new(PassthroughFile {
 			path: path.to_path_buf(),
-			message: "Copied, but might be optimized manually. See: https://stackoverflow.com/questions/2635423/way-to-reduce-size-of-ttf-fonts",
+			message: "Copied, but might be optimized manually (more information: https://stackoverflow.com/questions/2635423/way-to-reduce-size-of-ttf-fonts)",
 			is_compressed: false
-		}))
+		})))
 	} else if extension == "fsh" || extension == "vsh" || extension == "bin" {
-		Some(Box::new(PassthroughFile {
+		Ok(Some(Box::new(PassthroughFile {
 			path: path.to_path_buf(),
 			message: "Copied",
 			is_compressed: false
-		}))
-	} else if extension == "properties" && process_mod_files {
-		// These files are used in OptiFine resource packs
-		Some(Box::new(PropertiesFile {
+		})))
+	} else if extension == "properties" && allowed_mods.contains(Mod::OPTIFINE) {
+		Ok(Some(Box::new(PropertiesFile {
 			path: path.to_path_buf()
-		}))
+		})))
 	} else {
 		// Unknown file type
-		None
+		Ok(None)
 	}
 }
 
@@ -155,44 +222,62 @@ impl ResourcePackFile for JsonFile {
 	}
 }
 
-struct PngFile {
-	path: PathBuf
+struct PngFile<'a> {
+	path: PathBuf,
+	settings: Option<&'a FileSettings>
 }
 
-impl ResourcePackFile for PngFile {
+impl<'a> ResourcePackFile for PngFile<'a> {
 	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
-		// Read the image to a memory struct
-		let image = lodepng::decode32_file(&self.path)?;
-		let image_bytes = image.buffer.as_ref();
+		let optimization_settings = match &self.settings {
+			Some(FileSettings::PngSettings(optimization_settings)) => optimization_settings,
+			_ => &DEFAULT_PNG_OPTIMIZATION_SETTINGS
+		};
 
-		let mut compression_attributes = Attributes::new();
-		compression_attributes.set_max_colors(256);
-		compression_attributes.set_speed(2);
-		compression_attributes.set_quality(0, 100);
+		let input_png;
+		let quality_description;
+		if optimization_settings.quantize_image.unwrap_or(DEFAULT_PNG_OPTIMIZATION_SETTINGS.quantize_image.unwrap()) {
+			// Set up the quantization attributes
+			let mut quantization_attributes = Attributes::new();
+			quantization_attributes.set_max_colors(256);
+			quantization_attributes.set_speed(2);
+			quantization_attributes.set_quality(0, 100);
 
-		let mut image = Image::new(
-			&compression_attributes,
-			image_bytes,
-			image.width,
-			image.height,
-			0.0
-		)?;
+			// Read the image to memory
+			let image = lodepng::decode32_file(&self.path)?;
+			let image_bytes = &image.buffer;
+			let mut image = Image::new(
+				&quantization_attributes,
+				image_bytes,
+				image.width,
+				image.height,
+				0.0
+			)?;
 
-		// Quantize the image and remap it, so it uses the computed palette
-		let mut quantization_result = compression_attributes.quantize(&image)?;
-		quantization_result.set_dithering_level(1.0);
-		let (palette, image_bytes) = quantization_result.remapped(&mut image)?;
-		let mut encoder = Encoder::new();
-		let color_mode = encoder.info_raw_mut();
+			// Quantize the image and remap it, so it uses the computed palette
+			let mut quantization_result = quantization_attributes.quantize(&image)?;
+			quantization_result.set_dithering_level(1.0);
+			let (palette, image_bytes) = quantization_result.remapped(&mut image)?;
+			let mut encoder = Encoder::new();
+			let color_mode = encoder.info_raw_mut();
 
-		// Store used palette information
-		color_mode.colortype = ColorType::PALETTE;
-		color_mode.set_bitdepth(8);
-		for color in palette {
-			color_mode.palette_add(color)?;
+			// Set the color mode to palette and store the palette
+			color_mode.colortype = ColorType::PALETTE;
+			color_mode.set_bitdepth(8);
+			for color in palette {
+				color_mode.palette_add(color)?;
+			}
+
+			input_png = encoder.encode(&image_bytes, image.width(), image.height())?;
+
+			let mut quality_string = quantization_result.quantization_quality().to_string();
+			quality_string.push('%');
+			quality_description = quality_string;
+		} else {
+			// When not performing quantization, we just want to pass bytes through
+			input_png = fs::read(&self.path)?;
+			quality_description = LOSSLESS.to_string();
 		}
-
-		let encoded_png = encoder.encode(&image_bytes, image.width(), image.height())?;
 
 		// Init OxiPNG optimization settings
 		let mut alpha_optimizations = IndexSet::with_capacity(6);
@@ -211,11 +296,10 @@ impl ResourcePackFile for PngFile {
 		optimization_filters.insert(4);
 		optimization_filters.insert(5);
 
-		// Optimize the palette reduced PNG with Zopfli
-		// compression and more things that LodePNG and imagequant
-		// don't do
+		// Optimize the PNG with Zopfli compression and lossless transformations
+		// that LodePNG and imagequant don't do
 		let optimized_png = optimize_from_memory(
-			&encoded_png,
+			&input_png,
 			&Options {
 				alphas: alpha_optimizations,
 				backup: false,
@@ -238,10 +322,7 @@ impl ResourcePackFile for PngFile {
 
 		Ok((
 			optimized_png,
-			format!(
-				"PNG optimized with {}% quality",
-				quantization_result.quantization_quality()
-			)
+			format!("PNG optimized with {} quality", quality_description)
 		))
 	}
 
@@ -255,221 +336,249 @@ impl ResourcePackFile for PngFile {
 	}
 }
 
-struct OggFile {
-	path: PathBuf,
-	encoding_settings: OggEncodingSettings
+impl<'a> PngFile<'a> {
+	/// Checks whether the specified settings are valid for this resource pack
+	/// file.
+	fn are_file_settings_valid(file_settings: &Option<&FileSettings>) -> bool {
+		match file_settings {
+			Some(FileSettings::PngSettings(_)) | None => true,
+			_ => false
+		}
+	}
 }
 
-impl ResourcePackFile for OggFile {
+struct AudioFile<'a> {
+	path: PathBuf,
+	is_ogg: bool,
+	settings: Option<&'a FileSettings>
+}
+
+impl<'a> ResourcePackFile for AudioFile<'a> {
 	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
-		GSTREAMER_INIT.call_once(|| {
-			gstreamer::init().unwrap();
-		});
+		let transcoding_settings = match &self.settings {
+			Some(FileSettings::AudioSettings(transcoding_settings)) => transcoding_settings,
+			_ => &DEFAULT_AUDIO_TRANSCODING_SETTINGS
+		};
 
-		let result_ogg_lock_ptr = Arc::new(RwLock::new(Vec::with_capacity(16 * 1024)));
+		if !self.is_ogg || transcoding_settings.transcode_ogg.unwrap_or(
+			DEFAULT_AUDIO_TRANSCODING_SETTINGS.transcode_ogg.unwrap()
+		) {
+			// It is not OGG, or we want to transcode OGG anyway. Let the party begin!
+			GSTREAMER_INIT.call_once(|| {
+				gstreamer::init().unwrap();
+			});
 
-		let gstreamer_pipeline = gstreamer::Pipeline::new(None);
+			let result_ogg_lock_ptr = Arc::new(RwLock::new(Vec::with_capacity(16 * 1024)));
 
-		// Create the always used parts of the pipeline
-		let filesrc = ElementFactory::make("filesrc", None)?;
-		let decoder = ElementFactory::make("decodebin", None)?; // Contains a demuxer + decoder
-		let encoder = ElementFactory::make("vorbisenc", None)?;
-		let muxer = ElementFactory::make("oggmux", None)?;
-		let app_sink = ElementFactory::make("appsink", None)?;
+			let gstreamer_pipeline = gstreamer::Pipeline::new(None);
 
-		filesrc.set_property("location", &self.path.to_str().unwrap())?;
-		decoder.set_property("expose-all-streams", &false)?;
-		decoder.set_property(
-			"caps",
-			&Caps::new_simple("audio/x-raw", &[]) // Only decode audio streams
-		)?;
-		encoder.set_property("min-bitrate", &self.encoding_settings.minimum_bitrate)?;
-		encoder.set_property("max-bitrate", &self.encoding_settings.maximum_bitrate)?;
-		app_sink.set_property("sync", &false)?; // Output at max speed, not realtime
+			// Create the always used parts of the pipeline
+			let filesrc = ElementFactory::make("filesrc", None)?;
+			let decoder = ElementFactory::make("decodebin", None)?; // Contains a demuxer + decoder
+			let encoder = ElementFactory::make("vorbisenc", None)?;
+			let muxer = ElementFactory::make("oggmux", None)?;
+			let app_sink = ElementFactory::make("appsink", None)?;
 
-		// decodebin (demuxer + decoder) needs to be linked later with the next step, because in the
-		// beginning it doesn't have a source pad: it acquires it on the fly after probing the input
-
-		// Add and link the common parts of the pipeline
-		gstreamer_pipeline.add_many(&[&filesrc, &decoder, &encoder, &muxer, &app_sink])?;
-
-		filesrc.link(&decoder)?;
-		encoder.link(&muxer)?;
-		muxer.link(&app_sink)?;
-
-		/// Creates and configures the audio resampler and its corresponding filter element, so they
-		/// can be added to the pipeline afterwards.
-		fn create_resampler_and_filter<T: ToSendValue>(
-			sampling_frequency: &T
-		) -> Result<(Element, Element), Box<dyn Error>> {
-			let resampler = ElementFactory::make("audioresample", Some("resample"))?;
-			let resampler_filter = ElementFactory::make("capsfilter", Some("resample_filter"))?;
-
-			resampler.set_property("quality", &10)?; // Good quality resampling
-			resampler_filter.set_property(
+			filesrc.set_property("location", &self.path.to_str().unwrap())?;
+			decoder.set_property("expose-all-streams", &false)?;
+			decoder.set_property(
 				"caps",
-				&Caps::new_simple("audio/x-raw", &[("rate", sampling_frequency)])
+				&Caps::new_simple("audio/x-raw", &[]) // Only decode audio streams
 			)?;
-
-			Ok((resampler, resampler_filter))
-		}
-
-		// Now add and link together the variable parts of pipeline
-		if let Some(channels) = self.encoding_settings.channels {
-			// Create the channel mixing elements
-			let converter = ElementFactory::make("audioconvert", Some("channel_mix_convert"))?;
-			let channel_mix_filter =
-				ElementFactory::make("capsfilter", Some("channel_mix_filter"))?;
-
-			channel_mix_filter.set_property(
-				"caps",
-				&Caps::new_simple("audio/x-raw", &[("channels", &channels)])
+			encoder.set_property(
+				"min-bitrate",
+				&transcoding_settings.minimum_bitrate.unwrap_or(
+					DEFAULT_AUDIO_TRANSCODING_SETTINGS.minimum_bitrate.unwrap()
+				)
 			)?;
+			encoder.set_property(
+				"max-bitrate",
+				&transcoding_settings.maximum_bitrate.unwrap_or(
+					DEFAULT_AUDIO_TRANSCODING_SETTINGS.maximum_bitrate.unwrap()
+				)
+			)?;
+			app_sink.set_property("sync", &false)?; // Output at max speed, not realtime
 
-			if let Some(sampling_frequency) = self.encoding_settings.sampling_frequency {
-				// Now add and link the channel mixing elements with the resampling elements
+			// decodebin (demuxer + decoder) needs to be linked later with the next step, because in the
+			// beginning it doesn't have a source pad: it acquires it on the fly after probing the input
+
+			// Add and link the common parts of the pipeline
+			gstreamer_pipeline.add_many(&[&filesrc, &decoder, &encoder, &muxer, &app_sink])?;
+
+			filesrc.link(&decoder)?;
+			encoder.link(&muxer)?;
+			muxer.link(&app_sink)?;
+
+			/// Creates and configures the audio resampler and its corresponding filter element, so they
+			/// can be added to the pipeline afterwards.
+			fn create_resampler_and_filter<T: ToSendValue>(
+				sampling_frequency: &T
+			) -> Result<(Element, Element), Box<dyn Error>> {
+				let resampler = ElementFactory::make("audioresample", Some("resample"))?;
+				let resampler_filter = ElementFactory::make("capsfilter", Some("resample_filter"))?;
+
+				resampler.set_property("quality", &10)?; // Good quality resampling
+				resampler_filter.set_property(
+					"caps",
+					&Caps::new_simple("audio/x-raw", &[("rate", sampling_frequency)])
+				)?;
+
+				Ok((resampler, resampler_filter))
+			}
+
+			// Now add and link together the variable parts of pipeline
+			if let Some(channels) = transcoding_settings.channels {
+				// Create the channel mixing elements
+				let converter = ElementFactory::make("audioconvert", Some("channel_mix_convert"))?;
+				let channel_mix_filter = ElementFactory::make("capsfilter", Some("channel_mix_filter"))?;
+
+				channel_mix_filter.set_property(
+					"caps",
+					&Caps::new_simple("audio/x-raw", &[("channels", &channels)])
+				)?;
+
+				if let Some(sampling_frequency) = transcoding_settings.sampling_frequency {
+					// Now add and link the channel mixing elements with the resampling elements
+					let (resampler, resampler_filter) = create_resampler_and_filter(&sampling_frequency)?;
+
+					gstreamer_pipeline.add_many(&[
+						&converter,
+						&channel_mix_filter,
+						&resampler,
+						&resampler_filter
+					])?;
+
+					converter.link(&channel_mix_filter)?;
+					channel_mix_filter.link(&resampler)?;
+					resampler.link(&resampler_filter)?;
+					resampler_filter.link(&encoder)?;
+				} else {
+					// Just add and link the channel mixing elements
+					gstreamer_pipeline.add_many(&[&converter, &channel_mix_filter])?;
+
+					converter.link(&channel_mix_filter)?;
+					channel_mix_filter.link(&encoder)?;
+				}
+			} else if let Some(sampling_frequency) = transcoding_settings.sampling_frequency {
+				// Just add and link the resampling part
 				let (resampler, resampler_filter) = create_resampler_and_filter(&sampling_frequency)?;
 
-				gstreamer_pipeline.add_many(&[
-					&converter,
-					&channel_mix_filter,
-					&resampler,
-					&resampler_filter
-				])?;
+				gstreamer_pipeline.add_many(&[&resampler, &resampler_filter])?;
 
-				converter.link(&channel_mix_filter)?;
-				channel_mix_filter.link(&resampler)?;
 				resampler.link(&resampler_filter)?;
 				resampler_filter.link(&encoder)?;
-			} else {
-				// Just add and link the channel mixing elements
-				gstreamer_pipeline.add_many(&[&converter, &channel_mix_filter])?;
-
-				converter.link(&channel_mix_filter)?;
-				channel_mix_filter.link(&encoder)?;
 			}
-		} else if let Some(sampling_frequency) = self.encoding_settings.sampling_frequency {
-			// Just add and link the resampling part
-			let (resampler, resampler_filter) = create_resampler_and_filter(&sampling_frequency)?;
 
-			resampler.set_property("quality", &10)?; // Resample with the best quality
-			resampler_filter.set_property(
-				"caps",
-				&Caps::new_simple("audio/x-raw", &[("rate", &sampling_frequency)])
-			)?;
-
-			gstreamer_pipeline.add_many(&[&resampler, &resampler_filter])?;
-
-			resampler.link(&resampler_filter)?;
-			resampler_filter.link(&encoder)?;
-		}
-
-		// Handle the demuxer receiving a source pad
-		let dec_element_weak = decoder.downgrade();
-		let mix_converter = gstreamer_pipeline.get_by_name("channel_mix_convert");
-		let resampler = gstreamer_pipeline.get_by_name("resample");
-		decoder.connect_pad_added(move |_, src_pad| {
-			let dec_element = match dec_element_weak.upgrade() {
-				Some(element) => element,
-				_ => return
-			};
-
-			// Decide the element whose sink to connect to depending on resampling and channel mixing settings
-			let element_sink = match &mix_converter {
-				Some(element) => element,
-				_ => match &resampler {
+			// Handle the demuxer receiving a source pad
+			let dec_element_weak = decoder.downgrade();
+			let mix_converter = gstreamer_pipeline.get_by_name("channel_mix_convert");
+			let resampler = gstreamer_pipeline.get_by_name("resample");
+			decoder.connect_pad_added(move |_, src_pad| {
+				let dec_element = match dec_element_weak.upgrade() {
 					Some(element) => element,
-					_ => &encoder
+					_ => return
+				};
+
+				// Decide the element whose sink to connect to depending on resampling and channel mixing settings
+				let element_sink = match &mix_converter {
+					Some(element) => element,
+					_ => match &resampler {
+						Some(element) => element,
+						_ => &encoder
+					}
+				};
+
+				let sink = match element_sink.get_static_pad("sink") {
+					Some(sink) => sink,
+					None => return
+				};
+
+				// Ignore event if the link is already set up
+				if !sink.is_linked() {
+					// The demuxer received a audio source. Link the recently
+					// created demuxer source pad with the converter sink pad to
+					// complete the pipeline
+					if src_pad.link(&sink).is_err() {
+						return;
+					}
+
+					if dec_element.link(element_sink).is_err() {
+						return;
+					}
 				}
-			};
+			});
 
-			let sink = match element_sink.get_static_pad("sink") {
-				Some(sink) => sink,
-				None => return
-			};
+			let weak_result_ogg_lock_ptr = Arc::downgrade(&result_ogg_lock_ptr);
+			app_sink
+				.dynamic_cast::<gstreamer_app::AppSink>()
+				.unwrap()
+				.set_callbacks(
+					gstreamer_app::AppSinkCallbacks::builder()
+						.new_sample(move |sink| {
+							// Get the incoming sample (container for audio data)
+							let sample = sink.pull_sample().map_err(|_| gstreamer::FlowError::Eos)?;
+							// Now get the buffer contained in the sample
+							let buffer = sample
+								.get_buffer()
+								.ok_or(gstreamer::FlowError::Error)?;
+							// Request the buffer with read access
+							let mapped_buffer = buffer
+								.map_readable()
+								.map_err(|_| gstreamer::FlowError::Error)?;
 
-			// Ignore event if the link is already set up
-			if !sink.is_linked() {
-				// The demuxer received a audio source. Link the recently
-				// created demuxer source pad with the converter sink pad to
-				// complete the pipeline
-				if src_pad.link(&sink).is_err() {
-					return;
-				}
+							// Now try to upgrade the weak pointer, that shouldn't be freed yet
+							// because that's done when EOS is reached (and this closure is called no more)
+							let result_ogg_lock_ptr = match weak_result_ogg_lock_ptr.upgrade() {
+								Some(ptr) => ptr,
+								_ => return Err(gstreamer::FlowError::Error)
+							};
 
-				if dec_element.link(element_sink).is_err() {
-					return;
+							// Now get the write lock and add the bytes to the resulting OGG file
+							match result_ogg_lock_ptr.write() {
+								Ok(mut guard) => guard.extend_from_slice(mapped_buffer.as_slice()),
+								_ => return Err(gstreamer::FlowError::Error)
+							};
+
+							Ok(gstreamer::FlowSuccess::Ok)
+						})
+						.build()
+				);
+
+			gstreamer_pipeline.set_state(gstreamer::State::Playing)?;
+
+			// Handle errors and end of stream
+			let bus = gstreamer_pipeline.get_bus().unwrap();
+			for msg in bus.iter_timed(gstreamer::CLOCK_TIME_NONE) {
+				let message_view = msg.view();
+
+				if let MessageView::Eos(..) = message_view {
+					break;
+				} else if let MessageView::Error(err) = message_view {
+					gstreamer_pipeline.set_state(gstreamer::State::Null)?;
+
+					return Err(Box::new(SimpleError::new(
+						err.get_debug().unwrap_or_else(|| String::from("unknown"))
+					)));
 				}
 			}
-		});
 
-		let weak_result_ogg_lock_ptr = Arc::downgrade(&result_ogg_lock_ptr);
-		app_sink
-			.dynamic_cast::<gstreamer_app::AppSink>()
-			.unwrap()
-			.set_callbacks(
-				gstreamer_app::AppSinkCallbacks::builder()
-					.new_sample(move |sink| {
-						// Get the incoming sample (container for audio data)
-						let sample = sink.pull_sample().map_err(|_| gstreamer::FlowError::Eos)?;
-						// Now get the buffer contained in the sample
-						let buffer = sample
-							.get_buffer()
-							.ok_or_else(|| gstreamer::FlowError::Error)?;
-						// Request the buffer with read access
-						let mapped_buffer = buffer
-							.map_readable()
-							.map_err(|_| gstreamer::FlowError::Error)?;
+			// Clean up state before returning
+			gstreamer_pipeline.set_state(gstreamer::State::Null)?;
 
-						// Now try to upgrade the weak pointer, that shouldn't be freed yet
-						// because that's done when EOS is reached (and this closure is called no more)
-						let result_ogg_lock_ptr = match weak_result_ogg_lock_ptr.upgrade() {
-							Some(ptr) => ptr,
-							_ => return Err(gstreamer::FlowError::Error)
-						};
-
-						// Now get the write lock and add the bytes to the resulting OGG file
-						match result_ogg_lock_ptr.write() {
-							Ok(mut guard) => guard.extend_from_slice(mapped_buffer.as_slice()),
-							_ => return Err(gstreamer::FlowError::Error)
-						};
-
-						Ok(gstreamer::FlowSuccess::Ok)
-					})
-					.build()
-			);
-
-		gstreamer_pipeline.set_state(gstreamer::State::Playing)?;
-
-		// Handle errors and end of stream
-		let bus = gstreamer_pipeline.get_bus().unwrap();
-		for msg in bus.iter_timed(gstreamer::CLOCK_TIME_NONE) {
-			let message_view = msg.view();
-
-			if let MessageView::Eos(..) = message_view {
-				break;
-			} else if let MessageView::Error(err) = message_view {
-				gstreamer_pipeline.set_state(gstreamer::State::Null)?;
-
-				return Err(Box::new(SimpleError::new(
-					err.get_debug().unwrap_or_else(|| String::from("unknown"))
-				)));
-			}
+			// Unwrap ARC as it should have only one strong reference now (ours).
+			// Also consume the RwLock
+			let result_ogg = match Arc::try_unwrap(result_ogg_lock_ptr) {
+				Ok(result_ogg_lock) => match result_ogg_lock.into_inner() {
+					Ok(result) => result,
+					_ => return Err(Box::new(SimpleError::new("Couldn't consume RW lock")))
+				},
+				_ => return Err(Box::new(SimpleError::new("Couldn't unwrap the ARC")))
+			};
+			Ok((result_ogg, AUDIO_TRANSCODED.to_string()))
+		} else {
+			// The easy case: is OGG and the user does not want us to touch :)
+			Ok((fs::read(&self.path)?, OGG_COPIED.to_string()))
 		}
-
-		// Clean up state before returning
-		gstreamer_pipeline.set_state(gstreamer::State::Null)?;
-
-		// Unwrap ARC as it should have only one strong reference now (ours).
-		// Also consume the RwLock
-		let result_ogg = match Arc::try_unwrap(result_ogg_lock_ptr) {
-			Ok(result_ogg_lock) => match result_ogg_lock.into_inner() {
-				Ok(result) => result,
-				_ => return Err(Box::new(SimpleError::new("Couldn't consume RW lock")))
-			},
-			_ => return Err(Box::new(SimpleError::new("Couldn't unwrap the ARC")))
-		};
-		Ok((result_ogg, OGG_COMPRESSED.to_string()))
 	}
 
 	fn canonical_extension(&self) -> &str {
@@ -481,6 +590,17 @@ impl ResourcePackFile for OggFile {
 	}
 }
 
+impl<'a> AudioFile<'a> {
+	/// Checks whether the specified settings are valid for this resource pack
+	/// file.
+	fn are_file_settings_valid(file_settings: &Option<&FileSettings>) -> bool {
+		match file_settings {
+			Some(FileSettings::AudioSettings(_)) | None => true,
+			_ => false
+		}
+	}
+}
+
 struct PropertiesFile {
 	path: PathBuf
 }
@@ -488,7 +608,7 @@ struct PropertiesFile {
 impl ResourcePackFile for PropertiesFile {
 	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
 		let estimated_result_size = match fs::metadata(&self.path) {
-			Ok(file_meta) => file_meta.len().try_into().unwrap_or(0),
+			Ok(file_meta) => file_meta.len().try_into().unwrap_or(usize::MAX),
 			_ => 0
 		};
 
