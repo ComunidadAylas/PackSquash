@@ -36,7 +36,7 @@ jobs:
 
     - name: Download GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
-      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/msvc/gstreamer-1.0-devel-msvc-x86_64-1.18.0.msi --output gstreamer-1.0-devel-msvc-x86_64.msi
+      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi --output gstreamer-1.0-devel-msvc-x86_64.msi
 
     - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
@@ -53,7 +53,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         args: -- -D warnings
 
-    - name: Release build (Unix)
+    - name: Release build (Linux)
       if: runner.os == 'Linux'
       uses: actions-rs/cargo@v1
       with:
