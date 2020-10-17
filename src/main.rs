@@ -103,7 +103,7 @@ fn main() {
 		fn print_version_information() {
 			println!(
 				"PackSquash {} ({}) for {}",
-				option_env!("VERGEN_SEMVER_LIGHTWEIGHT").unwrap_or(CUSTOM_VERSION_STRING.as_str()),
+				option_env!("VERGEN_SEMVER_LIGHTWEIGHT").unwrap_or(&CUSTOM_VERSION_STRING[..]),
 				option_env!("VERGEN_BUILD_DATE").unwrap_or("unknown date"),
 				option_env!("VERGEN_TARGET_TRIPLE").unwrap_or("unknown platform")
 			);
@@ -202,22 +202,22 @@ fn main() {
 fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	let file_count = Arc::new(AtomicUsize::new(0));
 	let file_thread_pool = ThreadPool::new(
-		app_settings.general.thread_number.unwrap_or(
+		app_settings.general.thread_number.unwrap_or_else(|| {
 			DEFAULT_GENERAL_APP_SETTINGS.thread_number.unwrap()
-		)
+		})
 	);
 	let micro_zip = Arc::new(MicroZip::new(
 		16,
-		app_settings.general.use_zip_obfuscation.unwrap_or(
+		app_settings.general.use_zip_obfuscation.unwrap_or_else(|| {
 			DEFAULT_GENERAL_APP_SETTINGS.use_zip_obfuscation.unwrap()
-		)
+		})
 	));
 	let app_settings = Arc::new(app_settings);
 
 	// Build the set of globs that customize settings for the files they match
 	let mut globset_builder = GlobSetBuilder::new();
 	for pattern in app_settings.file_patterns.keys() {
-		let glob = Glob::new(pattern.as_str())?;
+		let glob = Glob::new(&pattern[..])?;
 		globset_builder.add(glob);
 	}
 	let file_globs = Arc::new(globset_builder.build()?);
@@ -239,7 +239,7 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	// Append the central directory
 	println!("> Finishing up resource pack ZIP file...");
 	let output_file_name = app_settings.general.output_file_name.as_ref()
-		.unwrap_or(DEFAULT_GENERAL_APP_SETTINGS.output_file_name.as_ref().unwrap());
+		.unwrap_or_else(|| DEFAULT_GENERAL_APP_SETTINGS.output_file_name.as_ref().unwrap());
 	micro_zip.finish_and_write(&mut fs::File::create(output_file_name)?)?;
 
 	println!(
@@ -269,9 +269,9 @@ fn process_directory(
 		let is_directory = file_metadata.is_dir();
 
 		// Check whether this is a system or dot (hidden) file, and if so skip it
-		if app_settings.general.ignore_system_and_hidden_files.unwrap_or(
+		if app_settings.general.ignore_system_and_hidden_files.unwrap_or_else(|| {
 			DEFAULT_GENERAL_APP_SETTINGS.ignore_system_and_hidden_files.unwrap()
-		) {
+		}) {
 			let file_name = path.file_name().unwrap_or(&EMPTY_OS_STR).to_string_lossy();
 			let is_dot_file = file_name.chars().next().unwrap_or('x') == '.';
 
@@ -309,12 +309,12 @@ fn process_directory(
 
 			// Now process the file in a different thread
 			file_thread_pool.execute(move || {
-				let skip_pack_icon = app_settings.general.skip_pack_icon.unwrap_or(
+				let skip_pack_icon = app_settings.general.skip_pack_icon.unwrap_or_else(|| {
 					DEFAULT_GENERAL_APP_SETTINGS.skip_pack_icon.unwrap()
-				);
-				let allowed_mods = app_settings.general.allowed_mods.unwrap_or(
+				});
+				let allowed_mods = app_settings.general.allowed_mods.unwrap_or_else(|| {
 					DEFAULT_GENERAL_APP_SETTINGS.allowed_mods.unwrap()
-				);
+				});
 
 				// Try to get the first resource pack file struct for this path
 				// that can be created with the settings associated to a file pattern.
@@ -338,7 +338,7 @@ fn process_directory(
 
 				// It may happen that no file pattern matches. If that's the case,
 				// fallback to no settings (i.e. use defaults)
-				if let None = resource_pack_file {
+				if resource_pack_file.is_none() {
 					resource_pack_file = resource_pack_file::path_to_resource_pack_file(
 						&path,
 						path_in_root,
@@ -354,9 +354,7 @@ fn process_directory(
 				if let Some(resource_pack_file) = resource_pack_file {
 					let result = resource_pack_file.process();
 
-					if result.is_ok() {
-						let (processed_bytes, message) = result.unwrap();
-
+					if let Ok((processed_bytes, message)) = result {
 						// Change the relative path with the canonical extension
 						relative_path.set_extension(resource_pack_file.canonical_extension());
 
@@ -366,9 +364,9 @@ fn process_directory(
 							ZipFileType::RegularFile,
 							&processed_bytes,
 							resource_pack_file.is_compressed() &&
-							!app_settings.general.compress_already_compressed_files.unwrap_or(
+							!app_settings.general.compress_already_compressed_files.unwrap_or_else(|| {
 								DEFAULT_GENERAL_APP_SETTINGS.compress_already_compressed_files.unwrap()
-							)
+							})
 						);
 
 						if add_result.is_ok() {

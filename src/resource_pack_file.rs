@@ -234,7 +234,9 @@ impl<'a> ResourcePackFile for PngFile<'a> {
 
 		let input_png;
 		let quality_description;
-		if optimization_settings.quantize_image.unwrap_or(DEFAULT_PNG_OPTIMIZATION_SETTINGS.quantize_image.unwrap()) {
+		if optimization_settings.quantize_image.unwrap_or_else(|| {
+			DEFAULT_PNG_OPTIMIZATION_SETTINGS.quantize_image.unwrap()
+		}) {
 			// Set up the quantization attributes
 			let mut quantization_attributes = Attributes::new();
 			quantization_attributes.set_max_colors(256);
@@ -338,10 +340,7 @@ impl<'a> PngFile<'a> {
 	/// Checks whether the specified settings are valid for this resource pack
 	/// file.
 	fn are_file_settings_valid(file_settings: &Option<&FileSettings>) -> bool {
-		match file_settings {
-			Some(FileSettings::PngSettings(_)) | None => true,
-			_ => false
-		}
+		matches!(file_settings, Some(FileSettings::PngSettings(_)) | None)
 	}
 }
 
@@ -358,9 +357,9 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			_ => &DEFAULT_AUDIO_TRANSCODING_SETTINGS
 		};
 
-		if !self.is_ogg || transcoding_settings.transcode_ogg.unwrap_or(
+		if !self.is_ogg || transcoding_settings.transcode_ogg.unwrap_or_else(|| {
 			DEFAULT_AUDIO_TRANSCODING_SETTINGS.transcode_ogg.unwrap()
-		) {
+		}) {
 			// It is not OGG, or we want to transcode OGG anyway. Let the party begin!
 			GSTREAMER_INIT.call_once(|| {
 				gstreamer::init().unwrap();
@@ -385,15 +384,15 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			)?;
 			encoder.set_property(
 				"min-bitrate",
-				&transcoding_settings.minimum_bitrate.unwrap_or(
+				&transcoding_settings.minimum_bitrate.unwrap_or_else(|| {
 					DEFAULT_AUDIO_TRANSCODING_SETTINGS.minimum_bitrate.unwrap()
-				)
+				})
 			)?;
 			encoder.set_property(
 				"max-bitrate",
-				&transcoding_settings.maximum_bitrate.unwrap_or(
+				&transcoding_settings.maximum_bitrate.unwrap_or_else(|| {
 					DEFAULT_AUDIO_TRANSCODING_SETTINGS.maximum_bitrate.unwrap()
-				)
+				})
 			)?;
 			app_sink.set_property("sync", &false)?; // Output at max speed, not realtime
 
@@ -533,7 +532,7 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 
 							// Now get the write lock and add the bytes to the resulting OGG file
 							match result_ogg_lock_ptr.write() {
-								Ok(mut guard) => guard.extend_from_slice(mapped_buffer.as_slice()),
+								Ok(mut guard) => guard.extend_from_slice(&mapped_buffer[..]),
 								_ => return Err(gstreamer::FlowError::Error)
 							};
 
@@ -592,10 +591,7 @@ impl<'a> AudioFile<'a> {
 	/// Checks whether the specified settings are valid for this resource pack
 	/// file.
 	fn are_file_settings_valid(file_settings: &Option<&FileSettings>) -> bool {
-		match file_settings {
-			Some(FileSettings::AudioSettings(_)) | None => true,
-			_ => false
-		}
+		matches!(file_settings, Some(FileSettings::AudioSettings(_)) | None)
 	}
 }
 

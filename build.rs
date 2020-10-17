@@ -33,7 +33,7 @@ fn add_exe_metadata(build_year: i32) {
 	windows_resource.set("ProductName", "PackSquash");
 	windows_resource.set(
 		"LegalCopyright",
-		format!("Copyright (C) {} {}", build_year, env!("CARGO_PKG_AUTHORS")).as_str()
+		&format!("Copyright (C) {} {}", build_year, env!("CARGO_PKG_AUTHORS"))[..]
 	);
 	windows_resource.set_language(0x0409); // English (US)
 	windows_resource.set_icon("src/app_icon.ico");
