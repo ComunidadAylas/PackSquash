@@ -1,7 +1,7 @@
 [package]
 name = "packsquash"
 description = "Lossily compresses and prepares Minecraft resource packs for distribution"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Alejandro \"AlexTMjugador\" González"]
 repository = "https://github.com/ComunidadAylas/PackSquash"
 license = "GPL-3.0"
