@@ -202,15 +202,15 @@ fn main() {
 fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	let file_count = Arc::new(AtomicUsize::new(0));
 	let file_thread_pool = ThreadPool::new(
-		app_settings.general.thread_number.unwrap_or_else(|| {
+		app_settings.general.thread_number.unwrap_or_else(||
 			DEFAULT_GENERAL_APP_SETTINGS.thread_number.unwrap()
-		})
+		)
 	);
 	let micro_zip = Arc::new(MicroZip::new(
 		16,
-		app_settings.general.use_zip_obfuscation.unwrap_or_else(|| {
+		app_settings.general.use_zip_obfuscation.unwrap_or_else(||
 			DEFAULT_GENERAL_APP_SETTINGS.use_zip_obfuscation.unwrap()
-		})
+		)
 	));
 	let app_settings = Arc::new(app_settings);
 
@@ -269,9 +269,9 @@ fn process_directory(
 		let is_directory = file_metadata.is_dir();
 
 		// Check whether this is a system or dot (hidden) file, and if so skip it
-		if app_settings.general.ignore_system_and_hidden_files.unwrap_or_else(|| {
+		if app_settings.general.ignore_system_and_hidden_files.unwrap_or_else(||
 			DEFAULT_GENERAL_APP_SETTINGS.ignore_system_and_hidden_files.unwrap()
-		}) {
+		) {
 			let file_name = path.file_name().unwrap_or(&EMPTY_OS_STR).to_string_lossy();
 			let is_dot_file = file_name.chars().next().unwrap_or('x') == '.';
 
@@ -309,12 +309,12 @@ fn process_directory(
 
 			// Now process the file in a different thread
 			file_thread_pool.execute(move || {
-				let skip_pack_icon = app_settings.general.skip_pack_icon.unwrap_or_else(|| {
+				let skip_pack_icon = app_settings.general.skip_pack_icon.unwrap_or_else(||
 					DEFAULT_GENERAL_APP_SETTINGS.skip_pack_icon.unwrap()
-				});
-				let allowed_mods = app_settings.general.allowed_mods.unwrap_or_else(|| {
+				);
+				let allowed_mods = app_settings.general.allowed_mods.unwrap_or_else(||
 					DEFAULT_GENERAL_APP_SETTINGS.allowed_mods.unwrap()
-				});
+				);
 
 				// Try to get the first resource pack file struct for this path
 				// that can be created with the settings associated to a file pattern.
@@ -364,9 +364,9 @@ fn process_directory(
 							ZipFileType::RegularFile,
 							&processed_bytes,
 							resource_pack_file.is_compressed() &&
-							!app_settings.general.compress_already_compressed_files.unwrap_or_else(|| {
+							!app_settings.general.compress_already_compressed_files.unwrap_or_else(||
 								DEFAULT_GENERAL_APP_SETTINGS.compress_already_compressed_files.unwrap()
-							})
+							)
 						);
 
 						if add_result.is_ok() {
