@@ -58,7 +58,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --features strip --release --target x86_64-unknown-linux-gnu -Z build-std -Z strip=symbols
+        args: --release --target x86_64-unknown-linux-gnu -Z build-std
 
     - name: Release build (Windows)
       if: runner.os == 'Windows'
@@ -76,8 +76,12 @@ jobs:
         command: build
         args: --release --target x86_64-apple-darwin -Z build-std
 
+    - name: Strip symbols from binary (Linux)
+      if: runner.os == 'Linux'
+      run: strip target/x86_64-unknown-linux-gnu/release/packsquash
+
     - name: Strip symbols from binary (macOS)
-      if: runner.os != 'macOS'
+      if: runner.os == 'macOS'
       run: strip target/x86_64-apple-darwin/release/packsquash
 
     - name: Upload executable artifact (Linux)
