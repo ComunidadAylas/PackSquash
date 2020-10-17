@@ -58,7 +58,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release -Z build-std --target x86_64-unknown-linux-gnu
+        args: --release -Z build-std --target x86_64-unknown-linux-gnu -Z strip=symbols
 
     - name: Release build (Windows)
       if: runner.os == 'Windows'
@@ -76,8 +76,27 @@ jobs:
         command: build
         args: --release -Z build-std --target x86_64-apple-darwin
 
-    - name: Upload executable artifacts
+    - name: Strip symbols from binary (macOS)
+      if: runner.os != 'macOS'
+      run: strip target/x86_64-apple-darwin/release/packsquash
+
+    - name: Upload executable artifact (Linux)
+      if: runner.os == 'Linux'
       uses: actions/upload-artifact@v2
       with:
         name: 'PackSquash executable (${{ runner.os }})'
-        path: target
+        path: target/x86_64-unknown-linux-gnu/release/packsquash
+
+    - name: Upload executable artifact (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'PackSquash executable (${{ runner.os }})'
+        path: target/x86_64-pc-windows-msvc/release/packsquash.exe
+
+    - name: Upload executable artifact (macOS)
+      if: runner.os == 'macOS'
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'PackSquash executable (${{ runner.os }})'
+        path: target/x86_64-apple-darwin/release/packsquash
