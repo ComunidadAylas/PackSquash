@@ -29,13 +29,16 @@ use gstreamer::{caps::Caps, ElementFactory};
 
 use java_properties::{LineEnding, PropertiesIter, PropertiesWriter};
 
+use glsl::syntax::TranslationUnit;
+use glsl::parser::Parse;
+use glsl::transpiler;
+
 use lazy_static::lazy_static;
 
 lazy_static! {
-	static ref JSON_COMPACTED: String = String::from("Compacted");
+	static ref COMPACTED: String = String::from("Compacted");
 	static ref AUDIO_TRANSCODED: String = String::from("Transcoded. Consider removing tags for extra savings");
 	static ref OGG_COPIED: String = String::from("Copied due to file settings");
-	static ref PROPERTIES_COMPACTED: String = String::from("Compacted");
 	static ref LOSSLESS: String = String::from("lossless");
 	static ref DEFAULT_AUDIO_TRANSCODING_SETTINGS: AudioTranscodingSettings = AudioTranscodingSettings::default();
 	static ref DEFAULT_PNG_OPTIMIZATION_SETTINGS: PngOptimizationSettings = PngOptimizationSettings::default();
@@ -171,13 +174,17 @@ pub fn path_to_resource_pack_file<'a>(
 		} else {
 			Err(Box::new(SimpleError::new("The provided settings are not appropriate for audio files")))
 		}
+	} else if extension == "fsh" || extension == "vsh" {
+		Ok(Some(Box::new(ShaderFile {
+			path: path.to_path_buf()
+		})))
 	} else if extension == "ttf" {
 		Ok(Some(Box::new(PassthroughFile {
 			path: path.to_path_buf(),
 			message: "Copied, but might be optimized manually (more information: https://stackoverflow.com/questions/2635423/way-to-reduce-size-of-ttf-fonts)",
 			is_compressed: false
 		})))
-	} else if extension == "fsh" || extension == "vsh" || extension == "bin" {
+	} else if extension == "bin" {
 		Ok(Some(Box::new(PassthroughFile {
 			path: path.to_path_buf(),
 			message: "Copied",
@@ -207,7 +214,7 @@ impl ResourcePackFile for JsonFile {
 
 		Ok((
 			json_value.to_string().into_bytes(),
-			JSON_COMPACTED.to_string()
+			COMPACTED.to_string()
 		))
 	}
 
@@ -537,6 +544,33 @@ impl<'a> AudioFile<'a> {
 	}
 }
 
+struct ShaderFile {
+	path: PathBuf
+}
+
+impl ResourcePackFile for ShaderFile {
+	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+		let estimated_result_size = match fs::metadata(&self.path) {
+			Ok(file_meta) => file_meta.len().try_into().unwrap_or(usize::MAX),
+			_ => 0
+		};
+
+		let mut compacted_shader = String::with_capacity(estimated_result_size);
+		let translation_unit = TranslationUnit::parse(fs::read_to_string(&self.path)?)?;
+		transpiler::glsl::show_translation_unit(&mut compacted_shader, &translation_unit);
+
+		Ok((compacted_shader.into_bytes(), COMPACTED.to_string()))
+	}
+
+	fn canonical_extension(&self) -> &str {
+		self.path.extension().unwrap().to_str().unwrap()
+	}
+
+	fn is_compressed(&self) -> bool {
+		false
+	}
+}
+
 struct PropertiesFile {
 	path: PathBuf
 }
@@ -561,7 +595,7 @@ impl ResourcePackFile for PropertiesFile {
 			compacted_properties_writer.write(&key, &value).unwrap();
 		})?;
 
-		Ok((compacted_properties, PROPERTIES_COMPACTED.to_string()))
+		Ok((compacted_properties, COMPACTED.to_string()))
 	}
 
 	fn canonical_extension(&self) -> &str {
