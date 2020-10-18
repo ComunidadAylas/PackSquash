@@ -318,7 +318,7 @@ impl MicroZip {
 			temp_out_file: RwLock::new(SpooledTempFile::new(64 * 1024 * 1024)), // 64 MiB
 			stored_file_paths: RwLock::new(HashSet::with_capacity(file_count_estimate)),
 			partial_central_directory_entries: RwLock::new(Vec::with_capacity(file_count_estimate)),
-			strict_spec_compliance: strict_spec_compliance,
+			strict_spec_compliance,
 			writing_central_directory: AtomicBool::new(false)
 		}
 	}
