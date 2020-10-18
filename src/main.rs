@@ -1,6 +1,7 @@
 mod micro_zip;
 mod resource_pack_file;
 
+use std::convert::TryInto;
 use std::error::Error;
 use std::ffi::OsStr;
 use std::iter::FromIterator;
@@ -62,7 +63,7 @@ struct GeneralSettings {
 	compress_already_compressed_files: bool,
 	ignore_system_and_hidden_files: bool,
 	allowed_mods: EnumSet<Mod>,
-	thread_number: u32,
+	threads: u32,
 	output_file_path: String
 }
 
@@ -74,7 +75,7 @@ impl Default for GeneralSettings {
 			compress_already_compressed_files: false,
 			ignore_system_and_hidden_files: true,
 			allowed_mods: EnumSet::empty(),
-			thread_number: cmp::max(num_cpus::get() as u32, 1),
+			threads: cmp::max(num_cpus::get().try_into().unwrap_or(u32::MAX), 1),
 			output_file_path: String::from("resource_pack.zip")
 		}
 	}
@@ -202,7 +203,7 @@ fn main() {
 
 fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	let file_count = Arc::new(AtomicUsize::new(0));
-	let file_thread_pool = ThreadPool::new(0, app_settings.general.thread_number, Duration::from_secs(15));
+	let file_thread_pool = ThreadPool::new(0, app_settings.general.threads, Duration::from_secs(15));
 	let micro_zip = Arc::new(MicroZip::new(16, app_settings.general.strict_zip_spec_compliance));
 	let app_settings = Arc::new(app_settings);
 
