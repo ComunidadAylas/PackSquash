@@ -81,27 +81,10 @@ pub enum FileSettings {
 #[derive(Deserialize)]
 #[serde(default)]
 pub struct AudioTranscodingSettings {
-	/// If false, OGG files will be passed through as they are to the output ZIP file,
-	/// so that PackSquash will just copy them without any transcoding or modifications.
 	transcode_ogg: bool,
-	/// The number of audio channels that the resulting file will have.
-	/// Mono files take 2 times less space that stereo ones, but for music
-	/// stereo channels can be noticeable and desired.
 	channels: i32,
-	/// The sampling frequency of the resulting file, which determines the
-	/// number of audio samples per second that it contains. As per Nyquist-Shannon
-	/// theorem, for a given sampling frequency of x Hz only frequencies up to
-	/// x / 2 Hz can be recreated without aliasing artifacts. Human speech typically
-	/// employs frequencies up to 6 kHz, so a sampling frequency of 12 kHz saves space
-	/// with acceptable audio quality. However, other sound types (e.g. music) use
-	/// more frequencies in the human audio spectrum, which goes up to 20 kHz.
-	/// Therefore, in any case, a frequency greater than 40 kHz (or 44.1 kHz, due to
-	/// technical reasons) is wasteful for encoding audio that is going to be heard
-	/// by humans and not meant to be edited further.
 	sampling_frequency: i32,
-	/// The minimum bps that the OGG encoder will try to use to store audio.
 	minimum_bitrate: i32,
-	/// The maximum bps that the OGG encoder will try to use to store audio.
 	maximum_bitrate: i32
 }
 
@@ -120,10 +103,6 @@ impl Default for AudioTranscodingSettings {
 #[derive(Deserialize)]
 #[serde(default)]
 pub struct PngOptimizationSettings {
-	/// If true, color quantization will be performed to reduce the palette to 256 colors,
-	/// in order to save space. Note that this setting has no effect in textures that are
-	/// 16x16 pixels or less, and vanilla Minecraft textures are usually 16x16, because
-	/// they contain at most 256 colors.
 	quantize_image: bool
 }
 
@@ -250,35 +229,43 @@ impl<'a> ResourcePackFile for PngFile<'a> {
 			quantization_attributes.set_quality(0, 100);
 
 			// Read the image to memory
-			let image = lodepng::decode32_file(&self.path)?;
-			let image_bytes = &image.buffer;
-			let mut image = Image::new(
-				&quantization_attributes,
-				image_bytes,
-				image.width,
-				image.height,
-				0.0
-			)?;
+			let file_bytes = fs::read(&self.path)?;
+			let image = lodepng::decode32(&file_bytes)?;
 
-			// Quantize the image and remap it, so it uses the computed palette
-			let mut quantization_result = quantization_attributes.quantize(&image)?;
-			quantization_result.set_dithering_level(1.0);
-			let (palette, image_bytes) = quantization_result.remapped(&mut image)?;
-			let mut encoder = Encoder::new();
-			let color_mode = encoder.info_raw_mut();
+			// Perform quantization only if there are more than 256 pixels
+			if image.width > 16 || image.height > 16 {
+				let mut image = Image::new(
+					&quantization_attributes,
+					&image.buffer,
+					image.width,
+					image.height,
+					0.0 // sRGB
+				)?;
 
-			// Set the color mode to palette and store the palette
-			color_mode.colortype = ColorType::PALETTE;
-			color_mode.set_bitdepth(8);
-			for color in palette {
-				color_mode.palette_add(color)?;
+				// Quantize the image and remap it, so it uses the computed palette
+				let mut quantization_result = quantization_attributes.quantize(&image)?;
+				quantization_result.set_dithering_level(1.0);
+				let (palette, image_bytes) = quantization_result.remapped(&mut image)?;
+				let mut encoder = Encoder::new();
+				let color_mode = encoder.info_raw_mut();
+
+				// Set the color mode to palette and store the palette
+				color_mode.colortype = ColorType::PALETTE;
+				color_mode.set_bitdepth(8);
+				for color in palette {
+					color_mode.palette_add(color)?;
+				}
+
+				input_png = encoder.encode(&image_bytes, image.width(), image.height())?;
+
+				let mut quality_string = quantization_result.quantization_quality().to_string();
+				quality_string.push('%');
+				quality_description = quality_string;
+			} else {
+				// Quantization is not needed
+				input_png = file_bytes;
+				quality_description = LOSSLESS.to_string();
 			}
-
-			input_png = encoder.encode(&image_bytes, image.width(), image.height())?;
-
-			let mut quality_string = quantization_result.quantization_quality().to_string();
-			quality_string.push('%');
-			quality_description = quality_string;
 		} else {
 			// When not performing quantization, we just want to pass bytes through
 			input_png = fs::read(&self.path)?;
