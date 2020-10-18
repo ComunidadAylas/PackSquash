@@ -22,7 +22,7 @@ Alternatively, if you are into these sort of things, you can download the latest
 ## 📝 Usage
 PackSquash is a command line application, so it must be executed from a command prompt, a shortcut, a command-line shell or a script. You can customize how it works by means of a settings file, which contains per-file compression settings and several other parameters. If no settings file is specified, or if it is a dash ("-"), the settings will be read from the standard input stream (usually, your keyboard or the output of another command). If in doubt, you can check out the command line argument syntax by launching PackSquash with the `-h` parameter.
 
-For more information about the format of the settings file, check the wiki article about it.
+For more information about the format of the settings file, check [the wiki article about it](https://github.com/ComunidadAylas/PackSquash/wiki/Settings-file-format).
 
 ## ✉️ Contact and support
 Like the license says, this software is provided without any warranty, with the hope that you find it useful. But that doesn't mean I don't welcome constructive feedback, suggestions, congratulations or assisting you on your usage of PackSquash (if I can and want to). If you wish to drop me a line for whatever reason related to PackSquash, you can contact me on Discord: _AlexTMjugador#5124_.
