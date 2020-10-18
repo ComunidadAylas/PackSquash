@@ -22,7 +22,7 @@ use serde::Deserialize;
 
 use simple_error::SimpleError;
 
-use globset::{Glob, GlobSet, GlobSetBuilder};
+use globset::{GlobBuilder, GlobSet, GlobSetBuilder};
 
 use resource_pack_file::{FileSettings, Mod};
 
@@ -210,8 +210,10 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	// Build the set of globs that customize settings for the files they match
 	let mut globset_builder = GlobSetBuilder::new();
 	for pattern in app_settings.file_patterns.keys() {
-		let glob = Glob::new(&pattern[..])?;
-		globset_builder.add(glob);
+		let mut glob_builder = GlobBuilder::new(&pattern[..]);
+		glob_builder.literal_separator(true);
+		glob_builder.backslash_escape(false);
+		globset_builder.add(glob_builder.build()?);
 	}
 	let file_globs = Arc::new(globset_builder.build()?);
 
