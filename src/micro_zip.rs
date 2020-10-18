@@ -308,17 +308,17 @@ pub struct MicroZip {
 	temp_out_file: RwLock<SpooledTempFile>,
 	stored_file_paths: RwLock<HashSet<Arc<String>>>,
 	partial_central_directory_entries: RwLock<Vec<PartialCentralDirectoryFileHeader>>,
-	obfuscate: bool,
+	strict_spec_compliance: bool,
 	writing_central_directory: AtomicBool
 }
 
 impl MicroZip {
-	pub fn new(file_count_estimate: usize, use_zip_obfuscation: bool) -> MicroZip {
+	pub fn new(file_count_estimate: usize, strict_spec_compliance: bool) -> MicroZip {
 		MicroZip {
 			temp_out_file: RwLock::new(SpooledTempFile::new(64 * 1024 * 1024)), // 64 MiB
 			stored_file_paths: RwLock::new(HashSet::with_capacity(file_count_estimate)),
 			partial_central_directory_entries: RwLock::new(Vec::with_capacity(file_count_estimate)),
-			obfuscate: use_zip_obfuscation,
+			strict_spec_compliance: strict_spec_compliance,
 			writing_central_directory: AtomicBool::new(false)
 		}
 	}
@@ -403,10 +403,12 @@ impl MicroZip {
 				compression_method: zip_compression_method_field,
 				crc_32: crc,
 				compressed_size: compressed_data.len() as u32
-					& ((!self.obfuscate as u32) * 0xFFFFFFFF),
-				uncompressed_size: data.len() as u32 & ((!self.obfuscate as u32) * 0xFFFFFFFF),
-				file_name_length: path_str_arc.len() as u16 & ((!self.obfuscate as u16) * 0xFFFF),
-				file_name: if !self.obfuscate {
+					& ((self.strict_spec_compliance as u32) * 0xFFFFFFFF),
+				uncompressed_size: data.len() as u32
+					& ((self.strict_spec_compliance as u32) * 0xFFFFFFFF),
+				file_name_length: path_str_arc.len() as u16
+					& ((self.strict_spec_compliance as u16) * 0xFFFF),
+				file_name: if self.strict_spec_compliance {
 					actual_path_str
 				} else {
 					&[]

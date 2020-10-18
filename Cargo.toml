@@ -18,9 +18,9 @@ lazy_static = "1.4.0"
 getopts = "0.2.21"
 simple-error = "0.2.2"
 num_cpus = "1.13.0"
-threadpool = "1.8.1"
+rusty_pool = { version = "0.4.3", default-features = false }
 tempfile = "3.1.0"
-enumflags2 = { version = "0.6.4", features = ["serde"] }
+enumset = { version = "1.0.1", features = ["serde"] }
 serde = { version = "1.0.116", features = ["derive"] }
 toml = "0.5.7"
 globset = "0.4.5"

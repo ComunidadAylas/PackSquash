@@ -7,8 +7,8 @@ use std::sync::{Arc, Once, RwLock};
 
 use super::EMPTY_OS_STR;
 
-use serde::Deserialize;
-use enumflags2::BitFlags;
+use serde::{Deserialize, Serialize};
+use enumset::{EnumSet, EnumSetType};
 
 use simple_error::SimpleError;
 
@@ -25,7 +25,7 @@ use serde_json::value::Value;
 
 use gstreamer::prelude::*;
 use gstreamer::MessageView;
-use gstreamer::{caps::Caps, Element, ElementFactory};
+use gstreamer::{caps::Caps, ElementFactory};
 
 use java_properties::{LineEnding, PropertiesIter, PropertiesWriter};
 
@@ -58,10 +58,11 @@ pub trait ResourcePackFile {
 	fn is_compressed(&self) -> bool;
 }
 
-#[derive(BitFlags, Copy, Clone, Deserialize)]
-#[repr(u8)]
+#[derive(EnumSetType, Serialize, Deserialize)]
+#[enumset(serialize_deny_unknown, serialize_as_list)]
 pub enum Mod {
-    OPTIFINE = 0b1
+	#[serde(rename = "OptiFine")]
+	Optifine
 }
 
 #[derive(Deserialize)]
@@ -75,15 +76,15 @@ pub enum FileSettings {
 }
 
 #[derive(Deserialize)]
+#[serde(default)]
 pub struct AudioTranscodingSettings {
 	/// If false, OGG files will be passed through as they are to the output ZIP file,
 	/// so that PackSquash will just copy them without any transcoding or modifications.
-	transcode_ogg: Option<bool>,
+	transcode_ogg: bool,
 	/// The number of audio channels that the resulting file will have.
 	/// Mono files take 2 times less space that stereo ones, but for music
 	/// stereo channels can be noticeable and desired.
-	/// If None, the channels present in the source file are kept.
-	channels: Option<i32>,
+	channels: i32,
 	/// The sampling frequency of the resulting file, which determines the
 	/// number of audio samples per second that it contains. As per Nyquist-Shannon
 	/// theorem, for a given sampling frequency of x Hz only frequencies up to
@@ -94,39 +95,39 @@ pub struct AudioTranscodingSettings {
 	/// Therefore, in any case, a frequency greater than 40 kHz (or 44.1 kHz, due to
 	/// technical reasons) is wasteful for encoding audio that is going to be heard
 	/// by humans and not meant to be edited further.
-	/// If none, the source audio is not resampled, and the frequency is kept as-is.
-	sampling_frequency: Option<i32>,
+	sampling_frequency: i32,
 	/// The minimum bps that the OGG encoder will try to use to store audio.
-	minimum_bitrate: Option<i32>,
+	minimum_bitrate: i32,
 	/// The maximum bps that the OGG encoder will try to use to store audio.
-	maximum_bitrate: Option<i32>
+	maximum_bitrate: i32
 }
 
 impl Default for AudioTranscodingSettings {
     fn default() -> Self {
         Self {
-			transcode_ogg: Some(true),
-			channels: Some(1),
-			sampling_frequency: Some(32000),
-			minimum_bitrate: Some(40000),
-			maximum_bitrate: Some(96000)
+			transcode_ogg: true,
+			channels: 1,
+			sampling_frequency: 32000,
+			minimum_bitrate: 40000,
+			maximum_bitrate: 96000
 		}
     }
 }
 
 #[derive(Deserialize)]
+#[serde(default)]
 pub struct PngOptimizationSettings {
 	/// If true, color quantization will be performed to reduce the palette to 256 colors,
 	/// in order to save space. Note that this setting has no effect in textures that are
 	/// 16x16 pixels or less, and vanilla Minecraft textures are usually 16x16, because
 	/// they contain at most 256 colors.
-	quantize_image: Option<bool>
+	quantize_image: bool
 }
 
 impl Default for PngOptimizationSettings {
     fn default() -> Self {
         Self {
-			quantize_image: Some(true)
+			quantize_image: true
 		}
     }
 }
@@ -139,7 +140,7 @@ pub fn path_to_resource_pack_file<'a>(
 	path: &PathBuf,
 	path_in_root: bool,
 	skip_pack_icon: bool,
-	allowed_mods: &BitFlags<Mod>,
+	allowed_mods: &EnumSet<Mod>,
 	file_settings: Option<&'a FileSettings>
 ) -> Result<Option<Box<dyn ResourcePackFile + 'a>>, Box<dyn Error>> {
 	let extension = path.extension().unwrap_or(&EMPTY_OS_STR).to_string_lossy().to_lowercase();
@@ -182,7 +183,7 @@ pub fn path_to_resource_pack_file<'a>(
 			message: "Copied",
 			is_compressed: false
 		})))
-	} else if extension == "properties" && allowed_mods.contains(Mod::OPTIFINE) {
+	} else if extension == "properties" && allowed_mods.contains(Mod::Optifine) {
 		Ok(Some(Box::new(PropertiesFile {
 			path: path.to_path_buf()
 		})))
@@ -234,9 +235,7 @@ impl<'a> ResourcePackFile for PngFile<'a> {
 
 		let input_png;
 		let quality_description;
-		if optimization_settings.quantize_image.unwrap_or_else(||
-			DEFAULT_PNG_OPTIMIZATION_SETTINGS.quantize_image.unwrap()
-		) {
+		if optimization_settings.quantize_image {
 			// Set up the quantization attributes
 			let mut quantization_attributes = Attributes::new();
 			quantization_attributes.set_max_colors(256);
@@ -357,9 +356,7 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			_ => &DEFAULT_AUDIO_TRANSCODING_SETTINGS
 		};
 
-		if !self.is_ogg || transcoding_settings.transcode_ogg.unwrap_or_else(||
-			DEFAULT_AUDIO_TRANSCODING_SETTINGS.transcode_ogg.unwrap()
-		) {
+		if !self.is_ogg || transcoding_settings.transcode_ogg {
 			// It is not OGG, or we want to transcode OGG anyway. Let the party begin!
 			GSTREAMER_INIT.call_once(|| gstreamer::init().unwrap());
 
@@ -367,9 +364,13 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 
 			let gstreamer_pipeline = gstreamer::Pipeline::new(None);
 
-			// Create the always used parts of the pipeline
+			// Create the pipeline
 			let filesrc = ElementFactory::make("filesrc", None)?;
 			let decoder = ElementFactory::make("decodebin", None)?; // Contains a demuxer + decoder
+			let converter = ElementFactory::make("audioconvert", None)?;
+			let channel_mix_filter = ElementFactory::make("capsfilter", None)?;
+			let resampler = ElementFactory::make("audioresample", None)?;
+			let resampler_filter = ElementFactory::make("capsfilter", None)?;
 			let encoder = ElementFactory::make("vorbisenc", None)?;
 			let muxer = ElementFactory::make("oggmux", None)?;
 			let app_sink = ElementFactory::make("appsink", None)?;
@@ -380,110 +381,55 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 				"caps",
 				&Caps::new_simple("audio/x-raw", &[]) // Only decode audio streams
 			)?;
-			encoder.set_property(
-				"min-bitrate",
-				&transcoding_settings.minimum_bitrate.unwrap_or_else(||
-					DEFAULT_AUDIO_TRANSCODING_SETTINGS.minimum_bitrate.unwrap()
-				)
+			channel_mix_filter.set_property(
+				"caps",
+				&Caps::new_simple("audio/x-raw", &[("channels", &transcoding_settings.channels)])
+			)?;
+			resampler.set_property("quality", &10)?; // Good quality resampling
+			resampler_filter.set_property(
+				"caps",
+				&Caps::new_simple("audio/x-raw", &[("rate", &transcoding_settings.sampling_frequency)])
 			)?;
 			encoder.set_property(
-				"max-bitrate",
-				&transcoding_settings.maximum_bitrate.unwrap_or_else(||
-					DEFAULT_AUDIO_TRANSCODING_SETTINGS.maximum_bitrate.unwrap()
-				)
+				"min-bitrate", &transcoding_settings.minimum_bitrate
+			)?;
+			encoder.set_property(
+				"max-bitrate", &transcoding_settings.maximum_bitrate
 			)?;
 			app_sink.set_property("sync", &false)?; // Output at max speed, not realtime
 
 			// decodebin (demuxer + decoder) needs to be linked later with the next step, because in the
 			// beginning it doesn't have a source pad: it acquires it on the fly after probing the input
 
-			// Add and link the common parts of the pipeline
-			gstreamer_pipeline.add_many(&[&filesrc, &decoder, &encoder, &muxer, &app_sink])?;
+			// Add and link the pipeline together
+			gstreamer_pipeline.add_many(&[
+				&filesrc,
+				&decoder,
+				&converter,
+				&channel_mix_filter,
+				&resampler,
+				&resampler_filter,
+				&encoder, &muxer, &app_sink
+			])?;
 
 			filesrc.link(&decoder)?;
+			converter.link(&channel_mix_filter)?;
+			channel_mix_filter.link(&resampler)?;
+			resampler.link(&resampler_filter)?;
+			resampler_filter.link(&encoder)?;
 			encoder.link(&muxer)?;
 			muxer.link(&app_sink)?;
 
-			/// Creates and configures the audio resampler and its corresponding filter element, so they
-			/// can be added to the pipeline afterwards.
-			fn create_resampler_and_filter<T: ToSendValue>(
-				sampling_frequency: &T
-			) -> Result<(Element, Element), Box<dyn Error>> {
-				let resampler = ElementFactory::make("audioresample", Some("resample"))?;
-				let resampler_filter = ElementFactory::make("capsfilter", Some("resample_filter"))?;
-
-				resampler.set_property("quality", &10)?; // Good quality resampling
-				resampler_filter.set_property(
-					"caps",
-					&Caps::new_simple("audio/x-raw", &[("rate", sampling_frequency)])
-				)?;
-
-				Ok((resampler, resampler_filter))
-			}
-
-			// Now add and link together the variable parts of pipeline
-			if let Some(channels) = transcoding_settings.channels {
-				// Create the channel mixing elements
-				let converter = ElementFactory::make("audioconvert", Some("channel_mix_convert"))?;
-				let channel_mix_filter = ElementFactory::make("capsfilter", Some("channel_mix_filter"))?;
-
-				channel_mix_filter.set_property(
-					"caps",
-					&Caps::new_simple("audio/x-raw", &[("channels", &channels)])
-				)?;
-
-				if let Some(sampling_frequency) = transcoding_settings.sampling_frequency {
-					// Now add and link the channel mixing elements with the resampling elements
-					let (resampler, resampler_filter) = create_resampler_and_filter(&sampling_frequency)?;
-
-					gstreamer_pipeline.add_many(&[
-						&converter,
-						&channel_mix_filter,
-						&resampler,
-						&resampler_filter
-					])?;
-
-					converter.link(&channel_mix_filter)?;
-					channel_mix_filter.link(&resampler)?;
-					resampler.link(&resampler_filter)?;
-					resampler_filter.link(&encoder)?;
-				} else {
-					// Just add and link the channel mixing elements
-					gstreamer_pipeline.add_many(&[&converter, &channel_mix_filter])?;
-
-					converter.link(&channel_mix_filter)?;
-					channel_mix_filter.link(&encoder)?;
-				}
-			} else if let Some(sampling_frequency) = transcoding_settings.sampling_frequency {
-				// Just add and link the resampling part
-				let (resampler, resampler_filter) = create_resampler_and_filter(&sampling_frequency)?;
-
-				gstreamer_pipeline.add_many(&[&resampler, &resampler_filter])?;
-
-				resampler.link(&resampler_filter)?;
-				resampler_filter.link(&encoder)?;
-			}
-
 			// Handle the demuxer receiving a source pad
 			let dec_element_weak = decoder.downgrade();
-			let mix_converter = gstreamer_pipeline.get_by_name("channel_mix_convert");
-			let resampler = gstreamer_pipeline.get_by_name("resample");
 			decoder.connect_pad_added(move |_, src_pad| {
 				let dec_element = match dec_element_weak.upgrade() {
 					Some(element) => element,
 					_ => return
 				};
 
-				// Decide the element whose sink to connect to depending on resampling and channel mixing settings
-				let element_sink = match &mix_converter {
-					Some(element) => element,
-					_ => match &resampler {
-						Some(element) => element,
-						_ => &encoder
-					}
-				};
-
-				let sink = match element_sink.get_static_pad("sink") {
+				// Get the sink pad of the converter, to connect the decoder to it
+				let sink = match converter.get_static_pad("sink") {
 					Some(sink) => sink,
 					None => return
 				};
@@ -497,9 +443,7 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 						return;
 					}
 
-					if dec_element.link(element_sink).is_err() {
-						return;
-					}
+					dec_element.link(&converter).unwrap_or(());
 				}
 			});
 

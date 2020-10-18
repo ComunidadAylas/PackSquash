@@ -9,10 +9,11 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::{cmp, env, io, fs, process};
 use std::io::Read;
+use std::time::Duration;
 
 use indexmap::IndexMap;
-use enumflags2::BitFlags;
-use threadpool::ThreadPool;
+use enumset::EnumSet;
+use rusty_pool::ThreadPool;
 
 use getopts::{Options, ParsingStyle};
 
@@ -31,7 +32,6 @@ use lazy_static::lazy_static;
 
 lazy_static! {
 	static ref EMPTY_OS_STR: &'static OsStr = OsStr::new("");
-	static ref DEFAULT_GENERAL_APP_SETTINGS: GeneralSettings = GeneralSettings::default();
 	static ref STANDARD_INPUT_STR: String = String::from("standard input");
 	static ref CUSTOM_VERSION_STRING: String = {
 		let cargo_package_version = env!("CARGO_PKG_VERSION");
@@ -55,26 +55,27 @@ struct AppSettings {
 }
 
 #[derive(Deserialize)]
+#[serde(default)]
 struct GeneralSettings {
-	skip_pack_icon: Option<bool>,
-	use_zip_obfuscation: Option<bool>,
-	compress_already_compressed_files: Option<bool>,
-	ignore_system_and_hidden_files: Option<bool>,
-	allowed_mods: Option<BitFlags<Mod>>,
-	thread_number: Option<usize>,
-	output_file_name: Option<String>
+	skip_pack_icon: bool,
+	strict_zip_spec_compliance: bool,
+	compress_already_compressed_files: bool,
+	ignore_system_and_hidden_files: bool,
+	allowed_mods: EnumSet<Mod>,
+	thread_number: u32,
+	output_file_path: String
 }
 
 impl Default for GeneralSettings {
 	fn default() -> Self {
 		Self {
-			skip_pack_icon: Some(false),
-			use_zip_obfuscation: Some(false),
-			compress_already_compressed_files: Some(false),
-			ignore_system_and_hidden_files: Some(true),
-			allowed_mods: Some(BitFlags::empty()),
-			thread_number: Some(cmp::max(num_cpus::get(), 1)),
-			output_file_name: Some(String::from("resource_pack.zip"))
+			skip_pack_icon: false,
+			strict_zip_spec_compliance: true,
+			compress_already_compressed_files: false,
+			ignore_system_and_hidden_files: true,
+			allowed_mods: EnumSet::empty(),
+			thread_number: cmp::max(num_cpus::get() as u32, 1),
+			output_file_path: String::from("resource_pack.zip")
 		}
 	}
 }
@@ -201,17 +202,8 @@ fn main() {
 
 fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	let file_count = Arc::new(AtomicUsize::new(0));
-	let file_thread_pool = ThreadPool::new(
-		app_settings.general.thread_number.unwrap_or_else(||
-			DEFAULT_GENERAL_APP_SETTINGS.thread_number.unwrap()
-		)
-	);
-	let micro_zip = Arc::new(MicroZip::new(
-		16,
-		app_settings.general.use_zip_obfuscation.unwrap_or_else(||
-			DEFAULT_GENERAL_APP_SETTINGS.use_zip_obfuscation.unwrap()
-		)
-	));
+	let file_thread_pool = ThreadPool::new(0, app_settings.general.thread_number, Duration::from_secs(15));
+	let micro_zip = Arc::new(MicroZip::new(16, app_settings.general.strict_zip_spec_compliance));
 	let app_settings = Arc::new(app_settings);
 
 	// Build the set of globs that customize settings for the files they match
@@ -237,15 +229,13 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	file_thread_pool.join();
 
 	// Append the central directory
-	println!("> Finishing up resource pack ZIP file...");
-	let output_file_name = app_settings.general.output_file_name.as_ref()
-		.unwrap_or_else(|| DEFAULT_GENERAL_APP_SETTINGS.output_file_name.as_ref().unwrap());
-	micro_zip.finish_and_write(&mut fs::File::create(output_file_name)?)?;
+	println!("Finishing up resource pack ZIP file...");
+	micro_zip.finish_and_write(&mut fs::File::create(&app_settings.general.output_file_path)?)?;
 
 	println!(
 		"{} processed resource pack files were stored in {}",
 		file_count.load(Ordering::Relaxed),
-		output_file_name
+		app_settings.general.output_file_path
 	);
 
 	Ok(())
@@ -269,9 +259,7 @@ fn process_directory(
 		let is_directory = file_metadata.is_dir();
 
 		// Check whether this is a system or dot (hidden) file, and if so skip it
-		if app_settings.general.ignore_system_and_hidden_files.unwrap_or_else(||
-			DEFAULT_GENERAL_APP_SETTINGS.ignore_system_and_hidden_files.unwrap()
-		) {
+		if app_settings.general.ignore_system_and_hidden_files {
 			let file_name = path.file_name().unwrap_or(&EMPTY_OS_STR).to_string_lossy();
 			let is_dot_file = file_name.chars().next().unwrap_or('x') == '.';
 
@@ -309,13 +297,6 @@ fn process_directory(
 
 			// Now process the file in a different thread
 			file_thread_pool.execute(move || {
-				let skip_pack_icon = app_settings.general.skip_pack_icon.unwrap_or_else(||
-					DEFAULT_GENERAL_APP_SETTINGS.skip_pack_icon.unwrap()
-				);
-				let allowed_mods = app_settings.general.allowed_mods.unwrap_or_else(||
-					DEFAULT_GENERAL_APP_SETTINGS.allowed_mods.unwrap()
-				);
-
 				// Try to get the first resource pack file struct for this path
 				// that can be created with the settings associated to a file pattern.
 				// This will effectively ignore any other matching file patterns that
@@ -327,8 +308,8 @@ fn process_directory(
 					if let Ok(file) = resource_pack_file::path_to_resource_pack_file(
 						&path,
 						path_in_root,
-						skip_pack_icon,
-						&allowed_mods,
+						app_settings.general.skip_pack_icon,
+						&app_settings.general.allowed_mods,
 						Some(&file_data.settings)
 					) {
 						resource_pack_file = file;
@@ -342,8 +323,8 @@ fn process_directory(
 					resource_pack_file = resource_pack_file::path_to_resource_pack_file(
 						&path,
 						path_in_root,
-						skip_pack_icon,
-						&allowed_mods,
+						app_settings.general.skip_pack_icon,
+						&app_settings.general.allowed_mods,
 						None
 					).unwrap();
 				}
@@ -364,9 +345,7 @@ fn process_directory(
 							ZipFileType::RegularFile,
 							&processed_bytes,
 							resource_pack_file.is_compressed() &&
-							!app_settings.general.compress_already_compressed_files.unwrap_or_else(||
-								DEFAULT_GENERAL_APP_SETTINGS.compress_already_compressed_files.unwrap()
-							)
+							!app_settings.general.compress_already_compressed_files
 						);
 
 						if add_result.is_ok() {
@@ -374,14 +353,14 @@ fn process_directory(
 							file_count.fetch_add(1, Ordering::Relaxed);
 						} else {
 							println!(
-								"> {}: Couldn't add to the result ZIP file: {}",
+								"! {}: Couldn't add to the result ZIP file: {}",
 								relative_path_str,
 								add_result.err().unwrap()
 							);
 						}
 					} else {
 						println!(
-							"> {}: Couldn't process the file: {}",
+							"! {}: Couldn't process the file: {}",
 							relative_path_str,
 							result.err().unwrap()
 						);
