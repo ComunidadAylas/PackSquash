@@ -36,6 +36,7 @@ gstreamer-app = "0.16.3"
 crc32fast = "1.2.0"
 zopfli = "0.4.0"
 java-properties = "1.2.0"
+glsl = "5.0.1"
 
 [build-dependencies]
 vergen = "3.1.0"
