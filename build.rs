@@ -1,15 +1,16 @@
 use time::OffsetDateTime;
-use vergen::{ConstantsFlags, generate_cargo_keys};
+use vergen::{generate_cargo_keys, ConstantsFlags};
 
 /// Initializes environment variables that will be accessible in the source
 /// code via the env! macro, and takes care of build-time metadata.
 fn main() {
 	// Setup the flags that enable the required environment variables
 	let flags = ConstantsFlags::from_bits(
-		ConstantsFlags::BUILD_DATE.bits() |
-		ConstantsFlags::TARGET_TRIPLE.bits() |
-		ConstantsFlags::SEMVER_LIGHTWEIGHT.bits()
-	).unwrap();
+		ConstantsFlags::BUILD_DATE.bits()
+			| ConstantsFlags::TARGET_TRIPLE.bits()
+			| ConstantsFlags::SEMVER_LIGHTWEIGHT.bits()
+	)
+	.unwrap();
 
 	// Generate the 'cargo:' key output that will do the magic
 	if let Err(error) = generate_cargo_keys(flags) {
@@ -38,7 +39,7 @@ fn add_exe_metadata(build_year: i32) {
 	windows_resource.set_language(0x0409); // English (US)
 	windows_resource.set_icon("src/app_icon.ico");
 
-    if let Err(error) = windows_resource.compile() {
+	if let Err(error) = windows_resource.compile() {
 		eprintln!(
 			"W: Couldn't set the metadata of the Windows executable. Details: {}",
 			error

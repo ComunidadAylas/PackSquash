@@ -4,16 +4,16 @@ mod resource_pack_file;
 use std::convert::TryInto;
 use std::error::Error;
 use std::ffi::OsStr;
+use std::io::Read;
 use std::iter::FromIterator;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::{cmp, env, io, fs, process};
-use std::io::Read;
 use std::time::Duration;
+use std::{cmp, env, fs, io, process};
 
-use indexmap::IndexMap;
 use enumset::EnumSet;
+use indexmap::IndexMap;
 use rusty_pool::ThreadPool;
 
 use getopts::{Options, ParsingStyle};
@@ -97,7 +97,10 @@ fn main() {
 	let options_parse_result = options.parse(env::args().skip(1)); // Skip program name
 
 	fn show_help_hint_and_fail() {
-		eprintln!("Use {} -h to see command line argument help", env!("CARGO_BIN_NAME"));
+		eprintln!(
+			"Use {} -h to see command line argument help",
+			env!("CARGO_BIN_NAME")
+		);
 		process::exit(1);
 	}
 
@@ -111,7 +114,11 @@ fn main() {
 			);
 			println!("{}", env!("CARGO_PKG_DESCRIPTION"));
 			println!();
-			println!("Copyright (C) {} {}", env!("BUILD_YEAR"), env!("CARGO_PKG_AUTHORS"));
+			println!(
+				"Copyright (C) {} {}",
+				env!("BUILD_YEAR"),
+				env!("CARGO_PKG_AUTHORS")
+			);
 			println!();
 			println!("This program is free software: you can redistribute it and/or modify");
 			println!("it under the terms of the GNU Affero General Public License as");
@@ -131,18 +138,22 @@ fn main() {
 			print_version_information();
 			println!();
 			println!("Usage:");
-			print!("    {} [OPTION]... [settings file path]", env!("CARGO_BIN_NAME"));
+			print!(
+				"    {} [OPTION]... [settings file path]",
+				env!("CARGO_BIN_NAME")
+			);
 			println!("{}", options.usage(""));
 		} else if option_matches.opt_present("v") {
 			print_version_information();
 		} else {
 			// If no free arguments were passed, or if the free argument was "-",
 			// consider no path
-			let settings_file_path = if option_matches.free.len() != 1 || option_matches.free[0] == "-" {
-				None
-			} else {
-				Some(&option_matches.free[0])
-			};
+			let settings_file_path =
+				if option_matches.free.len() != 1 || option_matches.free[0] == "-" {
+					None
+				} else {
+					Some(&option_matches.free[0])
+				};
 
 			// Now read the settings data
 			println!(
@@ -203,8 +214,12 @@ fn main() {
 
 fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	let file_count = Arc::new(AtomicUsize::new(0));
-	let file_thread_pool = ThreadPool::new(0, app_settings.general.threads, Duration::from_secs(15));
-	let micro_zip = Arc::new(MicroZip::new(16, app_settings.general.strict_zip_spec_compliance));
+	let file_thread_pool =
+		ThreadPool::new(0, app_settings.general.threads, Duration::from_secs(15));
+	let micro_zip = Arc::new(MicroZip::new(
+		16,
+		app_settings.general.strict_zip_spec_compliance
+	));
 	let app_settings = Arc::new(app_settings);
 
 	// Build the set of globs that customize settings for the files they match
@@ -215,7 +230,6 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 		glob_builder.backslash_escape(false);
 		globset_builder.add(glob_builder.build()?);
 	}
-	let file_globs = Arc::new(globset_builder.build()?);
 
 	// Process the entire resource pack directory
 	process_directory(
@@ -224,7 +238,7 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 		&file_count,
 		&file_thread_pool,
 		&app_settings,
-		&file_globs,
+		&Arc::new(globset_builder.build()?),
 		&micro_zip
 	)?;
 
@@ -233,7 +247,9 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 
 	// Append the central directory
 	println!("Finishing up resource pack ZIP file...");
-	micro_zip.finish_and_write(&mut fs::File::create(&app_settings.general.output_file_path)?)?;
+	micro_zip.finish_and_write(&mut fs::File::create(
+		&app_settings.general.output_file_path
+	)?)?;
 
 	println!(
 		"{} processed resource pack files were stored in {}",
@@ -306,7 +322,8 @@ fn process_directory(
 				// contain proper settings for this path
 				let mut resource_pack_file = None;
 				for pattern_index in file_globs.matches(&relative_path) {
-					let (_, file_data) = app_settings.file_patterns.get_index(pattern_index).unwrap();
+					let (_, file_data) =
+						app_settings.file_patterns.get_index(pattern_index).unwrap();
 
 					if let Ok(file) = resource_pack_file::path_to_resource_pack_file(
 						&path,
@@ -329,7 +346,8 @@ fn process_directory(
 						app_settings.general.skip_pack_icon,
 						&app_settings.general.allowed_mods,
 						None
-					).unwrap();
+					)
+					.unwrap();
 				}
 
 				// The calls to create a resource pack file struct were successful
@@ -347,8 +365,8 @@ fn process_directory(
 							&relative_path,
 							ZipFileType::RegularFile,
 							&processed_bytes,
-							resource_pack_file.is_compressed() &&
-							!app_settings.general.compress_already_compressed_files
+							resource_pack_file.is_compressed()
+								&& !app_settings.general.compress_already_compressed_files
 						);
 
 						if add_result.is_ok() {

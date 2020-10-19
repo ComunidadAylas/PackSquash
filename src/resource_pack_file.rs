@@ -7,8 +7,8 @@ use std::sync::{Arc, Once, RwLock};
 
 use super::EMPTY_OS_STR;
 
-use serde::{Deserialize, Serialize};
 use enumset::{EnumSet, EnumSetType};
+use serde::{Deserialize, Serialize};
 
 use simple_error::SimpleError;
 
@@ -29,19 +29,22 @@ use gstreamer::{caps::Caps, ElementFactory};
 
 use java_properties::{LineEnding, PropertiesIter, PropertiesWriter};
 
-use glsl::syntax::TranslationUnit;
 use glsl::parser::Parse;
+use glsl::syntax::TranslationUnit;
 use glsl::transpiler;
 
 use lazy_static::lazy_static;
 
 lazy_static! {
 	static ref COMPACTED: String = String::from("Compacted");
-	static ref AUDIO_TRANSCODED: String = String::from("Transcoded. Consider removing tags for extra savings");
+	static ref AUDIO_TRANSCODED: String =
+		String::from("Transcoded. Consider removing tags for extra savings");
 	static ref OGG_COPIED: String = String::from("Copied due to file settings");
 	static ref LOSSLESS: String = String::from("lossless");
-	static ref DEFAULT_AUDIO_TRANSCODING_SETTINGS: AudioTranscodingSettings = AudioTranscodingSettings::default();
-	static ref DEFAULT_PNG_OPTIMIZATION_SETTINGS: PngOptimizationSettings = PngOptimizationSettings::default();
+	static ref DEFAULT_AUDIO_TRANSCODING_SETTINGS: AudioTranscodingSettings =
+		AudioTranscodingSettings::default();
+	static ref DEFAULT_PNG_OPTIMIZATION_SETTINGS: PngOptimizationSettings =
+		PngOptimizationSettings::default();
 }
 
 static GSTREAMER_INIT: Once = Once::new();
@@ -89,15 +92,15 @@ pub struct AudioTranscodingSettings {
 }
 
 impl Default for AudioTranscodingSettings {
-    fn default() -> Self {
-        Self {
+	fn default() -> Self {
+		Self {
 			transcode_ogg: true,
 			channels: 1,
 			sampling_frequency: 32000,
 			minimum_bitrate: 40000,
 			maximum_bitrate: 96000
 		}
-    }
+	}
 }
 
 #[derive(Deserialize)]
@@ -107,11 +110,11 @@ pub struct PngOptimizationSettings {
 }
 
 impl Default for PngOptimizationSettings {
-    fn default() -> Self {
-        Self {
+	fn default() -> Self {
+		Self {
 			quantize_image: true
 		}
-    }
+	}
 }
 
 /// Converts a path to a resource pack file. If the conversion is unsuccessful, because the
@@ -125,7 +128,11 @@ pub fn path_to_resource_pack_file<'a>(
 	allowed_mods: &EnumSet<Mod>,
 	file_settings: Option<&'a FileSettings>
 ) -> Result<Option<Box<dyn ResourcePackFile + 'a>>, Box<dyn Error>> {
-	let extension = path.extension().unwrap_or(&EMPTY_OS_STR).to_string_lossy().to_lowercase();
+	let extension = path
+		.extension()
+		.unwrap_or(&EMPTY_OS_STR)
+		.to_string_lossy()
+		.to_lowercase();
 
 	if extension == "json" || extension == "mcmeta" {
 		Ok(Some(Box::new(JsonFile {
@@ -141,9 +148,16 @@ pub fn path_to_resource_pack_file<'a>(
 				settings: file_settings
 			})))
 		} else {
-			Err(Box::new(SimpleError::new("The provided settings are not appropriate for PNG files")))
+			Err(Box::new(SimpleError::new(
+				"The provided settings are not appropriate for PNG files"
+			)))
 		}
-	} else if extension == "ogg" || extension == "oga" || extension == "mp3" || extension == "flac" || extension == "wav" {
+	} else if extension == "ogg"
+		|| extension == "oga"
+		|| extension == "mp3"
+		|| extension == "flac"
+		|| extension == "wav"
+	{
 		if AudioFile::are_file_settings_valid(&file_settings) {
 			Ok(Some(Box::new(AudioFile {
 				path: path.to_path_buf(),
@@ -151,7 +165,9 @@ pub fn path_to_resource_pack_file<'a>(
 				settings: file_settings
 			})))
 		} else {
-			Err(Box::new(SimpleError::new("The provided settings are not appropriate for audio files")))
+			Err(Box::new(SimpleError::new(
+				"The provided settings are not appropriate for audio files"
+			)))
 		}
 	} else if extension == "fsh" || extension == "vsh" {
 		Ok(Some(Box::new(ShaderFile {
@@ -187,14 +203,10 @@ impl ResourcePackFile for JsonFile {
 	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
 		// Parse the JSON so we know how to serialize it again in a compact manner.
 		// Also, pass it through a comment stripper so we ignore comments
-		let json_value: Value = serde_json::from_reader(StripComments::new(
-			BufReader::new(File::open(&self.path)?)
-		))?;
+		let json_value: Value =
+			serde_json::from_reader(StripComments::new(BufReader::new(File::open(&self.path)?)))?;
 
-		Ok((
-			json_value.to_string().into_bytes(),
-			COMPACTED.to_string()
-		))
+		Ok((json_value.to_string().into_bytes(), COMPACTED.to_string()))
 	}
 
 	fn canonical_extension(&self) -> &str {
@@ -377,19 +389,21 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			)?;
 			channel_mix_filter.set_property(
 				"caps",
-				&Caps::new_simple("audio/x-raw", &[("channels", &transcoding_settings.channels)])
+				&Caps::new_simple(
+					"audio/x-raw",
+					&[("channels", &transcoding_settings.channels)]
+				)
 			)?;
 			resampler.set_property("quality", &10)?; // Good quality resampling
 			resampler_filter.set_property(
 				"caps",
-				&Caps::new_simple("audio/x-raw", &[("rate", &transcoding_settings.sampling_frequency)])
+				&Caps::new_simple(
+					"audio/x-raw",
+					&[("rate", &transcoding_settings.sampling_frequency)]
+				)
 			)?;
-			encoder.set_property(
-				"min-bitrate", &transcoding_settings.minimum_bitrate
-			)?;
-			encoder.set_property(
-				"max-bitrate", &transcoding_settings.maximum_bitrate
-			)?;
+			encoder.set_property("min-bitrate", &transcoding_settings.minimum_bitrate)?;
+			encoder.set_property("max-bitrate", &transcoding_settings.maximum_bitrate)?;
 			app_sink.set_property("sync", &false)?; // Output at max speed, not realtime
 
 			// decodebin (demuxer + decoder) needs to be linked later with the next step, because in the
@@ -403,7 +417,9 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 				&channel_mix_filter,
 				&resampler,
 				&resampler_filter,
-				&encoder, &muxer, &app_sink
+				&encoder,
+				&muxer,
+				&app_sink
 			])?;
 
 			filesrc.link(&decoder)?;
@@ -449,11 +465,10 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 					gstreamer_app::AppSinkCallbacks::builder()
 						.new_sample(move |sink| {
 							// Get the incoming sample (container for audio data)
-							let sample = sink.pull_sample().map_err(|_| gstreamer::FlowError::Eos)?;
+							let sample =
+								sink.pull_sample().map_err(|_| gstreamer::FlowError::Eos)?;
 							// Now get the buffer contained in the sample
-							let buffer = sample
-								.get_buffer()
-								.ok_or(gstreamer::FlowError::Error)?;
+							let buffer = sample.get_buffer().ok_or(gstreamer::FlowError::Error)?;
 							// Request the buffer with read access
 							let mapped_buffer = buffer
 								.map_readable()
