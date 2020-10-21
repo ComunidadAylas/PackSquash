@@ -19,10 +19,20 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install latest Rust nightly toolchain
+    - name: Install latest Rust nightly toolchain (Unix)
+      if: runner.os != 'Windows'
       uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly
+        override: true
+        components: rustfmt, clippy, rust-src
+
+    - name: Install latest Rust nightly toolchain (Windows)
+      if: runner.os == 'Windows'
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        target: x86_64-pc-windows-gnu
         override: true
         components: rustfmt, clippy, rust-src
 
@@ -36,11 +46,11 @@ jobs:
 
     - name: Download GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
-      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-msvc-x86_64-1.16.2.msi --output gstreamer-1.0-devel-msvc-x86_64.msi
+      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-mingw-x86_64-1.16.2.msi --output gstreamer-1.0-devel-mingw-x86_64.msi
 
     - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
-      run: msiexec /i gstreamer-1.0-devel-msvc-x86_64.msi /qn
+      run: msiexec /i gstreamer-1.0-devel-mingw-x86_64.msi /qn
 
     - name: Install GStreamer build and runtime dependencies (macOS)
       if: runner.os == 'macOS'
@@ -67,7 +77,7 @@ jobs:
         PKG_CONFIG_PATH: C:\gstreamer\1.0\x86_64\lib\pkgconfig
       with:
         command: build
-        args: --release --target x86_64-pc-windows-msvc -Z build-std
+        args: --release --target x86_64-pc-windows-gnu -Z build-std
 
     - name: Release build (macOS)
       if: runner.os == 'macOS'
@@ -96,7 +106,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: 'PackSquash executable (${{ runner.os }})'
-        path: target/x86_64-pc-windows-msvc/release/packsquash.exe
+        path: target/x86_64-pc-windows-gnu/release/packsquash.exe
 
     - name: Upload executable artifact (macOS)
       if: runner.os == 'macOS'
