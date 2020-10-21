@@ -215,7 +215,7 @@ fn main() {
 fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	let file_count = Arc::new(AtomicUsize::new(0));
 	let file_thread_pool = ThreadPool::new_named(
-		String::from("packsquash"),
+		String::from(env!("CARGO_PKG_NAME")),
 		0,
 		app_settings.general.threads,
 		Duration::from_secs(15)
