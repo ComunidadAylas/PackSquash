@@ -37,8 +37,7 @@ use lazy_static::lazy_static;
 
 lazy_static! {
 	static ref COMPACTED: String = String::from("Compacted");
-	static ref AUDIO_TRANSCODED: String =
-		String::from("Transcoded. Consider removing tags for extra savings");
+	static ref AUDIO_TRANSCODED: String = String::from("Transcoded");
 	static ref OGG_COPIED: String = String::from("Copied due to file settings");
 	static ref LOSSLESS: String = String::from("lossless");
 	static ref DEFAULT_AUDIO_TRANSCODING_SETTINGS: AudioTranscodingSettings =
@@ -82,11 +81,12 @@ pub enum FileSettings {
 }
 
 #[derive(Deserialize)]
-#[serde(default)]
+#[serde(default, deny_unknown_fields)]
 pub struct AudioTranscodingSettings {
 	transcode_ogg: bool,
 	channels: i32,
 	sampling_frequency: i32,
+	target_pitch: f32,
 	minimum_bitrate: i32,
 	maximum_bitrate: i32
 }
@@ -97,6 +97,7 @@ impl Default for AudioTranscodingSettings {
 			transcode_ogg: true,
 			channels: 1,
 			sampling_frequency: 32000,
+			target_pitch: 1.0,
 			minimum_bitrate: 40000,
 			maximum_bitrate: 96000
 		}
@@ -104,7 +105,7 @@ impl Default for AudioTranscodingSettings {
 }
 
 #[derive(Deserialize)]
-#[serde(default)]
+#[serde(default, deny_unknown_fields)]
 pub struct PngOptimizationSettings {
 	quantize_image: bool
 }
@@ -375,6 +376,7 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			let decoder = ElementFactory::make("decodebin", None)?; // Contains a demuxer + decoder
 			let converter = ElementFactory::make("audioconvert", None)?;
 			let channel_mix_filter = ElementFactory::make("capsfilter", None)?;
+			let pitch_shifter = ElementFactory::make("pitch", None)?;
 			let resampler = ElementFactory::make("audioresample", None)?;
 			let resampler_filter = ElementFactory::make("capsfilter", None)?;
 			let encoder = ElementFactory::make("vorbisenc", None)?;
@@ -394,6 +396,16 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 					&[("channels", &transcoding_settings.channels)]
 				)
 			)?;
+			// Minecraft lets OpenAL "Frequency Shift by Pitch" implement pitch shifting
+			// (see https://www.openal.org/documentation/openal-1.1-specification.pdf).
+			// OpenAL achieves the pitch shift by resampling the audio, i.e. changing both
+			// tempo and pitch, which introduces the "chipmunk effect". As we want the sound
+			// to be played back at its original speed at target_pitch, we shift the pitch
+			// to the inverse value. For instance, if the target pitch is 0.5 (half less pitch),
+			// we shift the pitch here to 1 / 0.5 = 2 (double the pitch), so the pitch shifts
+			// cancel each other out
+			pitch_shifter.set_property("pitch", &(1.0 / transcoding_settings.target_pitch))?;
+			pitch_shifter.set_property("tempo", &(1.0 / transcoding_settings.target_pitch))?;
 			resampler.set_property("quality", &10)?; // Good quality resampling
 			resampler_filter.set_property(
 				"caps",
@@ -415,6 +427,7 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 				&decoder,
 				&converter,
 				&channel_mix_filter,
+				&pitch_shifter,
 				&resampler,
 				&resampler_filter,
 				&encoder,
@@ -424,11 +437,20 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 
 			filesrc.link(&decoder)?;
 			converter.link(&channel_mix_filter)?;
-			channel_mix_filter.link(&resampler)?;
+			channel_mix_filter.link(&pitch_shifter)?;
+			pitch_shifter.link(&resampler)?;
 			resampler.link(&resampler_filter)?;
 			resampler_filter.link(&encoder)?;
 			encoder.link(&muxer)?;
 			muxer.link(&app_sink)?;
+
+			// Discard all event-provided tags. As the encoder is
+			// not simultaneously a tag reader, and we not explicitly
+			// add any tags, the resulting file will have no tags
+			encoder
+				.dynamic_cast::<gstreamer::TagSetter>()
+				.unwrap()
+				.set_tag_merge_mode(gstreamer::TagMergeMode::KeepAll);
 
 			// Handle the demuxer receiving a source pad
 			let dec_element_weak = decoder.downgrade();
@@ -439,17 +461,17 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 				};
 
 				// Get the sink pad of the converter, to connect the decoder to it
-				let sink = match converter.get_static_pad("sink") {
+				let converter_sink = match converter.get_static_pad("sink") {
 					Some(sink) => sink,
 					None => return
 				};
 
 				// Ignore event if the link is already set up
-				if !sink.is_linked() {
+				if !converter_sink.is_linked() {
 					// The demuxer received a audio source. Link the recently
 					// created demuxer source pad with the converter sink pad to
 					// complete the pipeline
-					if src_pad.link(&sink).is_err() {
+					if src_pad.link(&converter_sink).is_err() {
 						return;
 					}
 

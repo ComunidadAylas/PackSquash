@@ -56,7 +56,7 @@ struct AppSettings {
 }
 
 #[derive(Deserialize)]
-#[serde(default)]
+#[serde(default, deny_unknown_fields)]
 struct GeneralSettings {
 	skip_pack_icon: bool,
 	strict_zip_spec_compliance: bool,
@@ -96,44 +96,44 @@ fn main() {
 
 	let options_parse_result = options.parse(env::args().skip(1)); // Skip program name
 
-	fn show_help_hint_and_fail() {
+	let print_version_information = || {
+		println!(
+			"PackSquash {} ({}) for {}",
+			option_env!("VERGEN_SEMVER_LIGHTWEIGHT").unwrap_or(&CUSTOM_VERSION_STRING[..]),
+			option_env!("VERGEN_BUILD_DATE").unwrap_or("unknown date"),
+			option_env!("VERGEN_TARGET_TRIPLE").unwrap_or("unknown platform")
+		);
+		println!("{}", env!("CARGO_PKG_DESCRIPTION"));
+		println!();
+		println!(
+			"Copyright (C) {} {}",
+			env!("BUILD_YEAR"),
+			env!("CARGO_PKG_AUTHORS")
+		);
+		println!();
+		println!("This program is free software: you can redistribute it and/or modify");
+		println!("it under the terms of the GNU Affero General Public License as");
+		println!("published by the Free Software Foundation, either version 3 of the");
+		println!("License, or (at your option) any later version.");
+		println!();
+		println!("This program is distributed free of charge in the hope that it will");
+		println!("be useful, but WITHOUT ANY WARRANTY; without even the implied warranty");
+		println!("of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
+		println!("GNU Affero General Public License for more details.");
+		println!();
+		println!("You should have received a copy of the GNU Affero General Public License");
+		println!("along with this program. If not, see <https://www.gnu.org/licenses/>.");
+	};
+
+	let show_help_hint_and_fail = || {
 		eprintln!(
 			"Use {} -h to see command line argument help",
 			env!("CARGO_BIN_NAME")
 		);
 		process::exit(1);
-	}
+	};
 
 	if let Ok(option_matches) = options_parse_result {
-		fn print_version_information() {
-			println!(
-				"PackSquash {} ({}) for {}",
-				option_env!("VERGEN_SEMVER_LIGHTWEIGHT").unwrap_or(&CUSTOM_VERSION_STRING[..]),
-				option_env!("VERGEN_BUILD_DATE").unwrap_or("unknown date"),
-				option_env!("VERGEN_TARGET_TRIPLE").unwrap_or("unknown platform")
-			);
-			println!("{}", env!("CARGO_PKG_DESCRIPTION"));
-			println!();
-			println!(
-				"Copyright (C) {} {}",
-				env!("BUILD_YEAR"),
-				env!("CARGO_PKG_AUTHORS")
-			);
-			println!();
-			println!("This program is free software: you can redistribute it and/or modify");
-			println!("it under the terms of the GNU Affero General Public License as");
-			println!("published by the Free Software Foundation, either version 3 of the");
-			println!("License, or (at your option) any later version.");
-			println!();
-			println!("This program is distributed free of charge in the hope that it will");
-			println!("be useful, but WITHOUT ANY WARRANTY; without even the implied warranty");
-			println!("of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
-			println!("GNU Affero General Public License for more details.");
-			println!();
-			println!("You should have received a copy of the GNU Affero General Public License");
-			println!("along with this program. If not, see <https://www.gnu.org/licenses/>.");
-		}
-
 		if option_matches.opt_present("h") {
 			print_version_information();
 			println!();
@@ -214,8 +214,12 @@ fn main() {
 
 fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	let file_count = Arc::new(AtomicUsize::new(0));
-	let file_thread_pool =
-		ThreadPool::new(0, app_settings.general.threads, Duration::from_secs(15));
+	let file_thread_pool = ThreadPool::new_named(
+		String::from("packsquash"),
+		0,
+		app_settings.general.threads,
+		Duration::from_secs(15)
+	);
 	let micro_zip = Arc::new(MicroZip::new(
 		16,
 		app_settings.general.strict_zip_spec_compliance
@@ -252,7 +256,7 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	)?)?;
 
 	println!(
-		"{} processed resource pack files were stored in {}",
+		"{} files were stored in the resource pack {}",
 		file_count.load(Ordering::Relaxed),
 		app_settings.general.output_file_path
 	);
