@@ -1,69 +1,29 @@
-# PackSquash
-A fast Minecraft resource pack lossy compressor. It is able to reduce resource pack ZIP file sizes up to 7 times, which allows for efficient distribution and slightly improved game performance.
+<p align="center"><img src="https://user-images.githubusercontent.com/7822554/96335786-5f403f80-107b-11eb-8aa8-d0e0b6e1aae9.png" alt="PackSquash logo" width="300" height="300"></p>
 
-## How does it work?
-PackSquash analyzes all the resource pack files in a directory, applying file type specific compression techniques to each one. Currently, these techniques are:
+A Minecraft resource pack optimizer which aims to achieve the best possible compression, which allows for efficient distribution and slightly improved load times in the game, at good speed. Anecdotal evidence shows that, with the default options, it is able to reduce the size of the _Witchcraft & Wizardary_ resource pack ZIP file by Floo Network (version 1.6.2) from 118 MiB to 57 MiB, a 51.69% size reduction.
 
-* For PNG images: color quantization and palette generation (up to 256 colors), coupled with lossless bit depth, compression and color type reduction techniques. These operations are performed by the well known `imagequant` (used in `pngquant`) and `oxipng` libraries. For Minecraft style textures, up to 16x16 pixels in size, this results in dramatic size savings without any visual quality loss. The space savings also traslate to bigger textures, but they may incur in a slight visual quality loss, depending on how many colors it uses.
-* For OGG, FLAC, WAV and OGA sounds: downmixing to mono, resampling to 32 kHz and reencoding to OGG with a 40-96 kbit/s bitrate. These settings are good enough for in-game audio, and may improve game performance. Downmixing to mono also has the added benefit of allowing better 3D sound positioning for some use cases.
-* For JSON files: minification, by removing unneeded whitespace. As a side bonus, because minification requires parsing the JSON first, PackSquash also acts as a JSON file validator.
-* For Java property files (only if the -m flag is used): minification, by removing unneeded whitespace. As with JSON files, performing minification requires parsing the file, so PackSquash will show any validation error.
+## 🔎 How does it work?
+PackSquash walks through the resource pack files that it recognizes in a directory, applying per-file configurable lossy and lossless compression techniques, and builds a ZIP file with the results that can be used directly by Minecraft. Currently, PackSquash can apply the following techniques:
 
-In addition to these techniques, all files are compressed in the generated ZIP file using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, but tests with ~200 files resource packs show that it is still fast enough.
+* For PNG images: color quantization to generate a 256 color palette, coupled with lossless bit depth, compression and color type reduction, and metadata removal. The quantization, although it is pretty subtle or even unneeded for common texture sizes, can be disabled if lossless quality is desired. These operations are performed by the well known `imagequant` (used in `pngquant`) and `oxipng` libraries.
+* For OGG, OGA, MP3, FLAC and WAV files: channel mixing, resampling, transcoding, pitch shifting and tag removal. The default settings are meant to be good enough for in-game music, such that most listeners will think that the quality is good and not distracting. Unless configured otherwise, audio files are downmixed to mono, which may change how the Minecraft sound engine computes positional effects (see [MC-146721](https://bugs.mojang.com/browse/MC-146721)), but it is possible to disable this behavior, or even convert input mono files to stereo.
+* For JSON files: minification, by removing unneeded whitespace. As a side bonus, because minification requires parsing first, PackSquash also acts as a strict JSON file validator, which also accepts and discards comments. However, it doesn't catch errors that are not against the JSON format but will confuse Minecraft, like duplicated entries in an object.
+* For VSH and FSH shader files: minification, by removing unneeded whitespace. As with JSON files, PackSquash will perform basic validation on them.
+* For Java property files (only if OptiFine mod support is enabled): minification, by removing unneeded whitespace. As with JSON files, performing minification requires parsing the file, so PackSquash will show basic validation errors.
 
-## Download
-To get PackSquash, you can build it yourself, like the CI action in this repository does. You will also need to install both the development and runtime GStreamer libraries manually.
+In addition to these techniques, the files that are not already compressed by design (like OGG and PNG images) are losslessly compressed using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, whilst being compatible with every DEFLATE decoder. For even higher savings it is possible to try to compress already compressed files, but this is very likely to yield marginal savings, if at all.
 
-You can get a pre-built release for 64-bit Windows, Linux and macOS systems from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
+## 🔗 Download
+You can get the executable for the latest stable release from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
 
-## Usage
-```
-PackSquash 0.1.2
-AlexTMjugador
-Lossily compresses and prepares Minecraft resource packs for distribution
+Alternatively, if you are into these sort of things, you can download the latest unstable build from [GitHub Actions](https://github.com/ComunidadAylas/PackSquash/actions), or build the source yourself.
 
-USAGE:
-    packsquash [FLAGS] [OPTIONS] <resource pack directory> [result ZIP file]
+## 📝 Usage
+PackSquash is a command line application, so it must be executed from a command prompt, a shortcut, a command-line shell or a script. You can customize how it works by means of a settings file, which contains per-file compression settings and several other parameters. If no settings file is specified, or if it is a dash ("-"), the settings will be read from the standard input stream (usually, your keyboard or the output of another command). If in doubt, you can check out the command line argument syntax by launching PackSquash with the `-h` parameter.
 
-FLAGS:
-    -c, --compress-compressed
-            If specified, resource files that are already compressed by design (like PNG and OGG files) will be
-            losslessly compressed again in the result ZIP file, unless that yields no significant space savings. This is
-            disabled by default, as it is expected that compressing already compressed file formats yields marginal
-            space savings that do not outweigh the time cost.
-    -a, --do-not-ignore-system-and-hiden-files
-            If specified, filenames which start with a dot or are likely generated by a software system (Windows,
-            VCS...) won't be skipped without a message.
-    -m, --include-mod-files
-            If specified, resource pack files ignored by vanilla Minecraft clients, but used by modified clients, will
-            be included and processed. Currently, setting this option enables processing and including OptiFine property
-            files in the output ZIP.
-    -o, --zip-obfuscation
-            If provided, the generated ZIP file will not be able to be read by some common programs, like WinRAR, 7-Zip
-            or unzip, but will function normally within Minecraft. It will also not duplicate some metadata in the ZIP
-            file, reducing its size a bit more. You shouldn't rely on this feature to keep the resources safe from
-            unauthorized ripping, and there is a low possibility that a future version of Minecraft rejects these ZIP
-            files. Therefore, it is disabled by default.
-    -h, --help                                    Prints help information.
-    -n, --skip-pack-icon
-            If specified, the pack icon in pack.png will be skipped and not included in the resulting file.
+For more information about the format of the settings file, check [the wiki article about it](https://github.com/ComunidadAylas/PackSquash/wiki/Settings-file-format).
 
-    -V, --version                                 Prints version information
+## ✉️ Contact and support
+Like the license says, this software is provided without any warranty, with the hope that you find it useful. But that doesn't mean I don't welcome constructive feedback, suggestions, congratulations or assisting you on your usage of PackSquash (if I can and want to). If you wish to drop me a line for whatever reason related to PackSquash, you can contact me on Discord: _AlexTMjugador#5124_.
 
-OPTIONS:
-    -t, --threads <THREADS>    The number of resource pack files to process in parallel, in different threads. By
-                               default, a value appropriate to the CPU the program is running on is used, but you might
-                               want to decrease it to reduce memory usage.
-
-ARGS:
-    <resource pack directory>    The directory where the resource pack to process is.
-    <result ZIP file>            The path to the resulting ZIP file, ready to be distributed.
-```
-
-## Potentials for improvement
-These are some tweaks to the application which could further improve the compression it achieves, but are not scheduled for a release. Feel free to submit a PR with some (or all) of these changes!
-
-* Determine unused assets (models, textures, sounds...) by analyzing JSON files, and skip them from the result ZIP file.
-* Understand the OGG format more, to remove metadata from it.
-* Implement TTF minification.
-* Implement an "append mode", which only adds to a result ZIP file resource pack files which are newer than it (so the entire ZIP file isn't generated again if a single file changes).
+Also, if you speak Spanish, you may find that _Comunidad Aylas_, our Spanish-speaking community, suits you well. You can join us on Discord: https://discord.gg/RVAgQRS. Don't forget to introduce yourself!
