@@ -1,6 +1,6 @@
 [package]
 name = "packsquash"
-description = "Lossily compresses and prepares Minecraft resource packs for distribution"
+description = "Minecraft resource pack optimizer"
 version = "0.2.1"
 authors = ["Alejandro \"AlexTMjugador\" González"]
 repository = "https://github.com/ComunidadAylas/PackSquash"
