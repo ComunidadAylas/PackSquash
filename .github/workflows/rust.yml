@@ -35,13 +35,13 @@ jobs:
         override: true
         components: rustfmt, clippy, rust-src
 
-    - name: Set up MSYS2 environment (Windows)
+    - name: Set up MSYS2 environment with GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
       uses: msys2/setup-msys2@v2
       with:
         install: 'base-devel mingw-w64-x86_64-gstreamer mingw-w64-x86_64-gst-plugins-base'
 
-    - name: Install GStreamer build and runtime dependencies (Linux)
+    - name: Install GStreamer build dependencies (Linux)
       if: runner.os == 'Linux'
       run: sudo apt-get update && sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
@@ -49,7 +49,7 @@ jobs:
       if: runner.os == 'Windows'
       run: choco install pkgconfiglite
 
-    - name: Install GStreamer build and runtime dependencies (macOS)
+    - name: Install GStreamer build dependencies (macOS)
       if: runner.os == 'macOS'
       run: brew install gstreamer gst-plugins-base
 
@@ -66,6 +66,11 @@ jobs:
       with:
         command: build
         args: --release --target x86_64-unknown-linux-gnu -Z build-std
+
+    - name: Debug PKG_CONFIG_PATH (Windows)
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: msys2 -c 'echo $PKG_CONFIG_PATH'
 
     - name: Release build (Windows)
       if: runner.os == 'Windows'
