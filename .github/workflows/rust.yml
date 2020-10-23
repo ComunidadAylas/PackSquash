@@ -31,16 +31,15 @@ jobs:
       if: runner.os == 'Windows'
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
-        target: x86_64-pc-windows-gnu
+        toolchain: nightly-x86_64-pc-windows-gnu
         override: true
-        components: rustfmt, clippy
+        components: rustfmt, clippy, rust-src
 
     - name: Set up MSYS2 environment (Windows)
       if: runner.os == 'Windows'
       uses: msys2/setup-msys2@v2
       with:
-        install: 'base-devel pkg-config mingw-w64-x86_64-gstreamer mingw-w64-x86_64-gst-plugins-base'
+        install: 'base-devel mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gstreamer mingw-w64-x86_64-gst-plugins-base'
 
     - name: Install GStreamer build and runtime dependencies (Linux)
       if: runner.os == 'Linux'
@@ -69,7 +68,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release
+        args: --release --target x86_64-pc-windows-gnu -Z build-std
 
     - name: Release build (macOS)
       if: runner.os == 'macOS'
