@@ -45,7 +45,7 @@ jobs:
 
     - name: Download GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
-      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.16.2/gstreamer-1.0-devel-mingw-x86_64-1.16.2.msi --output gstreamer-1.0-devel-mingw-x86_64.msi
+      run: curl https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi --output gstreamer-1.0-devel-mingw-x86_64.msi
 
     - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
