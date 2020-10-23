@@ -67,7 +67,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release --target x86_64-unknown-linux-gnu -Z build-std
+        args: --release --target x86_64-unknown-linux-gnu -Z build-std -Z features=itarget
 
     - name: Release build (Windows)
       if: runner.os == 'Windows'
@@ -76,14 +76,14 @@ jobs:
         PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
         command: build
-        args: --release --target x86_64-pc-windows-gnu -Z build-std
+        args: --release --target x86_64-pc-windows-gnu -Z build-std -Z features=itarget
 
     - name: Release build (macOS)
       if: runner.os == 'macOS'
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release --target x86_64-apple-darwin -Z build-std
+        args: --release --target x86_64-apple-darwin -Z build-std -Z features=itarget
 
     - name: Strip symbols from binary (Linux)
       if: runner.os == 'Linux'
