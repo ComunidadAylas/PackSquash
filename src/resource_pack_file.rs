@@ -12,13 +12,13 @@ use serde::{Deserialize, Serialize};
 
 use simple_error::SimpleError;
 
-use imagequant::Attributes;
+/*use imagequant::Attributes;
 use imagequant::Image;
 
 use oxipng::{optimize_from_memory, AlphaOptim, Deflaters, Headers, IndexSet, Options};
 
 use lodepng::ffi::ColorType;
-use lodepng::Encoder;
+use lodepng::Encoder;*/
 
 use json_comments::StripComments;
 use serde_json::value::Value;
@@ -143,15 +143,12 @@ pub fn path_to_resource_pack_file<'a>(
 		if path_in_root && skip_pack_icon && path.file_name().unwrap_or(&EMPTY_OS_STR) == "pack.png" {
 			// Ignore pack.png if desired, as it is not visible for server resource packs
 			Ok(None)
-		} else if PngFile::are_file_settings_valid(&file_settings) {
-			Ok(Some(Box::new(PngFile {
+		} else /*if PngFile::are_file_settings_valid(&file_settings)*/ {
+			Ok(Some(Box::new(PassthroughFile {
 				path: path.to_path_buf(),
-				settings: file_settings
+				message: "Copied",
+				is_compressed: true
 			})))
-		} else {
-			Err(Box::new(SimpleError::new(
-				"The provided settings are not appropriate for PNG files"
-			)))
 		}
 	} else if extension == "ogg"
 		|| extension == "oga"
@@ -220,7 +217,7 @@ impl ResourcePackFile for JsonFile {
 	}
 }
 
-struct PngFile<'a> {
+/*struct PngFile<'a> {
 	path: PathBuf,
 	settings: Option<&'a FileSettings>
 }
@@ -348,7 +345,7 @@ impl<'a> PngFile<'a> {
 	fn are_file_settings_valid(file_settings: &Option<&FileSettings>) -> bool {
 		matches!(file_settings, Some(FileSettings::PngSettings(_)) | None)
 	}
-}
+}*/
 
 struct AudioFile<'a> {
 	path: PathBuf,

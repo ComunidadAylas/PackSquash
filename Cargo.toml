@@ -30,7 +30,7 @@ json_comments = "0.2.0"
 lodepng = "3.2.2"
 rgb = "0.8.25"
 imagequant = "2.12.5"
-oxipng = { version = "3.0.1", default-features = false }
+#oxipng = { version = "3.0.1", default-features = false }
 gstreamer = "0.16.4"
 gstreamer-app = "0.16.3"
 crc32fast = "1.2.0"
