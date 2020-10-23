@@ -91,7 +91,7 @@ jobs:
 
     - name: Strip symbols from binary (Windows)
       if: runner.os == 'Windows'
-      run: msys2 -c 'strip target/x86_64-pc-windows-gnu/release/packsquash'
+      run: msys2 -c 'strip target/x86_64-pc-windows-gnu/release/packsquash.exe'
 
     - name: Strip symbols from binary (macOS)
       if: runner.os == 'macOS'
