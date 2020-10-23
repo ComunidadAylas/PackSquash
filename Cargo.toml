@@ -40,7 +40,7 @@ glsl = "5.0.1"
 # Use our fork of oxipng that makes cloudflare-zlib optional
 # and fixes Windows builds with MinGW.
 # See: https://gitlab.com/kornelski/cloudflare-zlib-sys/-/issues/1
-[patch.oxipng]
+[patch.crates-io]
 oxipng = { git = 'https://github.com/ComunidadAylas/oxipng' }
 
 [target.'cfg(all(not(windows), any(target_arch = "x86_64", target_arch = "aarch64")))'.dependencies]
