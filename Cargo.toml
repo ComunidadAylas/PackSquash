@@ -24,7 +24,6 @@ serde_json = "1.0.59"
 json_comments = "0.2.0"
 lodepng = "3.2.2"
 rgb = "0.8.25"
-oxipng = { version = "3.0.1", default-features = false }
 imagequant = "2.12.5"
 gstreamer = "0.16.4"
 gstreamer-app = "0.16.3"
@@ -36,12 +35,16 @@ glsl = "5.0.1"
 # Use our fork of oxipng that makes cloudflare-zlib optional.
 # This allows fixing Windows builds with MinGW.
 # See: https://gitlab.com/kornelski/cloudflare-zlib-sys/-/issues/1
-[patch.crates-io]
-oxipng = { git = 'https://github.com/ComunidadAylas/oxipng' }
+[patch.crates-io.oxipng]
+git = 'https://github.com/ComunidadAylas/oxipng'
 
-# We enable it for Unix x64 and Aarch64 platforms
+# We depend on OxiPNG with cloudflare-zlib for Unix x64 and Aarch64 platforms
 [target.'cfg(all(unix, any(target_arch = "x86_64", target_arch = "aarch64")))'.dependencies]
-oxipng = { features = ["cloudflare-zlib"] }
+oxipng = { version = "3.0.1", default-features = false, features = ["cloudflare-zlib"] }
+
+# For Windows or non x64/Aarch64 platforms, we don't use cloudflare-zlib
+[target.'cfg(any(windows, not(any(target_arch = "x86_64", target_arch = "aarch64"))))'.dependencies]
+oxipng = { version = "3.0.1", default-features = false }
 
 [build-dependencies]
 vergen = "3.1.0"
