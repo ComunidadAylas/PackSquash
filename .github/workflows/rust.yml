@@ -39,11 +39,15 @@ jobs:
       if: runner.os == 'Windows'
       uses: msys2/setup-msys2@v2
       with:
-        install: 'base-devel mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gstreamer mingw-w64-x86_64-gst-plugins-base'
+        install: 'base-devel mingw-w64-x86_64-gstreamer mingw-w64-x86_64-gst-plugins-base'
 
     - name: Install GStreamer build and runtime dependencies (Linux)
       if: runner.os == 'Linux'
       run: sudo apt-get update && sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+
+    - name: Install pkgconfiglite (Windows)
+      if: runner.os == 'Windows'
+      run: choco install pkgconfiglite
 
     - name: Install GStreamer build and runtime dependencies (macOS)
       if: runner.os == 'macOS'
