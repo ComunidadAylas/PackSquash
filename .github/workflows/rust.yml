@@ -41,6 +41,7 @@ jobs:
 
     - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
+      shell: powershell
       run: |
         Invoke-WebRequest -Uri "https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi" -OutFile "gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi"
         Start-Process msiexec.exe -ArgumentList "/i gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi /qn" -Wait
