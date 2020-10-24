@@ -26,4 +26,4 @@ For more information about the format of the settings file, check [the wiki arti
 ## ✉️ Contact and support
 Like the license says, this software is provided without any warranty, with the hope that you find it useful. But that doesn't mean I don't welcome constructive feedback, suggestions, congratulations or assisting you on your usage of PackSquash (if I can and want to). If you wish to drop me a line for whatever reason related to PackSquash, you can contact me on Discord: _AlexTMjugador#5124_.
 
-Also, if you speak Spanish, you may find that _Comunidad Aylas_, our Spanish-speaking community, suits you well. You can join us on Discord: https://discord.gg/RVAgQRS. Don't forget to introduce yourself!
+Also, if you speak Spanish, you may find that _Comunidad Aylas_, our Spanish-speaking community, suits you well. You can [join us on Discord](https://discord.gg/RVAgQRS). Don't forget to introduce yourself!
