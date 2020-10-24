@@ -41,15 +41,14 @@ jobs:
 
     - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
-      shell: powershell
       run: |
         Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi'
         Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi /qn' -Wait
         $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '.tmp', '.zip' } –PassThru
-        Invoke-WebRequest -Uri 'https://downloads.sourceforge.net/project/pkgconfiglite/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip' -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome -OutFile $tmp_file
+        Invoke-WebRequest -Uri 'https://downloads.sourceforge.net/project/pkgconfiglite/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip' -UserAgent 'Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) AppleWebKit/534.6 (KHTML, like Gecko) Chrome/7.0.500.0 Safari/534.6' -OutFile $tmp_file
         $tmp_file | Expand-Archive -DestinationPath $PSScriptRoot -Force
         $tmp_file | Remove-Item
-        echo "$PWD\pkg-config-lite-0.28-1\bin" >> $GITHUB_PATH
+        "$PWD\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
     - name: Install GStreamer build dependencies (macOS)
       if: runner.os == 'macOS'
