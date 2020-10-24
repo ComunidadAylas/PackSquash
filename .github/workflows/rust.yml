@@ -42,7 +42,7 @@ jobs:
     - name: Install GStreamer build dependencies (Windows)
       if: runner.os == 'Windows'
       run: |
-        Invoke-WebRequest -Uri "https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi" "gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi"
+        Invoke-WebRequest -Uri "https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi" -OutFile "gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi"
         Start-Process msiexec.exe -ArgumentList "/i gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi /qn" -Wait
         $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace ".tmp", ".zip" } –PassThru
         Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/pkgconfiglite/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip" -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome -OutFile $tmp_file
