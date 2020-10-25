@@ -132,10 +132,11 @@ pub fn path_to_resource_pack_file<'a>(
 	let extension = path
 		.extension()
 		.unwrap_or(&EMPTY_OS_STR)
-		.to_string_lossy()
+		.to_str()
+		.unwrap()
 		.to_lowercase();
 
-	if extension == "json" || extension == "mcmeta" {
+	if extension == "json" || extension == "jsonc" || extension == "mcmeta" {
 		Ok(Some(Box::new(JsonFile {
 			path: path.to_path_buf()
 		})))
@@ -211,8 +212,15 @@ impl ResourcePackFile for JsonFile {
 	}
 
 	fn canonical_extension(&self) -> &str {
-		// Passthrough
-		self.path.extension().unwrap().to_str().unwrap()
+		let original_extension = self.path.extension().unwrap().to_str().unwrap();
+
+		if original_extension.to_ascii_lowercase() == "jsonc" {
+			// .jsonc extension is converted to .json, because we strip comments
+			"json"
+		} else {
+			// Other extensions (e.g. mcmeta) are passed through
+			original_extension
+		}
 	}
 
 	fn is_compressed(&self) -> bool {
