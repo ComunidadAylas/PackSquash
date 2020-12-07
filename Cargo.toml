@@ -30,7 +30,7 @@ gstreamer-app = "0.16.3"
 crc32fast = "1.2.1"
 zopfli = "0.4.0"
 java-properties = "1.2.0"
-glsl = "5.0.1"
+glsl = "6.0.0"
 
 # Use our fork of oxipng that makes cloudflare-zlib optional.
 # This allows fixing Windows builds with MinGW.
