@@ -267,7 +267,7 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 /// storing the resulting processed resource pack file data in a vector.
 fn process_directory(
 	root_path: &Path,
-	current_path: &PathBuf,
+	current_path: &Path,
 	file_count: &Arc<AtomicUsize>,
 	file_thread_pool: &ThreadPool,
 	app_settings: &Arc<AppSettings>,
@@ -403,7 +403,7 @@ fn process_directory(
 /// The resulting path is appropriate for using in ZIP files structures.
 fn relativize_path_for_zip_file(
 	root_path: &Path,
-	descendant_path: &PathBuf
+	descendant_path: &Path
 ) -> PathBuf {
 	let root_components: Vec<Component> = root_path.components().collect();
 	let mut relativized_path = PathBuf::new();
