@@ -45,7 +45,7 @@ jobs:
         Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi'
         Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi /qn' -Wait
         $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '.tmp', '.zip' } –PassThru
-        Invoke-WebRequest -Uri 'https://ftp.gnome.org/mirror/xbmc.org/build-deps/win32/mingw-msys/pkg-config-lite-0.28-1_bin-win32.zip' -OutFile $tmp_file
+        Invoke-WebRequest -Uri 'https://ftp.rrze.uni-erlangen.de/xbmc/build-deps/win32/mingw-msys/pkg-config-lite-0.28-1_bin-win32.zip' -OutFile $tmp_file
         $tmp_file | Expand-Archive -DestinationPath "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1" -Force
         $tmp_file | Remove-Item
         "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
