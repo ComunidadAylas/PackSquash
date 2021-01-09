@@ -2,7 +2,7 @@ use std::convert::TryInto;
 use std::error::Error;
 use std::fs::{self, File};
 use std::io::BufReader;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Once, RwLock};
 
 use super::EMPTY_OS_STR;
@@ -123,7 +123,7 @@ impl Default for PngOptimizationSettings {
 /// pack file, no resource pack file is returned successfully. No settings are valid for
 /// every resource pack file type.
 pub fn path_to_resource_pack_file<'a>(
-	path: &PathBuf,
+	path: &Path,
 	path_in_root: bool,
 	skip_pack_icon: bool,
 	allowed_mods: &EnumSet<Mod>,

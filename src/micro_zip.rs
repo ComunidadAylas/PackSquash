@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::io::{Seek, SeekFrom, Write};
 use std::ops::DerefMut;
-use std::path::PathBuf;
+use std::path::Path;
 
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
@@ -327,7 +327,7 @@ impl MicroZip {
 	/// returning an error if something went wrong during the operation.
 	pub fn add_file(
 		&self,
-		relativized_path: &PathBuf,
+		relativized_path: &Path,
 		file_type: ZipFileType,
 		data: &[u8],
 		skip_compression: bool
@@ -472,7 +472,7 @@ impl MicroZip {
 		// Swap false writing flag for true. If it was false, proceed
 		if !self
 			.writing_central_directory
-			.compare_and_swap(false, true, Ordering::SeqCst)
+			.swap(true, Ordering::SeqCst)
 		{
 			let mut temp_out_file =
 				match self.temp_out_file.write() {
@@ -534,7 +534,7 @@ impl MicroZip {
 
 	/// Converts a relativized path to a string, ready to be used in
 	/// ZIP files structures. Non-ASCII characters are forbidden.
-	fn relativized_path_to_string(relativized_path: &PathBuf) -> Result<String, Box<dyn Error>> {
+	fn relativized_path_to_string(relativized_path: &Path) -> Result<String, Box<dyn Error>> {
 		let mut result_string = String::new();
 
 		for component in relativized_path.components() {

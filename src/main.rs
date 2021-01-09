@@ -1,12 +1,11 @@
 mod micro_zip;
 mod resource_pack_file;
 
-use std::convert::TryInto;
+use std::{convert::TryInto, path::Component};
 use std::error::Error;
 use std::ffi::OsStr;
 use std::io::Read;
-use std::iter::FromIterator;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
@@ -267,7 +266,7 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 /// Recursively processes all the resource pack files in the given path,
 /// storing the resulting processed resource pack file data in a vector.
 fn process_directory(
-	root_path: &PathBuf,
+	root_path: &Path,
 	current_path: &PathBuf,
 	file_count: &Arc<AtomicUsize>,
 	file_thread_pool: &ThreadPool,
@@ -302,7 +301,7 @@ fn process_directory(
 				micro_zip
 			)?;
 		} else {
-			let mut relative_path = relativize_path_for_zip_file(&root_path, &path)?;
+			let mut relative_path = relativize_path_for_zip_file(root_path, &path);
 			let path_in_root = path.parent().unwrap() == root_path;
 			let relative_path_str = match relative_path.to_str() {
 				Some(path) => String::from(path),
@@ -403,10 +402,10 @@ fn process_directory(
 /// Relativizes the specified path from a given root path.
 /// The resulting path is appropriate for using in ZIP files structures.
 fn relativize_path_for_zip_file(
-	root_path: &PathBuf,
+	root_path: &Path,
 	descendant_path: &PathBuf
-) -> Result<PathBuf, Box<dyn Error>> {
-	let root_components = Vec::from_iter(root_path.components());
+) -> PathBuf {
+	let root_components: Vec<Component> = root_path.components().collect();
 	let mut relativized_path = PathBuf::new();
 
 	for (i, descendant_component) in descendant_path.components().enumerate() {
@@ -419,7 +418,7 @@ fn relativize_path_for_zip_file(
 		}
 	}
 
-	Ok(relativized_path)
+	relativized_path
 }
 
 /// Checks whether the specified path likely represents a file generated for use
