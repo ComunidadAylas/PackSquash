@@ -1,11 +1,11 @@
 mod micro_zip;
 mod resource_pack_file;
 
-use std::{convert::TryInto, path::Component};
+use std::convert::TryInto;
 use std::error::Error;
 use std::ffi::OsStr;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
