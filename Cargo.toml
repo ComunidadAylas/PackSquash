@@ -11,20 +11,20 @@ edition = "2018"
 [dependencies]
 lazy_static = "1.4.0"
 getopts = "0.2.21"
-simple-error = "0.2.2"
+simple-error = "0.2.3"
 num_cpus = "1.13.0"
-rusty_pool = { version = "0.4.3", default-features = false }
-tempfile = "3.1.0"
-enumset = { version = "1.0.1", features = ["serde"] }
-serde = { version = "1.0.118", features = ["derive"] }
+rusty_pool = { version = "0.5.0", default-features = false }
+tempfile = "3.2.0"
+enumset = { version = "1.0.3", features = ["serde"] }
+serde = { version = "1.0.123", features = ["derive"] }
 toml = "0.5.8"
 globset = "0.4.6"
 indexmap = { version = "1.6.1", default-features = false, features = ["serde-1"] }
 serde_json = "1.0.61"
 json_comments = "0.2.0"
-lodepng = "3.2.2"
+lodepng = "3.4.3"
 rgb = "0.8.25"
-imagequant = "2.13.0"
+imagequant = "3.0.3"
 gstreamer = "0.16.5"
 gstreamer-app = "0.16.5"
 crc32fast = "1.2.1"
@@ -38,12 +38,6 @@ glsl = "6.0.0"
 [patch.crates-io.oxipng]
 git = 'https://github.com/ComunidadAylas/oxipng'
 
-# Fix some random library trying to import private code of another library.
-# See: https://github.com/Lymia/enumset/issues/17#issuecomment-754972271
-[patch.crates-io.enumset_derive]
-git = "https://github.com/ocboogie/enumset"
-branch = "span-fix"
-
 # We depend on OxiPNG with cloudflare-zlib for Unix x64 and Aarch64 platforms
 [target.'cfg(all(unix, any(target_arch = "x86_64", target_arch = "aarch64")))'.dependencies]
 oxipng = { version = "4.0.3", default-features = false, features = ["zopfli", "cloudflare-zlib"] }
@@ -54,7 +48,7 @@ oxipng = { version = "4.0.3", default-features = false, features = ["zopfli"] }
 
 [build-dependencies]
 vergen = "3.1.0"
-time = "0.2.24"
+time = "0.2.25"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1.11"
