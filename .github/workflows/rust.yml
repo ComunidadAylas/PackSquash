@@ -19,6 +19,7 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly
+        target: x86_64-pc-windows-gnu
         override: true
         components: rustfmt, clippy, rust-src
 
