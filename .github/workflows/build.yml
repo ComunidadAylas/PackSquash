@@ -1,0 +1,136 @@
+name: Build
+
+on: [ push, pull_request ]
+
+env:
+  CARGO_TERM_COLOR: always
+  COMMON_CARGO_BUILD_PARAMS: --release -Z build-std
+
+jobs:
+  linux-x64-release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install latest Rust nightly toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        override: true
+        profile: minimal
+        components: rustfmt, clippy, rust-src
+
+    - name: Install GStreamer build dependencies
+      run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+
+    - name: Clippy check
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: -- -D warnings
+
+    - name: Cargo build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
+    - name: Format Rust source code using rustfmt
+      run: cargo fmt
+
+    - name: Commit and push Rust source code format changes
+      uses: EndBug/add-and-commit@v7
+      with:
+        author_name: github-actions[bot]
+        author_email: 41898282+github-actions[bot]@users.noreply.github.com
+
+    - name: Strip debug symbols from binary
+      run: strip target/x86_64-unknown-linux-gnu/release/packsquash
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'PackSquash executable (Linux x64)'
+        path: target/x86_64-unknown-linux-gnu/release/packsquash
+
+  windows-x64-release:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install latest Rust nightly toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly-x86_64-pc-windows-gnu
+        override: true
+        profile: minimal
+        components: rust-src
+
+    - name: Install GStreamer build dependencies
+      run: |
+        Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi'
+        Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi /qn' -Wait
+        $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '.tmp', '.zip' } -PassThru
+        Invoke-WebRequest -Uri 'https://ftp.rrze.uni-erlangen.de/xbmc/build-deps/win32/mingw-msys/pkg-config-lite-0.28-1_bin-win32.zip' -OutFile $tmp_file
+        $tmp_file | Expand-Archive -DestinationPath "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1" -Force
+        $tmp_file | Remove-Item
+        "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+    - name: Cargo build
+      uses: actions-rs/cargo@v1
+      env:
+        PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
+      with:
+        command: build
+        args: ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
+    - name: Strip debug symbols from binary
+      run: bash.exe -c 'strip target/x86_64-pc-windows-gnu/release/packsquash.exe'
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'PackSquash executable (Windows x64)'
+        path: target/x86_64-pc-windows-gnu/release/packsquash.exe
+
+  macos-x64-release:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install latest Rust nightly toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        override: true
+        profile: minimal
+        components: rust-src
+
+    - name: Install GStreamer build dependencies
+      run: brew install gstreamer gst-plugins-base
+
+    - name: Cargo build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
+    - name: Strip debug symbols from binary
+      run: strip target/x86_64-apple-darwin/release/packsquash
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'PackSquash executable (macOS x64)'
+        path: target/x86_64-apple-darwin/release/packsquash
