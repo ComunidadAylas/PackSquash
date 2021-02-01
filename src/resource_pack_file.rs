@@ -136,7 +136,9 @@ pub fn path_to_resource_pack_file<'a>(
 		.unwrap()
 		.to_lowercase();
 
-	if extension == "json" || extension == "jsonc" || extension == "mcmeta" {
+	if extension == "json" || extension == "jsonc" || extension == "mcmeta" ||
+		(allowed_mods.contains(Mod::Optifine) && (extension == "jpm" || extension == "jem"))
+	{
 		Ok(Some(Box::new(JsonFile {
 			path: path.to_path_buf()
 		})))
