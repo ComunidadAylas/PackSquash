@@ -57,12 +57,11 @@ jobs:
       run: brew install gstreamer gst-plugins-base
 
     - name: Cache build artifacts
-      uses: actions/cache@v2
+      uses: Swatinem/rust-cache@v1
       env:
         cache-version: 1
       with:
-        path: [ ~/.cargo/registry/index, ~/.cargo/registry/cache, ~/.cargo/git, target ]
-        key: ${{ runner.os }}-build-v${{ env.cache-version }}-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'src/**', '**/*.rs') }}
+        key: v${{ env.cache-version }}-${{ hashFiles('src/**', '**/*.rs') }}
 
     - name: Clippy check (Linux)
       if: runner.os == 'Linux'
