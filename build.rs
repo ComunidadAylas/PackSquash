@@ -6,8 +6,7 @@ use vergen::{generate_cargo_keys, ConstantsFlags};
 fn main() {
 	// Setup the flags that enable the required environment variables
 	let flags = ConstantsFlags::from_bits(
-		ConstantsFlags::BUILD_DATE.bits()
-			| ConstantsFlags::TARGET_TRIPLE.bits()
+		ConstantsFlags::TARGET_TRIPLE.bits()
 			| ConstantsFlags::SEMVER_LIGHTWEIGHT.bits()
 	)
 	.unwrap();
@@ -20,16 +19,18 @@ fn main() {
 		);
 	}
 
-	// Set a variable with the build year, for copyright strings
-	let build_year = OffsetDateTime::now_utc().year();
+	// Set variables with the build dates, for copyright and version strings
+	let build_date = OffsetDateTime::now_utc();
+	let build_year = build_date.year();
+	println!("cargo:rustc-env=BUILD_DATE={}", build_date.format("%F"));
 	println!("cargo:rustc-env=BUILD_YEAR={}", build_year);
 
 	// Add platform-specific metadata to the executable
-	add_exe_metadata(build_year);
+	add_executable_metadata(build_year);
 }
 
 #[cfg(windows)]
-fn add_exe_metadata(build_year: i32) {
+fn add_executable_metadata(build_year: i32) {
 	let mut windows_resource = winres::WindowsResource::new();
 	windows_resource.set("ProductName", "PackSquash");
 	windows_resource.set(
@@ -48,4 +49,4 @@ fn add_exe_metadata(build_year: i32) {
 }
 
 #[cfg(not(windows))]
-fn add_exe_metadata(_build_year: i32) {}
+fn add_executable_metadata(_build_year: i32) {}

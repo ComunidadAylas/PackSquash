@@ -99,7 +99,7 @@ fn main() {
 		println!(
 			"PackSquash {} ({}) for {}",
 			option_env!("VERGEN_SEMVER_LIGHTWEIGHT").unwrap_or(&CUSTOM_VERSION_STRING[..]),
-			option_env!("VERGEN_BUILD_DATE").unwrap_or("unknown date"),
+			env!("BUILD_DATE"),
 			option_env!("VERGEN_TARGET_TRIPLE").unwrap_or("unknown platform")
 		);
 		println!("{}", env!("CARGO_PKG_DESCRIPTION"));
