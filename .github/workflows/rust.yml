@@ -27,7 +27,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
     - name: Install cross-compilation toolchains
-      run: sudo apt-get install gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 
+      run: sudo apt-get install gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 mingw-w64-tools
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
