@@ -9,10 +9,8 @@ jobs:
   build:
 
     strategy:
-      fail-fast: true
-      max-parallel: 3
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        os: ubuntu-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -21,107 +19,45 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install latest Rust nightly toolchain (Unix)
-      if: runner.os != 'Windows'
+    - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly
         override: true
         components: rustfmt, clippy, rust-src
 
-    - name: Install latest Rust nightly toolchain (Windows)
-      if: runner.os == 'Windows'
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly-x86_64-pc-windows-gnu
-        override: true
-        components: rustfmt, clippy, rust-src
-
-    - name: Install GStreamer build dependencies (Linux)
-      if: runner.os == 'Linux'
+    - name: Install GStreamer build dependencies
       run: sudo apt-get update && sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
-    - name: Install GStreamer build dependencies (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi'
-        Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi /qn' -Wait
-        $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '.tmp', '.zip' } -PassThru
-        Invoke-WebRequest -Uri 'https://ftp.rrze.uni-erlangen.de/xbmc/build-deps/win32/mingw-msys/pkg-config-lite-0.28-1_bin-win32.zip' -OutFile $tmp_file
-        $tmp_file | Expand-Archive -DestinationPath "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1" -Force
-        $tmp_file | Remove-Item
-        "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-
-    - name: Install GStreamer build dependencies (macOS)
-      if: runner.os == 'macOS'
-      run: brew install gstreamer gst-plugins-base
-
-    - name: Cache build artifacts
-      uses: Swatinem/rust-cache@v1
-      env:
-        cache-version: 1
-      with:
-        key: v${{ env.cache-version }}-${{ hashFiles('src/**', '**/*.rs') }}
-
-    - name: Clippy check (Linux)
-      if: runner.os == 'Linux'
+    - name: Clippy check
       uses: actions-rs/clippy-check@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         args: -- -D warnings
 
-    - name: Release build (Linux)
-      if: runner.os == 'Linux'
+    - name: Release Linux build
       uses: actions-rs/cargo@v1
       with:
         command: build
         args: --release --target x86_64-unknown-linux-gnu -Z build-std
 
-    - name: Release build (Windows)
-      if: runner.os == 'Windows'
+    - name: Release Windows build
       uses: actions-rs/cargo@v1
-      env:
-        PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
         command: build
         args: --release --target x86_64-pc-windows-gnu -Z build-std
 
-    - name: Release build (macOS)
-      if: runner.os == 'macOS'
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --release --target x86_64-apple-darwin -Z build-std
-
-    - name: Strip symbols from binary (Linux)
-      if: runner.os == 'Linux'
+    - name: Strip symbols from Linux binary
       run: strip target/x86_64-unknown-linux-gnu/release/packsquash
 
-    - name: Strip symbols from binary (Windows)
-      if: runner.os == 'Windows'
-      run: bash.exe -c 'strip target/x86_64-pc-windows-gnu/release/packsquash.exe'
-
-    - name: Strip symbols from binary (macOS)
-      if: runner.os == 'macOS'
-      run: strip target/x86_64-apple-darwin/release/packsquash
-
-    - name: Upload executable artifact (Linux)
-      if: runner.os == 'Linux'
+    - name: Upload Linux binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (${{ runner.os }})'
+        name: 'PackSquash executable (Linux)'
         path: target/x86_64-unknown-linux-gnu/release/packsquash
 
-    - name: Upload executable artifact (Windows)
-      if: runner.os == 'Windows'
+    - name: Upload Windows binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (${{ runner.os }})'
+        name: 'PackSquash executable (Windows)'
         path: target/x86_64-pc-windows-gnu/release/packsquash.exe
-
-    - name: Upload executable artifact (macOS)
-      if: runner.os == 'macOS'
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'PackSquash executable (${{ runner.os }})'
-        path: target/x86_64-apple-darwin/release/packsquash
