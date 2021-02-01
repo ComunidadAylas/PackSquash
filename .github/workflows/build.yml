@@ -1,15 +1,23 @@
 name: Build
 
-on: [ push, pull_request ]
+on:
+  push:
+  pull_request:
+  release:
+    types:
+      - published
 
 env:
   CARGO_TERM_COLOR: always
-  COMMON_CARGO_BUILD_PARAMS: --release -Z build-std
+  COMMON_CARGO_BUILD_PARAMS: --release
 
 jobs:
-  linux-x64-gnu-release:
+  linux-x64-gnu:
 
     runs-on: ubuntu-latest
+
+    env:
+      CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
 
     steps:
     - uses: actions/checkout@v2
@@ -19,7 +27,7 @@ jobs:
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: nightly
+        toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
         override: true
         profile: minimal
         components: rustfmt, clippy, rust-src
@@ -40,7 +48,14 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --target x86_64-unknown-linux-gnu ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
+    - name: Cargo build with optimized standard library
+      if: ${{ github.event_name == 'release' }}
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Format Rust source code using rustfmt
       run: cargo fmt
@@ -53,17 +68,20 @@ jobs:
         author_email: 41898282+github-actions[bot]@users.noreply.github.com
 
     - name: Strip debug symbols from binary
-      run: strip target/x86_64-unknown-linux-gnu/release/packsquash
+      run: strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
         name: 'PackSquash executable (Linux x64)'
-        path: target/x86_64-unknown-linux-gnu/release/packsquash
+        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
-  windows-x64-gnu-release:
+  windows-x64-gnu:
 
     runs-on: windows-latest
+
+    env:
+      CARGO_BUILD_TARGET: x86_64-pc-windows-gnu
 
     steps:
     - uses: actions/checkout@v2
@@ -73,7 +91,7 @@ jobs:
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: nightly-x86_64-pc-windows-gnu
+        toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
         override: true
         profile: minimal
         components: rust-src
@@ -97,20 +115,30 @@ jobs:
         PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
         command: build
-        args: --target x86_64-pc-windows-gnu ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
+    - name: Cargo build with optimized standard library
+      if: ${{ github.event_name == 'release' }}
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Strip debug symbols from binary
-      run: bash.exe -c 'strip target/x86_64-pc-windows-gnu/release/packsquash.exe'
+      run: bash.exe -c 'strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe'
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
         name: 'PackSquash executable (Windows x64)'
-        path: target/x86_64-pc-windows-gnu/release/packsquash.exe
+        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe
 
-  macos-x64-darwin-release:
+  macos-x64-darwin:
 
     runs-on: macos-latest
+
+    env:
+      CARGO_BUILD_TARGET: x86_64-apple-darwin
 
     steps:
     - uses: actions/checkout@v2
@@ -120,7 +148,7 @@ jobs:
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: nightly-x86_64-apple-darwin
+        toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
         override: true
         profile: minimal
         components: rust-src
@@ -135,13 +163,20 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --target x86_64-apple-darwin ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
+    - name: Cargo build with optimized standard library
+      if: ${{ github.event_name == 'release' }}
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Strip debug symbols from binary
-      run: strip target/x86_64-apple-darwin/release/packsquash
+      run: strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
         name: 'PackSquash executable (macOS x64)'
-        path: target/x86_64-apple-darwin/release/packsquash
+        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
