@@ -45,6 +45,7 @@ jobs:
         args: --release -- -D warnings
 
     - name: Cargo build
+      if: ${{ github.event_name != 'release' }}
       uses: actions-rs/cargo@v1
       with:
         command: build
@@ -110,6 +111,7 @@ jobs:
         "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
     - name: Cargo build
+      if: ${{ github.event_name != 'release' }}
       uses: actions-rs/cargo@v1
       env:
         PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
@@ -160,6 +162,7 @@ jobs:
       run: brew install gstreamer gst-plugins-base
 
     - name: Cargo build
+      if: ${{ github.event_name != 'release' }}
       uses: actions-rs/cargo@v1
       with:
         command: build
