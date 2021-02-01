@@ -37,7 +37,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target x86_64-unknown-linux-gnu ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Format Rust source code using rustfmt
       run: cargo fmt
@@ -90,7 +90,7 @@ jobs:
         PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
         command: build
-        args: ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target x86_64-pc-windows-gnu ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Strip debug symbols from binary
       run: bash.exe -c 'strip target/x86_64-pc-windows-gnu/release/packsquash.exe'
@@ -124,7 +124,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target x86_64-apple-darwin ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Strip debug symbols from binary
       run: strip target/x86_64-apple-darwin/release/packsquash
