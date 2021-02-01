@@ -90,12 +90,12 @@ fn main() {
 	let mut options = Options::new();
 
 	options.optflag("h", "help", "Prints information about the command line arguments accepted by this application and exits")
-		.optflag("v", "version", "Prints version information of the application and exits")
+		.optflag("v", "version", "Prints version and copyright information of the application, then exits")
 		.parsing_style(ParsingStyle::StopAtFirstFree);
 
 	let options_parse_result = options.parse(env::args().skip(1)); // Skip program name
 
-	let print_version_information = || {
+	let print_version_information = |long_copyright_notice| {
 		println!(
 			"PackSquash {} ({}) for {}",
 			option_env!("VERGEN_SEMVER_LIGHTWEIGHT").unwrap_or(&CUSTOM_VERSION_STRING[..]),
@@ -104,24 +104,31 @@ fn main() {
 		);
 		println!("{}", env!("CARGO_PKG_DESCRIPTION"));
 		println!();
-		println!(
-			"Copyright (C) {} {}",
-			env!("BUILD_YEAR"),
-			env!("CARGO_PKG_AUTHORS")
-		);
-		println!();
-		println!("This program is free software: you can redistribute it and/or modify");
-		println!("it under the terms of the GNU Affero General Public License as");
-		println!("published by the Free Software Foundation, either version 3 of the");
-		println!("License, or (at your option) any later version.");
-		println!();
-		println!("This program is distributed free of charge in the hope that it will");
-		println!("be useful, but WITHOUT ANY WARRANTY; without even the implied warranty");
-		println!("of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
-		println!("GNU Affero General Public License for more details.");
-		println!();
-		println!("You should have received a copy of the GNU Affero General Public License");
-		println!("along with this program. If not, see <https://www.gnu.org/licenses/>.");
+
+		if long_copyright_notice {
+			println!(
+				"Copyright (C) {} {}",
+				env!("BUILD_YEAR"),
+				env!("CARGO_PKG_AUTHORS")
+			);
+			println!();
+			println!("This program is free software: you can redistribute it and/or modify");
+			println!("it under the terms of the GNU Affero General Public License as");
+			println!("published by the Free Software Foundation, either version 3 of the");
+			println!("License, or (at your option) any later version.");
+			println!();
+			println!("This program is distributed free of charge in the hope that it will");
+			println!("be useful, but WITHOUT ANY WARRANTY; without even the implied warranty");
+			println!("of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
+			println!("GNU Affero General Public License for more details.");
+			println!();
+			println!("You should have received a copy of the GNU Affero General Public License");
+			println!("along with this program. If not, see <https://www.gnu.org/licenses/>.");
+		} else {
+			println!("This program comes with ABSOLUTELY NO WARRANTY.");
+			println!("This is free software, and you are welcome to redistribute it");
+			println!("under certain conditions. Run {} -v for details.", env!("CARGO_BIN_NAME"));
+		}
 	};
 
 	let show_help_hint_and_fail = || {
@@ -134,7 +141,7 @@ fn main() {
 
 	if let Ok(option_matches) = options_parse_result {
 		if option_matches.opt_present("h") {
-			print_version_information();
+			print_version_information(true);
 			println!();
 			println!("Usage:");
 			print!(
@@ -143,8 +150,11 @@ fn main() {
 			);
 			println!("{}", options.usage(""));
 		} else if option_matches.opt_present("v") {
-			print_version_information();
+			print_version_information(true);
 		} else {
+			print_version_information(false);
+			println!();
+
 			// If no free arguments were passed, or if the free argument was "-",
 			// consider no path
 			let settings_file_path =
