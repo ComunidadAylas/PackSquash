@@ -31,7 +31,7 @@ jobs:
       uses: actions-rs/clippy-check@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        args: -- -D warnings
+        args: --release -- -D warnings
 
     - name: Cargo build
       uses: actions-rs/cargo@v1
@@ -113,6 +113,7 @@ jobs:
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
+        toolchain: nightly-x86_64-apple-darwin
         override: true
         profile: minimal
         components: rust-src
