@@ -7,7 +7,7 @@ env:
   COMMON_CARGO_BUILD_PARAMS: --release -Z build-std
 
 jobs:
-  linux-x64-release:
+  linux-x64-gnu-release:
 
     runs-on: ubuntu-latest
 
@@ -23,6 +23,9 @@ jobs:
         override: true
         profile: minimal
         components: rustfmt, clippy, rust-src
+
+    - name: Cache Rust artifacts
+      uses: Swatinem/rust-cache@v1
 
     - name: Install GStreamer build dependencies
       run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
@@ -45,6 +48,7 @@ jobs:
     - name: Commit and push Rust source code format changes
       uses: EndBug/add-and-commit@v7
       with:
+        message: 'Format Rust source code using rustfmt'
         author_name: github-actions[bot]
         author_email: 41898282+github-actions[bot]@users.noreply.github.com
 
@@ -57,7 +61,7 @@ jobs:
         name: 'PackSquash executable (Linux x64)'
         path: target/x86_64-unknown-linux-gnu/release/packsquash
 
-  windows-x64-release:
+  windows-x64-gnu-release:
 
     runs-on: windows-latest
 
@@ -73,6 +77,9 @@ jobs:
         override: true
         profile: minimal
         components: rust-src
+
+    - name: Cache Rust artifacts
+      uses: Swatinem/rust-cache@v1
 
     - name: Install GStreamer build dependencies
       run: |
@@ -101,7 +108,7 @@ jobs:
         name: 'PackSquash executable (Windows x64)'
         path: target/x86_64-pc-windows-gnu/release/packsquash.exe
 
-  macos-x64-release:
+  macos-x64-darwin-release:
 
     runs-on: macos-latest
 
@@ -117,6 +124,9 @@ jobs:
         override: true
         profile: minimal
         components: rust-src
+
+    - name: Cache Rust artifacts
+      uses: Swatinem/rust-cache@v1
 
     - name: Install GStreamer build dependencies
       run: brew install gstreamer gst-plugins-base
