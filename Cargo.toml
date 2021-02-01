@@ -7,6 +7,7 @@ repository = "https://github.com/ComunidadAylas/PackSquash"
 license = "AGPL-3.0"
 publish = false
 edition = "2018"
+resolver = "2"
 
 [dependencies]
 lazy_static = "1.4.0"
