@@ -470,24 +470,24 @@ impl MicroZip {
 	/// It is assumed that this function is called when no thread is executing add_file.
 	pub fn finish_and_write<D: Write + Seek>(&self, dst: &mut D) -> Result<(), Box<dyn Error>> {
 		// Swap false writing flag for true. If it was false, proceed
-		if !self
-			.writing_central_directory
-			.swap(true, Ordering::SeqCst)
-		{
-			let mut temp_out_file =
-				match self.temp_out_file.write() {
-					Ok(guard) => guard,
-					_ => return Err(Box::new(SimpleError::new(
+		if !self.writing_central_directory.swap(true, Ordering::SeqCst) {
+			let mut temp_out_file = match self.temp_out_file.write() {
+				Ok(guard) => guard,
+				_ => {
+					return Err(Box::new(SimpleError::new(
 						"An error occurred while acquiring a RW lock for finishing the ZIP file"
 					)))
-				};
+				}
+			};
 
 			let partial_central_directory_entries =
 				match self.partial_central_directory_entries.read() {
 					Ok(guard) => guard,
-					_ => return Err(Box::new(SimpleError::new(
-						"An error occurred while acquiring a RW lock for finishing the ZIP file"
-					)))
+					_ => {
+						return Err(Box::new(SimpleError::new(
+							"An error occurred while acquiring a RW lock for finishing the ZIP file"
+						)))
+					}
 				};
 
 			// First, rewind the temporary output file and write to the destination all its contents
@@ -521,8 +521,7 @@ impl MicroZip {
 				central_directory_entries_in_this_disk: partial_central_directory_entries.len()
 					as u16,
 				central_directory_entries_total: partial_central_directory_entries.len() as u16,
-				central_directory_size: (central_file_header_end - central_file_header_start)
-					as u32,
+				central_directory_size: (central_file_header_end - central_file_header_start) as u32,
 				central_directory_offset: central_file_header_start as u32,
 				..Default::default()
 			}

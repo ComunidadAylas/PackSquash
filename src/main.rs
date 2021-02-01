@@ -127,7 +127,10 @@ fn main() {
 		} else {
 			println!("This program comes with ABSOLUTELY NO WARRANTY.");
 			println!("This is free software, and you are welcome to redistribute it");
-			println!("under certain conditions. Run {} -v for details.", env!("CARGO_BIN_NAME"));
+			println!(
+				"under certain conditions. Run {} -v for details.",
+				env!("CARGO_BIN_NAME")
+			);
 		}
 	};
 
@@ -335,8 +338,7 @@ fn process_directory(
 				// contain proper settings for this path
 				let mut resource_pack_file = None;
 				for pattern_index in file_globs.matches(&relative_path) {
-					let (_, file_data) =
-						app_settings.file_patterns.get_index(pattern_index).unwrap();
+					let (_, file_data) = app_settings.file_patterns.get_index(pattern_index).unwrap();
 
 					if let Ok(file) = resource_pack_file::path_to_resource_pack_file(
 						&path,
@@ -411,10 +413,7 @@ fn process_directory(
 
 /// Relativizes the specified path from a given root path.
 /// The resulting path is appropriate for using in ZIP files structures.
-fn relativize_path_for_zip_file(
-	root_path: &Path,
-	descendant_path: &Path
-) -> PathBuf {
+fn relativize_path_for_zip_file(root_path: &Path, descendant_path: &Path) -> PathBuf {
 	let root_components: Vec<Component> = root_path.components().collect();
 	let mut relativized_path = PathBuf::new();
 
@@ -434,9 +433,6 @@ fn relativize_path_for_zip_file(
 /// Checks whether the specified path likely represents a file generated for use
 /// with some specific software that is not Minecraft, like VCS or operating system components.
 fn is_system_file(file_name: &str, is_directory: bool) -> bool {
-	(
-		file_name == "desktop.ini" ||
-		file_name == "thumbs.db" ||
-		file_name == "README.md"
-	) && !is_directory
+	(file_name == "desktop.ini" || file_name == "thumbs.db" || file_name == "README.md")
+		&& !is_directory
 }

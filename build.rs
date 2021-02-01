@@ -6,8 +6,7 @@ use vergen::{generate_cargo_keys, ConstantsFlags};
 fn main() {
 	// Setup the flags that enable the required environment variables
 	let flags = ConstantsFlags::from_bits(
-		ConstantsFlags::TARGET_TRIPLE.bits()
-			| ConstantsFlags::SEMVER_LIGHTWEIGHT.bits()
+		ConstantsFlags::TARGET_TRIPLE.bits() | ConstantsFlags::SEMVER_LIGHTWEIGHT.bits()
 	)
 	.unwrap();
 

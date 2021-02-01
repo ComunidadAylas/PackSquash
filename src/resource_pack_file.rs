@@ -136,8 +136,10 @@ pub fn path_to_resource_pack_file<'a>(
 		.unwrap()
 		.to_lowercase();
 
-	if extension == "json" || extension == "jsonc" || extension == "mcmeta" ||
-		(allowed_mods.contains(Mod::Optifine) && (extension == "jpm" || extension == "jem"))
+	if extension == "json"
+		|| extension == "jsonc"
+		|| extension == "mcmeta"
+		|| (allowed_mods.contains(Mod::Optifine) && (extension == "jpm" || extension == "jem"))
 	{
 		Ok(Some(Box::new(JsonFile {
 			path: path.to_path_buf()
@@ -497,8 +499,7 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 					gstreamer_app::AppSinkCallbacks::builder()
 						.new_sample(move |sink| {
 							// Get the incoming sample (container for audio data)
-							let sample =
-								sink.pull_sample().map_err(|_| gstreamer::FlowError::Eos)?;
+							let sample = sink.pull_sample().map_err(|_| gstreamer::FlowError::Eos)?;
 							// Now get the buffer contained in the sample
 							let buffer = sample.get_buffer().ok_or(gstreamer::FlowError::Error)?;
 							// Request the buffer with read access
