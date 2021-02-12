@@ -81,7 +81,7 @@ impl Default for GeneralSettings {
 			compress_already_compressed_files: false,
 			ignore_system_and_hidden_files: true,
 			allowed_mods: EnumSet::empty(),
-			threads: cmp::max(num_cpus::get().try_into().unwrap_or(u32::MAX), 1),
+			threads: 0,
 			output_file_path: String::from("resource_pack.zip"),
 			// The buffer size is in bytes, and we want to use half the available memory
 			output_file_spooling_buffer_size: available_mem_kb * 125 / 262144
@@ -238,7 +238,10 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	let file_thread_pool = ThreadPool::new_named(
 		String::from(env!("CARGO_PKG_NAME")),
 		0,
-		app_settings.general.threads,
+		match app_settings.general.threads {
+			0 => cmp::max(num_cpus::get().try_into().unwrap_or(u32::MAX), 1),
+			_ => app_settings.general.threads
+		},
 		Duration::from_secs(15)
 	);
 	let micro_zip = Arc::new(MicroZip::new(
