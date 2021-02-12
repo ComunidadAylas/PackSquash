@@ -12,7 +12,7 @@ PackSquash walks through the resource pack files that it recognizes in a directo
 * For VSH and FSH shader files: minification, by removing unneeded whitespace. As with JSON files, PackSquash will perform basic validation on them.
 * For Java property files (only if OptiFine mod support is enabled): minification, by removing unneeded whitespace. As with JSON files, performing minification requires parsing the file, so PackSquash will show basic validation errors.
 
-In addition to these techniques, the files that are not already compressed by design (like OGG and PNG images) are losslessly compressed using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, whilst being compatible with every DEFLATE decoder. For even higher savings it is possible to try to compress already compressed files, but this is very likely to yield marginal savings, if at all.
+In addition to these techniques, the files that are not already compressed by design (like OGG and PNG images) are losslessly compressed using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, whilst being compatible with every DEFLATE decoder. For even higher savings it is possible to try to compress already compressed files, although this slows down the process significantly.
 
 ## 🔗 Download
 You can get the executable for the latest stable release from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
@@ -23,6 +23,8 @@ Alternatively, if you are into these sort of things, you can download the latest
 PackSquash is a command line application, so it must be executed from a command prompt, a shortcut, a command-line shell or a script. You can customize how it works by means of a settings file, which contains per-file compression settings and several other parameters. If no settings file is specified, or if it is a dash ("-"), the settings will be read from the standard input stream (usually, your keyboard or the output of another command). If in doubt, you can check out the command line argument syntax by launching PackSquash with the `-h` parameter.
 
 For more information about the format of the settings file, check [the wiki article about it](https://github.com/ComunidadAylas/PackSquash/wiki/Settings-file-format).
+
+If you want a GUI for using PackSquash, or even authoring resource packs in general, you may want to try out the [Quiver](https://github.com/DeflatedPickle/Quiver) project, which is a third-party resource pack creator and manager for Minecraft that integrates with PackSquash. Just install PackSquash dependencies, open the resource pack folder, tweak the settings file if you need to, and enjoy!
 
 ## ✉️ Contact and support
 Like the license says, this software is provided without any warranty, with the hope that you find it useful. But that doesn't mean I don't welcome constructive feedback, suggestions, congratulations or assisting you on your usage of PackSquash (if I can and want to). If you wish to drop me a line for whatever reason related to PackSquash, you can contact me on Discord: _AlexTMjugador#5124_.
