@@ -17,15 +17,15 @@ use crc32fast::Hasher;
 
 /// Compression methods supported by Minecraft in a ZIP file.
 enum ZipCompressionMethod {
-	DEFLATE,
-	STORE
+	Deflate,
+	Store
 }
 
 impl ZipCompressionMethod {
 	fn to_bitstream_field(&self) -> u16 {
 		match self {
-			ZipCompressionMethod::DEFLATE => 8,
-			ZipCompressionMethod::STORE => 0
+			ZipCompressionMethod::Deflate => 8,
+			ZipCompressionMethod::Store => 0
 		}
 	}
 
@@ -46,7 +46,7 @@ impl ZipCompressionMethod {
 		}
 
 		match self {
-			ZipCompressionMethod::DEFLATE => {
+			ZipCompressionMethod::Deflate => {
 				// Compress the data with Zopfli
 				zopfli::compress(
 					&zopfli::Options::default(),
@@ -56,7 +56,7 @@ impl ZipCompressionMethod {
 				)
 				.unwrap();
 			}
-			ZipCompressionMethod::STORE => {
+			ZipCompressionMethod::Store => {
 				// Passthrough original data
 				vec_buffer.extend_from_slice(data);
 			}
@@ -69,12 +69,12 @@ impl ZipCompressionMethod {
 	/// and its CRC.
 	fn best_compress(data: &[u8]) -> (ZipCompressionMethod, Vec<u8>, u32) {
 		let (deflated_data, uncompressed_data_crc) =
-			match ZipCompressionMethod::DEFLATE.compress(data, true) {
+			match ZipCompressionMethod::Deflate.compress(data, true) {
 				(compressed_data, Some(crc)) => (compressed_data, crc),
 				(_, None) => panic!("Assertion failed")
 			};
 
-		let stored_data = match ZipCompressionMethod::STORE.compress(data, false) {
+		let stored_data = match ZipCompressionMethod::Store.compress(data, false) {
 			(passthrough_data, None) => passthrough_data,
 			_ => panic!("Assertion failed")
 		};
@@ -82,13 +82,13 @@ impl ZipCompressionMethod {
 		if deflated_data.len() < stored_data.len() {
 			// Consider DEFLATE better if it saves at least one byte
 			(
-				ZipCompressionMethod::DEFLATE,
+				ZipCompressionMethod::Deflate,
 				deflated_data,
 				uncompressed_data_crc
 			)
 		} else {
 			(
-				ZipCompressionMethod::STORE,
+				ZipCompressionMethod::Store,
 				stored_data,
 				uncompressed_data_crc
 			)
@@ -374,9 +374,9 @@ impl MicroZip {
 			let (zip_compression_method, compressed_data, crc) = match file_type {
 				ZipFileType::RegularFile => {
 					if skip_compression {
-						match ZipCompressionMethod::STORE.compress(data, true) {
+						match ZipCompressionMethod::Store.compress(data, true) {
 							(compressed_data, Some(crc)) => {
-								(ZipCompressionMethod::STORE, compressed_data, crc)
+								(ZipCompressionMethod::Store, compressed_data, crc)
 							}
 							_ => {
 								return Err(Box::new(SimpleError::new(
