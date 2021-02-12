@@ -83,7 +83,7 @@ impl Default for GeneralSettings {
 			allowed_mods: EnumSet::empty(),
 			threads: 0,
 			output_file_path: String::from("resource_pack.zip"),
-			// The buffer size is in bytes, and we want to use half the available memory
+			// The buffer size is in MiB, and we want to use half the available memory
 			output_file_spooling_buffer_size: available_mem_kb * 125 / 262144
 		}
 	}
