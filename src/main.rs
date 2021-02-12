@@ -30,6 +30,8 @@ use micro_zip::ZipFileType;
 
 use lazy_static::lazy_static;
 
+use sysinfo::{RefreshKind, System, SystemExt};
+
 lazy_static! {
 	static ref EMPTY_OS_STR: &'static OsStr = OsStr::new("");
 	static ref STANDARD_INPUT_STR: String = String::from("standard input");
@@ -63,11 +65,16 @@ struct GeneralSettings {
 	ignore_system_and_hidden_files: bool,
 	allowed_mods: EnumSet<Mod>,
 	threads: u32,
-	output_file_path: String
+	output_file_path: String,
+	output_file_spooling_buffer_size: u64
 }
 
 impl Default for GeneralSettings {
 	fn default() -> Self {
+		// The "k" in "kB" here has an SI-compliant meaning (1000 and not 1024 bytes)
+		let available_mem_kb =
+			System::new_with_specifics(RefreshKind::new().with_memory()).get_available_memory();
+
 		Self {
 			skip_pack_icon: false,
 			strict_zip_spec_compliance: true,
@@ -75,7 +82,9 @@ impl Default for GeneralSettings {
 			ignore_system_and_hidden_files: true,
 			allowed_mods: EnumSet::empty(),
 			threads: cmp::max(num_cpus::get().try_into().unwrap_or(u32::MAX), 1),
-			output_file_path: String::from("resource_pack.zip")
+			output_file_path: String::from("resource_pack.zip"),
+			// The buffer size is in bytes, and we want to use half the available memory
+			output_file_spooling_buffer_size: available_mem_kb * 125 / 262144
 		}
 	}
 }
@@ -234,7 +243,8 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	);
 	let micro_zip = Arc::new(MicroZip::new(
 		16,
-		app_settings.general.strict_zip_spec_compliance
+		app_settings.general.strict_zip_spec_compliance,
+		app_settings.general.output_file_spooling_buffer_size
 	));
 	let app_settings = Arc::new(app_settings);
 

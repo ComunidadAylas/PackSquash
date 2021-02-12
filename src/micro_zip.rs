@@ -1,8 +1,8 @@
-use std::collections::HashSet;
 use std::error::Error;
 use std::io::{Seek, SeekFrom, Write};
 use std::ops::DerefMut;
 use std::path::Path;
+use std::{collections::HashSet, convert::TryInto};
 
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
@@ -313,9 +313,18 @@ pub struct MicroZip {
 }
 
 impl MicroZip {
-	pub fn new(file_count_estimate: usize, strict_spec_compliance: bool) -> MicroZip {
+	pub fn new(
+		file_count_estimate: usize,
+		strict_spec_compliance: bool,
+		output_file_spooling_buffer_size: u64
+	) -> MicroZip {
 		MicroZip {
-			temp_out_file: RwLock::new(SpooledTempFile::new(64 * 1024 * 1024)), // 64 MiB
+			temp_out_file: RwLock::new(SpooledTempFile::new(
+				output_file_spooling_buffer_size
+					.try_into()
+					.unwrap_or(usize::MAX)
+					.saturating_mul(1024 * 1024)
+			)),
 			stored_file_paths: RwLock::new(HashSet::with_capacity(file_count_estimate)),
 			partial_central_directory_entries: RwLock::new(Vec::with_capacity(file_count_estimate)),
 			strict_spec_compliance,
