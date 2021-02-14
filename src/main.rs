@@ -281,7 +281,7 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 	)?)?;
 
 	println!(
-		"{} files were stored in the resource pack {}",
+		"{} files were stored in {}",
 		file_count.load(Ordering::Relaxed),
 		app_settings.general.output_file_path
 	);
