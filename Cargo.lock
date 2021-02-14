@@ -36,12 +36,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "afddf7f520a80dbf76e6f50a35bca42a2331ef227a28b3b6dc5c2e2338d114b1"
 
 [[package]]
-name = "array-init"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a51c983d65b6691893a791e55aa8bda43bbd9b11f947e5a9581710362277cc95"
-
-[[package]]
 name = "autocfg"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -617,40 +611,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gstreamer-audio"
-version = "0.16.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2e5de1fdcb26caebd09c99573e4929d76e5e20b7d44aab52587af61c89e6fd2"
-dependencies = [
- "array-init",
- "bitflags",
- "glib",
- "glib-sys",
- "gobject-sys",
- "gstreamer",
- "gstreamer-audio-sys",
- "gstreamer-base",
- "gstreamer-base-sys",
- "gstreamer-sys",
- "libc",
- "once_cell",
-]
-
-[[package]]
-name = "gstreamer-audio-sys"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b614d5e478ad2ff6f5699757d03f11f2868ea43164c651c60449bd0e3c6b7d75"
-dependencies = [
- "glib-sys",
- "gobject-sys",
- "gstreamer-base-sys",
- "gstreamer-sys",
- "libc",
- "system-deps",
-]
-
-[[package]]
 name = "gstreamer-base"
 version = "0.16.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -986,7 +946,6 @@ dependencies = [
  "glsl",
  "gstreamer",
  "gstreamer-app",
- "gstreamer-audio",
  "imagequant",
  "indexmap",
  "java-properties",
@@ -1159,9 +1118,9 @@ dependencies = [
 
 [[package]]
 name = "rand_core"
-version = "0.6.1"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c026d7df8b298d90ccbbc5190bd04d85e159eaf5576caeacf8741da93ccbd2e5"
+checksum = "34cf66eb183df1c5876e2dcf6b13d57340741e8dc255b48e40a26de954d06ae7"
 dependencies = [
  "getrandom",
 ]
