@@ -1,9 +1,9 @@
-use std::convert::TryInto;
 use std::error::Error;
 use std::fs::{self, File};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Once, RwLock};
+use std::{any::Any, convert::TryInto};
 
 use super::EMPTY_OS_STR;
 
@@ -95,7 +95,7 @@ impl Default for AudioTranscodingSettings {
 	fn default() -> Self {
 		Self {
 			transcode_ogg: true,
-			channels: 1,
+			channels: 0,
 			sampling_frequency: 32000,
 			target_pitch: 1.0,
 			minimum_bitrate: 40000,
@@ -383,11 +383,10 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 
 			let gstreamer_pipeline = gstreamer::Pipeline::new(None);
 
-			// Create the pipeline
+			// Create the pipeline elements
 			let filesrc = ElementFactory::make("filesrc", None)?;
 			let decoder = ElementFactory::make("decodebin", None)?; // Contains a demuxer + decoder
 			let converter = ElementFactory::make("audioconvert", None)?;
-			let channel_mix_filter = ElementFactory::make("capsfilter", None)?;
 			let pitch_shifter = ElementFactory::make("pitch", None)?;
 			let resampler = ElementFactory::make("audioresample", None)?;
 			let resampler_filter = ElementFactory::make("capsfilter", None)?;
@@ -400,13 +399,6 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			decoder.set_property(
 				"caps",
 				&Caps::new_simple("audio/x-raw", &[]) // Only decode audio streams
-			)?;
-			channel_mix_filter.set_property(
-				"caps",
-				&Caps::new_simple(
-					"audio/x-raw",
-					&[("channels", &transcoding_settings.channels)]
-				)
 			)?;
 			// Minecraft lets OpenAL "Frequency Shift by Pitch" implement pitch shifting
 			// (see https://www.openal.org/documentation/openal-1.1-specification.pdf).
@@ -431,14 +423,14 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			app_sink.set_property("sync", &false)?; // Output at max speed, not realtime
 
 			// decodebin (demuxer + decoder) needs to be linked later with the next step, because in the
-			// beginning it doesn't have a source pad: it acquires it on the fly after probing the input
+			// beginning it doesn't have a source pad: it acquires it on the fly after probing the input.
+			// That is also a good time to add the channel mixing filter, if needed
 
-			// Add and link the pipeline together
+			// Add and link the constant parts of the pipeline together
 			gstreamer_pipeline.add_many(&[
 				&filesrc,
 				&decoder,
 				&converter,
-				&channel_mix_filter,
 				&pitch_shifter,
 				&resampler,
 				&resampler_filter,
@@ -448,53 +440,90 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			])?;
 
 			filesrc.link(&decoder)?;
-			converter.link(&channel_mix_filter)?;
-			channel_mix_filter.link(&pitch_shifter)?;
-			pitch_shifter.link(&resampler)?;
-			resampler.link(&resampler_filter)?;
-			resampler_filter.link(&encoder)?;
-			encoder.link(&muxer)?;
-			muxer.link(&app_sink)?;
+			gstreamer::Element::link_many(&[
+				&pitch_shifter,
+				&resampler,
+				&resampler_filter,
+				&encoder,
+				&muxer,
+				&app_sink
+			])?;
 
 			// Discard all event-provided tags. As the encoder is
 			// not simultaneously a tag reader, and we not explicitly
 			// add any tags, the resulting file will have no tags
 			encoder
-				.dynamic_cast::<gstreamer::TagSetter>()
-				.unwrap()
+				.downcast_ref::<gstreamer::TagSetter>()
+				.ok_or_else(|| SimpleError::new("Couldn't cast the encoder to a tag setter"))?
 				.set_tag_merge_mode(gstreamer::TagMergeMode::KeepAll);
 
 			// Handle the demuxer receiving a source pad
-			let dec_element_weak = decoder.downgrade();
-			decoder.connect_pad_added(move |_, src_pad| {
-				let dec_element = match dec_element_weak.upgrade() {
-					Some(element) => element,
-					_ => return
-				};
+			let weak_pitch_shifter_ptr = pitch_shifter.downgrade();
+			let weak_gstreamer_pipeline_ptr = gstreamer_pipeline.downgrade();
+			let result_audio_channels = transcoding_settings.channels;
+			decoder.connect_pad_added(move |_, decoder_src_pad| {
+				// Closure that allows using the ? operator to return on error.
+				// Any error that happens here will leave the pipeline in an
+				// incorrect state and break later anyway
+				|| -> Option<Box<dyn Any>> {
+					// The decoder has just received a audio source.
+					// Get the sink pad of the converter, to connect the decoder source pad to it
+					let converter_sink_pad = converter.get_static_pad("sink")?;
 
-				// Get the sink pad of the converter, to connect the decoder to it
-				let converter_sink = match converter.get_static_pad("sink") {
-					Some(sink) => sink,
-					None => return
-				};
+					// Ignore event if the link is already set up
+					if !converter_sink_pad.is_linked() {
+						let pitch_shifter = weak_pitch_shifter_ptr.upgrade()?;
 
-				// Ignore event if the link is already set up
-				if !converter_sink.is_linked() {
-					// The demuxer received a audio source. Link the recently
-					// created demuxer source pad with the converter sink pad to
-					// complete the pipeline
-					if src_pad.link(&converter_sink).is_err() {
-						return;
+						if result_audio_channels > 0 {
+							let gstreamer_pipeline = weak_gstreamer_pipeline_ptr.upgrade()?;
+
+							// We want to mix to some number of channels, so configure the
+							// necessary caps filter (channel mix filter)
+							let channel_mix_filter = ElementFactory::make("capsfilter", None).ok()?;
+							channel_mix_filter
+								.set_property(
+									"caps",
+									&Caps::new_simple(
+										"audio/x-raw",
+										&[("channels", &result_audio_channels)]
+									)
+								)
+								.ok()?;
+
+							gstreamer_pipeline.add(&channel_mix_filter).ok()?;
+
+							// Link the converter to the channel mix filter and
+							// the channel mix filter to the pitch shifter:
+							// ... -> converter -> channel_mix_filter -> pitch_shifter -> ...
+							converter.link(&channel_mix_filter).ok()?;
+							channel_mix_filter.link(&pitch_shifter).ok()?;
+
+							// We also need to set the new element to play, or otherwise
+							// the entire pipeline will pause
+							channel_mix_filter.sync_state_with_parent().ok()?;
+						} else {
+							// No channel mixing is desired, so link the converter
+							// directly to the pitch shifter:
+							// ... -> converter -> pitch_shifter -> ...
+							converter.link(&pitch_shifter).ok()?;
+						}
+
+						// The decoder received a audio source. Link the recently
+						// created decoder source pad with the converter sink pad.
+						// This will complete the pipeline, as we both added and
+						// linked the rest of elements either statically or
+						// dynamically
+						decoder_src_pad.link(&converter_sink_pad).ok();
 					}
 
-					dec_element.link(&converter).unwrap_or(());
-				}
+					None
+				}();
 			});
 
 			let weak_result_ogg_lock_ptr = Arc::downgrade(&result_ogg_lock_ptr);
 			app_sink
-				.dynamic_cast::<gstreamer_app::AppSink>()
-				.unwrap()
+				.downcast_ref::<gstreamer_app::AppSink>()
+				.ok_or_else(|| SimpleError::new("Couldn't cast the app sink"))?
 				.set_callbacks(
 					gstreamer_app::AppSinkCallbacks::builder()
 						.new_sample(move |sink| {
@@ -509,16 +538,15 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 
 							// Now try to upgrade the weak pointer, that shouldn't be freed yet
 							// because that's done when EOS is reached (and this closure is called no more)
-							let result_ogg_lock_ptr = match weak_result_ogg_lock_ptr.upgrade() {
-								Some(ptr) => ptr,
-								_ => return Err(gstreamer::FlowError::Error)
-							};
+							let result_ogg_lock_ptr = weak_result_ogg_lock_ptr
+								.upgrade()
+								.ok_or(gstreamer::FlowError::Error)?;
 
 							// Now get the write lock and add the bytes to the resulting OGG file
-							match result_ogg_lock_ptr.write() {
-								Ok(mut guard) => guard.extend_from_slice(&mapped_buffer[..]),
-								_ => return Err(gstreamer::FlowError::Error)
-							};
+							result_ogg_lock_ptr
+								.write()
+								.map_err(|_| gstreamer::FlowError::Error)?
+								.extend_from_slice(&mapped_buffer[..]);
 
 							Ok(gstreamer::FlowSuccess::Ok)
 						})
@@ -530,16 +558,17 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			// Handle errors and end of stream
 			let bus = gstreamer_pipeline.get_bus().unwrap();
 			for msg in bus.iter_timed(gstreamer::CLOCK_TIME_NONE) {
-				let message_view = msg.view();
+				match msg.view() {
+					MessageView::Eos(..) => break,
+					MessageView::Error(err) => {
+						gstreamer_pipeline.set_state(gstreamer::State::Null)?;
 
-				if let MessageView::Eos(..) = message_view {
-					break;
-				} else if let MessageView::Error(err) = message_view {
-					gstreamer_pipeline.set_state(gstreamer::State::Null)?;
-
-					return Err(Box::new(SimpleError::new(
-						err.get_debug().unwrap_or_else(|| String::from("unknown"))
-					)));
+						return Err(Box::new(SimpleError::new(
+							err.get_debug()
+								.unwrap_or_else(|| String::from("unknown GStreamer bus error"))
+						)));
+					}
+					_ => ()
 				}
 			}
 
@@ -548,13 +577,11 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 
 			// Unwrap ARC as it should have only one strong reference now (ours).
 			// Also consume the RwLock
-			let result_ogg = match Arc::try_unwrap(result_ogg_lock_ptr) {
-				Ok(result_ogg_lock) => match result_ogg_lock.into_inner() {
-					Ok(result) => result,
-					_ => return Err(Box::new(SimpleError::new("Couldn't consume RW lock")))
-				},
-				_ => return Err(Box::new(SimpleError::new("Couldn't unwrap the ARC")))
-			};
+			let result_ogg = Arc::try_unwrap(result_ogg_lock_ptr)
+				.map_err(|_| SimpleError::new("Couldn't unwrap the ARC"))?
+				.into_inner()
+				.map_err(|_| SimpleError::new("Couldn't consume RW lock"))?;
+
 			Ok((result_ogg, AUDIO_TRANSCODED.to_string()))
 		} else {
 			// The easy case: is OGG and the user does not want us to touch :)
