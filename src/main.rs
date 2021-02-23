@@ -23,7 +23,7 @@ use simple_error::SimpleError;
 
 use globset::{GlobBuilder, GlobSet, GlobSetBuilder};
 
-use resource_pack_file::{FileSettings, Mod};
+use resource_pack_file::{FileSettings, InvalidSettingsForResourcePackFile, Mod, ResourcePackFile};
 
 use micro_zip::MicroZip;
 use micro_zip::ZipFileType;
@@ -345,46 +345,52 @@ fn process_directory(
 
 			// Now process the file in a different thread
 			file_thread_pool.execute(move || {
-				// Try to get the first resource pack file struct for this path
-				// that can be created with the settings associated to a file pattern.
-				// This will effectively ignore any other matching file patterns that
-				// contain proper settings for this path
-				let mut resource_pack_file = None;
-				for pattern_index in file_globs.matches(&relative_path) {
-					let (_, file_data) = app_settings.file_patterns.get_index(pattern_index).unwrap();
+				let resource_pack_file = || -> Result<Box<dyn ResourcePackFile>, Box<dyn Error>> {
+					// Try to get the first resource pack file struct for this path
+					// that can be created with the settings associated to a file pattern.
+					// This will effectively ignore any other matching file patterns that
+					// contain proper settings for this path
+					for pattern_index in file_globs.matches(&relative_path) {
+						let (_, file_data) =
+							app_settings.file_patterns.get_index(pattern_index).unwrap();
 
-					if let Ok(file) = resource_pack_file::path_to_resource_pack_file(
-						&path,
-						path_in_root,
-						app_settings.general.skip_pack_icon,
-						&app_settings.general.allowed_mods,
-						Some(&file_data.settings)
-					) {
-						resource_pack_file = file;
-						break;
+						match resource_pack_file::path_to_resource_pack_file(
+							&path,
+							path_in_root,
+							app_settings.general.skip_pack_icon,
+							&app_settings.general.allowed_mods,
+							Some(&file_data.settings)
+						) {
+							Ok(file) => return Ok(file),
+							Err(file_error) => {
+								// Passthrough the error only if it is a "hard" error
+								if !file_error.is::<InvalidSettingsForResourcePackFile>() {
+									return Err(file_error);
+								}
+							}
+						}
 					}
-				}
 
-				// It may happen that no file pattern matches. If that's the case,
-				// fallback to no settings (i.e. use defaults)
-				if resource_pack_file.is_none() {
-					resource_pack_file = resource_pack_file::path_to_resource_pack_file(
+					// If we get here, no file pattern matches. Fallback to no settings
+					// (i.e. use defaults)
+					resource_pack_file::path_to_resource_pack_file(
 						&path,
 						path_in_root,
 						app_settings.general.skip_pack_icon,
 						&app_settings.general.allowed_mods,
 						None
 					)
-					.unwrap();
-				}
+				}();
 
 				// The calls to create a resource pack file struct were successful
 				// at this point, but we may still not have the struct because
 				// the path is not a valid resource pack file
-				if let Some(resource_pack_file) = resource_pack_file {
+				if let Ok(mut resource_pack_file) = resource_pack_file {
 					let result = resource_pack_file.process();
 
 					if let Ok((processed_bytes, message)) = result {
+						let success_message = format!("> {}: {}", relative_path_str, message);
+
 						// Change the relative path with the canonical extension
 						relative_path.set_extension(resource_pack_file.canonical_extension());
 
@@ -398,24 +404,28 @@ fn process_directory(
 						);
 
 						if add_result.is_ok() {
-							println!("> {}: {}", relative_path_str, message);
+							println!("{}", success_message);
 							file_count.fetch_add(1, Ordering::Relaxed);
 						} else {
 							println!(
 								"! {}: Couldn't add to the result ZIP file: {}",
 								relative_path_str,
-								add_result.err().unwrap()
+								add_result.unwrap_err()
 							);
 						}
 					} else {
 						println!(
 							"! {}: Couldn't process the file: {}",
 							relative_path_str,
-							result.err().unwrap()
+							result.unwrap_err()
 						);
 					}
 				} else {
-					println!("> {}: Skipped", relative_path_str);
+					println!(
+						"> {}: Couldn't open file: {}",
+						relative_path_str,
+						resource_pack_file.err().unwrap()
+					);
 				}
 			});
 		}

@@ -1,9 +1,15 @@
-use std::error::Error;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::BufReader;
-use std::path::{Path, PathBuf};
-use std::sync::{Arc, Once, RwLock};
-use std::{any::Any, convert::TryInto};
+use std::path::Path;
+use std::sync::{Arc, Once};
+use std::{
+	borrow::Cow,
+	cmp,
+	error::Error,
+	fmt::{Display, Formatter},
+	io::Read
+};
+use std::{convert::TryInto, sync::Mutex};
 
 use super::EMPTY_OS_STR;
 
@@ -23,9 +29,13 @@ use lodepng::Encoder;
 use json_comments::StripComments;
 use serde_json::value::Value;
 
-use gstreamer::prelude::*;
-use gstreamer::MessageView;
-use gstreamer::{caps::Caps, ElementFactory};
+use gstreamer::{
+	caps::Caps,
+	glib::clone::Downgrade,
+	prelude::{Cast, ObjectExt},
+	ElementExt, ElementExtManual, ElementFactory, GstBinExt, GstBinExtManual, MessageView, PadExt,
+	PadExtManual, TagSetterExt
+};
 
 use java_properties::{LineEnding, PropertiesIter, PropertiesWriter};
 
@@ -36,14 +46,10 @@ use glsl::transpiler;
 use lazy_static::lazy_static;
 
 lazy_static! {
-	static ref COMPACTED: String = String::from("Compacted");
-	static ref AUDIO_TRANSCODED: String = String::from("Transcoded");
-	static ref OGG_COPIED: String = String::from("Copied due to file settings");
-	static ref LOSSLESS: String = String::from("lossless");
-	static ref DEFAULT_AUDIO_TRANSCODING_SETTINGS: AudioTranscodingSettings =
-		AudioTranscodingSettings::default();
 	static ref DEFAULT_PNG_OPTIMIZATION_SETTINGS: PngOptimizationSettings =
 		PngOptimizationSettings::default();
+	static ref DEFAULT_AUDIO_TRANSCODING_SETTINGS: AudioTranscodingSettings =
+		AudioTranscodingSettings::default();
 }
 
 static GSTREAMER_INIT: Once = Once::new();
@@ -52,7 +58,7 @@ pub trait ResourcePackFile {
 	/// Processes this resource pack file, returning its processed byte contents.
 	/// A descriptive string containing the performed action with the file is also
 	/// returned in the tuple.
-	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>>;
+	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>>;
 
 	/// Returns the canonical extension for this resource pack file, to use for
 	/// the resulting ZIP file.
@@ -118,6 +124,17 @@ impl Default for PngOptimizationSettings {
 	}
 }
 
+#[derive(Debug)]
+pub struct InvalidSettingsForResourcePackFile {}
+
+impl Display for InvalidSettingsForResourcePackFile {
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		f.write_str("The type of settings specified for the resource pack file is not appropriate")
+	}
+}
+
+impl Error for InvalidSettingsForResourcePackFile {}
+
 /// Converts a path to a resource pack file. If the conversion is unsuccessful, because the
 /// provided file settings are invalid, an error is returned. If the path is not a resource
 /// pack file, no resource pack file is returned successfully. No settings are valid for
@@ -128,7 +145,7 @@ pub fn path_to_resource_pack_file<'a>(
 	skip_pack_icon: bool,
 	allowed_mods: &EnumSet<Mod>,
 	file_settings: Option<&'a FileSettings>
-) -> Result<Option<Box<dyn ResourcePackFile + 'a>>, Box<dyn Error>> {
+) -> Result<Box<dyn ResourcePackFile + 'a>, Box<dyn Error>> {
 	let extension = path
 		.extension()
 		.unwrap_or(&EMPTY_OS_STR)
@@ -136,94 +153,62 @@ pub fn path_to_resource_pack_file<'a>(
 		.unwrap()
 		.to_lowercase();
 
-	if extension == "json"
-		|| extension == "jsonc"
-		|| extension == "mcmeta"
-		|| (allowed_mods.contains(Mod::Optifine) && (extension == "jpm" || extension == "jem"))
-	{
-		Ok(Some(Box::new(JsonFile {
-			path: path.to_path_buf()
-		})))
-	} else if extension == "png" {
-		if path_in_root && skip_pack_icon && path.file_name().unwrap_or(&EMPTY_OS_STR) == "pack.png" {
+	match &extension[..] {
+		"json" | "jsonc" | "mcmeta" => Ok(Box::new(JsonFile::new(path, extension)?)),
+		"jem" | "jpm" if allowed_mods.contains(Mod::Optifine) => Ok(Box::new(JsonFile::new(path, extension)?)),
+		"png" if path_in_root && skip_pack_icon && path.file_name().unwrap_or(&EMPTY_OS_STR) == "pack.png" =>
 			// Ignore pack.png if desired, as it is not visible for server resource packs
-			Ok(None)
-		} else if PngFile::are_file_settings_valid(&file_settings) {
-			Ok(Some(Box::new(PngFile {
-				path: path.to_path_buf(),
-				settings: file_settings
-			})))
-		} else {
-			Err(Box::new(SimpleError::new(
-				"The provided settings are not appropriate for PNG files"
-			)))
-		}
-	} else if extension == "ogg"
-		|| extension == "oga"
-		|| extension == "mp3"
-		|| extension == "flac"
-		|| extension == "wav"
-	{
-		if AudioFile::are_file_settings_valid(&file_settings) {
-			Ok(Some(Box::new(AudioFile {
-				path: path.to_path_buf(),
-				is_ogg: extension == "ogg" || extension == "oga",
-				settings: file_settings
-			})))
-		} else {
-			Err(Box::new(SimpleError::new(
-				"The provided settings are not appropriate for audio files"
-			)))
-		}
-	} else if extension == "fsh" || extension == "vsh" {
-		Ok(Some(Box::new(ShaderFile {
-			path: path.to_path_buf()
-		})))
-	} else if extension == "ttf" {
-		Ok(Some(Box::new(PassthroughFile {
-			path: path.to_path_buf(),
-			message: "Copied, but might be optimized manually (more information: https://stackoverflow.com/questions/2635423/way-to-reduce-size-of-ttf-fonts)",
-			is_compressed: false
-		})))
-	} else if extension == "bin" {
-		Ok(Some(Box::new(PassthroughFile {
-			path: path.to_path_buf(),
-			message: "Copied",
-			is_compressed: false
-		})))
-	} else if extension == "properties" && allowed_mods.contains(Mod::Optifine) {
-		Ok(Some(Box::new(PropertiesFile {
-			path: path.to_path_buf()
-		})))
-	} else {
-		// Unknown file type
-		Ok(None)
+			Ok(Box::new(SkippedFile {})),
+		"png" => match file_settings {
+				Some(FileSettings::PngSettings(png_settings)) => Ok(Box::new(PngFile::new(path, extension, Some(png_settings))?)),
+				None => Ok(Box::new(PngFile::new(path, extension, None)?)),
+				_ => Err(Box::new(InvalidSettingsForResourcePackFile {}))
+			},
+		"ogg" | "oga" | "mp3" | "flac" | "wav" => match file_settings {
+				Some(FileSettings::AudioSettings(audio_settings)) => Ok(Box::new(AudioFile::new(path, extension, Some(audio_settings))?)),
+				None => Ok(Box::new(AudioFile::new(path, extension, None)?)),
+				_ => Err(Box::new(InvalidSettingsForResourcePackFile {}))
+			},
+		"fsh" | "vsh" => Ok(Box::new(ShaderFile::new(path, extension)?)),
+		"ttf" => Ok(Box::new(PassthroughFile::new(path, "ttf", "Copied, but might be optimized manually (more information: https://stackoverflow.com/questions/2635423/way-to-reduce-size-of-ttf-fonts)", false)?)),
+		"bin" => Ok(Box::new(PassthroughFile::new(path, "bin", "Copied", false)?)),
+		"properties" if allowed_mods.contains(Mod::Optifine) => Ok(Box::new(PropertiesFile::new(path, extension)?)),
+		_ => Ok(Box::new(SkippedFile {}))
 	}
 }
 
-struct JsonFile {
-	path: PathBuf
+struct JsonFile<T: Read> {
+	data: T,
+	extension: String
 }
 
-impl ResourcePackFile for JsonFile {
-	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+impl JsonFile<BufReader<File>> {
+	fn new(file_path: &Path, extension: String) -> Result<Self, Box<dyn Error>> {
+		Ok(Self {
+			data: BufReader::new(File::open(file_path)?),
+			extension
+		})
+	}
+}
+
+impl<T: Read> ResourcePackFile for JsonFile<T> {
+	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
 		// Parse the JSON so we know how to serialize it again in a compact manner.
 		// Also, pass it through a comment stripper so we ignore comments
-		let json_value: Value =
-			serde_json::from_reader(StripComments::new(BufReader::new(File::open(&self.path)?)))?;
+		let json_value: Value = serde_json::from_reader(StripComments::new(&mut self.data))?;
 
-		Ok((json_value.to_string().into_bytes(), COMPACTED.to_string()))
+		Ok((
+			json_value.to_string().into_bytes(),
+			Cow::Borrowed("Compacted")
+		))
 	}
 
 	fn canonical_extension(&self) -> &str {
-		let original_extension = self.path.extension().unwrap().to_str().unwrap();
-
-		if original_extension.to_ascii_lowercase() == "jsonc" {
+		match &self.extension[..] {
 			// .jsonc extension is converted to .json, because we strip comments
-			"json"
-		} else {
+			"jsonc" => "json",
 			// Other extensions (e.g. mcmeta) are passed through
-			original_extension
+			_ => &self.extension
 		}
 	}
 
@@ -232,21 +217,42 @@ impl ResourcePackFile for JsonFile {
 	}
 }
 
-struct PngFile<'a> {
-	path: PathBuf,
-	settings: Option<&'a FileSettings>
+struct PngFile<'a, T: Read> {
+	data: T,
+	data_length: usize,
+	extension: String,
+	settings: &'a PngOptimizationSettings
 }
 
-impl<'a> ResourcePackFile for PngFile<'a> {
-	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
-		let optimization_settings = match &self.settings {
-			Some(FileSettings::PngSettings(optimization_settings)) => optimization_settings,
-			_ => &DEFAULT_PNG_OPTIMIZATION_SETTINGS
+impl<'a> PngFile<'a, BufReader<File>> {
+	fn new(
+		file_path: &Path,
+		extension: String,
+		settings: Option<&'a PngOptimizationSettings>
+	) -> Result<Self, Box<dyn Error>> {
+		let file = File::open(file_path)?;
+		Ok(Self {
+			data_length: file
+				.metadata()
+				.map(|file_metadata| file_metadata.len().try_into().unwrap_or(usize::MAX))?,
+			data: BufReader::new(file),
+			extension,
+			settings: settings.unwrap_or(&DEFAULT_PNG_OPTIMIZATION_SETTINGS)
+		})
+	}
+}
+
+impl<'a, T: Read> ResourcePackFile for PngFile<'a, T> {
+	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+		let mut input_png = {
+			let mut buffer = Vec::with_capacity(self.data_length);
+			self.data.read_to_end(&mut buffer)?;
+			buffer
 		};
 
-		let input_png;
 		let quality_description;
-		if optimization_settings.quantize_image {
+		let mut quality_percent_string;
+		if self.settings.quantize_image {
 			// Set up the quantization attributes
 			let mut quantization_attributes = Attributes::new();
 			quantization_attributes.set_max_colors(256);
@@ -254,8 +260,7 @@ impl<'a> ResourcePackFile for PngFile<'a> {
 			quantization_attributes.set_quality(0, 100);
 
 			// Read the image to memory
-			let file_bytes = fs::read(&self.path)?;
-			let image = lodepng::decode32(&file_bytes)?;
+			let image = lodepng::decode32(&input_png)?;
 
 			// Perform quantization only if there are more than 256 pixels
 			if image.width > 16 || image.height > 16 {
@@ -283,18 +288,16 @@ impl<'a> ResourcePackFile for PngFile<'a> {
 
 				input_png = encoder.encode(&image_bytes, image.width(), image.height())?;
 
-				let mut quality_string = quantization_result.quantization_quality().to_string();
-				quality_string.push('%');
-				quality_description = quality_string;
+				quality_percent_string = quantization_result.quantization_quality().to_string();
+				quality_percent_string.push('%');
+				quality_description = &quality_percent_string[..];
 			} else {
 				// Quantization is not needed
-				input_png = file_bytes;
-				quality_description = LOSSLESS.to_string();
+				quality_description = "lossless";
 			}
 		} else {
 			// When not performing quantization, we just want to pass bytes through
-			input_png = fs::read(&self.path)?;
-			quality_description = LOSSLESS.to_string();
+			quality_description = "lossless";
 		}
 
 		// Init OxiPNG optimization settings
@@ -340,13 +343,16 @@ impl<'a> ResourcePackFile for PngFile<'a> {
 
 		Ok((
 			optimized_png,
-			format!("PNG optimized with {} quality", quality_description)
+			Cow::Owned(format!(
+				"PNG optimized with {} quality",
+				quality_description
+			))
 		))
 	}
 
 	fn canonical_extension(&self) -> &str {
 		// Passthrough
-		self.path.extension().unwrap().to_str().unwrap()
+		&self.extension
 	}
 
 	fn is_compressed(&self) -> bool {
@@ -354,37 +360,43 @@ impl<'a> ResourcePackFile for PngFile<'a> {
 	}
 }
 
-impl<'a> PngFile<'a> {
-	/// Checks whether the specified settings are valid for this resource pack
-	/// file.
-	fn are_file_settings_valid(file_settings: &Option<&FileSettings>) -> bool {
-		matches!(file_settings, Some(FileSettings::PngSettings(_)) | None)
+struct AudioFile<'a, T: Read + Send + Sync> {
+	data: Arc<Mutex<T>>,
+	data_length: usize,
+	is_ogg: bool,
+	settings: &'a AudioTranscodingSettings
+}
+
+impl<'a> AudioFile<'a, BufReader<File>> {
+	fn new(
+		file_path: &Path,
+		extension: String,
+		settings: Option<&'a AudioTranscodingSettings>
+	) -> Result<Self, Box<dyn Error>> {
+		let file = File::open(file_path)?;
+		Ok(Self {
+			data_length: file
+				.metadata()
+				.map(|file_metadata| file_metadata.len().try_into().unwrap_or(usize::MAX))?,
+			data: Arc::new(Mutex::new(BufReader::new(file))),
+			is_ogg: extension == "ogg" || extension == "oga",
+			settings: settings.unwrap_or(&DEFAULT_AUDIO_TRANSCODING_SETTINGS)
+		})
 	}
 }
 
-struct AudioFile<'a> {
-	path: PathBuf,
-	is_ogg: bool,
-	settings: Option<&'a FileSettings>
-}
-
-impl<'a> ResourcePackFile for AudioFile<'a> {
-	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
-		let transcoding_settings = match &self.settings {
-			Some(FileSettings::AudioSettings(transcoding_settings)) => transcoding_settings,
-			_ => &DEFAULT_AUDIO_TRANSCODING_SETTINGS
-		};
-
-		if !self.is_ogg || transcoding_settings.transcode_ogg {
+impl<'a, T: Read + Send + Sync + 'static> ResourcePackFile for AudioFile<'a, T> {
+	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+		if !self.is_ogg || self.settings.transcode_ogg {
 			// It is not OGG, or we want to transcode OGG anyway. Let the party begin!
-			GSTREAMER_INIT.call_once(|| gstreamer::init().unwrap());
+			let result_ogg_lock = Arc::new(Mutex::new(Vec::with_capacity(self.data_length / 8)));
 
-			let result_ogg_lock_ptr = Arc::new(RwLock::new(Vec::with_capacity(16 * 1024)));
+			GSTREAMER_INIT.call_once(|| gstreamer::init().unwrap());
 
 			let gstreamer_pipeline = gstreamer::Pipeline::new(None);
 
 			// Create the pipeline elements
-			let filesrc = ElementFactory::make("filesrc", None)?;
+			let appsrc = ElementFactory::make("appsrc", None)?;
 			let decoder = ElementFactory::make("decodebin", None)?; // Contains a demuxer + decoder
 			let converter = ElementFactory::make("audioconvert", None)?;
 			let pitch_shifter = ElementFactory::make("pitch", None)?;
@@ -392,9 +404,9 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			let resampler_filter = ElementFactory::make("capsfilter", None)?;
 			let encoder = ElementFactory::make("vorbisenc", None)?;
 			let muxer = ElementFactory::make("oggmux", None)?;
-			let app_sink = ElementFactory::make("appsink", None)?;
+			let appsink = ElementFactory::make("appsink", None)?;
 
-			filesrc.set_property("location", &self.path.to_str().unwrap())?;
+			appsrc.set_property("size", &self.data_length.try_into().unwrap_or(-1i64))?;
 			decoder.set_property("expose-all-streams", &false)?;
 			decoder.set_property(
 				"caps",
@@ -408,27 +420,26 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 			// to the inverse value. For instance, if the target pitch is 0.5 (half less pitch),
 			// we shift the pitch here to 1 / 0.5 = 2 (double the pitch), so the pitch shifts
 			// cancel each other out
-			pitch_shifter.set_property("pitch", &(1.0 / transcoding_settings.target_pitch))?;
-			pitch_shifter.set_property("tempo", &(1.0 / transcoding_settings.target_pitch))?;
+			pitch_shifter.set_property("pitch", &(1.0 / self.settings.target_pitch))?;
+			pitch_shifter.set_property("tempo", &(1.0 / self.settings.target_pitch))?;
 			resampler.set_property("quality", &10)?; // Good quality resampling
 			resampler_filter.set_property(
 				"caps",
 				&Caps::new_simple(
 					"audio/x-raw",
-					&[("rate", &transcoding_settings.sampling_frequency)]
+					&[("rate", &self.settings.sampling_frequency)]
 				)
 			)?;
-			encoder.set_property("min-bitrate", &transcoding_settings.minimum_bitrate)?;
-			encoder.set_property("max-bitrate", &transcoding_settings.maximum_bitrate)?;
-			app_sink.set_property("sync", &false)?; // Output at max speed, not realtime
+			encoder.set_property("min-bitrate", &self.settings.minimum_bitrate)?;
+			encoder.set_property("max-bitrate", &self.settings.maximum_bitrate)?;
+			appsink.set_property("sync", &false)?; // Output at max speed, not realtime
 
 			// decodebin (demuxer + decoder) needs to be linked later with the next step, because in the
-			// beginning it doesn't have a source pad: it acquires it on the fly after probing the input.
-			// That is also a good time to add the channel mixing filter, if needed
+			// beginning it doesn't have a source pad: it acquires it on the fly after probing the input
 
 			// Add and link the constant parts of the pipeline together
 			gstreamer_pipeline.add_many(&[
-				&filesrc,
+				&appsrc,
 				&decoder,
 				&converter,
 				&pitch_shifter,
@@ -436,17 +447,17 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 				&resampler_filter,
 				&encoder,
 				&muxer,
-				&app_sink
+				&appsink
 			])?;
 
-			filesrc.link(&decoder)?;
+			appsrc.link(&decoder)?;
 			gstreamer::Element::link_many(&[
 				&pitch_shifter,
 				&resampler,
 				&resampler_filter,
 				&encoder,
 				&muxer,
-				&app_sink
+				&appsink
 			])?;
 
 			// Discard all event-provided tags. As the encoder is
@@ -458,70 +469,99 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 				.set_tag_merge_mode(gstreamer::TagMergeMode::KeepAll);
 
 			// Handle the demuxer receiving a source pad
-			let weak_pitch_shifter_ptr = pitch_shifter.downgrade();
-			let weak_gstreamer_pipeline_ptr = gstreamer_pipeline.downgrade();
-			let result_audio_channels = transcoding_settings.channels;
+			let weak_pitch_shifter_ptr = Downgrade::downgrade(&pitch_shifter);
+			let weak_gstreamer_pipeline_ptr = Downgrade::downgrade(&gstreamer_pipeline);
+			let result_audio_channels = self.settings.channels;
 			decoder.connect_pad_added(move |_, decoder_src_pad| {
-				// Closure that allows using the ? operator to return on error.
-				// Any error that happens here will leave the pipeline in an
-				// incorrect state and break later anyway
-				|| -> Option<Box<dyn Any>> {
-					// The decoder has just received a audio source.
-					// Get the sink pad of the converter, to connect the decoder source pad to it
-					let converter_sink_pad = converter.get_static_pad("sink")?;
+				// The decoder has just received a audio source.
+				// Get the sink pad of the converter, to connect the decoder source pad to it
+				let converter_sink_pad = converter.get_static_pad("sink").unwrap();
 
-					// Ignore event if the link is already set up
-					if !converter_sink_pad.is_linked() {
-						let pitch_shifter = weak_pitch_shifter_ptr.upgrade()?;
+				// Ignore event if the link is already set up
+				if !converter_sink_pad.is_linked() {
+					let pitch_shifter = weak_pitch_shifter_ptr.upgrade().unwrap();
 
-						if result_audio_channels > 0 {
-							let gstreamer_pipeline = weak_gstreamer_pipeline_ptr.upgrade()?;
+					if result_audio_channels > 0 {
+						let gstreamer_pipeline = weak_gstreamer_pipeline_ptr.upgrade().unwrap();
 
-							// We want to mix to some number of channels, so configure the
-							// necessary caps filter (channel mix filter)
-							let channel_mix_filter = ElementFactory::make("capsfilter", None).ok()?;
-							channel_mix_filter
-								.set_property(
-									"caps",
-									&Caps::new_simple(
-										"audio/x-raw",
-										&[("channels", &result_audio_channels)]
-									)
+						// We want to mix to some number of channels, so configure the
+						// necessary caps filter (channel mix filter)
+						let channel_mix_filter = ElementFactory::make("capsfilter", None).unwrap();
+						channel_mix_filter
+							.set_property(
+								"caps",
+								&Caps::new_simple(
+									"audio/x-raw",
+									&[("channels", &result_audio_channels)]
 								)
-								.ok()?;
+							)
+							.unwrap();
 
-							gstreamer_pipeline.add(&channel_mix_filter).ok()?;
+						gstreamer_pipeline.add(&channel_mix_filter).unwrap();
 
-							// Link the converter to the channel mix filter and
-							// the channel mix filter to the pitch shifter:
-							// ... -> converter -> channel_mix_filter -> pitch_shifter -> ...
-							converter.link(&channel_mix_filter).ok()?;
-							channel_mix_filter.link(&pitch_shifter).ok()?;
+						// Link the converter to the channel mix filter and
+						// the channel mix filter to the pitch shifter:
+						// ... -> converter -> channel_mix_filter -> pitch_shifter -> ...
+						converter.link(&channel_mix_filter).unwrap();
+						channel_mix_filter.link(&pitch_shifter).unwrap();
 
-							// We also need to set the new element to play, or otherwise
-							// the entire pipeline will pause
-							channel_mix_filter.sync_state_with_parent().ok()?;
-						} else {
-							// No channel mixing is desired, so link the converter
-							// directly to the pitch shifter:
-							// ... -> converter -> pitch_shifter -> ...
-							converter.link(&pitch_shifter).ok()?;
-						}
-
-						// The decoder received a audio source. Link the recently
-						// created decoder source pad with the converter sink pad.
-						// This will complete the pipeline, as we both added and
-						// linked the rest of elements either statically or
-						// dynamically
-						decoder_src_pad.link(&converter_sink_pad).ok();
+						// We also need to set the new element to play, or otherwise
+						// the entire pipeline will pause
+						channel_mix_filter.sync_state_with_parent().unwrap();
+					} else {
+						// No channel mixing is desired, so link the converter
+						// directly to the pitch shifter:
+						// ... -> converter -> pitch_shifter -> ...
+						converter.link(&pitch_shifter).unwrap();
 					}
 
-					None
-				}();
+					// The decoder received a audio source. Link the recently
+					// created decoder source pad with the converter sink pad.
+					// This will complete the pipeline, as we both added and
+					// linked the rest of elements either statically or
+					// dynamically
+					decoder_src_pad.link(&converter_sink_pad).unwrap();
+				}
 			});
 
-			let weak_result_ogg_lock_ptr = Arc::downgrade(&result_ogg_lock_ptr);
-			app_sink
+			// Handle GStreamer requesting data on the app source by handing it a
+			// buffer with the next bytes provided by the source stream
+			let data_lock = self.data.clone();
+			let buffer_size = cmp::min(cmp::max(64 * 1024, self.data_length / 4), 2 * 1024 * 1024);
+			appsrc
+				.downcast_ref::<gstreamer_app::AppSrc>()
+				.ok_or_else(|| SimpleError::new("Couldn't cast the app source"))?
+				.set_callbacks(
+					gstreamer_app::AppSrcCallbacks::builder()
+						.need_data(move |appsrc, _| {
+							// Create the buffer and get a mutable reference to it
+							let mut buffer = gstreamer::Buffer::with_size(buffer_size).unwrap();
+							let buffer_mut = buffer.get_mut().unwrap();
+
+							// Map the buffer as writable and read to it
+							let read_bytes;
+							{
+								let mut gstreamer_mapped_buffer = buffer_mut.map_writable().unwrap();
+								let mut data = data_lock.lock().unwrap();
+
+								read_bytes = data.read(&mut gstreamer_mapped_buffer).unwrap();
+							}
+
+							// Truncate it to the actual number of bytes we read
+							buffer_mut.set_size(read_bytes);
+
+							if read_bytes > 0 {
+								appsrc.push_buffer(buffer).unwrap();
+							} else {
+								appsrc.end_of_stream().unwrap();
+							}
+						})
+						.build()
+				);
+
+			// Handle data being received on the app sink by copying it to the result vector
+			let result_ogg_lock_ptr = Arc::downgrade(&result_ogg_lock);
+			appsink
 				.downcast_ref::<gstreamer_app::AppSink>()
 				.ok_or_else(|| SimpleError::new("Couldn't cast the app sink"))?
 				.set_callbacks(
@@ -529,8 +569,10 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 						.new_sample(move |sink| {
 							// Get the incoming sample (container for audio data)
 							let sample = sink.pull_sample().map_err(|_| gstreamer::FlowError::Eos)?;
+
 							// Now get the buffer contained in the sample
 							let buffer = sample.get_buffer().ok_or(gstreamer::FlowError::Error)?;
+
 							// Request the buffer with read access
 							let mapped_buffer = buffer
 								.map_readable()
@@ -538,13 +580,13 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 
 							// Now try to upgrade the weak pointer, that shouldn't be freed yet
 							// because that's done when EOS is reached (and this closure is called no more)
-							let result_ogg_lock_ptr = weak_result_ogg_lock_ptr
+							let result_ogg_lock = result_ogg_lock_ptr
 								.upgrade()
 								.ok_or(gstreamer::FlowError::Error)?;
 
-							// Now get the write lock and add the bytes to the resulting OGG file
-							result_ogg_lock_ptr
-								.write()
+							// Now acquire the write lock and add the bytes to the resulting OGG file
+							result_ogg_lock
+								.lock()
 								.map_err(|_| gstreamer::FlowError::Error)?
 								.extend_from_slice(&mapped_buffer[..]);
 
@@ -572,20 +614,27 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 				}
 			}
 
-			// Clean up state before returning
+			// Clean up state
 			gstreamer_pipeline.set_state(gstreamer::State::Null)?;
 
 			// Unwrap ARC as it should have only one strong reference now (ours).
 			// Also consume the RwLock
-			let result_ogg = Arc::try_unwrap(result_ogg_lock_ptr)
+			let result_ogg = Arc::try_unwrap(result_ogg_lock)
 				.map_err(|_| SimpleError::new("Couldn't unwrap the ARC"))?
 				.into_inner()
 				.map_err(|_| SimpleError::new("Couldn't consume RW lock"))?;
 
-			Ok((result_ogg, AUDIO_TRANSCODED.to_string()))
+			Ok((result_ogg, Cow::Borrowed("Transcoded")))
 		} else {
 			// The easy case: is OGG and the user does not want us to touch :)
-			Ok((fs::read(&self.path)?, OGG_COPIED.to_string()))
+
+			let mut buffer = Vec::with_capacity(self.data_length);
+			self.data
+				.lock()
+				.map_err(|_| SimpleError::new("Couldn't acquire RW lock for writing"))?
+				.read_to_end(&mut buffer)?;
+
+			Ok((buffer, Cow::Borrowed("Copied due to file settings")))
 		}
 	}
 
@@ -598,34 +647,45 @@ impl<'a> ResourcePackFile for AudioFile<'a> {
 	}
 }
 
-impl<'a> AudioFile<'a> {
-	/// Checks whether the specified settings are valid for this resource pack
-	/// file.
-	fn are_file_settings_valid(file_settings: &Option<&FileSettings>) -> bool {
-		matches!(file_settings, Some(FileSettings::AudioSettings(_)) | None)
+struct ShaderFile<T: Read> {
+	data: T,
+	data_length: usize,
+	extension: String
+}
+
+impl ShaderFile<BufReader<File>> {
+	fn new(file_path: &Path, extension: String) -> Result<Self, Box<dyn Error>> {
+		let file = File::open(file_path)?;
+		Ok(Self {
+			data_length: file
+				.metadata()
+				.map(|file_metadata| file_metadata.len().try_into().unwrap_or(usize::MAX))?,
+			data: BufReader::new(file),
+			extension
+		})
 	}
 }
 
-struct ShaderFile {
-	path: PathBuf
-}
+impl<T: Read> ResourcePackFile for ShaderFile<T> {
+	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+		let mut buffer = String::with_capacity(self.data_length);
 
-impl ResourcePackFile for ShaderFile {
-	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
-		let estimated_result_size = match fs::metadata(&self.path) {
-			Ok(file_meta) => file_meta.len().try_into().unwrap_or(usize::MAX),
-			_ => 0
-		};
+		// Transfer the translation unit source code to the buffer
+		self.data.read_to_string(&mut buffer)?;
 
-		let mut compacted_shader = String::with_capacity(estimated_result_size);
-		let translation_unit = TranslationUnit::parse(fs::read_to_string(&self.path)?)?;
-		transpiler::glsl::show_translation_unit(&mut compacted_shader, &translation_unit);
+		// Parse a translation unit struct from the contents of the buffer.
+		// Then discard the contents of the buffer, without deallocating memory,
+		// to reuse it to show its compacted version
+		let translation_unit = TranslationUnit::parse(&mut buffer)?;
+		buffer.clear();
 
-		Ok((compacted_shader.into_bytes(), COMPACTED.to_string()))
+		transpiler::glsl::show_translation_unit(&mut buffer, &translation_unit);
+
+		Ok((buffer.into_bytes(), Cow::Borrowed("Compacted")))
 	}
 
 	fn canonical_extension(&self) -> &str {
-		self.path.extension().unwrap().to_str().unwrap()
+		&self.extension
 	}
 
 	fn is_compressed(&self) -> bool {
@@ -633,18 +693,28 @@ impl ResourcePackFile for ShaderFile {
 	}
 }
 
-struct PropertiesFile {
-	path: PathBuf
+struct PropertiesFile<T: Read> {
+	data: T,
+	data_length: usize,
+	extension: String
 }
 
-impl ResourcePackFile for PropertiesFile {
-	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
-		let estimated_result_size = match fs::metadata(&self.path) {
-			Ok(file_meta) => file_meta.len().try_into().unwrap_or(usize::MAX),
-			_ => 0
-		};
+impl PropertiesFile<BufReader<File>> {
+	fn new(file_path: &Path, extension: String) -> Result<Self, Box<dyn Error>> {
+		let file = File::open(file_path)?;
+		Ok(Self {
+			data_length: file
+				.metadata()
+				.map(|file_metadata| file_metadata.len().try_into().unwrap_or(usize::MAX))?,
+			data: BufReader::new(file),
+			extension
+		})
+	}
+}
 
-		let mut compacted_properties = Vec::with_capacity(estimated_result_size);
+impl<T: Read> ResourcePackFile for PropertiesFile<T> {
+	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+		let mut compacted_properties = Vec::with_capacity(self.data_length);
 		let mut compacted_properties_writer = PropertiesWriter::new(&mut compacted_properties);
 
 		// Normalize line endings and separators
@@ -653,16 +723,16 @@ impl ResourcePackFile for PropertiesFile {
 
 		// Read key-value pairs from the input file, and write them without comments
 		// in the tersest way possible
-		PropertiesIter::new(BufReader::new(File::open(&self.path)?)).read_into(|key, value| {
+		PropertiesIter::new(&mut self.data).read_into(|key, value| {
 			compacted_properties_writer.write(&key, &value).unwrap();
 		})?;
 
-		Ok((compacted_properties, COMPACTED.to_string()))
+		Ok((compacted_properties, Cow::Borrowed("Compacted")))
 	}
 
 	fn canonical_extension(&self) -> &str {
 		// Passthrough
-		self.path.extension().unwrap().to_str().unwrap()
+		&self.extension
 	}
 
 	fn is_compressed(&self) -> bool {
@@ -670,24 +740,64 @@ impl ResourcePackFile for PropertiesFile {
 	}
 }
 
-struct PassthroughFile<'a> {
-	path: PathBuf,
+struct PassthroughFile<'a, T: Read> {
+	data: T,
+	data_length: usize,
+	canonical_extension: &'a str,
 	message: &'a str,
 	is_compressed: bool
 }
 
-impl<'a> ResourcePackFile for PassthroughFile<'a> {
-	fn process(&self) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+impl<'a> PassthroughFile<'a, BufReader<File>> {
+	fn new(
+		file_path: &Path,
+		canonical_extension: &'a str,
+		message: &'a str,
+		is_compressed: bool
+	) -> Result<Self, Box<dyn Error>> {
+		let file = File::open(file_path)?;
+		Ok(Self {
+			data_length: file
+				.metadata()
+				.map(|file_metadata| file_metadata.len().try_into().unwrap_or(usize::MAX))?,
+			data: BufReader::new(file),
+			canonical_extension,
+			message,
+			is_compressed
+		})
+	}
+}
+
+impl<'a, T: Read> ResourcePackFile for PassthroughFile<'a, T> {
+	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
 		// Just copy file contents to memory
-		Ok((fs::read(&self.path)?, String::from(self.message)))
+		let mut buffer = Vec::with_capacity(self.data_length);
+		self.data.read_to_end(&mut buffer)?;
+
+		Ok((buffer, Cow::Borrowed(self.message)))
 	}
 
 	fn canonical_extension(&self) -> &str {
-		// Passthrough
-		self.path.extension().unwrap().to_str().unwrap()
+		&self.canonical_extension
 	}
 
 	fn is_compressed(&self) -> bool {
 		self.is_compressed
+	}
+}
+
+struct SkippedFile {}
+
+impl ResourcePackFile for SkippedFile {
+	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+		Ok((Vec::new(), Cow::Borrowed("Skipped")))
+	}
+
+	fn canonical_extension(&self) -> &str {
+		""
+	}
+
+	fn is_compressed(&self) -> bool {
+		true
 	}
 }
