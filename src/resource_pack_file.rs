@@ -54,11 +54,13 @@ lazy_static! {
 
 static GSTREAMER_INIT: Once = Once::new();
 
+type ProcessResult<'a> = (Option<Vec<u8>>, Cow<'a, str>);
+
 pub trait ResourcePackFile {
 	/// Processes this resource pack file, returning its processed byte contents.
 	/// A descriptive string containing the performed action with the file is also
 	/// returned in the tuple.
-	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>>;
+	fn process(&mut self) -> Result<ProcessResult, Box<dyn Error>>;
 
 	/// Returns the canonical extension for this resource pack file, to use for
 	/// the resulting ZIP file.
@@ -192,7 +194,7 @@ impl JsonFile<BufReader<File>> {
 }
 
 impl<T: Read> ResourcePackFile for JsonFile<T> {
-	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<ProcessResult, Box<dyn Error>> {
 		// Parse the JSON so we know how to serialize it again in a compact manner.
 		// Also, pass it through a comment stripper so we ignore comments
 		let json_value: Value = serde_json::from_reader(StripComments::new(&mut self.data))?;
@@ -243,7 +245,7 @@ impl<'a> PngFile<'a, BufReader<File>> {
 }
 
 impl<'a, T: Read> ResourcePackFile for PngFile<'a, T> {
-	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<ProcessResult, Box<dyn Error>> {
 		let mut input_png = {
 			let mut buffer = Vec::with_capacity(self.data_length);
 			self.data.read_to_end(&mut buffer)?;
@@ -386,7 +388,7 @@ impl<'a> AudioFile<'a, BufReader<File>> {
 }
 
 impl<'a, T: Read + Send + Sync + 'static> ResourcePackFile for AudioFile<'a, T> {
-	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<ProcessResult, Box<dyn Error>> {
 		if !self.is_ogg || self.settings.transcode_ogg {
 			// It is not OGG, or we want to transcode OGG anyway. Let the party begin!
 			let result_ogg_lock = Arc::new(Mutex::new(Vec::with_capacity(self.data_length / 8)));
@@ -667,7 +669,7 @@ impl ShaderFile<BufReader<File>> {
 }
 
 impl<T: Read> ResourcePackFile for ShaderFile<T> {
-	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<ProcessResult, Box<dyn Error>> {
 		let mut buffer = String::with_capacity(self.data_length);
 
 		// Transfer the translation unit source code to the buffer
@@ -713,7 +715,7 @@ impl PropertiesFile<BufReader<File>> {
 }
 
 impl<T: Read> ResourcePackFile for PropertiesFile<T> {
-	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<ProcessResult, Box<dyn Error>> {
 		let mut compacted_properties = Vec::with_capacity(self.data_length);
 		let mut compacted_properties_writer = PropertiesWriter::new(&mut compacted_properties);
 
@@ -769,7 +771,7 @@ impl<'a> PassthroughFile<'a, BufReader<File>> {
 }
 
 impl<'a, T: Read> ResourcePackFile for PassthroughFile<'a, T> {
-	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<ProcessResult, Box<dyn Error>> {
 		// Just copy file contents to memory
 		let mut buffer = Vec::with_capacity(self.data_length);
 		self.data.read_to_end(&mut buffer)?;
@@ -789,7 +791,7 @@ impl<'a, T: Read> ResourcePackFile for PassthroughFile<'a, T> {
 struct SkippedFile {}
 
 impl ResourcePackFile for SkippedFile {
-	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<ProcessResult, Box<dyn Error>> {
 		Ok((None, Cow::Borrowed("Skipped")))
 	}
 
