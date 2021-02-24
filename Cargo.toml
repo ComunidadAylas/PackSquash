@@ -33,9 +33,6 @@ zopfli = "0.4.0"
 java-properties = "1.3.0"
 glsl = "6.0.0"
 sysinfo = { version = "0.16.0", default-features = false }
-# Work around funty and bitvec havoc
-# See: https://github.com/myrrlyn/funty/issues/3
-funty = "=1.1.0"
 
 # Use our fork of oxipng that makes cloudflare-zlib optional.
 # This allows fixing Windows builds with MinGW.
@@ -62,3 +59,4 @@ winres = "0.1.11"
 opt-level = 3
 lto = "fat"
 codegen-units = 1
+panic = "abort"

@@ -1,7 +1,7 @@
 mod micro_zip;
 mod resource_pack_file;
 
-use std::convert::TryInto;
+use std::{convert::TryInto, time::Instant};
 use std::error::Error;
 use std::ffi::OsStr;
 use std::io::Read;
@@ -260,6 +260,8 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 		globset_builder.add(glob_builder.build()?);
 	}
 
+	let start_instant = Instant::now();
+
 	// Process the entire resource pack directory
 	process_directory(
 		&app_settings.resource_pack_directory,
@@ -280,10 +282,13 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 		&app_settings.general.output_file_path
 	)?)?;
 
+	let process_duration = start_instant.elapsed();
 	println!(
-		"{} files were stored in {}",
+		"{} files were stored in {} (took {}.{:03} s)",
 		file_count.load(Ordering::Relaxed),
-		app_settings.general.output_file_path
+		app_settings.general.output_file_path,
+		process_duration.as_secs(),
+		process_duration.subsec_millis()
 	);
 
 	Ok(())
@@ -394,24 +399,28 @@ fn process_directory(
 						// Change the relative path with the canonical extension
 						relative_path.set_extension(resource_pack_file.canonical_extension());
 
-						// Add it to the ZIP file
-						let add_result = micro_zip.add_file(
-							&relative_path,
-							ZipFileType::RegularFile,
-							&processed_bytes,
-							resource_pack_file.is_compressed()
-								&& !app_settings.general.compress_already_compressed_files
-						);
-
-						if add_result.is_ok() {
-							println!("{}", success_message);
-							file_count.fetch_add(1, Ordering::Relaxed);
-						} else {
-							println!(
-								"! {}: Couldn't add to the result ZIP file: {}",
-								relative_path_str,
-								add_result.unwrap_err()
+						// If we have data to add to the ZIP file, do it
+						if let Some(processed_bytes) = processed_bytes {
+							let add_result = micro_zip.add_file(
+								&relative_path,
+								ZipFileType::RegularFile,
+								&processed_bytes,
+								resource_pack_file.is_compressed()
+									&& !app_settings.general.compress_already_compressed_files
 							);
+
+							if add_result.is_ok() {
+								println!("{}", success_message);
+								file_count.fetch_add(1, Ordering::Relaxed);
+							} else {
+								println!(
+									"! {}: Couldn't add to the result ZIP file: {}",
+									relative_path_str,
+									add_result.unwrap_err()
+								);
+							}
+						} else {
+							println!("{}", success_message);
 						}
 					} else {
 						println!(

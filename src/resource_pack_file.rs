@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::{fs::File, num::NonZeroI32};
 use std::io::BufReader;
 use std::path::Path;
 use std::sync::{Arc, Once};
@@ -58,7 +58,7 @@ pub trait ResourcePackFile {
 	/// Processes this resource pack file, returning its processed byte contents.
 	/// A descriptive string containing the performed action with the file is also
 	/// returned in the tuple.
-	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>>;
+	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>>;
 
 	/// Returns the canonical extension for this resource pack file, to use for
 	/// the resulting ZIP file.
@@ -91,10 +91,10 @@ pub enum FileSettings {
 pub struct AudioTranscodingSettings {
 	transcode_ogg: bool,
 	channels: i32,
-	sampling_frequency: i32,
+	sampling_frequency: NonZeroI32,
 	target_pitch: f32,
-	minimum_bitrate: i32,
-	maximum_bitrate: i32
+	minimum_bitrate: NonZeroI32,
+	maximum_bitrate: NonZeroI32
 }
 
 impl Default for AudioTranscodingSettings {
@@ -102,10 +102,10 @@ impl Default for AudioTranscodingSettings {
 		Self {
 			transcode_ogg: true,
 			channels: 0,
-			sampling_frequency: 32000,
+			sampling_frequency: NonZeroI32::new(32000).unwrap(),
 			target_pitch: 1.0,
-			minimum_bitrate: 40000,
-			maximum_bitrate: 96000
+			minimum_bitrate: NonZeroI32::new(40000).unwrap(),
+			maximum_bitrate: NonZeroI32::new(96000).unwrap()
 		}
 	}
 }
@@ -192,13 +192,13 @@ impl JsonFile<BufReader<File>> {
 }
 
 impl<T: Read> ResourcePackFile for JsonFile<T> {
-	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
 		// Parse the JSON so we know how to serialize it again in a compact manner.
 		// Also, pass it through a comment stripper so we ignore comments
 		let json_value: Value = serde_json::from_reader(StripComments::new(&mut self.data))?;
 
 		Ok((
-			json_value.to_string().into_bytes(),
+			Some(json_value.to_string().into_bytes()),
 			Cow::Borrowed("Compacted")
 		))
 	}
@@ -243,7 +243,7 @@ impl<'a> PngFile<'a, BufReader<File>> {
 }
 
 impl<'a, T: Read> ResourcePackFile for PngFile<'a, T> {
-	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
 		let mut input_png = {
 			let mut buffer = Vec::with_capacity(self.data_length);
 			self.data.read_to_end(&mut buffer)?;
@@ -342,7 +342,7 @@ impl<'a, T: Read> ResourcePackFile for PngFile<'a, T> {
 		)?;
 
 		Ok((
-			optimized_png,
+			Some(optimized_png),
 			Cow::Owned(format!(
 				"PNG optimized with {} quality",
 				quality_description
@@ -386,7 +386,7 @@ impl<'a> AudioFile<'a, BufReader<File>> {
 }
 
 impl<'a, T: Read + Send + Sync + 'static> ResourcePackFile for AudioFile<'a, T> {
-	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
 		if !self.is_ogg || self.settings.transcode_ogg {
 			// It is not OGG, or we want to transcode OGG anyway. Let the party begin!
 			let result_ogg_lock = Arc::new(Mutex::new(Vec::with_capacity(self.data_length / 8)));
@@ -427,11 +427,11 @@ impl<'a, T: Read + Send + Sync + 'static> ResourcePackFile for AudioFile<'a, T> 
 				"caps",
 				&Caps::new_simple(
 					"audio/x-raw",
-					&[("rate", &self.settings.sampling_frequency)]
+					&[("rate", &self.settings.sampling_frequency.get())]
 				)
 			)?;
-			encoder.set_property("min-bitrate", &self.settings.minimum_bitrate)?;
-			encoder.set_property("max-bitrate", &self.settings.maximum_bitrate)?;
+			encoder.set_property("min-bitrate", &self.settings.minimum_bitrate.get())?;
+			encoder.set_property("max-bitrate", &self.settings.maximum_bitrate.get())?;
 			appsink.set_property("sync", &false)?; // Output at max speed, not realtime
 
 			// decodebin (demuxer + decoder) needs to be linked later with the next step, because in the
@@ -527,7 +527,7 @@ impl<'a, T: Read + Send + Sync + 'static> ResourcePackFile for AudioFile<'a, T> 
 			// Handle GStreamer requesting data on the app source by handing it a
 			// buffer with the next bytes provided by the source stream
 			let data_lock = self.data.clone();
-			let buffer_size = cmp::min(cmp::max(64 * 1024, self.data_length / 4), 2 * 1024 * 1024);
+			let buffer_size = cmp::min(cmp::max(64 * 1024, self.data_length / 4), 4 * 1024 * 1024);
 			appsrc
 				.downcast_ref::<gstreamer_app::AppSrc>()
 				.ok_or_else(|| SimpleError::new("Couldn't cast the app source"))?
@@ -624,7 +624,7 @@ impl<'a, T: Read + Send + Sync + 'static> ResourcePackFile for AudioFile<'a, T> 
 				.into_inner()
 				.map_err(|_| SimpleError::new("Couldn't consume RW lock"))?;
 
-			Ok((result_ogg, Cow::Borrowed("Transcoded")))
+			Ok((Some(result_ogg), Cow::Borrowed("Transcoded")))
 		} else {
 			// The easy case: is OGG and the user does not want us to touch :)
 
@@ -634,7 +634,7 @@ impl<'a, T: Read + Send + Sync + 'static> ResourcePackFile for AudioFile<'a, T> 
 				.map_err(|_| SimpleError::new("Couldn't acquire RW lock for writing"))?
 				.read_to_end(&mut buffer)?;
 
-			Ok((buffer, Cow::Borrowed("Copied due to file settings")))
+			Ok((Some(buffer), Cow::Borrowed("Copied due to file settings")))
 		}
 	}
 
@@ -667,7 +667,7 @@ impl ShaderFile<BufReader<File>> {
 }
 
 impl<T: Read> ResourcePackFile for ShaderFile<T> {
-	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
 		let mut buffer = String::with_capacity(self.data_length);
 
 		// Transfer the translation unit source code to the buffer
@@ -681,7 +681,7 @@ impl<T: Read> ResourcePackFile for ShaderFile<T> {
 
 		transpiler::glsl::show_translation_unit(&mut buffer, &translation_unit);
 
-		Ok((buffer.into_bytes(), Cow::Borrowed("Compacted")))
+		Ok((Some(buffer.into_bytes()), Cow::Borrowed("Compacted")))
 	}
 
 	fn canonical_extension(&self) -> &str {
@@ -713,7 +713,7 @@ impl PropertiesFile<BufReader<File>> {
 }
 
 impl<T: Read> ResourcePackFile for PropertiesFile<T> {
-	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
 		let mut compacted_properties = Vec::with_capacity(self.data_length);
 		let mut compacted_properties_writer = PropertiesWriter::new(&mut compacted_properties);
 
@@ -727,7 +727,7 @@ impl<T: Read> ResourcePackFile for PropertiesFile<T> {
 			compacted_properties_writer.write(&key, &value).unwrap();
 		})?;
 
-		Ok((compacted_properties, Cow::Borrowed("Compacted")))
+		Ok((Some(compacted_properties), Cow::Borrowed("Compacted")))
 	}
 
 	fn canonical_extension(&self) -> &str {
@@ -769,12 +769,12 @@ impl<'a> PassthroughFile<'a, BufReader<File>> {
 }
 
 impl<'a, T: Read> ResourcePackFile for PassthroughFile<'a, T> {
-	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
+	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
 		// Just copy file contents to memory
 		let mut buffer = Vec::with_capacity(self.data_length);
 		self.data.read_to_end(&mut buffer)?;
 
-		Ok((buffer, Cow::Borrowed(self.message)))
+		Ok((Some(buffer), Cow::Borrowed(self.message)))
 	}
 
 	fn canonical_extension(&self) -> &str {
@@ -789,8 +789,8 @@ impl<'a, T: Read> ResourcePackFile for PassthroughFile<'a, T> {
 struct SkippedFile {}
 
 impl ResourcePackFile for SkippedFile {
-	fn process(&mut self) -> Result<(Vec<u8>, Cow<str>), Box<dyn Error>> {
-		Ok((Vec::new(), Cow::Borrowed("Skipped")))
+	fn process(&mut self) -> Result<(Option<Vec<u8>>, Cow<str>), Box<dyn Error>> {
+		Ok((None, Cow::Borrowed("Skipped")))
 	}
 
 	fn canonical_extension(&self) -> &str {
