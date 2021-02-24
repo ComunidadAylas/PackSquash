@@ -1,4 +1,3 @@
-use std::{fs::File, num::NonZeroI32};
 use std::io::BufReader;
 use std::path::Path;
 use std::sync::{Arc, Once};
@@ -10,6 +9,7 @@ use std::{
 	io::Read
 };
 use std::{convert::TryInto, sync::Mutex};
+use std::{fs::File, num::NonZeroI32};
 
 use super::EMPTY_OS_STR;
 
