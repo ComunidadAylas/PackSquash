@@ -36,7 +36,7 @@ jobs:
       uses: Swatinem/rust-cache@v1
 
     - name: Install GStreamer build dependencies
-      run: sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-good libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+      run: sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
@@ -100,8 +100,8 @@ jobs:
 
     - name: Install GStreamer build dependencies
       run: |
-        Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi'
-        Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi /qn' -Wait
+        Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.18.4/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.4.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64.msi'
+        Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64.msi /qn' -Wait
         $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '.tmp', '.zip' } -PassThru
         Invoke-WebRequest -Uri 'https://ftp.rrze.uni-erlangen.de/xbmc/build-deps/win32/mingw-msys/pkg-config-lite-0.28-1_bin-win32.zip' -OutFile $tmp_file
         $tmp_file | Expand-Archive -DestinationPath "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1" -Force
@@ -116,6 +116,8 @@ jobs:
 
     - name: Cargo build
       uses: actions-rs/cargo@v1
+      env:
+        PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
         command: build
         args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
@@ -153,7 +155,7 @@ jobs:
       uses: Swatinem/rust-cache@v1
 
     - name: Install GStreamer build dependencies
-      run: brew install gstreamer gst-plugins-base gst-plugins-good
+      run: brew install gstreamer gst-plugins-good gst-plugins-bad
 
     - name: Cargo test
       uses: actions-rs/cargo@v1
