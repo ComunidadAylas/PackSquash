@@ -1,0 +1,42 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug executable",
+			"cargo": {
+				"args": [
+					"build",
+					"--bin=packsquash",
+					"--package=packsquash"
+				],
+				"filter": {
+					"name": "packsquash",
+					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug unit tests",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--bin=packsquash",
+					"--package=packsquash"
+				],
+				"filter": {
+					"name": "packsquash",
+					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		}
+	]
+}
