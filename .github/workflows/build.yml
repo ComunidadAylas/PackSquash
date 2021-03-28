@@ -44,15 +44,13 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         args: --release -- -D warnings
 
-    - name: Cargo build
-      if: ${{ github.event_name != 'release' }}
+    - name: Cargo test
       uses: actions-rs/cargo@v1
       with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        command: test
+        args: --release
 
-    - name: Cargo build with optimized standard library
-      if: ${{ github.event_name == 'release' }}
+    - name: Cargo build
       uses: actions-rs/cargo@v1
       with:
         command: build
@@ -110,17 +108,13 @@ jobs:
         $tmp_file | Remove-Item
         "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
-    - name: Cargo build
-      if: ${{ github.event_name != 'release' }}
+    - name: Cargo test
       uses: actions-rs/cargo@v1
-      env:
-        PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        command: test
+        args: --release
 
-    - name: Cargo build with optimized standard library
-      if: ${{ github.event_name == 'release' }}
+    - name: Cargo build
       uses: actions-rs/cargo@v1
       with:
         command: build
@@ -161,15 +155,13 @@ jobs:
     - name: Install GStreamer build dependencies
       run: brew install gstreamer gst-plugins-base
 
-    - name: Cargo build
-      if: ${{ github.event_name != 'release' }}
+    - name: Cargo test
       uses: actions-rs/cargo@v1
       with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        command: test
+        args: --release
 
-    - name: Cargo build with optimized standard library
-      if: ${{ github.event_name == 'release' }}
+    - name: Cargo build
       uses: actions-rs/cargo@v1
       with:
         command: build
