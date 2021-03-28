@@ -197,7 +197,7 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 
 		// We have just handled sending data to GStreamer. Now handle the part
 		// client code is more interested in: the output of the pipeline
-		let poll_status = match Pin::new(&mut self.output_byte_stream).poll_next(cx) {
+		match Pin::new(&mut self.output_byte_stream).poll_next(cx) {
 			Poll::Ready(Some(sample)) => Poll::Ready(Some(Ok(sample
 				.get_buffer_owned()
 				.unwrap()
@@ -211,9 +211,7 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 				Poll::Ready(None)
 			}
 			Poll::Pending => Poll::Pending
-		};
-
-		poll_status
+		}
 	}
 }
 

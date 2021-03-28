@@ -64,6 +64,7 @@ impl Default for OptimizationSettings {
 
 /// Possible strategies to quantize the colors of a [PngFile].
 #[derive(Copy, Clone)]
+#[allow(dead_code)] // TODO: temporary?
 enum ColorQuantizationMode {
 	/// No quantization will be done, only lossless optimizations.
 	None,

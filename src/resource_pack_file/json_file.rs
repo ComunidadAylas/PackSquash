@@ -38,14 +38,14 @@ struct OptimizationSettings {
 	/// Removes JSON values that, while ignored by Minecraft, are fairly
 	/// common to see in input files. This can be because some program
 	/// automatically adds them, or other reasons.
-	delete_bloat_values: bool
+	delete_bloat: bool
 }
 
 impl Default for OptimizationSettings {
 	fn default() -> Self {
 		Self {
 			minify: true,
-			delete_bloat_values: true
+			delete_bloat: true
 		}
 	}
 }
@@ -91,7 +91,7 @@ impl Decoder for OptimizerDecoder {
 		src.clear();
 
 		// Debloat the read value
-		if self.optimization_settings.delete_bloat_values {
+		if self.optimization_settings.delete_bloat {
 			DEBLOATER.with(|debloater| -> Result<(), DebloatError> {
 				debloater.debloat(&mut json_value)
 			})?;
