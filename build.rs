@@ -1,17 +1,21 @@
 use time::OffsetDateTime;
-use vergen::{generate_cargo_keys, ConstantsFlags};
+use vergen::{vergen, SemverKind};
 
 /// Initializes environment variables that will be accessible in the source
 /// code via the env! macro, and takes care of build-time metadata.
 fn main() {
-	// Setup the flags that enable the required environment variables
-	let flags = ConstantsFlags::from_bits(
-		ConstantsFlags::TARGET_TRIPLE.bits() | ConstantsFlags::SEMVER_LIGHTWEIGHT.bits()
-	)
-	.unwrap();
+	let mut vergen_config = vergen::Config::default();
+	*vergen_config.cargo_mut().features_mut() = false;
+	*vergen_config.cargo_mut().profile_mut() = false;
+	*vergen_config.cargo_mut().target_triple_mut() = true;
+	*vergen_config.git_mut().branch_mut() = false;
+	*vergen_config.git_mut().commit_timestamp_mut() = false;
+	*vergen_config.git_mut().semver_mut() = true;
+	*vergen_config.git_mut().semver_kind_mut() = SemverKind::Lightweight;
+	*vergen_config.git_mut().sha_mut() = false;
 
-	// Generate the 'cargo:' key output that will do the magic
-	if let Err(error) = generate_cargo_keys(flags) {
+	// Generate the 'cargo:' key output that populate the target triple and version envrionment variables
+	if let Err(error) = vergen(vergen_config) {
 		eprintln!(
 			"W: Couldn't generate Cargo keys. This is normal for custom builds outside a repository. Details: {}",
 			error

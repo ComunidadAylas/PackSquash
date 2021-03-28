@@ -1,7 +1,24 @@
-mod micro_zip;
+//! A Minecraft resource pack optimizer that aims to achieve the best possible compression,
+//! which allows for efficient distribution and slightly improved load times in the game,
+//! at good speed.
+
+#![deny(unsafe_code)]
+#![feature(const_option)]
+#![feature(new_uninit)]
+#![feature(once_cell)]
+#![feature(doc_cfg)]
+#![doc(
+	html_logo_url = "https://user-images.githubusercontent.com/7822554/96335786-5f403f80-107b-11eb-8aa8-d0e0b6e1aae9.png"
+)]
+#![deny(missing_docs)]
+#![deny(rustdoc::private_intra_doc_links)]
+#![deny(rustdoc::invalid_html_tags)]
+
 mod resource_pack_file;
 
-use std::{convert::TryInto, time::Instant};
+fn main() {}
+
+/*use std::{convert::TryInto, time::Instant};
 use std::error::Error;
 use std::ffi::OsStr;
 use std::io::Read;
@@ -13,7 +30,6 @@ use std::{cmp, env, fs, io, process};
 
 use enumset::EnumSet;
 use indexmap::IndexMap;
-use rusty_pool::ThreadPool;
 
 use getopts::{Options, ParsingStyle};
 
@@ -27,8 +43,6 @@ use resource_pack_file::{FileSettings, InvalidSettingsForResourcePackFile, Mod, 
 
 use micro_zip::MicroZip;
 use micro_zip::ZipFileType;
-
-use lazy_static::lazy_static;
 
 use sysinfo::{RefreshKind, System, SystemExt};
 
@@ -467,4 +481,4 @@ fn relativize_path_for_zip_file(root_path: &Path, descendant_path: &Path) -> Pat
 fn is_system_file(file_name: &str, is_directory: bool) -> bool {
 	(file_name == "desktop.ini" || file_name == "thumbs.db" || file_name == "README.md")
 		&& !is_directory
-}
+}*/

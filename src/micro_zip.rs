@@ -1,4 +1,4 @@
-use std::error::Error;
+/*use std::error::Error;
 use std::io::{Seek, SeekFrom, Write};
 use std::ops::DerefMut;
 use std::path::Path;
@@ -8,8 +8,6 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::sync::RwLock;
-
-use tempfile::SpooledTempFile;
 
 use simple_error::SimpleError;
 
@@ -570,4 +568,4 @@ impl MicroZip {
 
 		Ok(result_string)
 	}
-}
+}*/
