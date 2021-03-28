@@ -110,6 +110,8 @@ jobs:
 
     - name: Cargo test
       uses: actions-rs/cargo@v1
+      env:
+        PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
         command: test
         args: --release
