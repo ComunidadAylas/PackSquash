@@ -29,10 +29,10 @@ fn main() {
 	println!("cargo:rustc-env=BUILD_YEAR={}", build_year);
 
 	// Add platform-specific metadata to the executable
-	//add_executable_metadata(build_year);
+	add_executable_metadata(build_year);
 }
 
-/*#[cfg(windows)]
+#[cfg(windows)]
 fn add_executable_metadata(build_year: i32) {
 	let mut windows_resource = winres::WindowsResource::new();
 	windows_resource.set("ProductName", "PackSquash");
@@ -52,4 +52,4 @@ fn add_executable_metadata(build_year: i32) {
 }
 
 #[cfg(not(windows))]
-fn add_executable_metadata(_build_year: i32) {}*/
+fn add_executable_metadata(_build_year: i32) {}

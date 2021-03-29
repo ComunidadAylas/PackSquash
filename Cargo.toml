@@ -61,8 +61,8 @@ imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
 vergen = { version = "5.1.0", default-features = false, features = ["cargo", "git"] }
 time = "0.2.26"
 
-#[target.'cfg(windows)'.build-dependencies]
-#winres = "0.1.11"
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1.11"
 
 [dev-dependencies]
 tokio-test = "0.4.1"
