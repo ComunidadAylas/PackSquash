@@ -378,6 +378,8 @@ impl<T: AsyncRead + Unpin + 'static>
 
 			// If we need to change the target pitch, add the needed elements
 			let mut pitch_shifter = None;
+
+			#[allow(clippy::float_cmp)] // Edge case were comparing float equality is good
 			if self.optimization_settings.target_pitch != 1.0 {
 				let pitch_shifter_element = ElementFactory::make("pitch", None).unwrap();
 
@@ -402,13 +404,12 @@ impl<T: AsyncRead + Unpin + 'static>
 
 			// Handle the demuxer receiving a source pad
 			let result_audio_channels = self.optimization_settings.channels;
-			let target_pitch = self.optimization_settings.target_pitch;
 			decoder.connect_pad_added(move |decoder, _| {
 				// The decoder has just received a audio source.
 				// Get the target element, and then its sink, to connect the
 				// decoder source pad to it
-				let sink_element = if target_pitch != 1.0 {
-					pitch_shifter.as_ref().unwrap()
+				let sink_element = if let Some(pitch_shifter) = pitch_shifter.as_ref() {
+					pitch_shifter
 				} else {
 					&resampler
 				};
