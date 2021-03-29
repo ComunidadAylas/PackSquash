@@ -27,6 +27,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use std::{cmp, env, fs, io, process};
+use std::{convert::TryInto, time::Instant};
 
 use enumset::EnumSet;
 use indexmap::IndexMap;
