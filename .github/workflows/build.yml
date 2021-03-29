@@ -114,7 +114,7 @@ jobs:
         PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
         command: test
-        args: --release
+        args: -vv --release
 
     - name: Cargo build
       uses: actions-rs/cargo@v1
@@ -169,7 +169,7 @@ jobs:
         sudo installer -pkg MacPorts.pkg -target /
 
     - name: Install GStreamer
-      run: sudo port install gstreamer1 gstreamer1-gst-plugins-bad gstreamer1-gst-plugins-bad
+      run: sudo /opt/local/bin/port install gstreamer1 gstreamer1-gst-plugins-bad gstreamer1-gst-plugins-bad
 
     - name: Cargo test
       uses: actions-rs/cargo@v1
