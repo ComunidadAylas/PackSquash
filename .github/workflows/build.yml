@@ -35,7 +35,7 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer build dependencies
+    - name: Install GStreamer
       run: sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
     - name: Clippy check
@@ -98,7 +98,7 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer build dependencies
+    - name: Install GStreamer
       run: |
         Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.18.4/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.4.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64.msi'
         Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64.msi /qn' -Wait
@@ -156,8 +156,11 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer build dependencies
-      run: brew install gstreamer gst-plugins-good gst-plugins-bad
+    - name: Install MacPorts
+      uses: keepitsimpletech/actions/setup-macports@setup-macports/releases/v1
+
+    - name: Install GStreamer
+      run: sudo port install gstreamer1 gstreamer1-gst-plugins-bad gstreamer1-gst-plugins-bad
 
     - name: Cargo test
       uses: actions-rs/cargo@v1
