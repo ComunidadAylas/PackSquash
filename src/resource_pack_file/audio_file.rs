@@ -310,7 +310,6 @@ impl<T: AsyncRead + Unpin + 'static>
 			let appsrc = ElementFactory::make("appsrc", None).unwrap();
 			let decoder = ElementFactory::make("decodebin", None).unwrap(); // Contains a demuxer + decoder
 			let converter = ElementFactory::make("audioconvert", None).unwrap();
-			let pitch_shifter = ElementFactory::make("pitch", None).unwrap();
 			let resampler = ElementFactory::make("audioresample", None).unwrap();
 			let resampler_filter = ElementFactory::make("capsfilter", None).unwrap();
 			let encoder = ElementFactory::make("vorbisenc", None).unwrap();
@@ -329,17 +328,6 @@ impl<T: AsyncRead + Unpin + 'static>
 					&Caps::new_simple("audio/x-raw", &[]) // Only decode audio streams
 				)
 				.unwrap();
-
-			// Minecraft lets OpenAL "Frequency Shift by Pitch" implement pitch shifting
-			// (see https://www.openal.org/documentation/openal-1.1-specification.pdf).
-			// OpenAL achieves the pitch shift by resampling the audio, i.e. changing both
-			// tempo and pitch, which introduces the "chipmunk effect". As we want the sound
-			// to be played back at its original speed at target_pitch, we shift the pitch
-			// to the inverse value. For instance, if the target pitch is 0.5 (half less pitch),
-			// we shift the pitch here to 1 / 0.5 = 2 (double the pitch), so the pitch shifts
-			// cancel each other out
-			pitch_shifter.set_property("pitch", &(1.0 / self.optimization_settings.target_pitch))?;
-			pitch_shifter.set_property("tempo", &(1.0 / self.optimization_settings.target_pitch))?;
 
 			resampler.set_property("quality", &10).unwrap(); // Good quality resampling
 
@@ -369,7 +357,6 @@ impl<T: AsyncRead + Unpin + 'static>
 					&appsrc,
 					&decoder,
 					&converter,
-					&pitch_shifter,
 					&resampler,
 					&resampler_filter,
 					&encoder,
@@ -379,14 +366,7 @@ impl<T: AsyncRead + Unpin + 'static>
 				.unwrap();
 
 			appsrc.link(&decoder)?;
-			Element::link_many(&[
-				&pitch_shifter,
-				&resampler,
-				&resampler_filter,
-				&encoder,
-				&muxer,
-				&appsink
-			])?;
+			Element::link_many(&[&resampler, &resampler_filter, &encoder, &muxer, &appsink])?;
 
 			// Discard all event-provided tags. As the encoder is
 			// not simultaneously a tag reader, and we not explicitly
@@ -396,15 +376,46 @@ impl<T: AsyncRead + Unpin + 'static>
 				.unwrap()
 				.set_tag_merge_mode(TagMergeMode::KeepAll);
 
+			// If we need to change the target pitch, add the needed elements
+			let mut pitch_shifter = None;
+			if self.optimization_settings.target_pitch != 1.0 {
+				let pitch_shifter_element = ElementFactory::make("pitch", None).unwrap();
+
+				// Minecraft lets OpenAL "Frequency Shift by Pitch" implement pitch shifting
+				// (see https://www.openal.org/documentation/openal-1.1-specification.pdf).
+				// OpenAL achieves the pitch shift by resampling the audio, i.e. changing both
+				// tempo and pitch, which introduces the "chipmunk effect". As we want the sound
+				// to be played back at its original speed at target_pitch, we shift the pitch
+				// to the inverse value. For instance, if the target pitch is 0.5 (half less pitch),
+				// we shift the pitch here to 1 / 0.5 = 2 (double the pitch), so the pitch shifts
+				// cancel each other out
+				pitch_shifter_element
+					.set_property("pitch", &(1.0 / self.optimization_settings.target_pitch))?;
+				pitch_shifter_element
+					.set_property("tempo", &(1.0 / self.optimization_settings.target_pitch))?;
+
+				gstreamer_pipeline.add(&pitch_shifter_element).unwrap();
+				pitch_shifter_element.link(&resampler)?;
+
+				pitch_shifter = Some(pitch_shifter_element);
+			}
+
 			// Handle the demuxer receiving a source pad
 			let result_audio_channels = self.optimization_settings.channels;
-			decoder.connect_pad_added(move |_, decoder_src_pad| {
+			let target_pitch = self.optimization_settings.target_pitch;
+			decoder.connect_pad_added(move |decoder, _| {
 				// The decoder has just received a audio source.
-				// Get the sink pad of the converter, to connect the decoder source pad to it
-				let converter_sink_pad = converter.get_static_pad("sink").unwrap();
+				// Get the target element, and then its sink, to connect the
+				// decoder source pad to it
+				let sink_element = if target_pitch != 1.0 {
+					pitch_shifter.as_ref().unwrap()
+				} else {
+					&resampler
+				};
+				let sink_pad = sink_element.get_static_pad("sink").unwrap();
 
 				// Ignore event if the link is already set up
-				if converter_sink_pad.is_linked() {
+				if sink_pad.is_linked() {
 					return;
 				}
 
@@ -421,7 +432,7 @@ impl<T: AsyncRead + Unpin + 'static>
 
 					// Get the pipeline, which is the parent of any element in the
 					// pipeline, and add the new caps filter to it
-					converter
+					sink_element
 						.get_parent()
 						.unwrap()
 						.downcast_ref::<Pipeline>()
@@ -429,28 +440,21 @@ impl<T: AsyncRead + Unpin + 'static>
 						.add(&channel_mix_filter)
 						.unwrap();
 
-					// Link the converter to the channel mix filter and
-					// the channel mix filter to the pitch shifter:
-					// ... -> converter -> channel_mix_filter -> pitch_shifter -> ...
-					converter.link(&channel_mix_filter).unwrap();
-					channel_mix_filter.link(&pitch_shifter).unwrap();
+					// Link the decoder with the converter, the converter to the channel mix filter, and
+					// the channel mix filter to the sink element:
+					// ... -> decoder -> converter -> channel_mix_filter -> sink_element -> ...
+					Element::link_many(&[decoder, &converter, &channel_mix_filter, sink_element])
+						.unwrap();
 
 					// We also need to set the new element to play, or otherwise
 					// the entire pipeline will pause
 					channel_mix_filter.sync_state_with_parent().unwrap();
 				} else {
-					// No channel mixing is desired, so link the converter
-					// directly to the pitch shifter:
-					// ... -> converter -> pitch_shifter -> ...
-					converter.link(&pitch_shifter).unwrap();
+					// No channel mixing is desired, so link the decoder with the
+					// converter, and the converter directly with the sink element:
+					// ... -> decoder -> converter -> sink_element -> ...
+					Element::link_many(&[decoder, &converter, sink_element]).unwrap();
 				}
-
-				// The decoder received a audio source. Link the recently
-				// created decoder source pad with the converter sink pad.
-				// This will complete the pipeline, as we both added and
-				// linked the rest of elements either statically or
-				// dynamically
-				decoder_src_pad.link(&converter_sink_pad).unwrap();
 			});
 
 			// The pipeline is good to go. Let's start!

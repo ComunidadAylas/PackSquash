@@ -120,6 +120,52 @@ async fn passthrough_works() {
 	.await
 }
 
+#[cfg(any(target_os = "linux", windows))]
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn pitch_shifting_works() {
+	successful_process_test(
+		OGG_AUDIO_DATA,
+		true, // Is Ogg
+		OptimizationSettings {
+			target_pitch: 1.25,
+			..Default::default()
+		},
+		false // Smaller file size
+	)
+	.await
+}
+
+#[cfg(any(target_os = "linux", windows))]
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn channel_mixing_works() {
+	successful_process_test(
+		OGG_AUDIO_DATA,
+		true, // Is Ogg
+		OptimizationSettings {
+			channels: 2,
+			..Default::default()
+		},
+		false // Smaller file size
+	)
+	.await
+}
+
+#[cfg(any(target_os = "linux", windows))]
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn channel_mixing_and_pitch_shifting_work() {
+	successful_process_test(
+		OGG_AUDIO_DATA,
+		true, // Is Ogg
+		OptimizationSettings {
+			target_pitch: 1.25,
+			channels: 2,
+			..Default::default()
+		},
+		false // Smaller file size
+	)
+	.await
+}
+
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn invalid_input_is_handled() {
 	error_process_test(
