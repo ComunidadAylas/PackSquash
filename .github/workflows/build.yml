@@ -156,11 +156,11 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install MacPorts
-      uses: keepitsimpletech/actions/setup-macports@setup-macports/releases/v1
-
-    - name: Install GStreamer
-      run: sudo port install gstreamer1 gstreamer1-gst-plugins-bad gstreamer1-gst-plugins-bad
+    - name: Install MacPorts and GStreamer
+      run: |
+        curl -o MacPorts.pkg https://distfiles.macports.org/MacPorts/MacPorts-2.6.4-10.15-Catalina.pkg
+        sudo installer -pkg MacPorts.pkg -target /
+        sudo port install gstreamer1 gstreamer1-gst-plugins-bad gstreamer1-gst-plugins-bad
 
     - name: Cargo test
       uses: actions-rs/cargo@v1
