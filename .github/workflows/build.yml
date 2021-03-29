@@ -93,7 +93,6 @@ jobs:
         toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
         override: true
         profile: minimal
-        components: rust-src
 
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
@@ -108,21 +107,22 @@ jobs:
         $tmp_file | Remove-Item
         "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
-    #- name: Cargo test
-    #  uses: actions-rs/cargo@v1
-    #  env:
-    #    PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
-    #  with:
-    #    command: test
-    #    args: --release
+    - name: Configure GStreamer environment variables
+      run: |
+        echo "${env:GSTREAMER_1_0_ROOT_MINGW_X86_64}bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo "PKG_CONFIG_PATH=C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Cargo test
+      uses: actions-rs/cargo@v1
+      with:
+        command: test
+        args: --release
 
     - name: Cargo build
       uses: actions-rs/cargo@v1
-      env:
-        PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
         command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Strip debug symbols from binary
       run: bash.exe -c 'strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe'

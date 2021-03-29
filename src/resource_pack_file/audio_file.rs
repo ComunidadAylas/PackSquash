@@ -379,7 +379,7 @@ impl<T: AsyncRead + Unpin + 'static>
 			// If we need to change the target pitch, add the needed elements
 			let mut pitch_shifter = None;
 
-			#[allow(clippy::float_cmp)] // Edge case were comparing float equality is good
+			#[allow(clippy::float_cmp)] // Edge case where comparing float equality is okay
 			if self.optimization_settings.target_pitch != 1.0 {
 				let pitch_shifter_element = ElementFactory::make("pitch", None).unwrap();
 
