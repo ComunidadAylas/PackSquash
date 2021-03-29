@@ -156,20 +156,8 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Cache MacPorts installer
-      id: cache-macports
-      uses: actions/cache@v2
-      with:
-        path: MacPorts.pkg
-        key: ${{ runner.os }}
-
-    - name: Install MacPorts
-      run: |
-        curl -C - -o MacPorts.pkg https://distfiles.macports.org/MacPorts/MacPorts-2.6.4-10.15-Catalina.pkg
-        sudo installer -pkg MacPorts.pkg -target /
-
     - name: Install GStreamer
-      run: sudo /opt/local/bin/port install gstreamer1 gstreamer1-gst-plugins-bad gstreamer1-gst-plugins-bad
+      run: brew install sound-touch gst-plugins-good gst-plugins-bad
 
     - name: Cargo test
       uses: actions-rs/cargo@v1
