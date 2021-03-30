@@ -170,7 +170,7 @@ async fn channel_mixing_and_pitch_shifting_work() {
 }
 
 // FIXME: this causes a deadlock in Linux CI runs
-/*#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn invalid_input_is_handled() {
 	error_process_test(
 		Builder::new().read(&[]).build(),
@@ -179,7 +179,7 @@ async fn invalid_input_is_handled() {
 		Default::default()
 	)
 	.await
-}*/
+}
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn early_errors_are_handled() {

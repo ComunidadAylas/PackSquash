@@ -120,15 +120,19 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 
 	fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
 		if !self.reached_eof {
+			eprintln!("Not EOF");
+
 			// Get the Vec with the pending read buffer in the cell,
 			// temporarily setting the cell to a dummy value
 			let mut input_buf = self.input_buf.take();
 
 			// If we don't have a buffer to hand-off to GStreamer, we should read one
 			if !self.pending_input_buf {
+				eprintln!("Polling read");
 				if let Poll::Ready(read_result) =
 					poll_read_buf(Pin::new(&mut self.read), cx, &mut input_buf)
 				{
+					eprintln!("Polled read");
 					match read_result {
 						Ok(_) => self.pending_input_buf = true,
 						Err(err) => return Poll::Ready(Some(Err(err.into())))
@@ -138,10 +142,12 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 
 			// If we have a buffer of data ready to send to GStreamer, send it
 			if self.pending_input_buf {
+				eprintln!("Pending buffer");
 				if !input_buf.is_empty() {
 					if let Poll::Ready(sink_ready_result) =
 						Pin::new(&mut self.input_byte_sink).poll_ready(cx)
 					{
+						eprintln!("Sink ready");
 						match sink_ready_result {
 							Ok(_) => match Pin::new(&mut self.input_byte_sink).start_send(
 								Sample::builder()
@@ -160,6 +166,7 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 						};
 					}
 				} else {
+					eprintln!("EOF reached");
 					// AsyncRead only reads no bytes when EOF is reached. Remember this
 					self.reached_eof = true;
 				}
@@ -175,7 +182,10 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 		// If we reached EOF, signal EOS once by using poll_close. If an error happens while
 		// doing so, propagate it
 		if self.reached_eof && !self.signalled_eos {
+			eprintln!("EOF, not EOS");
+
 			if let Poll::Ready(result) = Pin::new(&mut self.input_byte_sink).poll_close(cx) {
+				eprintln!("EOS signalled");
 				self.signalled_eos = true;
 
 				if let Err(err) = result {
@@ -184,6 +194,7 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 			}
 		}
 
+		eprintln!("Polling appsink");
 		// We have just handled sending data to GStreamer. Now handle the part
 		// client code is more interested in: the output of the pipeline
 		match Pin::new(&mut self.output_byte_stream).poll_next(cx) {
@@ -193,6 +204,8 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 				.into_mapped_buffer_readable()
 				.unwrap()))),
 			Poll::Ready(None) => {
+				eprintln!("appsink ended");
+
 				// The app sink is in EOS state, so it won't ever generate more output.
 				// Tear the pipeline down
 				self.gstreamer_pipeline.set_state(State::Null).ok();
@@ -200,6 +213,8 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 				Poll::Ready(None)
 			}
 			Poll::Pending => {
+				eprintln!("appsink pending");
+
 				// Look at the pending bus messages for relevant error conditions.
 				// This loop is necessary because we need to make sure that the task
 				// that this stream belongs to is woken up whenever a new, potentially
@@ -213,6 +228,7 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 				// new messages as needed. This also keeps the number of messages in the internal
 				// unbounded channel queue small
 				while let Poll::Ready(msg) = Pin::new(&mut self.bus_message_stream).poll_next(cx) {
+					eprintln!("Polled message");
 					match msg {
 						Some(msg) => {
 							if let MessageView::Error(err) = msg.view() {
@@ -220,6 +236,8 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 							}
 						}
 						None => {
+							eprintln!("Polled no more messages");
+
 							// No more messages will ever be generated. Tear the pipeline down
 							self.gstreamer_pipeline.set_state(State::Null).ok();
 
