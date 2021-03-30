@@ -87,6 +87,7 @@ struct ProcessedAudioDataStream<T: AsyncRead + Unpin + 'static> {
 	input_buf: Cell<Vec<u8>>,
 	pending_input_buf: bool,
 	reached_eof: bool,
+	signalled_eos: bool,
 	gstreamer_pipeline: Pipeline,
 	bus_message_stream: BusStream,
 	input_byte_sink: AppSrcSink,
@@ -105,6 +106,7 @@ impl<T: AsyncRead + Unpin + 'static> ProcessedAudioDataStream<T> {
 			input_buf: Cell::new(Vec::with_capacity(AUDIO_DATA_BUFFER_SIZE)),
 			pending_input_buf: false,
 			reached_eof: false,
+			signalled_eos: false,
 			bus_message_stream: gstreamer_pipeline.get_bus().unwrap().stream(),
 			gstreamer_pipeline,
 			input_byte_sink,
@@ -117,24 +119,6 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 	type Item = Result<MappedBuffer<Readable>, OptimizationError>;
 
 	fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-		// Look at the pending bus messages for relevant error conditions.
-		// This while loop is necessary because we need to make sure that the
-		// task that this stream belongs to is woken up whenever a new, potentially
-		// important message arrives, too. If we just poll the bus once, it may
-		// return a message inmediately, and that does not schedule the current
-		// task to wake up when any other messages arrive. Such scenario leads to a
-		// deadlock if nothing else schedules a wake up either, which may happen
-		// when the generation of samples stops because of an error and EOF was reached.
-		// Therefore, we poll it until it returns Poll::Ready(None) or Poll::Pending,
-		// because when such statuses are returned the method already scheduled
-		// this task to wake up for new messages as needed. This also keeps the number
-		// of messages in the internal unbounded channel queue small
-		while let Poll::Ready(Some(msg)) = Pin::new(&mut self.bus_message_stream).poll_next(cx) {
-			if let MessageView::Error(err) = msg.view() {
-				return Poll::Ready(Some(Err(err.get_error().into())));
-			}
-		}
-
 		if !self.reached_eof {
 			// Get the Vec with the pending read buffer in the cell,
 			// temporarily setting the cell to a dummy value
@@ -176,15 +160,8 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 						};
 					}
 				} else {
-					// AsyncRead only reads no bytes when EOF is reached, so remember the
-					// condition and signal EOS by using poll_close. If an error happens while
-					// doing so, propagate it
+					// AsyncRead only reads no bytes when EOF is reached. Remember this
 					self.reached_eof = true;
-
-					if let Poll::Ready(Err(err)) = Pin::new(&mut self.input_byte_sink).poll_close(cx)
-					{
-						return Poll::Ready(Some(Err(err.into())));
-					}
 				}
 			}
 
@@ -193,6 +170,18 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 			// not keep polling for items, and in such case the stream would be broken
 			// anyway
 			self.input_buf.set(input_buf);
+		}
+
+		// If we reached EOF, signal EOS once by using poll_close. If an error happens while
+		// doing so, propagate it
+		if self.reached_eof && !self.signalled_eos {
+			if let Poll::Ready(result) = Pin::new(&mut self.input_byte_sink).poll_close(cx) {
+				self.signalled_eos = true;
+
+				if let Err(err) = result {
+					return Poll::Ready(Some(Err(err.into())));
+				}
+			}
 		}
 
 		// We have just handled sending data to GStreamer. Now handle the part
@@ -210,7 +199,37 @@ impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
 
 				Poll::Ready(None)
 			}
-			Poll::Pending => Poll::Pending
+			Poll::Pending => {
+				// Look at the pending bus messages for relevant error conditions.
+				// This loop is necessary because we need to make sure that the task
+				// that this stream belongs to is woken up whenever a new, potentially
+				// important message arrives, too. If we just poll the bus once, it may
+				// return a message inmediately, and that does not schedule the current
+				// task to wake up when any other messages arrive. Such scenario leads to a
+				// deadlock if nothing else schedules a wake up either, which may happen
+				// when the generation of samples stops because of an error and EOF was reached.
+				// Therefore, we poll it until it returns Poll::Pending, because when such
+				// statuses are returned the method already scheduled this task to wake up for
+				// new messages as needed. This also keeps the number of messages in the internal
+				// unbounded channel queue small
+				while let Poll::Ready(msg) = Pin::new(&mut self.bus_message_stream).poll_next(cx) {
+					match msg {
+						Some(msg) => {
+							if let MessageView::Error(err) = msg.view() {
+								return Poll::Ready(Some(Err(err.get_error().into())));
+							}
+						}
+						None => {
+							// No more messages will ever be generated. Tear the pipeline down
+							self.gstreamer_pipeline.set_state(State::Null).ok();
+
+							return Poll::Ready(None);
+						}
+					}
+				}
+
+				Poll::Pending
+			}
 		}
 	}
 }
