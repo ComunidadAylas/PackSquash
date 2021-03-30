@@ -4,7 +4,6 @@ use tokio_test::io::Builder;
 use super::*;
 
 static FRAGMENT_SHADER_DATA: &str = include_str!("example.fsh");
-static MINIFIED_FRAGMENT_SHADER_DATA: &str = include_str!("example_minified.fsh");
 
 /// Processes the given input data as a [ShaderFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
@@ -12,13 +11,15 @@ async fn successful_process_test(
 	input_data: &str,
 	extension: &str,
 	settings: OptimizationSettings,
-	expected_result: &str
+	expect_smaller_file_size: bool
 ) {
+	let input_ast = TranslationUnit::parse(&input_data)
+		.expect("The input data should be a valid translation unit");
 	let input_data = input_data.as_bytes();
 
 	let data_stream = ShaderFile {
 		read: Builder::new().read(input_data).build(),
-		extension: extension,
+		extension,
 		file_length: input_data.len(),
 		optimization_settings: settings
 	}
@@ -40,7 +41,18 @@ async fn successful_process_test(
 	}
 
 	let data = String::from_utf8(data).expect("The result should be a UTF-8 string");
-	assert_eq!(&data, expected_result);
+	let processed_ast =
+		TranslationUnit::parse(&data).expect("The result should be a valid translation unit");
+
+	assert_eq!(
+		input_ast, processed_ast,
+		"The processed translation unit should represent the same AST as the input"
+	);
+
+	assert!(
+		!expect_smaller_file_size || data.as_bytes().len() < input_data.len(),
+		"The processed shader file should be smaller than the original"
+	);
 }
 
 #[tokio::test]
@@ -49,7 +61,7 @@ async fn minifying_works() {
 		FRAGMENT_SHADER_DATA,
 		"fsh",
 		OptimizationSettings { minify: true },
-		MINIFIED_FRAGMENT_SHADER_DATA
+		true // Smaller size
 	)
 	.await
 }
@@ -60,7 +72,7 @@ async fn passthrough_works() {
 		FRAGMENT_SHADER_DATA,
 		"fsh",
 		OptimizationSettings { minify: false },
-		FRAGMENT_SHADER_DATA
+		false // Same size
 	)
 	.await
 }
