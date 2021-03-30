@@ -42,7 +42,7 @@ jobs:
       uses: actions-rs/clippy-check@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        args: --release -- -D warnings
+        args: --release
 
     - name: Cargo test
       uses: actions-rs/cargo@v1
@@ -117,7 +117,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: test
-        args: --release
+        args: --release -j 1 -- --nocapture
 
     - name: Cargo build
       uses: actions-rs/cargo@v1

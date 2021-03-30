@@ -95,7 +95,7 @@ async fn error_process_test<T: AsyncRead + Unpin + 'static>(
 
 // These tests need to run on the multi-thread runtime due to tokio::task::block_in_place
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+/* #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn transcoding_works() {
 	successful_process_test(
 		FLAC_AUDIO_DATA,
@@ -167,7 +167,7 @@ async fn channel_mixing_and_pitch_shifting_work() {
 		false // Smaller file size
 	)
 	.await
-}
+} */
 
 // FIXME: this causes a deadlock in Linux CI runs
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
