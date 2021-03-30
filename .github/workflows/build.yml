@@ -158,7 +158,7 @@ jobs:
       uses: Swatinem/rust-cache@v1
 
     - name: Install GStreamer
-      run: brew install sound-touch gst-plugins-good gst-plugins-bad
+      run: brew install gst-plugins-good gst-plugins-bad
 
     - name: Cargo test
       uses: actions-rs/cargo@v1
