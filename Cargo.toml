@@ -56,6 +56,10 @@ zopfli = "0.4.0"
 oxipng = { git = "https://github.com/ComunidadAylas/oxipng", branch = "packsquash" }
 # Use the latest commit of imagequant, which allows some zero-copy operations
 imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
+# Use a third-party fork of glsl that allows it to parse files that use
+# DOS-style CRLF line endings, prevalent on Windows environments.
+# See: https://github.com/phaazon/glsl/pull/138
+glsl = { git = "https://github.com/vtavernier/glsl", branch = "fix/dos-crlf" }
 
 [build-dependencies]
 vergen = { version = "5.1.0", default-features = false, features = ["cargo", "git"] }
