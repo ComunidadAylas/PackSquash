@@ -170,10 +170,21 @@ async fn channel_mixing_and_pitch_shifting_work() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn invalid_input_is_handled() {
+async fn invalid_empty_input_is_handled() {
 	error_process_test(
 		Builder::new().read(&[]).build(),
 		0,     // Input file size
+		false, // Is not Ogg
+		Default::default()
+	)
+	.await
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn invalid_non_empty_input_is_handled() {
+	error_process_test(
+		Builder::new().read(&[1, 2]).read(&[3, 4]).build(),
+		4,     // Input file size
 		false, // Is not Ogg
 		Default::default()
 	)
