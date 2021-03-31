@@ -1,12 +1,15 @@
-use futures_sink::Sink;
+use futures::{
+	future,
+	stream::{poll_fn, select},
+	SinkExt, StreamExt
+};
 use gstreamer::{
-	bus::BusStream, glib::BoolError, prelude::*, Buffer, Caps, Element, ElementFactory, FlowError,
-	MessageView, Pipeline, Sample, State, StateChangeError, TagMergeMode, TagSetter
+	glib::BoolError, prelude::*, Buffer, Caps, Element, ElementFactory, FlowError, MessageView,
+	Pipeline, Sample, State, StateChangeError, TagMergeMode, TagSetter
 };
 
 use std::{
 	borrow::Cow,
-	cell::Cell,
 	convert::TryInto,
 	pin::Pin,
 	task::{Context, Poll}
@@ -14,11 +17,11 @@ use std::{
 
 use bytes::BytesMut;
 use gstreamer::{buffer::Readable, MappedBuffer};
-use gstreamer_app::{app_sink::AppSinkStream, app_src::AppSrcSink, AppSink, AppSrc};
+use gstreamer_app::{AppSink, AppSrc};
 use thiserror::Error;
 use tokio::{io::AsyncRead, task};
 use tokio_stream::Stream;
-use tokio_util::{codec::FramedRead, io::poll_read_buf};
+use tokio_util::{codec::FramedRead, io::ReaderStream};
 
 use super::{passthrough_file::PassthroughDecoder, OptimizedBytes, ResourcePackFile};
 
@@ -29,7 +32,7 @@ mod tests;
 ///
 /// Vanilla Minecraft uses OGG Vorbis files for both music and sound effects. Resource
 /// packs may replace and add new sound events to Minecraft.
-struct AudioFile<T: AsyncRead + Unpin + 'static> {
+struct AudioFile<T: AsyncRead + Unpin + Send + 'static> {
 	read: T,
 	file_length: usize,
 	is_ogg: bool,
@@ -80,193 +83,107 @@ enum OptimizationError {
 	Io(#[from] std::io::Error)
 }
 
-/// Converts an [AsyncRead] to a stream of audio data processed by GStreamer by
-/// sending chunks of data to an [AppSrcSink] and polling the output of [AppSinkStream].
-struct ProcessedAudioDataStream<T: AsyncRead + Unpin + 'static> {
+/// Alias for the opaque stream type that provides the processed (optimized) audio
+/// file data, when it was transcoded.
+type ProcessedAudioDataStream<T> =
+	impl Stream<Item = Result<MappedBuffer<Readable>, OptimizationError>> + Unpin;
+
+/// Creates a new processed audio file data stream, that will use the specified
+/// GStreamer pipeline, which contains the provided appsrc and appsink elements,
+/// to process audio file bytes read from an [AsyncRead] to an optimized form,
+/// via transcoding.
+fn new_processed_audio_data_stream<T: AsyncRead + Unpin + Send + 'static>(
 	read: T,
-	input_buf: Cell<Vec<u8>>,
-	pending_input_buf: bool,
-	reached_eof: bool,
-	signalled_eos: bool,
 	gstreamer_pipeline: Pipeline,
-	bus_message_stream: BusStream,
-	input_byte_sink: AppSrcSink,
-	output_byte_stream: AppSinkStream
-}
+	appsrc: &AppSrc,
+	appsink: &AppSink
+) -> ProcessedAudioDataStream<T> {
+	let read_stream = ReaderStream::new(read);
+	let input_sample_sink = appsrc.sink().sink_err_into();
+	let bus_message_stream = gstreamer_pipeline.get_bus().unwrap().stream();
 
-impl<T: AsyncRead + Unpin + 'static> ProcessedAudioDataStream<T> {
-	fn new(
-		read: T,
-		gstreamer_pipeline: Pipeline,
-		input_byte_sink: AppSrcSink,
-		output_byte_stream: AppSinkStream
-	) -> Self {
-		Self {
-			read,
-			input_buf: Cell::new(Vec::with_capacity(AUDIO_DATA_BUFFER_SIZE)),
-			pending_input_buf: false,
-			reached_eof: false,
-			signalled_eos: false,
-			bus_message_stream: gstreamer_pipeline.get_bus().unwrap().stream(),
-			gstreamer_pipeline,
-			input_byte_sink,
-			output_byte_stream
-		}
-	}
-}
-
-impl<T: AsyncRead + Unpin + 'static> Stream for ProcessedAudioDataStream<T> {
-	type Item = Result<MappedBuffer<Readable>, OptimizationError>;
-
-	fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-		if !self.reached_eof {
-			eprintln!("Not EOF");
-
-			// Get the Vec with the pending read buffer in the cell,
-			// temporarily setting the cell to a dummy value
-			let mut input_buf = self.input_buf.take();
-
-			// If we don't have a buffer to hand-off to GStreamer, we should read one
-			if !self.pending_input_buf {
-				eprintln!("Polling read");
-				if let Poll::Ready(read_result) =
-					poll_read_buf(Pin::new(&mut self.read), cx, &mut input_buf)
-				{
-					eprintln!("Polled read");
-					match read_result {
-						Ok(_) => self.pending_input_buf = true,
-						Err(err) => return Poll::Ready(Some(Err(err.into())))
-					};
-				}
-			}
-
-			// If we have a buffer of data ready to send to GStreamer, send it
-			if self.pending_input_buf {
-				eprintln!("Pending buffer");
-				if !input_buf.is_empty() {
-					if let Poll::Ready(sink_ready_result) =
-						Pin::new(&mut self.input_byte_sink).poll_ready(cx)
-					{
-						eprintln!("Sink ready");
-						match sink_ready_result {
-							Ok(_) => match Pin::new(&mut self.input_byte_sink).start_send(
-								Sample::builder()
-									.buffer(&Buffer::from_slice(input_buf))
-									.build()
-							) {
-								Ok(_) => {
-									// The buffer was just sent to GStreamer, moving its
-									// ownership. Prepare a new buffer for future reads
-									input_buf = Vec::with_capacity(AUDIO_DATA_BUFFER_SIZE);
-									self.pending_input_buf = false;
-								}
-								Err(err) => return Poll::Ready(Some(Err(err.into())))
-							},
-							Err(err) => return Poll::Ready(Some(Err(err.into())))
-						};
+	// Spawn auxiliary task that reads data from the AsyncRead and forwards
+	// it to the appsrc sink, taking care of EOF and EOS. This is needed because
+	// we can only ask the client code to periodically poll the output streams,
+	// and the output streams would otherwise wait forever for somebody to feed
+	// the input data
+	let input_forward_task = task::spawn(
+		read_stream
+			.map(|read_result| {
+				read_result.map_or_else(
+					|error| Err(OptimizationError::from(error)),
+					|buffer| {
+						Ok(Sample::builder()
+							.buffer(&Buffer::from_slice(buffer))
+							.build())
 					}
-				} else {
-					eprintln!("EOF reached");
-					// AsyncRead only reads no bytes when EOF is reached. Remember this
-					self.reached_eof = true;
+				)
+			})
+			.forward(input_sample_sink)
+	);
+
+	let error_message_stream = bus_message_stream
+		.filter_map(|msg| {
+			future::ready(match msg.view() {
+				// Convert error messages and pass them through
+				MessageView::Error(error) => {
+					Some(Some(Err(OptimizationError::from(error.get_error()))))
 				}
-			}
+				// Let the first EOS message pass, so we can end this stream. This is
+				// needed because after EOS there will be no more messages for our
+				// purposes, and we should end the stream there
+				MessageView::Eos(_) => Some(None),
+				// Do not ley any other messages through
+				_ => None
+			})
+		})
+		// Passthrough any error, but end the stream if we find EOS
+		.scan((), |_, error_or_eos| {
+			future::ready(error_or_eos.map(|error| error))
+		})
+		.take(1);
 
-			// Now restore the input buffer cell contents. It doesn't matter we don't
-			// do so in case we bail with an error earlier because the caller should
-			// not keep polling for items, and in such case the stream would be broken
-			// anyway
-			self.input_buf.set(input_buf);
-		}
-
-		// If we reached EOF, signal EOS once by using poll_close. If an error happens while
-		// doing so, propagate it
-		if self.reached_eof && !self.signalled_eos {
-			eprintln!("EOF, not EOS");
-
-			if let Poll::Ready(result) = Pin::new(&mut self.input_byte_sink).poll_close(cx) {
-				eprintln!("EOS signalled");
-				self.signalled_eos = true;
-
-				if let Err(err) = result {
-					return Poll::Ready(Some(Err(err.into())));
-				}
-			}
-		}
-
-		eprintln!("Polling appsink");
-		// We have just handled sending data to GStreamer. Now handle the part
-		// client code is more interested in: the output of the pipeline
-		match Pin::new(&mut self.output_byte_stream).poll_next(cx) {
-			Poll::Ready(Some(sample)) => Poll::Ready(Some(Ok(sample
+	select(
+		// Return either output data or error conditions, by polling from both streams.
+		// The result stream will only end when both of these end
+		error_message_stream,
+		appsink.stream().map(|sample| {
+			Ok(sample
 				.get_buffer_owned()
 				.unwrap()
 				.into_mapped_buffer_readable()
-				.unwrap()))),
-			Poll::Ready(None) => {
-				eprintln!("appsink ended");
+				.unwrap())
+		})
+	)
+	.chain(poll_fn(move |_| -> Poll<Option<_>> {
+		// After both an error or EOS message was received and the output sample
+		// stream signalled EOS, we know that the file was completely processed.
+		// We want to make sure that the auxiliary task is done for good
+		input_forward_task.abort();
 
-				// The app sink is in EOS state, so it won't ever generate more output.
-				// Tear the pipeline down
-				self.gstreamer_pipeline.set_state(State::Null).ok();
+		// This is also a good moment to tear down the pipeline, and let
+		// GStreamer free memory
+		gstreamer_pipeline.set_state(State::Null).ok();
 
-				Poll::Ready(None)
-			}
-			Poll::Pending => {
-				eprintln!("appsink pending");
-
-				// Look at the pending bus messages for relevant error conditions.
-				// This loop is necessary because we need to make sure that the task
-				// that this stream belongs to is woken up whenever a new, potentially
-				// important message arrives, too. If we just poll the bus once, it may
-				// return a message inmediately, and that does not schedule the current
-				// task to wake up when any other messages arrive. Such scenario leads to a
-				// deadlock if nothing else schedules a wake up either, which may happen
-				// when the generation of samples stops because of an error and EOF was reached.
-				// Therefore, we poll it until it returns Poll::Pending, because when such
-				// statuses are returned the method already scheduled this task to wake up for
-				// new messages as needed. This also keeps the number of messages in the internal
-				// unbounded channel queue small
-				while let Poll::Ready(msg) = Pin::new(&mut self.bus_message_stream).poll_next(cx) {
-					eprintln!("Polled message");
-					match msg {
-						Some(msg) => {
-							if let MessageView::Error(err) = msg.view() {
-								return Poll::Ready(Some(Err(err.get_error().into())));
-							}
-						}
-						None => {
-							eprintln!("Polled no more messages");
-
-							// No more messages will ever be generated. Tear the pipeline down
-							self.gstreamer_pipeline.set_state(State::Null).ok();
-
-							return Poll::Ready(None);
-						}
-					}
-				}
-
-				Poll::Pending
-			}
-		}
-	}
+		Poll::Ready(None)
+	}))
 }
 
 /// Adapts internal stream structs used by [AudioFile] to a single [Stream]
 /// that matches client code expectations.
-enum AudioDataStream<T: AsyncRead + Unpin + 'static> {
+enum AudioDataStream<T: AsyncRead + Unpin + Send + 'static> {
 	Transcoded(ProcessedAudioDataStream<T>),
 	PassedThrough(FramedRead<T, PassthroughDecoder>),
 	InitError(tokio_stream::Once<<Self as Stream>::Item>)
 }
 
-impl<T: AsyncRead + Unpin + 'static> Stream for AudioDataStream<T> {
+impl<T: AsyncRead + Unpin + Send + 'static> Stream for AudioDataStream<T> {
 	type Item = Result<(Cow<'static, str>, OptimizedBytes<ByteBuffer>), OptimizationError>;
 
 	fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
 		// Pass through to the underlying stream, mapping types accordingly
 		match Pin::into_inner(self) {
-			AudioDataStream::Transcoded(stream) => Pin::new(stream).poll_next(cx).map(|item| {
+			AudioDataStream::Transcoded(stream) => stream.poll_next_unpin(cx).map(|item| {
 				item.map(|result| {
 					result.map(|buf| {
 						(
@@ -276,7 +193,7 @@ impl<T: AsyncRead + Unpin + 'static> Stream for AudioDataStream<T> {
 					})
 				})
 			}),
-			AudioDataStream::PassedThrough(stream) => Pin::new(stream).poll_next(cx).map(|item| {
+			AudioDataStream::PassedThrough(stream) => stream.poll_next_unpin(cx).map(|item| {
 				item.map(|result| {
 					result.map_or_else(
 						|err| Err(err.into()),
@@ -289,7 +206,7 @@ impl<T: AsyncRead + Unpin + 'static> Stream for AudioDataStream<T> {
 					)
 				})
 			}),
-			AudioDataStream::InitError(stream) => Pin::new(stream).poll_next(cx)
+			AudioDataStream::InitError(stream) => stream.poll_next_unpin(cx)
 		}
 	}
 }
@@ -311,7 +228,7 @@ impl AsRef<[u8]> for ByteBuffer {
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static>
+impl<T: AsyncRead + Unpin + Send + 'static>
 	ResourcePackFile<ByteBuffer, OptimizationError, AudioDataStream<T>> for AudioFile<T>
 {
 	fn process(self) -> AudioDataStream<T> {
@@ -498,12 +415,14 @@ impl<T: AsyncRead + Unpin + 'static>
 			// The pipeline is good to go. Let's start!
 			gstreamer_pipeline.set_state(State::Playing)?;
 
-			Ok(AudioDataStream::Transcoded(ProcessedAudioDataStream::new(
-				self.read,
-				gstreamer_pipeline,
-				appsrc.downcast_ref::<AppSrc>().unwrap().sink(),
-				appsink.downcast_ref::<AppSink>().unwrap().stream()
-			)))
+			Ok(AudioDataStream::Transcoded(
+				new_processed_audio_data_stream(
+					self.read,
+					gstreamer_pipeline,
+					appsrc.downcast_ref::<AppSrc>().unwrap(),
+					appsink.downcast_ref::<AppSink>().unwrap()
+				)
+			))
 		}()
 		.map_or_else(
 			|err| AudioDataStream::InitError(tokio_stream::once(Err(err))),

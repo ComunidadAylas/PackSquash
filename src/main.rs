@@ -6,6 +6,7 @@
 #![feature(const_option)]
 #![feature(new_uninit)]
 #![feature(once_cell)]
+#![feature(min_type_alias_impl_trait)]
 #![feature(doc_cfg)]
 #![doc(
 	html_logo_url = "https://user-images.githubusercontent.com/7822554/96335786-5f403f80-107b-11eb-8aa8-d0e0b6e1aae9.png"
