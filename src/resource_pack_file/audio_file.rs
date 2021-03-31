@@ -138,9 +138,7 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + Send + 'static>(
 			})
 		})
 		// Passthrough any error, but end the stream if we find EOS
-		.scan((), |_, error_or_eos| {
-			future::ready(error_or_eos.map(|error| error))
-		})
+		.scan((), |_, error_or_eos| future::ready(error_or_eos))
 		.take(1);
 
 	select(
