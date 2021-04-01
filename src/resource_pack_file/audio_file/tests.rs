@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
 
@@ -183,7 +185,11 @@ async fn invalid_empty_input_is_handled() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn invalid_non_empty_input_is_handled() {
 	error_process_test(
-		Builder::new().read(&[1, 2]).read(&[3, 4]).build(),
+		Builder::new()
+			.read(&[1, 2])
+			.wait(Duration::from_millis(50))
+			.read(&[3, 4])
+			.build(),
 		4,     // Input file size
 		false, // Is not Ogg
 		Default::default()
@@ -195,7 +201,7 @@ async fn invalid_non_empty_input_is_handled() {
 async fn early_errors_are_handled() {
 	error_process_test(
 		Builder::new().build(), // No input file data is read
-		0,                      // Input file size (doesn't matter)
+		1,                      // Input file size (greater than zero to avoid bailing out early)
 		true,                   // Is Ogg
 		OptimizationSettings {
 			sampling_frequency: -8000, // This causes GStreamer to barf while building the pipeline
