@@ -1,7 +1,7 @@
 use futures::{
 	future,
 	stream::{poll_fn, select},
-	SinkExt, StreamExt
+	FutureExt, SinkExt, StreamExt
 };
 use gstreamer::{
 	glib::BoolError, prelude::*, Buffer, Caps, Element, ElementFactory, FlowError, MessageView,
@@ -32,7 +32,7 @@ mod tests;
 ///
 /// Vanilla Minecraft uses OGG Vorbis files for both music and sound effects. Resource
 /// packs may replace and add new sound events to Minecraft.
-struct AudioFile<T: AsyncRead + Unpin + Send + 'static> {
+struct AudioFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
 	file_length: usize,
 	is_ogg: bool,
@@ -92,7 +92,7 @@ type ProcessedAudioDataStream<T> =
 /// GStreamer pipeline, which contains the provided appsrc and appsink elements,
 /// to process audio file bytes read from an [AsyncRead] to an optimized form,
 /// via transcoding.
-fn new_processed_audio_data_stream<T: AsyncRead + Unpin + Send + 'static>(
+fn new_processed_audio_data_stream<T: AsyncRead + Unpin + 'static>(
 	read: T,
 	gstreamer_pipeline: Pipeline,
 	appsrc: &AppSrc,
@@ -102,25 +102,27 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + Send + 'static>(
 	let input_sample_sink = appsrc.sink().sink_err_into();
 	let bus_message_stream = gstreamer_pipeline.get_bus().unwrap().stream();
 
-	// Spawn auxiliary task that reads data from the AsyncRead and forwards
-	// it to the appsrc sink, taking care of EOF and EOS. This is needed because
-	// we can only ask the client code to periodically poll the output streams,
-	// and the output streams would otherwise wait forever for somebody to feed
-	// the input data
-	let input_forward_task = task::spawn(
-		read_stream
-			.map(|read_result| {
-				read_result.map_or_else(
-					|error| Err(OptimizationError::from(error)),
-					|buffer| {
-						Ok(Sample::builder()
-							.buffer(&Buffer::from_slice(buffer))
-							.build())
-					}
-				)
-			})
-			.forward(input_sample_sink)
-	);
+	let mut input_forward_future = read_stream
+		.map(|read_result| {
+			read_result.map_or_else(
+				|error| Err(OptimizationError::from(error)),
+				|buffer| {
+					Ok(Sample::builder()
+						.buffer(&Buffer::from_slice(buffer))
+						.build())
+				}
+			)
+		})
+		.forward(input_sample_sink);
+
+	// This stream just polls the input forward future to completion,
+	// returning either end of stream and no items or an error when the
+	// future resolves. While it is in progress, it always returns Pending
+	let input_forward_stream = poll_fn(move |cx| -> Poll<Option<_>> {
+		input_forward_future
+			.poll_unpin(cx)
+			.map(|result| result.err().map(Err))
+	});
 
 	let error_message_stream = bus_message_stream
 		.filter_map(|msg| {
@@ -131,7 +133,7 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + Send + 'static>(
 				}
 				// Let the first EOS message pass, so we can end this stream. This is
 				// needed because after EOS there will be no more messages for our
-				// purposes, and we should end the stream there
+				// purposes, and we should end the stream here
 				MessageView::Eos(_) => Some(None),
 				// Do not ley any other messages through
 				_ => None
@@ -142,25 +144,28 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + Send + 'static>(
 		.take(1);
 
 	select(
-		// Return either output data or error conditions, by polling from both streams.
+		// Return either errors that happen while forwarding data from the read or another
+		// data, by polling from two streams.
 		// The result stream will only end when both of these end
-		error_message_stream,
-		appsink.stream().map(|sample| {
-			Ok(sample
-				.get_buffer_owned()
-				.unwrap()
-				.into_mapped_buffer_readable()
-				.unwrap())
-		})
+		input_forward_stream,
+		select(
+			// Return either actual output data or error conditions signalled in the bus
+			error_message_stream,
+			appsink.stream().map(|sample| {
+				Ok(sample
+					.get_buffer_owned()
+					.unwrap()
+					.into_mapped_buffer_readable()
+					.unwrap())
+			})
+		)
 	)
 	.chain(poll_fn(move |_| -> Poll<Option<_>> {
-		// After both an error or EOS message was received and the output sample
-		// stream signalled EOS, we know that the file was completely processed.
-		// We want to make sure that the auxiliary task is done for good
-		input_forward_task.abort();
-
-		// This is also a good moment to tear down the pipeline, and let
-		// GStreamer free memory
+		// After an error or EOS message was received in the bus, the appsink
+		// stream signalled EOS, and we reached EOF on the read, we know that
+		// the file was completely processed.
+		// This is a good moment to tear down the pipeline, and let GStreamer
+		// free memory
 		gstreamer_pipeline.set_state(State::Null).ok();
 
 		Poll::Ready(None)
@@ -169,13 +174,13 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + Send + 'static>(
 
 /// Adapts internal stream structs used by [AudioFile] to a single [Stream]
 /// that matches client code expectations.
-enum AudioDataStream<T: AsyncRead + Unpin + Send + 'static> {
+enum AudioDataStream<T: AsyncRead + Unpin + 'static> {
 	Transcoded(ProcessedAudioDataStream<T>),
 	PassedThrough(FramedRead<T, PassthroughDecoder>),
 	InitError(tokio_stream::Once<<Self as Stream>::Item>)
 }
 
-impl<T: AsyncRead + Unpin + Send + 'static> Stream for AudioDataStream<T> {
+impl<T: AsyncRead + Unpin + 'static> Stream for AudioDataStream<T> {
 	type Item = Result<(Cow<'static, str>, OptimizedBytes<ByteBuffer>), OptimizationError>;
 
 	fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
@@ -226,7 +231,7 @@ impl AsRef<[u8]> for ByteBuffer {
 	}
 }
 
-impl<T: AsyncRead + Unpin + Send + 'static>
+impl<T: AsyncRead + Unpin + 'static>
 	ResourcePackFile<ByteBuffer, OptimizationError, AudioDataStream<T>> for AudioFile<T>
 {
 	fn process(self) -> AudioDataStream<T> {
@@ -266,7 +271,8 @@ impl<T: AsyncRead + Unpin + Send + 'static>
 				// for PackSquash to introduce extra synchronization to guarantee that
 				// this is only called once. This behavior is unlikely to change, because
 				// it is a reasonable expectation of the documentation, which states
-				// that the method returns "true if GStreamer could be initialized".
+				// that the method returns success "if GStreamer could be initialized"
+				// (it doesn't specify now or before).
 				// See: https://github.com/GStreamer/gstreamer/blob/44bdad58f623e50a07476c0f40f8ff7543396f7c/gst/gst.c#L411
 				gstreamer::init().unwrap();
 			});
