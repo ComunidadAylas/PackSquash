@@ -29,4 +29,4 @@ If you want a GUI for using PackSquash, or even authoring resource packs in gene
 ## ✉️ Contact and support
 Like the license says, this software is provided without any warranty, with the hope that you find it useful. But that doesn't mean I don't welcome constructive feedback, suggestions, congratulations or assisting you on your usage of PackSquash (if I can and want to). If you wish to drop me a line for whatever reason related to PackSquash, you can contact me on Discord: _AlexTMjugador#5124_.
 
-Also, if you speak Spanish, you may find that _Comunidad Aylas_, our Spanish-speaking community, suits you well. You can [join us on Discord](https://discord.gg/RVAgQRS). Don't forget to introduce yourself!
+You can also get support on the _Comunidad Aylas_ Discord server, our Spanish-speaking community. We have channels dedicated to PackSquash, where you can discuss PackSquash matters and get support in English and Spanish. [Join us on Discord](https://discord.gg/bGUSamzJYp), don't forget to introduce yourself, and, if you speak Spanish, please check out the things that our community has to offer!
