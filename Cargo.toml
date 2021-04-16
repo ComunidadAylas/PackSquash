@@ -36,7 +36,7 @@ glsl = "6.0.0"
 sysinfo = { version = "0.17.0", default-features = false }
 
 [build-dependencies]
-vergen = "3.1.0"
+vergen = "5.1.1"
 time = "0.2.26"
 
 [target.'cfg(windows)'.build-dependencies]
