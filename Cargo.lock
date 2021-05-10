@@ -1196,9 +1196,9 @@ dependencies = [
 
 [[package]]
 name = "rusty_pool"
-version = "0.5.1"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f12d1ce1d54238418882fa3c4a1b14a2a15d3d6f98640a6b432542152b72133b"
+checksum = "33a01b7876355018cbcc41204d38ff70227950dd3cd6fe3f4f52a10474b1a2de"
 dependencies = [
  "crossbeam-channel",
  "futures-channel",
