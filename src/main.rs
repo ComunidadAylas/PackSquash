@@ -64,7 +64,7 @@ struct GeneralSettings {
 	compress_already_compressed_files: bool,
 	ignore_system_and_hidden_files: bool,
 	allowed_mods: EnumSet<Mod>,
-	threads: u32,
+	threads: usize,
 	output_file_path: String,
 	output_file_spooling_buffer_size: u64
 }
@@ -239,7 +239,7 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 		String::from(env!("CARGO_PKG_NAME")),
 		0,
 		match app_settings.general.threads {
-			0 => cmp::max(num_cpus::get().try_into().unwrap_or(u32::MAX), 1),
+			0 => cmp::max(num_cpus::get().try_into().unwrap_or(usize::MAX), 1),
 			_ => app_settings.general.threads
 		},
 		Duration::from_secs(15)
