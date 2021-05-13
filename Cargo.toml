@@ -14,7 +14,7 @@ lazy_static = "1.4.0"
 getopts = "0.2.21"
 simple-error = "0.2.3"
 num_cpus = "1.13.0"
-rusty_pool = { version = "0.5.1", default-features = false }
+rusty_pool = { version = "0.6.0", default-features = false }
 tempfile = "3.2.0"
 enumset = { version = "1.0.6", features = ["serde"] }
 serde = { version = "1.0.125", features = ["derive"] }
