@@ -8,8 +8,8 @@ use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
-use std::{cmp, env, fs, io, process};
 use std::time::Instant;
+use std::{cmp, env, fs, io, process};
 
 use enumset::EnumSet;
 use indexmap::IndexMap;
