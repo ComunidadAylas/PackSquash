@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use std::{cmp, env, fs, io, process};
-use std::{convert::TryInto, time::Instant};
+use std::time::Instant;
 
 use enumset::EnumSet;
 use indexmap::IndexMap;
@@ -239,7 +239,7 @@ fn execute(app_settings: AppSettings) -> Result<(), Box<dyn Error>> {
 		String::from(env!("CARGO_PKG_NAME")),
 		0,
 		match app_settings.general.threads {
-			0 => cmp::max(num_cpus::get().try_into().unwrap_or(usize::MAX), 1),
+			0 => cmp::max(num_cpus::get(), 1),
 			_ => app_settings.general.threads
 		},
 		Duration::from_secs(15)
