@@ -23,7 +23,7 @@ globset = "0.4.6"
 indexmap = { version = "1.6.2", default-features = false, features = ["serde-1"] }
 serde_json = "1.0.64"
 json_comments = "0.2.0"
-lodepng = "3.4.5"
+lodepng = "3.4.6"
 rgb = "0.8.27"
 imagequant = "3.0.3"
 oxipng = { version = "4.0.3", default-features = false, features = ["zopfli"] }

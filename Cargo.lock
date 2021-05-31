@@ -355,9 +355,9 @@ dependencies = [
 
 [[package]]
 name = "fallible_collections"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af7980d168e1f2e897fce6170e3e81c05cd0e2774a0b189b71a97ea9986ec5e6"
+checksum = "4ad9169582543d2cfe9961be1e9eaf4fc42f9aa3483f7c485717b8dde36466ea"
 dependencies = [
  "hashbrown",
 ]
@@ -778,15 +778,15 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.94"
+version = "0.2.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18794a8ad5b29321f790b55d93dfba91e125cb1a9edbd4f8e3150acc771c1a5e"
+checksum = "789da6d93f1b866ffe175afc5322a4d76c038605a1c3319bb57b06967ca98a36"
 
 [[package]]
 name = "lodepng"
-version = "3.4.5"
+version = "3.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c60778a2380faaea48875fd8d007bae8aea7786c47dd7a455c1c813c3a4c36d7"
+checksum = "e1f7ef1b146a329001ccc6ad5fc1def8300281dda5176e8336b7fd44e440fb96"
 dependencies = [
  "fallible_collections",
  "flate2",
