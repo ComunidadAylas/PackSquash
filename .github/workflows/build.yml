@@ -38,7 +38,7 @@ jobs:
       uses: Swatinem/rust-cache@v1
 
     - name: Install GStreamer build dependencies
-      run: sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+      run: sudo apt-get update && sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
