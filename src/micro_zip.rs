@@ -253,8 +253,8 @@ impl<'a> ZipStructure for LocalFileHeader<'a> {
 		writer.write_all(&self.uncompressed_size.to_le_bytes())?;
 		writer.write_all(&self.file_name_length.to_le_bytes())?;
 		writer.write_all(&self.extra_field_length.to_le_bytes())?;
-		writer.write_all(&self.file_name)?;
-		writer.write_all(&self.file_data)?;
+		writer.write_all(self.file_name)?;
+		writer.write_all(self.file_data)?;
 
 		Ok(())
 	}
