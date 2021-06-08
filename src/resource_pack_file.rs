@@ -780,7 +780,7 @@ impl<'a, T: Read> ResourcePackFile for PassthroughFile<'a, T> {
 	}
 
 	fn canonical_extension(&self) -> &str {
-		&self.canonical_extension
+		self.canonical_extension
 	}
 
 	fn is_compressed(&self) -> bool {
