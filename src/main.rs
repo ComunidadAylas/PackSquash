@@ -326,7 +326,7 @@ fn process_directory(
 				root_path,
 				&path,
 				file_count,
-				&file_thread_pool,
+				file_thread_pool,
 				app_settings,
 				file_globs,
 				micro_zip
