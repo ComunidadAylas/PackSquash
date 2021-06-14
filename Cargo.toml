@@ -19,7 +19,7 @@ tempfile = "3.2.0"
 enumset = { version = "1.0.6", features = ["serde"] }
 serde = { version = "1.0.126", features = ["derive"] }
 toml = "0.5.8"
-globset = "0.4.6"
+globset = "0.4.7"
 indexmap = { version = "1.6.2", default-features = false, features = ["serde-1"] }
 serde_json = "1.0.64"
 json_comments = "0.2.0"
