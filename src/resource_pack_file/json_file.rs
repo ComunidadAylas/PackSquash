@@ -9,7 +9,7 @@ use tokio_util::codec::{Decoder, FramedRead};
 
 use self::debloater::{DebloatError, Debloater};
 
-use super::{OptimizedBytes, ResourcePackFile};
+use super::{util::bom_stripper, OptimizedBytes, ResourcePackFile};
 
 mod debloater;
 
@@ -84,7 +84,8 @@ impl Decoder for OptimizerDecoder {
 
 		// Parse the JSON so we know how to serialize it again in a compact manner,
 		// and we know it's valid. Also, remove its comments
-		let mut json_value: Value = serde_json::from_reader(StripComments::new(&**src))?;
+		let mut json_value: Value =
+			serde_json::from_reader(StripComments::new(bom_stripper::strip_utf8_bom(src)))?;
 
 		// Now that we have the value struct, clear the input buffer to reuse it for
 		// the optimized JSON serialization

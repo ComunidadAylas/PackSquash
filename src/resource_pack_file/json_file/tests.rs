@@ -57,6 +57,22 @@ async fn minifying_works() {
 }
 
 #[tokio::test]
+async fn minifying_with_bom_works() {
+	let mut json_data_with_bom = String::from(JSON_DATA);
+	json_data_with_bom.insert(0, '\u{feff}');
+
+	successful_process_test(
+		&json_data_with_bom,
+		OptimizationSettings {
+			minify: true,
+			..Default::default()
+		},
+		MINIFIED_JSON_DATA
+	)
+	.await
+}
+
+#[tokio::test]
 async fn prettifying_works() {
 	successful_process_test(
 		JSON_DATA,

@@ -5,7 +5,7 @@ use java_properties::{LineEnding, PropertiesError, PropertiesIter, PropertiesWri
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
-use super::{OptimizedBytes, ResourcePackFile};
+use super::{util::bom_stripper, OptimizedBytes, ResourcePackFile};
 
 #[cfg(test)]
 mod tests;
@@ -90,7 +90,7 @@ impl Decoder for OptimizerDecoder {
 			minified_properties_writer.set_line_ending(LineEnding::LF);
 			minified_properties_writer.set_kv_separator("=").unwrap();
 
-			PropertiesIter::new(&**src).read_into(|key, value| {
+			PropertiesIter::new(bom_stripper::strip_utf8_bom(src)).read_into(|key, value| {
 				minified_properties_writer.write(&key, &value).unwrap();
 			})?;
 

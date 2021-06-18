@@ -1,4 +1,8 @@
-use std::{borrow::Cow, io::Write, str::Utf8Error};
+use std::{
+	borrow::Cow,
+	io::{self, Write},
+	str::Utf8Error
+};
 
 use bytes::{BufMut, BytesMut};
 use glsl::{
@@ -9,7 +13,7 @@ use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
-use super::{OptimizedBytes, ResourcePackFile};
+use super::{util::bom_stripper, OptimizedBytes, ResourcePackFile};
 
 #[cfg(test)]
 mod tests;
@@ -66,7 +70,7 @@ enum OptimizationError {
 	#[error("Invalid shader code: {0}")]
 	InvalidShaderStage(#[from] ParseError),
 	#[error("I/O error: {0}")]
-	Io(#[from] std::io::Error)
+	Io(#[from] io::Error)
 }
 
 impl Decoder for OptimizerDecoder {
@@ -83,7 +87,8 @@ impl Decoder for OptimizerDecoder {
 		}
 
 		// Parse the translation unit
-		let translation_unit = TranslationUnit::parse(std::str::from_utf8(src)?)?;
+		let translation_unit =
+			TranslationUnit::parse(std::str::from_utf8(bom_stripper::strip_utf8_bom(src))?)?;
 
 		if self.optimization_settings.minify {
 			// Transpile the translation unit back to a more compact GLSL string

@@ -48,6 +48,19 @@ async fn minifying_works() {
 }
 
 #[tokio::test]
+async fn minifying_with_bom_works() {
+	let mut properties_data_with_bom = String::from(PROPERTIES_DATA);
+	properties_data_with_bom.insert(0, '\u{feff}');
+
+	successful_process_test(
+		&properties_data_with_bom,
+		OptimizationSettings { minify: true },
+		MINIFIED_PROPERTIES_DATA
+	)
+	.await
+}
+
+#[tokio::test]
 async fn passthrough_works() {
 	successful_process_test(
 		PROPERTIES_DATA,

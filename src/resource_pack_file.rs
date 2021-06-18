@@ -51,6 +51,8 @@ trait ResourcePackFile<T: AsRef<[u8]>, E: Error, S: Stream<Item = OptimizedBytes
 	fn is_compressed(&self) -> bool;
 }
 
+mod util;
+
 mod audio_file;
 mod json_file;
 mod passthrough_file;

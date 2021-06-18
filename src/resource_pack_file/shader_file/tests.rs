@@ -8,14 +8,25 @@ static FRAGMENT_SHADER_DATA: &str = include_str!("example.fsh");
 /// Processes the given input data as a [ShaderFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
 async fn successful_process_test(
-	input_data: &str,
+	input_text: &str,
+	add_bom: bool,
 	extension: &str,
 	settings: OptimizationSettings,
 	expect_smaller_file_size: bool
 ) {
-	let input_ast = TranslationUnit::parse(&input_data)
-		.expect("The input data should be a valid translation unit");
-	let input_data = input_data.as_bytes();
+	let input_ast = TranslationUnit::parse(input_text)
+		.expect("The test input data should be a valid translation unit");
+
+	let input_text = {
+		let mut input_data = Cow::Borrowed(input_text);
+
+		if add_bom {
+			input_data.to_mut().insert(0, '\u{feff}');
+		}
+
+		input_data
+	};
+	let input_data = input_text.as_bytes();
 
 	let data_stream = ShaderFile {
 		read: Builder::new().read(input_data).build(),
@@ -59,6 +70,19 @@ async fn successful_process_test(
 async fn minifying_works() {
 	successful_process_test(
 		FRAGMENT_SHADER_DATA,
+		false, // No BOM
+		"fsh",
+		OptimizationSettings { minify: true },
+		true // Smaller size
+	)
+	.await
+}
+
+#[tokio::test]
+async fn minifying_with_bom_works() {
+	successful_process_test(
+		FRAGMENT_SHADER_DATA,
+		true, // Add BOM
 		"fsh",
 		OptimizationSettings { minify: true },
 		true // Smaller size
@@ -70,6 +94,7 @@ async fn minifying_works() {
 async fn passthrough_works() {
 	successful_process_test(
 		FRAGMENT_SHADER_DATA,
+		false, // No BOM
 		"fsh",
 		OptimizationSettings { minify: false },
 		false // Same size
