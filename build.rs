@@ -15,10 +15,10 @@ fn main() {
 	*vergen_config.git_mut().sha_mut() = false;
 
 	// Generate the 'cargo:' key output that populate the target triple and version envrionment variables
-	if let Err(error) = vergen(vergen_config) {
+	if let Err(err) = vergen(vergen_config) {
 		eprintln!(
 			"W: Couldn't generate Cargo keys. This is normal for custom builds outside a repository. Details: {}",
-			error
+			err
 		);
 	}
 
@@ -38,15 +38,15 @@ fn add_executable_metadata(build_year: i32) {
 	windows_resource.set("ProductName", "PackSquash");
 	windows_resource.set(
 		"LegalCopyright",
-		&format!("Copyright (C) {} {}", build_year, env!("CARGO_PKG_AUTHORS"))[..]
+		&format!("Copyright (C) {} {}", build_year, env!("CARGO_PKG_AUTHORS"))
 	);
 	windows_resource.set_language(0x0409); // English (US)
 	windows_resource.set_icon("src/app_icon.ico");
 
-	if let Err(error) = windows_resource.compile() {
+	if let Err(err) = windows_resource.compile() {
 		eprintln!(
 			"W: Couldn't set the metadata of the Windows executable. Details: {}",
-			error
+			err
 		);
 	}
 }

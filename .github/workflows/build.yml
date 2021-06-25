@@ -2,6 +2,8 @@ name: Build
 
 on:
   push:
+    branches-ignore:
+      - 'dependabot/**'
   pull_request:
   release:
     types:
@@ -35,14 +37,14 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer
-      run: sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+    - name: Install GStreamer build dependencies
+      run: sudo apt-get update && sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        args: --release -- -D warnings
+        args: --release
 
     - name: Cargo test
       uses: actions-rs/cargo@v1
@@ -50,7 +52,7 @@ jobs:
         command: test
         args: --release
 
-    - name: Cargo build
+    - name: Cargo build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
@@ -65,9 +67,6 @@ jobs:
         message: 'Format Rust source code using rustfmt'
         author_name: github-actions[bot]
         author_email: 41898282+github-actions[bot]@users.noreply.github.com
-
-    - name: Strip debug symbols from binary
-      run: strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
@@ -93,6 +92,7 @@ jobs:
         toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
         override: true
         profile: minimal
+        components: rust-src
 
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
@@ -119,14 +119,11 @@ jobs:
         command: test
         args: --release
 
-    - name: Cargo build
+    - name: Cargo build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: ${{ env.COMMON_CARGO_BUILD_PARAMS }}
-
-    - name: Strip debug symbols from binary
-      run: bash.exe -c 'strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe'
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
@@ -166,14 +163,11 @@ jobs:
         command: test
         args: --release
 
-    - name: Cargo build
+    - name: Cargo build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
         args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
-
-    - name: Strip debug symbols from binary
-      run: strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
     - name: Upload binary
       uses: actions/upload-artifact@v2

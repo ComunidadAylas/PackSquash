@@ -16,8 +16,11 @@
 #![deny(rustdoc::invalid_html_tags)]
 
 mod resource_pack_file;
+mod squash_zip;
 
-fn main() {}
+fn main() -> std::io::Result<()> {
+	Ok(())
+}
 
 /*use std::{convert::TryInto, time::Instant};
 use std::error::Error;

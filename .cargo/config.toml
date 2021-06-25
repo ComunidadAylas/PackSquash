@@ -1,0 +1,3 @@
+# Placeholder Cargo configuration file for PackSquash.
+# Reference: https://doc.rust-lang.org/cargo/reference/config.html
+# This file is primarily useful for specifying custom rustflags.

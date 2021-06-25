@@ -1,3 +1,5 @@
+cargo-features = ["strip"]
+
 [package]
 name = "packsquash"
 description = "Minecraft resource pack optimizer"
@@ -9,28 +11,29 @@ publish = false
 edition = "2018"
 
 [dependencies]
-globset = "0.4.6"
-enumset = { version = "1.0.6", features = ["serde"] }
 bytes = "1.0.1"
+globset = "0.4.8"
+enumset = { version = "1.0.6", features = ["serde"] }
 indexmap = { version = "1.6.2", default-features = false, features = ["serde-1"] }
-thiserror = "1.0.24"
+thiserror = "1.0.25"
+ahash = "0.7.4"
+static_assertions = "1.1.0"
 
-tokio = { version = "1.4.0", default-features = false, features = ["rt-multi-thread", "macros", "parking_lot"] }
-tokio-util = { version = "0.6.5", default-features = false, features = ["codec", "io"] }
-tokio-stream = { version = "0.1.5", default-features = false }
-futures = { version = "0.3.13", default-features = false }
+tokio = { version = "1.7.1", default-features = false, features = ["rt-multi-thread", "macros", "parking_lot", "io-util", "fs"] }
+tokio-util = { version = "0.6.7", default-features = false, features = ["codec", "io"] }
+tokio-stream = { version = "0.1.6", default-features = false }
+futures = { version = "0.3.15", default-features = false }
 
 getopts = "0.2.21"
-num_cpus = "1.13.0"
 
-serde = { version = "1.0.125", features = ["derive"] }
+serde = { version = "1.0.126", features = ["derive"] }
 toml = "0.5.8"
 
 serde_json = "1.0.64"
 json_comments = "0.2.0"
-jsonpath_lib = "0.2.6"
+jsonpath_lib = "0.3.0"
 
-spng = { version = "0.1.0", default-features = false, features = ["zlib-ng"] }
+spng = { version = "0.1.0", default-features = false }
 png = "0.16.8"
 rgb = "0.8.27"
 imagequant = "3.0.4-alpha.2"
@@ -43,15 +46,26 @@ glsl = "6.0.0"
 
 java-properties = { version = "1.3.0", optional = true }
 
+tempfile = "3.2.0"
 crc32fast = "1.2.1"
 zopfli = "0.4.0"
 
+const-random = "0.1.13"
+aes = "0.7.4"
+fpe = "0.4.0"
+uuid = "0.8.2"
+libc = "0.2.97"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.9.0"
+wmi = "0.8.1"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation = "0.9.1"
+mach = "0.3.2"
+
 [patch.crates-io]
-# Use our fork of oxipng that makes cloudflare-zlib optional.
-# This allows fixing Windows builds with MinGW.
-# See: https://gitlab.com/kornelski/cloudflare-zlib-sys/-/issues/1
-# https://github.com/shssoichiro/oxipng/pull/369
-# It also removes a dependency and an unneeded sanity check
+# Use our fork of oxipng that removes a dependency and an unneeded sanity check
 oxipng = { git = "https://github.com/ComunidadAylas/oxipng", branch = "packsquash" }
 # Use the latest commit of imagequant, which allows some zero-copy operations
 imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
@@ -59,16 +73,20 @@ imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
 # DOS-style CRLF line endings, prevalent on Windows environments.
 # See: https://github.com/phaazon/glsl/pull/138
 glsl = { git = "https://github.com/vtavernier/glsl", branch = "fix/dos-crlf" }
+# Use our fork of Zopfli that includes streaming support
+zopfli = { git = "https://github.com/ComunidadAylas/zopfli" }
+# Use our fork of fpe that fixes compatibility with newer aes versions
+fpe = { git = "https://github.com/ComunidadAylas/fpe" }
 
 [build-dependencies]
-vergen = { version = "5.1.0", default-features = false, features = ["cargo", "git"] }
-time = "0.2.26"
+vergen = { version = "5.1.9", default-features = false, features = ["cargo", "git"] }
+time = "0.2.27"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1.11"
 
 [dev-dependencies]
-tokio-test = "0.4.1"
+tokio-test = "0.4.2"
 
 [features]
 # Support all kinds of files added by modifications by default
@@ -82,3 +100,4 @@ optifine-support = ["java-properties"]
 opt-level = 3
 lto = "fat"
 codegen-units = 1
+strip = "symbols"
