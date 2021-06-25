@@ -195,7 +195,7 @@ pub(super) fn get_dmi_product_id() -> Option<(u128, bool, bool)> {
 /// - https://github.com/svartalf/rust-battery/blob/20233871e16b0e7083281df560875110a0cac93b/battery/src/platform/darwin/iokit/sys.rs
 /// - https://github.com/servo/core-foundation-rs/blob/master/core-foundation
 #[cfg(target_os = "macos")]
-#[allow(unsafe_code)]
+#[allow(unsafe_code, non_camel_case_types)]
 pub(super) fn get_platform_serial_number() -> Option<(u128, bool, bool)> {
 	use core_foundation::{
 		base::{kCFAllocatorDefault, mach_port_t, CFAllocatorRef, CFTypeRef, TCFType},
@@ -205,7 +205,7 @@ pub(super) fn get_platform_serial_number() -> Option<(u128, bool, bool)> {
 	use mach::kern_return::kern_return_t;
 	use std::{
 		convert::TryFrom,
-		ffi::{CStr, CString},
+		ffi::CString,
 		os::raw::c_char
 	};
 
@@ -260,7 +260,7 @@ pub(super) fn get_platform_serial_number() -> Option<(u128, bool, bool)> {
 			0
 		)
 	};
-	if serial_number_cf_string_ref == 0 {
+	if serial_number_cf_string_ref == 0 as CFTypeRef {
 		release_objects();
 		return None;
 	}
@@ -270,7 +270,7 @@ pub(super) fn get_platform_serial_number() -> Option<(u128, bool, bool)> {
 	// be any string. Truncate it if it is big, pad it if it is short, and just use
 	// its raw byte values to construct a u128 to return
 	let mut serial_number_bytes =
-		unsafe { CFString::wrap_under_create_rule(serial_number_cf_string_ref).into() }.as_bytes();
+		unsafe { CFString::wrap_under_create_rule(serial_number_cf_string_ref as CFStringRef).into() }.as_bytes();
 	let mut buf;
 	if serial_number_bytes.len() > 15 {
 		serial_number_bytes = serial_number_bytes[..16];
@@ -327,7 +327,7 @@ pub(super) fn get_host_id() -> Option<(u128, bool, bool)> {
 #[cfg(windows)]
 pub(super) fn get_machine_id() -> Option<(u128, bool, bool)> {
 	use uuid::Uuid;
-	use winreg::{RegKey, HKEY_LOCAL_MACHINE};
+	use winreg::{RegKey, enums::HKEY_LOCAL_MACHINE};
 
 	let machine_guid: String = RegKey::predef(HKEY_LOCAL_MACHINE)
 		.open_subkey("SOFTWARE\\Microsoft\\Cryptography")
@@ -335,7 +335,7 @@ pub(super) fn get_machine_id() -> Option<(u128, bool, bool)> {
 		.get_value("MachineGuid")
 		.ok()?;
 
-	Some(Uuid::parse_str(&machine_guid).ok()?.as_u128(), true, false)
+	Some((Uuid::parse_str(&machine_guid).ok()?.as_u128(), true, false))
 }
 
 /// Uses Windows Management Interface to get a product UUID. Although not stated in the
@@ -374,7 +374,7 @@ pub(super) fn get_product_id() -> Option<(u128, bool, bool)> {
 /// and, because it is 32-bit long, it is pretty weak. Use as a last-resort fallback.
 #[cfg(windows)]
 pub(super) fn get_install_date() -> Option<(u128, bool, bool)> {
-	use winreg::{RegKey, HKEY_LOCAL_MACHINE};
+	use winreg::{RegKey, enums::HKEY_LOCAL_MACHINE};
 
 	let install_date: u32 = RegKey::predef(HKEY_LOCAL_MACHINE)
 		.open_subkey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion")
@@ -382,5 +382,5 @@ pub(super) fn get_install_date() -> Option<(u128, bool, bool)> {
 		.get_value("InstallDate")
 		.ok()?;
 
-	Some(install_date as u128, false, false)
+	Some((install_date as u128, false, false))
 }
