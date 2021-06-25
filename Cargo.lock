@@ -1160,7 +1160,7 @@ checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 [[package]]
 name = "oxipng"
 version = "4.0.3"
-source = "git+https://github.com/ComunidadAylas/oxipng?branch=packsquash#769e07eab0f3f04c295cb5c6217b2725ea1fe901"
+source = "git+https://github.com/ComunidadAylas/oxipng?branch=packsquash#6a52b995828ae769fd53647d2f2dc789837c95ca"
 dependencies = [
  "bit-vec",
  "byteorder",
