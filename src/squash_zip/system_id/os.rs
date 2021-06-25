@@ -265,10 +265,11 @@ pub(super) fn get_platform_serial_number() -> Option<(u128, bool, bool)> {
 	// because they are not happy with just making you pay exorbitant prices. It may
 	// be any string. Truncate it if it is big, pad it if it is short, and just use
 	// its raw byte values to construct a u128 to return
-	let mut serial_number_bytes = unsafe {
-		CFString::wrap_under_create_rule(serial_number_cf_string_ref as CFStringRef).into()
-	}
-	.as_bytes();
+	let mut serial_number_bytes =
+		unsafe { CFString::wrap_under_create_rule(serial_number_cf_string_ref as CFStringRef) }
+			.to_string()
+			.as_bytes();
+
 	let mut buf;
 	if serial_number_bytes.len() > 15 {
 		serial_number_bytes = serial_number_bytes[..16];
