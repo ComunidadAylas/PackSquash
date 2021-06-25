@@ -1,7 +1,7 @@
 //! OS-specific functions to get PackSquash system IDs.
 
 /// Gets the D-Bus and/or systemd generated machine ID. This machine ID is
-/// 128-bit wide, and is intended to be constant for all the life of the
+/// 128-bit wide, and is intended to be constant for all the lifecycle of the
 /// OS install, no matter if hardware is replaced or some configuration is
 /// changed.
 ///
@@ -203,7 +203,7 @@ pub(super) fn get_platform_serial_number() -> Option<(u128, bool, bool)> {
 		string::{CFString, CFStringRef}
 	};
 	use mach::kern_return::kern_return_t;
-	use std::{convert::TryFrom, ffi::CString, os::raw::c_char};
+	use std::{convert::TryInto, ffi::CString, os::raw::c_char};
 
 	type io_object_t = mach_port_t;
 	type io_registry_entry_t = io_object_t;
@@ -272,14 +272,18 @@ pub(super) fn get_platform_serial_number() -> Option<(u128, bool, bool)> {
 
 	let mut buf;
 	if serial_number_bytes.len() > 15 {
-		serial_number_bytes = serial_number_bytes[..16];
+		serial_number_bytes = &serial_number_bytes[..16];
 	} else {
 		buf = vec![0; 16];
 		&mut buf[..serial_number_bytes.len()].copy_from_slice(serial_number_bytes);
 		serial_number_bytes = &buf;
 	}
 
-	let result = Some((u128::try_from(serial_number_bytes).unwrap(), true, false));
+	let result = Some((
+		u128::from_le_bytes(serial_number_bytes.try_into().unwrap()),
+		true,
+		false
+	));
 
 	release_objects();
 
