@@ -12,7 +12,7 @@
 /// Further reading:
 /// - https://www.freedesktop.org/software/systemd/man/machine-id.html
 /// - https://unix.stackexchange.com/questions/396052/missing-etc-machine-id-on-freebsd-trueos-dragonfly-bsd-et-al
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "macos")))]
 pub(super) fn get_dbus_machine_id() -> Option<(u128, bool, bool)> {
 	use std::fs;
 
@@ -275,7 +275,7 @@ pub(super) fn get_platform_serial_number() -> Option<(u128, bool, bool)> {
 		serial_number_bytes = &serial_number_bytes[..16];
 	} else {
 		buf = vec![0; 16];
-		&mut buf[..serial_number_bytes.len()].copy_from_slice(serial_number_bytes);
+		buf[..serial_number_bytes.len()].copy_from_slice(serial_number_bytes);
 		serial_number_bytes = &buf;
 	}
 
