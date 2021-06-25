@@ -13,7 +13,7 @@ pub(super) mod bom_stripper {
 		if buf.len() > 2 && buf[..3] == [0xEF, 0xBB, 0xBF] {
 			&buf[3..]
 		} else {
-			&buf
+			buf
 		}
 	}
 }

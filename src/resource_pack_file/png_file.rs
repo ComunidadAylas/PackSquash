@@ -64,7 +64,7 @@ impl Default for OptimizationSettings {
 
 /// Possible strategies to quantize the colors of a [PngFile].
 #[derive(Copy, Clone)]
-#[allow(dead_code)] // TODO: temporary?
+#[allow(dead_code)] // TODO: temporary
 enum ColorQuantizationMode {
 	/// No quantization will be done, only lossless optimizations.
 	None,
@@ -112,6 +112,7 @@ struct OptimizerDecoder {
 
 /// Represents an error that may happen while optimizing PNG files.
 #[derive(Error, Debug)]
+#[non_exhaustive]
 enum OptimizationError {
 	#[error("PNG decode error: {0}")]
 	PngDecoding(#[from] spng::Error),
@@ -213,7 +214,7 @@ impl Decoder for OptimizerDecoder {
 
 				// Get the quantization attributes to use
 				let mut quantization_attributes = Attributes::new();
-				quantization_attributes.set_max_colors(maximum_colors.try_into().unwrap());
+				quantization_attributes.set_max_colors(maximum_colors.try_into()?);
 				quantization_attributes.set_speed(2);
 				quantization_attributes.set_quality(0, 100);
 

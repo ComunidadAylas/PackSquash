@@ -18,7 +18,10 @@ async fn successful_process_test(
 ) {
 	let data_stream = AudioFile {
 		read: Builder::new().read(input_data).build(),
-		file_length: input_data.len(),
+		file_length: input_data
+			.len()
+			.try_into()
+			.expect("The input file is too big"),
 		is_ogg,
 		optimization_settings: settings
 	}
@@ -76,7 +79,7 @@ async fn successful_process_test(
 /// expecting an error on the first stream result.
 async fn error_process_test<T: AsyncRead + Unpin + Send + 'static>(
 	read: T,
-	file_length: usize,
+	file_length: u32,
 	is_ogg: bool,
 	settings: OptimizationSettings
 ) {

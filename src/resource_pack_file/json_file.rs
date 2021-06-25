@@ -58,6 +58,7 @@ struct OptimizerDecoder {
 
 /// Represents an error that may happen while optimizing JSON files.
 #[derive(Error, Debug)]
+#[non_exhaustive]
 enum OptimizationError {
 	#[error("JSON object serialization or desarialization error: {0}")]
 	JsonSerde(#[from] serde_json::Error),

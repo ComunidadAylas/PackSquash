@@ -7,6 +7,7 @@ use gstreamer::{
 	glib::BoolError, prelude::*, Buffer, Caps, Element, ElementFactory, FlowError, MessageView,
 	Pipeline, Sample, State, StateChangeError, TagMergeMode, TagSetter
 };
+use static_assertions::const_assert;
 
 use std::{
 	borrow::Cow,
@@ -34,7 +35,7 @@ mod tests;
 /// packs may replace and add new sound events to Minecraft.
 struct AudioFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
-	file_length: usize,
+	file_length: u32,
 	is_ogg: bool,
 	optimization_settings: OptimizationSettings
 }
@@ -62,14 +63,18 @@ impl Default for OptimizationSettings {
 	}
 }
 
+// We assume usize is at least 16 bits wide for the constants that follow
+const_assert!(usize::BITS >= 16);
+
 /// The size of the temporary audio data buffers that are handed-off and received from
 /// GStreamer, in bytes.
-const AUDIO_DATA_BUFFER_SIZE: usize = 128 * 1024; // This fits in u32, the smallest reasonable usize
+const AUDIO_DATA_BUFFER_SIZE: usize = 32 * 1024;
 const AUDIO_DATA_BUFFER_SIZE_U32: u32 = AUDIO_DATA_BUFFER_SIZE as u32;
 const AUDIO_DATA_BUFFER_SIZE_U64: u64 = AUDIO_DATA_BUFFER_SIZE_U32 as u64;
 
 /// Represents an error that may happen while optimizing audio files.
 #[derive(Error, Debug)]
+#[non_exhaustive]
 enum OptimizationError {
 	#[error("GStreamer element state change error (more info with GST_DEBUG): {0}")]
 	GstreamerStateChange(#[from] StateChangeError),

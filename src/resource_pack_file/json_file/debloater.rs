@@ -36,7 +36,7 @@ impl From<JsonPathError> for DebloatError {
 
 impl Debloater {
 	/// Creates a new Minecraft JSON file debloater.
-	pub(super) fn new() -> Self {
+	pub fn new() -> Self {
 		Self {
 			bloat_values_selectors: Cell::new([
 				// Blockbench credits
@@ -46,7 +46,7 @@ impl Debloater {
 	}
 
 	/// Debloats the specified Minecraft JSON file, previously parsed as a JSON value.
-	pub(super) fn debloat(&self, root_value: &mut Value) -> Result<(), DebloatError> {
+	pub fn debloat(&self, root_value: &mut Value) -> Result<(), DebloatError> {
 		// Put the value in a Cell to be able to get its ownership by replacing it
 		// temporarily during each iteration
 		let value = Cell::from_mut(root_value);
@@ -59,7 +59,7 @@ impl Debloater {
 
 			match selector.remove() {
 				Ok(_) => (),
-				Err(error) => match error {
+				Err(err) => match err {
 					JsonPathError::EmptyValue => (),
 					other_error => {
 						// Always make sure we set the cell back to its original

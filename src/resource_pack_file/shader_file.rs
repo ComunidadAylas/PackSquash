@@ -64,6 +64,7 @@ struct OptimizerDecoder {
 }
 
 #[derive(Error, Debug)]
+#[non_exhaustive]
 enum OptimizationError {
 	#[error("Invalid UTF-8 character encoding: {0}")]
 	InvalidUtf8(#[from] Utf8Error),
