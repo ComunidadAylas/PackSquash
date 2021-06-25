@@ -592,7 +592,8 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				io::copy(
 					&mut io::Read::take(&mut &output_zip_decorator, compressed_data_size as u64),
 					&mut &output_zip_decorator
-				).map(|_| ())
+				)
+				.map(|_| ())
 			};
 
 			// As per the reasons mentioned in Step 4 implementation, we handle blocking I/O
@@ -834,9 +835,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 
 			let previous_zip_data =
 				ReaderStream::new(previous_zip.take(previous_file.compressed_size as u64))
-					.map_ok(|byte_chunk| {
-						tokio_stream::iter(byte_chunk).map(Result::Ok)
-					})
+					.map_ok(|byte_chunk| tokio_stream::iter(byte_chunk).map(Result::Ok))
 					.try_flatten();
 
 			// Use stream magic to check whether the bytes in both regions are the same.

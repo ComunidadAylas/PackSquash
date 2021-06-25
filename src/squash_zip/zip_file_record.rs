@@ -1,8 +1,4 @@
-use std::{
-	cmp,
-	convert::TryInto,
-	io::Error
-};
+use std::{cmp, convert::TryInto, io::Error};
 
 use enumset::{EnumSet, EnumSetType};
 
