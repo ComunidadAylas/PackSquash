@@ -65,7 +65,9 @@ fn host_id_works() {
 			// See: https://bug-coreutils.gnu.narkive.com/4cnKKtfD/workaround-for-hostid-on-darwin-8-macppc
 			host_id
 		} else {
-			Some(host_id.expect("Assuming an appropriate environment, this should return a system ID"))
+			Some(
+				host_id.expect("Assuming an appropriate environment, this should return a system ID")
+			)
 		}
 	)
 }
