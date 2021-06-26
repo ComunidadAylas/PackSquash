@@ -32,7 +32,7 @@ struct PropertiesFile<'a, T: AsyncRead + Unpin + 'static> {
 
 /// Parameters that influence how a [PropertiesFile] is optimized.
 struct OptimizationSettings {
-	/// If true, the JSON data will be normalized and minified, which normally
+	/// If true, the properties will be normalized and minified, which normally
 	/// improves compressibility a fair amount, or even replaces it altogether for
 	/// tiny files. If false, the data will be parsed, to check for errors, and
 	/// then returned as-is if the validation is successful
