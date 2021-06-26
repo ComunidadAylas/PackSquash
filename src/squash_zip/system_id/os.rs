@@ -305,7 +305,6 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 /// - https://docs.oracle.com/cd/E86824_01/html/E54766/gethostid-3c.html
 #[cfg(unix)]
 pub(super) fn get_host_id() -> Option<SystemId> {
-	use std::convert::TryFrom;
 	use std::os::raw::c_long;
 
 	extern "C" {
@@ -315,14 +314,8 @@ pub(super) fn get_host_id() -> Option<SystemId> {
 		fn gethostid() -> c_long;
 	}
 
-	i128::try_from(
-		#[allow(unsafe_code)]
-		unsafe {
-			gethostid()
-		}
-	)
-	.ok()
-	.and_then(|id| SystemId::new(id as u128, false, 50))
+	#[allow(unsafe_code)]
+	SystemId::new(unsafe { gethostid() } as u128, false, 50)
 }
 
 /// Gets a machine ID, persistent across upgrades, from its most common location in the

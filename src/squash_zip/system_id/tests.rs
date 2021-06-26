@@ -56,9 +56,17 @@ fn platform_serial_number_works() {
 fn host_id_works() {
 	use super::os::get_host_id;
 
+	let host_id = get_host_id();
+
 	eprintln!(
 		"host_id: {:?}",
-		get_host_id().expect("Assuming an appropriate environment, this should return a system ID")
+		if cfg!(target_os = "macos") {
+			// gethostid() is known to be buggy on macOS and return all zeros sometimes, so this can fail.
+			// See: https://bug-coreutils.gnu.narkive.com/4cnKKtfD/workaround-for-hostid-on-darwin-8-macppc
+			host_id
+		} else {
+			host_id.expect("Assuming an appropriate environment, this should return a system ID")
+		}
 	)
 }
 
