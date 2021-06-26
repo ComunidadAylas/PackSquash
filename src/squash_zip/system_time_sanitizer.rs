@@ -8,7 +8,7 @@ use const_random::const_random;
 use fpe::ff1::{BinaryNumeralString, FF1};
 use thiserror::Error;
 
-use super::{system_id::SYSTEM_ID, zip_file_record::DUMMY_SQUASH_TIME};
+use super::{system_id::get_or_compute_system_id, zip_file_record::DUMMY_SQUASH_TIME};
 
 #[cfg(test)]
 mod tests;
@@ -64,7 +64,7 @@ impl SystemTimeSanitizer<Aes128> {
 		// Now generate the actual encryption key by encrypting the system-specific
 		// system ID with our application-wide salt. This makes it much harder to
 		// derive the system ID from the ciphertext, even if we know the salt
-		let mut key = SYSTEM_ID.0.to_le_bytes();
+		let mut key = get_or_compute_system_id().id.to_le_bytes();
 		Aes128::new(GenericArray::from_slice(&TIME_SANITIZATION_SALT))
 			.encrypt_block(Block::from_mut_slice(&mut key));
 

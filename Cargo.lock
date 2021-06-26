@@ -439,6 +439,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a246d82be1c9d791c5dfde9a2bd045fc3cbba3fa2b11ad558f27d01712f00569"
 
 [[package]]
+name = "entropy"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e885f8dca86fbf1999f9b4643d6e94e984c5c8b36073404dd227be3e5255f1d5"
+
+[[package]]
 name = "enum-iterator"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1186,6 +1192,7 @@ dependencies = [
  "const-random",
  "core-foundation",
  "crc32fast",
+ "entropy",
  "enumset",
  "fpe",
  "futures",
@@ -1199,7 +1206,6 @@ dependencies = [
  "java-properties",
  "json_comments",
  "jsonpath_lib",
- "libc",
  "mach",
  "oxipng",
  "png",

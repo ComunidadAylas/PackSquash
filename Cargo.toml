@@ -54,7 +54,7 @@ const-random = "0.1.13"
 aes = "0.7.4"
 fpe = "0.4.0"
 uuid = "0.8.2"
-libc = "0.2.97"
+entropy = "0.4.1"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.9.0"

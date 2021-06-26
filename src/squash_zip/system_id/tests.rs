@@ -1,11 +1,19 @@
 //! NOTE: these tests should be run on devices that support all the platform-specific
-//! methods to get system IDs that are applicable.
+//! methods to get system IDs that are applicable. It is also assumed that the ID has
+//! not been tampered with and was generated as usual.
 
 use super::*;
 
 #[test]
 fn works() {
-	SYSTEM_ID.0;
+	let system_id = get_or_compute_system_id();
+
+	eprintln!("System ID: {:?}", system_id);
+
+	assert!(
+		system_id.has_high_entropy,
+		"Expected a high entropy system ID in test environments"
+	)
 }
 
 #[test]
@@ -13,8 +21,11 @@ fn works() {
 fn dbus_machine_id_works() {
 	use super::os::get_dbus_machine_id;
 
-	get_dbus_machine_id()
-		.expect("Assuming an appropriate environment, this should return a system ID");
+	eprintln!(
+		"dbus_machine_id: {:?}",
+		get_dbus_machine_id()
+			.expect("Assuming an appropriate environment, this should return a system ID")
+	)
 }
 
 #[test]
@@ -22,7 +33,10 @@ fn dbus_machine_id_works() {
 fn get_boot_id_works() {
 	use super::os::get_boot_id;
 
-	get_boot_id().expect("Assuming an appropriate environment, this should return a system ID");
+	eprintln!(
+		"boot_id: {:?}",
+		get_boot_id().expect("Assuming an appropriate environment, this should return a system ID")
+	)
 }
 
 #[test]
@@ -30,8 +44,11 @@ fn get_boot_id_works() {
 fn platform_serial_number_works() {
 	use super::os::get_platform_serial_number;
 
-	get_platform_serial_number()
-		.expect("Assuming an appropriate environment, this should return a system ID");
+	eprintln!(
+		"platform_serial_number: {:?}",
+		get_platform_serial_number()
+			.expect("Assuming an appropriate environment, this should return a system ID")
+	)
 }
 
 #[test]
@@ -39,7 +56,10 @@ fn platform_serial_number_works() {
 fn host_id_works() {
 	use super::os::get_host_id;
 
-	get_host_id().expect("Assuming an appropriate environment, this should return a system ID");
+	eprintln!(
+		"host_id: {:?}",
+		get_host_id().expect("Assuming an appropriate environment, this should return a system ID")
+	)
 }
 
 #[test]
@@ -47,7 +67,11 @@ fn host_id_works() {
 fn machine_id_works() {
 	use super::os::get_machine_id;
 
-	get_machine_id().expect("Assuming an appropriate environment, this should return a system ID");
+	eprintln!(
+		"machine_id: {:?}",
+		get_machine_id()
+			.expect("Assuming an appropriate environment, this should return a system ID")
+	)
 }
 
 #[test]
@@ -55,7 +79,11 @@ fn machine_id_works() {
 fn product_id_works() {
 	use super::os::get_product_id;
 
-	get_product_id().expect("Assuming an appropriate environment, this should return a system ID");
+	eprintln!(
+		"product_id: {:?}",
+		get_product_id()
+			.expect("Assuming an appropriate environment, this should return a system ID")
+	)
 }
 
 #[test]
@@ -63,5 +91,9 @@ fn product_id_works() {
 fn install_date_works() {
 	use super::os::get_install_date;
 
-	get_install_date().expect("Assuming an appropriate environment, this should return a system ID");
+	eprintln!(
+		"install_date: {:?}",
+		get_install_date()
+			.expect("Assuming an appropriate environment, this should return a system ID")
+	)
 }
