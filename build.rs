@@ -6,7 +6,7 @@ use vergen::{vergen, SemverKind};
 fn main() {
 	let mut vergen_config = vergen::Config::default();
 	*vergen_config.cargo_mut().features_mut() = false;
-	*vergen_config.cargo_mut().profile_mut() = false;
+	*vergen_config.cargo_mut().profile_mut() = true;
 	*vergen_config.cargo_mut().target_triple_mut() = true;
 	*vergen_config.git_mut().branch_mut() = false;
 	*vergen_config.git_mut().commit_timestamp_mut() = false;

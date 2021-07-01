@@ -190,7 +190,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 /// TODO
 fn print_version_information(verbose: bool) {
 	println!(
-		"PackSquash {} ({}) for {}",
+		"PackSquash {} ({}, {}) for {}",
 		option_env!("VERGEN_SEMVER_LIGHTWEIGHT").map_or_else(
 			|| {
 				let cargo_package_version = env!("CARGO_PKG_VERSION");
@@ -204,8 +204,9 @@ fn print_version_information(verbose: bool) {
 			},
 			|version| Cow::Borrowed(version)
 		),
+		env!("VERGEN_CARGO_PROFILE"),
 		env!("BUILD_DATE"),
-		option_env!("VERGEN_TARGET_TRIPLE").unwrap_or("unknown platform")
+		env!("VERGEN_CARGO_TARGET_TRIPLE")
 	);
 	println!("{}", env!("CARGO_PKG_DESCRIPTION"));
 	println!();
