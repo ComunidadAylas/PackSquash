@@ -73,7 +73,7 @@ impl Default for GeneralSettings {
 	fn default() -> Self {
 		// The "k" in "kB" here has an SI-compliant meaning (1000 and not 1024 bytes)
 		let available_mem_kb =
-			System::new_with_specifics(RefreshKind::new().with_memory()).get_available_memory();
+			System::new_with_specifics(RefreshKind::new().with_memory()).available_memory();
 
 		Self {
 			skip_pack_icon: false,
