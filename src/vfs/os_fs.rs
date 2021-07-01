@@ -13,7 +13,7 @@ use crate::{PackFileVfsMetadata, RelativePath};
 
 use super::{DirectoryTraversalOptions, VirtualFileSystem};
 
-/// TODO: tests and docs
+/// TODO
 pub struct OsFilesystem;
 
 impl VirtualFileSystem for OsFilesystem {
@@ -51,8 +51,8 @@ impl VirtualFileSystem for OsFilesystem {
 							file_read: BufReader::new(tokio::fs::File::from_std(File::open(
 								&file_path
 							)?)),
-							creation_time: file_metadata.created()?,
-							modification_time: file_metadata.modified()?,
+							creation_time: file_metadata.created().ok(),
+							modification_time: file_metadata.modified().ok(),
 							file_size: file_metadata.len()
 						})
 					})
@@ -86,4 +86,73 @@ fn is_system_or_hidden_file(entry: &DirEntry) -> bool {
 				|| file_name == "Temporary Items"
 				|| file_name == "$RECYCLE.BIN"
 		}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	use std::fs::File;
+
+	use tempfile::Builder;
+
+	#[test]
+	fn os_filesystem_vfs_works() {
+		let root_dir = Builder::new()
+			.prefix("ps-osfs-test")
+			.tempdir()
+			.expect("I/O operations are assumed not to fail during tests");
+
+		let mut file1_path = root_dir.path().join("hello");
+		file1_path.push("world.txt");
+		{
+			fs::create_dir_all(file1_path.parent().unwrap())
+				.expect("I/O operations are assumed not to fail during tests");
+
+			File::create(&file1_path).expect("I/O operations are assumed not to fail during tests");
+		}
+
+		let mut file2_path = root_dir.path().join("bye");
+		file2_path.push("bye");
+		file2_path.push("now.txt");
+		{
+			fs::create_dir_all(file2_path.parent().unwrap())
+				.expect("I/O operations are assumed not to fail during tests");
+
+			File::create(&file2_path).expect("I/O operations are assumed not to fail during tests");
+		}
+
+		let mut file3_path = root_dir.path().join("bye");
+		file3_path.push(".dont_come_back.txt");
+		{
+			File::create(&file3_path).expect("I/O operations are assumed not to fail during tests");
+		}
+
+		let file_iter = OsFilesystem.file_iterator(
+			root_dir.path(),
+			DirectoryTraversalOptions {
+				ignore_system_and_hidden_files: true
+			}
+		);
+
+		const RELATIVE_PATHS: &[&str] = &["hello/world.txt", "bye/bye/now.txt"];
+
+		let mut file_count = 0;
+		for file in file_iter {
+			assert!(RELATIVE_PATHS.contains(
+				&file
+					.expect("I/O operations are assumed not to fail during tests")
+					.relative_path
+					.as_ref()
+			));
+
+			file_count += 1;
+		}
+
+		assert_eq!(
+			file_count,
+			RELATIVE_PATHS.len(),
+			"Unexpected number of files yielded"
+		);
+	}
 }

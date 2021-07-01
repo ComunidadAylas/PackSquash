@@ -21,6 +21,7 @@
 use std::borrow::Cow;
 use std::cmp;
 use std::io::ErrorKind;
+use std::pin::Pin;
 use std::sync::Arc;
 use std::{io, path::Path, time::SystemTime};
 
@@ -46,6 +47,8 @@ use crate::config::PropertiesFileOptions;
 #[cfg(feature = "optifine-support")]
 use crate::pack_file::properties_file::PropertiesFile;
 
+use futures::future;
+use futures::StreamExt;
 use globset::{GlobBuilder, GlobSet, GlobSetBuilder};
 use squash_zip::{SquashZip, SquashZipError};
 use thiserror::Error;
@@ -170,8 +173,10 @@ impl PackSquasher {
 						Err(err) => {
 							if let Some(tx) = pack_file_status_sender {
 								tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
-									path: RelativePath::from_inner(Cow::Borrowed("Error")),
-									optimization_strategy: String::from("Error"),
+									path: RelativePath::from_inner(Cow::Borrowed("-")),
+									optimization_strategy: String::from(
+										"Error getting pack file metadata"
+									),
 									optimization_error: Some(err.to_string())
 								}))
 								.await
@@ -210,12 +215,18 @@ impl PackSquasher {
 								$pack_file,
 								&pack_file_data.relative_path,
 								// The file edit time is the most recent of the creation and
-								// modification times, so in case of incongruence we do the
-								// safest thing
-								cmp::max(
-									pack_file_data.creation_time,
-									pack_file_data.modification_time
-								),
+								// modification times, provided we have a modification time
+								// available, so in case of incongruence or non-availability
+								// of the modification time we do the safest thing. Also keep
+								// in mind that Some(...) > None
+								pack_file_data
+									.modification_time
+									.and_then(|modification_time| {
+										cmp::max(
+											pack_file_data.creation_time,
+											Some(modification_time)
+										)
+									}),
 								squash_zip,
 								pack_file_status_sender
 							)
@@ -391,8 +402,8 @@ pub enum PackSquasherError {
 pub struct PackFileVfsMetadata<R: AsyncRead + Unpin + 'static> {
 	relative_path: RelativePath<'static>,
 	file_read: R,
-	creation_time: SystemTime,
-	modification_time: SystemTime,
+	creation_time: Option<SystemTime>,
+	modification_time: Option<SystemTime>,
 	file_size: u64
 }
 
@@ -488,7 +499,7 @@ pub mod vfs {
 async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	pack_file: impl PackFile,
 	relative_path: &RelativePath<'_>,
-	edit_time: SystemTime,
+	edit_time: Option<SystemTime>,
 	squash_zip: Arc<SquashZip<F>>,
 	pack_file_status_sender: Option<Sender<PackSquasherStatus>>
 ) {
@@ -504,9 +515,10 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 			.unwrap()
 	);
 
-	let previous_file_is_current = squash_zip
-		.file_process_time(&pack_file_path)
-		.map_or_else(|| false, |squash_time| squash_time >= edit_time);
+	let previous_file_is_current = squash_zip.file_process_time(&pack_file_path).map_or_else(
+		|| false,
+		|squash_time| edit_time.is_some() && Some(squash_time) >= edit_time
+	);
 
 	let mut optimization_error = None;
 	let optimization_strategy;
