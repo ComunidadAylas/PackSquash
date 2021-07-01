@@ -39,7 +39,9 @@ fn add_executable_metadata(build_year: i32) {
 	windows_resource.set_language(0x0409); // English (US)
 	windows_resource.set_icon("src/app_icon.ico");
 
-	windows_resource.compile().expect("Windows executable resource build failure");
+	windows_resource
+		.compile()
+		.expect("Windows executable resource build failure");
 }
 
 #[cfg(not(windows))]
