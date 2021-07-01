@@ -88,7 +88,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		Ok(options_string) => options_string,
 		Err(err) => {
 			eprintln!(
-				"Couldn't read the options file at {}: {}",
+				"! Couldn't read the options file at {}: {}",
 				options_user_friendly_path, err
 			);
 
@@ -101,7 +101,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
 			eprintln!(
-				"An error occurred while parsing the options file at {}: {}",
+				"! An error occurred while parsing the options file at {}: {}",
 				options_user_friendly_path, deserialize_error
 			);
 
@@ -167,7 +167,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	}()
 	.map_or_else(
 		|err| {
-			eprintln!("Error while processing the pack: {}", err);
+			eprintln!("! Pack processing error: {}", err);
 
 			4
 		},
