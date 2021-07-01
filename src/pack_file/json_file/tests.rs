@@ -9,16 +9,12 @@ static PRETTIFIED_JSON_DATA: &str = include_str!("example_prettified.json");
 
 /// Processes the given input data as a [JsonFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
-async fn successful_process_test(
-	input_data: &str,
-	settings: OptimizationSettings,
-	expected_result: &str
-) {
+async fn successful_process_test(input_data: &str, settings: JsonFileOptions, expected_result: &str) {
 	let input_data = input_data.as_bytes();
 
 	let data_stream = JsonFile {
 		read: Builder::new().read(input_data).build(),
-		extension: "json",
+		extension: String::from("json"),
 		file_length: input_data.len(),
 		optimization_settings: settings
 	}
@@ -47,7 +43,7 @@ async fn successful_process_test(
 async fn minifying_works() {
 	successful_process_test(
 		JSON_DATA,
-		OptimizationSettings {
+		JsonFileOptions {
 			minify: true,
 			..Default::default()
 		},
@@ -63,7 +59,7 @@ async fn minifying_with_bom_works() {
 
 	successful_process_test(
 		&json_data_with_bom,
-		OptimizationSettings {
+		JsonFileOptions {
 			minify: true,
 			..Default::default()
 		},
@@ -76,7 +72,7 @@ async fn minifying_with_bom_works() {
 async fn prettifying_works() {
 	successful_process_test(
 		JSON_DATA,
-		OptimizationSettings {
+		JsonFileOptions {
 			minify: false,
 			..Default::default()
 		},
@@ -89,7 +85,7 @@ async fn prettifying_works() {
 async fn invalid_input_is_handled() {
 	let mut data_stream = JsonFile {
 		read: Builder::new().read(&[]).build(),
-		extension: "json",
+		extension: String::from("json"),
 		file_length: 0,
 		optimization_settings: Default::default()
 	}

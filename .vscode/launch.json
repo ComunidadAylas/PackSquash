@@ -27,12 +27,12 @@
 				"args": [
 					"test",
 					"--no-run",
-					"--bin=packsquash",
+					"--lib=packsquash",
 					"--package=packsquash"
 				],
 				"filter": {
 					"name": "packsquash",
-					"kind": "bin"
+					"kind": "lib"
 				}
 			},
 			"args": [],

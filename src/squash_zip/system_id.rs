@@ -37,10 +37,10 @@ static ERROR_MESSAGE: &str =
 /// greater than another when it has higher entropy, lower volatileness or higher
 /// priority. Therefore, if a system ID is "greater" than another, it is "better".
 #[derive(Debug)]
-pub(super) struct SystemId {
-	pub(super) id: u128,
-	pub(super) has_high_entropy: bool,
-	pub(super) is_volatile: bool,
+pub struct SystemId {
+	pub id: u128,
+	pub has_low_entropy: bool,
+	pub is_volatile: bool,
 	entropy: f32,
 	priority: u8
 }
@@ -57,7 +57,7 @@ impl SystemId {
 				// Metric entropy is the Shannon entropy normalized by the length of the string.
 				// Therefore, the optimum metric entropy is 0.25, which means that every bit in the
 				// ID is unpredictable. A threshold at 0.2 seems okay
-				has_high_entropy: entropy > 0.2,
+				has_low_entropy: entropy <= 0.2,
 				is_volatile,
 				entropy,
 				priority
@@ -106,13 +106,13 @@ impl Eq for SystemId {}
 macro_rules! read_from_env {
 	() => {
 		|| -> Option<SystemId> {
-			Some(SystemId::new(
+			SystemId::new(
 				uuid::Uuid::parse_str(&std::env::var("PACKSQUASH_SYSTEM_ID").ok()?)
 					.ok()?
 					.as_u128(),
 				false,
 				u8::MAX
-			)?)
+			)
 		}()
 	};
 }
@@ -128,12 +128,12 @@ static SYSTEM_ID: SyncOnceCell<SystemId> = SyncOnceCell::new();
 /// change during the lifetime of the process. However, obtaining a system ID for the first time
 /// may be a relatively expensive operation, involving I/O and system calls.
 pub(super) fn get_or_compute_system_id() -> &'static SystemId {
-	SYSTEM_ID.get_or_init(|| task::block_in_place(|| compute_system_id()))
+	SYSTEM_ID.get_or_init(|| task::block_in_place(compute_system_id))
 }
 
 /// Gets the system ID if and only if it was calculated at some point. If not, this function
 /// returns `None`. This function is guaranteed to never block.
-pub(super) fn get_system_id() -> Option<&'static SystemId> {
+pub fn get_system_id() -> Option<&'static SystemId> {
 	SYSTEM_ID.get()
 }
 

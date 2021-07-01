@@ -1,5 +1,7 @@
 use std::{
 	borrow::{Borrow, Cow},
+	io,
+	ops::Deref,
 	path::{Path, MAIN_SEPARATOR}
 };
 
@@ -12,14 +14,30 @@ use thiserror::Error;
 /// representation, normalized to always use the forward slash as a component
 /// separator. Therefore, any instance of this struct is appropriate for
 /// direct consumption by ZIP file data structures.
-#[derive(PartialEq, Eq, Hash)]
-pub(super) struct RelativePath<'a>(Cow<'a, str>);
+///
+/// The struct is efficient, because it tries to use smart pointers to avoid
+/// allocating new buffers to represent the relative path, borrowing data when
+/// possible.
+#[derive(Debug, PartialEq, Eq, Hash)]
+pub struct RelativePath<'a>(Cow<'a, str>);
 
 /// Represents an error that may happen while converting a path to a relative
 /// path.
 #[derive(Error, Debug)]
 #[error("The specified path contains non UTF-8 characters: {0}")]
-pub(super) struct InvalidPathError<'a>(Cow<'a, str>);
+pub struct InvalidPathError<'a>(Cow<'a, str>);
+
+impl From<InvalidPathError<'_>> for io::Error {
+	fn from(error: InvalidPathError<'_>) -> Self {
+		io::Error::new(
+			io::ErrorKind::Other,
+			format!(
+				"The specified path contains non UTF-8 characters: {}",
+				error.0
+			)
+		)
+	}
+}
 
 impl<'a> RelativePath<'a> {
 	/// Creates a new relative path from the given ancestor and descendant paths,
@@ -74,6 +92,21 @@ impl<'a> RelativePath<'a> {
 		Ok(Self(relative_path_string))
 	}
 
+	/// Consumes this relative path to get another that owns all the path data it refers
+	/// to, so that its lifetime bounds can now be indefinitely long.
+	///
+	/// This only allocates memory if the relative path didn't own all of the data it
+	/// referred to. Otherwise, this operation is effectively a no-op.
+	pub fn into_owned(self) -> RelativePath<'static> {
+		RelativePath(Cow::Owned(self.0.into_owned()))
+	}
+
+	/// Unwraps this relative path to get the internal copy-on-write smart pointer to
+	/// the string that holds it.
+	pub fn into_inner(self) -> Cow<'a, str> {
+		self.0
+	}
+
 	/// Creates a new relative path directly from its raw representation, without
 	/// any checks or processing. This is a low-level constructor.
 	///
@@ -81,7 +114,7 @@ impl<'a> RelativePath<'a> {
 	/// The caller is responsible of providing a string that upholds the expectations
 	/// of this struct; namely, that the string is a normalized, relative path that
 	/// always uses the forward slash (/) as a component separator.
-	pub fn new_from_string<T: Into<Cow<'a, str>>>(string: T) -> Self {
+	pub(crate) fn from_inner<T: Into<Cow<'a, str>>>(string: T) -> Self {
 		Self(string.into())
 	}
 }
@@ -89,6 +122,14 @@ impl<'a> RelativePath<'a> {
 impl AsRef<str> for RelativePath<'_> {
 	fn as_ref(&self) -> &str {
 		&self.0
+	}
+}
+
+impl Deref for RelativePath<'_> {
+	type Target = Path;
+
+	fn deref(&self) -> &Self::Target {
+		Path::new(&*self.0)
 	}
 }
 

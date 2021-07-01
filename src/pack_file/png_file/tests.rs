@@ -3,6 +3,8 @@ use std::{env, fs};
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
 
+use crate::config::ColorQuantizationTarget;
+
 use super::*;
 
 static PNG_DATA: &[u8] = include_bytes!("example.png");
@@ -11,7 +13,7 @@ static PNG_DATA: &[u8] = include_bytes!("example.png");
 /// expecting a successful result.
 async fn successful_process_test(
 	input_data: &[u8],
-	settings: OptimizationSettings,
+	settings: PngFileOptions,
 	expect_same_pixels: bool,
 	expect_smaller_file_size: bool,
 	test_name: &str
@@ -20,7 +22,6 @@ async fn successful_process_test(
 
 	let data_stream = PngFile {
 		read: Builder::new().read(input_data).build(),
-		extension: "png",
 		file_length: input_data_len,
 		optimization_settings: settings
 	}
@@ -98,8 +99,8 @@ async fn successful_process_test(
 async fn lossless_optimization_works() {
 	successful_process_test(
 		PNG_DATA,
-		OptimizationSettings {
-			color_quantization_mode: ColorQuantizationMode::None,
+		PngFileOptions {
+			color_quantization_target: ColorQuantizationTarget::None,
 			..Default::default()
 		},
 		true, // Same pixels
@@ -113,8 +114,8 @@ async fn lossless_optimization_works() {
 async fn lossy_optimization_works() {
 	successful_process_test(
 		PNG_DATA,
-		OptimizationSettings {
-			color_quantization_mode: ColorQuantizationMode::FourBitDepth,
+		PngFileOptions {
+			color_quantization_target: ColorQuantizationTarget::FourBitDepth,
 			..Default::default()
 		},
 		false, // Not necessarily the same pixels
@@ -128,7 +129,6 @@ async fn lossy_optimization_works() {
 async fn invalid_input_is_handled() {
 	let mut data_stream = PngFile {
 		read: Builder::new().read(&[]).build(),
-		extension: "png",
 		file_length: 0,
 		optimization_settings: Default::default()
 	}

@@ -1,0 +1,110 @@
+use std::{borrow::Cow, io::Error};
+
+use bytes::BytesMut;
+use tokio::io::AsyncRead;
+use tokio_util::codec::{Decoder, FramedRead};
+
+use super::{
+	util::to_ascii_lowercase_extension, OptimizedBytes, PackFile, PackFileConstructor,
+	PackFileConstructorArgs
+};
+
+#[cfg(test)]
+mod tests;
+
+/// Represents a pack file that will be passed through (copied) exactly as-is,
+/// without any check or validation whatsoever.
+///
+/// This struct is mainly useful for files that PackSquash knows that are part
+/// of a pack but have a format that can't be handled better (yet), or that
+/// the user does not want to be processed.
+pub struct PassthroughFile<T: AsyncRead + Unpin + 'static> {
+	read: T,
+	canonical_extension: &'static str,
+	optimization_strategy_message: &'static str,
+	is_compressed: bool
+}
+
+/// Passthrough decoder that always returns the bytes it receives without changes or checks.
+pub struct PassthroughDecoder {
+	pub optimization_strategy_message: &'static str
+}
+
+impl Decoder for PassthroughDecoder {
+	type Item = (Cow<'static, str>, OptimizedBytes<BytesMut>);
+	type Error = Error;
+
+	fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+		if src.is_empty() {
+			Ok(None)
+		} else {
+			Ok(Some((
+				Cow::Borrowed(self.optimization_strategy_message),
+				OptimizedBytes(src.split_off(0))
+			)))
+		}
+	}
+}
+
+impl<T: AsyncRead + Unpin + 'static> PackFile for PassthroughFile<T> {
+	type ByteChunkType = BytesMut;
+	type OptimizationError = Error;
+	type OptimizedBytesChunksStream = FramedRead<T, PassthroughDecoder>;
+
+	fn process(self) -> FramedRead<T, PassthroughDecoder> {
+		FramedRead::new(
+			self.read,
+			PassthroughDecoder {
+				optimization_strategy_message: self.optimization_strategy_message
+			}
+		)
+	}
+
+	fn canonical_extension(&self) -> &str {
+		self.canonical_extension
+	}
+
+	fn is_compressed(&self) -> bool {
+		self.is_compressed
+	}
+}
+
+impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PassthroughFile<T> {
+	type OptimizationSettings = ();
+
+	fn new(
+		args: PackFileConstructorArgs<'_, T, ()>
+	) -> Result<Self, PackFileConstructorArgs<'_, T, ()>> {
+		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
+
+		match extension {
+			"ttf" => Ok(Self {
+				read: args.file_read,
+				canonical_extension: "ttf",
+				optimization_strategy_message: "Copied, but might be optimized manually (more information: https://stackoverflow.com/questions/2635423/way-to-reduce-size-of-ttf-fonts)",
+				is_compressed: false
+			}),
+			"bin" => Ok(Self {
+				read: args.file_read,
+				canonical_extension: "bin",
+				optimization_strategy_message: "Copied",
+				is_compressed: false
+			}),
+			// FIXME: these two should have file-specific optimizations, and they are not difficult
+			// to do. This is a temporary solution for PackSquash to work with data packs
+			"nbt" => Ok(Self {
+				read: args.file_read,
+				canonical_extension: "nbt",
+				optimization_strategy_message: "Copied",
+				is_compressed: true
+			}),
+			"mcfunction" => Ok(Self {
+				read: args.file_read,
+				canonical_extension: "mcfunction",
+				optimization_strategy_message: "Copied",
+				is_compressed: false
+			}),
+			_ => Err(args)
+		}
+	}
+}

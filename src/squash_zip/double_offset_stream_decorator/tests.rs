@@ -61,7 +61,7 @@ async fn works() {
 
 			assert_eq!(
 				4,
-				file_decorator.get_write_position(),
+				file_decorator.write_position(),
 				"Unexpected file write position after read and write operations"
 			);
 

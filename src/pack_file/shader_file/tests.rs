@@ -10,8 +10,8 @@ static FRAGMENT_SHADER_DATA: &str = include_str!("example.fsh");
 async fn successful_process_test(
 	input_text: &str,
 	add_bom: bool,
-	extension: &str,
-	settings: OptimizationSettings,
+	extension: String,
+	settings: ShaderFileOptions,
 	expect_smaller_file_size: bool
 ) {
 	let input_ast = TranslationUnit::parse(input_text)
@@ -71,8 +71,8 @@ async fn minifying_works() {
 	successful_process_test(
 		FRAGMENT_SHADER_DATA,
 		false, // No BOM
-		"fsh",
-		OptimizationSettings { minify: true },
+		String::from("fsh"),
+		ShaderFileOptions { minify: true },
 		true // Smaller size
 	)
 	.await
@@ -83,8 +83,8 @@ async fn minifying_with_bom_works() {
 	successful_process_test(
 		FRAGMENT_SHADER_DATA,
 		true, // Add BOM
-		"fsh",
-		OptimizationSettings { minify: true },
+		String::from("fsh"),
+		ShaderFileOptions { minify: true },
 		true // Smaller size
 	)
 	.await
@@ -95,8 +95,8 @@ async fn passthrough_works() {
 	successful_process_test(
 		FRAGMENT_SHADER_DATA,
 		false, // No BOM
-		"fsh",
-		OptimizationSettings { minify: false },
+		String::from("fsh"),
+		ShaderFileOptions { minify: false },
 		false // Same size
 	)
 	.await
@@ -106,7 +106,7 @@ async fn passthrough_works() {
 async fn invalid_input_is_handled() {
 	let mut data_stream = ShaderFile {
 		read: Builder::new().read(&[]).build(),
-		extension: "fsh",
+		extension: String::from("fsh"),
 		file_length: 0,
 		optimization_settings: Default::default()
 	}

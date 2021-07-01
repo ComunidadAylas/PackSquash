@@ -10,14 +10,13 @@ static MINIFIED_PROPERTIES_DATA: &str = include_str!("example_minified.propertie
 /// expecting a successful result that equals the expected string.
 async fn successful_process_test(
 	input_data: &str,
-	settings: OptimizationSettings,
+	settings: PropertiesFileOptions,
 	expected_result: &str
 ) {
 	let input_data = input_data.as_bytes();
 
 	let data_stream = PropertiesFile {
 		read: Builder::new().read(input_data).build(),
-		extension: "properties",
 		file_length: input_data.len(),
 		optimization_settings: settings
 	}
@@ -41,7 +40,7 @@ async fn successful_process_test(
 async fn minifying_works() {
 	successful_process_test(
 		PROPERTIES_DATA,
-		OptimizationSettings { minify: true },
+		PropertiesFileOptions { minify: true },
 		MINIFIED_PROPERTIES_DATA
 	)
 	.await
@@ -54,7 +53,7 @@ async fn minifying_with_bom_works() {
 
 	successful_process_test(
 		&properties_data_with_bom,
-		OptimizationSettings { minify: true },
+		PropertiesFileOptions { minify: true },
 		MINIFIED_PROPERTIES_DATA
 	)
 	.await
@@ -64,7 +63,7 @@ async fn minifying_with_bom_works() {
 async fn passthrough_works() {
 	successful_process_test(
 		PROPERTIES_DATA,
-		OptimizationSettings { minify: false },
+		PropertiesFileOptions { minify: false },
 		PROPERTIES_DATA
 	)
 	.await
@@ -72,5 +71,5 @@ async fn passthrough_works() {
 
 #[tokio::test]
 async fn empty_input_is_handled_properly() {
-	successful_process_test("", OptimizationSettings::default(), "").await
+	successful_process_test("", PropertiesFileOptions::default(), "").await
 }

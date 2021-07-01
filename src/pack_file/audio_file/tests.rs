@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{convert::TryInto, time::Duration};
 
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
@@ -13,7 +13,7 @@ static OGG_AUDIO_DATA: &[u8] = include_bytes!("dtmf_tone.ogg");
 async fn successful_process_test(
 	input_data: &[u8],
 	is_ogg: bool,
-	settings: OptimizationSettings,
+	settings: AudioFileOptions,
 	expect_same_file_size: bool
 ) {
 	let data_stream = AudioFile {
@@ -79,9 +79,9 @@ async fn successful_process_test(
 /// expecting an error on the first stream result.
 async fn error_process_test<T: AsyncRead + Unpin + Send + 'static>(
 	read: T,
-	file_length: u32,
+	file_length: u64,
 	is_ogg: bool,
-	settings: OptimizationSettings
+	settings: AudioFileOptions
 ) {
 	let mut data_stream = AudioFile {
 		read,
@@ -116,8 +116,8 @@ async fn passthrough_works() {
 	successful_process_test(
 		OGG_AUDIO_DATA,
 		true, // Is Ogg
-		OptimizationSettings {
-			copy_if_ogg: true,
+		AudioFileOptions {
+			transcode_ogg: false,
 			..Default::default()
 		},
 		true // Same file size
@@ -133,7 +133,7 @@ async fn pitch_shifting_works() {
 	successful_process_test(
 		OGG_AUDIO_DATA,
 		true, // Is Ogg
-		OptimizationSettings {
+		AudioFileOptions {
 			target_pitch: 1.25,
 			..Default::default()
 		},
@@ -147,8 +147,8 @@ async fn channel_mixing_works() {
 	successful_process_test(
 		OGG_AUDIO_DATA,
 		true, // Is Ogg
-		OptimizationSettings {
-			channels: 2,
+		AudioFileOptions {
+			channels: ChannelMixingOption::ToChannels(2.try_into().unwrap()),
 			..Default::default()
 		},
 		false // Smaller file size
@@ -164,9 +164,9 @@ async fn channel_mixing_and_pitch_shifting_work() {
 	successful_process_test(
 		OGG_AUDIO_DATA,
 		true, // Is Ogg
-		OptimizationSettings {
+		AudioFileOptions {
 			target_pitch: 1.25,
-			channels: 2,
+			channels: ChannelMixingOption::ToChannels(2.try_into().unwrap()),
 			..Default::default()
 		},
 		false // Smaller file size
@@ -190,26 +190,12 @@ async fn invalid_non_empty_input_is_handled() {
 	error_process_test(
 		Builder::new()
 			.read(&[1, 2])
-			.wait(Duration::from_millis(50))
+			.wait(Duration::from_millis(100))
 			.read(&[3, 4])
 			.build(),
 		4,     // Input file size
 		false, // Is not Ogg
 		Default::default()
-	)
-	.await
-}
-
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn early_errors_are_handled() {
-	error_process_test(
-		Builder::new().build(), // No input file data is read
-		1,                      // Input file size (greater than zero to avoid bailing out early)
-		true,                   // Is Ogg
-		OptimizationSettings {
-			sampling_frequency: -8000, // This causes GStreamer to barf while building the pipeline
-			..Default::default()
-		}
 	)
 	.await
 }

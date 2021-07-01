@@ -16,7 +16,7 @@ mod tests;
 /// Represents an error that may happen while sanitizing [SystemTime] structs.
 #[derive(Error, Debug)]
 #[allow(clippy::enum_variant_names)]
-pub(super) enum SystemTimeSanitizationError {
+pub enum SystemTimeSanitizationError {
 	#[error("The time is too far back in past")]
 	PastSystemTime(#[from] SystemTimeError),
 	#[error("The time is too far back in past")]
@@ -39,7 +39,7 @@ pub(super) enum SystemTimeSanitizationError {
 //
 // If you're trying to reverse the sanitized format, please consider whether doing
 // so is really worth your time and that PackSquash developers made it harder for
-// you because resource pack files modification dates are inteded to be private.
+// you because pack files modification dates are inteded to be private.
 pub(super) struct SystemTimeSanitizer<
 	C: NewBlockCipher + BlockCipher + BlockEncrypt + BlockDecrypt + Clone
 > {

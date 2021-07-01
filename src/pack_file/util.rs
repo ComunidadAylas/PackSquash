@@ -1,5 +1,7 @@
 //! Contains miscellaneous small helper functions that are used for processing
-//! resource pack files.
+//! pack files.
+
+use std::{borrow::Cow, path::Path};
 
 /// Contains helper functions to strip Unicode byte order marks from text files.
 pub(super) mod bom_stripper {
@@ -15,5 +17,22 @@ pub(super) mod bom_stripper {
 		} else {
 			buf
 		}
+	}
+}
+
+/// Returns the extension of the provided path, as if the `to_ascii_lowercase` method was called on
+/// it, but avoiding allocating a new copy of the string if no changes were made. This is efficient
+/// because extensions are usually short and already lowercase.
+pub fn to_ascii_lowercase_extension<P: AsRef<Path> + ?Sized>(path: &P) -> Cow<'_, str> {
+	let extension = Path::new(path.as_ref())
+		.extension()
+		.unwrap()
+		.to_str()
+		.unwrap();
+
+	if extension.chars().any(|c| c.is_ascii_uppercase()) {
+		Cow::Owned(extension.to_ascii_lowercase())
+	} else {
+		Cow::Borrowed(extension)
 	}
 }

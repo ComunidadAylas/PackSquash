@@ -44,7 +44,7 @@ fn create_temporary_output_file(test_name: &'static str) -> PathBuf {
 async fn add_files_finish_and_read_back_test(
 	squash_zip: Option<SquashZip<File>>,
 	file_count: u8,
-	strict_spec_conformance: bool,
+	enable_deduplication: bool,
 	file_name_number: impl Fn(u8) -> u8,
 	file_byte: impl Fn(u8) -> u8,
 	skip_compression: impl Fn(u8) -> bool,
@@ -54,7 +54,11 @@ async fn add_files_finish_and_read_back_test(
 		SquashZip::new(
 			None,
 			SquashZipSettings {
-				strict_spec_conformance,
+				store_squash_time: true,
+				enable_obfuscation: false,
+				enable_deduplication,
+				enable_size_increasing_obfuscation: false,
+				percentage_of_structures_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 				spool_buffer_size: SPOOL_BUFFER_SIZE
 			}
 		)
@@ -67,7 +71,7 @@ async fn add_files_finish_and_read_back_test(
 	for i in 0..file_count {
 		squash_zip
 			.add_file(
-				RelativePath::new(
+				&RelativePath::new(
 					Path::new("./gimme/gimme"),
 					Path::new(&format!(
 						"./gimme/gimme/virtual/visions{}.bin",
@@ -90,7 +94,11 @@ async fn add_files_finish_and_read_back_test(
 	let squash_zip = SquashZip::new(
 		Some(File::open(&file_path).await.expect(UNEXPECTED_IO_FAILURE)),
 		SquashZipSettings {
-			strict_spec_conformance,
+			store_squash_time: true,
+			enable_obfuscation: false,
+			enable_deduplication,
+			enable_size_increasing_obfuscation: false,
+			percentage_of_structures_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			spool_buffer_size: SPOOL_BUFFER_SIZE
 		}
 	)
@@ -98,7 +106,7 @@ async fn add_files_finish_and_read_back_test(
 	.expect(INSTANTIATION_FAILURE);
 
 	assert!(
-		squash_zip.previous_zip_contents.len() >= file_count as usize,
+		squash_zip.previous_file_count() >= file_count as usize,
 		"Not all previous ZIP contents were read back"
 	);
 
@@ -110,7 +118,7 @@ async fn add_single_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		1,
-		true,
+		false,
 		|i| i,
 		|_| b'a',
 		|_| false,
@@ -124,7 +132,7 @@ async fn add_several_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		3,
-		true,
+		false,
 		|i| i,
 		|_| b'a',
 		|_| false,
@@ -138,7 +146,7 @@ async fn add_several_finish_and_read_back_with_deduplication_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		3,
-		false,
+		true,
 		|i| i,
 		|_| b'a',
 		|_| true,
@@ -152,7 +160,7 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 	let bigger_file = add_files_finish_and_read_back_test(
 		None,
 		3,
-		false,
+		true,
 		|i| i,
 		|_| b'a',
 		|i| i < 2,
@@ -163,7 +171,7 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 	let smaller_file = add_files_finish_and_read_back_test(
 		None,
 		3,
-		false,
+		true,
 		|i| i,
 		|_| b'a',
 		|_| false,
@@ -198,7 +206,7 @@ async fn add_several_and_read_back_some_duplicates_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		3,
-		false,
+		true,
 		|i| i,
 		|i| b'a' + i % 2,
 		|_| true,
@@ -213,7 +221,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 	let zip_path = add_files_finish_and_read_back_test(
 		None,
 		2,
-		false,
+		true,
 		|i| i,
 		|i| b'a' + i % 2,
 		|_| true,
@@ -224,7 +232,11 @@ async fn add_several_finish_then_reuse_and_add_works() {
 	let mut squash_zip = SquashZip::new(
 		Some(File::open(&zip_path).await.expect(UNEXPECTED_IO_FAILURE)),
 		SquashZipSettings {
-			strict_spec_conformance: false,
+			store_squash_time: true,
+			enable_obfuscation: false,
+			enable_deduplication: true,
+			enable_size_increasing_obfuscation: false,
+			percentage_of_structures_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			spool_buffer_size: SPOOL_BUFFER_SIZE
 		}
 	)
@@ -233,7 +245,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 
 	// Add the previous visions0.bin file
 	squash_zip
-		.add_previous_file(&RelativePath::new_from_string("virtual/visions0.bin"))
+		.add_previous_file(&RelativePath::from_inner("virtual/visions0.bin"))
 		.await
 		.expect(UNEXPECTED_OPERATION_FAILURE);
 
@@ -242,14 +254,47 @@ async fn add_several_finish_then_reuse_and_add_works() {
 	// - visions0.bin ('a' bytes), sharing local file header with visions2.bin ('a' bytes)
 	// - visions3.bin ('c' bytes)
 	// visions1.bin must not appear.
-	add_files_finish_and_read_back_test(
+	let zip_path = add_files_finish_and_read_back_test(
 		Some(squash_zip),
 		2,
-		false,
+		true,
 		|i| i + 2,
 		|i| if i == 0 { b'a' } else { b'c' },
 		|_| true,
 		"add_several_finish_then_reuse_and_add_works (second part)"
 	)
 	.await;
+
+	let squash_zip = SquashZip::new(
+		Some(File::open(&zip_path).await.expect(UNEXPECTED_IO_FAILURE)),
+		SquashZipSettings {
+			store_squash_time: true,
+			enable_obfuscation: false,
+			enable_deduplication: true,
+			enable_size_increasing_obfuscation: false,
+			percentage_of_structures_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
+			spool_buffer_size: SPOOL_BUFFER_SIZE
+		}
+	)
+	.await
+	.expect(INSTANTIATION_FAILURE);
+
+	assert_eq!(
+		squash_zip.previous_file_count(),
+		3,
+		"Three files were expected to have been read back"
+	);
+
+	for file in [
+		"virtual/visions0.bin",
+		"virtual/visions2.bin",
+		"virtual/visions3.bin"
+	] {
+		squash_zip
+			.file_process_time(&RelativePath::from_inner(file))
+			.expect(&format!(
+				"Expected file not read back from output ZIP: {}",
+				file
+			));
+	}
 }

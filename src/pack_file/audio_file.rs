@@ -7,11 +7,9 @@ use gstreamer::{
 	glib::BoolError, prelude::*, Buffer, Caps, Element, ElementFactory, FlowError, MessageView,
 	Pipeline, Sample, State, StateChangeError, TagMergeMode, TagSetter
 };
-use static_assertions::const_assert;
 
 use std::{
 	borrow::Cow,
-	convert::TryInto,
 	pin::Pin,
 	task::{Context, Poll}
 };
@@ -24,7 +22,12 @@ use tokio::{io::AsyncRead, task};
 use tokio_stream::Stream;
 use tokio_util::{codec::FramedRead, io::ReaderStream};
 
-use super::{passthrough_file::PassthroughDecoder, OptimizedBytes, ResourcePackFile};
+use crate::config::{AudioFileOptions, ChannelMixingOption};
+
+use super::{
+	passthrough_file::PassthroughDecoder, util::to_ascii_lowercase_extension, OptimizedBytes,
+	PackFile, PackFileConstructor, PackFileConstructorArgs
+};
 
 #[cfg(test)]
 mod tests;
@@ -33,38 +36,12 @@ mod tests;
 ///
 /// Vanilla Minecraft uses OGG Vorbis files for both music and sound effects. Resource
 /// packs may replace and add new sound events to Minecraft.
-struct AudioFile<T: AsyncRead + Unpin + 'static> {
+pub struct AudioFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
-	file_length: u32,
+	file_length: u64,
 	is_ogg: bool,
-	optimization_settings: OptimizationSettings
+	optimization_settings: AudioFileOptions
 }
-
-/// Parameters that influence how a [AudioFile] is optimized.
-struct OptimizationSettings {
-	copy_if_ogg: bool,
-	channels: i32,
-	sampling_frequency: i32,
-	target_pitch: f32,
-	minimum_bitrate: i32,
-	maximum_bitrate: i32
-}
-
-impl Default for OptimizationSettings {
-	fn default() -> Self {
-		Self {
-			copy_if_ogg: false,
-			channels: 0,
-			sampling_frequency: 32_000,
-			target_pitch: 1.0,
-			minimum_bitrate: 40_000,
-			maximum_bitrate: 96_000
-		}
-	}
-}
-
-// We assume usize is at least 16 bits wide for the constants that follow
-const_assert!(usize::BITS >= 16);
 
 /// The size of the temporary audio data buffers that are handed-off and received from
 /// GStreamer, in bytes.
@@ -75,7 +52,7 @@ const AUDIO_DATA_BUFFER_SIZE_U64: u64 = AUDIO_DATA_BUFFER_SIZE_U32 as u64;
 /// Represents an error that may happen while optimizing audio files.
 #[derive(Error, Debug)]
 #[non_exhaustive]
-enum OptimizationError {
+pub enum OptimizationError {
 	#[error("GStreamer element state change error (more info with GST_DEBUG): {0}")]
 	GstreamerStateChange(#[from] StateChangeError),
 	#[error("GStreamer error (more info with GST_DEBUG): {0}")]
@@ -90,7 +67,7 @@ enum OptimizationError {
 
 /// Alias for the opaque stream type that provides the processed (optimized) audio
 /// file data, when it was transcoded.
-type ProcessedAudioDataStream<T> =
+pub type ProcessedAudioDataStream<T> =
 	impl Stream<Item = Result<MappedBuffer<Readable>, OptimizationError>> + Unpin;
 
 /// Creates a new processed audio file data stream, that will use the specified
@@ -105,12 +82,12 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + 'static>(
 ) -> ProcessedAudioDataStream<T> {
 	let read_stream = ReaderStream::new(read);
 	let input_sample_sink = appsrc.sink().sink_err_into();
-	let bus_message_stream = gstreamer_pipeline.get_bus().unwrap().stream();
+	let bus_message_stream = gstreamer_pipeline.bus().unwrap().stream();
 
 	let mut input_forward_future = read_stream
 		.map(|read_result| {
 			read_result.map_or_else(
-				|error| Err(OptimizationError::from(error)),
+				|error| Err(error.into()),
 				|buffer| {
 					Ok(Sample::builder()
 						.buffer(&Buffer::from_slice(buffer))
@@ -133,9 +110,7 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + 'static>(
 		.filter_map(|msg| {
 			future::ready(match msg.view() {
 				// Convert error messages and pass them through
-				MessageView::Error(error) => {
-					Some(Some(Err(OptimizationError::from(error.get_error()))))
-				}
+				MessageView::Error(error) => Some(Some(Err(error.error().into()))),
 				// Let the first EOS message pass, so we can end this stream. This is
 				// needed because after EOS there will be no more messages for our
 				// purposes, and we should end the stream here
@@ -158,7 +133,7 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + 'static>(
 			error_message_stream,
 			appsink.stream().map(|sample| {
 				Ok(sample
-					.get_buffer_owned()
+					.buffer_owned()
 					.unwrap()
 					.into_mapped_buffer_readable()
 					.unwrap())
@@ -179,7 +154,7 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + 'static>(
 
 /// Adapts internal stream structs used by [AudioFile] to a single [Stream]
 /// that matches client code expectations.
-enum AudioDataStream<T: AsyncRead + Unpin + 'static> {
+pub enum AudioDataStream<T: AsyncRead + Unpin + 'static> {
 	Transcoded(ProcessedAudioDataStream<T>),
 	PassedThrough(FramedRead<T, PassthroughDecoder>),
 	InitError(tokio_stream::Once<<Self as Stream>::Item>)
@@ -222,7 +197,7 @@ impl<T: AsyncRead + Unpin + 'static> Stream for AudioDataStream<T> {
 /// Helper enum to allow clients of [AudioFile] consume bytes from different
 /// owned representations, which skips costly conversions.
 #[derive(Debug)]
-enum ByteBuffer {
+pub enum ByteBuffer {
 	MappedBuffer(MappedBuffer<Readable>),
 	BytesMut(BytesMut)
 }
@@ -236,12 +211,14 @@ impl AsRef<[u8]> for ByteBuffer {
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static>
-	ResourcePackFile<ByteBuffer, OptimizationError, AudioDataStream<T>> for AudioFile<T>
-{
+impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
+	type ByteChunkType = ByteBuffer;
+	type OptimizationError = OptimizationError;
+	type OptimizedBytesChunksStream = AudioDataStream<T>;
+
 	fn process(self) -> AudioDataStream<T> {
 		// Bail with a passthrough stream if we want to do so
-		if self.is_ogg && self.optimization_settings.copy_if_ogg {
+		if self.is_ogg && !self.optimization_settings.transcode_ogg {
 			return AudioDataStream::PassedThrough(FramedRead::new(
 				self.read,
 				PassthroughDecoder {
@@ -294,7 +271,7 @@ impl<T: AsyncRead + Unpin + 'static>
 			let muxer = ElementFactory::make("oggmux", None).unwrap();
 			let appsink = ElementFactory::make("appsink", None).unwrap();
 
-			appsrc.set_property("size", &self.file_length.try_into().unwrap_or(-1i64))?;
+			appsrc.set_property("size", &(self.file_length as i64))?;
 			appsrc
 				.set_property("max-bytes", &AUDIO_DATA_BUFFER_SIZE_U64)
 				.unwrap();
@@ -313,12 +290,21 @@ impl<T: AsyncRead + Unpin + 'static>
 				"caps",
 				&Caps::new_simple(
 					"audio/x-raw",
-					&[("rate", &self.optimization_settings.sampling_frequency)]
+					&[(
+						"rate",
+						&i32::from(self.optimization_settings.sampling_frequency)
+					)]
 				)
 			)?;
 
-			encoder.set_property("min-bitrate", &self.optimization_settings.minimum_bitrate)?;
-			encoder.set_property("max-bitrate", &self.optimization_settings.maximum_bitrate)?;
+			encoder.set_property(
+				"min-bitrate",
+				&i32::from(self.optimization_settings.minimum_bitrate)
+			)?;
+			encoder.set_property(
+				"max-bitrate",
+				&i32::from(self.optimization_settings.maximum_bitrate)
+			)?;
 
 			appsink.set_property("sync", &false).unwrap(); // Output at max speed, not realtime
 			appsink
@@ -391,28 +377,31 @@ impl<T: AsyncRead + Unpin + 'static>
 				} else {
 					&resampler
 				};
-				let sink_pad = sink_element.get_static_pad("sink").unwrap();
+				let sink_pad = sink_element.static_pad("sink").unwrap();
 
 				// Ignore event if the link is already set up
 				if sink_pad.is_linked() {
 					return;
 				}
 
-				if result_audio_channels > 0 {
+				if let ChannelMixingOption::ToChannels(num_channels) = result_audio_channels {
 					// We want to mix to some number of channels, so configure the
 					// necessary caps filter (channel mix filter)
 					let channel_mix_filter = ElementFactory::make("capsfilter", None).unwrap();
 					channel_mix_filter
 						.set_property(
 							"caps",
-							&Caps::new_simple("audio/x-raw", &[("channels", &result_audio_channels)])
+							&Caps::new_simple(
+								"audio/x-raw",
+								&[("channels", &i32::from(num_channels))]
+							)
 						)
 						.unwrap();
 
 					// Get the pipeline, which is the parent of any element in the
 					// pipeline, and add the new caps filter to it
 					sink_element
-						.get_parent()
+						.parent()
 						.unwrap()
 						.downcast_ref::<Pipeline>()
 						.unwrap()
@@ -460,5 +449,26 @@ impl<T: AsyncRead + Unpin + 'static>
 
 	fn is_compressed(&self) -> bool {
 		true
+	}
+}
+
+impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for AudioFile<T> {
+	type OptimizationSettings = AudioFileOptions;
+
+	fn new(
+		args: PackFileConstructorArgs<'_, T, AudioFileOptions>
+	) -> Result<Self, PackFileConstructorArgs<'_, T, AudioFileOptions>> {
+		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
+
+		if matches!(extension, "ogg" | "oga" | "mp3" | "flac" | "wav") {
+			Ok(Self {
+				read: args.file_read,
+				file_length: args.file_size,
+				is_ogg: extension == "ogg",
+				optimization_settings: args.optimization_settings
+			})
+		} else {
+			Err(args)
+		}
 	}
 }

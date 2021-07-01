@@ -2,7 +2,7 @@ cargo-features = ["strip"]
 
 [package]
 name = "packsquash"
-description = "Minecraft resource pack optimizer"
+description = "Minecraft resource and data pack optimizer"
 version = "0.3.0"
 authors = ["Alejandro \"AlexTMjugador\" González"]
 repository = "https://github.com/ComunidadAylas/PackSquash"
@@ -14,12 +14,15 @@ edition = "2018"
 bytes = "1.0.1"
 globset = "0.4.8"
 enumset = { version = "1.0.6", features = ["serde"] }
-indexmap = { version = "1.6.2", default-features = false, features = ["serde-1"] }
+indexmap = { version = "1.7.0", default-features = false, features = ["serde-1"] }
 thiserror = "1.0.25"
 ahash = "0.7.4"
-static_assertions = "1.1.0"
 
-tokio = { version = "1.7.1", default-features = false, features = ["rt-multi-thread", "macros", "parking_lot", "io-util", "fs"] }
+num_cpus = "1.13.0"
+sysinfo = { version = "0.19.0", default-features = false }
+walkdir = "2.3.2"
+
+tokio = { version = "1.7.1", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
 tokio-util = { version = "0.6.7", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.6", default-features = false }
 futures = { version = "0.3.15", default-features = false }
@@ -39,8 +42,8 @@ rgb = "0.8.27"
 imagequant = "3.0.4-alpha.2"
 oxipng = { version = "4.0.3", default-features = false, features = ["zopfli"] }
 
-gstreamer = { version = "0.16.7", default-features = false }
-gstreamer-app = { version = "0.16.5", default-features = false, features = ["v1_10"] }
+gstreamer = { version = "0.17.0", default-features = false }
+gstreamer-app = { version = "0.17.0", default-features = false, features = ["v1_10"] }
 
 glsl = "6.0.0"
 
@@ -77,9 +80,11 @@ glsl = { git = "https://github.com/vtavernier/glsl", branch = "fix/dos-crlf" }
 zopfli = { git = "https://github.com/ComunidadAylas/zopfli" }
 # Use our fork of fpe that fixes compatibility with newer aes versions
 fpe = { git = "https://github.com/ComunidadAylas/fpe" }
+# Use our fork of globset that adds a constructor that reduces reallocations
+globset = { git = "https://github.com/ComunidadAylas/ripgrep" }
 
 [build-dependencies]
-vergen = { version = "5.1.9", default-features = false, features = ["cargo", "git"] }
+vergen = { version = "5.1.12", default-features = false, features = ["cargo", "git"] }
 time = "0.2.27"
 
 [target.'cfg(windows)'.build-dependencies]

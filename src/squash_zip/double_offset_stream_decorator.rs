@@ -44,7 +44,7 @@ impl<T: Read + Write + Seek> DoubleOffsetStreamDecorator<T> {
 	}
 
 	/// Returns the current write position in the stream as an absolute offset.
-	pub fn get_write_position(&self) -> u64 {
+	pub fn write_position(&self) -> u64 {
 		self.write_offset.get()
 	}
 }

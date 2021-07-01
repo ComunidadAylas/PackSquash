@@ -1,5 +1,6 @@
 use std::{
 	borrow::Cow,
+	convert::TryInto,
 	io::{self, Write},
 	str::Utf8Error
 };
@@ -13,7 +14,12 @@ use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
-use super::{util::bom_stripper, OptimizedBytes, ResourcePackFile};
+use crate::config::ShaderFileOptions;
+
+use super::{
+	util::bom_stripper, util::to_ascii_lowercase_extension, OptimizedBytes, PackFile,
+	PackFileConstructor, PackFileConstructorArgs
+};
 
 #[cfg(test)]
 mod tests;
@@ -24,26 +30,11 @@ mod tests;
 /// packs for several effects, like the "creeper vision" showed while spectating a Creeper,
 /// and the "Super Secret Settings" button that was ultimately removed.
 /// Minecraft mods may support more shaders that can be added or replaced via resource packs.
-struct ShaderFile<'a, T: AsyncRead + Unpin + 'static> {
+pub struct ShaderFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
 	file_length: usize,
-	extension: &'a str,
-	optimization_settings: OptimizationSettings
-}
-
-/// Parameters that influence how a [ShaderFile] is optimized.
-struct OptimizationSettings {
-	/// If true, the shader source code will be minified, which normally
-	/// improves compressibility, or even replaces it altogether for tiny
-	/// files. If false, the data will be parsed, to check for errors, and
-	/// then returned as-is if the validation is successful
-	minify: bool
-}
-
-impl Default for OptimizationSettings {
-	fn default() -> Self {
-		Self { minify: true }
-	}
+	extension: String,
+	optimization_settings: ShaderFileOptions
 }
 
 /// Helper struct to treat a [std::io::Write] like a [std::fmt::Write],
@@ -58,14 +49,14 @@ impl<W: Write> std::fmt::Write for FormatWrite<W> {
 
 /// Optimizer decoder that transforms shader source code files to an optimized
 /// representation.
-struct OptimizerDecoder {
+pub struct OptimizerDecoder {
 	file_length: usize,
-	optimization_settings: OptimizationSettings
+	optimization_settings: ShaderFileOptions
 }
 
 #[derive(Error, Debug)]
 #[non_exhaustive]
-enum OptimizationError {
+pub enum OptimizationError {
 	#[error("Invalid UTF-8 character encoding: {0}")]
 	InvalidUtf8(#[from] Utf8Error),
 	#[error("Invalid shader code: {0}")]
@@ -119,9 +110,11 @@ impl Decoder for OptimizerDecoder {
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static>
-	ResourcePackFile<BytesMut, OptimizationError, FramedRead<T, OptimizerDecoder>> for ShaderFile<'_, T>
-{
+impl<T: AsyncRead + Unpin + 'static> PackFile for ShaderFile<T> {
+	type ByteChunkType = BytesMut;
+	type OptimizationError = OptimizationError;
+	type OptimizedBytesChunksStream = FramedRead<T, OptimizerDecoder>;
+
 	fn process(self) -> FramedRead<T, OptimizerDecoder> {
 		FramedRead::with_capacity(
 			self.read,
@@ -134,10 +127,32 @@ impl<T: AsyncRead + Unpin + 'static>
 	}
 
 	fn canonical_extension(&self) -> &str {
-		self.extension
+		&self.extension
 	}
 
 	fn is_compressed(&self) -> bool {
 		false
+	}
+}
+
+impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for ShaderFile<T> {
+	type OptimizationSettings = ShaderFileOptions;
+
+	fn new(
+		args: PackFileConstructorArgs<'_, T, ShaderFileOptions>
+	) -> Result<Self, PackFileConstructorArgs<'_, T, ShaderFileOptions>> {
+		let extension = to_ascii_lowercase_extension(args.path.as_ref());
+
+		if matches!(&*extension, "fsh" | "vsh") {
+			Ok(Self {
+				read: args.file_read,
+				// The file is too big to fit in memory if this conversion fails anyway
+				file_length: args.file_size.try_into().unwrap_or(usize::MAX),
+				extension: extension.into_owned(),
+				optimization_settings: args.optimization_settings
+			})
+		} else {
+			Err(args)
+		}
 	}
 }

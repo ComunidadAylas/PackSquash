@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, convert::TryInto};
 
 use bytes::{BufMut, BytesMut};
 use json_comments::StripComments;
@@ -7,59 +7,42 @@ use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
+use crate::config::JsonFileOptions;
+
 use self::debloater::{DebloatError, Debloater};
 
-use super::{util::bom_stripper, OptimizedBytes, ResourcePackFile};
+use super::{
+	util::bom_stripper, util::to_ascii_lowercase_extension, OptimizedBytes, PackFile,
+	PackFileConstructor, PackFileConstructorArgs
+};
 
 mod debloater;
 
 #[cfg(test)]
 mod tests;
 
-/// Represents a resource pack text file that contains a single JSON object.
-/// This file may have several extensions (`json`, `jsonc`, `mcmeta`...), and its
-/// contents may be interpreted differently by Minecraft according to the role
-/// of the file.
+/// Represents a pack text file that contains a single JSON object. This file may
+/// have several extensions (`json`, `jsonc`, `mcmeta`...), and its contents may
+/// be interpreted differently by Minecraft according to the role of the file.
 ///
-/// The optimization process may be customized via [OptimizationSettings].
-struct JsonFile<'a, T: AsyncRead + Unpin + 'static> {
+/// The optimization process may be customized via [JsonFileOptions].
+pub struct JsonFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
 	file_length: usize,
-	extension: &'a str,
-	optimization_settings: OptimizationSettings
-}
-
-/// Parameters that influence how a [JsonFile] is optimized.
-struct OptimizationSettings {
-	/// If true, the JSON data will be minified, which normally improves
-	/// compressibility a fair amount, or even replaces it altogether for
-	/// tiny files. If false, the data will be prettified instead
-	minify: bool,
-	/// Removes JSON values that, while ignored by Minecraft, are fairly
-	/// common to see in input files. This can be because some program
-	/// automatically adds them, or other reasons.
-	delete_bloat: bool
-}
-
-impl Default for OptimizationSettings {
-	fn default() -> Self {
-		Self {
-			minify: true,
-			delete_bloat: true
-		}
-	}
+	extension: String,
+	optimization_settings: JsonFileOptions
 }
 
 /// Optimizer decoder that transforms JSON files to an optimized representation.
-struct OptimizerDecoder {
+pub struct OptimizerDecoder {
 	file_length: usize,
-	optimization_settings: OptimizationSettings
+	optimization_settings: JsonFileOptions
 }
 
 /// Represents an error that may happen while optimizing JSON files.
 #[derive(Error, Debug)]
 #[non_exhaustive]
-enum OptimizationError {
+pub enum OptimizationError {
 	#[error("JSON object serialization or desarialization error: {0}")]
 	JsonSerde(#[from] serde_json::Error),
 	#[error("Debloat error: {0}")]
@@ -119,9 +102,11 @@ impl Decoder for OptimizerDecoder {
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static>
-	ResourcePackFile<BytesMut, OptimizationError, FramedRead<T, OptimizerDecoder>> for JsonFile<'_, T>
-{
+impl<T: AsyncRead + Unpin + 'static> PackFile for JsonFile<T> {
+	type ByteChunkType = BytesMut;
+	type OptimizationError = OptimizationError;
+	type OptimizedBytesChunksStream = FramedRead<T, OptimizerDecoder>;
+
 	fn process(self) -> FramedRead<T, OptimizerDecoder> {
 		FramedRead::with_capacity(
 			self.read,
@@ -134,15 +119,41 @@ impl<T: AsyncRead + Unpin + 'static>
 	}
 
 	fn canonical_extension(&self) -> &str {
-		match self.extension {
+		match &*self.extension {
 			// .jsonc is converted to .json, because we strip comments
 			"jsonc" => "json",
 			// Other extensions (e.g. .mcmeta) are passed through
-			_ => self.extension
+			_ => &self.extension
 		}
 	}
 
 	fn is_compressed(&self) -> bool {
 		false
+	}
+}
+
+impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for JsonFile<T> {
+	type OptimizationSettings = JsonFileOptions;
+
+	fn new(
+		args: PackFileConstructorArgs<'_, T, JsonFileOptions>
+	) -> Result<Self, PackFileConstructorArgs<'_, T, JsonFileOptions>> {
+		let extension = to_ascii_lowercase_extension(args.path.as_ref());
+
+		let is_json_file = matches!(&*extension, "json" | "jsonc" | "mcmeta")
+			|| (args.optimization_settings.allow_optifine_extensions
+				&& matches!(&*extension, "jem" | "jpm"));
+
+		if is_json_file {
+			Ok(Self {
+				read: args.file_read,
+				// The file is too big to fit in memory if this conversion fails anyway
+				file_length: args.file_size.try_into().unwrap_or(usize::MAX),
+				extension: extension.into_owned(),
+				optimization_settings: args.optimization_settings
+			})
+		} else {
+			Err(args)
+		}
 	}
 }

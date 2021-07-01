@@ -46,7 +46,7 @@ pub(super) enum BufferedAsyncSpooledTempFile {
 impl BufferedAsyncSpooledTempFile {
 	/// Creates a new [`BufferedAsyncSpooledTempFile`] with the specified size threshold.
 	pub fn new(size_threshold: usize) -> Self {
-		Self::InMemory(size_threshold, Cursor::new(Vec::new()))
+		Self::InMemory(size_threshold, Cursor::new(vec![]))
 	}
 
 	/// Returns whether this file was written out to disk, which means that any I/O

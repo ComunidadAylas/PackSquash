@@ -2,16 +2,12 @@ use std::{cmp, convert::TryInto, io::Error};
 
 use enumset::{EnumSet, EnumSetType};
 
-use static_assertions::const_assert;
 use tokio::io::{AsyncWrite, AsyncWriteExt};
 
 use super::SquashZipError;
 
 #[cfg(test)]
 mod tests;
-
-// We assume usize is at least 16 bits wide to do proper conversions
-const_assert!(usize::BITS >= 16);
 
 /// A dummy value for the last modification time and date in the local file header and central
 /// directory ZIP file records.
@@ -271,7 +267,7 @@ impl<'a> LocalFileHeader<'a> {
 
 	/// Returns the size that this ZIP file record would take on the file. This
 	/// is the same number of bytes that would be written by [`Self::write_bytes()`].
-	pub fn get_size(&self) -> u32 {
+	pub fn size(&self) -> u32 {
 		LOCAL_FILE_HEADER_CONSTANT_FIELDS_PADDING.len() as u32 + self.file_name_length as u32
 	}
 }
@@ -453,7 +449,7 @@ impl<'a> CentralDirectoryHeader<'a> {
 
 	/// Returns the size that this ZIP file record would take on the file. This
 	/// is the same number of bytes that would be written by [`Self::write_bytes()`].
-	pub fn get_size(&self) -> u32 {
+	pub fn size(&self) -> u32 {
 		46 + self.file_name.len() as u32 + self.compute_extra_field_length() as u32
 	}
 }
@@ -736,7 +732,7 @@ impl EndOfCentralDirectory {
 
 	/// Returns the size that this ZIP file record would take on the file. This
 	/// is the same number of bytes that would be written by [`Self::write_bytes()`].
-	pub fn get_size(&self) -> u32 {
+	pub fn size(&self) -> u32 {
 		(56 + 20) * self.requires_zip64_extensions() as u32 + 22
 	}
 }

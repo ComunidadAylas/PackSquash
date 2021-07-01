@@ -11,7 +11,7 @@ fn works() {
 	eprintln!("System ID: {:?}", system_id);
 
 	assert!(
-		system_id.has_high_entropy,
+		!system_id.has_low_entropy,
 		"Expected a high entropy system ID in test environments"
 	)
 }
@@ -30,7 +30,7 @@ fn dbus_machine_id_works() {
 
 #[test]
 #[cfg(any(target_os = "linux", target_os = "android"))]
-fn get_boot_id_works() {
+fn boot_id_works() {
 	use super::os::get_boot_id;
 
 	eprintln!(

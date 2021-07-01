@@ -1,11 +1,16 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, convert::TryInto};
 
 use bytes::BytesMut;
 use java_properties::{LineEnding, PropertiesError, PropertiesIter, PropertiesWriter};
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
-use super::{util::bom_stripper, OptimizedBytes, ResourcePackFile};
+use crate::config::PropertiesFileOptions;
+
+use super::{
+	util::bom_stripper, util::to_ascii_lowercase_extension, OptimizedBytes, PackFile,
+	PackFileConstructor, PackFileConstructorArgs
+};
 
 #[cfg(test)]
 mod tests;
@@ -14,47 +19,30 @@ mod tests;
 /// keys and values. These files are easy to parse and generate in the Java ecosystem,
 /// and as such fairly common.
 ///
-/// Vanilla Minecraft does not use property files in resource packs. Currently, only
-/// the OptiFine mod is known to do so. In such mod, properties files are used for
-/// several features, like Alternate Blocks, Connected Textures, and so on; see
-/// [the official documentation][2].
+/// Vanilla Minecraft does not use property files in resource packs. Currently, only the
+/// OptiFine mod is known to do so. In such mod, properties files are used for several features,
+/// like Alternate Blocks, Connected Textures, and so on; see [the official documentation][2].
 ///
-/// The optimization process may be customized via [OptimizationSettings].
+/// The optimization process may be customized via [PropertiesFileOptions].
 ///
 /// [1]: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Properties.html#load(java.io.Reader)
 /// [2]: https://github.com/sp614x/optifine/tree/master/OptiFineDoc/doc
-struct PropertiesFile<'a, T: AsyncRead + Unpin + 'static> {
+pub struct PropertiesFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
 	file_length: usize,
-	extension: &'a str,
-	optimization_settings: OptimizationSettings
-}
-
-/// Parameters that influence how a [PropertiesFile] is optimized.
-struct OptimizationSettings {
-	/// If true, the properties will be normalized and minified, which normally
-	/// improves compressibility a fair amount, or even replaces it altogether for
-	/// tiny files. If false, the data will be parsed, to check for errors, and
-	/// then returned as-is if the validation is successful
-	minify: bool
-}
-
-impl Default for OptimizationSettings {
-	fn default() -> Self {
-		Self { minify: true }
-	}
+	optimization_settings: PropertiesFileOptions
 }
 
 /// Optimizer decoder that transforms properties files to an optimized representation.
-struct OptimizerDecoder {
+pub struct OptimizerDecoder {
 	file_length: usize,
-	optimization_settings: OptimizationSettings
+	optimization_settings: PropertiesFileOptions
 }
 
 /// Helper enum to allow clients of [PropertiesFile] consume bytes from different
 /// owned representations, which skips costly conversions.
 #[derive(Debug)]
-enum ByteBuffer {
+pub enum ByteBuffer {
 	BytesMut(BytesMut),
 	Vec(Vec<u8>)
 }
@@ -114,10 +102,11 @@ impl Decoder for OptimizerDecoder {
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static>
-	ResourcePackFile<ByteBuffer, PropertiesError, FramedRead<T, OptimizerDecoder>>
-	for PropertiesFile<'_, T>
-{
+impl<T: AsyncRead + Unpin + 'static> PackFile for PropertiesFile<T> {
+	type ByteChunkType = ByteBuffer;
+	type OptimizationError = PropertiesError;
+	type OptimizedBytesChunksStream = FramedRead<T, OptimizerDecoder>;
+
 	fn process(self) -> FramedRead<T, OptimizerDecoder> {
 		FramedRead::with_capacity(
 			self.read,
@@ -130,10 +119,31 @@ impl<T: AsyncRead + Unpin + 'static>
 	}
 
 	fn canonical_extension(&self) -> &str {
-		self.extension
+		"properties"
 	}
 
 	fn is_compressed(&self) -> bool {
 		false
+	}
+}
+
+impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PropertiesFile<T> {
+	type OptimizationSettings = PropertiesFileOptions;
+
+	fn new(
+		args: PackFileConstructorArgs<'_, T, PropertiesFileOptions>
+	) -> Result<Self, PackFileConstructorArgs<'_, T, PropertiesFileOptions>> {
+		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
+
+		if matches!(extension, "properties") {
+			Ok(Self {
+				read: args.file_read,
+				// The file is too big to fit in memory if this conversion fails anyway
+				file_length: args.file_size.try_into().unwrap_or(usize::MAX),
+				optimization_settings: args.optimization_settings
+			})
+		} else {
+			Err(args)
+		}
 	}
 }

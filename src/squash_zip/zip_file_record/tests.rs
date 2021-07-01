@@ -69,7 +69,7 @@ async fn central_directory_works_test(use_zip64_extensions: bool) {
 	let cen_size = CENTRAL_DIRECTORY_HEADER_SIZE_NO_EXTRA_FIELDS + extra_field_size as usize;
 
 	assert_eq!(
-		cen.get_size() as usize,
+		cen.size() as usize,
 		cen_size,
 		"Unexpected reported central directory size"
 	);
@@ -270,7 +270,7 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 	);
 
 	assert_eq!(
-		eocd.get_size() as usize,
+		eocd.size() as usize,
 		eocd_size,
 		"Unexpected reported end of central directory size"
 	);
