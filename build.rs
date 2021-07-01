@@ -12,6 +12,7 @@ fn main() {
 	*vergen_config.git_mut().commit_timestamp_mut() = false;
 	*vergen_config.git_mut().semver_mut() = true;
 	*vergen_config.git_mut().semver_kind_mut() = SemverKind::Lightweight;
+	*vergen_config.git_mut().semver_dirty_mut() = Some("-custom");
 	*vergen_config.git_mut().sha_mut() = false;
 
 	// Generate the 'cargo:' key output that populate the target triple and version envrionment variables
