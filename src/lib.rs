@@ -21,6 +21,7 @@
 use std::borrow::Cow;
 use std::cmp;
 use std::io::ErrorKind;
+use std::path::PathBuf;
 use std::pin::Pin;
 use std::sync::Arc;
 use std::{io, path::Path, time::SystemTime};
@@ -105,7 +106,7 @@ impl PackSquasher {
 	}
 
 	/// TODO
-	pub fn run<F: VirtualFileSystem, P: AsRef<Path>>(
+	pub fn run<F: VirtualFileSystem + 'static, P: AsRef<Path>>(
 		self: Arc<Self>,
 		vfs: F,
 		pack_directory: Option<P>,
@@ -122,6 +123,8 @@ impl PackSquasher {
 				"The pack directory path must point to a directory, not a file"
 			));
 		}
+
+		let vfs = Arc::new(vfs);
 
 		self.runtime.block_on(async {
 			// Get the iterator over pack files from the virtual file system
@@ -165,18 +168,18 @@ impl PackSquasher {
 			for pack_file_data in pack_file_iter {
 				let packsquasher = Arc::clone(&self);
 				let squash_zip = Arc::clone(&squash_zip);
+				let vfs = Arc::clone(&vfs);
+
 				let pack_file_status_sender = pack_file_status_sender.clone();
 
 				pack_file_tasks.push(self.runtime.spawn(async move {
-					let mut pack_file_data = match pack_file_data {
+					let pack_file_data = match pack_file_data {
 						Ok(data) => data,
 						Err(err) => {
 							if let Some(tx) = pack_file_status_sender {
 								tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
 									path: RelativePath::from_inner(Cow::Borrowed("-")),
-									optimization_strategy: String::from(
-										"Error getting pack file metadata"
-									),
+									optimization_strategy: String::from("Pack directory scan error"),
 									optimization_error: Some(err.to_string())
 								}))
 								.await
@@ -191,16 +194,12 @@ impl PackSquasher {
 					macro_rules! constructor_args {
 						(()) => {
 							PackFileConstructorArgs {
-								file_read: pack_file_data.file_read,
-								file_size: pack_file_data.file_size,
 								path: &pack_file_data.relative_path,
 								optimization_settings: ()
 							}
 						};
 						($file_options:expr) => {
 							PackFileConstructorArgs {
-								file_read: pack_file_data.file_read,
-								file_size: pack_file_data.file_size,
 								path: &pack_file_data.relative_path,
 								optimization_settings: $file_options
 									.tweak_from_global_options(&packsquasher.options.global_options)
@@ -209,8 +208,11 @@ impl PackSquasher {
 					}
 
 					/// TODO
-					macro_rules! process_pack_file {
-						($pack_file:expr) => {
+					macro_rules! process {
+						($pack_file:expr, $pack_file_meta:expr) => {
+							// We instantiated the pack file, so we got our VFS metadata back
+							let pack_file_meta = $pack_file_meta.unwrap();
+
 							process_pack_file(
 								$pack_file,
 								&pack_file_data.relative_path,
@@ -219,11 +221,11 @@ impl PackSquasher {
 								// available, so in case of incongruence or non-availability
 								// of the modification time we do the safest thing. Also keep
 								// in mind that Some(...) > None
-								pack_file_data
+								pack_file_meta
 									.modification_time
 									.and_then(|modification_time| {
 										cmp::max(
-											pack_file_data.creation_time,
+											pack_file_meta.creation_time,
 											Some(modification_time)
 										)
 									}),
@@ -235,47 +237,67 @@ impl PackSquasher {
 					}
 
 					/// TODO
-					macro_rules! process_candidate_match {
-						($candidate:ident, $candidate_options:ident, $file_options:expr) => {
-							if let FileOptions::$candidate_options(file_options) = $file_options {
-								match $candidate::new(constructor_args!(file_options)) {
-									Ok(pack_file) => {
-										process_pack_file!(pack_file);
-										return;
+					macro_rules! process_with_options {
+						($file_type:ident, $constructor_args:expr) => {
+							let mut pack_file_open_error = None;
+							let mut vfs_pack_file_meta = None;
+
+							match $file_type::new(
+								|| match vfs.open(&pack_file_data.file_path) {
+									Ok(vfs_pack_file) => {
+										vfs_pack_file_meta = Some(vfs_pack_file.metadata);
+										Some((vfs_pack_file.file_read, vfs_pack_file.file_size))
 									}
-									Err(constructor_args) => {
-										// The pack file is not of the expected type.
-										// Recover ownership of its read to keep trying in next iterations
-										pack_file_data.file_read = constructor_args.file_read;
+									Err(err) => {
+										pack_file_open_error = Some(err);
+										None
+									}
+								},
+								$constructor_args
+							) {
+								Some(pack_file) => {
+									process!(pack_file, vfs_pack_file_meta);
+									return;
+								}
+								None => {
+									if let Some(err) = pack_file_open_error {
+										if let Some(tx) = pack_file_status_sender {
+											tx.send(PackSquasherStatus::PackFileProcessed(
+												PackFileStatus {
+													path: pack_file_data.relative_path,
+													optimization_strategy: String::from(
+														"Error opening pack file"
+													),
+													optimization_error: Some(err.to_string())
+												}
+											))
+											.await
+											.ok();
+
+											return;
+										}
 									}
 								}
-							};
+							}
 						};
 					}
 
 					/// TODO
-					macro_rules! process_default {
-						($type:ident) => {
-							match $type::new(constructor_args!(())) {
-								Ok(pack_file) => {
-									process_pack_file!(pack_file);
-									return;
-								}
-								Err(constructor_args) => {
-									pack_file_data.file_read = constructor_args.file_read
-								}
+					macro_rules! process_if_match {
+						($file_type:ident, $file_options_type:ident, $file_options:expr) => {
+							if let FileOptions::$file_options_type(file_options) = $file_options {
+								process_with_options!($file_type, constructor_args!(file_options));
 							}
 						};
-						($type:ident, $default_options:expr) => {
-							match $type::new(constructor_args!($default_options)) {
-								Ok(pack_file) => {
-									process_pack_file!(pack_file);
-									return;
-								}
-								Err(constructor_args) => {
-									pack_file_data.file_read = constructor_args.file_read
-								}
-							}
+					}
+
+					/// TODO
+					macro_rules! process_with_defaults {
+						($file_type:ident) => {
+							process_with_options!($file_type, constructor_args!(()));
+						};
+						($file_type:ident, $file_options:expr) => {
+							process_with_options!($file_type, constructor_args!($file_options));
 						};
 					}
 
@@ -289,25 +311,25 @@ impl PackSquasher {
 						let file_options = packsquasher.options.file_options[i];
 
 						// Now try to instantiate the pack file type that corresponds to the options
-						/*process_candidate_match!(JsonFile, JsonFileOptions, file_options);
-						process_candidate_match!(AudioFile, AudioFileOptions, file_options);
-						process_candidate_match!(PngFile, PngFileOptions, file_options);
+						process_if_match!(JsonFile, JsonFileOptions, file_options);
+						process_if_match!(AudioFile, AudioFileOptions, file_options);
+						process_if_match!(PngFile, PngFileOptions, file_options);
 						#[cfg(feature = "optifine-support")]
-						process_candidate_match!(PropertiesFile, PropertiesFileOptions, file_options);
-						process_candidate_match!(ShaderFile, ShaderFileOptions, file_options);*/
+						process_if_match!(PropertiesFile, PropertiesFileOptions, file_options);
+						process_if_match!(ShaderFile, ShaderFileOptions, file_options);
 					}
 
 					// If we get here, this pack file either did not match any file settings,
 					// in which case we should try defaults, or the file settings it matched
 					// were not appropriate for its type (i.e. all matches were for JSON files,
 					// but this is an audio file), in which case we should try defaults too
-					/*process_default!(JsonFile, JsonFileOptions::default());
-					process_default!(AudioFile, AudioFileOptions::default());
-					process_default!(PngFile, PngFileOptions::default());
+					process_with_defaults!(JsonFile, JsonFileOptions::default());
+					process_with_defaults!(AudioFile, AudioFileOptions::default());
+					process_with_defaults!(PngFile, PngFileOptions::default());
 					#[cfg(feature = "optifine-support")]
-					process_default!(PropertiesFile, PropertiesFileOptions::default());
-					process_default!(ShaderFile, ShaderFileOptions::default());
-					process_default!(PassthroughFile);*/
+					process_with_defaults!(PropertiesFile, PropertiesFileOptions::default());
+					process_with_defaults!(ShaderFile, ShaderFileOptions::default());
+					process_with_defaults!(PassthroughFile);
 
 					// Finally, if we get here, we did not process this pack file because
 					// it really is not a pack file. Tell caller we skipped it
@@ -399,12 +421,22 @@ pub enum PackSquasherError {
 }
 
 /// TODO
-pub struct PackFileVfsMetadata<R: AsyncRead + Unpin + 'static> {
+pub struct VfsPackFileIterEntry {
 	relative_path: RelativePath<'static>,
+	file_path: PathBuf
+}
+
+/// TODO
+pub struct VfsPackFile<R: AsyncRead + Unpin + 'static> {
 	file_read: R,
+	file_size: u64,
+	metadata: VfsPackFileMetadata
+}
+
+/// TODO
+pub struct VfsPackFileMetadata {
 	creation_time: Option<SystemTime>,
-	modification_time: Option<SystemTime>,
-	file_size: u64
+	modification_time: Option<SystemTime>
 }
 
 /// TODO
@@ -457,16 +489,16 @@ pub mod vfs {
 
 	use tokio::io::AsyncRead;
 
-	use crate::PackFileVfsMetadata;
+	use crate::{VfsPackFile, VfsPackFileIterEntry};
 
 	pub mod os_fs;
 
 	/// TODO
-	pub trait VirtualFileSystem {
+	pub trait VirtualFileSystem: Send + Sync {
 		/// TODO
 		type FileRead: AsyncRead + Unpin + Send + 'static;
 		/// TODO
-		type FileIter: Iterator<Item = Result<PackFileVfsMetadata<Self::FileRead>, io::Error>>;
+		type FileIter: Iterator<Item = Result<VfsPackFileIterEntry, io::Error>>;
 
 		/// TODO
 		fn file_iterator(
@@ -474,6 +506,9 @@ pub mod vfs {
 			root_path: &Path,
 			directory_traversal_options: DirectoryTraversalOptions
 		) -> Self::FileIter;
+
+		/// TODO
+		fn open<P: AsRef<Path>>(&self, path: P) -> Result<VfsPackFile<Self::FileRead>, io::Error>;
 
 		/// TODO
 		fn file_type<P: AsRef<Path>>(&self, path: P) -> Result<FileType, io::Error>;
@@ -504,7 +539,7 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	pack_file_status_sender: Option<Sender<PackSquasherStatus>>
 ) {
 	// TODO
-	/* 	// We may have to change the file extension to a canonical
+	// We may have to change the file extension to a canonical
 	// one that's accepted by Minecraft. Do that early, because
 	// we store the file with the canonical extension in the ZIP
 	let pack_file_path = RelativePath::from_inner(
@@ -524,11 +559,11 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	let optimization_strategy;
 
 	if previous_file_is_current {
-		optimization_error = squash_zip
-			.add_previous_file(&pack_file_path)
-			.await
-			.err()
-			.map(|err| err.to_string());
+		optimization_error = None; /*squash_zip
+						   .add_previous_file(&pack_file_path)
+						   .await
+						   .err()
+						   .map(|err| err.to_string());*/
 
 		optimization_strategy = Cow::Owned(String::from("Copied from previous run"))
 	} else {
@@ -565,11 +600,11 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 			})
 			.map(|chunk| chunk.unwrap().1);
 
-		let squash_zip_error = squash_zip
-			.add_file(&pack_file_path, processed_pack_file_chunks, is_compressed)
-			.await
-			.err()
-			.map(|err| err.to_string());
+		let squash_zip_error = None; /*squash_zip
+							 .add_file(&pack_file_path, processed_pack_file_chunks, is_compressed)
+							 .await
+							 .err()
+							 .map(|err| err.to_string());*/
 
 		optimization_error = optimization_error.or(squash_zip_error);
 	}
@@ -582,5 +617,5 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 		}))
 		.await
 		.ok();
-	} */
+	}
 }

@@ -138,21 +138,22 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for ShaderFile<T> {
 impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for ShaderFile<T> {
 	type OptimizationSettings = ShaderFileOptions;
 
-	fn new(
-		args: PackFileConstructorArgs<'_, T, ShaderFileOptions>
-	) -> Result<Self, PackFileConstructorArgs<'_, T, ShaderFileOptions>> {
+	fn new<F: FnMut() -> Option<(T, u64)>>(
+		mut file_read_producer: F,
+		args: PackFileConstructorArgs<'_, ShaderFileOptions>
+	) -> Option<Self> {
 		let extension = to_ascii_lowercase_extension(args.path.as_ref());
 
 		if matches!(&*extension, "fsh" | "vsh") {
-			Ok(Self {
-				read: args.file_read,
+			file_read_producer().map(|(read, file_length)| Self {
+				read,
 				// The file is too big to fit in memory if this conversion fails anyway
-				file_length: args.file_size.try_into().unwrap_or(usize::MAX),
+				file_length: file_length.try_into().unwrap_or(usize::MAX),
 				extension: extension.into_owned(),
 				optimization_settings: args.optimization_settings
 			})
 		} else {
-			Err(args)
+			None
 		}
 	}
 }

@@ -9,7 +9,7 @@ use std::{
 use tokio::io::BufReader;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::{PackFileVfsMetadata, RelativePath};
+use crate::{RelativePath, VfsPackFile, VfsPackFileIterEntry, VfsPackFileMetadata};
 
 use super::{DirectoryTraversalOptions, VirtualFileSystem};
 
@@ -18,7 +18,7 @@ pub struct OsFilesystem;
 
 impl VirtualFileSystem for OsFilesystem {
 	type FileRead = BufReader<tokio::fs::File>;
-	type FileIter = impl Iterator<Item = Result<PackFileVfsMetadata<Self::FileRead>, io::Error>>;
+	type FileIter = impl Iterator<Item = Result<VfsPackFileIterEntry, io::Error>>;
 
 	fn file_iterator(
 		&self,
@@ -42,22 +42,30 @@ impl VirtualFileSystem for OsFilesystem {
 						// Use the entry depth to efficiently get a root path without doing
 						// additional allocations or moving ownership of the method parameter
 						let entry_depth = entry.depth();
-						let file_metadata = entry.metadata()?;
 						let file_path = entry.into_path();
 						let root_path = file_path.ancestors().take(1 + entry_depth).last().unwrap();
 
-						Ok(PackFileVfsMetadata {
+						Ok(VfsPackFileIterEntry {
 							relative_path: RelativePath::new(root_path, &file_path)?.into_owned(),
-							file_read: BufReader::new(tokio::fs::File::from_std(File::open(
-								&file_path
-							)?)),
-							creation_time: file_metadata.created().ok(),
-							modification_time: file_metadata.modified().ok(),
-							file_size: file_metadata.len()
+							file_path
 						})
 					})
 				}
 			)
+		})
+	}
+
+	fn open<P: AsRef<Path>>(&self, path: P) -> Result<VfsPackFile<Self::FileRead>, io::Error> {
+		// This matches what walkdir would do on a DirEntry, because we follow symlinks
+		let metadata = fs::metadata(&path)?;
+
+		Ok(VfsPackFile {
+			file_read: BufReader::new(tokio::fs::File::from_std(File::open(path)?)),
+			metadata: VfsPackFileMetadata {
+				creation_time: metadata.created().ok(),
+				modification_time: metadata.modified().ok()
+			},
+			file_size: metadata.len()
 		})
 	}
 

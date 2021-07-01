@@ -1,4 +1,10 @@
-use std::{borrow::Cow, convert::TryInto};
+use std::{
+	borrow::Cow,
+	convert::TryInto,
+	error::Error,
+	fmt::{self, Display, Formatter},
+	io
+};
 
 use bytes::BytesMut;
 use java_properties::{LineEnding, PropertiesError, PropertiesIter, PropertiesWriter};
@@ -39,6 +45,36 @@ pub struct OptimizerDecoder {
 	optimization_settings: PropertiesFileOptions
 }
 
+/// Represents an error that may happen while optimizing properties files.
+#[derive(Debug)]
+pub struct OptimizationError {
+	description: String
+}
+
+impl Error for OptimizationError {}
+
+impl Display for OptimizationError {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		f.write_fmt(format_args!("Parse or I/O error: {}", self.description))
+	}
+}
+
+impl From<PropertiesError> for OptimizationError {
+	fn from(err: PropertiesError) -> Self {
+		Self {
+			description: err.to_string()
+		}
+	}
+}
+
+impl From<io::Error> for OptimizationError {
+	fn from(err: io::Error) -> Self {
+		Self {
+			description: err.to_string()
+		}
+	}
+}
+
 /// Helper enum to allow clients of [PropertiesFile] consume bytes from different
 /// owned representations, which skips costly conversions.
 #[derive(Debug)]
@@ -58,7 +94,7 @@ impl AsRef<[u8]> for ByteBuffer {
 
 impl Decoder for OptimizerDecoder {
 	type Item = (Cow<'static, str>, OptimizedBytes<ByteBuffer>);
-	type Error = PropertiesError;
+	type Error = OptimizationError;
 
 	fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
 		// FIXME: actual framing?
@@ -104,7 +140,7 @@ impl Decoder for OptimizerDecoder {
 
 impl<T: AsyncRead + Unpin + 'static> PackFile for PropertiesFile<T> {
 	type ByteChunkType = ByteBuffer;
-	type OptimizationError = PropertiesError;
+	type OptimizationError = OptimizationError;
 	type OptimizedBytesChunksStream = FramedRead<T, OptimizerDecoder>;
 
 	fn process(self) -> FramedRead<T, OptimizerDecoder> {
@@ -130,20 +166,21 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for PropertiesFile<T> {
 impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PropertiesFile<T> {
 	type OptimizationSettings = PropertiesFileOptions;
 
-	fn new(
-		args: PackFileConstructorArgs<'_, T, PropertiesFileOptions>
-	) -> Result<Self, PackFileConstructorArgs<'_, T, PropertiesFileOptions>> {
+	fn new<F: FnMut() -> Option<(T, u64)>>(
+		mut file_read_producer: F,
+		args: PackFileConstructorArgs<'_, PropertiesFileOptions>
+	) -> Option<Self> {
 		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
 
 		if matches!(extension, "properties") {
-			Ok(Self {
-				read: args.file_read,
+			file_read_producer().map(|(read, file_length)| Self {
+				read,
 				// The file is too big to fit in memory if this conversion fails anyway
-				file_length: args.file_size.try_into().unwrap_or(usize::MAX),
+				file_length: file_length.try_into().unwrap_or(usize::MAX),
 				optimization_settings: args.optimization_settings
 			})
 		} else {
-			Err(args)
+			None
 		}
 	}
 }

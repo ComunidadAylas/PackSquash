@@ -135,9 +135,10 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for JsonFile<T> {
 impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for JsonFile<T> {
 	type OptimizationSettings = JsonFileOptions;
 
-	fn new(
-		args: PackFileConstructorArgs<'_, T, JsonFileOptions>
-	) -> Result<Self, PackFileConstructorArgs<'_, T, JsonFileOptions>> {
+	fn new<F: FnMut() -> Option<(T, u64)>>(
+		mut file_read_producer: F,
+		args: PackFileConstructorArgs<'_, JsonFileOptions>
+	) -> Option<Self> {
 		let extension = to_ascii_lowercase_extension(args.path.as_ref());
 
 		let is_json_file = matches!(&*extension, "json" | "jsonc" | "mcmeta")
@@ -145,15 +146,15 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for JsonFile<T> {
 				&& matches!(&*extension, "jem" | "jpm"));
 
 		if is_json_file {
-			Ok(Self {
-				read: args.file_read,
+			file_read_producer().map(|(read, file_length)| Self {
+				read,
 				// The file is too big to fit in memory if this conversion fails anyway
-				file_length: args.file_size.try_into().unwrap_or(usize::MAX),
+				file_length: file_length.try_into().unwrap_or(usize::MAX),
 				extension: extension.into_owned(),
 				optimization_settings: args.optimization_settings
 			})
 		} else {
-			Err(args)
+			None
 		}
 	}
 }

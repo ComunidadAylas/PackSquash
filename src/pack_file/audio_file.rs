@@ -455,20 +455,21 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
 impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for AudioFile<T> {
 	type OptimizationSettings = AudioFileOptions;
 
-	fn new(
-		args: PackFileConstructorArgs<'_, T, AudioFileOptions>
-	) -> Result<Self, PackFileConstructorArgs<'_, T, AudioFileOptions>> {
+	fn new<F: FnMut() -> Option<(T, u64)>>(
+		mut file_read_producer: F,
+		args: PackFileConstructorArgs<'_, AudioFileOptions>
+	) -> Option<Self> {
 		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
 
 		if matches!(extension, "ogg" | "oga" | "mp3" | "flac" | "wav") {
-			Ok(Self {
-				read: args.file_read,
-				file_length: args.file_size,
+			file_read_producer().map(|(read, file_length)| Self {
+				read,
+				file_length,
 				is_ogg: extension == "ogg",
 				optimization_settings: args.optimization_settings
 			})
 		} else {
-			Err(args)
+			None
 		}
 	}
 }

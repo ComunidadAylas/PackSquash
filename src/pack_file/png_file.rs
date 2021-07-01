@@ -265,9 +265,10 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for PngFile<T> {
 impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PngFile<T> {
 	type OptimizationSettings = PngFileOptions;
 
-	fn new(
-		args: PackFileConstructorArgs<'_, T, PngFileOptions>
-	) -> Result<Self, PackFileConstructorArgs<'_, T, PngFileOptions>> {
+	fn new<F: FnMut() -> Option<(T, u64)>>(
+		mut file_read_producer: F,
+		args: PackFileConstructorArgs<'_, PngFileOptions>
+	) -> Option<Self> {
 		let file_path = &*args.path;
 		let extension = &*to_ascii_lowercase_extension(file_path.as_ref());
 
@@ -277,14 +278,14 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PngFile<T> {
 				&& file_path.file_name().unwrap().to_str().unwrap() == "pack.png");
 
 		if !skip {
-			Ok(Self {
-				read: args.file_read,
+			file_read_producer().map(|(read, file_length)| Self {
+				read,
 				// The file is too big to fit in memory if this conversion fails anyway
-				file_length: args.file_size.try_into().unwrap_or(usize::MAX),
+				file_length: file_length.try_into().unwrap_or(usize::MAX),
 				optimization_settings: args.optimization_settings
 			})
 		} else {
-			Err(args)
+			None
 		}
 	}
 }

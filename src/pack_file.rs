@@ -9,9 +9,6 @@ use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_stream::Stream;
 
-#[cfg(feature = "optifine-support")]
-use java_properties::PropertiesError;
-
 use crate::RelativePath;
 
 mod util;
@@ -48,7 +45,7 @@ pub enum OptimizationError {
 	PngFile(#[from] png_file::OptimizationError),
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
-	PropertiesFile(#[from] PropertiesError),
+	PropertiesFile(#[from] properties_file::OptimizationError),
 	ShaderFile(#[from] shader_file::OptimizationError),
 	IoError(#[from] io::Error)
 }
@@ -103,15 +100,14 @@ pub trait PackFileConstructor<R: AsyncRead + Unpin + 'static>: PackFile + Sized 
 	type OptimizationSettings;
 
 	/// TODO
-	fn new(
-		init_data: PackFileConstructorArgs<'_, R, Self::OptimizationSettings>
-	) -> Result<Self, PackFileConstructorArgs<'_, R, Self::OptimizationSettings>>;
+	fn new<F: FnMut() -> Option<(R, u64)>>(
+		file_read_producer: F,
+		args: PackFileConstructorArgs<'_, Self::OptimizationSettings>
+	) -> Option<Self>;
 }
 
 /// TODO
-pub struct PackFileConstructorArgs<'a, R: AsyncRead + Unpin + 'static, S> {
-	pub file_read: R,
-	pub file_size: u64,
+pub struct PackFileConstructorArgs<'a, S> {
 	pub path: &'a RelativePath<'a>,
 	pub optimization_settings: S
 }

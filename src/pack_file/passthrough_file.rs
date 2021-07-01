@@ -72,39 +72,40 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for PassthroughFile<T> {
 impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PassthroughFile<T> {
 	type OptimizationSettings = ();
 
-	fn new(
-		args: PackFileConstructorArgs<'_, T, ()>
-	) -> Result<Self, PackFileConstructorArgs<'_, T, ()>> {
+	fn new<F: FnMut() -> Option<(T, u64)>>(
+		mut file_read_producer: F,
+		args: PackFileConstructorArgs<'_, ()>
+	) -> Option<Self> {
 		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
 
 		match extension {
-			"ttf" => Ok(Self {
-				read: args.file_read,
+			"ttf" => file_read_producer().map(|(read, _)| Self {
+				read,
 				canonical_extension: "ttf",
 				optimization_strategy_message: "Copied, but might be optimized manually (more information: https://stackoverflow.com/questions/2635423/way-to-reduce-size-of-ttf-fonts)",
 				is_compressed: false
 			}),
-			"bin" => Ok(Self {
-				read: args.file_read,
+			"bin" => file_read_producer().map(|(read, _)| Self {
+				read,
 				canonical_extension: "bin",
 				optimization_strategy_message: "Copied",
 				is_compressed: false
 			}),
 			// FIXME: these two should have file-specific optimizations, and they are not difficult
 			// to do. This is a temporary solution for PackSquash to work with data packs
-			"nbt" => Ok(Self {
-				read: args.file_read,
+			"nbt" => file_read_producer().map(|(read, _)| Self {
+				read,
 				canonical_extension: "nbt",
 				optimization_strategy_message: "Copied",
 				is_compressed: true
 			}),
-			"mcfunction" => Ok(Self {
-				read: args.file_read,
+			"mcfunction" => file_read_producer().map(|(read, _)| Self {
+				read,
 				canonical_extension: "mcfunction",
 				optimization_strategy_message: "Copied",
 				is_compressed: false
 			}),
-			_ => Err(args)
+			_ => None
 		}
 	}
 }
