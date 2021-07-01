@@ -105,4 +105,4 @@ optifine-support = ["java-properties"]
 opt-level = 3
 lto = "fat"
 codegen-units = 1
-strip = "symbols"
+#strip = "symbols"
