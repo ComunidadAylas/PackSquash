@@ -145,10 +145,10 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 					PackSquasherStatus::ZipFinish => println!("Finishing up ZIP file..."),
 					PackSquasherStatus::Warning(warning) => match warning {
 						PackSquasherWarning::LowEntropySystemId => eprintln!(
-							"! Used a low entropy system ID. The dates embedded in the result ZIP file, which reveal when it was \
+							"* Used a low entropy system ID. The dates embedded in the result ZIP file, which reveal when it was \
 							generated, may be easier to decrypt. Please see the relevant GitHub Wiki article for details."),
 						PackSquasherWarning::VolatileSystemId => eprintln!(
-							"! Used a volatile system ID. In general, you shouldn't reuse the result ZIP file, as it may unexpectedly \
+							"* Used a volatile system ID. In general, you shouldn't reuse the result ZIP file, as it may unexpectedly \
 							change after you use your device as usual. Please see the relevant GitHub Wiki article for details."),
 						_ => unimplemented!()
 					},
