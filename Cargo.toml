@@ -15,14 +15,14 @@ bytes = "1.0.1"
 globset = "0.4.8"
 enumset = { version = "1.0.6", features = ["serde"] }
 indexmap = { version = "1.7.0", default-features = false, features = ["serde-1"] }
-thiserror = "1.0.25"
+thiserror = "1.0.26"
 ahash = "0.7.4"
 
 num_cpus = "1.13.0"
 sysinfo = { version = "0.19.0", default-features = false }
 walkdir = "2.3.2"
 
-tokio = { version = "1.7.1", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
+tokio = { version = "1.8.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
 tokio-util = { version = "0.6.7", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.6", default-features = false }
 futures = { version = "0.3.15", default-features = false }
@@ -87,9 +87,6 @@ globset = { git = "https://github.com/ComunidadAylas/ripgrep" }
 vergen = { version = "5.1.12", default-features = false, features = ["cargo", "git"] }
 time = "0.2.27"
 
-[target.'cfg(windows)'.build-dependencies]
-winres = "0.1.11"
-
 [dev-dependencies]
 tokio-test = "0.4.2"
 
@@ -105,4 +102,4 @@ optifine-support = ["java-properties"]
 opt-level = 3
 lto = "fat"
 codegen-units = 1
-#strip = "symbols"
+strip = "symbols"

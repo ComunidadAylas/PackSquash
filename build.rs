@@ -1,3 +1,5 @@
+use std::{env, fs};
+
 use time::OffsetDateTime;
 use vergen::{vergen, SemverKind};
 
@@ -24,25 +26,55 @@ fn main() {
 	println!("cargo:rustc-env=BUILD_DATE={}", build_date.format("%F"));
 	println!("cargo:rustc-env=BUILD_YEAR={}", build_year);
 
-	// Add platform-specific metadata to the executable
-	add_executable_metadata(build_year);
+	// For Windows, generate a script to set the executable resource data
+	#[cfg(windows)]
+	{
+		fn escape_quotations(string: String) -> String {
+			string.replace('\'', "''")
+		}
+
+		let script = format!(
+			r#"
+# Automatically generated PowerShell script to set PackSquash executable resource data.
+# Invoke after the release executable is built
+
+# -----
+$rcedit_download_url = 'https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe'
+$packsquash_exe = '{}\target\release\{}.exe'
+$icon_path = '{}\src\app_icon.ico'
+$basename = Split-Path "$packsquash_exe" -Leaf
+$name = 'PackSquash'
+$company = 'Comunidad Aylas'
+$description = '{}'
+$cargo_version = '{}'
+$semver_version = '{}'
+$authors = '{}'
+# -----
+
+$rcedit = New-TemporaryFile | Rename-Item -NewName {{ $_.Name -replace '.tmp', '.exe' }} -PassThru
+Invoke-WebRequest -Uri "$rcedit_download_url" -OutFile $rcedit
+& "$rcedit" "$packsquash_exe" `
+--set-version-string 'ProductName' "$name" `
+--set-version-string 'FileDescription' "$name - $description" `
+--set-version-string 'LegalCopyright' "$authors" `
+--set-version-string 'CompanyName' "$company" `
+--set-version-string 'FileVersion' "$cargo_version" `
+--set-version-string 'ProductVersion' "$semver_version" `
+--set-version-string 'OriginalFilename' "$basename" `
+--set-version-string 'InternalName' "$basename" `
+--set-icon "$icon_path""#,
+			escape_quotations(env::var("CARGO_MANIFEST_DIR").unwrap()),
+			escape_quotations(env::var("CARGO_PKG_NAME").unwrap()),
+			escape_quotations(env::var("CARGO_MANIFEST_DIR").unwrap()),
+			escape_quotations(env::var("CARGO_PKG_DESCRIPTION").unwrap()),
+			escape_quotations(env::var("CARGO_PKG_VERSION").unwrap()),
+			// Can't actually get the Git semver here due to vergen limitations,
+			// so use the closest thing instead
+			escape_quotations(env::var("CARGO_PKG_VERSION").unwrap()),
+			escape_quotations(env::var("CARGO_PKG_AUTHORS").unwrap())
+		);
+
+		fs::write("target/set_executable_resource_data.ps1", script)
+			.expect("Couldn't create the script that changes the executable resource metadata");
+	}
 }
-
-#[cfg(windows)]
-fn add_executable_metadata(build_year: i32) {
-	let mut windows_resource = winres::WindowsResource::new();
-	windows_resource.set("ProductName", "PackSquash");
-	windows_resource.set(
-		"LegalCopyright",
-		&format!("Copyright (C) {} {}", build_year, env!("CARGO_PKG_AUTHORS"))
-	);
-	windows_resource.set_language(0x0409); // English (US)
-	windows_resource.set_icon("src/app_icon.ico");
-
-	windows_resource
-		.compile()
-		.expect("Windows executable resource build failure");
-}
-
-#[cfg(not(windows))]
-fn add_executable_metadata(_build_year: i32) {}
