@@ -37,6 +37,7 @@ fn set_windows_executable_resource_data() {
 
 		fn escape_quotations(string: String) -> String {
 			string.replace('\'', "''")
+				.replace('"', "\\\"")
 		}
 
 		let script = format!(
