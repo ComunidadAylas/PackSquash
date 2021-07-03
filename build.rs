@@ -1,5 +1,3 @@
-use std::{env, fs};
-
 use time::OffsetDateTime;
 use vergen::{vergen, SemverKind};
 
@@ -27,8 +25,16 @@ fn main() {
 	println!("cargo:rustc-env=BUILD_YEAR={}", build_year);
 
 	// For Windows, generate a script to set the executable resource data
+	set_windows_executable_resource_data();
+}
+
+/// Generates a PowerShell script that sets the resource data of the executable generated
+/// by this build. This resource data embeds an icon in the file and makes it look nice.
+fn set_windows_executable_resource_data() {
 	#[cfg(windows)]
 	{
+		use std::{env, fs};
+
 		fn escape_quotations(string: String) -> String {
 			string.replace('\'', "''")
 		}
@@ -40,7 +46,7 @@ fn main() {
 
 # -----
 $rcedit_download_url = 'https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe'
-$packsquash_exe = '{}\target\{}\{}.exe'
+$packsquash_exe = '{}\target\{}\{}\{}.exe'
 $icon_path = '{}\src\app_icon.ico'
 $basename = Split-Path "$packsquash_exe" -Leaf
 $name = 'PackSquash'
@@ -64,6 +70,7 @@ Invoke-WebRequest -Uri "$rcedit_download_url" -OutFile $rcedit
 --set-version-string 'InternalName' "$basename" `
 --set-icon "$icon_path""#,
 			escape_quotations(env::var("CARGO_MANIFEST_DIR").unwrap()),
+			escape_quotations(env::var("TARGET").unwrap()),
 			escape_quotations(env::var("PROFILE").unwrap()),
 			escape_quotations(env::var("CARGO_PKG_NAME").unwrap()),
 			escape_quotations(env::var("CARGO_MANIFEST_DIR").unwrap()),
