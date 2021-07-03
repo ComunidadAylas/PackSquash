@@ -62,7 +62,6 @@ impl VirtualFileSystem for OsFilesystem {
 		Ok(VfsPackFile {
 			file_read: BufReader::new(tokio::fs::File::from_std(File::open(path)?)),
 			metadata: VfsPackFileMetadata {
-				creation_time: metadata.created().ok(),
 				modification_time: metadata.modified().ok()
 			},
 			file_size: metadata.len()

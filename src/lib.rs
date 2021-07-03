@@ -216,19 +216,7 @@ impl PackSquasher {
 							process_pack_file(
 								$pack_file,
 								&pack_file_data.relative_path,
-								// The file edit time is the most recent of the creation and
-								// modification times, provided we have a modification time
-								// available, so in case of incongruence or non-availability
-								// of the modification time we do the safest thing. Also keep
-								// in mind that Some(...) > None
-								pack_file_meta
-									.modification_time
-									.and_then(|modification_time| {
-										cmp::max(
-											pack_file_meta.creation_time,
-											Some(modification_time)
-										)
-									}),
+								pack_file_meta.modification_time,
 								squash_zip,
 								pack_file_status_sender
 							)
@@ -435,7 +423,6 @@ pub struct VfsPackFile<R: AsyncRead + Unpin + 'static> {
 
 /// TODO
 pub struct VfsPackFileMetadata {
-	creation_time: Option<SystemTime>,
 	modification_time: Option<SystemTime>
 }
 
@@ -588,7 +575,7 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 		}
 		.clone();
 
-		let processed_pack_file_chunks = processed_pack_file_chunks
+		let mut processed_pack_file_chunks = processed_pack_file_chunks
 			.take_while(|chunk| {
 				future::ready(if let Err(err) = chunk {
 					optimization_error = Some(err.to_string());
@@ -599,6 +586,9 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 				})
 			})
 			.map(|chunk| chunk.unwrap().1);
+
+		// TODO: temporary so optimization_error is set
+		processed_pack_file_chunks.next().await;
 
 		let squash_zip_error = None; /*squash_zip
 							 .add_file(&pack_file_path, processed_pack_file_chunks, is_compressed)
