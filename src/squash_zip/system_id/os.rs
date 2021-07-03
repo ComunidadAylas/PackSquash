@@ -2,6 +2,9 @@
 
 use super::SystemId;
 
+#[cfg(all(unix, not(target_os = "macos")))]
+use std::{fs, io, path::Path};
+
 /// Gets the D-Bus and/or systemd generated machine ID. This machine ID is
 /// 128-bit wide, and is intended to be constant for all the lifecycle of the
 /// OS install, no matter if hardware is replaced or some configuration is
@@ -16,15 +19,13 @@ use super::SystemId;
 /// - https://unix.stackexchange.com/questions/396052/missing-etc-machine-id-on-freebsd-trueos-dragonfly-bsd-et-al
 #[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
 pub(super) fn get_dbus_machine_id() -> Option<SystemId> {
-	use std::fs;
-
 	u128::from_str_radix(
-		fs::read_to_string("/etc/machine-id")
+		read_uuid_file("/etc/machine-id")
 			.map_err(|_| {
-				fs::read_to_string("/var/lib/dbus/machine-id")
-					.map_err(|_| fs::read_to_string("/var/db/dbus/machine-id"))
-					.map_err(|_| fs::read_to_string("/usr/local/etc/machine-id"))
-					.map_err(|_| fs::read_to_string("/run/machine-id"))
+				read_uuid_file("/var/lib/dbus/machine-id")
+					.map_err(|_| read_uuid_file("/var/db/dbus/machine-id"))
+					.map_err(|_| read_uuid_file("/usr/local/etc/machine-id"))
+					.map_err(|_| read_uuid_file("/run/machine-id"))
 			})
 			.ok()?
 			.trim(),
@@ -45,12 +46,11 @@ pub(super) fn get_dbus_machine_id() -> Option<SystemId> {
 /// - http://0pointer.de/blog/projects/ids.html
 #[cfg(any(target_os = "linux", target_os = "android"))]
 pub(super) fn get_boot_id() -> Option<SystemId> {
-	use std::fs;
 	use uuid::Uuid;
 
 	SystemId::new(
 		Uuid::parse_str(
-			fs::read_to_string("/proc/sys/kernel/random/boot_id")
+			read_uuid_file("/proc/sys/kernel/random/boot_id")
 				.ok()?
 				.trim()
 		)
@@ -385,4 +385,33 @@ pub(super) fn get_install_date() -> Option<SystemId> {
 		false, // Murphy's law corollary: Windows will update itself when it's a bad time
 		50
 	)
+}
+
+#[cfg(all(unix, not(target_os = "macos")))]
+/// Reads a file that is expected to contain a UUID in text formatto a string.
+/// Differently from other helper methods available in the standard library,
+/// like `read_to_string`, this limits the maximum number of bytes read,
+/// so we discard invalid big files pretty fast and without almost consuming
+/// any memory.
+fn read_uuid_file<P: AsRef<Path>>(path: P) -> io::Result<String> {
+	use std::io::Read;
+
+	/// The maximum size of a UUID, assuming its hyphenated representation.
+	const UUID_LENGTH: usize = 36;
+
+	let mut buf = [0; UUID_LENGTH];
+	let mut file = fs::File::open(path)?;
+	let mut i = 0;
+
+	// Read file bytes until we fill the buffer or reach EOF
+	while i < UUID_LENGTH {
+		let bytes_read = file.read(&mut buf[i..UUID_LENGTH])?;
+		i += bytes_read;
+
+		if bytes_read == 0 {
+			break;
+		}
+	}
+
+	Ok(String::from_utf8_lossy(&buf[..i]).into_owned())
 }
