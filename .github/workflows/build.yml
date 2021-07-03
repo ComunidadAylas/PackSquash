@@ -126,7 +126,7 @@ jobs:
         args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Set binary resource data
-      run: target/${{ env.CARGO_BUILD_TARGET }}/set_executable_resource_data.ps1
+      run: '& target/$env:CARGO_BUILD_TARGET/set_executable_resource_data.ps1'
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
