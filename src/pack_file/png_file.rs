@@ -1,4 +1,4 @@
-use std::{borrow::Cow, convert::TryInto, num::TryFromIntError};
+use std::{borrow::Cow, convert::TryInto, num::TryFromIntError, time::Duration};
 
 use bytes::{BufMut, BytesMut};
 use imagequant::{liq_error, Attributes, Image};
@@ -224,7 +224,7 @@ impl Decoder for OptimizerDecoder {
 			preserve_attrs: false,
 			pretend: false,
 			strip: Headers::All,
-			timeout: None,
+			timeout: Some(Duration::from_secs(600)), // Bail out if the optimization takes too long
 			use_heuristics: false
 		};
 
