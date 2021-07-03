@@ -64,7 +64,7 @@ Invoke-WebRequest -Uri "$rcedit_download_url" -OutFile $rcedit
 --set-version-string 'FileDescription' "$name - $description" `
 --set-version-string 'LegalCopyright' "$authors" `
 --set-version-string 'CompanyName' "$company" `
---set-version-string 'FileVersion' "$cargo_version" `
+--set-file-version "$cargo_version" `
 --set-version-string 'ProductVersion' "$semver_version" `
 --set-version-string 'OriginalFilename' "$basename" `
 --set-version-string 'InternalName' "$basename" `
