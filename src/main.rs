@@ -72,7 +72,14 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		|path| Cow::Borrowed(path)
 	);
 
+	// Tell the user where are we reading the configuration from
 	println!("Reading options from {}...", options_user_friendly_path);
+	if options_file_path.is_none() {
+		// Newbies are often confused by terms such as "standard input", so try
+		// to point them in the direction of what they probably want to do
+		println!("If you are not sure what this means or what to do now, please consider reading the settings \
+		(or options) file documentation over GitHub, as you probably want to write and use one of those instead.");
+	}
 
 	// Read the TOML configuration data from the specified source
 	let options_string = match match options_file_path {
