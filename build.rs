@@ -36,11 +36,11 @@ fn main() {
 		let script = format!(
 			r#"
 # Automatically generated PowerShell script to set PackSquash executable resource data.
-# Invoke after the release executable is built
+# Invoke after the executable is built
 
 # -----
 $rcedit_download_url = 'https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe'
-$packsquash_exe = '{}\target\release\{}.exe'
+$packsquash_exe = '{}\target\{}\{}.exe'
 $icon_path = '{}\src\app_icon.ico'
 $basename = Split-Path "$packsquash_exe" -Leaf
 $name = 'PackSquash'
@@ -64,12 +64,13 @@ Invoke-WebRequest -Uri "$rcedit_download_url" -OutFile $rcedit
 --set-version-string 'InternalName' "$basename" `
 --set-icon "$icon_path""#,
 			escape_quotations(env::var("CARGO_MANIFEST_DIR").unwrap()),
+			escape_quotations(env::var("PROFILE").unwrap()),
 			escape_quotations(env::var("CARGO_PKG_NAME").unwrap()),
 			escape_quotations(env::var("CARGO_MANIFEST_DIR").unwrap()),
 			escape_quotations(env::var("CARGO_PKG_DESCRIPTION").unwrap()),
 			escape_quotations(env::var("CARGO_PKG_VERSION").unwrap()),
 			// Can't actually get the Git semver here due to vergen limitations,
-			// so use the closest thing instead
+			// so use the closest thing available instead
 			escape_quotations(env::var("CARGO_PKG_VERSION").unwrap()),
 			escape_quotations(env::var("CARGO_PKG_AUTHORS").unwrap())
 		);
