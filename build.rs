@@ -36,8 +36,7 @@ fn set_windows_executable_resource_data() {
 		use std::{env, fs};
 
 		fn escape_quotations(string: String) -> String {
-			string.replace('\'', "''")
-				.replace('"', "\\\"")
+			string.replace('\'', "''").replace('"', "\\\"")
 		}
 
 		let script = format!(
