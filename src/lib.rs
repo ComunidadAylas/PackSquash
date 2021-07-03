@@ -19,7 +19,6 @@
 #![deny(rustdoc::private_intra_doc_links)]
 
 use std::borrow::Cow;
-use std::cmp;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::pin::Pin;
