@@ -46,7 +46,7 @@ mod tests;
 /// time for a 64 KiB block of somewhat difficult to compress data.
 const A: f32 = 0.004381402;
 /// Intercept of the linear regression function described in [`A`].
-const B: f32 = 0.035055662;
+const B: f32 = 0.035055663;
 /// The maximum number of Zopfli iterations that SquashZip will do, no matter the
 /// input file size. Must be at least 1.
 const MAXIMUM_ZOPFLI_ITERATIONS: u8 = 20;
