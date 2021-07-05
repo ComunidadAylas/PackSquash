@@ -80,9 +80,11 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	if options_file_path.is_none() {
 		// Newbies are often confused by terms such as "standard input", so try
 		// to point them in the direction of what they probably want to do
-		println!("If you are not sure what this means or what to do now, please \n\
+		println!(
+			"If you are not sure what this means or what to do now, please \n\
 		consider reading the settings (or options) file documentation over\n\
-		GitHub, as you probably want to write and use one of those instead.");
+		GitHub, as you probably want to write and use one of those instead."
+		);
 	}
 	println!();
 
@@ -172,7 +174,11 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		});
 
 		// Squash the pack! This blocks until the operation is complete
-		let result = Arc::new(PackSquasher::new(squash_options)?).run::<_, &str>(OsFilesystem, None, Some(sender));
+		let result = Arc::new(PackSquasher::new(squash_options)?).run::<_, &str>(
+			OsFilesystem,
+			None,
+			Some(sender)
+		);
 
 		// Wait for the CLI thread to process any remaining buffered messages
 		cli_thread.join().ok();
