@@ -1,0 +1,12 @@
+root = true
+
+# Replicate cargo fmt behavior. This is ignored by Rust-aware editors,
+# but not by those that are not aware. Also, thanks to this, GitHub
+# renders TABs 4 characters wide and not 8, so they don't look terrible
+[*]
+indent_style = tab
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
