@@ -44,7 +44,7 @@ jobs:
       uses: actions-rs/clippy-check@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        args: --release -- -D warnings
+        args: --release
 
     - name: Cargo build
       if: ${{ github.event_name != 'release' }}
