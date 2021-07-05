@@ -68,12 +68,6 @@ async fn central_directory_works_test(use_zip64_extensions: bool) {
 
 	let cen_size = CENTRAL_DIRECTORY_HEADER_SIZE_NO_EXTRA_FIELDS + extra_field_size as usize;
 
-	assert_eq!(
-		cen.size() as usize,
-		cen_size,
-		"Unexpected reported central directory size"
-	);
-
 	let mut buf =
 		Vec::with_capacity(CENTRAL_DIRECTORY_HEADER_SIZE_NO_EXTRA_FIELDS + extra_field_size as usize);
 
@@ -267,12 +261,6 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 		eocd.requires_zip64_extensions(),
 		use_zip64_extensions,
 		"The reported ZIP64 extensions requirement status for the end of central directory was unexpected"
-	);
-
-	assert_eq!(
-		eocd.size() as usize,
-		eocd_size,
-		"Unexpected reported end of central directory size"
 	);
 
 	let mut buf = Vec::with_capacity(eocd_size);

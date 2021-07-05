@@ -428,12 +428,6 @@ impl<'a> CentralDirectoryHeader<'a> {
 
 		Ok(())
 	}
-
-	/// Returns the size that this ZIP file record would take on the file. This
-	/// is the same number of bytes that would be written by [`Self::write()`].
-	pub fn size(&self) -> u32 {
-		46 + self.file_name.len() as u32 + self.compute_extra_field_length() as u32
-	}
 }
 
 /// A mid-level abstraction for a ZIP file central directory record. When written,
@@ -710,11 +704,5 @@ impl EndOfCentralDirectory {
 		output_zip.write_all(&[0; 2]).await?;
 
 		Ok(())
-	}
-
-	/// Returns the size that this ZIP file record would take on the file. This
-	/// is the same number of bytes that would be written by [`Self::write()`].
-	pub fn size(&self) -> u32 {
-		(56 + 20) * self.requires_zip64_extensions() as u32 + 22
 	}
 }
