@@ -16,8 +16,7 @@ use thiserror::Error;
 use tokio::{
 	fs::File,
 	io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt, AsyncWriteExt},
-	sync::Mutex,
-	task
+	sync::Mutex
 };
 use tokio_stream::Stream;
 use tokio_util::io::ReaderStream;
@@ -486,34 +485,29 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				.await?;
 
 			let mut bytes_compared = 0;
-			already_stored = task::block_in_place(|| -> Result<bool, SquashZipError> {
-				Ok(compressed_data_scratch_file
-					.by_ref()
-					.bytes()
-					.zip(
-						Read::take(&mut *output_zip, local_file_header.compressed_size as u64)
-							.bytes()
-					)
-					.try_find(|(byte_new, byte_stored)| {
-						// Find the first byte that differs in both streams. If the streams are
-						// equal so far, but one is shorter than another, we won't find any
-						// difference, so keep a counter to know whether we read all the bytes
-						// we should have, and only consider them equal when we read the same
-						// number of equal bytes from both
-						bytes_compared += 1;
+			already_stored = compressed_data_scratch_file
+				.by_ref()
+				.bytes()
+				.zip(Read::take(&mut *output_zip, local_file_header.compressed_size as u64).bytes())
+				.try_find(|(byte_new, byte_stored)| {
+					// Find the first byte that differs in both streams. If the streams are
+					// equal so far, but one is shorter than another, we won't find any
+					// difference, so keep a counter to know whether we read all the bytes
+					// we should have, and only consider them equal when we read the same
+					// number of equal bytes from both
+					bytes_compared += 1;
 
-						let to_owned_io_error = |err: &io::Error| -> io::Error {
-							err.raw_os_error()
-								.map_or_else(|| err.kind().into(), io::Error::from_raw_os_error)
-						};
+					let to_owned_io_error = |err: &io::Error| -> io::Error {
+						err.raw_os_error()
+							.map_or_else(|| err.kind().into(), io::Error::from_raw_os_error)
+					};
 
-						let byte_new = byte_new.as_ref().map_err(to_owned_io_error);
-						let byte_stored = byte_stored.as_ref().map_err(to_owned_io_error);
+					let byte_new = byte_new.as_ref().map_err(to_owned_io_error);
+					let byte_stored = byte_stored.as_ref().map_err(to_owned_io_error);
 
-						Ok::<bool, io::Error>(byte_new? != byte_stored?)
-					})?
-					.is_none() && bytes_compared == local_file_header.compressed_size)
-			})?;
+					Ok::<bool, io::Error>(byte_new? != byte_stored?)
+				})?
+				.is_none() && bytes_compared == local_file_header.compressed_size;
 
 			if already_stored {
 				// We know for sure we found a matching file, so just add another pointer to
@@ -901,35 +895,29 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			// Rewind scratch file to read it back for compression
 			processed_data_scratch_file.seek(SeekFrom::Start(0)).await?;
 
-			// This operation will take long, so move this task to a blocking thread. Although when
-			// rolled over to disk the I/O operations themselves would move the task periodically,
-			// checking that needs to acquire a lock on the output file, which limits concurrency,
-			// so we don't do that
-			task::block_in_place(|| {
-				// Use a linear regression model to estimate an appropriate number of iterations for the
-				// file size. We correct the data size using a non-linear function, so that we don't
-				// start reducing iterations like crazy to meet the target time when we deal with bigger
-				// files, because we still care about compression. This means that we eventually reduce
-				// the iterations if the file grows pretty big (> 4 MiB), and that bigger files will take
-				// longer, but not too longer
-				let file_magnitude = (processed_data_size as f64 / 65536.0).powf(5.0 / 6.0) as f32;
-				let iterations = ((self.target_compression_time - B * file_magnitude)
-					/ (A * file_magnitude))
-					.clamp(1.0, MAXIMUM_ZOPFLI_ITERATIONS as f32)
-					.round() as u8;
+			// Use a linear regression model to estimate an appropriate number of iterations for the
+			// file size. We correct the data size using a non-linear function, so that we don't
+			// start reducing iterations like crazy to meet the target time when we deal with bigger
+			// files, because we still care about compression. This means that we eventually reduce
+			// the iterations if the file grows pretty big (> 4 MiB), and that bigger files will take
+			// longer, but not too longer
+			let file_magnitude = (processed_data_size as f64 / 65536.0).powf(5.0 / 6.0) as f32;
+			let iterations = ((self.target_compression_time - B * file_magnitude)
+				/ (A * file_magnitude))
+				.clamp(1.0, MAXIMUM_ZOPFLI_ITERATIONS as f32)
+				.round() as u8;
 
-				zopfli::compress(
-					&{
-						let mut zopfli_options = zopfli::Options::default();
-						zopfli_options.numiterations = iterations.into();
-						zopfli_options
-					},
-					&Format::Deflate,
-					&mut processed_data_scratch_file,
-					processed_data_size as u64,
-					&mut compressed_data_scratch_file
-				)
-			})?;
+			zopfli::compress(
+				&{
+					let mut zopfli_options = zopfli::Options::default();
+					zopfli_options.numiterations = iterations.into();
+					zopfli_options
+				},
+				&Format::Deflate,
+				&mut processed_data_scratch_file,
+				processed_data_size as u64,
+				&mut compressed_data_scratch_file
+			)?;
 
 			compressed_data_size = compressed_data_scratch_file
 				.seek(SeekFrom::Current(0))
