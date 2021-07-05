@@ -51,7 +51,8 @@ pub enum OptimizationError {
 }
 
 /// The result of processing a chunk of pack file bytes to an optimized representation.
-pub type OptimizedBytesChunk<T, E> = Result<(Cow<'static, str>, OptimizedBytes<T>), E>;
+#[allow(dead_code)] // Actually used in the PackFile trait definition for nicer syntax
+type OptimizedBytesChunk<T, E> = Result<(Cow<'static, str>, OptimizedBytes<T>), E>;
 
 /// A candidate for a Minecraft pack file, that may be processed in order to improve its internal
 /// coding efficiency and/or its compressibility by a lossless data compression algorithm. This
