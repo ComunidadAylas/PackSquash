@@ -195,8 +195,15 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 			let process_time = start_instant.elapsed();
 
 			println!(
-				"{} generated ({} files, {}.{:03} s)",
+				"{} generated{} ({} files, {}.{:03} s)",
 				output_file_path.as_os_str().to_string_lossy(),
+				output_file_path.metadata().map_or_else(
+					|_| Cow::Borrowed(""),
+					|metadata| Cow::Owned(format!(
+						", {:.3} MiB",
+						metadata.len() as f64 / (1024.0 * 1024.0)
+					))
+				),
 				Arc::try_unwrap(processed_file_count).unwrap().into_inner(),
 				process_time.as_secs(),
 				process_time.subsec_millis()
