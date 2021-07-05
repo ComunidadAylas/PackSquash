@@ -15,9 +15,10 @@
 // https://docs.rs/crate/machine-uid/0.2.0
 // https://github.com/tilda/rust-hwid
 
-use std::{cmp::Ordering, lazy::SyncOnceCell};
+use std::{cmp::Ordering, env, lazy::SyncOnceCell};
 
 use tokio::task;
+use uuid::Uuid;
 
 mod os;
 
@@ -101,22 +102,6 @@ impl PartialEq for SystemId {
 
 impl Eq for SystemId {}
 
-/// Provides more concise syntax for reading a system ID from a special process
-/// environment variable.
-macro_rules! read_from_env {
-	() => {
-		|| -> Option<SystemId> {
-			SystemId::new(
-				uuid::Uuid::parse_str(&std::env::var("PACKSQUASH_SYSTEM_ID").ok()?)
-					.ok()?
-					.as_u128(),
-				false,
-				u8::MAX
-			)
-		}()
-	};
-}
-
 /// The cell that will be used to memoize the result of computing the system ID, so
 /// it's done only once in the lifetime of the process.
 static SYSTEM_ID: SyncOnceCell<SystemId> = SyncOnceCell::new();
@@ -137,6 +122,18 @@ pub fn get_system_id() -> Option<&'static SystemId> {
 	SYSTEM_ID.get()
 }
 
+/// Reads a system ID from a special process environment variable. This environment variable
+/// may not exist or be valid, in which case `None` is returned.
+fn read_from_env() -> Option<SystemId> {
+	SystemId::new(
+		Uuid::parse_str(&env::var("PACKSQUASH_SYSTEM_ID").ok()?)
+			.ok()?
+			.as_u128(),
+		false,
+		u8::MAX
+	)
+}
+
 // What follows are target specific definitions of the function that computes the system ID.
 // Obviously, it can't be defined twice for the same target.
 //
@@ -146,7 +143,7 @@ pub fn get_system_id() -> Option<&'static SystemId> {
 fn compute_system_id() -> SystemId {
 	use self::os::{get_boot_id, get_dbus_machine_id, get_host_id};
 
-	read_from_env!()
+	read_from_env()
 		.or_else(|| {
 			get_dbus_machine_id()
 				.into_iter()
@@ -161,7 +158,7 @@ fn compute_system_id() -> SystemId {
 fn compute_system_id() -> SystemId {
 	use self::os::{get_boot_id, get_host_id};
 
-	read_from_env!()
+	read_from_env()
 		.or_else(|| {
 			get_boot_id()
 				.into_iter()
@@ -175,7 +172,7 @@ fn compute_system_id() -> SystemId {
 fn compute_system_id() -> SystemId {
 	use self::os::{get_dbus_machine_id, get_dmi_product_id, get_host_id, get_kernel_host_id};
 
-	read_from_env!()
+	read_from_env()
 		.or_else(|| {
 			get_dbus_machine_id()
 				.into_iter()
@@ -191,7 +188,7 @@ fn compute_system_id() -> SystemId {
 fn compute_system_id() -> SystemId {
 	use self::os::{get_host_id, get_platform_serial_number};
 
-	read_from_env!()
+	read_from_env()
 		.or_else(|| {
 			get_platform_serial_number()
 				.into_iter()
@@ -205,7 +202,7 @@ fn compute_system_id() -> SystemId {
 fn compute_system_id() -> SystemId {
 	use self::os::{get_install_date, get_machine_id, get_product_id};
 
-	read_from_env!()
+	read_from_env()
 		.or_else(|| {
 			get_machine_id()
 				.into_iter()
