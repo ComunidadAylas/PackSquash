@@ -50,7 +50,10 @@ fn run() -> i32 {
 			} else {
 				print_version_information(false);
 				println!();
-				read_options_file_and_process(option_matches.free.first())
+				read_options_file_and_process(option_matches.free.first().filter(|path| {
+					// Let "-" behave as if no path was provided
+					path != &"-"
+				}))
 			}
 		}
 		Err(parse_err) => {
@@ -67,13 +70,13 @@ fn run() -> i32 {
 
 /// TODO
 fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
-	let options_user_friendly_path = options_file_path.map_or_else(
+	let user_friendly_options_path = options_file_path.map_or_else(
 		|| Cow::Borrowed("standard input"),
 		|path| Cow::Borrowed(path)
 	);
 
 	// Tell the user where are we reading the configuration from
-	println!("Reading options from {}...", options_user_friendly_path);
+	println!("Reading options from {}...", user_friendly_options_path);
 	if options_file_path.is_none() {
 		// Newbies are often confused by terms such as "standard input", so try
 		// to point them in the direction of what they probably want to do
@@ -96,7 +99,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		Err(err) => {
 			eprintln!(
 				"! Couldn't read the options file at {}: {}",
-				options_user_friendly_path, err
+				user_friendly_options_path, err
 			);
 
 			return 2;
@@ -109,7 +112,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		Err(deserialize_error) => {
 			eprintln!(
 				"! An error occurred while parsing the options file at {}: {}",
-				options_user_friendly_path, deserialize_error
+				user_friendly_options_path, deserialize_error
 			);
 
 			return 3;
@@ -153,10 +156,10 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 					PackSquasherStatus::Warning(warning) => match warning {
 						PackSquasherWarning::LowEntropySystemId => eprintln!(
 							"* Used a low entropy system ID. The dates embedded in the result ZIP file, which reveal when it was \
-							generated, may be easier to decrypt. Please see the relevant GitHub Wiki article for details."),
+							generated, may be easier to decrypt. Please read the relevant documentation over GitHub for details."),
 						PackSquasherWarning::VolatileSystemId => eprintln!(
-							"* Used a volatile system ID. In general, you shouldn't reuse the result ZIP file, as it may unexpectedly \
-							change after you use your device as usual. Please see the relevant GitHub Wiki article for details."),
+							"* Used a volatile system ID. You maybe should not reuse the result ZIP file, as unexpected results \
+							can occur after you use your device as usual. Please read the relevant documentation over GitHub for details."),
 						_ => unimplemented!()
 					},
 					_ => unimplemented!()
@@ -167,7 +170,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		// Squash the pack! This blocks until the operation is complete
 		let result = Arc::new(PackSquasher::new(squash_options)?).run::<_, &str>(OsFilesystem, None, Some(sender));
 
-		// Wait for the CLI thread to process any buffered messages
+		// Wait for the CLI thread to process any remaining buffered messages
 		cli_thread.join().ok();
 
 		result
