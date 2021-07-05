@@ -447,23 +447,10 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 async fn local_file_header_works() {
 	// The memory buffer does not fit the entire local file header in order to
 	// test correct behavior on roll
-	let mut buf = Vec::with_capacity(LOCAL_FILE_HEADER_SIZE);
+	let buf = Vec::with_capacity(LOCAL_FILE_HEADER_SIZE);
 
 	let mut loc =
 		LocalFileHeader::new(FILE_NAME).expect("The local file header instantiation should not fail");
-
-	// Test space reservation
-	{
-		loc.reserve_space(&mut buf)
-			.await
-			.expect("No errors expected while reserving space for the local file header");
-
-		assert_eq!(
-			buf.len(),
-			LOCAL_FILE_HEADER_SIZE,
-			"Reserved an unexpected amount of space for the local file header"
-		);
-	}
 
 	// Test changing fields after instantiation
 	loc.compression_method = CompressionMethod::Deflate;

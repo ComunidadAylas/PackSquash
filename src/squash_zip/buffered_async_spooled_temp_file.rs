@@ -27,7 +27,7 @@ mod tests;
 /// implementations are provided. These implementations will always yield results
 /// inmediately, but, to avoid starving other asynchronous tasks, if blocking would
 /// occur, the current task is blocked in place, so it momentarily becomes a blocking
-/// task in the Tokio runtime. Due to Tokio limitations, these asynchronous traits
+/// task in the Tokio runtime. Due to how Tokio is designed, these asynchronous traits
 /// will panic when used in the context of a current thread runtime, but it is fine to
 /// use them in multithreaded runtimes or outside of any runtime.
 // FIXME: it'd be nice to make this struct async-first. However, async read, write and
@@ -46,15 +46,17 @@ pub(super) enum BufferedAsyncSpooledTempFile {
 impl BufferedAsyncSpooledTempFile {
 	/// Creates a new [`BufferedAsyncSpooledTempFile`] with the specified size threshold.
 	pub fn new(size_threshold: usize) -> Self {
-		Self::InMemory(size_threshold, Cursor::new(vec![]))
+		Self::with_capacity(0, size_threshold)
 	}
 
-	/// Returns whether this file was written out to disk, which means that any I/O
-	/// operation would potentially interact with a disk. Due to the use of buffering,
-	/// however, not every I/O operation when rolled over will necessarily imply actual
-	/// I/O.
-	pub fn is_rolled(&self) -> bool {
-		matches!(self, Self::OnDisk(_, _))
+	/// Creates a new [`BufferedAsyncSpooledTempFile`] with the specified in-memory buffer
+	/// capacity and size threshold. The in-memory buffer capacity will never exceed the
+	/// size threshold.
+	pub fn with_capacity(capacity: usize, size_threshold: usize) -> Self {
+		Self::InMemory(
+			size_threshold,
+			Cursor::new(Vec::with_capacity(cmp::min(capacity, size_threshold)))
+		)
 	}
 }
 

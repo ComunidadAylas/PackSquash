@@ -9,6 +9,7 @@
 #![feature(new_uninit)]
 #![feature(once_cell)]
 #![feature(min_type_alias_impl_trait)]
+#![feature(try_find)]
 #![feature(doc_cfg)]
 #![doc(
 	html_logo_url = "https://user-images.githubusercontent.com/7822554/96335786-5f403f80-107b-11eb-8aa8-d0e0b6e1aae9.png"
@@ -354,7 +355,7 @@ impl PackSquasher {
 				Err(_) => panic!("Unexpected number of strong references to SquashZip")
 			};
 
-			// Finally, send warnings about relevant onditions
+			// Finally, send warnings about relevant conditions
 			if let Some(tx) = pack_file_status_sender {
 				if let Some(system_id) = system_id::get_system_id() {
 					if system_id.has_low_entropy {

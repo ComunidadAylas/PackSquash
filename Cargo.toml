@@ -77,7 +77,7 @@ imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
 # See: https://github.com/phaazon/glsl/pull/138
 glsl = { git = "https://github.com/vtavernier/glsl", branch = "fix/dos-crlf" }
 # Use our fork of Zopfli that includes streaming support
-zopfli = { git = "https://github.com/ComunidadAylas/zopfli" }
+zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquash" }
 # Use our fork of fpe that fixes compatibility with newer aes versions
 fpe = { git = "https://github.com/ComunidadAylas/fpe" }
 # Use our fork of globset that adds a constructor that reduces reallocations

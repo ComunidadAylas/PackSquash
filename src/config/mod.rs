@@ -81,6 +81,20 @@ pub struct GlobalOptions {
 	///
 	/// **Default value**: `0`
 	pub percentage_of_zip_structures_tuned_for_obfuscation_discretion: PercentageInteger,
+	/// If `zip_spec_conformance` is set to a value that allows storing the time metadata needed to
+	/// reuse the generated ZIP files in future runs, this option controls whether that time metadata
+	/// will actually be stored or not. If `true`, the metadata won't be stored no matter what, which
+	/// means that the ZIP file won't be able to be reused. Otherwise, if `false`, whether this metadata
+	/// is stored or not depends on the value of `zip_spec_conformance`.
+	///
+	/// You might want to set this to `true` if you are concerned about the presence of encrypted
+	/// metadata in the generated ZIP files and don't care about potential speed ups in later runs.
+	/// In fact, if you won't run PackSquash anymore on this pack, for example because you will
+	/// distribute it to players after this run, it is recommended to set this to `true`, as this
+	/// improves compressibility a bit and removes the now unnecessary metadata.
+	///
+	/// **Default value**: `false`
+	pub never_store_squash_times: bool,
 	/// If its value is true, this option instructs PackSquash to try compressing files that
 	/// are already compressed by design, like audio and PNG files, before storing them in the
 	/// result ZIP file. This can squeeze in some extra savings, at the cost of noticeably increased
@@ -88,6 +102,29 @@ pub struct GlobalOptions {
 	///
 	/// **Default value**: `false`
 	pub recompress_compressed_files: bool,
+	/// The number of Zopfli compression iterations that PackSquash will do when compressing a file
+	/// of magnitude 1 MiB just before it is stored in the ZIP file. This affects files that are not
+	/// compressed by design, or all files if `recompress_compressed_files` is enabled. A higher
+	/// number of iterations means that bigger files will be subject to more compression iterations,
+	/// which can lead to higher space savings, but is slower. Lower numbers mean that, in general,
+	/// less compression iterations will be done, which is quicker, but reduces space savings.
+	///
+	/// Note that PackSquash calculates the exact number of iterations for a file depending on its
+	/// size, so this number of iterations only guides that computation. In particular, PackSquash
+	/// targets a reference compression time, so smaller files will be compressed more, and larger
+	/// files will be compressed less. Also, the file size is not actually taken into account for
+	/// this; what is really used is a non-linear magnitude that grows slower than the file size
+	/// (in mathematical terms, the order of the function is that of a fractional power, which is
+	/// less than linear). This means that PackSquash will be a bit "hesitant" to reduce the number
+	/// of iterations for bigger files to meet the target time, so it will exceed it, but not by too
+	/// much.
+	///
+	/// The number of iterations actually used is clamped to the `[1, 20]` interval, so using values
+	/// outside that interval for this option will only change the magnitude threshold where iterations
+	/// start being reduced to meet a target time.
+	///
+	/// **Default value**: `20`
+	pub zip_compression_iterations: u8,
 	/// Some Minecraft versions have some quirks that limit how some files can be compressed, because
 	/// otherwise they are not correctly interpreted by the game. PackSquash can work around these
 	/// quirks, but doing so may come at the cost of reduced space savings or increased processing
@@ -116,7 +153,7 @@ pub struct GlobalOptions {
 	/// Depending on how other options are configured, PackSquash may use this ZIP file, if it exists,
 	/// to reuse its processed data and speed up squash operations.
 	///
-	/// **Default value**: `resource_pack.zip` (file `resource_pack.zip` in the current working directory)
+	/// **Default value**: `pack.zip` (file `pack.zip` in the current working directory)
 	pub output_file_path: PathBuf,
 	/// The number of concurrent threads that PackSquash will use to process the resource pack files.
 	/// Several threads allow processing several files at once, improving speed substantially. PackSquash
@@ -141,7 +178,9 @@ impl GlobalOptions {
 	/// TODO
 	pub(crate) fn as_squash_zip_settings(&self) -> SquashZipSettings {
 		SquashZipSettings {
-			store_squash_time: !matches!(self.zip_spec_conformance, ZipSpecConformance::Pedantic),
+			zopfli_iterations: self.zip_compression_iterations,
+			store_squash_time: !self.never_store_squash_times
+				&& !matches!(self.zip_spec_conformance, ZipSpecConformance::Pedantic),
 			enable_obfuscation: matches!(self.zip_spec_conformance, ZipSpecConformance::Disregard),
 			enable_deduplication: matches!(
 				self.zip_spec_conformance,
@@ -168,12 +207,14 @@ impl Default for GlobalOptions {
 			zip_spec_conformance: Default::default(),
 			size_increasing_zip_obfuscation: false,
 			percentage_of_zip_structures_tuned_for_obfuscation_discretion: PercentageInteger(0),
+			never_store_squash_times: false,
 			recompress_compressed_files: false,
+			zip_compression_iterations: 20,
 			workaround_minecraft_quirks: EnumSet::empty(),
 			ignore_system_and_hidden_files: true,
 			allow_mods: EnumSet::empty(),
 			threads: hardware_threads.try_into().unwrap(),
-			output_file_path: PathBuf::from("resource_pack.zip"),
+			output_file_path: PathBuf::from("pack.zip"),
 			// In MiB. By default, half of available memory / hardware threads
 			spooling_buffers_size: (available_memory_kb * 125
 				/ 262144 / (hardware_threads as u64 + 1))

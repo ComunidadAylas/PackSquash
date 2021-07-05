@@ -9,7 +9,7 @@ fn sync_io_works() {
 	let mut spooled_file = BufferedAsyncSpooledTempFile::new(10);
 
 	assert!(
-		!spooled_file.is_rolled(),
+		!is_rolled(&spooled_file),
 		"Spooled temporary files start their lifecycle as not rolled"
 	);
 
@@ -47,7 +47,7 @@ fn sync_io_works() {
 	Write::write_all(&mut spooled_file, &[5; 6 + 1]).expect("No I/O errors are assumed during tests");
 
 	assert!(
-		spooled_file.is_rolled(),
+		is_rolled(&spooled_file),
 		"Expected file to roll to disk after reaching threshold"
 	);
 
@@ -122,7 +122,7 @@ async fn async_io_works() {
 		.expect("No error should occur during this I/O operation");
 
 	assert!(
-		spooled_file.is_rolled(),
+		is_rolled(&spooled_file),
 		"The spooled file should roll after its threshold is reached"
 	);
 
@@ -140,4 +140,12 @@ async fn async_io_works() {
 		[5, 6, 7, 8, 9],
 		"Unexpected bytes read back after first write and seek"
 	);
+}
+
+/// Returns whether a spooled file was written out to disk, which means that any I/O
+/// operation would potentially interact with a disk. Due to the use of buffering,
+/// however, not every I/O operation when rolled over will necessarily imply actual
+/// I/O.
+fn is_rolled(spooled_file: &BufferedAsyncSpooledTempFile) -> bool {
+	matches!(spooled_file, BufferedAsyncSpooledTempFile::OnDisk(_, _))
 }

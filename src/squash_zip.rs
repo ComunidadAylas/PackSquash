@@ -1,7 +1,6 @@
 use std::{
 	convert::{TryFrom, TryInto},
-	hash::Hasher,
-	io::{self, SeekFrom},
+	io::{self, Read, SeekFrom},
 	lazy::SyncLazy,
 	num::TryFromIntError,
 	ops::Deref,
@@ -12,24 +11,22 @@ use std::{
 
 use aes::Aes128;
 use ahash::AHashMap;
-use futures::{StreamExt, TryStreamExt};
+use futures::{future, StreamExt, TryStreamExt};
 use thiserror::Error;
 use tokio::{
 	fs::File,
 	io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt, AsyncWriteExt},
+	sync::Mutex,
 	task
 };
 use tokio_stream::Stream;
 use tokio_util::io::ReaderStream;
 use zopfli::Format;
 
-use crate::config::PercentageInteger;
+use crate::{config::PercentageInteger, RelativePath};
 
 use self::{
 	buffered_async_spooled_temp_file::BufferedAsyncSpooledTempFile,
-	double_offset_stream_decorator::DoubleOffsetStreamDecorator,
-	file_region_comparator::FileRegionComparator,
-	relative_path::RelativePath,
 	system_time_sanitizer::{SystemTimeSanitizationError, SystemTimeSanitizer},
 	zip_file_record::{
 		CentralDirectoryHeader, CompressionMethod, EndOfCentralDirectory, LocalFileHeader
@@ -37,8 +34,6 @@ use self::{
 };
 
 mod buffered_async_spooled_temp_file;
-mod double_offset_stream_decorator;
-mod file_region_comparator;
 pub mod relative_path;
 pub mod system_id;
 mod system_time_sanitizer;
@@ -47,13 +42,22 @@ mod zip_file_record;
 #[cfg(test)]
 mod tests;
 
+/// Slope of the linear regression function that estimates the Zopfli compression
+/// time for a 64 KiB block of somewhat difficult to compress data.
+const A: f32 = 0.004381402;
+/// Intercept of the linear regression function described in [`A`].
+const B: f32 = 0.035055662;
+/// The maximum number of Zopfli iterations that SquashZip will do, no matter the
+/// input file size. Must be at least 1.
+const MAXIMUM_ZOPFLI_ITERATIONS: u8 = 20;
+
 /// Contains information about a file that was processed in a previous
 /// run of PackSquash; i.e., already present in a generated ZIP file.
 struct PreviousFile {
 	/// Time when this file was processed in the previous run.
 	squash_time: SystemTime,
 	/// The offset to (seek position in the file of) the processed,
-	// compressed data.
+	/// compressed data.
 	data_offset: u64,
 	/// The CRC of the processed data in the previous ZIP file. This field
 	/// will be passed through.
@@ -115,6 +119,8 @@ pub enum SquashZipError {
 /// Contains settings that tweak SquashZip operation.
 pub struct SquashZipSettings {
 	/// TODO
+	pub zopfli_iterations: u8,
+	/// TODO
 	pub store_squash_time: bool,
 	/// TODO
 	pub enable_obfuscation: bool,
@@ -133,13 +139,12 @@ pub struct SquashZipSettings {
 /// optimizations and use cases possible.
 pub struct SquashZip<F: AsyncRead + AsyncSeek + Unpin> {
 	settings: SquashZipSettings,
-	output_zip: BufferedAsyncSpooledTempFile,
-	output_zip_size: u64,
-	previous_zip: Option<F>,
+	target_compression_time: f32,
+	output_zip: Mutex<BufferedAsyncSpooledTempFile>,
+	previous_zip: Option<Mutex<F>>,
 	previous_zip_contents: AHashMap<RelativePath<'static>, PreviousFile>,
-	processed_local_headers: AHashMap<HashAndSize, Vec<(u64, u32)>>,
-	central_directory_data: Vec<PartialCentralDirectoryHeader>,
-	crc32_hasher: crc32fast::Hasher
+	processed_local_headers: Mutex<AHashMap<HashAndSize, Vec<(u64, u32)>>>,
+	central_directory_data: Mutex<Vec<PartialCentralDirectoryHeader>>
 }
 
 /// The system time sanitizer that SquashZip will use for sanitizing and
@@ -270,7 +275,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				// Read the fields that will be stored as-is in the map
 				let process_time = SYSTEM_TIME_SANITIZER
 					.desanitize(buffer[8..12].try_into().unwrap(), &buffer[12..16]);
-				// TODO: decrypt this with FPE if needed. Handle obfuscation in this method
+				// TODO: deobfuscate these fields. Insert deobfuscated data in the in-memory map
 				let crc = u32::from_le_bytes(buffer[12..16].try_into().unwrap());
 				let compression_method = CompressionMethod::from_compression_method_field(
 					u16::from_le_bytes(buffer[6..8].try_into().unwrap())
@@ -332,7 +337,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				// compressed data offset, as the compressed data is after the file name, which
 				// has variable length. We can't assume that the local hile header filename
 				// length is the same as in the central directory because we intentionally
-				// set it to zero to save space when not being strictly compliant
+				// can set it to different values due to deduplication and other reasons
 				previous_zip
 					.seek(SeekFrom::Start(local_file_header_offset))
 					.await?;
@@ -396,14 +401,15 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		// TODO: initial obfuscation in output ZIP
 
 		Ok(Self {
-			output_zip: BufferedAsyncSpooledTempFile::new(settings.spool_buffer_size),
-			output_zip_size: 0,
+			output_zip: Mutex::new(BufferedAsyncSpooledTempFile::new(
+				settings.spool_buffer_size
+			)),
+			target_compression_time: (A * settings.zopfli_iterations as f32 + B) * 16.0,
 			settings,
-			previous_zip,
-			processed_local_headers: AHashMap::with_capacity(previous_zip_contents.len()),
-			central_directory_data: Vec::with_capacity(previous_zip_contents.len()),
-			previous_zip_contents,
-			crc32_hasher: crc32fast::Hasher::new()
+			previous_zip: previous_zip.map(Mutex::new),
+			processed_local_headers: Mutex::new(AHashMap::with_capacity(previous_zip_contents.len())),
+			central_directory_data: Mutex::new(Vec::with_capacity(previous_zip_contents.len())),
+			previous_zip_contents
 		})
 	}
 
@@ -420,249 +426,108 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// for no good reasons. Therefore, doing so is not recommended.
 	///
 	/// The result ZIP file may be left in an inconsistent state if this method returns
-	/// an error. The caller probably should discard the ZIP file if this happens, not
+	/// an error. The caller probably should discard the ZIP file if this happens, by
 	/// not calling any further methods on this instance.
 	pub async fn add_file<T: Deref<Target = [u8]>, S: Stream<Item = T> + Unpin>(
-		&mut self,
+		&self,
 		path: &RelativePath<'_>,
-		mut processed_data: S,
-		skip_compression: bool
+		processed_data: S,
+		skip_compression: bool,
+		estimated_file_size: usize
 	) -> Result<(), SquashZipError> {
-		// This big method implements the algortihm described in the following steps:
-		// 0. Store the current file offset and Squash Time timestamp.
-		// 1. Create a local file header.
-		// 2. Write as many zero bytes as the local file header will take (i.e. reserve
-		//    space for it in the output file).
-		// 3. Write processed, but uncompressed data from the processed_data stream to
-		//    the output file. Store its size and CRC32 hash. Update the local file
-		//    header with the CRC32, uncompressed data size, and Squash Time.
-		// 4. Compress the processed data right after the end of the data written in 3.
-		//    Store the "compressed, processed data" size. Store the file offsets where
-		//    both the "compressed, processed data" and "processed data" start.
-		// 5. Compare len(compressed, processed data) with len(processed data).
-		//    5.1. If len(compressed, processed data) < len(processed data), move
-		//         "compressed, processed data" to where "processed data" is. Store that
-		//         DEFLATE is the compression method used.
-		//    5.2. If len(compressed, processed data) >= len(processed data), store that
-		//         STORE is the compression method used and make "compressed, processed
-		//         data" equal to the "processed data" size computed in 3.
-		// 6. Get entry for map 1) (CRC32 hash, processed data size) -> (local file header
-		//    offset list). This map stores offsets that point to already written local
-		//    file headers of files with some CRC32 and size combination, so if strict ZIP
-		//    spec conformance is not desired this allows to check whether a file with the
-		//    same data was already added to the ZIP file.
-		//    6.1. If it is in map 1), compare the file data we have just added with the file
-		//         datas we have already stored and are pointed to by the offset list.
-		//         6.1.1. If some file data matches (bitwise comparison succeeds), add an
-		//                entry (partial CEN data list, with matched file local header offset)
-		//                to a list 2) and discard the local file header and data added in
-		//                previous steps, by rewinding the output file to the position stored
-		//                in 0. Do not increment output ZIP file size.
-		//         6.1.2. If no file data matches (bitwise comparison fails), push the new
-		//                local file header to the value of the entry described in 6, and
-		//                add an entry to the list 2) with the new local file header offset.
-		//                Increment output ZIP file size by local file header size +
-		//                "compressed, processed data" size. Seek the output file to the
-		//                position stored in 0 and overwrite the local file header with its
-		//                actual, final data. Finally, seek the output file to the position
-		//                where the "compressed, processed data" ends.
-		//    6.2. If it is not in map 1), proceed as in 6.1.2.
-		// Alternate flows:
-		// - If strict ZIP conformance is desired, make 6.1 behave like 6.2. Also, do not
-		//   write Squash Time during 3.
-		// - If no compression is desired, skip 4, treating the processed and uncompressed
-		//   data as if it was compressed.
-
-		// Step 0
-		let local_file_header_offset = self.output_zip.seek(SeekFrom::Current(0)).await?;
-
-		// Step 1
-		let mut local_file_header = LocalFileHeader::new(path.as_ref())?; // TODO: obfuscate path
-
-		// Step 2
-		let local_file_header_size = local_file_header.size();
-		local_file_header
-			.reserve_space(&mut self.output_zip)
+		let (local_file_header, mut compressed_data_scratch_file) = self
+			.compress_and_generate_local_header(
+				path,
+				processed_data,
+				skip_compression,
+				estimated_file_size
+			)
 			.await?;
 
-		// Step 3
-		let mut processed_data_size = 0u32;
-		let processed_data_hash;
+		// Code below starts a critical region sooner or later, to ensure orderly
+		// appending to the partial ZIP file
 
-		while let Some(data) = processed_data.next().await {
-			self.output_zip.write_all(&data).await?;
-
-			self.crc32_hasher.write(&data);
-			processed_data_size = processed_data_size
-				.checked_add(data.len().try_into()?)
-				.ok_or(SquashZipError::FileTooBig)?;
-		}
-
-		processed_data_hash = self.crc32_hasher.finish() as u32;
-		self.crc32_hasher.reset();
-
-		local_file_header.crc32 = processed_data_hash; // TODO: obfuscate
-		local_file_header.uncompressed_size = processed_data_size; // TODO: obfuscate
-		if self.settings.store_squash_time {
-			local_file_header.squash_time = SYSTEM_TIME_SANITIZER
-				.sanitize(&SystemTime::now(), &processed_data_hash.to_le_bytes())?; // TODO: obfuscate
-		}
-
-		// Step 4
-		let processed_data_start_offset = local_file_header_offset + local_file_header_size as u64;
-		let compressed_data_start_offset;
-		let mut compressed_data_size;
-		if skip_compression {
-			compressed_data_start_offset = processed_data_start_offset;
-			compressed_data_size = processed_data_size as u64;
-		} else {
-			compressed_data_start_offset = processed_data_start_offset + processed_data_size as u64;
-
-			self.output_zip
-				.seek(SeekFrom::Start(processed_data_start_offset))
-				.await?;
-
-			let do_compression = |output_zip: &mut BufferedAsyncSpooledTempFile| -> io::Result<u64> {
-				let output_zip_decorator = DoubleOffsetStreamDecorator::new(
-					output_zip,
-					processed_data_start_offset,
-					compressed_data_start_offset
-				);
-
-				zopfli::compress(
-					&zopfli::Options::default(),
-					&Format::Deflate,
-					&output_zip_decorator,
-					processed_data_size as u64,
-					&output_zip_decorator
-				)
-				.map(|_| output_zip_decorator.write_position())
-			};
-
-			// Our output file implements non async I/O operations in a way that blocks the current
-			// thread in place when it is rolled, and does not block when it is not rolled. But doing
-			// Zopfli compression is time consuming, and we want to treat it as a blocking operation,
-			// so let I/O do the blocking for us if the file is rolled, and do it once ourselves when
-			// not rolled.
-			// FIXME: reconsider this, the existence of the is_rolled method and DoubleOffsetStreamDecorator
-			// if the output ZIP is ever changed to be really async
-			let compressed_data_end_offset;
-			if self.output_zip.is_rolled() {
-				compressed_data_end_offset = do_compression(&mut self.output_zip)?;
-			} else {
-				compressed_data_end_offset =
-					task::block_in_place(|| do_compression(&mut self.output_zip))?;
-			}
-
-			// If for some reason our file contains 4 GiB of uncompressible data, compression
-			// overhead can increase its size over 4 GiB. However, this doesn't matter, because we
-			// always choose the smaller representation, and a number greater than 4 Gi won't ever
-			// be equal than or smaller than a number that is <= 4 Gi
-			compressed_data_size = compressed_data_end_offset - compressed_data_start_offset;
-		}
-
-		// Step 5
-		let compression_method;
-		if compressed_data_size < processed_data_size as u64 {
-			// Step 5.1: compressed data is smaller, and should replace uncompressed
-			// (processed) data in the file
-			self.output_zip
-				.seek(SeekFrom::Start(compressed_data_start_offset))
-				.await?;
-
-			let do_copy = |output_zip: &mut BufferedAsyncSpooledTempFile| -> io::Result<()> {
-				let output_zip_decorator = DoubleOffsetStreamDecorator::new(
-					output_zip,
-					compressed_data_start_offset,
-					processed_data_start_offset
-				);
-
-				io::copy(
-					&mut io::Read::take(&mut &output_zip_decorator, compressed_data_size as u64),
-					&mut &output_zip_decorator
-				)
-				.map(|_| ())
-			};
-
-			// As per the reasons mentioned in Step 4 implementation, we handle blocking I/O
-			// properly
-			if self.output_zip.is_rolled() {
-				task::block_in_place(|| do_copy(&mut self.output_zip))?;
-			} else {
-				do_copy(&mut self.output_zip)?;
-			}
-
-			compression_method = CompressionMethod::Deflate;
-		} else {
-			// Step 5.2: compressed data is equal in size or bigger. Compressed
-			// data should be discarded
-			compression_method = CompressionMethod::Store;
-
-			compressed_data_size = processed_data_size as u64;
-		}
-
-		local_file_header.compressed_size = compressed_data_size as u32; // TODO: obfuscate
-		local_file_header.compression_method = compression_method; // TODO: obfuscate
-
-		// Step 6: check if we have already written another local file header that
-		// contains this file data
 		let mut empty_vec;
+		let mut processed_local_headers;
 		let matching_local_headers = if !self.settings.enable_deduplication {
 			// We can't reuse local file headers if deduplication is disabled.
 			// Consider that no headers ever match
 			empty_vec = vec![];
 			&mut empty_vec
 		} else {
-			self.processed_local_headers
+			processed_local_headers = self.processed_local_headers.lock().await;
+
+			processed_local_headers
 				.entry(HashAndSize {
-					hash: processed_data_hash,
-					size: compressed_data_size as u32
+					hash: local_file_header.crc32,
+					size: local_file_header.compressed_size
 				})
 				.or_insert_with(|| Vec::with_capacity(1)) // Usually, this list will be small
 		};
 
-		let get_partial_central_directory_header =
-			|local_header_offset: u64| -> PartialCentralDirectoryHeader {
-				PartialCentralDirectoryHeader {
-					local_header_offset,
-					file_name: String::from(path.as_ref()),
-					compression_method,
-					squash_time: local_file_header.squash_time,
-					crc32: processed_data_hash,
-					compressed_size: compressed_data_size as u32,
-					uncompressed_size: processed_data_size
-				}
-			};
-
 		let mut already_stored = false;
+		let mut output_zip = self.output_zip.lock().await;
+		let mut initial_output_zip_stream_offset = None;
 		for (matching_header_offset, matching_header_size) in &*matching_local_headers {
 			let matching_data_start_offset = matching_header_offset + *matching_header_size as u64;
 
-			// Rule out hash collisions by doing an expensive bitwise comparison.
-			// Hash collisions for files that are not specially crafted to provoke them should
-			// be so rare, but to output correct results no matter what, we need to do the
-			// check
-			already_stored = FileRegionComparator::new(&mut self.output_zip).eq(
-				processed_data_start_offset,
-				matching_data_start_offset,
-				compressed_data_size as u32
-			)?;
+			// Make sure we read data from the start
+			compressed_data_scratch_file
+				.seek(SeekFrom::Start(0))
+				.await?;
+
+			// Move the output ZIP file cursor to where the matching data starts. If this is our
+			// first seek, make sure to note where it was, so we can go back there
+			if initial_output_zip_stream_offset.is_none() {
+				initial_output_zip_stream_offset = Some(output_zip.seek(SeekFrom::Current(0)).await?);
+			}
+			output_zip
+				.seek(SeekFrom::Start(matching_data_start_offset))
+				.await?;
+
+			let mut bytes_compared = 0;
+			already_stored = task::block_in_place(|| -> Result<bool, SquashZipError> {
+				Ok(compressed_data_scratch_file
+					.by_ref()
+					.bytes()
+					.zip(
+						Read::take(&mut *output_zip, local_file_header.compressed_size as u64)
+							.bytes()
+					)
+					.try_find(|(byte_new, byte_stored)| {
+						// Find the first byte that differs in both streams. If the streams are
+						// equal so far, but one is shorter than another, we won't find any
+						// difference, so keep a counter to know whether we read all the bytes
+						// we should have, and only consider them equal when we read the same
+						// number of equal bytes from both
+						bytes_compared += 1;
+
+						let to_owned_io_error = |err: &io::Error| -> io::Error {
+							err.raw_os_error()
+								.map_or_else(|| err.kind().into(), io::Error::from_raw_os_error)
+						};
+
+						let byte_new = byte_new.as_ref().map_err(to_owned_io_error);
+						let byte_stored = byte_stored.as_ref().map_err(to_owned_io_error);
+
+						Ok::<bool, io::Error>(byte_new? != byte_stored?)
+					})?
+					.is_none() && bytes_compared == local_file_header.compressed_size)
+			})?;
 
 			if already_stored {
-				// Step 6.1.1: discard the local file header and file data we have just wrote,
-				// because an equivalent pair has been written before, and we will reuse
-				// those for maximum efficiency. To do this:
-				// - We remember to create another central directory header entry that points
-				//   to the matching local file header
-				// - We rewind to the offset we saved at step 0 and not increment the output
-				//   ZIP file size counter
-				self.central_directory_data
-					.push(get_partial_central_directory_header(
-						*matching_header_offset
-					));
+				// We know for sure we found a matching file, so just add another pointer to
+				// existing data in the central directory (but with different metadata)
+				self.add_partial_central_directory_header(
+					path,
+					&local_file_header,
+					*matching_header_offset
+				)
+				.await;
 
-				self.output_zip
-					.seek(SeekFrom::Start(local_file_header_offset))
+				// Seek to where the next local header would be
+				output_zip
+					.seek(SeekFrom::Start(initial_output_zip_stream_offset.unwrap()))
 					.await?;
 
 				// Found a match. No point in finding more
@@ -671,42 +536,39 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		}
 
 		if !already_stored {
-			// Steps 6.1.2 and 6.2: this file has not been stored yet. We have to:
-			// - Add it to the processed_local_headers map, so for future files we know that
-			//   a file with this hash and size was stored at the current local file header
-			//   offset
-			// - Add it to the central_directory_data list, so we create a central directory
-			//   file header record that points to the new local file header when we finish
-			//   the file
-			// - Increment the size of the output ZIP file by the size of the local header,
-			//   plus the size of the processed and compressed file data that follows
-			// - Seek to the position stored in 0 to overwrite the local file header with its
-			//   actual data (in step 2 it was just reserved by writing placeholder bytes)
-			// - Seek to the end of the processed and compressed file data, so the next
-			//   local file header we add is written just after this file data
+			let new_local_file_header_offset = if let Some(offset) = initial_output_zip_stream_offset
+			{
+				// Reuse the offset we already have. Make sure we write the new local file header
+				// in its expected position
+				output_zip.seek(SeekFrom::Start(offset)).await?;
+				offset
+			} else {
+				// No matches occurred. Get the offset now for the first time
+				output_zip.seek(SeekFrom::Current(0)).await?
+			};
+
+			// Avoid allocating memory for the dummy vector
 			if self.settings.enable_deduplication {
-				// Avoid allocating memory for the dummy vector
-				matching_local_headers.push((local_file_header_offset, local_file_header_size));
+				matching_local_headers.push((new_local_file_header_offset, local_file_header.size()));
 			}
 
-			self.central_directory_data
-				.push(get_partial_central_directory_header(
-					local_file_header_offset
-				));
+			self.add_partial_central_directory_header(
+				path,
+				&local_file_header,
+				new_local_file_header_offset
+			)
+			.await;
 
-			self.output_zip_size += local_file_header_size as u64 + compressed_data_size;
+			// Write the local header
+			// TODO: obfuscate header here
+			local_file_header.write(&mut *output_zip).await?;
 
-			self.output_zip
-				.seek(SeekFrom::Start(local_file_header_offset))
+			// Write the compressed data
+			compressed_data_scratch_file
+				.seek(SeekFrom::Start(0))
 				.await?;
 
-			local_file_header.write(&mut self.output_zip).await?;
-
-			self.output_zip
-				.seek(SeekFrom::Start(
-					processed_data_start_offset + compressed_data_size
-				))
-				.await?;
+			tokio::io::copy(&mut compressed_data_scratch_file, &mut *output_zip).await?;
 		}
 
 		Ok(())
@@ -740,15 +602,15 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// was not present in the previous ZIP file. In this case it is guaranteed that no bad
 	/// state was introduced in the result output ZIP file, and the instance can still used
 	/// normally.
-	pub async fn add_previous_file(&mut self, path: &RelativePath<'_>) -> Result<(), SquashZipError> {
-		// For this method we implement a simpler version of the algorithm explained in
-		// add_file. It can be summarised as follows:
-		// 1. Check if the file is in map 1) (hash, tamaño) -> (LOC offset list).
+	pub async fn add_previous_file(&self, path: &RelativePath<'_>) -> Result<(), SquashZipError> {
+		// For this method we implement a simpler version of the algorithm of add_file. It can be
+		// summarised as follows:
+		// 1. Check if the file is in map 1) (hash, size) -> (LOC offset list).
 		//    1.1. It is (there is an entry and a comparison is successful): don't add LOC,
 		//         just add CEN pushing to 2) (partial CEN data list).
 		//    1.2. It isn't (there is no entry or comparisons are unsuccessful): add LOC,
-		//         add new LOC to 1), add entry to 2), copy previous file data to the output
-		//         file, and increment output file size by LOC size + file data size.
+		//         add new LOC to 1), add CEN entry to 2) and copy previous file data to the
+		//         output file.
 
 		let previous_file = if let Some(previous_file) = self.previous_zip_contents.get(path) {
 			previous_file
@@ -762,107 +624,117 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		// no previous file, and any previous file has Squash Time data
 		let sanitized_squash_time = SYSTEM_TIME_SANITIZER.sanitize(
 			&previous_file.squash_time,
-			&previous_file.crc32.to_le_bytes() // TODO: obfuscation
+			&previous_file.crc32.to_le_bytes()
 		)?;
 
-		let previous_zip = self.previous_zip.as_mut().unwrap();
-
+		// Reconstruct the local file header this file would have
 		let mut local_file_header = LocalFileHeader::new(path.as_ref())?;
 		local_file_header.squash_time = sanitized_squash_time;
-		local_file_header.crc32 = previous_file.crc32; // TODO: obfuscation
-		local_file_header.compression_method = previous_file.compression_method; // TODO: obfuscation
-		local_file_header.uncompressed_size = previous_file.uncompressed_size; // TODO: obfuscation
-		local_file_header.compressed_size = previous_file.compressed_size; // TODO: obfuscation
+		local_file_header.crc32 = previous_file.crc32;
+		local_file_header.compression_method = previous_file.compression_method;
+		local_file_header.uncompressed_size = previous_file.uncompressed_size;
+		local_file_header.compressed_size = previous_file.compressed_size;
+
+		// Critical section start
 
 		let mut empty_vec;
+		let mut processed_local_headers;
 		let matching_local_headers = if !self.settings.enable_deduplication {
 			// We can't reuse local file headers if deduplication is disabled.
 			// Consider that no headers ever match
 			empty_vec = vec![];
 			&mut empty_vec
 		} else {
-			self.processed_local_headers
+			processed_local_headers = self.processed_local_headers.lock().await;
+
+			processed_local_headers
 				.entry(HashAndSize {
-					hash: previous_file.crc32,           // TODO: obfuscation
-					size: previous_file.compressed_size  // TODO: obfuscation
+					hash: previous_file.crc32,
+					size: previous_file.compressed_size
 				})
 				.or_insert_with(|| Vec::with_capacity(1)) // Usually, this list will be small
 		};
 
-		let get_partial_central_directory_header =
-			|local_header_offset: u64| -> Result<PartialCentralDirectoryHeader, SquashZipError> {
-				Ok(PartialCentralDirectoryHeader {
-					local_header_offset,
-					file_name: String::from(path.as_ref()), // TODO: obfuscation
-					compression_method: previous_file.compression_method, // TODO: obfuscation
-					squash_time: sanitized_squash_time,
-					crc32: previous_file.crc32,                         // TODO: obfuscation
-					compressed_size: previous_file.compressed_size,     // TODO: obfuscation
-					uncompressed_size: previous_file.uncompressed_size  // TODO: obfuscation
-				})
-			};
-
-		let local_file_header_offset = self.output_zip.seek(SeekFrom::Current(0)).await?;
 		let mut already_stored = false;
+		let mut output_zip = self.output_zip.lock().await;
+		let mut previous_zip = self.previous_zip.as_ref().unwrap().lock().await;
+		let mut initial_output_zip_stream_offset = None;
 		for (matching_header_offset, matching_header_size) in &*matching_local_headers {
 			let matching_data_start_offset = matching_header_offset + *matching_header_size as u64;
 
-			// Read from the output ZIP file the matching data
-			self.output_zip
-				.seek(SeekFrom::Start(matching_data_start_offset))
-				.await?;
-
-			let matching_output_zip_data =
-				ReaderStream::new((&mut self.output_zip).take(previous_file.compressed_size as u64))
-					.map_ok(|byte_chunk| {
-						tokio_stream::iter(byte_chunk).map(Result::<u8, io::Error>::Ok)
-					})
-					.try_flatten();
-
-			// Now do the same with the previous ZIP file data
+			// Position the previous ZIP to read the compressed data
 			previous_zip
 				.seek(SeekFrom::Start(previous_file.data_offset))
 				.await?;
 
 			let previous_zip_data =
-				ReaderStream::new(previous_zip.take(previous_file.compressed_size as u64))
-					.map_ok(|byte_chunk| tokio_stream::iter(byte_chunk).map(Result::Ok))
+				ReaderStream::new((&mut *previous_zip).take(previous_file.compressed_size as u64))
+					.map_ok(|byte_chunk| {
+						tokio_stream::iter(byte_chunk).map(Result::<u8, io::Error>::Ok)
+					})
 					.try_flatten();
 
-			// Use stream magic to check whether the bytes in both regions are the same.
-			// FIXME: this doesn't fail fast in case an error or inequality is found
-			already_stored = match matching_output_zip_data
-				.zip(previous_zip_data)
-				.fold(
-					(true, None),
-					|(equal_bytes, err), (output_byte, previous_byte)| async move {
-						match output_byte {
-							Ok(output_byte) => match previous_byte {
-								Ok(previous_byte) => {
-									(equal_bytes && output_byte == previous_byte, err)
-								}
-								Err(err) => (equal_bytes, Some(err))
-							},
-							Err(err) => (equal_bytes, Some(err))
-						}
-					}
-				)
+			// Move the output ZIP file cursor to where the matching data starts. If this is our
+			// first seek, make sure to note where it was, so we can go back there
+			if initial_output_zip_stream_offset.is_none() {
+				initial_output_zip_stream_offset = Some(output_zip.seek(SeekFrom::Current(0)).await?);
+			}
+			output_zip
+				.seek(SeekFrom::Start(matching_data_start_offset))
+				.await?;
+
+			let matching_output_zip_data = ReaderStream::new(AsyncReadExt::take(
+				&mut *output_zip,
+				previous_file.compressed_size as u64
+			))
+			.map_ok(|byte_chunk| tokio_stream::iter(byte_chunk).map(Result::<u8, io::Error>::Ok))
+			.try_flatten();
+
+			let mut bytes_compared = 0;
+			already_stored = match previous_zip_data
+				.zip(matching_output_zip_data)
+				.skip_while(|(result_byte_previous, result_byte_stored)| {
+					bytes_compared += 1;
+
+					future::ready(
+						result_byte_previous.is_ok()
+							&& result_byte_stored.is_ok()
+							&& *result_byte_previous.as_ref().unwrap()
+								== *result_byte_stored.as_ref().unwrap()
+					)
+				})
+				.next()
 				.await
 			{
-				(equal_bytes, None) => equal_bytes,
-				(_, Some(err)) => return Err(err.into())
+				Some((Ok(_), Ok(_))) => {
+					// Found a different byte
+					false
+				}
+				Some((Err(err), _)) | Some((_, Err(err))) => {
+					// An I/O error occurred. Propagate it
+					return Err(err.into());
+				}
+				None => {
+					// A different byte was not found (i.e. the bytes read from both streams were
+					// equal). Make sure we read the same number of bytes from both, as one may
+					// still be shorter than the other
+					bytes_compared == previous_file.compressed_size
+				}
 			};
 
 			if already_stored {
-				self.central_directory_data
-					.push(get_partial_central_directory_header(
-						*matching_header_offset
-					)?);
+				// We know for sure we found a matching file, so just add another pointer to
+				// existing data in the central directory (but with different metadata)
+				self.add_partial_central_directory_header(
+					path,
+					&local_file_header,
+					*matching_header_offset
+				)
+				.await;
 
-				// Make sure the next local file header is where it should be
-				// for the following operations
-				self.output_zip
-					.seek(SeekFrom::Start(local_file_header_offset))
+				// Seek to where the next local header would be
+				output_zip
+					.seek(SeekFrom::Start(initial_output_zip_stream_offset.unwrap()))
 					.await?;
 
 				// Found a match. No point in finding more
@@ -871,38 +743,41 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		}
 
 		if !already_stored {
-			let local_file_header_size = local_file_header.size();
+			let new_local_file_header_offset = if let Some(offset) = initial_output_zip_stream_offset
+			{
+				// Reuse the offset we already have. Make sure we write the new local file header
+				// in its expected position
+				output_zip.seek(SeekFrom::Start(offset)).await?;
+				offset
+			} else {
+				// No matches occurred. Get the offset now for the first time
+				output_zip.seek(SeekFrom::Current(0)).await?
+			};
 
-			// If some unsucessful comparison was done, the stream position of the output
-			// ZIP file will not be that of the to be added local file header
-			if !matching_local_headers.is_empty() {
-				self.output_zip
-					.seek(SeekFrom::Start(local_file_header_offset))
-					.await?;
-			}
-
+			// Avoid allocating memory for the dummy vector
 			if self.settings.enable_deduplication {
-				// Avoid allocating memory for the dummy vector
-				matching_local_headers.push((local_file_header_offset, local_file_header_size));
+				matching_local_headers.push((new_local_file_header_offset, local_file_header.size()));
 			}
 
-			self.central_directory_data
-				.push(get_partial_central_directory_header(
-					local_file_header_offset
-				)?);
+			self.add_partial_central_directory_header(
+				path,
+				&local_file_header,
+				new_local_file_header_offset
+			)
+			.await;
 
-			self.output_zip_size +=
-				local_file_header_size as u64 + previous_file.compressed_size as u64; // TODO: obfuscation
+			// Write the local header
+			// TODO: obfuscate header here
+			local_file_header.write(&mut *output_zip).await?;
 
-			local_file_header.write(&mut self.output_zip).await?;
-
-			previous_zip
+			// Write the compressed data
+			(&mut *previous_zip)
 				.seek(SeekFrom::Start(previous_file.data_offset))
 				.await?;
 
 			tokio::io::copy(
-				&mut previous_zip.take(previous_file.compressed_size as u64), // TODO: obfuscation
-				&mut self.output_zip
+				&mut (&mut *previous_zip).take(previous_file.compressed_size as u64),
+				&mut *output_zip
 			)
 			.await?;
 		}
@@ -915,13 +790,15 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	///
 	/// This operation ends the lifecycle of this SquashZip instance, consuming it, so no
 	/// further operations can be done on the ZIP file after this method returns.
-	pub async fn finish<P: AsRef<Path>>(mut self, path: P) -> Result<(), SquashZipError> {
-		let central_directory_entry_count = u64::try_from(self.central_directory_data.len())?;
+	pub async fn finish<P: AsRef<Path>>(self, path: P) -> Result<(), SquashZipError> {
+		let central_directory_data = self.central_directory_data.into_inner();
+		let mut output_zip = self.output_zip.into_inner();
 
-		// First, write the central directory file headers. Remember where they are
-		let central_directory_start_offset = self.output_zip.seek(SeekFrom::Current(0)).await?;
-		for header_data in self.central_directory_data {
-			// TODO: obfuscation
+		let central_directory_entry_count = u64::try_from(central_directory_data.len())?;
+		let central_directory_start_offset = output_zip.seek(SeekFrom::Current(0)).await?;
+
+		// First, write the central directory file headers
+		for header_data in central_directory_data {
 			let central_directory_header = CentralDirectoryHeader::new(
 				&header_data.file_name,
 				header_data.local_header_offset,
@@ -934,13 +811,13 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				false  // Spoof version made by
 			);
 
-			central_directory_header.write(&mut self.output_zip).await?;
-			self.output_zip_size += central_directory_header.size() as u64;
+			// TODO: obfuscate here
+			central_directory_header.write(&mut output_zip).await?;
 		}
-		let central_directory_end_offset = self.output_zip.seek(SeekFrom::Current(0)).await?;
+
+		let central_directory_end_offset = output_zip.seek(SeekFrom::Current(0)).await?;
 
 		// Now write the end of central directory
-		// TODO: obfuscation
 		let end_of_central_directory = EndOfCentralDirectory::new(
 			0,                                                             // Number of this disk
 			0,                                                             // Central directory start disk number
@@ -955,17 +832,162 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			false  // Zero out unused ZIP64 fields
 		);
 
-		end_of_central_directory.write(&mut self.output_zip).await?;
-		self.output_zip_size += end_of_central_directory.size() as u64;
+		// TODO: obfuscate here
+		end_of_central_directory.write(&mut output_zip).await?;
 
 		// Finally, write the generated ZIP file to its place!
 		// This also implicitly flushes any buffer, so any error during flushing will be returned
-		self.output_zip.seek(SeekFrom::Start(0)).await?;
-		tokio::io::copy(
-			&mut AsyncReadExt::take(self.output_zip, self.output_zip_size),
-			&mut File::create(path).await?
-		)
-		.await
-		.map_or_else(|err| Err(err.into()), |_| Ok(()))
+		output_zip.seek(SeekFrom::Start(0)).await?;
+
+		tokio::io::copy(&mut output_zip, &mut File::create(path).await?).await?;
+
+		Ok(())
+	}
+
+	/// Compresses a stream of processed data for the given ZIP file path, returning its corresponding
+	/// local file header and a scratch data file that contains its most efficient representation in
+	/// terms of size. The scratch data file stream position is just after the compressed contents, so
+	/// to read the compressed data back client code may need to rewind the file first.
+	async fn compress_and_generate_local_header<
+		'a,
+		T: Deref<Target = [u8]>,
+		S: Stream<Item = T> + Unpin
+	>(
+		&self,
+		path: &'a RelativePath<'a>,
+		mut processed_data: S,
+		skip_compression: bool,
+		estimated_file_size: usize
+	) -> Result<(LocalFileHeader<'a>, BufferedAsyncSpooledTempFile), SquashZipError> {
+		// Get the Squash Time right now, so it is as close as possible to the time when
+		// we saw whether it was modified or not, which is a good thing. Instantiate the
+		// local file header now so we validate the path as early as possible
+		let squash_time = self.settings.store_squash_time.then(SystemTime::now);
+		let mut local_file_header = LocalFileHeader::new(path.as_ref())?;
+
+		// Set up our scratch data files
+		let mut processed_data_scratch_file = BufferedAsyncSpooledTempFile::with_capacity(
+			self.settings.spool_buffer_size / 2,
+			estimated_file_size
+		);
+		let mut compressed_data_scratch_file = BufferedAsyncSpooledTempFile::with_capacity(
+			self.settings.spool_buffer_size / 2,
+			estimated_file_size
+		);
+
+		// Store the processed data in the scratch file we created for that purpose.
+		// Compute its hash and size
+		let mut crc32_hasher = crc32fast::Hasher::new();
+		let mut processed_data_size = 0u32;
+		let processed_data_crc;
+
+		while let Some(data) = processed_data.next().await {
+			processed_data_scratch_file.write_all(&data).await?;
+			crc32_hasher.update(&data);
+
+			processed_data_size = processed_data_size
+				.checked_add(data.len().try_into()?)
+				.ok_or(SquashZipError::FileTooBig)?;
+		}
+
+		processed_data_crc = crc32_hasher.finalize();
+
+		let mut compressed_data_size;
+		if skip_compression {
+			// Treat uncompressed data as if it was compressed. Because this never
+			// saves space, we don't actually get to use compressed_data_scratch_file
+			compressed_data_size = processed_data_size as u64;
+		} else {
+			// Rewind scratch file to read it back for compression
+			processed_data_scratch_file.seek(SeekFrom::Start(0)).await?;
+
+			// This operation will take long, so move this task to a blocking thread. Although when
+			// rolled over to disk the I/O operations themselves would move the task periodically,
+			// checking that needs to acquire a lock on the output file, which limits concurrency,
+			// so we don't do that
+			task::block_in_place(|| {
+				// Use a linear regression model to estimate an appropriate number of iterations for the
+				// file size. We correct the data size using a non-linear function, so that we don't
+				// start reducing iterations like crazy to meet the target time when we deal with bigger
+				// files, because we still care about compression. This means that we eventually reduce
+				// the iterations if the file grows pretty big (> 4 MiB), and that bigger files will take
+				// longer, but not too longer
+				let file_magnitude = (processed_data_size as f64 / 65536.0).powf(5.0 / 6.0) as f32;
+				let iterations = ((self.target_compression_time - B * file_magnitude)
+					/ (A * file_magnitude))
+					.clamp(1.0, MAXIMUM_ZOPFLI_ITERATIONS as f32)
+					.round() as u8;
+
+				zopfli::compress(
+					&{
+						let mut zopfli_options = zopfli::Options::default();
+						zopfli_options.numiterations = iterations.into();
+						zopfli_options
+					},
+					&Format::Deflate,
+					&mut processed_data_scratch_file,
+					processed_data_size as u64,
+					&mut compressed_data_scratch_file
+				)
+			})?;
+
+			compressed_data_size = compressed_data_scratch_file
+				.seek(SeekFrom::Current(0))
+				.await?;
+		}
+
+		let compression_method;
+		if compressed_data_size < processed_data_size as u64 {
+			// Storing the compressed data in the ZIP saves space, so use the compressed version
+			compression_method = CompressionMethod::Deflate;
+
+			// Close the uncompressed data file. We won't use it anymore
+			drop(processed_data_scratch_file);
+		} else {
+			// Compressed data is equal in size or bigger than uncompressed data.
+			// Favor uncompressed data, treating it as compressed
+			compression_method = CompressionMethod::Store;
+			compressed_data_size = processed_data_size as u64;
+
+			compressed_data_scratch_file = processed_data_scratch_file;
+		}
+
+		// Now populate all the local file header fields
+		local_file_header.compression_method = compression_method;
+		local_file_header.crc32 = processed_data_crc;
+		local_file_header.uncompressed_size = processed_data_size;
+		// The cast is always okay because compressed_data_size <= processed_data_size
+		local_file_header.compressed_size = compressed_data_size as u32;
+		if let Some(squash_time) = squash_time {
+			local_file_header.squash_time =
+				SYSTEM_TIME_SANITIZER.sanitize(&squash_time, &processed_data_crc.to_le_bytes())?;
+		}
+
+		Ok((local_file_header, compressed_data_scratch_file))
+	}
+
+	/// Adds a partial central directory header to the partial central directory headers list, which
+	/// is used when finishing up the ZIP file to generate the central directory.
+	///
+	/// This method acquires a lock on the `central_directory_data` field, which is released as soon as
+	/// it returns.
+	async fn add_partial_central_directory_header(
+		&self,
+		path: &RelativePath<'_>,
+		local_file_header: &LocalFileHeader<'_>,
+		local_file_header_offset: u64
+	) {
+		self.central_directory_data
+			.lock()
+			.await
+			.push(PartialCentralDirectoryHeader {
+				local_header_offset: local_file_header_offset,
+				file_name: String::from(path.as_ref()),
+				compression_method: local_file_header.compression_method,
+				squash_time: local_file_header.squash_time,
+				crc32: local_file_header.crc32,
+				compressed_size: local_file_header.compressed_size,
+				uncompressed_size: local_file_header.uncompressed_size
+			});
 	}
 }

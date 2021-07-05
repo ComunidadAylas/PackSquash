@@ -39,7 +39,7 @@ pub(super) enum ZipFeature {
 	// It is assumed that these features are in descending version
 	// needed to extract order (i.e. highest version needed first).
 	// If a new feature is added above the highest one,
-	// CentralDirectoryHeader::write_bytes must be changed
+	// CentralDirectoryHeader::write must be changed
 	Zip64Extensions,
 	DeflateCompression,
 	BasicFeatures
@@ -247,26 +247,8 @@ impl<'a> LocalFileHeader<'a> {
 		Ok(())
 	}
 
-	/// Reserves space in the output ZIP file to contain this ZIP file record,
-	/// by writing as many zero-bytes as this ZIP file record would take.
-	/// The caller can then write the proper record by rewinding to the offset
-	/// where the space was reserved and calling [`Self::write_bytes()`].
-	pub async fn reserve_space<W: AsyncWrite + Unpin + ?Sized>(
-		&self,
-		output_zip: &mut W
-	) -> Result<(), Error> {
-		output_zip
-			.write_all(&LOCAL_FILE_HEADER_CONSTANT_FIELDS_PADDING)
-			.await?;
-		output_zip
-			.write_all(&vec![0; self.file_name_length as usize])
-			.await?;
-
-		Ok(())
-	}
-
 	/// Returns the size that this ZIP file record would take on the file. This
-	/// is the same number of bytes that would be written by [`Self::write_bytes()`].
+	/// is the same number of bytes that would be written by [`Self::write()`].
 	pub fn size(&self) -> u32 {
 		LOCAL_FILE_HEADER_CONSTANT_FIELDS_PADDING.len() as u32 + self.file_name_length as u32
 	}
@@ -448,7 +430,7 @@ impl<'a> CentralDirectoryHeader<'a> {
 	}
 
 	/// Returns the size that this ZIP file record would take on the file. This
-	/// is the same number of bytes that would be written by [`Self::write_bytes()`].
+	/// is the same number of bytes that would be written by [`Self::write()`].
 	pub fn size(&self) -> u32 {
 		46 + self.file_name.len() as u32 + self.compute_extra_field_length() as u32
 	}
@@ -731,7 +713,7 @@ impl EndOfCentralDirectory {
 	}
 
 	/// Returns the size that this ZIP file record would take on the file. This
-	/// is the same number of bytes that would be written by [`Self::write_bytes()`].
+	/// is the same number of bytes that would be written by [`Self::write()`].
 	pub fn size(&self) -> u32 {
 		(56 + 20) * self.requires_zip64_extensions() as u32 + 22
 	}

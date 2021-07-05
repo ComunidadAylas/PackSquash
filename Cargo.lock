@@ -2115,7 +2115,7 @@ checksum = "85e60b0d1b5f99db2556934e21937020776a5d31520bf169e851ac44e6420214"
 [[package]]
 name = "zopfli"
 version = "0.4.0"
-source = "git+https://github.com/ComunidadAylas/zopfli#e97d7a8a3cbeb3285eed241b76da462f19c6088e"
+source = "git+https://github.com/ComunidadAylas/zopfli?branch=packsquash#03288fa856781e1966c2ab2c8c87f5734295192b"
 dependencies = [
  "adler32",
  "byteorder",
