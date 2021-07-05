@@ -80,9 +80,11 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	if options_file_path.is_none() {
 		// Newbies are often confused by terms such as "standard input", so try
 		// to point them in the direction of what they probably want to do
-		println!("If you are not sure what this means or what to do now, please consider reading the settings \
-		(or options) file documentation over GitHub, as you probably want to write and use one of those instead.");
+		println!("If you are not sure what this means or what to do now, please \n\
+		consider reading the settings (or options) file documentation over\n\
+		GitHub, as you probably want to write and use one of those instead.");
 	}
+	println!();
 
 	// Read the TOML configuration data from the specified source
 	let options_string = match match options_file_path {
@@ -155,11 +157,13 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 					PackSquasherStatus::ZipFinish => println!("Finishing up ZIP file..."),
 					PackSquasherStatus::Warning(warning) => match warning {
 						PackSquasherWarning::LowEntropySystemId => eprintln!(
-							"* Used a low entropy system ID. The dates embedded in the result ZIP file, which reveal when it was \
-							generated, may be easier to decrypt. Please read the relevant documentation over GitHub for details."),
+							"* Used a low entropy system ID. The dates embedded in the result ZIP file,\n\
+							which reveal when it was generated, may be easier to decrypt. Please read\n\
+							the relevant documentation over GitHub for details."),
 						PackSquasherWarning::VolatileSystemId => eprintln!(
-							"* Used a volatile system ID. You maybe should not reuse the result ZIP file, as unexpected results \
-							can occur after you use your device as usual. Please read the relevant documentation over GitHub for details."),
+							"* Used a volatile system ID. You maybe should not reuse the result ZIP file,\n\
+							as unexpected results can occur after you use your device as usual. Please\n\
+							read the relevant documentation over GitHub for details."),
 						_ => unimplemented!()
 					},
 					_ => unimplemented!()
