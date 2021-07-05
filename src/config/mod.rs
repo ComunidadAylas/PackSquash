@@ -171,7 +171,21 @@ pub struct GlobalOptions {
 	/// the output ZIP file.
 	///
 	/// **Default value**: `half of the available memory reported by the OS / (number of CPU hardware threads + 1)`
-	pub spooling_buffers_size: usize
+	pub spooling_buffers_size: usize,
+	/// The tentative maximum number of files that PackSquash will keep open at the same time. The default is
+	/// almost always fine, but if lots of threads are spawned to process pack files (more than 64) there can be
+	/// problems, because most operating systems limit the number of open files a process can have, and each thread
+	/// will keep the pack file it is processing open, at least.
+	///
+	/// Under normal circumstances, you should only reduce this value when you hit an open file limit. Conversely,
+	/// you should only increase it if you have configured your operating system to increase this limit and `threads`
+	/// is less than this value, because otherwise the concurrency will be effectively limited by this limit.
+	///
+	/// The default value is a conservative limit that won't hurt performance under most circumstances, neither risk
+	/// hitting limitations.
+	///
+	/// **Default value**: `512`
+	pub open_file_limit: usize
 }
 
 impl GlobalOptions {
@@ -219,7 +233,8 @@ impl Default for GlobalOptions {
 			spooling_buffers_size: (available_memory_kb * 125
 				/ 262144 / (hardware_threads as u64 + 1))
 				.try_into()
-				.unwrap_or(usize::MAX)
+				.unwrap_or(usize::MAX),
+			open_file_limit: 512
 		}
 	}
 }

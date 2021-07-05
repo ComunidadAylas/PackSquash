@@ -12,7 +12,7 @@
 #![feature(try_find)]
 #![feature(doc_cfg)]
 #![doc(
-	html_logo_url = "https://user-images.githubusercontent.com/7822554/96335786-5f403f80-107b-11eb-8aa8-d0e0b6e1aae9.png"
+	html_logo_url = "https://user-images.githubusercontent.com/31966940/124388201-1f40eb80-dce2-11eb-88e8-3934d7d73c0a.png"
 )]
 #![deny(missing_docs)]
 #![deny(rustdoc::invalid_html_tags)]
@@ -20,6 +20,7 @@
 #![deny(rustdoc::private_intra_doc_links)]
 
 use std::borrow::Cow;
+use std::cmp;
 use std::convert::TryInto;
 use std::io::ErrorKind;
 use std::path::PathBuf;
@@ -58,6 +59,7 @@ use tokio::fs::File;
 use tokio::io::AsyncSeek;
 use tokio::io::BufReader;
 use tokio::sync::mpsc::Sender;
+use tokio::sync::Semaphore;
 use tokio::{
 	io::AsyncRead,
 	runtime::{Builder, Runtime}
@@ -96,8 +98,9 @@ impl PackSquasher {
 
 		Ok(Self {
 			runtime: Builder::new_multi_thread()
-				.worker_threads(options.global_options.threads.into())
-				.max_blocking_threads(options.global_options.threads.into())
+				.worker_threads(options.global_options.threads.get())
+				// The actual number of blocking threads will be worker threads + 1 + this (1)
+				.max_blocking_threads(1)
 				.thread_name("packsquasher-worker")
 				.build()
 				.unwrap(),
@@ -164,6 +167,19 @@ impl PackSquasher {
 			let mut pack_file_tasks = Vec::with_capacity(squash_zip.previous_file_count());
 			let squash_zip = Arc::new(squash_zip);
 
+			// Instantiate a semaphore that will help us limit the number of in-flight tasks.
+			// This is needed because if we spawn those tasks faster than we finish them we
+			// may end up opening a lot of files, needlessly consuming memory and exhausting
+			// open file limits
+			let in_flight_tasks_semaphore = Arc::new(Semaphore::new(cmp::min(
+				self.options.global_options.threads.get() * 2,
+				// - 2 because we open the output file and the previous file at most
+				// / 3 because each task may consume 3 descriptors: the pack file itself,
+				// and two temporary files
+				// - 10 because the OsFilesystem VFS may keep some files open
+				(self.options.global_options.open_file_limit - 2 - 10) / 3
+			)));
+
 			// In the current thread, dispatch a task for each pack file, that may execute
 			// in any thread of the Tokio runtime
 			for pack_file_data in pack_file_iter {
@@ -171,9 +187,18 @@ impl PackSquasher {
 				let squash_zip = Arc::clone(&squash_zip);
 				let vfs = Arc::clone(&vfs);
 
+				let in_flight_tasks_semaphore = Arc::clone(&in_flight_tasks_semaphore);
 				let pack_file_status_sender = pack_file_status_sender.clone();
 
+				// Acquire a task permit before spawning it, and send it to the task. This
+				// stops iteration of the VFS if it is going too fast relative to the
+				// processing speed
+				let task_permit = in_flight_tasks_semaphore.acquire_owned().await.unwrap();
+
 				pack_file_tasks.push(self.runtime.spawn(async move {
+					// We will release the permit only after we have completed the task
+					let _ = task_permit;
+
 					let pack_file_data = match pack_file_data {
 						Ok(data) => data,
 						Err(err) => {
@@ -252,6 +277,7 @@ impl PackSquasher {
 							) {
 								Some(pack_file) => {
 									process!(pack_file, vfs_pack_file_meta);
+
 									return;
 								}
 								None => {
@@ -274,6 +300,8 @@ impl PackSquasher {
 									}
 								}
 							}
+
+							drop(vfs_pack_file_meta);
 						};
 					}
 

@@ -27,6 +27,7 @@ impl VirtualFileSystem for OsFilesystem {
 	) -> Self::FileIter {
 		let entry_iter = WalkDir::new(&root_path)
 			.follow_links(true)
+			.max_open(10)
 			.into_iter()
 			.filter_entry(move |entry| {
 				!directory_traversal_options.ignore_system_and_hidden_files
