@@ -20,6 +20,7 @@
 #![deny(rustdoc::private_intra_doc_links)]
 
 use std::borrow::Cow;
+use std::convert::TryInto;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::pin::Pin;
@@ -211,14 +212,19 @@ impl PackSquasher {
 					macro_rules! process {
 						($pack_file:expr, $pack_file_meta:expr) => {
 							// We instantiated the pack file, so we got our VFS metadata back
-							let pack_file_meta = $pack_file_meta.unwrap();
+							let (pack_file_meta, pack_file_size) = $pack_file_meta.unwrap();
 
 							process_pack_file(
 								$pack_file,
 								&pack_file_data.relative_path,
 								pack_file_meta.modification_time,
+								pack_file_size,
 								squash_zip,
-								pack_file_status_sender
+								pack_file_status_sender,
+								packsquasher
+									.options
+									.global_options
+									.recompress_compressed_files
 							)
 							.await
 						};
@@ -233,7 +239,8 @@ impl PackSquasher {
 							match $file_type::new(
 								|| match vfs.open(&pack_file_data.file_path) {
 									Ok(vfs_pack_file) => {
-										vfs_pack_file_meta = Some(vfs_pack_file.metadata);
+										vfs_pack_file_meta =
+											Some((vfs_pack_file.metadata, vfs_pack_file.file_size));
 										Some((vfs_pack_file.file_read, vfs_pack_file.file_size))
 									}
 									Err(err) => {
@@ -522,10 +529,11 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	pack_file: impl PackFile,
 	relative_path: &RelativePath<'_>,
 	edit_time: Option<SystemTime>,
+	file_size: u64,
 	squash_zip: Arc<SquashZip<F>>,
-	pack_file_status_sender: Option<Sender<PackSquasherStatus>>
+	pack_file_status_sender: Option<Sender<PackSquasherStatus>>,
+	always_compress: bool
 ) {
-	// TODO
 	// We may have to change the file extension to a canonical
 	// one that's accepted by Minecraft. Do that early, because
 	// we store the file with the canonical extension in the ZIP
@@ -546,11 +554,11 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	let optimization_strategy;
 
 	if previous_file_is_current {
-		optimization_error = None; /*squash_zip
-						   .add_previous_file(&pack_file_path)
-						   .await
-						   .err()
-						   .map(|err| err.to_string());*/
+		optimization_error = squash_zip
+			.add_previous_file(&pack_file_path)
+			.await
+			.err()
+			.map(|err| err.to_string());
 
 		optimization_strategy = Cow::Owned(String::from("Copied from previous run"))
 	} else {
@@ -575,7 +583,7 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 		}
 		.clone();
 
-		let mut processed_pack_file_chunks = processed_pack_file_chunks
+		let processed_pack_file_chunks = processed_pack_file_chunks
 			.take_while(|chunk| {
 				future::ready(if let Err(err) = chunk {
 					optimization_error = Some(err.to_string());
@@ -587,14 +595,16 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 			})
 			.map(|chunk| chunk.unwrap().1);
 
-		// TODO: temporary so optimization_error is set
-		processed_pack_file_chunks.next().await;
-
-		let squash_zip_error = None; /*squash_zip
-							 .add_file(&pack_file_path, processed_pack_file_chunks, is_compressed)
-							 .await
-							 .err()
-							 .map(|err| err.to_string());*/
+		let squash_zip_error = squash_zip
+			.add_file(
+				&pack_file_path,
+				processed_pack_file_chunks,
+				!always_compress && is_compressed,
+				file_size.try_into().unwrap_or(0)
+			)
+			.await
+			.err()
+			.map(|err| err.to_string());
 
 		optimization_error = optimization_error.or(squash_zip_error);
 	}
