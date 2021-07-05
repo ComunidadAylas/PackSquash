@@ -1,7 +1,7 @@
-<p align="center"><img src="https://user-images.githubusercontent.com/7822554/96335786-5f403f80-107b-11eb-8aa8-d0e0b6e1aae9.png" alt="PackSquash logo" width="300" height="300"></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/31966940/124388201-1f40eb80-dce2-11eb-88e8-3934d7d73c0a.png" alt="PackSquash logo" width="300" height="300"></p>
 
 # PackSquash [![Build](https://github.com/ComunidadAylas/PackSquash/workflows/Build/badge.svg)](https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3ABuild) [![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Latest version downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/latest/total?label=Downloads)](https://github.com/ComunidadAylas/PackSquash/releases/latest)
-A Minecraft resource pack optimizer which aims to achieve the best possible compression, which allows for efficient distribution and slightly improved load times in the game, at good speed. Anecdotal evidence shows that, with the default options, it is able to reduce the size of the _Witchcraft & Wizardary_ resource pack ZIP file by Floo Network (version 1.6.2) from 118 MiB to 57 MiB, a 51.69% size reduction.
+A Minecraft resource and data pack optimizer which aims to achieve the best possible compression, which allows for efficient distribution and slightly improved load times in the game, at good speed. Anecdotal evidence shows that, with the default options, it is able to reduce the size of the _Witchcraft & Wizardary_ resource pack ZIP file by Floo Network (version 1.6.2) from 118 MiB to 57 MiB, a 51.69% size reduction.
 
 ## 🔎 How does it work?
 PackSquash walks through the resource pack files that it recognizes in a directory, applying per-file configurable lossy and lossless compression techniques, and builds a ZIP file with the results that can be used directly by Minecraft. Currently, PackSquash can apply the following techniques:
@@ -13,6 +13,8 @@ PackSquash walks through the resource pack files that it recognizes in a directo
 * For Java property files (only if OptiFine mod support is enabled): minification, by removing unneeded whitespace. As with JSON files, performing minification requires parsing the file, so PackSquash will show basic validation errors.
 
 In addition to these techniques, the files that are not already compressed by design (like OGG and PNG images) are losslessly compressed using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, whilst being compatible with every DEFLATE decoder. For even higher savings it is possible to try to compress already compressed files, although this slows down the process significantly.
+
+PackSquash can also reuse previously generated ZIP files to skip recompressing files that did not change between executions, which greatly speeds up its usage for incrementally changing packs, where only a few files change each time. Finally, the generated ZIP files can also be protected, making them harder to extract by most ZIP manipulation programs. These features are disabled by default, however: they work fine, but you should read the documentation and make an informed decision before you enable them.
 
 ## 🔗 Download
 You can get the executable for the latest stable release from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
