@@ -181,7 +181,7 @@ impl PackSquasher {
 					(self
 						.options
 						.global_options
-						.open_file_limit
+						.open_files_limit
 						.get()
 						.saturating_sub(2)
 						.saturating_sub(10)) / 3,

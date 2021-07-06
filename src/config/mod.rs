@@ -185,7 +185,7 @@ pub struct GlobalOptions {
 	/// hitting limitations.
 	///
 	/// **Default value**: `512`
-	pub open_file_limit: NonZeroUsize
+	pub open_files_limit: NonZeroUsize
 }
 
 impl GlobalOptions {
@@ -234,7 +234,7 @@ impl Default for GlobalOptions {
 				/ 262144 / (hardware_threads as u64 + 1))
 				.try_into()
 				.unwrap_or(usize::MAX),
-			open_file_limit: 512.try_into().unwrap()
+			open_files_limit: 512.try_into().unwrap()
 		}
 	}
 }
