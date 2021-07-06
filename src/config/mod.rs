@@ -115,13 +115,22 @@ pub struct GlobalOptions {
 	/// files will be compressed less. Also, the file size is not actually taken into account for
 	/// this; what is really used is a non-linear magnitude that grows slower than the file size
 	/// (in mathematical terms, the order of the function is that of a fractional power, which is
-	/// less than linear). This means that PackSquash will be a bit "hesitant" to reduce the number
-	/// of iterations for bigger files to meet the target time, so it will exceed it, but not by too
+	/// less than linear). This means that PackSquash will be "hesitant" to reduce the number of
+	/// iterations for bigger files to meet the target time, so it will exceed it, but not by too
 	/// much.
 	///
-	/// The number of iterations actually used is clamped to the `[1, 20]` interval, so using values
-	/// outside that interval for this option will only change the magnitude threshold where iterations
-	/// start being reduced to meet a target time.
+	/// Unless set to zero, the number of iterations actually used is clamped to the `[1, 20]` interval,
+	/// so using values outside that interval for this option will only change the magnitude threshold
+	/// where iterations start being reduced to meet a target time.
+	///
+	/// Zero is a special case, however, because no file will be compressed, no matter its size. This
+	/// is useful to speed up the squash process without sacrificing file-specific optimization
+	/// techniques, while usually speeding up the loading speed of your pack by Minecraft clients (because
+	/// they won't have to decompress any file, which is a CPU bottleneck, especially with fast storage
+	/// devices). The obvious downside is that the generated ZIP files may take much more space, which
+	/// increases bandwidth requirements. Also, if the decompression speed is greater than the storage
+	/// device speed (i.e. a beefy CPU is paired with a slow HDD, for example), Minecraft clients may
+	/// actually take longer to load the pack.
 	///
 	/// **Default value**: `20`
 	pub zip_compression_iterations: u8,
