@@ -155,6 +155,8 @@ pub struct GlobalOptions {
 	/// This option does not have any effect if PackSquash was compiled without mod support.
 	///
 	/// **Default value**: empty set (do not add any mod-specific files)
+	#[cfg(feature = "mod-support")]
+	#[doc(cfg(feature = "mod-support"))]
 	pub allow_mods: EnumSet<MinecraftMod>,
 	/// The output file path where the result ZIP will be written to. This path must not point to a
 	/// folder.
@@ -215,6 +217,7 @@ impl Default for GlobalOptions {
 			zip_compression_iterations: 20,
 			workaround_minecraft_quirks: EnumSet::empty(),
 			ignore_system_and_hidden_files: true,
+			#[cfg(feature = "mod-support")]
 			allow_mods: EnumSet::empty(),
 			threads: hardware_threads.try_into().unwrap(),
 			output_file_path: PathBuf::from("pack.zip"),
@@ -578,6 +581,7 @@ impl Default for JsonFileOptions {
 }
 
 impl FileOptionsTrait for JsonFileOptions {
+	#[cfg_attr(not(feature = "optifine-support"), allow(unused_mut, unused_variables))]
 	fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
 		#[cfg(feature = "optifine-support")]
 		{
