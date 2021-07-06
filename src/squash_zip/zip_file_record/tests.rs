@@ -8,8 +8,7 @@ use super::*;
 const FILE_NAME: &str = "𒀭𒂗𒆠 こんにちは 😄.bin";
 
 /// The size of the local file header that should be generated.
-const LOCAL_FILE_HEADER_SIZE: usize =
-	LOCAL_FILE_HEADER_CONSTANT_FIELDS_PADDING.len() + FILE_NAME.len();
+const LOCAL_FILE_HEADER_SIZE: usize = 30 + FILE_NAME.len();
 
 // The minimum central directory header size, assuming an empty file
 // name, no extra fields and no file comments.

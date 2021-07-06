@@ -167,9 +167,6 @@ pub(super) struct LocalFileHeader<'a> {
 /// the beginning of a local file header record.
 const LOCAL_FILE_HEADER_SIGNATURE: [u8; 4] = 0x04034B50_u32.to_le_bytes();
 
-/// Padding bytes used to reserve space for a local file header record.
-const LOCAL_FILE_HEADER_CONSTANT_FIELDS_PADDING: [u8; 30] = [0; 30];
-
 impl<'a> LocalFileHeader<'a> {
 	/// Creates a new local file header record. This operation may fail if the
 	/// file name is too big. The caller must make sure that the following fields
@@ -250,7 +247,7 @@ impl<'a> LocalFileHeader<'a> {
 	/// Returns the size that this ZIP file record would take on the file. This
 	/// is the same number of bytes that would be written by [`Self::write()`].
 	pub fn size(&self) -> u32 {
-		LOCAL_FILE_HEADER_CONSTANT_FIELDS_PADDING.len() as u32 + self.file_name_length as u32
+		30 + self.file_name_length as u32
 	}
 }
 
