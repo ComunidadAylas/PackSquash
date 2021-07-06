@@ -117,19 +117,40 @@ pub enum SquashZipError {
 
 /// Contains settings that tweak SquashZip operation.
 pub struct SquashZipSettings {
-	/// TODO
+	/// The number of Zopfli compression iterations that will be done on input files of
+	/// 1 MiB magnitude, if they are to be deflated by SquashZip. This number is adjusted
+	/// to the actual input file magnitude via a combination of a linear regression model
+	/// and non-linear file magnitude formula, the objective being to minimize compression
+	/// time differences between files of different sizes, by compressing smaller files
+	/// more and bigger files less. Zero is treated in a special way, meaning to never
+	/// perform any compression.
 	pub zopfli_iterations: u8,
-	/// TODO
+	/// Whether Squash Time timestamps will be stored and read from ZIP files or not.
+	/// This allows reusing the contents of previously generated ZIP files to skip
+	/// processing unchanged files again.
 	pub store_squash_time: bool,
-	/// TODO
+	/// Whether to enable ZIP file records obfuscation or not, expressely aimed at
+	/// increasing compressibility and/or protection.
 	pub enable_obfuscation: bool,
-	/// TODO
+	/// Whether to enable deduplication of identical processed input files or not.
+	/// This is a good thing for space savings, but can cause many ZIP file manipulation
+	/// programs to choke. It also takes a bit of time to make sure whether two files are
+	/// indeed duplicates, because doing so requires comparing their contents, although
+	/// these operations are reduced to the minimum possible by comparing the hash and
+	/// file size first.
 	pub enable_deduplication: bool,
-	/// TODO
+	/// Whether to enable ZIP file obfuscations that may increase file size for extra
+	/// protection or not.
 	pub enable_size_increasing_obfuscation: bool,
-	/// TODO
-	pub percentage_of_structures_tuned_for_obfuscation_discretion: PercentageInteger,
-	/// TODO (in bytes)
+	/// Controls the percentage of ZIP file records that will be stored favoring increased
+	/// resistance against some potentially protection-breaking activities vs. increased
+	/// compressibility.
+	pub percentage_of_records_tuned_for_obfuscation_discretion: PercentageInteger,
+	/// Sets the size of the in-memory buffer of the spooled temporary files that will be
+	/// used to hold the output ZIP file contents, input files and compressed versions
+	/// of the input files, in bytes. The temporary files that hold data from input files
+	/// are extremely temporary, being only valid during a call to `add_file`, and each of
+	/// them will have a buffer `spool_buffer_size / 2` bytes big.
 	pub spool_buffer_size: usize
 }
 

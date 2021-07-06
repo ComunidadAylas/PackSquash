@@ -65,7 +65,7 @@ async fn add_files_finish_and_read_back_test(
 				enable_obfuscation: false,
 				enable_deduplication,
 				enable_size_increasing_obfuscation: false,
-				percentage_of_structures_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
+				percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 				spool_buffer_size: SPOOL_BUFFER_SIZE
 			}
 		)
@@ -107,7 +107,7 @@ async fn add_files_finish_and_read_back_test(
 			enable_obfuscation: false,
 			enable_deduplication,
 			enable_size_increasing_obfuscation: false,
-			percentage_of_structures_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
+			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			spool_buffer_size: SPOOL_BUFFER_SIZE
 		}
 	)
@@ -293,7 +293,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 			enable_obfuscation: false,
 			enable_deduplication: true,
 			enable_size_increasing_obfuscation: false,
-			percentage_of_structures_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
+			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			spool_buffer_size: SPOOL_BUFFER_SIZE
 		}
 	)
@@ -332,7 +332,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 			enable_obfuscation: false,
 			enable_deduplication: true,
 			enable_size_increasing_obfuscation: false,
-			percentage_of_structures_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
+			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			spool_buffer_size: SPOOL_BUFFER_SIZE
 		}
 	)

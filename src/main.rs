@@ -4,7 +4,7 @@ use std::{
 	io::{self, Read},
 	process,
 	sync::{
-		atomic::{AtomicU64, Ordering},
+		atomic::{AtomicBool, AtomicU64, Ordering},
 		Arc
 	},
 	thread,
@@ -22,7 +22,8 @@ fn main() {
 	process::exit(run());
 }
 
-/// TODO
+/// Runs PackSquash, parsing the command line parameters and deciding what options file
+/// to read to process a pack.
 fn run() -> i32 {
 	let mut options = Options::new();
 
@@ -68,7 +69,8 @@ fn run() -> i32 {
 	}
 }
 
-/// TODO
+/// Reads an options file and launches a squash operation to optimize it with the
+/// read options.
 fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	let user_friendly_options_path = options_file_path.map_or_else(
 		|| Cow::Borrowed("standard input"),
@@ -128,11 +130,13 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 
 	let output_file_path = squash_options.global_options.output_file_path.clone();
 	let processed_file_count = Arc::new(AtomicU64::new(0));
+	let error_occurred = Arc::new(AtomicBool::new(false));
 	let start_instant = Instant::now();
 
 	|| -> Result<(), PackSquasherError> {
 		let (sender, mut receiver) = channel(64);
 		let processed_file_count = processed_file_count.clone();
+		let error_occurred = error_occurred.clone();
 
 		// Spawn our CLI-updating thread. This decouples the pack processing from
 		// the printing of standard streams messages, unless printing to them is
@@ -145,26 +149,30 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 						processed_file_count.fetch_add(1, Ordering::Relaxed);
 
 						match pack_file_status.optimization_error() {
-							Some(error_description) => eprintln!(
-								"! {}: {}",
-								pack_file_status.path().as_ref(),
-								error_description
-							),
-							None => println!(
+							Some(error_description) => {
+								error_occurred.store(true, Ordering::Relaxed);
+
+								eprintln!(
+									"! {}: {}",
+									pack_file_status.path().as_ref(),
+									error_description
+								);
+							}
+							None => eprintln!(
 								"> {}: {}",
 								pack_file_status.path().as_ref(),
 								pack_file_status.optimization_strategy()
 							)
 						}
 					}
-					PackSquasherStatus::ZipFinish => println!("Finishing up ZIP file..."),
+					PackSquasherStatus::ZipFinish => eprintln!("- Finishing up ZIP file..."),
 					PackSquasherStatus::Warning(warning) => match warning {
 						PackSquasherWarning::LowEntropySystemId => eprintln!(
-							"* Used a low entropy system ID. The dates embedded in the result ZIP file,\n\
+							"! Used a low entropy system ID. The dates embedded in the result ZIP file,\n\
 							which reveal when it was generated, may be easier to decrypt. Please read\n\
 							the relevant documentation over GitHub for details."),
 						PackSquasherWarning::VolatileSystemId => eprintln!(
-							"* Used a volatile system ID. You maybe should not reuse the result ZIP file,\n\
+							"! Used a volatile system ID. You maybe should not reuse the result ZIP file,\n\
 							as unexpected results can occur after you use your device as usual. Please\n\
 							read the relevant documentation over GitHub for details."),
 						_ => unimplemented!()
@@ -194,28 +202,37 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		},
 		|_| {
 			let process_time = start_instant.elapsed();
+			let error_occurred = Arc::try_unwrap(error_occurred).unwrap().into_inner();
 
 			println!(
-				"{} generated{} ({} files, {}.{:03} s)",
-				output_file_path.as_os_str().to_string_lossy(),
-				output_file_path.metadata().map_or_else(
-					|_| Cow::Borrowed(""),
-					|metadata| Cow::Owned(format!(
-						", {:.3} MiB",
-						metadata.len() as f64 / (1024.0 * 1024.0)
-					))
-				),
+				"{} ({} files, {}.{:03} s)",
+				output_file_path
+					.metadata()
+					.ok()
+					.filter(|_| !error_occurred)
+					.map_or_else(
+						|| Cow::Borrowed("Pack processed"),
+						|metadata| Cow::Owned(format!(
+							"{} generated, {:.3} MiB",
+							output_file_path.as_os_str().to_string_lossy(),
+							metadata.len() as f64 / (1024.0 * 1024.0)
+						))
+					),
 				Arc::try_unwrap(processed_file_count).unwrap().into_inner(),
 				process_time.as_secs(),
 				process_time.subsec_millis()
 			);
 
-			0
+			if error_occurred {
+				4
+			} else {
+				0
+			}
 		}
 	)
 }
 
-/// TODO
+/// Prints PackSquash version information to the standard output stream.
 fn print_version_information(verbose: bool) {
 	println!(
 		"PackSquash {} ({}, {}) for {}",

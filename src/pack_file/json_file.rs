@@ -43,7 +43,7 @@ pub struct OptimizerDecoder {
 #[derive(Error, Debug)]
 #[non_exhaustive]
 pub enum OptimizationError {
-	#[error("JSON object serialization or desarialization error: {0}")]
+	#[error("JSON error: {0}")]
 	JsonSerde(#[from] serde_json::Error),
 	#[error("Debloat error: {0}")]
 	Debloat(#[from] DebloatError),

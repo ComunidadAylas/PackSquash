@@ -36,7 +36,7 @@ impl<T: AsRef<[u8]>> Deref for OptimizedBytes<T> {
 	}
 }
 
-/// TODO
+/// Represents an error that may occur while optimizing a pack file.
 #[derive(Error, Debug)]
 #[error("{0}")]
 pub enum OptimizationError {
@@ -95,20 +95,35 @@ pub trait PackFile {
 	fn is_compressed(&self) -> bool;
 }
 
-/// TODO
+/// Factory trait for a [`PackFile`] that allows it to be instantiated in an standard way. It is separated
+/// from that trait because it can only be implemented in a sized type, and that constraint would make the
+/// [`PackFile`] trait not object-safe, which may limit the usage of the pack file by client code.
+///
+/// Every [`PackFile`] must implement this trait in order to be used easily with the already existing
+/// high-level library code.
 pub trait PackFileConstructor<R: AsyncRead + Unpin + 'static>: PackFile + Sized {
 	/// The type of optimization settings that have to be used to instantiate the pack file.
 	type OptimizationSettings;
 
-	/// TODO
+	/// Instantiates this pack file with the provided arguments, which contain optimization settings
+	/// specific to the type, lazily associating it with the read struct that `file_read_producer`
+	/// returns.
+	///
+	/// This operation will not yield a pack file instance if the provided arguments don't actually point
+	/// to a pack file of this type, if the pack file should be skipped, or if the read struct producer function
+	/// returns `None`. It is the responsibility of the caller to deal with any I/O error that may happen
+	/// during the execution of this producer function. If these conditions do not apply, this method is
+	/// guaranteed to suceed and return `Some`.
 	fn new<F: FnMut() -> Option<(R, u64)>>(
 		file_read_producer: F,
 		args: PackFileConstructorArgs<'_, Self::OptimizationSettings>
 	) -> Option<Self>;
 }
 
-/// TODO
+/// Contains the arguments needed to instantiate a [`PackFile`] via the [`PackFileConstructor`] trait.
 pub struct PackFileConstructorArgs<'a, S> {
+	/// The relative path where this pack file is.
 	pub path: &'a RelativePath<'a>,
+	/// The pack file type specific optimization settings.
 	pub optimization_settings: S
 }

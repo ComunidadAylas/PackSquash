@@ -1,4 +1,5 @@
-//! TODO
+//! Contains the data types that support a virtual filesystem implementation
+//! that operates with files from the operating system filesystems.
 
 use std::{
 	fs::{self, File, FileType},
@@ -9,11 +10,12 @@ use std::{
 use tokio::io::BufReader;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::{RelativePath, VfsPackFile, VfsPackFileIterEntry, VfsPackFileMetadata};
+use crate::{RelativePath, VfsFile, VfsPackFileIterEntry, VfsPackFileMetadata};
 
-use super::{DirectoryTraversalOptions, VirtualFileSystem};
+use super::{IteratorTraversalOptions, VirtualFileSystem};
 
-/// TODO
+/// A virtual filesystem implementation that operates with files in the mounted
+/// operating system filesystems. In other words, it is a facade for `std::fs`.
 pub struct OsFilesystem;
 
 impl VirtualFileSystem for OsFilesystem {
@@ -23,14 +25,14 @@ impl VirtualFileSystem for OsFilesystem {
 	fn file_iterator(
 		&self,
 		root_path: &Path,
-		directory_traversal_options: DirectoryTraversalOptions
+		iterator_traversal_options: IteratorTraversalOptions
 	) -> Self::FileIter {
 		let entry_iter = WalkDir::new(&root_path)
 			.follow_links(true)
 			.max_open(10)
 			.into_iter()
 			.filter_entry(move |entry| {
-				!directory_traversal_options.ignore_system_and_hidden_files
+				!iterator_traversal_options.ignore_system_and_hidden_files
 					|| !is_system_or_hidden_file(entry)
 			});
 
@@ -56,11 +58,11 @@ impl VirtualFileSystem for OsFilesystem {
 		})
 	}
 
-	fn open<P: AsRef<Path>>(&self, path: P) -> Result<VfsPackFile<Self::FileRead>, io::Error> {
+	fn open<P: AsRef<Path>>(&self, path: P) -> Result<VfsFile<Self::FileRead>, io::Error> {
 		// This matches what walkdir would do on a DirEntry, because we follow symlinks
 		let metadata = fs::metadata(&path)?;
 
-		Ok(VfsPackFile {
+		Ok(VfsFile {
 			file_read: BufReader::new(tokio::fs::File::from_std(File::open(path)?)),
 			metadata: VfsPackFileMetadata {
 				modification_time: metadata.modified().ok()
@@ -138,7 +140,7 @@ mod tests {
 
 		let file_iter = OsFilesystem.file_iterator(
 			root_dir.path(),
-			DirectoryTraversalOptions {
+			IteratorTraversalOptions {
 				ignore_system_and_hidden_files: true
 			}
 		);

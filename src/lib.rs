@@ -1,8 +1,5 @@
 //! A Minecraft resource and data pack optimizer that aims to achieve the best possible compression,
 //! which allows for efficient distribution and slightly improved load times in the game, at good speed.
-//!
-//! TODO: example to get started, talk about important data types, explain essential things about how
-//! PackSquash works
 
 #![deny(unsafe_code)]
 #![feature(const_option)]
@@ -43,7 +40,7 @@ use crate::pack_file::PackFile;
 use crate::pack_file::PackFileConstructor;
 use crate::pack_file::PackFileConstructorArgs;
 use crate::squash_zip::system_id;
-use crate::vfs::{DirectoryTraversalOptions, VirtualFileSystem};
+use crate::vfs::{IteratorTraversalOptions, VirtualFileSystem};
 
 #[cfg(feature = "optifine-support")]
 use crate::config::PropertiesFileOptions;
@@ -72,7 +69,8 @@ mod pack_file;
 mod squash_zip;
 
 /// A struct that represents a resource or data pack optimization operation with configuration
-/// parameters known beforehand. This is a good starting point for reading the API documentation.
+/// parameters known beforehand, which generates an output ZIP file. This is a good starting
+/// point for reading the API documentation.
 ///
 /// Once constructed, this struct can be used to run one or several optimization operations
 /// with the same configuration on any pack, in an efficient manner.
@@ -109,7 +107,22 @@ impl PackSquasher {
 		})
 	}
 
-	/// TODO
+	/// Executes the configured squash operation, reading pack files from the provided virtual
+	/// file system, on the specified directory, and waits for it to finish. If a pack directory
+	/// is not provided, it will be read from the [`SquashOptions`] struct provided when this
+	/// struct was instantiated. In that case, if the [`SquashOptions`] doesn't contain a pack
+	/// directory either, an error will be returned.
+	///
+	/// Client code can provide an optional channel to this method in the
+	/// `pack_file_status_sender` parameter. Status updates of the squash operation will be
+	/// sent to this channel, which the client code can use as it deems fit.
+	///
+	/// Even if this function returns successfully, a output ZIP file will not be generated if
+	/// an error occurrs while processing a pack file. The caller can detect whether such an error
+	/// occurred via the status updates channel.
+	///
+	/// Note that, due to the usage of several threads, the [`PackSquasher`] instance must be
+	/// wrapped on an atomically reference counted pointer (`Arc`) to call this method.
 	pub fn run<F: VirtualFileSystem + 'static, P: AsRef<Path>>(
 		self: Arc<Self>,
 		vfs: F,
@@ -134,7 +147,7 @@ impl PackSquasher {
 			// Get the iterator over pack files from the virtual file system
 			let pack_file_iter = vfs.file_iterator(
 				pack_directory,
-				DirectoryTraversalOptions {
+				IteratorTraversalOptions {
 					ignore_system_and_hidden_files: self
 						.options
 						.global_options
@@ -225,7 +238,8 @@ impl PackSquasher {
 						}
 					};
 
-					/// TODO
+					/// Macro that evaluates to a [`PackFileConstructorArgs`] instance, allowing its
+					/// instantiation with less verbosity.
 					macro_rules! constructor_args {
 						(()) => {
 							PackFileConstructorArgs {
@@ -242,7 +256,8 @@ impl PackSquasher {
 						};
 					}
 
-					/// TODO
+					/// Macro that evaluates to a call to the `process_pack_file` function,
+					/// providing less verbose syntax to call it.
 					macro_rules! process {
 						($pack_file:expr, $pack_file_meta:expr) => {
 							// We instantiated the pack file, so we got our VFS metadata back
@@ -264,18 +279,21 @@ impl PackSquasher {
 						};
 					}
 
-					/// TODO
+					/// Big macro that opens a pack file ant tries to instantiate it with the
+					/// appropriate options, handling any error that could happen. The function
+					/// will return if either the pack file is processed successfully or not or
+					/// an error occurs while opening the pack file. It will not return if
+					/// the pack file is not of the expected file type.
 					macro_rules! process_with_options {
 						($file_type:ident, $constructor_args:expr) => {
 							let mut pack_file_open_error = None;
-							let mut vfs_pack_file_meta = None;
+							let mut vfs_file_meta = None;
 
 							match $file_type::new(
 								|| match vfs.open(&pack_file_data.file_path) {
-									Ok(vfs_pack_file) => {
-										vfs_pack_file_meta =
-											Some((vfs_pack_file.metadata, vfs_pack_file.file_size));
-										Some((vfs_pack_file.file_read, vfs_pack_file.file_size))
+									Ok(vfs_file) => {
+										vfs_file_meta = Some((vfs_file.metadata, vfs_file.file_size));
+										Some((vfs_file.file_read, vfs_file.file_size))
 									}
 									Err(err) => {
 										pack_file_open_error = Some(err);
@@ -285,7 +303,7 @@ impl PackSquasher {
 								$constructor_args
 							) {
 								Some(pack_file) => {
-									process!(pack_file, vfs_pack_file_meta);
+									process!(pack_file, vfs_file_meta);
 
 									return;
 								}
@@ -309,12 +327,12 @@ impl PackSquasher {
 									}
 								}
 							}
-
-							drop(vfs_pack_file_meta);
 						};
 					}
 
-					/// TODO
+					/// Processes this pack file if and only if the provided file options variant
+					/// matches the expected variant for the pack file type. If the variant doesn't
+					/// match, nothing is done.
 					macro_rules! process_if_match {
 						($file_type:ident, $file_options_type:ident, $file_options:expr) => {
 							if let FileOptions::$file_options_type(file_options) = $file_options {
@@ -323,7 +341,8 @@ impl PackSquasher {
 						};
 					}
 
-					/// TODO
+					/// Processes this pack file as if it was of the specified type, using the
+					/// provided options.
 					macro_rules! process_with_defaults {
 						($file_type:ident) => {
 							process_with_options!($file_type, constructor_args!(()));
@@ -425,7 +444,7 @@ impl PackSquasher {
 	}
 }
 
-/// TODO
+/// An error that may occur during a pack squashing operation.
 #[derive(Error, Debug)]
 #[non_exhaustive]
 pub enum PackSquasherError {
@@ -452,45 +471,58 @@ pub enum PackSquasherError {
 	SquashZip(#[from] SquashZipError)
 }
 
-/// TODO
+/// A entry in a virtual filesystem directory that represents a possible pack file,
+/// obtained via a virtual filesystem directory file iterator.
 pub struct VfsPackFileIterEntry {
 	relative_path: RelativePath<'static>,
 	file_path: PathBuf
 }
 
-/// TODO
-pub struct VfsPackFile<R: AsyncRead + Unpin + 'static> {
+/// An open file in a virtual filesystem, from which data can be read and
+/// metadata is available.
+pub struct VfsFile<R: AsyncRead + Unpin + 'static> {
 	file_read: R,
 	file_size: u64,
 	metadata: VfsPackFileMetadata
 }
 
-/// TODO
+/// Metadata of a virtual filesystem file.
 pub struct VfsPackFileMetadata {
 	modification_time: Option<SystemTime>
 }
 
-/// TODO
+/// Warnings that [`PackSquasher`] may emit while running a squash operation
+/// to notify about conditions that may require some attention, because they
+/// might signal some potential problem.
+///
+/// Although these warnings are currently emitted just before finishing the
+/// squash operation, that behavior is subject to change in the future, so
+/// it shouldn't be relied upon.
 #[non_exhaustive]
 pub enum PackSquasherWarning {
-	/// TODO
+	/// A system identifier with low entropy was used to encrypt data, which
+	/// may render that data easier to decrypt.
 	LowEntropySystemId,
-	/// TODO
+	/// A system identifier that may change even if no targeted action by the
+	/// user to explicitly change it was done was used.
 	VolatileSystemId
 }
 
-/// TODO
+/// A status message concerning an in-progress squash operation.
 #[non_exhaustive]
 pub enum PackSquasherStatus {
-	/// TODO
+	/// A pack file was processed in some way, either successfully or not.
 	PackFileProcessed(PackFileStatus),
-	/// TODO
+	/// Every pack file was processed, and the output ZIP file is being
+	/// finished up.
 	ZipFinish,
-	/// TODO
+	/// A condition about the squash operation that may indicate a
+	/// potential problem.
 	Warning(PackSquasherWarning)
 }
 
-/// TODO
+/// Status message that represents that a pack file was processed in some way,
+/// successfully or not.
 pub struct PackFileStatus {
 	path: RelativePath<'static>,
 	optimization_strategy: String,
@@ -498,61 +530,81 @@ pub struct PackFileStatus {
 }
 
 impl PackFileStatus {
-	/// TODO
+	/// Gets the relative path of the pack file that was processed.
 	pub fn path(&self) -> &RelativePath<'static> {
 		&self.path
 	}
 
-	/// TODO
+	/// Gets the optimization strategy that was applied to this file. The string
+	/// returned by this method is guaranteed to be user-friendly, but it is not
+	/// advised to match patterns against it, because these strings may change
+	/// between releases.
 	pub fn optimization_strategy(&self) -> &str {
 		&self.optimization_strategy
 	}
 
-	/// TODO
+	/// Gets the error that occurred while optimizing this file. If an error
+	/// did not happen, this returns `None`. Like the string returned by the
+	/// `optimization_strategy` method, it is user-friendly and it may change
+	/// between versions.
 	pub fn optimization_error(&self) -> Option<&str> {
 		self.optimization_error.as_deref()
 	}
 }
 
-/// TODO
+/// Contains virtual file systems implementations to use with [`PackSquasher`].
 pub mod vfs {
 	use std::{fs::FileType, io, path::Path};
 
 	use tokio::io::AsyncRead;
 
-	use crate::{VfsPackFile, VfsPackFileIterEntry};
+	use crate::{VfsFile, VfsPackFileIterEntry};
 
 	pub mod os_fs;
 
-	/// TODO
+	/// Defines the contract that any virtual file system must implement.
 	pub trait VirtualFileSystem: Send + Sync {
-		/// TODO
+		/// The type of the byte source that this virtual file system yields
+		/// when successfully opening files. It reading bytes from this source
+		/// is costly, it is recommended to introduce some buffering for maximum
+		/// performance.
 		type FileRead: AsyncRead + Unpin + Send + 'static;
-		/// TODO
+		/// The type of the iterator over the files within a path that this virtual
+		/// file system yields.
 		type FileIter: Iterator<Item = Result<VfsPackFileIterEntry, io::Error>>;
 
-		/// TODO
+		/// Returns an iterator over the files that are in the filesystem subtree
+		/// whose root is at `root_path`, which usually is a directory, according
+		/// to the specified directory traversal options. This means that not only
+		/// direct children of the `root_path` are yielded, but also grandchildren
+		/// and so on. Files that don't hold any readable user data (i.e. directories)
+		/// are not yielded.
+		///
+		/// Any I/O error that may happen is returned as an element in the iterator,
+		/// so getting the iterator itself can't fail.
 		fn file_iterator(
 			&self,
 			root_path: &Path,
-			directory_traversal_options: DirectoryTraversalOptions
+			iterator_traversal_options: IteratorTraversalOptions
 		) -> Self::FileIter;
 
-		/// TODO
-		fn open<P: AsRef<Path>>(&self, path: P) -> Result<VfsPackFile<Self::FileRead>, io::Error>;
+		/// Opens the file at the specified virtual filesystem path for read-only access.
+		fn open<P: AsRef<Path>>(&self, path: P) -> Result<VfsFile<Self::FileRead>, io::Error>;
 
-		/// TODO
+		/// Returns the type of the file at the specified virtual filesystem path.
 		fn file_type<P: AsRef<Path>>(&self, path: P) -> Result<FileType, io::Error>;
 	}
 
-	/// TODO
+	/// Contains options that tweak the operation of the [`VirtualFileSystem::file_iterator`]
+	/// method.
 	#[non_exhaustive]
-	pub struct DirectoryTraversalOptions {
-		/// TODO
+	pub struct IteratorTraversalOptions {
+		/// Whether system (i.e. clearly not part of a pack file) and hidden files
+		/// (usually, those whose name begins with a dot) are yielded or not.
 		pub ignore_system_and_hidden_files: bool
 	}
 
-	impl Default for DirectoryTraversalOptions {
+	impl Default for IteratorTraversalOptions {
 		fn default() -> Self {
 			Self {
 				ignore_system_and_hidden_files: false
@@ -561,7 +613,11 @@ pub mod vfs {
 	}
 }
 
-/// TODO
+/// Processes the provided pack file, adding it to the output ZIP file
+/// as appropriate and notifying client code via a channel about the
+/// result of the operation. If some error occurs, the state of the
+/// output ZIP file may become invalid, and no further pack files
+/// should be processed and added to it.
 async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	pack_file: impl PackFile,
 	relative_path: &RelativePath<'_>,
@@ -620,6 +676,9 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 		}
 		.clone();
 
+		// Stop taking chunks of processed data if some error happens, and store
+		// the error that happened. After that, unwrap the successful chunks
+		// so that they only contain the data
 		let processed_pack_file_chunks = processed_pack_file_chunks
 			.take_while(|chunk| {
 				future::ready(if let Err(err) = chunk {

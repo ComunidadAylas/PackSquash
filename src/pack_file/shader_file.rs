@@ -59,7 +59,7 @@ pub struct OptimizerDecoder {
 pub enum OptimizationError {
 	#[error("Invalid UTF-8 character encoding: {0}")]
 	InvalidUtf8(#[from] Utf8Error),
-	#[error("Invalid shader code: {0}")]
+	#[error("Shader parse error: {0}")]
 	InvalidShaderStage(#[from] ParseError),
 	#[error("I/O error: {0}")]
 	Io(#[from] io::Error)

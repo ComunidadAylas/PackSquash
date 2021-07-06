@@ -1,4 +1,4 @@
-//! TODO
+//! Contains the configuration options needed to create a `PackSquasher` run.
 
 use std::{
 	convert::{TryFrom, TryInto},
@@ -119,18 +119,18 @@ pub struct GlobalOptions {
 	/// iterations for bigger files to meet the target time, so it will exceed it, but not by too
 	/// much.
 	///
-	/// Unless set to zero, the number of iterations actually used is clamped to the `[1, 20]` interval,
-	/// so using values outside that interval for this option will only change the magnitude threshold
-	/// where iterations start being reduced to meet a target time.
+	/// Unless set to zero, the number of iterations is clamped to the `[1, 20]` interval, so using
+	/// values outside that interval for this option will only change the magnitude threshold where
+	/// iterations start being reduced to meet a target time.
 	///
-	/// Zero is a special case, however, because no file will be compressed, no matter its size. This
-	/// is useful to speed up the squash process without sacrificing file-specific optimization
-	/// techniques, while usually speeding up the loading speed of your pack by Minecraft clients (because
-	/// they won't have to decompress any file, which is a CPU bottleneck, especially with fast storage
-	/// devices). The obvious downside is that the generated ZIP files may take much more space, which
-	/// increases bandwidth requirements. Also, if the decompression speed is greater than the storage
-	/// device speed (i.e. a beefy CPU is paired with a slow HDD, for example), Minecraft clients may
-	/// actually take longer to load the pack.
+	/// However, zero is a special case, because no file will be compressed, no matter its size. This
+	/// is useful to speed up the process without sacrificing file-specific optimization techniques,
+	/// while usually speeding up the loading speed of your pack by Minecraft clients (because they
+	/// won't have to decompress any file, which is a bottleneck, especially with the advent of fast
+	/// storage devices in these years). The obvious downside is that the generated ZIP files may take
+	/// more space, which increases bandwidth requirements. Also, if the decompression speed is much
+	/// greater than the storage device speed (i.e. a beefy CPU is paired with a slow HDD, for example),
+	/// Minecraft clients may actually take longer to load the pack.
 	///
 	/// **Default value**: `20`
 	pub zip_compression_iterations: u8,
@@ -138,7 +138,7 @@ pub struct GlobalOptions {
 	/// otherwise they are not correctly interpreted by the game. PackSquash can work around these
 	/// quirks, but doing so may come at the cost of reduced space savings or increased processing
 	/// times, so this should only be done when your pack is affected by them. This option specifies
-	/// the quirks that will worked around.
+	/// the quirks that will be worked around.
 	///
 	/// **Default value**: empty set (no quirks worked around)
 	pub workaround_minecraft_quirks: EnumSet<MinecraftQuirk>,
@@ -197,26 +197,6 @@ pub struct GlobalOptions {
 	pub open_files_limit: NonZeroUsize
 }
 
-impl GlobalOptions {
-	/// TODO
-	pub(crate) fn as_squash_zip_settings(&self) -> SquashZipSettings {
-		SquashZipSettings {
-			zopfli_iterations: self.zip_compression_iterations,
-			store_squash_time: !self.never_store_squash_times
-				&& !matches!(self.zip_spec_conformance, ZipSpecConformance::Pedantic),
-			enable_obfuscation: matches!(self.zip_spec_conformance, ZipSpecConformance::Disregard),
-			enable_deduplication: matches!(
-				self.zip_spec_conformance,
-				ZipSpecConformance::Balanced | ZipSpecConformance::Disregard
-			),
-			enable_size_increasing_obfuscation: self.size_increasing_zip_obfuscation,
-			percentage_of_structures_tuned_for_obfuscation_discretion: self
-				.percentage_of_zip_structures_tuned_for_obfuscation_discretion,
-			spool_buffer_size: self.spooling_buffers_size.saturating_mul(1024 * 1024)
-		}
-	}
-}
-
 impl Default for GlobalOptions {
 	fn default() -> Self {
 		// The "k" in "kB" here has an SI-compliant meaning (1000 and not 1024 bytes)
@@ -238,12 +218,33 @@ impl Default for GlobalOptions {
 			allow_mods: EnumSet::empty(),
 			threads: hardware_threads.try_into().unwrap(),
 			output_file_path: PathBuf::from("pack.zip"),
-			// In MiB. By default, half of available memory / hardware threads
+			// In MiB. By default, half of available memory / (hardware threads + 1 for the output ZIP)
 			spooling_buffers_size: (available_memory_kb * 125
 				/ 262144 / (hardware_threads as u64 + 1))
 				.try_into()
 				.unwrap_or(usize::MAX),
 			open_files_limit: 512.try_into().unwrap()
+		}
+	}
+}
+
+impl GlobalOptions {
+	/// Returns the [`SquashZipSettings`] contained within these options, which are used to configure
+	/// the SquashZip compressor.
+	pub(crate) fn as_squash_zip_settings(&self) -> SquashZipSettings {
+		SquashZipSettings {
+			zopfli_iterations: self.zip_compression_iterations,
+			store_squash_time: !self.never_store_squash_times
+				&& !matches!(self.zip_spec_conformance, ZipSpecConformance::Pedantic),
+			enable_obfuscation: matches!(self.zip_spec_conformance, ZipSpecConformance::Disregard),
+			enable_deduplication: matches!(
+				self.zip_spec_conformance,
+				ZipSpecConformance::Balanced | ZipSpecConformance::Disregard
+			),
+			enable_size_increasing_obfuscation: self.size_increasing_zip_obfuscation,
+			percentage_of_records_tuned_for_obfuscation_discretion: self
+				.percentage_of_zip_structures_tuned_for_obfuscation_discretion,
+			spool_buffer_size: self.spooling_buffers_size.saturating_mul(1024 * 1024)
 		}
 	}
 }
@@ -611,19 +612,6 @@ pub struct PngFileOptions {
 	/// reasonable texture sizes.
 	///
 	/// **Default value**: 4096
-	// TODO: put this text in the wiki
-	// Internally, Minecraft builds a texture atlas with every texture it needs to draw,
-	// including those of packs, for efficiency reasons.
-	// Assuming a maximum texture size of 65536x65536 (which as of 2021 is an upper bound
-	// for consumer GPUs), 256 individual textures of 4096x4096 would fit in such an atlas,
-	// which is a pretty low number and not enough to hold all vanilla textures. Resource
-	// packs with few textures may get away with textures that are even bigger than this,
-	// maybe only on "beefy" GPUs, but it does not make much sense to mix and match small
-	// textures with such big textures. I've not seen packs with textures bigger
-	// than 2048x2048, and even that is quite a stretch. Therefore, establish an upper limit
-	// of 4096x4096 to set an upper bound to memory usage per decoded RGBA8 image of ~64 MiB,
-	// and reject textures that are impractically big, introducing a kind of "validation" that
-	// may help limit how much pack creators can shoot themselves on the foot
 	pub maximum_width_and_height: u32,
 	/// Crate-private option set by the [MinecraftQuirk::GrayscaleTexturesGammaMiscorrection]
 	/// workaround to not reduce color images to grayscale.
