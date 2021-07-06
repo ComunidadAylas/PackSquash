@@ -13,7 +13,7 @@ edition = "2018"
 [dependencies]
 bytes = "1.0.1"
 globset = "0.4.8"
-enumset = { version = "1.0.6", features = ["serde"] }
+enumset = { version = "1.0.7", features = ["serde"] }
 indexmap = { version = "1.7.0", default-features = false, features = ["serde-1"] }
 thiserror = "1.0.26"
 ahash = "0.7.4"
