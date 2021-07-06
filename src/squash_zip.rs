@@ -511,7 +511,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 
 			if already_stored {
 				// We know for sure we found a matching file, so just add another pointer to
-				// existing data in the central directory (but with different metadata)
+				// existing local header in the central directory
 				self.add_partial_central_directory_header(
 					path,
 					&local_file_header,
