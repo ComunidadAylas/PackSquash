@@ -124,6 +124,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	};
 
 	println!("Options read. Processing pack...");
+	println!();
 
 	let output_file_path = squash_options.global_options.output_file_path.clone();
 	let processed_file_count = Arc::new(AtomicU64::new(0));
