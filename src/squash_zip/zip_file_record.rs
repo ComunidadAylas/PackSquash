@@ -79,7 +79,7 @@ fn version_needed_to_extract(zip_features: &EnumSet<ZipFeature>) -> u16 {
 /// spoofing is enabled, we mask ourselves as Info-ZIP zip 3.0 for Unix systems (a pretty common
 /// command line utility to generate ZIP files), to give an attacker the least information
 /// possible.
-fn get_version_made_by(spoof_version_made_by: bool) -> [u8; 2] {
+const fn get_version_made_by(spoof_version_made_by: bool) -> [u8; 2] {
 	if spoof_version_made_by {
 		[30, 3] // First byte (lower) = "specification version"
 	} else {
@@ -246,7 +246,7 @@ impl<'a> LocalFileHeader<'a> {
 
 	/// Returns the size that this ZIP file record would take on the file. This
 	/// is the same number of bytes that would be written by [`Self::write()`].
-	pub fn size(&self) -> u32 {
+	pub const fn size(&self) -> u32 {
 		30 + self.file_name_length as u32
 	}
 }
@@ -278,7 +278,7 @@ impl<'a> CentralDirectoryHeader<'a> {
 	/// name length should already have been checked previously, while building the
 	/// local file header.
 	#[allow(clippy::too_many_arguments)]
-	pub fn new(
+	pub const fn new(
 		file_name: &'a str,
 		local_header_offset: u64,
 		compression_method: CompressionMethod,
@@ -461,7 +461,7 @@ const END_OF_CENTRAL_DIRECTORY_SIGNATURE: [u8; 4] = 0x06054B50_u32.to_le_bytes()
 impl EndOfCentralDirectory {
 	/// Creates a end of central directory.
 	#[allow(clippy::too_many_arguments)]
-	pub fn new(
+	pub const fn new(
 		disk_number: u16,
 		central_directory_start_disk_number: u16,
 		central_directory_entry_count_current_disk: u64,

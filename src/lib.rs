@@ -531,7 +531,7 @@ pub struct PackFileStatus {
 
 impl PackFileStatus {
 	/// Gets the relative path of the pack file that was processed.
-	pub fn path(&self) -> &RelativePath<'static> {
+	pub const fn path(&self) -> &RelativePath<'static> {
 		&self.path
 	}
 

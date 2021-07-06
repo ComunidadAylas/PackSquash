@@ -234,7 +234,7 @@ impl Default for GlobalOptions {
 impl GlobalOptions {
 	/// Returns the [`SquashZipSettings`] contained within these options, which are used to configure
 	/// the SquashZip compressor.
-	pub(crate) fn as_squash_zip_settings(&self) -> SquashZipSettings {
+	pub(crate) const fn as_squash_zip_settings(&self) -> SquashZipSettings {
 		SquashZipSettings {
 			zopfli_iterations: self.zip_compression_iterations,
 			store_squash_time: !self.never_store_squash_times
