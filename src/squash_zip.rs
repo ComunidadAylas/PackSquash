@@ -887,9 +887,9 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		processed_data_crc = crc32_hasher.finalize();
 
 		let mut compressed_data_size;
-		if skip_compression || self.settings.zopfli_iterations == 0 {
-			// Treat uncompressed data as if it was compressed. Because this never
-			// saves space, we don't actually get to use compressed_data_scratch_file
+		if skip_compression || self.settings.zopfli_iterations == 0 || processed_data_size == 0 {
+			// Perform no compression and treat uncompressed data as if it was compressed.
+			// Because this never saves space, we don't actually get to use compressed_data_scratch_file
 			compressed_data_size = processed_data_size as u64;
 		} else {
 			// Rewind scratch file to read it back for compression

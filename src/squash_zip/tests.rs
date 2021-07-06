@@ -9,7 +9,11 @@ static RELATIVE_PATH_INSTANTIATION_FAILURE: &str = "Relative path creation was n
 static UNEXPECTED_OPERATION_FAILURE: &str = "This SquashZip operation should not fail";
 static UNEXPECTED_IO_FAILURE: &str = "I/O operations are assumed not to fail";
 
+/// The size of the spooled temporary file that SquashZip will use internally.
 const SPOOL_BUFFER_SIZE: usize = 64 * 1024 * 1024;
+
+/// The uncompressed size of the files that will be added to ZIP files during tests.
+const FILE_SIZE: usize = 2048;
 
 /// Creates a temporary output file for testing, and returns its path. Depending on the value of
 /// the `WRITE_SQUASHZIP_TEST_RESULTS` environment variable, the named of the created file may
@@ -47,6 +51,7 @@ async fn add_files_finish_and_read_back_test(
 	enable_deduplication: bool,
 	file_name_number: impl Fn(u8) -> u8,
 	file_byte: impl Fn(u8) -> u8,
+	file_size: usize,
 	skip_compression: impl Fn(u8) -> bool,
 	test_name: &'static str,
 	files_reused_from_previous_run: usize
@@ -81,9 +86,9 @@ async fn add_files_finish_and_read_back_test(
 					))
 				)
 				.expect(RELATIVE_PATH_INSTANTIATION_FAILURE),
-				&mut tokio_stream::iter(std::iter::repeat(&[file_byte(i)][..]).take(2048)),
+				&mut tokio_stream::iter(std::iter::repeat(&[file_byte(i)][..]).take(file_size)),
 				skip_compression(i),
-				2048
+				file_size
 			)
 			.await
 			.expect(UNEXPECTED_OPERATION_FAILURE);
@@ -126,8 +131,41 @@ async fn add_single_finish_and_read_back_works() {
 		false,
 		|i| i,
 		|_| b'a',
+		FILE_SIZE,
 		|_| false,
 		"add_single_finish_and_read_back_works",
+		0
+	)
+	.await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn add_empty_finish_and_read_back_works() {
+	add_files_finish_and_read_back_test(
+		None,
+		1,
+		false,
+		|i| i,
+		|_| b'a',
+		0,
+		|_| false,
+		"add_empty_finish_and_read_back_works",
+		0
+	)
+	.await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn add_tiny_finish_and_read_back_works() {
+	add_files_finish_and_read_back_test(
+		None,
+		1,
+		false,
+		|i| i,
+		|_| b'a',
+		1,
+		|_| false,
+		"add_tiny_finish_and_read_back_works",
 		0
 	)
 	.await;
@@ -141,6 +179,7 @@ async fn add_several_finish_and_read_back_works() {
 		false,
 		|i| i,
 		|_| b'a',
+		FILE_SIZE,
 		|_| false,
 		"add_several_finish_and_read_back_works",
 		0
@@ -156,6 +195,7 @@ async fn add_several_finish_and_read_back_with_deduplication_works() {
 		true,
 		|i| i,
 		|_| b'a',
+		FILE_SIZE,
 		|_| true,
 		"add_several_finish_and_read_back_with_deduplication_works",
 		0
@@ -171,6 +211,7 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 		true,
 		|i| i,
 		|_| b'a',
+		FILE_SIZE,
 		|i| i < 2,
 		"add_several_compressed_finish_and_read_back_with_deduplication_works (bigger file)",
 		0
@@ -183,6 +224,7 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 		true,
 		|i| i,
 		|_| b'a',
+		FILE_SIZE,
 		|_| false,
 		"add_several_compressed_finish_and_read_back_with_deduplication_works (smaller file)",
 		0
@@ -219,6 +261,7 @@ async fn add_several_and_read_back_some_duplicates_works() {
 		true,
 		|i| i,
 		|i| b'a' + i % 2,
+		FILE_SIZE,
 		|_| true,
 		"add_several_and_read_back_some_duplicates_works",
 		0
@@ -235,6 +278,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 		true,
 		|i| i,
 		|i| b'a' + i % 2,
+		FILE_SIZE,
 		|_| true,
 		"add_several_finish_then_reuse_and_add_works (first part)",
 		0
@@ -273,6 +317,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 		true,
 		|i| i + 2,
 		|i| if i == 0 { b'a' } else { b'c' },
+		FILE_SIZE,
 		|_| true,
 		"add_several_finish_then_reuse_and_add_works (second part)",
 		1
