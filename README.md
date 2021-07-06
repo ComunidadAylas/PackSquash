@@ -14,7 +14,7 @@ PackSquash walks through the resource pack files that it recognizes in a directo
 
 In addition to these techniques, the files that are not already compressed by design (like OGG and PNG images) are losslessly compressed using the Zopfli algorithm, which is a state of the art DEFLATE encoder made by Google. It is tuned for very high space savings at the cost of performance, whilst being compatible with every DEFLATE decoder. For even higher savings it is possible to try to compress already compressed files, although this slows down the process significantly.
 
-PackSquash can also reuse previously generated ZIP files to skip recompressing files that did not change between executions, which greatly speeds up its usage for incrementally changing packs, where only a few files change each time. Finally, the generated ZIP files can also be protected, making them harder to extract by most ZIP manipulation programs. These features are disabled by default, however: they work fine, but you should read the documentation and make an informed decision before you enable them.
+PackSquash can also reuse previously generated ZIP files to skip recompressing files that did not change between executions, which greatly speeds up its usage for incrementally changing packs, where only a few files change each time. Finally, the generated ZIP files can also be protected, making them harder to read by most ZIP manipulation programs. These features are disabled by default, however: they work fine, but you should read the documentation and make an informed decision before you enable them.
 
 ## 🔗 Download
 You can get the executable for the latest stable release from [here](https://github.com/ComunidadAylas/PackSquash/releases/latest).
