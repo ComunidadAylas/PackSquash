@@ -274,8 +274,10 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PngFile<T> {
 
 		let skip = !matches!(extension, "png")
 			|| (args.optimization_settings.skip_pack_icon
-				&& file_path.parent().is_none()
-				&& file_path.file_name().unwrap().to_str().unwrap() == "pack.png");
+				&& file_path
+					.parent()
+					.filter(|parent_path| !parent_path.as_os_str().is_empty())
+					.is_none() && file_path.file_name().unwrap().to_str().unwrap() == "pack.png");
 
 		if !skip {
 			file_read_producer().map(|(read, file_length)| Self {
