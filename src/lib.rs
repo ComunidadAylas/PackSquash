@@ -173,11 +173,20 @@ impl PackSquasher {
 			// open file limits
 			let in_flight_tasks_semaphore = Arc::new(Semaphore::new(cmp::min(
 				self.options.global_options.threads.get() * 2,
-				// - 2 because we open the output file and the previous file at most
+				// - 2 because we open the output file and the previous file
 				// - 10 because the OsFilesystem VFS may keep some files open
 				// / 3 because each task may consume 3 descriptors: the pack file itself,
 				// and two temporary files
-				(self.options.global_options.open_file_limit - 2 - 10) / 3
+				cmp::max(
+					(self
+						.options
+						.global_options
+						.open_file_limit
+						.get()
+						.saturating_sub(2)
+						.saturating_sub(10)) / 3,
+					1
+				)
 			)));
 
 			// In the current thread, dispatch a task for each pack file, that may execute
