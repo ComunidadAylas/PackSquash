@@ -221,5 +221,5 @@ jobs:
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (Linux, AArch64, glibc)'
+        name: 'PackSquash executable (Linux, AArch64-ARM64, glibc)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
