@@ -298,10 +298,10 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				}
 
 				// Read the fields that will be stored as-is in the map
-				let process_time = SYSTEM_TIME_SANITIZER
-					.desanitize(buffer[8..12].try_into().unwrap(), &buffer[12..16]);
 				let crc = obfuscation_engine
 					.deobfuscate_crc32(u32::from_le_bytes(buffer[12..16].try_into().unwrap()));
+				let process_time = SYSTEM_TIME_SANITIZER
+					.desanitize(buffer[8..12].try_into().unwrap(), &crc.to_le_bytes());
 				let compression_method = CompressionMethod::from_compression_method_field(
 					u16::from_le_bytes(buffer[6..8].try_into().unwrap())
 				)?;
