@@ -104,6 +104,9 @@ jobs:
 
     - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
       run: |
+        echo 'deb http://ports.ubuntu.com/ubuntu-ports focal main' | sudo tee /etc/apt/sources.list.d/arm64_multiarch.list && \
+        echo 'deb http://ports.ubuntu.com/ubuntu-ports focal-updates main' | sudo tee -a /etc/apt/sources.list.d/arm64_multiarch.list && \
+        echo 'deb http://ports.ubuntu.com/ubuntu-ports focal-security main' | sudo tee -a /etc/apt/sources.list.d/arm64_multiarch.list && \
         sudo dpkg --add-architecture arm64 && \
         sudo apt-get update && \
         sudo apt-get install gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
