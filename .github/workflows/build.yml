@@ -93,10 +93,11 @@ jobs:
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
+        toolchain: nightly
+        target: ${{ env.CARGO_BUILD_TARGET }}
         override: true
         profile: minimal
-        components: rustfmt, clippy, rust-src
+        components: rust-src
 
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
