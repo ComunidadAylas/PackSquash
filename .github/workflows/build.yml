@@ -37,8 +37,10 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer
-      run: sudo apt-get update && sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+    - name: Install GStreamer libraries and GStreamer development packages
+      run: |
+        sudo apt-get update && \
+        sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
@@ -46,13 +48,13 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         args: --release
 
-    - name: Cargo test
+    - name: Run tests
       uses: actions-rs/cargo@v1
       with:
         command: test
         args: --release
 
-    - name: Cargo build with optimized standard library
+    - name: Build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
@@ -71,7 +73,50 @@ jobs:
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (Linux x64)'
+        name: 'PackSquash executable (Linux, x64, gnu/glibc)'
+        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+
+  linux-aarch64-gnu:
+
+    runs-on: ubuntu-latest
+
+    env:
+      CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
+      PKG_CONFIG_ALLOW_CROSS: 1
+      PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install latest Rust nightly toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
+        override: true
+        profile: minimal
+        components: rustfmt, clippy, rust-src
+
+    - name: Cache Rust artifacts
+      uses: Swatinem/rust-cache@v1
+
+    - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
+      run: |
+        dpkg --add-architecture arm64 && \
+        sudo apt-get update && \
+        sudo apt-get install gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
+
+    - name: Build with optimized standard library
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'PackSquash executable (Linux, AArch64/ARM64, gnu/glibc)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
   windows-x64-gnu:
@@ -97,7 +142,7 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer
+    - name: Install GStreamer libraries and GStreamer development packages
       run: |
         Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.19.1/mingw/gstreamer-1.0-devel-mingw-x86_64-1.19.1.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64.msi'
         Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64.msi /qn' -Wait
@@ -113,13 +158,13 @@ jobs:
         Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-mingw-x86_64.msi /qn' -Wait
         "C:\gstreamer\1.0\mingw_x86_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-    - name: Cargo test
+    - name: Run tests
       uses: actions-rs/cargo@v1
       with:
         command: test
         args: --release
 
-    - name: Cargo build with optimized standard library
+    - name: Build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
@@ -131,7 +176,7 @@ jobs:
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (Windows x64)'
+        name: 'PackSquash executable (Windows, x64)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe
 
   macos-x64-darwin:
@@ -157,16 +202,16 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer
+    - name: Install GStreamer libraries and GStreamer development packages
       run: brew install gst-plugins-good gst-plugins-bad
 
-    - name: Cargo test
+    - name: Run tests
       uses: actions-rs/cargo@v1
       with:
         command: test
         args: --release
 
-    - name: Cargo build with optimized standard library
+    - name: Build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
@@ -175,5 +220,5 @@ jobs:
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (macOS x64)'
+        name: 'PackSquash executable (macOS, x64)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
