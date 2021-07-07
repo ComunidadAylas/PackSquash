@@ -10,6 +10,8 @@ fn works() {
 
 	eprintln!("System ID: {:?}", system_id);
 
+	// The platform serial number in macOS may have a bit low entropy
+	#[cfg(not(target_os = "macos"))]
 	assert!(
 		!system_id.has_low_entropy,
 		"Expected a high entropy system ID in test environments"
