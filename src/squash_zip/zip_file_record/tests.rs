@@ -41,17 +41,17 @@ async fn central_directory_works_test(use_zip64_extensions: bool) {
 
 	let extra_field_size = if use_zip64_extensions { 12 } else { 0 };
 
-	let cen = CentralDirectoryHeader::new(
-		FILE_NAME,
-		local_file_header_offset,
-		CompressionMethod::Deflate,
-		42u32.to_le_bytes(), // Squash Time
-		1,                   // CRC32
-		2,                   // Compressed size
-		3,                   // Uncompressed size
-		4,                   // Disk number
-		false                // Spoof version made by
-	);
+	let cen = CentralDirectoryHeader {
+		compression_method: CompressionMethod::Deflate,
+		squash_time: 42u32.to_le_bytes(),
+		crc32: 1,
+		compressed_size: 2,
+		uncompressed_size: 3,
+		local_header_disk_number: 4,
+		local_header_offset: local_file_header_offset,
+		file_name: FILE_NAME,
+		spoof_version_made_by: false
+	};
 
 	assert_eq!(
 		cen.requires_zip64_extensions(),
@@ -232,7 +232,7 @@ async fn central_directory_works_test(use_zip64_extensions: bool) {
 /// Tests that the end of central directory is written as expected, no matter if ZIP64
 /// extensions are used or not.
 async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
-	let cd_start_offset = if use_zip64_extensions {
+	let central_directory_start_offset = if use_zip64_extensions {
 		(u32::MAX as u64) + 1 // This can only be represented using ZIP64 extensions
 	} else {
 		5
@@ -242,19 +242,19 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 		+ (ZIP64_END_OF_CENTRAL_DIRECTORY_SIZE + ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIZE)
 			* use_zip64_extensions as usize;
 
-	let eocd = EndOfCentralDirectory::new(
-		0,               // Disk number
-		1,               // Disk number where the central directory starts
-		2,               // Entries in CD in this disk
-		3,               // Total entries in CD (all disks)
-		4,               // CD size (sum of all CD file headers)
-		cd_start_offset, // CD start offset (offset of first CD file header)
-		6,               // Number of disks
-		7,               // Current file offset
-		8,               // ZIP64 record size offset (for obfuscation; zero means write the real value)
-		true,            // Spoof version made by
-		false            // Zero out unused ZIP64 fields
-	);
+	let eocd = EndOfCentralDirectory {
+		disk_number: 0,
+		central_directory_start_disk_number: 1,
+		central_directory_entry_count_current_disk: 2,
+		total_central_directory_entry_count: 3,
+		central_directory_size: 4,
+		central_directory_start_offset,
+		total_number_of_disks: 6,
+		current_file_offset: 7,
+		zip64_record_size_offset: 8,
+		spoof_version_made_by: true,
+		zero_out_unused_zip64_fields: false
+	};
 
 	assert_eq!(
 		eocd.requires_zip64_extensions(),
@@ -343,7 +343,7 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 
 			assert_eq!(
 				buf[48..56],
-				cd_start_offset.to_le_bytes(),
+				central_directory_start_offset.to_le_bytes(),
 				"Unexpected offset of start of central directory in ZIP64 end of central directory"
 			);
 
@@ -416,7 +416,7 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 			if use_zip64_extensions {
 				u32::MAX
 			} else {
-				cd_start_offset as u32
+				central_directory_start_offset as u32
 			}
 			.to_le_bytes(),
 			"Unexpected offset of start of central directory in end of central directory header"

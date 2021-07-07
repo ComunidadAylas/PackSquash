@@ -65,9 +65,9 @@ pub struct GlobalOptions {
 	/// **Default value**: `false`
 	pub size_increasing_zip_obfuscation: bool,
 	/// If `zip_spec_conformance` is set to [ZipSpecConformance::Disregard], this option
-	/// sets the probability for each internal ZIP record to be stored in a way that favors
-	/// additional discretion of the fact that protection techniques were used, as opposed to
-	/// a way that favors increased compressibility of the result ZIP file. Additional
+	/// sets the approximate probability for each internal ZIP record to be stored in a way that
+	/// favors additional discretion of the fact that protection techniques were used, as opposed
+	/// to a way that favors increased compressibility of the result ZIP file. Additional
 	/// compressibility may be useful if the ZIP file is to be achieved or distributed from a
 	/// web server that supports static content compression, for example.
 	///

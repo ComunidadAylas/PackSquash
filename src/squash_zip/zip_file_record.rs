@@ -1,4 +1,5 @@
 use std::{
+	borrow::Cow,
 	convert::TryInto,
 	io::{Cursor, Error, Write}
 };
@@ -138,13 +139,13 @@ fn get_general_purpose_bit_flag(file_name: &str) -> u16 {
 /// A ZIP file local file header, defined in section 4.3.7 of the ZIP
 /// specification.
 pub(super) struct LocalFileHeader<'a> {
-	pub(super) compression_method: CompressionMethod,
-	pub(super) squash_time: [u8; 4],
-	pub(super) crc32: u32,
-	pub(super) compressed_size: u32,
-	pub(super) uncompressed_size: u32,
+	pub compression_method: CompressionMethod,
+	pub squash_time: [u8; 4],
+	pub crc32: u32,
+	pub compressed_size: u32,
+	pub uncompressed_size: u32,
 	file_name_length: u16,
-	file_name: &'a str
+	file_name: Cow<'a, str>
 }
 
 /// Magic bytes defined in the ZIP specification whose purpose is signalling
@@ -160,7 +161,9 @@ impl<'a> LocalFileHeader<'a> {
 	/// - `compressed_size` (by default it is 0)
 	/// - `uncompressed_size` (by default it is 0)
 	/// - `squash_time` (by default it is a dummy value)
-	pub fn new(file_name: &'a str) -> Result<Self, SquashZipError> {
+	pub fn new<T: Into<Cow<'a, str>>>(file_name: T) -> Result<Self, SquashZipError> {
+		let file_name = file_name.into();
+
 		Ok(Self {
 			compression_method: CompressionMethod::Store,
 			squash_time: DUMMY_SQUASH_TIME,
@@ -188,7 +191,7 @@ impl<'a> LocalFileHeader<'a> {
 		}
 
 		let version_needed_to_extract = version_needed_to_extract(&zip_features_needed_to_extract);
-		let general_purpose_bit_flag = get_general_purpose_bit_flag(self.file_name);
+		let general_purpose_bit_flag = get_general_purpose_bit_flag(&self.file_name);
 		let compression_method = self.compression_method.to_compression_method_field();
 
 		// A 4-byte Squash Time timestamp is stored in the two little-endian two bytes fields
@@ -226,20 +229,30 @@ impl<'a> LocalFileHeader<'a> {
 	pub const fn size(&self) -> u32 {
 		30 + self.file_name_length as u32
 	}
+
+	/// Returns the file name that this ZIP file record would contain when
+	/// written to a file.
+	pub fn file_name(&self) -> &str {
+		&self.file_name
+	}
 }
 
 /// A ZIP file central directory file header, defined in section 4.3.12
 /// of the ZIP file specification.
 pub(super) struct CentralDirectoryHeader<'a> {
-	compression_method: CompressionMethod,
-	squash_time: [u8; 4],
-	crc32: u32,
-	compressed_size: u32,
-	uncompressed_size: u32,
-	local_header_disk_number: u16,
-	local_header_offset: u64,
-	file_name: &'a str,
-	spoof_version_made_by: bool
+	pub compression_method: CompressionMethod,
+	pub squash_time: [u8; 4],
+	pub crc32: u32,
+	pub compressed_size: u32,
+	pub uncompressed_size: u32,
+	pub local_header_disk_number: u16,
+	pub local_header_offset: u64,
+	/// It is assumed that the file name is 65535 bytes long or less, as limited by the
+	/// ZIP specification. Failure to uphold this assumption will lead to incorrect
+	/// results. This should not be a problem because the file name length should already
+	/// have been checked previously, while building the local file header.
+	pub file_name: &'a str,
+	pub spoof_version_made_by: bool
 }
 
 /// Magic bytes defined in the ZIP specification whose purpose is signalling
@@ -247,38 +260,6 @@ pub(super) struct CentralDirectoryHeader<'a> {
 const CENTRAL_DIRECTORY_HEADER_SIGNATURE: [u8; 4] = 0x02014B50_u32.to_le_bytes();
 
 impl<'a> CentralDirectoryHeader<'a> {
-	/// Creates a new central directory file header record.
-	/// # Assumptions
-	/// This constructor assumes that the file name is 65535 bytes long or less,
-	/// as limited by the ZIP specification. Failure to uphold this assumption
-	/// will lead to incorrect results. This should not be a problem because the file
-	/// name length should already have been checked previously, while building the
-	/// local file header.
-	#[allow(clippy::too_many_arguments)]
-	pub const fn new(
-		file_name: &'a str,
-		local_header_offset: u64,
-		compression_method: CompressionMethod,
-		squash_time: [u8; 4],
-		crc32: u32,
-		compressed_size: u32,
-		uncompressed_size: u32,
-		local_header_disk_number: u16,
-		spoof_version_made_by: bool
-	) -> Self {
-		Self {
-			compression_method,
-			squash_time,
-			crc32,
-			compressed_size,
-			uncompressed_size,
-			local_header_disk_number,
-			local_header_offset,
-			file_name,
-			spoof_version_made_by
-		}
-	}
-
 	/// Returns whether this central directory header record requires ZIP64 extensions
 	/// to be stored correctly.
 	const fn requires_zip64_extensions(&self) -> bool {
@@ -394,17 +375,17 @@ impl<'a> CentralDirectoryHeader<'a> {
 /// These records are defined in sections 4.3.14, 4.3.15 and 4.3.16 of the ZIP file
 /// specification.
 pub(super) struct EndOfCentralDirectory {
-	disk_number: u16,
-	central_directory_start_disk_number: u16,
-	central_directory_entry_count_current_disk: u64,
-	total_central_directory_entry_count: u64,
-	central_directory_size: u64,
-	central_directory_start_offset: u64,
-	total_number_of_disks: u32,
-	current_file_offset: u64,
-	zip64_record_size_offset: i8,
-	spoof_version_made_by: bool,
-	zero_out_unused_zip64_fields: bool
+	pub disk_number: u16,
+	pub central_directory_start_disk_number: u16,
+	pub central_directory_entry_count_current_disk: u64,
+	pub total_central_directory_entry_count: u64,
+	pub central_directory_size: u64,
+	pub central_directory_start_offset: u64,
+	pub total_number_of_disks: u32,
+	pub current_file_offset: u64,
+	pub zip64_record_size_offset: i8,
+	pub spoof_version_made_by: bool,
+	pub zero_out_unused_zip64_fields: bool
 }
 
 /// Magic bytes defined in the ZIP specification whose purpose is signalling
@@ -420,36 +401,6 @@ const ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE: [u8; 4] = 0x07064B50_u32
 const END_OF_CENTRAL_DIRECTORY_SIGNATURE: [u8; 4] = 0x06054B50_u32.to_le_bytes();
 
 impl EndOfCentralDirectory {
-	/// Creates a end of central directory.
-	#[allow(clippy::too_many_arguments)]
-	pub const fn new(
-		disk_number: u16,
-		central_directory_start_disk_number: u16,
-		central_directory_entry_count_current_disk: u64,
-		total_central_directory_entry_count: u64,
-		central_directory_size: u64,
-		central_directory_start_offset: u64,
-		total_number_of_disks: u32,
-		current_file_offset: u64,
-		zip64_size_offset: i8,
-		spoof_version_made_by: bool,
-		zero_out_unused_zip64_fields: bool
-	) -> Self {
-		Self {
-			disk_number,
-			central_directory_start_disk_number,
-			central_directory_entry_count_current_disk,
-			total_central_directory_entry_count,
-			central_directory_size,
-			central_directory_start_offset,
-			total_number_of_disks,
-			current_file_offset,
-			zip64_record_size_offset: zip64_size_offset,
-			spoof_version_made_by,
-			zero_out_unused_zip64_fields
-		}
-	}
-
 	/// Returns whether this end of central directory requires ZIP64 extensions to be
 	/// stored correctly.
 	const fn requires_zip64_extensions(&self) -> bool {

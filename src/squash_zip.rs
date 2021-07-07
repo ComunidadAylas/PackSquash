@@ -26,6 +26,7 @@ use crate::{config::PercentageInteger, RelativePath};
 
 use self::{
 	buffered_async_spooled_temp_file::BufferedAsyncSpooledTempFile,
+	obfuscation_engine::ObfuscationEngine,
 	system_time_sanitizer::{SystemTimeSanitizationError, SystemTimeSanitizer},
 	zip_file_record::{
 		CentralDirectoryHeader, CompressionMethod, EndOfCentralDirectory, LocalFileHeader
@@ -33,6 +34,7 @@ use self::{
 };
 
 mod buffered_async_spooled_temp_file;
+mod obfuscation_engine;
 pub mod relative_path;
 pub mod system_id;
 mod system_time_sanitizer;
@@ -160,6 +162,7 @@ pub struct SquashZipSettings {
 pub struct SquashZip<F: AsyncRead + AsyncSeek + Unpin> {
 	settings: SquashZipSettings,
 	target_compression_time: f32,
+	obfuscation_engine: ObfuscationEngine,
 	output_zip: Mutex<BufferedAsyncSpooledTempFile>,
 	previous_zip: Option<Mutex<F>>,
 	previous_zip_contents: AHashMap<RelativePath<'static>, PreviousFile>,
@@ -188,6 +191,8 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		settings: SquashZipSettings
 	) -> Result<Self, SquashZipError> {
 		let mut previous_zip_contents;
+		let obfuscation_engine = ObfuscationEngine::from_squash_zip_settings(&settings);
+		let mut output_zip = BufferedAsyncSpooledTempFile::new(settings.spool_buffer_size);
 
 		if let Some(previous_zip) = &mut previous_zip {
 			let mut buffer = [0u8; 52];
@@ -295,8 +300,8 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				// Read the fields that will be stored as-is in the map
 				let process_time = SYSTEM_TIME_SANITIZER
 					.desanitize(buffer[8..12].try_into().unwrap(), &buffer[12..16]);
-				// TODO: deobfuscate these fields. Insert deobfuscated data in the in-memory map
-				let crc = u32::from_le_bytes(buffer[12..16].try_into().unwrap());
+				let crc = obfuscation_engine
+					.deobfuscate_crc32(u32::from_le_bytes(buffer[12..16].try_into().unwrap()));
 				let compression_method = CompressionMethod::from_compression_method_field(
 					u16::from_le_bytes(buffer[6..8].try_into().unwrap())
 				)?;
@@ -310,8 +315,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 					u32::from_le_bytes(buffer[38..42].try_into().unwrap()) as u64;
 
 				// Now get the relative path
-				let relative_path;
-				{
+				let relative_path = {
 					// The filename may not only be larger than our stack-allocated buffer,
 					// but we also need a owned string because that buffer is dropped when
 					// this function ends
@@ -322,8 +326,8 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 					// In the unlikely case this relative path is corrupt and/or invalid, but
 					// still valid UTF-8, it'll be effectively ignored, so it doesn't really
 					// matter
-					relative_path = RelativePath::from_inner(String::from_utf8(filename_buf)?);
-				}
+					RelativePath::from_inner(String::from_utf8(filename_buf)?)
+				};
 
 				if extra_field_length == 12 && local_file_header_offset == 0xFFFFFFFF {
 					// We maybe have a proper local file header offset in a ZIP64 extended information
@@ -376,16 +380,6 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 					u16::from_le_bytes(buffer[26..28].try_into().unwrap()) as usize;
 				let extra_field_length = u16::from_le_bytes(buffer[28..30].try_into().unwrap());
 
-				if local_header_file_name_length != 0
-					&& local_header_file_name_length != file_name_length
-				{
-					// Again, according to the specification, this shouldn't be a hard error,
-					// but for our purposes it indicates that this ZIP file is not pristine
-					return Err(SquashZipError::InvalidPreviousZip(
-						"Unexpected file name length in LFH"
-					));
-				}
-
 				if extra_field_length > 0 {
 					// SquashZip ZIP files never contain extra fields in local file headers
 					return Err(SquashZipError::InvalidPreviousZip(
@@ -418,14 +412,18 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			previous_zip_contents = AHashMap::new();
 		}
 
-		// TODO: initial obfuscation in output ZIP
+		obfuscation_engine
+			.obfuscating_header(
+				&mut output_zip,
+				(previous_zip_contents.len() ^ settings.spool_buffer_size) as u64
+			)
+			.await?;
 
 		Ok(Self {
-			output_zip: Mutex::new(BufferedAsyncSpooledTempFile::new(
-				settings.spool_buffer_size
-			)),
+			output_zip: Mutex::new(output_zip),
 			target_compression_time: (A * settings.zopfli_iterations as f32 + B) * 16.0,
 			settings,
+			obfuscation_engine,
 			previous_zip: previous_zip.map(Mutex::new),
 			processed_local_headers: Mutex::new(AHashMap::with_capacity(previous_zip_contents.len())),
 			central_directory_data: Mutex::new(Vec::with_capacity(previous_zip_contents.len())),
@@ -562,11 +560,6 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				output_zip.seek(SeekFrom::Current(0)).await?
 			};
 
-			// Avoid allocating memory for the dummy vector
-			if self.settings.enable_deduplication {
-				matching_local_headers.push((new_local_file_header_offset, local_file_header.size()));
-			}
-
 			self.add_partial_central_directory_header(
 				path,
 				&local_file_header,
@@ -574,8 +567,16 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			)
 			.await;
 
+			let local_file_header = self
+				.obfuscation_engine
+				.obfuscate_local_file_header(local_file_header);
+
+			// Avoid allocating memory for the dummy vector
+			if self.settings.enable_deduplication {
+				matching_local_headers.push((new_local_file_header_offset, local_file_header.size()));
+			}
+
 			// Write the local header
-			// TODO: obfuscate header here
 			local_file_header.write(&mut *output_zip).await?;
 
 			// Write the compressed data
@@ -769,11 +770,6 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				output_zip.seek(SeekFrom::Current(0)).await?
 			};
 
-			// Avoid allocating memory for the dummy vector
-			if self.settings.enable_deduplication {
-				matching_local_headers.push((new_local_file_header_offset, local_file_header.size()));
-			}
-
 			self.add_partial_central_directory_header(
 				path,
 				&local_file_header,
@@ -781,8 +777,16 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			)
 			.await;
 
+			let local_file_header = self
+				.obfuscation_engine
+				.obfuscate_local_file_header(local_file_header);
+
+			// Avoid allocating memory for the dummy vector
+			if self.settings.enable_deduplication {
+				matching_local_headers.push((new_local_file_header_offset, local_file_header.size()));
+			}
+
 			// Write the local header
-			// TODO: obfuscate header here
 			local_file_header.write(&mut *output_zip).await?;
 
 			// Write the compressed data
@@ -814,41 +818,45 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 
 		// First, write the central directory file headers
 		for header_data in central_directory_data {
-			let central_directory_header = CentralDirectoryHeader::new(
-				&header_data.file_name,
-				header_data.local_header_offset,
-				header_data.compression_method,
-				header_data.squash_time,
-				header_data.crc32,
-				header_data.compressed_size,
-				header_data.uncompressed_size,
-				0,     // Local header disk
-				false  // Spoof version made by
-			);
+			let central_directory_header = CentralDirectoryHeader {
+				compression_method: header_data.compression_method,
+				squash_time: header_data.squash_time,
+				crc32: header_data.crc32,
+				compressed_size: header_data.compressed_size,
+				uncompressed_size: header_data.uncompressed_size,
+				local_header_disk_number: 0,
+				local_header_offset: header_data.local_header_offset,
+				file_name: &header_data.file_name,
+				spoof_version_made_by: false
+			};
 
-			// TODO: obfuscate here
-			central_directory_header.write(&mut output_zip).await?;
+			self.obfuscation_engine
+				.obfuscate_central_directory_header(central_directory_header)
+				.write(&mut output_zip)
+				.await?;
 		}
 
 		let central_directory_end_offset = output_zip.seek(SeekFrom::Current(0)).await?;
 
 		// Now write the end of central directory
-		let end_of_central_directory = EndOfCentralDirectory::new(
-			0,                                                             // Number of this disk
-			0,                                                             // Central directory start disk number
-			central_directory_entry_count,                                 // Entries in CD in this disk
-			central_directory_entry_count,                                 // Total entries in CD (all disks)
-			central_directory_end_offset - central_directory_start_offset, // CD size
-			central_directory_start_offset,                                // CD start offset
-			0,                                                             // Number of disks
-			central_directory_end_offset,                                  // Current file offset
-			0,     // ZIP64 record size offset (for obfuscation; zero means write the real value)
-			false, // Spoof version made by
-			false  // Zero out unused ZIP64 fields
-		);
+		let end_of_central_directory = EndOfCentralDirectory {
+			disk_number: 0,
+			central_directory_start_disk_number: 0,
+			central_directory_entry_count_current_disk: central_directory_entry_count,
+			total_central_directory_entry_count: central_directory_entry_count,
+			central_directory_size: central_directory_end_offset - central_directory_start_offset,
+			central_directory_start_offset,
+			total_number_of_disks: 1,
+			current_file_offset: central_directory_end_offset,
+			zip64_record_size_offset: 0,
+			spoof_version_made_by: false,
+			zero_out_unused_zip64_fields: false
+		};
 
-		// TODO: obfuscate here
-		end_of_central_directory.write(&mut output_zip).await?;
+		self.obfuscation_engine
+			.obfuscate_end_of_central_directory(end_of_central_directory)
+			.write(&mut output_zip)
+			.await?;
 
 		// Finally, write the generated ZIP file to its place!
 		// This also implicitly flushes any buffer, so any error during flushing will be returned
