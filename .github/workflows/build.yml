@@ -73,54 +73,7 @@ jobs:
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (Linux, x64, gnu/glibc)'
-        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
-
-  linux-aarch64-gnu:
-
-    runs-on: ubuntu-latest
-
-    env:
-      CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
-      PKG_CONFIG_ALLOW_CROSS: 1
-      PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-    - name: Install latest Rust nightly toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly
-        target: ${{ env.CARGO_BUILD_TARGET }}
-        override: true
-        profile: minimal
-        components: rust-src
-
-    - name: Cache Rust artifacts
-      uses: Swatinem/rust-cache@v1
-
-    - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
-      run: |
-        echo 'deb http://ports.ubuntu.com/ubuntu-ports focal main' | sudo tee /etc/apt/sources.list.d/arm64_multiarch.list && \
-        echo 'deb http://ports.ubuntu.com/ubuntu-ports focal-updates main' | sudo tee -a /etc/apt/sources.list.d/arm64_multiarch.list && \
-        echo 'deb http://ports.ubuntu.com/ubuntu-ports focal-security main' | sudo tee -a /etc/apt/sources.list.d/arm64_multiarch.list && \
-        sudo dpkg --add-architecture arm64 && \
-        sudo apt-get update && \
-        sudo apt-get install gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
-
-    - name: Build with optimized standard library
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
-
-    - name: Upload binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'PackSquash executable (Linux, AArch64/ARM64, gnu/glibc)'
+        name: 'PackSquash executable (Linux, x64, glibc)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
   windows-x64-gnu:
@@ -225,4 +178,48 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: 'PackSquash executable (macOS, x64)'
+        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+
+  linux-aarch64-gnu:
+
+    runs-on: ubuntu-latest
+
+    env:
+      CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
+      PKG_CONFIG_ALLOW_CROSS: 1
+      PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install latest Rust nightly toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        target: ${{ env.CARGO_BUILD_TARGET }}
+        override: true
+        profile: minimal
+        components: rust-src
+
+    - name: Cache Rust artifacts
+      uses: Swatinem/rust-cache@v1
+
+    - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
+      uses: ryankurte/action-apt@v0.3.0
+      with:
+        arch: arm64
+        packages: gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
+
+    - name: Build with optimized standard library
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'PackSquash executable (Linux, AArch64, glibc)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
