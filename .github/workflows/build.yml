@@ -104,7 +104,7 @@ jobs:
 
     - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
       run: |
-        dpkg --add-architecture arm64 && \
+        sudo dpkg --add-architecture arm64 && \
         sudo apt-get update && \
         sudo apt-get install gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
 
