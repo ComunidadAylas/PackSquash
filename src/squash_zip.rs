@@ -125,7 +125,7 @@ pub struct SquashZipSettings {
 	/// more and bigger files less. Zero is treated in a special way, meaning to never
 	/// perform any compression.
 	pub zopfli_iterations: u8,
-	/// Whether Squash Time timestamps will be stored and read from ZIP files or not.
+	/// Whether Squash Time timestamps will be stored to the output ZIP file or not.
 	/// This allows reusing the contents of previously generated ZIP files to skip
 	/// processing unchanged files again.
 	pub store_squash_time: bool,

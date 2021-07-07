@@ -22,6 +22,7 @@ use std::convert::TryInto;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::pin::Pin;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::{io, path::Path, time::SystemTime};
 
@@ -117,9 +118,10 @@ impl PackSquasher {
 	/// `pack_file_status_sender` parameter. Status updates of the squash operation will be
 	/// sent to this channel, which the client code can use as it deems fit.
 	///
-	/// Even if this function returns successfully, a output ZIP file will not be generated if
-	/// an error occurrs while processing a pack file. The caller can detect whether such an error
-	/// occurred via the status updates channel.
+	/// If this function returns successfully, it is guaranteed that a output ZIP file has been
+	/// generated. If it does not, it should be noted that the caller may get more information about
+	/// errors while processing particular pack files via the status updates channel, should they
+	/// happen and that information be desired.
 	///
 	/// Note that, due to the usage of several threads, the [`PackSquasher`] instance must be
 	/// wrapped on an atomically reference counted pointer (`Arc`) to call this method.
@@ -202,14 +204,24 @@ impl PackSquasher {
 				)
 			)));
 
+			let pack_file_optimization_failed = Arc::new(AtomicBool::new(false));
+
 			// In the current thread, dispatch a task for each pack file, that may execute
 			// in any thread of the Tokio runtime
 			for pack_file_data in pack_file_iter {
+				// Stop iterating over pack files if something went wrong processing one of them.
+				// Use an acquire ordering to force happens-before relationships which ensure that
+				// any value stored by other threads is read promptly by this thread
+				if pack_file_optimization_failed.load(Ordering::Acquire) {
+					break;
+				}
+
 				let packsquasher = Arc::clone(&self);
 				let squash_zip = Arc::clone(&squash_zip);
 				let vfs = Arc::clone(&vfs);
 
 				let in_flight_tasks_semaphore = Arc::clone(&in_flight_tasks_semaphore);
+				let pack_file_optimization_failed = Arc::clone(&pack_file_optimization_failed);
 				let pack_file_status_sender = pack_file_status_sender.clone();
 
 				// Acquire a task permit before spawning it, and send it to the task. This
@@ -234,6 +246,7 @@ impl PackSquasher {
 								.ok();
 							}
 
+							pack_file_optimization_failed.store(true, Ordering::Release);
 							return;
 						}
 					};
@@ -259,7 +272,7 @@ impl PackSquasher {
 					/// Macro that evaluates to a call to the `process_pack_file` function,
 					/// providing less verbose syntax to call it.
 					macro_rules! process {
-						($pack_file:expr, $pack_file_meta:expr) => {
+						($pack_file:expr, $pack_file_meta:expr) => {{
 							// We instantiated the pack file, so we got our VFS metadata back
 							let (pack_file_meta, pack_file_size) = $pack_file_meta.unwrap();
 
@@ -276,7 +289,7 @@ impl PackSquasher {
 									.recompress_compressed_files
 							)
 							.await
-						};
+						}};
 					}
 
 					/// Big macro that opens a pack file ant tries to instantiate it with the
@@ -303,7 +316,9 @@ impl PackSquasher {
 								$constructor_args
 							) {
 								Some(pack_file) => {
-									process!(pack_file, vfs_file_meta);
+									if !process!(pack_file, vfs_file_meta) {
+										pack_file_optimization_failed.store(true, Ordering::Release);
+									}
 
 									return;
 								}
@@ -321,9 +336,10 @@ impl PackSquasher {
 											))
 											.await
 											.ok();
-
-											return;
 										}
+
+										pack_file_optimization_failed.store(true, Ordering::Release);
+										return;
 									}
 								}
 							}
@@ -397,8 +413,19 @@ impl PackSquasher {
 			}
 
 			// Now wait for every pack file task to finish, so the ZIP file is complete
+			// if everything went fine, or any pending work is done if not
 			for join_handle in pack_file_tasks {
 				join_handle.await.ok();
+			}
+
+			// Do not try to finish the ZIP file if something went wrong. We can't rely
+			// on a local variable that indicates whether the loop exited early because
+			// it may be finished by the time this is set to true, so do the atomic
+			// access. The ordering can't be relaxed because awaiting for a join handle
+			// is not documented to guarantee any synchronization (maybe the thread that
+			// ran the task is still alive in the pool)
+			if pack_file_optimization_failed.load(Ordering::Acquire) {
+				return Err(PackSquasherError::PackFileError);
 			}
 
 			// Notify that we are about to finish the ZIP file
@@ -468,7 +495,12 @@ pub enum PackSquasherError {
 	InvalidFileType(&'static str),
 	/// Thrown when some error occurs in a ZIP file operation.
 	#[error("Error while performing a ZIP file operation: {0}")]
-	SquashZip(#[from] SquashZipError)
+	SquashZip(#[from] SquashZipError),
+	/// Thrown when some error occurs while processing a pack file. More detailed
+	/// information about it can be obtained by reading the corresponding status
+	/// update.
+	#[error("An error occurred while processing a pack file")]
+	PackFileError
 }
 
 /// A entry in a virtual filesystem directory that represents a possible pack file,
@@ -613,11 +645,12 @@ pub mod vfs {
 	}
 }
 
-/// Processes the provided pack file, adding it to the output ZIP file
-/// as appropriate and notifying client code via a channel about the
-/// result of the operation. If some error occurs, the state of the
-/// output ZIP file may become invalid, and no further pack files
+/// Processes the provided pack file, adding it to the output ZIP file as appropriate and
+/// notifying client code via a channel about the result of the operation. If some error
+/// occurs, the state of the output ZIP file may become invalid, and no further pack files
 /// should be processed and added to it.
+///
+/// The return value is `true` if no error ocurred, and `false` if some error happened.
 async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	pack_file: impl PackFile,
 	relative_path: &RelativePath<'_>,
@@ -626,10 +659,9 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	squash_zip: Arc<SquashZip<F>>,
 	pack_file_status_sender: Option<Sender<PackSquasherStatus>>,
 	always_compress: bool
-) {
-	// We may have to change the file extension to a canonical
-	// one that's accepted by Minecraft. Do that early, because
-	// we store the file with the canonical extension in the ZIP
+) -> bool {
+	// We may have to change the file extension to a canonical one that's accepted by Minecraft.
+	// Do that early, because we store the file with the canonical extension in the ZIP
 	let pack_file_path = RelativePath::from_inner(
 		relative_path
 			.with_extension(pack_file.canonical_extension())
@@ -659,9 +691,8 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 
 		let mut processed_pack_file_chunks = pack_file.process().peekable();
 
-		// Peek the strategy string contained in the first
-		// processed chunk, and use that as the optimization
-		// strategy string for all the file
+		// Peek the strategy string contained in the first processed chunk, and use that
+		// as the optimization strategy string for all the file
 		optimization_strategy = {
 			let first_chunk = Pin::new(&mut processed_pack_file_chunks).peek().await;
 
@@ -705,6 +736,8 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 		optimization_error = optimization_error.or(squash_zip_error);
 	}
 
+	let all_ok = optimization_error.is_none();
+
 	if let Some(tx) = pack_file_status_sender {
 		tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
 			path: pack_file_path,
@@ -714,4 +747,6 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 		.await
 		.ok();
 	}
+
+	all_ok
 }

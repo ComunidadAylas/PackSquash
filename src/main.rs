@@ -4,7 +4,7 @@ use std::{
 	io::{self, Read},
 	process,
 	sync::{
-		atomic::{AtomicBool, AtomicU64, Ordering},
+		atomic::{AtomicU64, Ordering},
 		Arc
 	},
 	thread,
@@ -130,13 +130,11 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 
 	let output_file_path = squash_options.global_options.output_file_path.clone();
 	let processed_file_count = Arc::new(AtomicU64::new(0));
-	let error_occurred = Arc::new(AtomicBool::new(false));
 	let start_instant = Instant::now();
 
 	|| -> Result<(), PackSquasherError> {
 		let (sender, mut receiver) = channel(64);
 		let processed_file_count = processed_file_count.clone();
-		let error_occurred = error_occurred.clone();
 
 		// Spawn our CLI-updating thread. This decouples the pack processing from
 		// the printing of standard streams messages, unless printing to them is
@@ -149,15 +147,11 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 						processed_file_count.fetch_add(1, Ordering::Relaxed);
 
 						match pack_file_status.optimization_error() {
-							Some(error_description) => {
-								error_occurred.store(true, Ordering::Relaxed);
-
-								eprintln!(
-									"! {}: {}",
-									pack_file_status.path().as_ref(),
-									error_description
-								);
-							}
+							Some(error_description) => eprintln!(
+								"! {}: {}",
+								pack_file_status.path().as_ref(),
+								error_description
+							),
 							None => eprintln!(
 								"> {}: {}",
 								pack_file_status.path().as_ref(),
@@ -202,32 +196,23 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		},
 		|_| {
 			let process_time = start_instant.elapsed();
-			let error_occurred = Arc::try_unwrap(error_occurred).unwrap().into_inner();
 
 			println!(
 				"{} ({} files, {}.{:03} s)",
-				output_file_path
-					.metadata()
-					.ok()
-					.filter(|_| !error_occurred)
-					.map_or_else(
-						|| Cow::Borrowed("Pack processed"),
-						|metadata| Cow::Owned(format!(
-							"{} generated, {:.3} MiB",
-							output_file_path.as_os_str().to_string_lossy(),
-							metadata.len() as f64 / (1024.0 * 1024.0)
-						))
-					),
+				output_file_path.metadata().ok().map_or_else(
+					|| Cow::Borrowed("Pack processed"),
+					|metadata| Cow::Owned(format!(
+						"{} generated, {:.3} MiB",
+						output_file_path.as_os_str().to_string_lossy(),
+						metadata.len() as f64 / (1024.0 * 1024.0)
+					))
+				),
 				Arc::try_unwrap(processed_file_count).unwrap().into_inner(),
 				process_time.as_secs(),
 				process_time.subsec_millis()
 			);
 
-			if error_occurred {
-				4
-			} else {
-				0
-			}
+			0
 		}
 	)
 }
