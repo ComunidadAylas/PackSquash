@@ -1,8 +1,11 @@
-use std::{cmp, convert::TryInto, io::Error};
+use std::{
+	convert::TryInto,
+	io::{Cursor, Error, Write}
+};
 
 use enumset::{EnumSet, EnumSetType};
 
-use tokio::io::{AsyncWrite, AsyncWriteExt};
+use tokio::io::{self, AsyncWrite};
 
 use super::SquashZipError;
 
@@ -122,25 +125,6 @@ impl CompressionMethod {
 	}
 }
 
-/// Provides a more concise and ergonomic syntax for carrying out an I/O
-/// operation that writes a ZIP file record field to a output ZIP file.
-macro_rules! write_fields {
-	($self:expr, $output_zip:expr, None, $field:ident) => {
-		$output_zip.write_all(&$self.$field).await?;
-	};
-	($self:expr, $output_zip:expr, $op:ident, $field:ident) => {
-		$output_zip.write_all(&$self.$field.$op()).await?;
-	};
-	($self:expr, $output_zip:expr, None, $field:ident, $($fields:ident),+) => {
-		write_fields!($self, $output_zip, None, $field);
-		write_fields!($self, $output_zip, None, $($fields),+);
-	};
-	($self:expr, $output_zip:expr, $op:ident, $field:ident, $($fields:ident),+) => {
-		write_fields!($self, $output_zip, $op, $field);
-		write_fields!($self, $output_zip, $op, $($fields),+);
-	};
-}
-
 /// Computes the general purpose bit flag for this ZIP file record from the file name
 /// it contains, used to specify its UTF-8 encoding.
 fn get_general_purpose_bit_flag(file_name: &str) -> u16 {
@@ -194,6 +178,9 @@ impl<'a> LocalFileHeader<'a> {
 		&self,
 		output_zip: &mut W
 	) -> Result<(), Error> {
+		let mut buf = [0; 30];
+		let mut cursor = Cursor::new(&mut buf[..]);
+
 		// Compute the actual set of ZIP features needed to extract with the information we have
 		let mut zip_features_needed_to_extract = EnumSet::empty();
 		if self.compression_method == CompressionMethod::Deflate {
@@ -217,31 +204,21 @@ impl<'a> LocalFileHeader<'a> {
 		// -> last_mod_date = 0xAABB (LE bytes on disk: 0xBBAA)
 		// Therefore, writing squash_time bytes in LE order is enough to achieve this
 
-		output_zip.write_all(&LOCAL_FILE_HEADER_SIGNATURE).await?;
-		output_zip
-			.write_all(&version_needed_to_extract.to_le_bytes())
-			.await?;
-		output_zip
-			.write_all(&general_purpose_bit_flag.to_le_bytes())
-			.await?;
-		output_zip
-			.write_all(&compression_method.to_le_bytes())
-			.await?;
-		output_zip.write_all(&self.squash_time).await?;
-		write_fields!(
-			self,
-			output_zip,
-			to_le_bytes,
-			crc32,
-			compressed_size,
-			uncompressed_size,
-			file_name_length
-		);
+		cursor.write_all(&LOCAL_FILE_HEADER_SIGNATURE)?;
+		cursor.write_all(&version_needed_to_extract.to_le_bytes())?;
+		cursor.write_all(&general_purpose_bit_flag.to_le_bytes())?;
+		cursor.write_all(&compression_method.to_le_bytes())?;
+		cursor.write_all(&self.squash_time)?;
+		cursor.write_all(&self.crc32.to_le_bytes())?;
+		cursor.write_all(&self.compressed_size.to_le_bytes())?;
+		cursor.write_all(&self.uncompressed_size.to_le_bytes())?;
+		cursor.write_all(&self.file_name_length.to_le_bytes())?;
 		// We don't add extra fields in the local file header
-		output_zip.write_all(&0u16.to_le_bytes()).await?;
-		write_fields!(self, output_zip, as_bytes, file_name);
+		cursor.write_all(&0u16.to_le_bytes())?;
 
-		Ok(())
+		io::AsyncWriteExt::write_all(output_zip, &buf).await?;
+
+		io::AsyncWriteExt::write_all(output_zip, self.file_name.as_bytes()).await
 	}
 
 	/// Returns the size that this ZIP file record would take on the file. This
@@ -333,6 +310,9 @@ impl<'a> CentralDirectoryHeader<'a> {
 		&self,
 		output_zip: &mut W
 	) -> Result<(), Error> {
+		let mut buf = [0; 46];
+		let mut cursor = Cursor::new(&mut buf[..]);
+
 		// We use ZIP64 extensions in case the local file header offset can't be stored
 		// in 4 bytes
 		let local_header_offset_requires_zip64 = self.local_header_offset_requires_zip64_extensions();
@@ -353,73 +333,54 @@ impl<'a> CentralDirectoryHeader<'a> {
 		let general_purpose_bit_flag = get_general_purpose_bit_flag(self.file_name);
 		let compression_method = self.compression_method.to_compression_method_field();
 
-		output_zip
-			.write_all(&CENTRAL_DIRECTORY_HEADER_SIGNATURE)
-			.await?;
-		output_zip
-			.write_all(&get_version_made_by(self.spoof_version_made_by))
-			.await?;
+		cursor.write_all(&CENTRAL_DIRECTORY_HEADER_SIGNATURE)?;
+		cursor.write_all(&get_version_made_by(self.spoof_version_made_by))?;
 		// Same operations as local file header
-		output_zip
-			.write_all(&version_needed_to_extract.to_le_bytes())
-			.await?;
-		output_zip
-			.write_all(&general_purpose_bit_flag.to_le_bytes())
-			.await?;
-		output_zip
-			.write_all(&compression_method.to_le_bytes())
-			.await?;
-		output_zip.write_all(&self.squash_time).await?;
-		write_fields!(
-			self,
-			output_zip,
-			to_le_bytes,
-			crc32,
-			compressed_size,
-			uncompressed_size
-		);
+		cursor.write_all(&version_needed_to_extract.to_le_bytes())?;
+		cursor.write_all(&general_purpose_bit_flag.to_le_bytes())?;
+		cursor.write_all(&compression_method.to_le_bytes())?;
+		cursor.write_all(&self.squash_time)?;
+		cursor.write_all(&self.crc32.to_le_bytes())?;
+		cursor.write_all(&self.compressed_size.to_le_bytes())?;
+		cursor.write_all(&self.uncompressed_size.to_le_bytes())?;
 		// End of same operations as local file header
-		output_zip
-			.write_all(&(self.file_name.len() as u16).to_le_bytes())
-			.await?;
-		output_zip
-			.write_all(&extra_field_length.to_le_bytes())
-			.await?;
+		cursor.write_all(&(self.file_name.len() as u16).to_le_bytes())?;
+		cursor.write_all(&extra_field_length.to_le_bytes())?;
 		// File comment length
-		output_zip.write_all(&[0; 2]).await?;
+		cursor.write_all(&[0; 2])?;
 		// Number of the disk where the local file header is
-		output_zip
-			.write_all(&self.local_header_disk_number.to_le_bytes())
-			.await?;
+		cursor.write_all(&self.local_header_disk_number.to_le_bytes())?;
 		// Internal file attributes (always zero so no sane program will mangle the file with
 		// EOL conversion, for example)
-		output_zip.write_all(&[0; 2]).await?;
+		cursor.write_all(&[0; 2])?;
 		// External file attributes
-		output_zip
-			.write_all(&FILE_ATTRIBUTE_READONLY.to_le_bytes())
-			.await?;
+		cursor.write_all(&FILE_ATTRIBUTE_READONLY.to_le_bytes())?;
 		// Local header offset
-		output_zip
-			.write_all(
-				&if local_header_offset_requires_zip64 {
-					u32::MAX
-				} else {
-					self.local_header_offset as u32
-				}
-				.to_le_bytes()
-			)
-			.await?;
-		write_fields!(self, output_zip, as_bytes, file_name);
+		cursor.write_all(
+			&if local_header_offset_requires_zip64 {
+				u32::MAX
+			} else {
+				self.local_header_offset as u32
+			}
+			.to_le_bytes()
+		)?;
+		io::AsyncWriteExt::write_all(output_zip, &buf).await?;
+		io::AsyncWriteExt::write_all(output_zip, self.file_name.as_bytes()).await?;
+
 		// ZIP64 extended information extra field
 		if zip64_extensions_required {
+			let mut buf = [0; 4];
+			let mut cursor = Cursor::new(&mut buf[..]);
+
 			// Extra field tag/ID
-			output_zip.write_all(&0x0001_u16.to_le_bytes()).await?;
+			cursor.write_all(&0x0001_u16.to_le_bytes())?;
 			// Data size (does not include the 4 byte long header)
-			output_zip
-				.write_all(&(extra_field_length - 4).to_le_bytes())
-				.await?;
+			cursor.write_all(&(extra_field_length - 4).to_le_bytes())?;
+			io::AsyncWriteExt::write_all(output_zip, &buf).await?;
+
 			if local_header_offset_requires_zip64 {
-				write_fields!(self, output_zip, to_le_bytes, local_header_offset);
+				io::AsyncWriteExt::write_all(output_zip, &self.local_header_offset.to_le_bytes())
+					.await?;
 			}
 		}
 
@@ -535,171 +496,135 @@ impl EndOfCentralDirectory {
 		// If ZIP64 extensions are required, we must generate a ZIP64 end of central directory
 		// record, with its corresponding locator
 		if self.requires_zip64_extensions() {
-			output_zip
-				.write_all(&ZIP64_END_OF_CENTRAL_DIRECTORY_SIGNATURE)
-				.await?;
-			output_zip
-				.write_all(&cmp::max(44 + self.zip64_record_size_offset as i64, 0).to_le_bytes())
-				.await?;
-			output_zip
-				.write_all(&get_version_made_by(self.spoof_version_made_by))
-				.await?;
+			let mut buf = [0; 56 + 20];
+			let mut cursor = Cursor::new(&mut buf[..]);
+
+			cursor.write_all(&ZIP64_END_OF_CENTRAL_DIRECTORY_SIGNATURE)?;
+			cursor.write_all(&(44 + self.zip64_record_size_offset as i64).to_le_bytes())?;
+			cursor.write_all(&get_version_made_by(self.spoof_version_made_by))?;
 			// Luckily, ZIP64 is the highest specification version we support, so this is
 			// always correct. It also achieves more compressibility if we didn't spoof
 			// the made by version
-			output_zip
-				.write_all(
-					&ZipFeature::Zip64Extensions
-						.to_version_needed_to_extract()
-						.to_le_bytes()
-				)
-				.await?;
-			output_zip
-				.write_all(
-					&(if self.zero_out_unused_zip64_fields {
-						0
-					} else {
-						self.disk_number
-					} as u32)
-						.to_le_bytes()
-				)
-				.await?;
-			output_zip
-				.write_all(
-					&(if self.zero_out_unused_zip64_fields {
-						0
-					} else {
-						self.central_directory_start_disk_number
-					} as u32)
-						.to_le_bytes()
-				)
-				.await?;
-			output_zip
-				.write_all(
-					&if self.zero_out_unused_zip64_fields
-						&& !self.entry_count_current_disk_requires_zip64_extensions()
-					{
-						0
-					} else {
-						self.central_directory_entry_count_current_disk
-					}
+			cursor.write_all(
+				&ZipFeature::Zip64Extensions
+					.to_version_needed_to_extract()
 					.to_le_bytes()
-				)
-				.await?;
-			output_zip
-				.write_all(
-					&if self.zero_out_unused_zip64_fields
-						&& !self.total_entry_count_requires_zip64_extensions()
-					{
-						0
-					} else {
-						self.total_central_directory_entry_count
-					}
+			)?;
+			cursor.write_all(
+				&(if self.zero_out_unused_zip64_fields {
+					0
+				} else {
+					self.disk_number
+				} as u32)
 					.to_le_bytes()
-				)
-				.await?;
-			output_zip
-				.write_all(
-					&if self.zero_out_unused_zip64_fields
-						&& !self.central_directory_size_requires_zip64_extensions()
-					{
-						0
-					} else {
-						self.central_directory_size
-					}
+			)?;
+			cursor.write_all(
+				&(if self.zero_out_unused_zip64_fields {
+					0
+				} else {
+					self.central_directory_start_disk_number
+				} as u32)
 					.to_le_bytes()
-				)
-				.await?;
-			output_zip
-				.write_all(
-					&if self.zero_out_unused_zip64_fields
-						&& !self.central_directory_start_offset_requires_zip64_extensions()
-					{
-						0
-					} else {
-						self.central_directory_start_offset
-					}
-					.to_le_bytes()
-				)
-				.await?;
+			)?;
+			cursor.write_all(
+				&if self.zero_out_unused_zip64_fields
+					&& !self.entry_count_current_disk_requires_zip64_extensions()
+				{
+					0
+				} else {
+					self.central_directory_entry_count_current_disk
+				}
+				.to_le_bytes()
+			)?;
+			cursor.write_all(
+				&if self.zero_out_unused_zip64_fields
+					&& !self.total_entry_count_requires_zip64_extensions()
+				{
+					0
+				} else {
+					self.total_central_directory_entry_count
+				}
+				.to_le_bytes()
+			)?;
+			cursor.write_all(
+				&if self.zero_out_unused_zip64_fields
+					&& !self.central_directory_size_requires_zip64_extensions()
+				{
+					0
+				} else {
+					self.central_directory_size
+				}
+				.to_le_bytes()
+			)?;
+			cursor.write_all(
+				&if self.zero_out_unused_zip64_fields
+					&& !self.central_directory_start_offset_requires_zip64_extensions()
+				{
+					0
+				} else {
+					self.central_directory_start_offset
+				}
+				.to_le_bytes()
+			)?;
 
 			// Now go for the ZIP64 EOCD locator, which is always needed
-			output_zip
-				.write_all(&ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE)
-				.await?;
-			output_zip
-				.write_all(
-					&(if self.zero_out_unused_zip64_fields {
-						0
-					} else {
-						self.central_directory_start_disk_number
-					} as u32)
-						.to_le_bytes()
-				)
-				.await?;
-			write_fields!(
-				self,
-				output_zip,
-				to_le_bytes,
-				current_file_offset,
-				total_number_of_disks
-			);
+			cursor.write_all(&ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE)?;
+			cursor.write_all(
+				&(if self.zero_out_unused_zip64_fields {
+					0
+				} else {
+					self.central_directory_start_disk_number
+				} as u32)
+					.to_le_bytes()
+			)?;
+			cursor.write_all(&self.current_file_offset.to_le_bytes())?;
+			cursor.write_all(&self.total_number_of_disks.to_le_bytes())?;
+
+			io::AsyncWriteExt::write_all(output_zip, &buf).await?;
 		}
 
-		// After the ZIP64 EOCD record, if any, goes the traditional EOCD record. Write it
-		output_zip
-			.write_all(&END_OF_CENTRAL_DIRECTORY_SIGNATURE)
-			.await?;
-		write_fields!(
-			self,
-			output_zip,
-			to_le_bytes,
-			disk_number,
-			central_directory_start_disk_number
-		);
-		output_zip
-			.write_all(
-				&if self.entry_count_current_disk_requires_zip64_extensions() {
-					u16::MAX
-				} else {
-					self.central_directory_entry_count_current_disk as u16
-				}
-				.to_le_bytes()
-			)
-			.await?;
-		output_zip
-			.write_all(
-				&if self.total_entry_count_requires_zip64_extensions() {
-					u16::MAX
-				} else {
-					self.total_central_directory_entry_count as u16
-				}
-				.to_le_bytes()
-			)
-			.await?;
-		output_zip
-			.write_all(
-				&if self.central_directory_size_requires_zip64_extensions() {
-					u32::MAX
-				} else {
-					self.central_directory_size as u32
-				}
-				.to_le_bytes()
-			)
-			.await?;
-		output_zip
-			.write_all(
-				&if self.central_directory_start_offset_requires_zip64_extensions() {
-					u32::MAX
-				} else {
-					self.central_directory_start_offset as u32
-				}
-				.to_le_bytes()
-			)
-			.await?;
-		// No comments (zero comment length)
-		output_zip.write_all(&[0; 2]).await?;
+		let mut buf = [0; 22];
+		let mut cursor = Cursor::new(&mut buf[..]);
 
-		Ok(())
+		// After the ZIP64 EOCD record, if any, goes the traditional EOCD record. Write it
+		cursor.write_all(&END_OF_CENTRAL_DIRECTORY_SIGNATURE)?;
+		cursor.write_all(&self.disk_number.to_le_bytes())?;
+		cursor.write_all(&self.central_directory_start_disk_number.to_le_bytes())?;
+		cursor.write_all(
+			&if self.entry_count_current_disk_requires_zip64_extensions() {
+				u16::MAX
+			} else {
+				self.central_directory_entry_count_current_disk as u16
+			}
+			.to_le_bytes()
+		)?;
+		cursor.write_all(
+			&if self.total_entry_count_requires_zip64_extensions() {
+				u16::MAX
+			} else {
+				self.total_central_directory_entry_count as u16
+			}
+			.to_le_bytes()
+		)?;
+		cursor.write_all(
+			&if self.central_directory_size_requires_zip64_extensions() {
+				u32::MAX
+			} else {
+				self.central_directory_size as u32
+			}
+			.to_le_bytes()
+		)?;
+		cursor.write_all(
+			&if self.central_directory_start_offset_requires_zip64_extensions() {
+				u32::MAX
+			} else {
+				self.central_directory_start_offset as u32
+			}
+			.to_le_bytes()
+		)?;
+		// No comments (zero comment length)
+		cursor.write_all(&[0; 2])?;
+
+		io::AsyncWriteExt::write_all(output_zip, &buf).await
 	}
 }
