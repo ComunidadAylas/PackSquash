@@ -8,7 +8,7 @@ use const_random::const_random;
 use fpe::ff1::{BinaryNumeralString, FF1};
 use thiserror::Error;
 
-use super::{system_id::get_or_compute_system_id, zip_file_record::DUMMY_SQUASH_TIME};
+use super::system_id::get_or_compute_system_id;
 
 #[cfg(test)]
 mod tests;
@@ -22,9 +22,7 @@ pub enum SystemTimeSanitizationError {
 	#[error("The time is too far back in past")]
 	PastSquashTime,
 	#[error("The time is too far into the future")]
-	FutureSquashTime(#[from] TryFromIntError),
-	#[error("The time has a reserved value. Please try again")]
-	ReservedSquashTime
+	FutureSquashTime(#[from] TryFromIntError)
 }
 
 /// Sanitizes [SystemTime] structs to a 4-byte format that looks random, but can be
@@ -107,10 +105,7 @@ impl<C: NewBlockCipher + BlockCipher + BlockEncrypt + BlockDecrypt + Clone> Syst
 			.unwrap()
 			.to_bytes_le();
 
-		match sanitized_squash_time_bytes.try_into().unwrap() {
-			DUMMY_SQUASH_TIME => Err(SystemTimeSanitizationError::ReservedSquashTime),
-			sanitized_time => Ok(sanitized_time)
-		}
+		Ok(sanitized_squash_time_bytes.try_into().unwrap())
 	}
 
 	/// Desanitizes the specified four bytes back to a system time. The tweak
