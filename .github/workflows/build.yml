@@ -37,8 +37,10 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer build dependencies
-      run: sudo apt-get update && sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+    - name: Install GStreamer libraries and GStreamer development packages
+      run: |
+        sudo apt-get update && \
+        sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
@@ -46,15 +48,13 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         args: --release
 
-    - name: Cargo build
-      if: ${{ github.event_name != 'release' }}
+    - name: Run tests
       uses: actions-rs/cargo@v1
       with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        command: test
+        args: --release
 
-    - name: Cargo build with optimized standard library
-      if: ${{ github.event_name == 'release' }}
+    - name: Build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
@@ -70,13 +70,10 @@ jobs:
         author_name: github-actions[bot]
         author_email: 41898282+github-actions[bot]@users.noreply.github.com
 
-    - name: Strip debug symbols from binary
-      run: strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
-
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (Linux x64)'
+        name: 'PackSquash executable (Linux, x64, glibc)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
   windows-x64-gnu:
@@ -102,39 +99,41 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer build dependencies
+    - name: Install GStreamer libraries and GStreamer development packages
       run: |
-        Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.18.0/mingw/gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi'
-        Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64-1.18.0.msi /qn' -Wait
+        Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.19.1/mingw/gstreamer-1.0-devel-mingw-x86_64-1.19.1.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64.msi'
+        Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64.msi /qn' -Wait
+        "PKG_CONFIG_PATH=C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
         $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '.tmp', '.zip' } -PassThru
         Invoke-WebRequest -Uri 'https://ftp.rrze.uni-erlangen.de/xbmc/build-deps/win32/mingw-msys/pkg-config-lite-0.28-1_bin-win32.zip' -OutFile $tmp_file
         $tmp_file | Expand-Archive -DestinationPath "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1" -Force
         $tmp_file | Remove-Item
-        "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+        "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-    - name: Cargo build
-      if: ${{ github.event_name != 'release' }}
+        Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.19.1/mingw/gstreamer-1.0-mingw-x86_64-1.19.1.msi' -OutFile 'gstreamer-1.0-mingw-x86_64.msi'
+        Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-mingw-x86_64.msi /qn' -Wait
+        "C:\gstreamer\1.0\mingw_x86_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - name: Run tests
       uses: actions-rs/cargo@v1
-      env:
-        PKG_CONFIG_PATH: C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig
       with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        command: test
+        args: --release
 
-    - name: Cargo build with optimized standard library
-      if: ${{ github.event_name == 'release' }}
+    - name: Build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
         args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
-    - name: Strip debug symbols from binary
-      run: bash.exe -c 'strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe'
+    - name: Set binary resource data
+      run: target/set_executable_resource_data.ps1
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (Windows x64)'
+        name: 'PackSquash executable (Windows, x64)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe
 
   macos-x64-darwin:
@@ -160,28 +159,67 @@ jobs:
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer build dependencies
-      run: brew install gstreamer gst-plugins-base
+    - name: Install GStreamer libraries and GStreamer development packages
+      run: brew install gst-plugins-good gst-plugins-bad
 
-    - name: Cargo build
-      if: ${{ github.event_name != 'release' }}
+    - name: Run tests
       uses: actions-rs/cargo@v1
       with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        command: test
+        args: --release
 
-    - name: Cargo build with optimized standard library
-      if: ${{ github.event_name == 'release' }}
+    - name: Build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
         args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
-    - name: Strip debug symbols from binary
-      run: strip target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'PackSquash executable (macOS, x64)'
+        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+
+  linux-aarch64-gnu:
+
+    runs-on: ubuntu-latest
+
+    env:
+      CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
+      PKG_CONFIG_ALLOW_CROSS: 1
+      PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install latest Rust nightly toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        target: ${{ env.CARGO_BUILD_TARGET }}
+        override: true
+        profile: minimal
+        components: rust-src
+
+    - name: Cache Rust artifacts
+      uses: Swatinem/rust-cache@v1
+
+    - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
+      uses: ryankurte/action-apt@v0.3.0
+      with:
+        arch: arm64
+        packages: gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
+
+    - name: Build with optimized standard library
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
-        name: 'PackSquash executable (macOS x64)'
+        name: 'PackSquash executable (Linux, AArch64-ARM64, glibc)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash

@@ -1,0 +1,5 @@
+# Make sure LF is used for line endings in text files that are
+# used for comparing expected results in unit tests
+src/pack_file/json_file/*.json			eol=lf
+src/pack_file/properties_file/*.properties	eol=lf
+src/pack_file/shader_file/*.fsh			eol=lf
