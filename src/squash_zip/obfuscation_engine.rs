@@ -13,7 +13,7 @@ use rand_xoshiro::{
 };
 use tokio::io::{AsyncWrite, AsyncWriteExt};
 
-use crate::{config::PercentageInteger, RelativePath};
+use crate::config::PercentageInteger;
 
 use super::{
 	zip_file_record::{
@@ -103,6 +103,7 @@ impl ObfuscationEngine {
 			let compressed_size;
 			let uncompressed_size;
 			let file_name;
+			let zero_out_version_needed_to_extract;
 
 			if discretion {
 				compression_method = obfuscated_header.compression_method;
@@ -111,62 +112,54 @@ impl ObfuscationEngine {
 				compressed_size = obfuscated_header.compressed_size + random_u32(seed) % 8 + 1;
 				uncompressed_size = obfuscated_header.uncompressed_size + random_u32(seed) % 8 + 1;
 				file_name = {
-					let file_path = RelativePath::from_inner(obfuscated_header.file_name());
 					let digit_displacement = (random_u32(seed) % 10 + 1) as u8;
 					let mut remaining_file_name_bytes =
-						obfuscated_header.file_name().as_bytes().len();
+						obfuscated_header.file_name().as_bytes().len() as i32;
 
 					Cow::Owned(
-						file_path
-							.with_file_name(
-								obfuscated_header
-									.file_name()
-									.chars()
-									.flat_map(|c| {
-										enum ObfuscatedChars {
-											ToUppercase(ToUppercase),
-											ToLowercase(ToLowercase),
-											Passthrough(Once<char>)
+						obfuscated_header
+							.file_name()
+							.chars()
+							.flat_map(|c| {
+								enum ObfuscatedChars {
+									ToUppercase(ToUppercase),
+									ToLowercase(ToLowercase),
+									Passthrough(Once<char>)
+								}
+
+								impl Iterator for ObfuscatedChars {
+									type Item = char;
+
+									fn next(&mut self) -> Option<Self::Item> {
+										match self {
+											Self::ToUppercase(iter) => iter.next(),
+											Self::ToLowercase(iter) => iter.next(),
+											Self::Passthrough(iter) => iter.next()
 										}
+									}
+								}
 
-										impl Iterator for ObfuscatedChars {
-											type Item = char;
+								if c.is_ascii_digit() {
+									ObfuscatedChars::Passthrough(iter::once(
+										((c as u8 - 48 + digit_displacement) % 10 + 48) as char
+									))
+								} else if c.is_lowercase() {
+									ObfuscatedChars::ToUppercase(c.to_uppercase())
+								} else if c.is_uppercase() {
+									ObfuscatedChars::ToLowercase(c.to_lowercase())
+								} else {
+									ObfuscatedChars::Passthrough(iter::once(c))
+								}
+							})
+							.take_while(|c| {
+								remaining_file_name_bytes -= c.len_utf8() as i32;
 
-											fn next(&mut self) -> Option<Self::Item> {
-												match self {
-													Self::ToUppercase(iter) => iter.next(),
-													Self::ToLowercase(iter) => iter.next(),
-													Self::Passthrough(iter) => iter.next()
-												}
-											}
-										}
-
-										if c.is_ascii_digit() {
-											ObfuscatedChars::Passthrough(iter::once(
-												((c as u8 - 48 + digit_displacement) % 10 + 48)
-													as char
-											))
-										} else if c.is_lowercase() {
-											ObfuscatedChars::ToUppercase(c.to_uppercase())
-										} else if c.is_uppercase() {
-											ObfuscatedChars::ToLowercase(c.to_lowercase())
-										} else {
-											ObfuscatedChars::Passthrough(iter::once(c))
-										}
-									})
-									.take_while(|c| {
-										remaining_file_name_bytes =
-											remaining_file_name_bytes.saturating_sub(c.len_utf8());
-
-										remaining_file_name_bytes > 0
-									})
-									.collect::<String>()
-							)
-							.into_os_string()
-							.into_string()
-							.unwrap()
+								remaining_file_name_bytes >= 0
+							})
+							.collect::<String>()
 					)
 				};
+				zero_out_version_needed_to_extract = false;
 			} else {
 				compression_method = CompressionMethod::Store;
 				squash_time = [0; 4];
@@ -174,6 +167,7 @@ impl ObfuscationEngine {
 				compressed_size = 0;
 				uncompressed_size = 0;
 				file_name = Cow::Borrowed("");
+				zero_out_version_needed_to_extract = true;
 			}
 
 			obfuscated_header = LocalFileHeader::new(file_name).unwrap();
@@ -182,6 +176,7 @@ impl ObfuscationEngine {
 			obfuscated_header.compressed_size = compressed_size;
 			obfuscated_header.uncompressed_size = uncompressed_size;
 			obfuscated_header.squash_time = squash_time;
+			obfuscated_header.zero_out_version_needed_to_extract = zero_out_version_needed_to_extract;
 		}
 
 		obfuscated_header
@@ -220,7 +215,8 @@ impl ObfuscationEngine {
 				compressed_size: obfuscated_header.compressed_size,
 				uncompressed_size,
 				local_header_disk_number,
-				local_header_offset: obfuscated_header.local_header_offset,
+				local_header_offset: obfuscated_header.local_header_offset
+					- self.obfuscating_header_size(),
 				file_name: obfuscated_header.file_name,
 				spoof_version_made_by: true
 			};
@@ -267,9 +263,11 @@ impl ObfuscationEngine {
 				central_directory_entry_count_current_disk,
 				total_central_directory_entry_count,
 				central_directory_size: obfuscated_header.central_directory_size,
-				central_directory_start_offset: obfuscated_header.central_directory_start_offset,
+				central_directory_start_offset: obfuscated_header.central_directory_start_offset
+					- self.obfuscating_header_size(),
 				total_number_of_disks,
-				current_file_offset: obfuscated_header.current_file_offset,
+				current_file_offset: obfuscated_header.current_file_offset
+					- self.obfuscating_header_size(),
 				zip64_record_size_offset,
 				spoof_version_made_by: true,
 				zero_out_unused_zip64_fields: !discretion
@@ -284,6 +282,18 @@ impl ObfuscationEngine {
 			obfuscated_crc32 ^ CRC32_KEY
 		} else {
 			obfuscated_crc32
+		}
+	}
+
+	pub fn obfuscating_header_size(&self) -> u64 {
+		if let ObfuscationEngine::Obfuscation {
+			size_increasing_obfuscation: true,
+			..
+		} = self
+		{
+			4
+		} else {
+			0
 		}
 	}
 

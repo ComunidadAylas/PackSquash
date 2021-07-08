@@ -28,7 +28,7 @@ mod tests;
 // use bitwise operations and do not perform any checks. However, a compliant
 // program could reject these dates because they're undefined
 #[allow(clippy::unusual_byte_groupings)] // Grouped according to fields
-pub(super) const DUMMY_SQUASH_TIME: [u8; 4] = ((0b0000000_0001_00001 << 16) as u32).to_le_bytes();
+const DUMMY_SQUASH_TIME: [u8; 4] = ((0b0000000_0001_00001 << 16) as u32).to_le_bytes();
 
 /// The MS-DOS read-only file attribute. Used to signal the intent for the files
 /// to not be modified after extraction, although this isn't always honoured.
@@ -144,6 +144,7 @@ pub(super) struct LocalFileHeader<'a> {
 	pub crc32: u32,
 	pub compressed_size: u32,
 	pub uncompressed_size: u32,
+	pub zero_out_version_needed_to_extract: bool,
 	file_name_length: u16,
 	file_name: Cow<'a, str>
 }
@@ -161,6 +162,7 @@ impl<'a> LocalFileHeader<'a> {
 	/// - `compressed_size` (by default it is 0)
 	/// - `uncompressed_size` (by default it is 0)
 	/// - `squash_time` (by default it is a dummy value)
+	/// - `zero_out_version_needed_to_extract` (by default is `false`)
 	pub fn new<T: Into<Cow<'a, str>>>(file_name: T) -> Result<Self, SquashZipError> {
 		let file_name = file_name.into();
 
@@ -170,6 +172,7 @@ impl<'a> LocalFileHeader<'a> {
 			crc32: 0,
 			compressed_size: 0,
 			uncompressed_size: 0,
+			zero_out_version_needed_to_extract: false,
 			file_name_length: file_name.len().try_into()?,
 			file_name
 		})
@@ -184,13 +187,18 @@ impl<'a> LocalFileHeader<'a> {
 		let mut buf = [0; 30];
 		let mut cursor = Cursor::new(&mut buf[..]);
 
-		// Compute the actual set of ZIP features needed to extract with the information we have
-		let mut zip_features_needed_to_extract = EnumSet::empty();
-		if self.compression_method == CompressionMethod::Deflate {
-			zip_features_needed_to_extract |= ZipFeature::DeflateCompression;
-		}
+		let version_needed_to_extract = if !self.zero_out_version_needed_to_extract {
+			// Compute the actual set of ZIP features needed to extract with the information we have
+			let mut zip_features_needed_to_extract = EnumSet::empty();
 
-		let version_needed_to_extract = version_needed_to_extract(&zip_features_needed_to_extract);
+			if self.compression_method == CompressionMethod::Deflate {
+				zip_features_needed_to_extract |= ZipFeature::DeflateCompression;
+			}
+
+			version_needed_to_extract(&zip_features_needed_to_extract)
+		} else {
+			0
+		};
 		let general_purpose_bit_flag = get_general_purpose_bit_flag(&self.file_name);
 		let compression_method = self.compression_method.to_compression_method_field();
 
