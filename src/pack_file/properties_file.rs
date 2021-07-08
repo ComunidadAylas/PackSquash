@@ -170,9 +170,11 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PropertiesFile<T
 		mut file_read_producer: F,
 		args: PackFileConstructorArgs<'_, PropertiesFileOptions>
 	) -> Option<Self> {
-		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
-
-		if matches!(extension, "properties") {
+		if !args.optimization_settings.skip
+			&& matches!(
+				&*to_ascii_lowercase_extension(args.path.as_ref()),
+				"properties"
+			) {
 			file_read_producer().map(|(read, file_length)| Self {
 				read,
 				// The file is too big to fit in memory if this conversion fails anyway

@@ -40,7 +40,10 @@ async fn successful_process_test(
 async fn minifying_works() {
 	successful_process_test(
 		PROPERTIES_DATA,
-		PropertiesFileOptions { minify: true },
+		PropertiesFileOptions {
+			minify: true,
+			..Default::default()
+		},
 		MINIFIED_PROPERTIES_DATA
 	)
 	.await
@@ -53,7 +56,10 @@ async fn minifying_with_bom_works() {
 
 	successful_process_test(
 		&properties_data_with_bom,
-		PropertiesFileOptions { minify: true },
+		PropertiesFileOptions {
+			minify: true,
+			..Default::default()
+		},
 		MINIFIED_PROPERTIES_DATA
 	)
 	.await
@@ -63,7 +69,10 @@ async fn minifying_with_bom_works() {
 async fn passthrough_works() {
 	successful_process_test(
 		PROPERTIES_DATA,
-		PropertiesFileOptions { minify: false },
+		PropertiesFileOptions {
+			minify: false,
+			..Default::default()
+		},
 		PROPERTIES_DATA
 	)
 	.await

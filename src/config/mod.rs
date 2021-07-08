@@ -178,8 +178,8 @@ pub struct GlobalOptions {
 	/// each of the spooling buffers used will be able to grow up to before being rolled over to disk,
 	/// freeing memory and diverting the operations to a temporary file, which is slower.
 	///
-	/// Currently, PackSquash creates one spooling buffer per thread, plus one extra spooling buffer for
-	/// the output ZIP file.
+	/// Currently, PackSquash creates what amounts to one spooling buffer per thread, plus one extra
+	/// spooling buffer for the output ZIP file.
 	///
 	/// **Default value**: `half of the available memory reported by the OS / (number of CPU hardware threads + 1)`
 	pub spooling_buffers_size: usize,
@@ -741,19 +741,29 @@ pub struct PropertiesFileOptions {
 	///
 	/// **Default value**: `true` (minify)
 	#[serde(rename = "minify_properties")]
-	pub minify: bool
+	pub minify: bool,
+	/// Crate-private option set to false when [MinecraftMod::Optifine] was configured.
+	///
+	/// **Default value**: `true`
+	#[serde(skip)]
+	pub(crate) skip: bool
 }
 
 #[cfg(feature = "optifine-support")]
 impl Default for PropertiesFileOptions {
 	fn default() -> Self {
-		Self { minify: true }
+		Self {
+			minify: true,
+			skip: true
+		}
 	}
 }
 
 #[cfg(feature = "optifine-support")]
 impl FileOptionsTrait for PropertiesFileOptions {
-	fn tweak_from_global_options(self, _: &GlobalOptions) -> Self {
+	fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
+		self.skip = !global_options.allow_mods.contains(MinecraftMod::Optifine);
+
 		self
 	}
 }
