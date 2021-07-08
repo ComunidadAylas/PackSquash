@@ -26,7 +26,7 @@ pub(super) mod bom_stripper {
 pub fn to_ascii_lowercase_extension<P: AsRef<Path> + ?Sized>(path: &P) -> Cow<'_, str> {
 	let extension = Path::new(path.as_ref())
 		.extension()
-		.unwrap_or(OsStr::new(""))
+		.unwrap_or_else(|| OsStr::new(""))
 		.to_str()
 		.unwrap();
 
