@@ -84,8 +84,8 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		// to point them in the direction of what they probably want to do
 		println!(
 			"If you are not sure what this means or what to do now, please \n\
-		consider reading the settings (or options) file documentation over\n\
-		GitHub, as you probably want to write and use one of those instead."
+		consider reading the options file documentation over GitHub, as you\n\
+		probably want to write and use one of those instead."
 		);
 	}
 	println!();

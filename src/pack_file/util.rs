@@ -1,7 +1,7 @@
 //! Contains miscellaneous small helper functions that are used for processing
 //! pack files.
 
-use std::{borrow::Cow, path::Path};
+use std::{borrow::Cow, ffi::OsStr, path::Path};
 
 /// Contains helper functions to strip Unicode byte order marks from text files.
 pub(super) mod bom_stripper {
@@ -26,7 +26,7 @@ pub(super) mod bom_stripper {
 pub fn to_ascii_lowercase_extension<P: AsRef<Path> + ?Sized>(path: &P) -> Cow<'_, str> {
 	let extension = Path::new(path.as_ref())
 		.extension()
-		.unwrap()
+		.unwrap_or(OsStr::new(""))
 		.to_str()
 		.unwrap();
 

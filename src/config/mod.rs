@@ -51,20 +51,20 @@ pub struct GlobalOptions {
 	pub skip_pack_icon: bool,
 	/// PackSquash uses a custom ZIP compressor that is able to balance ZIP file
 	/// interoperability and specification intent conformance with increased space savings,
-	/// compressibility and protection against programs other than Minecraft being able
-	/// to extract files from the ZIP. This option lets you choose the tradeoff that is
-	/// most suitable to your situation and objectives.
+	/// compressibility and protection against external programs being able to extract files
+	/// from the ZIP. This option lets you choose the tradeoff that is most suitable to your
+	/// situation and objectives.
 	///
-	/// **Default value**: [ZipSpecConformance::Pedantic]
-	pub zip_spec_conformance: ZipSpecConformance,
-	/// If `zip_spec_conformance` is set to [ZipSpecConformance::Disregard], enabling this
+	/// **Default value**: [ZipSpecConformanceLevel::Pedantic]
+	pub zip_spec_conformance_level: ZipSpecConformanceLevel,
+	/// If `zip_spec_conformance` is set to [ZipSpecConformanceLevel::Disregard], enabling this
 	/// option will add extra protections to the ZIP file that will slightly increase its
 	/// size. Otherwise, the value of this option will be ignored. This setting does not
 	/// affect whether protections that do not increase the file size are added or not.
 	///
 	/// **Default value**: `false`
 	pub size_increasing_zip_obfuscation: bool,
-	/// If `zip_spec_conformance` is set to [ZipSpecConformance::Disregard], this option
+	/// If `zip_spec_conformance` is set to [ZipSpecConformanceLevel::Disregard], this option
 	/// sets the approximate probability for each internal ZIP record to be stored in a way that
 	/// favors additional discretion of the fact that protection techniques were used, as opposed
 	/// to a way that favors increased compressibility of the result ZIP file. Additional
@@ -77,7 +77,7 @@ pub struct GlobalOptions {
 	/// increased discretion and compressibility, which may exacerbate both qualities.
 	///
 	/// This setting has no effect if `zip_spec_conformance` is not set to
-	/// [ZipSpecConformance::Disregard].
+	/// [ZipSpecConformanceLevel::Disregard].
 	///
 	/// **Default value**: `0`
 	pub percentage_of_zip_structures_tuned_for_obfuscation_discretion: PercentageInteger,
@@ -141,8 +141,8 @@ pub struct GlobalOptions {
 	/// the quirks that will be worked around.
 	///
 	/// **Default value**: empty set (no quirks worked around)
-	pub workaround_minecraft_quirks: EnumSet<MinecraftQuirk>,
-	/// This option controls whether Minecraft will ignore system and hidden files (i.e. whose name
+	pub work_around_minecraft_quirks: EnumSet<MinecraftQuirk>,
+	/// This option controls whether PackSquash will ignore system and hidden files (i.e. whose name
 	/// starts with a dot), not even trying to process them. Under most circumstances, you shouldn't
 	/// need to disable this option.
 	///
@@ -209,13 +209,13 @@ impl Default for GlobalOptions {
 
 		Self {
 			skip_pack_icon: false,
-			zip_spec_conformance: Default::default(),
+			zip_spec_conformance_level: Default::default(),
 			size_increasing_zip_obfuscation: false,
 			percentage_of_zip_structures_tuned_for_obfuscation_discretion: PercentageInteger(0),
 			never_store_squash_times: false,
 			recompress_compressed_files: false,
 			zip_compression_iterations: 20,
-			workaround_minecraft_quirks: EnumSet::empty(),
+			work_around_minecraft_quirks: EnumSet::empty(),
 			ignore_system_and_hidden_files: true,
 			#[cfg(feature = "mod-support")]
 			allow_mods: EnumSet::empty(),
@@ -238,11 +238,17 @@ impl GlobalOptions {
 		SquashZipSettings {
 			zopfli_iterations: self.zip_compression_iterations,
 			store_squash_time: !self.never_store_squash_times
-				&& !matches!(self.zip_spec_conformance, ZipSpecConformance::Pedantic),
-			enable_obfuscation: matches!(self.zip_spec_conformance, ZipSpecConformance::Disregard),
+				&& !matches!(
+					self.zip_spec_conformance_level,
+					ZipSpecConformanceLevel::Pedantic
+				),
+			enable_obfuscation: matches!(
+				self.zip_spec_conformance_level,
+				ZipSpecConformanceLevel::Disregard
+			),
 			enable_deduplication: matches!(
-				self.zip_spec_conformance,
-				ZipSpecConformance::Balanced | ZipSpecConformance::Disregard
+				self.zip_spec_conformance_level,
+				ZipSpecConformanceLevel::Balanced | ZipSpecConformanceLevel::Disregard
 			),
 			enable_size_increasing_obfuscation: self.size_increasing_zip_obfuscation,
 			percentage_of_records_tuned_for_obfuscation_discretion: self
@@ -252,11 +258,11 @@ impl GlobalOptions {
 	}
 }
 
-/// A ZIP specification intent conformance target that a squash operation can adhere to.
+/// A ZIP specification intent conformance level that a squash operation can adhere to.
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
-pub enum ZipSpecConformance {
+pub enum ZipSpecConformanceLevel {
 	/// The generated ZIP files will follow the ZIP file specification to the letter, so they
 	/// can be extracted with virtually any ZIP file manipulation program.
 	///
@@ -269,25 +275,25 @@ pub enum ZipSpecConformance {
 	/// - No ability to reuse ZIP files generated in previous runs, because this requires
 	///   using metadata in a way that is technically not within the ZIP file specification.
 	///
-	/// Output ZIP files generated with this conformance target **MUST NOT** be reused in runs
+	/// Output ZIP files generated with this conformance level **MUST NOT** be reused in runs
 	/// configured to expect and generate output ZIP files with a less strict conformance
-	/// target. Reusing them with runs configured with this same conformance target does not have
+	/// level. Reusing them with runs configured with this same conformance level does not have
 	/// any effect.
 	Pedantic,
-	/// Like [ZipSpecConformance::Pedantic], but stores the metadata needed to reuse this ZIP file
+	/// Like [ZipSpecConformanceLevel::Pedantic], but stores the metadata needed to reuse this ZIP file
 	/// to speed up future runs, and expects this metadata from the specified output ZIP file, if it
 	/// already exists.
 	///
-	/// This conformance target is compatible with most ZIP file manipulation programs, even
+	/// This conformance level is compatible with most ZIP file manipulation programs, even
 	/// though some metadata is out of specification, so any compliant ZIP file manipulation
 	/// program is, in theory, free to reject the file or warn about it. They almost universally
 	/// don't do this, though.
 	///
-	/// Output ZIP files generated with this conformance target can only be safely reused with runs
-	/// configured to expect and generate output ZIP files with the [ZipSpecConformance::Balanced]
-	/// target and, of course, [ZipSpecConformance::High] target.
+	/// Output ZIP files generated with this conformance level can only be safely reused with runs
+	/// configured to expect and generate output ZIP files with the [ZipSpecConformanceLevel::Balanced]
+	/// level and, of course, [ZipSpecConformanceLevel::High] level.
 	High,
-	/// Like [ZipSpecConformance::High], but allows deduplicating identical processed files in
+	/// Like [ZipSpecConformanceLevel::High], but allows deduplicating identical processed files in
 	/// the output ZIP file. This yields significant space savings in case the pack contains
 	/// repeated assets.
 	///
@@ -295,16 +301,16 @@ pub enum ZipSpecConformance {
 	/// the file, but no additional protections or compressibility improvements are applied.
 	///
 	/// If your pack does not contain assets that process to the same contents, this conformance
-	/// target is equivalent to [ZipSpecConformance::High].
+	/// level is equivalent to [ZipSpecConformanceLevel::High].
 	///
-	/// Output ZIP files generated with this conformance target can only be safely reused with runs
-	/// configured to expect and generate output ZIP files with the [ZipSpecConformance::High]
-	/// target and, of course, [ZipSpecConformance::Balanced] target.
+	/// Output ZIP files generated with this conformance level can only be safely reused with runs
+	/// configured to expect and generate output ZIP files with the [ZipSpecConformanceLevel::High]
+	/// level and, of course, [ZipSpecConformanceLevel::Balanced] level.
 	Balanced,
 	/// PackSquash will apply every technique it knows to protect your pack, improve its compressibility
 	/// and reduce its size, without any regard that the result ZIP file can be used outside of Minecraft
 	/// (in fact, the protection techniques make this harder). This is the complete opposite to
-	/// [ZipSpecConformance::Pedantic].
+	/// [ZipSpecConformanceLevel::Pedantic].
 	///
 	/// Currently, the above paragraph means:
 	/// - Deduplication is allowed.
@@ -313,13 +319,13 @@ pub enum ZipSpecConformance {
 	///   Minecraft, are used.
 	/// - ZIP files generated in previous runs may be reused to speed up the current run.
 	///
-	/// Output ZIP files generated with this conformance target can only be safely reused with runs
-	/// configured to expect and generate output ZIP files with the [ZipSpecConformance::Disregard]
-	/// target.
+	/// Output ZIP files generated with this conformance level can only be safely reused with runs
+	/// configured to expect and generate output ZIP files with the [ZipSpecConformanceLevel::Disregard]
+	/// level.
 	Disregard
 }
 
-impl Default for ZipSpecConformance {
+impl Default for ZipSpecConformanceLevel {
 	fn default() -> Self {
 		Self::Pedantic
 	}
@@ -644,7 +650,7 @@ impl Default for PngFileOptions {
 impl FileOptionsTrait for PngFileOptions {
 	fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
 		self.do_not_reduce_to_grayscale = global_options
-			.workaround_minecraft_quirks
+			.work_around_minecraft_quirks
 			.contains(MinecraftQuirk::GrayscaleTexturesGammaMiscorrection);
 		self.skip_pack_icon = global_options.skip_pack_icon;
 
