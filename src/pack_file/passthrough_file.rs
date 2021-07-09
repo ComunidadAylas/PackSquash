@@ -91,6 +91,18 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PassthroughFile<
 				optimization_strategy_message: "Copied",
 				is_compressed: false
 			}),
+			// Plain text files that are known to be used by Minecraft
+			"txt" if matches!(
+				args.path.as_ref(),
+				"assets/minecraft/texts/end.txt" |
+				"assets/minecraft/texts/credits.txt" |
+				"assets/minecraft/texts/splashes.txt"
+			) => file_read_producer().map(|(read, _)| Self {
+				read,
+				canonical_extension: "txt",
+				optimization_strategy_message: "Copied",
+				is_compressed: false
+			}),
 			// FIXME: these two should have file-specific optimizations, and they are not difficult
 			// to do. This is a temporary solution for PackSquash to work with data packs
 			"nbt" => file_read_producer().map(|(read, _)| Self {
