@@ -36,6 +36,11 @@ footer {
 	float: none;
 	color: #fff;
 	background: url("../images/icon_download.png") no-repeat 0% 50%;
+
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
 }
 
 .zip_download_link:hover {
