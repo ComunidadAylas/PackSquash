@@ -51,6 +51,7 @@ copyIdButton.onmouseleave = function(evt) {
 	evt.target.blur();
 };
 
-document.querySelectorAll(".hide_no_js").forEach(function(elem) {
-	elem.classList.remove("hide_no_js");
-});
+var hiddenElements = document.querySelectorAll(".hide_no_js");
+for (var i = 0; i < hiddenElements.length; ++i) {
+	hiddenElements[i].classList.remove("hide_no_js");
+}
