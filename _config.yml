@@ -1,12 +1,4 @@
-title: PackSquash
-description: A Minecraft resource pack optimizer which aims to achieve the best possible compression, which allows for efficient distribution and slightly improved load times in the game, at good speed.
-google_analytics: 
-show_downloads: true
 theme: jekyll-theme-slate
 
-gems:
+plugins:
   - jekyll-mentions
- 
-github:
-  zip_url: https://github.com/ComunidadAylas/PackSquash/releases/latest
-  tar_url: https://github.com/ComunidadAylas/PackSquash/releases/latest

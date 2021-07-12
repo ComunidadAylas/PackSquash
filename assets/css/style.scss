@@ -1,0 +1,44 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+img#footer_logo {
+	margin-right: 1em;
+	box-shadow: none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	-o-box-shadow: none;
+	-ms-box-shadow: none;
+}
+
+footer {
+	text-align: center;
+}
+
+#download {
+	text-align: center;
+	background: #646464;
+	transition: background-color 0.25s;
+}
+
+#download:hover {
+	cursor: pointer;
+	background: #444444;
+	transition: background-color 0.25s;
+}
+
+.zip_download_link {
+	padding: 0.5em;
+	width: 100%;
+	height: inherit;
+	text-indent: inherit;
+	float: none;
+	color: #fff;
+	background: url("../images/icon_download.png") no-repeat 0% 50%;
+}
+
+.zip_download_link:hover {
+	text-decoration: none;
+	background: url("../images/icon_download.png") no-repeat 0% 50%;
+}
