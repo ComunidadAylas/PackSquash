@@ -621,7 +621,7 @@ pub struct PngFileOptions {
 	/// sets a high bound of memory usage by PackSquash and helps authoring packs with
 	/// reasonable texture sizes.
 	///
-	/// **Default value**: 4096
+	/// **Default value**: 8192
 	pub maximum_width_and_height: u32,
 	/// Crate-private option set by the [MinecraftQuirk::GrayscaleTexturesGammaMiscorrection]
 	/// workaround to not reduce color images to grayscale.
@@ -640,7 +640,7 @@ impl Default for PngFileOptions {
 	fn default() -> Self {
 		Self {
 			color_quantization_target: Default::default(),
-			maximum_width_and_height: 4096,
+			maximum_width_and_height: 8192,
 			do_not_reduce_to_grayscale: false,
 			skip_pack_icon: false
 		}
