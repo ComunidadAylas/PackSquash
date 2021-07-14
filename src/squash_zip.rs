@@ -148,6 +148,9 @@ pub struct SquashZipSettings {
 	/// resistance against some potentially protection-breaking activities vs. increased
 	/// compressibility.
 	pub percentage_of_records_tuned_for_obfuscation_discretion: PercentageInteger,
+	/// Whether obfuscation acceptance quirks that are specific to older Java versions
+	/// need to be worked around or not.
+	pub workaround_old_java_obfuscation_quirks: bool,
 	/// Sets the size of the in-memory buffer of the spooled temporary files that will be
 	/// used to hold the output ZIP file contents, input files and compressed versions
 	/// of the input files, in bytes. The temporary files that hold data from input files

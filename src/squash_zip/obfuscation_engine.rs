@@ -47,7 +47,8 @@ pub(super) enum ObfuscationEngine {
 	NoObfuscation,
 	Obfuscation {
 		size_increasing_obfuscation: bool,
-		obfuscation_discretion_records_percentage: PercentageInteger
+		obfuscation_discretion_records_percentage: PercentageInteger,
+		workaround_old_java_obfuscation_quirks: bool
 	}
 }
 
@@ -58,7 +59,9 @@ impl ObfuscationEngine {
 			Self::Obfuscation {
 				size_increasing_obfuscation: squash_zip_settings.enable_size_increasing_obfuscation,
 				obfuscation_discretion_records_percentage: squash_zip_settings
-					.percentage_of_records_tuned_for_obfuscation_discretion
+					.percentage_of_records_tuned_for_obfuscation_discretion,
+				workaround_old_java_obfuscation_quirks: squash_zip_settings
+					.workaround_old_java_obfuscation_quirks
 			}
 		} else {
 			Self::NoObfuscation
@@ -188,23 +191,36 @@ impl ObfuscationEngine {
 	) -> CentralDirectoryHeader<'a> {
 		let mut obfuscated_header = central_directory_header;
 
-		if let ObfuscationEngine::Obfuscation { .. } = self {
+		if let ObfuscationEngine::Obfuscation {
+			workaround_old_java_obfuscation_quirks,
+			..
+		} = self
+		{
 			let seed = obfuscated_header.crc32 as u64;
 			let discretion = self.use_discretion(seed);
 
 			let uncompressed_size;
 			let local_header_disk_number;
 
+			let obfuscate_uncompressed_size = !workaround_old_java_obfuscation_quirks
+				|| (obfuscated_header.compression_method != CompressionMethod::Store
+					&& obfuscated_header.compressed_size != 0);
+
 			if discretion {
-				uncompressed_size =
-					if obfuscated_header.compression_method == CompressionMethod::Store {
-						obfuscated_header.compressed_size
-					} else {
-						4096 + obfuscated_header.compressed_size % 4096
-					};
+				uncompressed_size = if !obfuscate_uncompressed_size
+					|| obfuscated_header.compression_method == CompressionMethod::Store
+				{
+					obfuscated_header.uncompressed_size
+				} else {
+					4096 + obfuscated_header.compressed_size % 4096
+				};
 				local_header_disk_number = (random_u32(seed) % 32768) as u16 + 32768;
 			} else {
-				uncompressed_size = 0;
+				uncompressed_size = if obfuscate_uncompressed_size {
+					0
+				} else {
+					obfuscated_header.uncompressed_size
+				};
 				local_header_disk_number = 0;
 			}
 

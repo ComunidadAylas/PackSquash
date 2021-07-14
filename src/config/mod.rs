@@ -134,11 +134,10 @@ pub struct GlobalOptions {
 	///
 	/// **Default value**: `20`
 	pub zip_compression_iterations: u8,
-	/// Some Minecraft versions have some quirks that limit how some files can be compressed, because
+	/// Some Minecraft versions have some quirks that limit how pack files can be compressed, because
 	/// otherwise they are not correctly interpreted by the game. PackSquash can work around these
-	/// quirks, but doing so may come at the cost of reduced space savings or increased processing
-	/// times, so this should only be done when your pack is affected by them. This option specifies
-	/// the quirks that will be worked around.
+	/// quirks, but doing so may come at the cost of some drawbacks, so this should only be done when
+	/// your pack is affected by them. This option specifies the quirks that will be worked around.
 	///
 	/// **Default value**: empty set (no quirks worked around)
 	pub work_around_minecraft_quirks: EnumSet<MinecraftQuirk>,
@@ -234,7 +233,7 @@ impl Default for GlobalOptions {
 impl GlobalOptions {
 	/// Returns the [`SquashZipSettings`] contained within these options, which are used to configure
 	/// the SquashZip compressor.
-	pub(crate) const fn as_squash_zip_settings(&self) -> SquashZipSettings {
+	pub(crate) fn as_squash_zip_settings(&self) -> SquashZipSettings {
 		SquashZipSettings {
 			zopfli_iterations: self.zip_compression_iterations,
 			store_squash_time: !self.never_store_squash_times
@@ -253,6 +252,9 @@ impl GlobalOptions {
 			enable_size_increasing_obfuscation: self.size_increasing_zip_obfuscation,
 			percentage_of_records_tuned_for_obfuscation_discretion: self
 				.percentage_of_zip_structures_tuned_for_obfuscation_discretion,
+			workaround_old_java_obfuscation_quirks: self
+				.work_around_minecraft_quirks
+				.contains(MinecraftQuirk::Java8ZipObfuscationQuirks),
 			spool_buffer_size: self.spooling_buffers_size.saturating_mul(1024 * 1024)
 		}
 	}
@@ -377,7 +379,21 @@ pub enum MinecraftQuirk {
 	///
 	/// This workaround stops PackSquash from reducing color images to grayscale, which may
 	/// hurt compression. This has no effect for input images that already are in grayscale.
-	GrayscaleTexturesGammaMiscorrection
+	GrayscaleTexturesGammaMiscorrection,
+	/// The latest Minecraft versions, from 1.17 onwards, are compiled for Java 16+, which
+	/// means that they do not support older Java versions. On the other hand, Java 8 was
+	/// used almost ubiquitously with older Minecraft clients, especially in modded
+	/// environments. However, a lot of things have changed in newer Java versions, including
+	/// low-level details of how ZIP files are read.
+	///
+	/// When a ZIP specification conformance level that adds extraction protection is used,
+	/// this workaround tells PackSquash to use obfuscation techniques that work fine with
+	/// Java 8. This comes at the cost of a protection that is a bit different, but the small
+	/// differences will extremely likely not matter in protection strength. Compressibility
+	/// can be impacted negatively, though. This quirk does not have any effect if an affected
+	/// ZIP specification conformance level is not used, or if the Minecraft client is run
+	/// using recent Java versions.
+	Java8ZipObfuscationQuirks
 }
 
 /// A Minecraft modification supported by PackSquash that adds file types to packs.
