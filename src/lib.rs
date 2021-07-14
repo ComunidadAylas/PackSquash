@@ -85,7 +85,7 @@ impl PackSquasher {
 	/// Creates a new [`PackSquasher`] struct that will squash packs according to the specified
 	/// options.
 	pub fn new(options: SquashOptions) -> Result<Self, PackSquasherError> {
-		let mut globset_builder = GlobSetBuilder::with_capacity(options.file_options.len());
+		let mut globset_builder = GlobSetBuilder::new();
 		for glob_pattern in options.file_options.keys() {
 			globset_builder.add(
 				GlobBuilder::new(glob_pattern)

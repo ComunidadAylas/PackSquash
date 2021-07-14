@@ -48,9 +48,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.41"
+version = "1.0.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15af2628f6890fe2609a3b91bef4c83450512802e59489f9c1cb1fa5df064a61"
+checksum = "595d3cfa7a60d4555cb5067b99f07142a08ea778de5cf993f7b75c7d8fabc486"
 
 [[package]]
 name = "async-stream"
@@ -166,9 +166,9 @@ checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
 
 [[package]]
 name = "cc"
-version = "1.0.68"
+version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a72c244c1ff497a746a7e1fb3d14bd08420ecda70c8f25c7112f2781652d787"
+checksum = "e70cc2f62c6ce1868963827bd677764c62d07c3d9a3e1fb1177ee1a9ab199eb2"
 dependencies = [
  "jobserver",
 ]
@@ -290,6 +290,21 @@ checksum = "d663548de7f5cca343f1e0a48d14dcfb0e9eb4e079ec58883b7251539fa10aeb"
 dependencies = [
  "build_const",
 ]
+
+[[package]]
+name = "crc"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10c2722795460108a7872e1cd933a85d6ec38abc4baecad51028f702da28889f"
+dependencies = [
+ "crc-catalog",
+]
+
+[[package]]
+name = "crc-catalog"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccaeedb56da03b09f598226e25e80088cb4cd25f316e6e4df7d695f0feeb1403"
 
 [[package]]
 name = "crc32fast"
@@ -666,9 +681,9 @@ dependencies = [
 
 [[package]]
 name = "glib"
-version = "0.14.1"
+version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78180c0a243778b856e0d59ab40ac6bdacc0dfd9480a397d4939bd20f37ca92d"
+checksum = "dbecad7a3a898ee749d491ce2ae0decb0bce9e736f9747bc49159b1cea5d37f4"
 dependencies = [
  "bitflags",
  "futures-channel",
@@ -711,7 +726,8 @@ dependencies = [
 [[package]]
 name = "globset"
 version = "0.4.8"
-source = "git+https://github.com/ComunidadAylas/ripgrep#e5fa4686210269d086b7ff8f5e7b0522029709e6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10463d9ff00a2a068db14231982f5132edebad0d7660cd956a1c30292dbcbfbd"
 dependencies = [
  "aho-corasick",
  "bstr",
@@ -722,8 +738,8 @@ dependencies = [
 
 [[package]]
 name = "glsl"
-version = "6.0.0"
-source = "git+https://github.com/vtavernier/glsl?branch=fix/dos-crlf#253a7141800c9cf640455fbb2e4b393202a2297d"
+version = "6.0.1"
+source = "git+https://github.com/ComunidadAylas/glsl?branch=packsquash#2a0a76e0c55e8ba74084dc656b0a65a15e3b193f"
 dependencies = [
  "nom",
 ]
@@ -741,9 +757,9 @@ dependencies = [
 
 [[package]]
 name = "gstreamer"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2163b09b359d8b651d627d9c83dcce5550929ad678b8ce7ec750787affa93ec"
+checksum = "1f71e8c163945a3e0140e6b1ed10d1507da7e71196fedec568cbad92db63d762"
 dependencies = [
  "bitflags",
  "cfg-if",
@@ -875,7 +891,7 @@ dependencies = [
 [[package]]
 name = "imagequant"
 version = "3.0.4-alpha.2"
-source = "git+https://github.com/ImageOptim/libimagequant#330463f47ec1ecca4848be52033f0977198604ef"
+source = "git+https://github.com/ImageOptim/libimagequant#c2ce900b1ca55d0a9906b24e622552d2a8ae9d45"
 dependencies = [
  "imagequant-sys",
  "libc",
@@ -885,7 +901,7 @@ dependencies = [
 [[package]]
 name = "imagequant-sys"
 version = "3.0.6+sys2.15.1"
-source = "git+https://github.com/ImageOptim/libimagequant#330463f47ec1ecca4848be52033f0977198604ef"
+source = "git+https://github.com/ImageOptim/libimagequant#c2ce900b1ca55d0a9906b24e622552d2a8ae9d45"
 dependencies = [
  "bitflags",
  "cc",
@@ -926,9 +942,9 @@ checksum = "dd25036021b0de88a0aff6b850051563c6516d0bf53f8638938edbb9de732736"
 
 [[package]]
 name = "java-properties"
-version = "1.3.0"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d179c3692142e6fc4080d48d5a4d9c04738a3bece41ff2abdde13d505590c1b7"
+checksum = "20e9b11dedd144ceb96484add3f9088c131795e4295ce51448ef755e0ec19c07"
 dependencies = [
  "encoding",
  "lazy_static",
@@ -1138,20 +1154,20 @@ checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 
 [[package]]
 name = "oxipng"
-version = "4.0.3"
-source = "git+https://github.com/ComunidadAylas/oxipng?branch=packsquash#6a52b995828ae769fd53647d2f2dc789837c95ca"
+version = "5.0.0"
+source = "git+https://github.com/ComunidadAylas/oxipng?branch=packsquash#04fdfb0cbb7652747dee3746ffbfc83a6a395f1b"
 dependencies = [
  "bit-vec",
  "byteorder",
  "cloudflare-zlib",
- "crc",
+ "crc 2.0.0",
  "crossbeam-channel",
  "indexmap",
  "itertools",
  "log",
  "miniz_oxide 0.4.4",
  "rgb",
- "rustc_version 0.3.3",
+ "rustc_version 0.4.0",
  "zopfli",
 ]
 
@@ -1216,15 +1232,6 @@ name = "percent-encoding"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
-
-[[package]]
-name = "pest"
-version = "2.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10f4872ae94d7b90ae48754df22fd42ad52ce740b8f370b03da4835417403e53"
-dependencies = [
- "ucd-trie",
-]
 
 [[package]]
 name = "pin-project-lite"
@@ -1436,11 +1443,11 @@ dependencies = [
 
 [[package]]
 name = "rustc_version"
-version = "0.3.3"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0dfe2087c51c460008730de8b57e6a320782fbfb312e1f4d520e6c6fae155ee"
+checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
 dependencies = [
- "semver 0.11.0",
+ "semver 1.0.3",
 ]
 
 [[package]]
@@ -1470,32 +1477,20 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d7eb9ef2c18661902cc47e535f9bc51b78acd254da71d375c2f6720d9a40403"
 dependencies = [
- "semver-parser 0.7.0",
+ "semver-parser",
 ]
 
 [[package]]
 name = "semver"
-version = "0.11.0"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f301af10236f6df4160f7c3f04eec6dbc70ace82d23326abad5edee88801c6b6"
-dependencies = [
- "semver-parser 0.10.2",
-]
+checksum = "5f3aac57ee7f3272d8395c6e4f502f434f0e289fcd62876f70daa008c20dcabe"
 
 [[package]]
 name = "semver-parser"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
-
-[[package]]
-name = "semver-parser"
-version = "0.10.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00b0bef5b7f9e0df16536d3961cfb6e84331c065b4066afb39768d0e319411f7"
-dependencies = [
- "pest",
-]
 
 [[package]]
 name = "serde"
@@ -1892,12 +1887,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "879f6906492a7cd215bfa4cf595b600146ccfac0c79bcbd1f3000162af5e8b06"
 
 [[package]]
-name = "ucd-trie"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56dee185309b50d1f11bfedef0fe6d036842e3fb77413abef29f8f8d1c5d4c1c"
-
-[[package]]
 name = "unicode-bidi"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1959,9 +1948,9 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "vergen"
-version = "5.1.12"
+version = "5.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f710158a7c9449f400cf734e97cb417a09a7b5f0cf54b133718b6b2951c9f79"
+checksum = "542f37b4798c879409865dde7908e746d836f77839c3a6bea5c8b4e4dcf6620b"
 dependencies = [
  "anyhow",
  "cfg-if",
@@ -2129,7 +2118,7 @@ source = "git+https://github.com/ComunidadAylas/zopfli?branch=packsquash#03288fa
 dependencies = [
  "adler32",
  "byteorder",
- "crc",
+ "crc 1.8.1",
  "iter-read",
  "typed-arena",
 ]
