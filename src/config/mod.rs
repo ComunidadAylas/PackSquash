@@ -336,6 +336,7 @@ impl Default for ZipSpecConformanceLevel {
 /// A helper struct that contains an integer guaranteed to be in the `[0, 100]` interval.
 #[derive(Deserialize, Clone, Copy)]
 #[serde(try_from = "u8")]
+#[repr(transparent)]
 pub struct PercentageInteger(u8);
 
 impl PercentageInteger {
@@ -538,6 +539,7 @@ impl Default for ChannelMixingOption {
 /// greater, and not equal to, zero).
 #[derive(Deserialize, Clone, Copy)]
 #[serde(try_from = "i32")]
+#[repr(transparent)]
 pub struct PositiveI32(i32);
 
 impl PositiveI32 {

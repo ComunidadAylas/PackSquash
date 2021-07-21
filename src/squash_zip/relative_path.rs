@@ -19,12 +19,14 @@ use thiserror::Error;
 /// allocating new buffers to represent the relative path, borrowing data when
 /// possible.
 #[derive(Debug, PartialEq, Eq, Hash)]
+#[repr(transparent)]
 pub struct RelativePath<'a>(Cow<'a, str>);
 
 /// Represents an error that may happen while converting a path to a relative
 /// path.
 #[derive(Error, Debug)]
 #[error("The specified path contains non UTF-8 characters: {0}")]
+#[repr(transparent)]
 pub struct InvalidPathError<'a>(Cow<'a, str>);
 
 impl From<InvalidPathError<'_>> for io::Error {

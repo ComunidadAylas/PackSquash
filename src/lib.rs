@@ -293,7 +293,7 @@ impl PackSquasher {
 					}
 
 					/// Big macro that opens a pack file ant tries to instantiate it with the
-					/// appropriate options, handling any error that could happen. The function
+					/// appropriate options, handling any error that could happen. The macro
 					/// will return if either the pack file is processed successfully or not or
 					/// an error occurs while opening the pack file. It will not return if
 					/// the pack file is not of the expected file type.

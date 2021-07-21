@@ -26,6 +26,7 @@ pub(super) struct Debloater {
 /// An error that may occur during debloat operations.
 #[derive(Error, Debug)]
 #[error("JSONPath error: {0}")]
+#[repr(transparent)]
 pub struct DebloatError(JsonPathError);
 
 impl From<JsonPathError> for DebloatError {
