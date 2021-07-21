@@ -23,4 +23,4 @@ A clear and concise description of what you expected to happen.
 If applicable, add files that help reproduce your problem.
 
 **Additional context**
-Add any other context about the problem here.
+Add any other context about the problem here. If you are trying to use a generated ZIP file with a Minecraft server, it is relevant to know if it works fine in singleplayer, because if it works in singleplayer then a network or server misconfiguration issue may be the cause of the issue.
