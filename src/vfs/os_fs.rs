@@ -81,7 +81,7 @@ fn is_system_or_hidden_file(entry: &DirEntry) -> bool {
 	let file_name = entry.file_name().to_string_lossy();
 
 	// List based on https://www.toptal.com/developers/gitignore/api/git,windows,linux,macos
-	file_name.starts_with('.')
+	(file_name.starts_with('.') && file_name != "." && file_name != "..")
 		|| if entry.file_type().is_file() {
 			file_name == "desktop.ini"
 				|| file_name == "Desktop.ini"
@@ -163,6 +163,36 @@ mod tests {
 			file_count,
 			RELATIVE_PATHS.len(),
 			"Unexpected number of files yielded"
+		);
+	}
+
+	#[test]
+	fn single_component_dot_relative_path_works() {
+		let mut file_iter = OsFilesystem.file_iterator(
+			&Path::new("."),
+			IteratorTraversalOptions {
+				ignore_system_and_hidden_files: true
+			}
+		);
+
+		assert!(
+			file_iter.next().is_some(),
+			"The current working directory, where the source files are located, is expected to have files"
+		);
+	}
+
+	#[test]
+	fn single_component_double_dot_relative_path_works() {
+		let mut file_iter = OsFilesystem.file_iterator(
+			&Path::new(".."),
+			IteratorTraversalOptions {
+				ignore_system_and_hidden_files: true
+			}
+		);
+
+		assert!(
+			file_iter.next().is_some(),
+			"The parent of the current working directory, where the source files are located, is expected to have files"
 		);
 	}
 }
