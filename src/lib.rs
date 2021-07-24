@@ -130,7 +130,7 @@ impl PackSquasher {
 	/// Reasonable client code can assume that this method does not panic. However, it should
 	/// be noted that this method may temporarily set a panic hook to handle any panics that
 	/// occur internally and then forward the panic information to the current panic hook,
-	/// in order to fullfill its contract under any circumstances.
+	/// in order to fulfill its contract under any circumstances.
 	///
 	/// Therefore, to guarantee that this method produces the expected results, the panic hook
 	/// should not be modified in any way while this method is executing.
