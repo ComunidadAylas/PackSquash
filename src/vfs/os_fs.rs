@@ -28,6 +28,7 @@ impl VirtualFileSystem for OsFilesystem {
 		iterator_traversal_options: IteratorTraversalOptions
 	) -> Self::FileIter {
 		let entry_iter = WalkDir::new(&root_path)
+			.min_depth(1) // Do not yield the root path itself, but all of its children
 			.follow_links(true)
 			.max_open(10)
 			.into_iter()
@@ -81,7 +82,7 @@ fn is_system_or_hidden_file(entry: &DirEntry) -> bool {
 	let file_name = entry.file_name().to_string_lossy();
 
 	// List based on https://www.toptal.com/developers/gitignore/api/git,windows,linux,macos
-	(file_name.starts_with('.') && file_name != "." && file_name != "..")
+	file_name.starts_with('.')
 		|| if entry.file_type().is_file() {
 			file_name == "desktop.ini"
 				|| file_name == "Desktop.ini"
@@ -193,6 +194,30 @@ mod tests {
 		assert!(
 			file_iter.next().is_some(),
 			"The parent of the current working directory, where the source files are located, is expected to have files"
+		);
+	}
+
+	#[test]
+	fn hidden_top_directory_is_descended_into() {
+		let root_dir = Builder::new()
+			.prefix(".ps-osfs-test")
+			.tempdir()
+			.expect("I/O operations are assumed not to fail during tests");
+
+		let file_path = root_dir.path().join("file.bin");
+		File::create(&file_path).expect("I/O operations are assumed not to fail during tests");
+
+		let file_iter = OsFilesystem.file_iterator(
+			root_dir.path(),
+			IteratorTraversalOptions {
+				ignore_system_and_hidden_files: true
+			}
+		);
+
+		assert_eq!(
+			file_iter.count(),
+			1,
+			"An initial hidden directory should be descended into and yield exactly one file in this test"
 		);
 	}
 }
