@@ -454,7 +454,7 @@ pub(crate) trait FileOptionsTrait {
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct AudioFileOptions {
-	/// If `true`, input audio files that are already OGG won't be transcoded again. This preserves
+	/// If `true`, input audio files that are already Ogg won't be transcoded again. This preserves
 	/// their original quality and improves performance, but may come at a cost in space savings.
 	///
 	/// **Default value**: `true`
@@ -483,12 +483,12 @@ pub struct AudioFileOptions {
 	///
 	/// **Default value**: `1.0` (the audio pitch is not shifted)
 	pub target_pitch: f32,
-	/// The minimum bitrate that the OGG Vorbis encoder will try to use to represent the audio
+	/// The minimum bitrate that the Ogg Vorbis encoder will try to use to represent the audio
 	/// signal. Higher values provide higher quality at the expense of file size.
 	///
 	/// **Default value**: 40000 (bit/s)
 	pub minimum_bitrate: PositiveI32,
-	/// The maximum bitrate that the OGG Vorbis encoder will try to use to represent the audio
+	/// The maximum bitrate that the Ogg Vorbis encoder will try to use to represent the audio
 	/// signal. Higher values provide higher quality at the expense of file size.
 	///
 	/// **Default value**: 96000 (bit/s)

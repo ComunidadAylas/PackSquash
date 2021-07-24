@@ -32,9 +32,9 @@ use super::{
 #[cfg(test)]
 mod tests;
 
-/// Represents an audio file, that can be optimized and/or transcoded to OGG.
+/// Represents an audio file, that can be optimized and/or transcoded to Ogg.
 ///
-/// Vanilla Minecraft uses OGG Vorbis files for both music and sound effects. Resource
+/// Vanilla Minecraft uses Ogg Vorbis files for both music and sound effects. Resource
 /// packs may replace and add new sound events to Minecraft.
 pub struct AudioFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
@@ -256,7 +256,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
 				// that the method returns success "if GStreamer could be initialized"
 				// (it doesn't specify now or before).
 				// See: https://github.com/GStreamer/gstreamer/blob/44bdad58f623e50a07476c0f40f8ff7543396f7c/gst/gst.c#L411
-				gstreamer::init().unwrap();
+				gstreamer::init().unwrap()
 			});
 
 			let gstreamer_pipeline = Pipeline::new(None);
