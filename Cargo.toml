@@ -19,13 +19,13 @@ thiserror = "1.0.26"
 ahash = "0.7.4"
 
 num_cpus = "1.13.0"
-sysinfo = { version = "0.19.1", default-features = false }
+sysinfo = { version = "0.19.2", default-features = false }
 walkdir = "2.3.2"
 
-tokio = { version = "1.8.1", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
+tokio = { version = "1.9.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
 tokio-util = { version = "0.6.7", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.7", default-features = false }
-futures = { version = "0.3.15", default-features = false }
+futures = { version = "0.3.16", default-features = false }
 
 getopts = "0.2.21"
 
@@ -59,6 +59,8 @@ fpe = "0.4.0"
 uuid = "0.8.2"
 entropy = "0.4.1"
 rand_xoshiro = "0.6.0"
+
+color-backtrace = { version = "0.5.1", default-features = false }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.9.0"

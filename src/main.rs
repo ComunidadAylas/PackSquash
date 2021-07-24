@@ -25,6 +25,8 @@ fn main() {
 /// Runs PackSquash, parsing the command line parameters and deciding what options file
 /// to read to process a pack.
 fn run() -> i32 {
+	color_backtrace::install();
+
 	let mut options = Options::new();
 
 	options.optflag("h", "help", "Prints information about the command line arguments accepted by this application and exits")

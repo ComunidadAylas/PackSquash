@@ -17,13 +17,13 @@
 #![deny(rustdoc::private_intra_doc_links)]
 
 use std::borrow::Cow;
-use std::cmp;
 use std::convert::TryInto;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::{cmp, panic};
 use std::{io, path::Path, time::SystemTime};
 
 use crate::config::AudioFileOptions;
@@ -125,6 +125,15 @@ impl PackSquasher {
 	///
 	/// Note that, due to the usage of several threads, the [`PackSquasher`] instance must be
 	/// wrapped on an atomically reference counted pointer (`Arc`) to call this method.
+	///
+	/// # Panics
+	/// Reasonable client code can assume that this method does not panic. However, it should
+	/// be noted that this method may temporarily set a panic hook to handle any panics that
+	/// occur internally and then forward the panic information to the current panic hook,
+	/// in order to fullfill its contract under any circumstances.
+	///
+	/// Therefore, to guarantee that this method produces the expected results, the panic hook
+	/// should not be modified in any way while this method is executing.
 	pub fn run<F: VirtualFileSystem + 'static, P: AsRef<Path>>(
 		self: Arc<Self>,
 		vfs: F,
@@ -205,6 +214,25 @@ impl PackSquasher {
 			)));
 
 			let pack_file_optimization_failed = Arc::new(AtomicBool::new(false));
+
+			// To shield ourselves against pack file tasks that may panic, even if they shouldn't
+			// do so (GStreamer, I'm looking at you, because initializing your libraries can fail),
+			// install a temporary panic hook that will register the pack file optimization as
+			// failed and then invoke the already registered hook. This will "leak" two Arc's
+			// in case we don't get to restore the previous panic hook, but if that's the case
+			// then we will propagate the panic to the caller, which will probably not care about
+			// this anyway. This "leak" lasts untilthe hook is set again, because the reference
+			// count then drops to zero
+			let previous_panic_hook = Arc::new(panic::take_hook());
+			panic::set_hook({
+				let pack_file_optimization_failed = Arc::clone(&pack_file_optimization_failed);
+				let previous_panic_hook = Arc::clone(&previous_panic_hook);
+
+				Box::new(move |panic_info| {
+					pack_file_optimization_failed.store(true, Ordering::Release);
+					previous_panic_hook(panic_info);
+				})
+			});
 
 			// In the current thread, dispatch a task for each pack file, that may execute
 			// in any thread of the Tokio runtime
@@ -412,11 +440,19 @@ impl PackSquasher {
 				}));
 			}
 
-			// Now wait for every pack file task to finish, so the ZIP file is complete
-			// if everything went fine, or any pending work is done if not
+			// Now wait for every pack file task to finish, including those who panic,
+			// so the ZIP file is complete if everything went fine, or any pending work
+			// is done if not
 			for join_handle in pack_file_tasks {
 				join_handle.await.ok();
 			}
+
+			// Everything's done, so restore the previous panic hook
+			drop(panic::take_hook());
+			panic::set_hook(match Arc::try_unwrap(previous_panic_hook) {
+				Ok(hook) => hook,
+				Err(_) => panic!("Unexpected number of strong references to the panic handler")
+			});
 
 			// Do not try to finish the ZIP file if something went wrong. We can't rely
 			// on a local variable that indicates whether the loop exited early because
