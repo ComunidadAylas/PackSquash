@@ -221,7 +221,7 @@ impl PackSquasher {
 			// failed and then invoke the already registered hook. This will "leak" two Arc's
 			// in case we don't get to restore the previous panic hook, but if that's the case
 			// then we will propagate the panic to the caller, which will probably not care about
-			// this anyway. This "leak" lasts untilthe hook is set again, because the reference
+			// this anyway. This "leak" lasts until the hook is set again, because the reference
 			// count then drops to zero
 			let previous_panic_hook = Arc::new(panic::take_hook());
 			panic::set_hook({
@@ -451,7 +451,7 @@ impl PackSquasher {
 			drop(panic::take_hook());
 			panic::set_hook(match Arc::try_unwrap(previous_panic_hook) {
 				Ok(hook) => hook,
-				Err(_) => panic!("Unexpected number of strong references to the panic handler")
+				Err(_) => panic!("Unexpected number of strong references to the panic hook")
 			});
 
 			// Do not try to finish the ZIP file if something went wrong. We can't rely
