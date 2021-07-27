@@ -31,9 +31,6 @@ pub enum SystemTimeSanitizationError {
 /// This 4-byte format is not a strictly conforming MS-DOS date and time, as defined
 /// in the ZIP file specification. However, for performance reasons, most MS-DOS date
 /// and time parsing implementations are lenient and accept invalid values.
-///
-/// It is guaranteed that a [SystemTime] will never sanitize to the same value as
-/// [DUMMY_SQUASH_TIME].
 //
 // If you're trying to reverse the sanitized format, please consider whether doing
 // so is really worth your time and that PackSquash developers made it harder for
