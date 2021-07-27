@@ -382,7 +382,7 @@ pub(super) fn get_install_date() -> Option<SystemId> {
 
 	SystemId::new(
 		install_date as u128,
-		false, // Murphy's law corollary: Windows will update itself when it's a bad time
+		true, // Murphy's law corollary: Windows will update itself when it's a bad time
 		50
 	)
 }
