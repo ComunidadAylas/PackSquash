@@ -5,7 +5,7 @@
 #![feature(const_option)]
 #![feature(new_uninit)]
 #![feature(once_cell)]
-#![feature(min_type_alias_impl_trait)]
+#![feature(type_alias_impl_trait)]
 #![feature(try_find)]
 #![feature(doc_cfg)]
 #![doc(
