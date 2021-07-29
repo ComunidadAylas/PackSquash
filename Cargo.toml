@@ -32,7 +32,7 @@ getopts = "0.2.21"
 serde = { version = "1.0.126", features = ["derive"] }
 toml = "0.5.8"
 
-serde_json = "1.0.64"
+serde_json = "1.0.66"
 json_comments = "0.2.0"
 jsonpath_lib = "0.3.0"
 
@@ -64,7 +64,7 @@ color-backtrace = { version = "0.5.1", default-features = false }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.9.0"
-wmi = "0.8.1"
+wmi = "0.9.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.9.1"
@@ -86,7 +86,7 @@ zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquas
 fpe = { git = "https://github.com/ComunidadAylas/fpe" }
 
 [build-dependencies]
-vergen = { version = "5.1.13", default-features = false, features = ["cargo", "git"] }
+vergen = { version = "5.1.14", default-features = false, features = ["cargo", "git"] }
 time = "0.2.27"
 
 [dev-dependencies]
