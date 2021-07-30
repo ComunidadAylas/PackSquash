@@ -109,7 +109,7 @@ pub enum SquashZipError {
 	Overflow(#[from] TryFromIntError),
 	#[error("A file size exceeds the 4 GiB limit")]
 	FileTooBig,
-	#[error("Could not create a timestamp for a ZIP file: {0}")]
+	#[error("ZIP file timestamp error: {0}")]
 	SystemTimeSanitizationError(#[from] SystemTimeSanitizationError),
 	#[error("No such file in the previous ZIP: {0}")]
 	NoSuchPreviousFile(String),
@@ -307,7 +307,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				let crc = obfuscation_engine
 					.deobfuscate_crc32(u32::from_le_bytes(buffer[12..16].try_into().unwrap()));
 				let process_time = SYSTEM_TIME_SANITIZER
-					.desanitize(buffer[8..12].try_into().unwrap(), &crc.to_le_bytes());
+					.desanitize(buffer[8..12].try_into().unwrap(), &crc.to_le_bytes())?;
 				let compression_method = CompressionMethod::from_compression_method_field(
 					u16::from_le_bytes(buffer[6..8].try_into().unwrap())
 				)?;
