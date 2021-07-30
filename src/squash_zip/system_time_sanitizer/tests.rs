@@ -22,14 +22,15 @@ fn successful_sanitize_desanitize_cycle_test(time: &SystemTime) {
 		.as_millis();
 
 	let desanitized_unix_timestamp = desanitized_time
+		.expect("Expected a sanitized time with a proper stick parity bit value")
 		.duration_since(SystemTime::UNIX_EPOCH)
 		.expect("The system clock is set to an invalid date")
 		.as_millis();
 
 	assert_eq!(
 		// Because we actually sanitize the Squash Time, we only have
-		// quarter-second precision
-		unix_timestamp - unix_timestamp % 250,
+		// half-second precision
+		unix_timestamp - unix_timestamp % 500,
 		desanitized_unix_timestamp,
 		"The sanitization is not reversible"
 	);

@@ -1,5 +1,5 @@
 use std::time::{Duration, SystemTime, SystemTimeError};
-use std::{convert::TryFrom, convert::TryInto, num::TryFromIntError};
+use std::{convert::TryFrom, convert::TryInto};
 
 use aes::cipher::generic_array::GenericArray;
 use aes::{Aes128, Block, BlockCipher, BlockDecrypt, BlockEncrypt, NewBlockCipher};
@@ -22,7 +22,9 @@ pub enum SystemTimeSanitizationError {
 	#[error("The time is too far back in past")]
 	PastSquashTime,
 	#[error("The time is too far into the future")]
-	FutureSquashTime(#[from] TryFromIntError)
+	FutureSquashTime,
+	#[error("Invalid stick parity bit. Did the system identifier change?")]
+	CorruptSquashTime
 }
 
 /// Sanitizes [SystemTime] structs to a 4-byte format that looks random, but can be
@@ -52,6 +54,9 @@ pub(super) struct SystemTimeSanitizer<
 /// ```
 const TIME_SANITIZATION_SALT: [u8; 16] = const_random!(u128).to_le_bytes();
 
+/// A 32-bit unsigned integer with the MSB set.
+const STICK_PARITY_BIT: u32 = 1 << 31;
+
 impl SystemTimeSanitizer<Aes128> {
 	/// Creates a new system time sanitizer that uses AES-128 in CBC mode as its
 	/// underlying cipher.
@@ -79,18 +84,27 @@ impl<C: NewBlockCipher + BlockCipher + BlockEncrypt + BlockDecrypt + Clone> Syst
 		time: &SystemTime,
 		tweak: &[u8]
 	) -> Result<[u8; 4], SystemTimeSanitizationError> {
-		// Squash Time is defined as quarter-seconds since Monday, 22 December 2014 0:00:00 (UTC),
-		// as adjustements to the Unix time, following the formula squash_time = (ms_unix_time -
-		// squash_epoch) / 250.
-		// This will be able to represent dates until Wednesday, 30 December 2048 13:37:03 (UTC),
-		// which is better than 32-bit, second-precision Unix timestamps
+		// Squash Time is defined as the count of half-seconds since Monday, 22 December 2014
+		// 0:00:00 (UTC), as adjustements to the Unix time, following the formula
+		// squash_time = (ms_unix_time - squash_epoch) / 500.
+		// With 31 bits to store the magnitude, timestamps up to Wednesday, 30 December 2048
+		// 13:37:03 (UTC) can be represented, which is better than 32-bit, second-precision
+		// Unix timestamps
 		let squash_time = u32::try_from(
 			time.duration_since(SystemTime::UNIX_EPOCH)?
 				.as_millis()
 				.checked_sub(1419206400000)
 				.ok_or(SystemTimeSanitizationError::PastSquashTime)?
-				/ 250
-		)?;
+				/ 500
+		)
+		.map_err(|_| SystemTimeSanitizationError::FutureSquashTime)?;
+
+		// Make sure that the most significant bit is not set, because we use as it as a
+		// stick parity bit that is always set to zero to check that whether the decoding
+		// is plausibly correct
+		if squash_time >= STICK_PARITY_BIT {
+			return Err(SystemTimeSanitizationError::FutureSquashTime);
+		}
 
 		// Now use our block cipher in FF1 FPE mode to encrypt the Squash Time
 		let sanitized_squash_time_bytes = self
@@ -106,10 +120,15 @@ impl<C: NewBlockCipher + BlockCipher + BlockEncrypt + BlockDecrypt + Clone> Syst
 	}
 
 	/// Desanitizes the specified four bytes back to a system time. The tweak
-	/// must be the same that was used for sanitization. Note that any four
-	/// bytes desanitize to lexically valid system times, but they may not be
-	/// _semantically_ valid.
-	pub fn desanitize(&self, sanitized_time: &[u8; 4], tweak: &[u8]) -> SystemTime {
+	/// must be the same that was used for sanitization. Some authenticity is
+	/// guaranteed using a stick parity bit, but such bit can only detect
+	/// non-authentic bytes as such with 50% probability, as any change in the
+	/// tweak, key or bytes is assumed to desanitize to an incorrect random number.
+	pub fn desanitize(
+		&self,
+		sanitized_time: &[u8; 4],
+		tweak: &[u8]
+	) -> Result<SystemTime, SystemTimeSanitizationError> {
 		let squash_time = u32::from_le_bytes(
 			self.ff1_cipher
 				.decrypt(tweak, &BinaryNumeralString::from_bytes_le(sanitized_time))
@@ -119,10 +138,16 @@ impl<C: NewBlockCipher + BlockCipher + BlockEncrypt + BlockDecrypt + Clone> Syst
 				.unwrap()
 		);
 
+		// If the stick parity bit is set, we know for sure that this Squash Time
+		// is not authentic, because it was tampered with or a key has changed
+		if squash_time >= STICK_PARITY_BIT {
+			return Err(SystemTimeSanitizationError::CorruptSquashTime);
+		}
+
 		// Convert Squash Time back to Unix time, in ms. The result value
 		// needs at most 42 bits, so it fits nicely in a 64 bit integer
-		let ms_unix_time = 250 * squash_time as u64 + 1419206400000;
+		let ms_unix_time = 500 * squash_time as u64 + 1419206400000;
 
-		SystemTime::UNIX_EPOCH + Duration::from_millis(ms_unix_time)
+		Ok(SystemTime::UNIX_EPOCH + Duration::from_millis(ms_unix_time))
 	}
 }
