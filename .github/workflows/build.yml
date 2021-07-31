@@ -16,7 +16,7 @@ env:
 jobs:
   linux-x64-gnu:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     env:
       CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
@@ -182,7 +182,7 @@ jobs:
 
   linux-aarch64-gnu:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     env:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
