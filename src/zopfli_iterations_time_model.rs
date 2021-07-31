@@ -52,10 +52,9 @@ impl ZopfliIterationsTimeModel {
 		max_iterations: u8
 	) -> u8 {
 		let data_magnitude = (size as f64 / 65536.0).powf(self.magnitude_power as f64) as f32;
-		let iterations = ((self.target_compression_time - B * data_magnitude) / (A * data_magnitude))
-			.clamp(min_iterations as f32, max_iterations as f32)
-			.round() as u8;
 
-		iterations
+		((self.target_compression_time - B * data_magnitude) / (A * data_magnitude))
+			.clamp(min_iterations as f32, max_iterations as f32)
+			.round() as u8
 	}
 }
