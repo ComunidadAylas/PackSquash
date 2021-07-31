@@ -58,7 +58,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
     - name: Format Rust source code using rustfmt
       run: cargo fmt
