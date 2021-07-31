@@ -22,7 +22,9 @@ use tokio_stream::Stream;
 use tokio_util::io::ReaderStream;
 use zopfli::Format;
 
-use crate::{config::PercentageInteger, RelativePath};
+use crate::{
+	config::PercentageInteger, zopfli_iterations_time_model::ZopfliIterationsTimeModel, RelativePath
+};
 
 use self::{
 	buffered_async_spooled_temp_file::BufferedAsyncSpooledTempFile,
@@ -43,11 +45,6 @@ mod zip_file_record;
 #[cfg(test)]
 mod tests;
 
-/// Slope of the linear regression function that estimates the Zopfli compression
-/// time for a 64 KiB block of somewhat difficult to compress data.
-const A: f32 = 0.004381402;
-/// Intercept of the linear regression function described in [`A`].
-const B: f32 = 0.035055663;
 /// The maximum number of Zopfli iterations that SquashZip will do, no matter the
 /// input file size. Must be at least 1.
 const MAXIMUM_ZOPFLI_ITERATIONS: u8 = 20;
@@ -164,7 +161,7 @@ pub struct SquashZipSettings {
 /// optimizations and use cases possible.
 pub struct SquashZip<F: AsyncRead + AsyncSeek + Unpin> {
 	settings: SquashZipSettings,
-	target_compression_time: f32,
+	zopfli_iterations_time_model: ZopfliIterationsTimeModel,
 	obfuscation_engine: ObfuscationEngine,
 	output_zip: Mutex<BufferedAsyncSpooledTempFile>,
 	previous_zip: Option<Mutex<F>>,
@@ -428,7 +425,10 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 
 		Ok(Self {
 			output_zip: Mutex::new(output_zip),
-			target_compression_time: (A * settings.zopfli_iterations as f32 + B) * 16.0,
+			zopfli_iterations_time_model: ZopfliIterationsTimeModel::new(
+				settings.zopfli_iterations,
+				5.0 / 6.0
+			),
 			settings,
 			obfuscation_engine,
 			previous_zip: previous_zip.map(Mutex::new),
@@ -931,22 +931,13 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			// Rewind scratch file to read it back for compression
 			processed_data_scratch_file.seek(SeekFrom::Start(0)).await?;
 
-			// Use a linear regression model to estimate an appropriate number of iterations for the
-			// file size. We correct the data size using a non-linear function, so that we don't
-			// start reducing iterations like crazy to meet the target time when we deal with bigger
-			// files, because we still care about compression. This means that we eventually reduce
-			// the iterations if the file grows pretty big (> 4 MiB), and that bigger files will take
-			// longer, but not too longer
-			let file_magnitude = (processed_data_size as f64 / 65536.0).powf(5.0 / 6.0) as f32;
-			let iterations = ((self.target_compression_time - B * file_magnitude)
-				/ (A * file_magnitude))
-				.clamp(1.0, MAXIMUM_ZOPFLI_ITERATIONS as f32)
-				.round() as u8;
-
 			zopfli::compress(
 				&{
 					let mut zopfli_options = zopfli::Options::default();
-					zopfli_options.numiterations = iterations.into();
+					zopfli_options.numiterations = self
+						.zopfli_iterations_time_model
+						.iterations_for_data_size(processed_data_size, 1, MAXIMUM_ZOPFLI_ITERATIONS)
+						.into();
 					zopfli_options
 				},
 				&Format::Deflate,

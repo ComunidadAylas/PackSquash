@@ -625,6 +625,20 @@ impl FileOptionsTrait for JsonFileOptions {
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct PngFileOptions {
+	/// The number of Zopfli compression iterations that PackSquash will do to compress raw
+	/// pixel data that amounts to a magnitude of 1 MiB. This option is similar to
+	/// `zip_compression_iterations`, and is used to feed the same linear model, but with
+	/// different parameters better suited for image compression.
+	///
+	/// When the number of compression iterations drops to zero, which happens when this option
+	/// is set to zero or the texture is pretty big, a much more faster DEFLATE compression
+	/// algorithm is used instead of Zopfli. This extra performance comes at the cost of file
+	/// size. On the other side, the number of iterations is limited to a maximum of 15. Values
+	/// greater than 15 are still useful for this setting, because they change the threshold
+	/// where iterations start being reduced in order to keep an acceptable performance.
+	///
+	/// **Default value**: `3`
+	pub image_data_compression_iterations: u8,
 	/// Controls how the colors of the image will be quantized.
 	///
 	/// Color quantization is a lossy process if and only if the image contains more colors than
@@ -640,7 +654,17 @@ pub struct PngFileOptions {
 	/// reasonable texture sizes.
 	///
 	/// **Default value**: 8192
-	pub maximum_width_and_height: u32,
+	pub maximum_width_and_height: u16,
+	/// If `true`, this option prevents the color values of completely transparent pixels from being
+	/// changed in order to achieve better compression. This optimization is visually lossless,
+	/// because completely transparent pixels are invisible no matter their color, and does not
+	/// affect textures that lack an alpha channel. However, if the texture is meant to be edited
+	/// afterwards or contains steganographic data, this optimization may have undesirable side
+	/// effects. Disabling alpha optimizations also reduces the time it takes to optimize an
+	/// image, at the cost of a maybe increased file size.
+	///
+	/// **Default value**: `false`
+	pub skip_alpha_optimizations: bool,
 	/// Crate-private option set by the [MinecraftQuirk::GrayscaleTexturesGammaMiscorrection]
 	/// workaround to not reduce color images to grayscale.
 	///
@@ -657,8 +681,10 @@ pub struct PngFileOptions {
 impl Default for PngFileOptions {
 	fn default() -> Self {
 		Self {
+			image_data_compression_iterations: 3,
 			color_quantization_target: Default::default(),
 			maximum_width_and_height: 8192,
+			skip_alpha_optimizations: false,
 			do_not_reduce_to_grayscale: false,
 			skip_pack_icon: false
 		}

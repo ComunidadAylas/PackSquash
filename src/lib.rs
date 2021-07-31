@@ -3,6 +3,7 @@
 
 #![deny(unsafe_code)]
 #![feature(const_option)]
+#![feature(const_fn_floating_point_arithmetic)]
 #![feature(new_uninit)]
 #![feature(once_cell)]
 #![feature(type_alias_impl_trait)]
@@ -68,6 +69,7 @@ pub use crate::squash_zip::relative_path::RelativePath;
 pub mod config;
 mod pack_file;
 mod squash_zip;
+mod zopfli_iterations_time_model;
 
 /// A struct that represents a resource or data pack optimization operation with configuration
 /// parameters known beforehand, which generates an output ZIP file. This is a good starting

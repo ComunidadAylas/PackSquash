@@ -1,4 +1,9 @@
-use std::{borrow::Cow, convert::TryInto, num::TryFromIntError, time::Duration};
+use std::{
+	borrow::Cow,
+	convert::TryInto,
+	num::{NonZeroU8, TryFromIntError},
+	time::Duration
+};
 
 use bytes::{BufMut, BytesMut};
 use imagequant::{liq_error, Attributes, Image};
@@ -11,7 +16,7 @@ use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
-use crate::config::PngFileOptions;
+use crate::{config::PngFileOptions, zopfli_iterations_time_model::ZopfliIterationsTimeModel};
 
 use super::{
 	util::to_ascii_lowercase_extension, OptimizedBytes, PackFile, PackFileConstructor,
@@ -67,6 +72,10 @@ impl Decoder for OptimizerDecoder {
 			return Ok(None);
 		}
 
+		let zopfli_iterations_time_model = ZopfliIterationsTimeModel::new(
+			self.optimization_settings.image_data_compression_iterations,
+			7.0 / 8.0
+		);
 		let color_quantization_target = self.optimization_settings.color_quantization_target;
 		let maximum_colors = color_quantization_target.max_colors();
 		let quality_description;
@@ -74,13 +83,22 @@ impl Decoder for OptimizerDecoder {
 		// Read the PNG IHDR and other information chunks, to validate it
 		let (image_info, mut png_reader) = spng::Decoder::new(&**src)
 			.with_limits(Limits {
-				max_width: self.optimization_settings.maximum_width_and_height,
-				max_height: self.optimization_settings.maximum_width_and_height
+				max_width: self.optimization_settings.maximum_width_and_height as u32,
+				max_height: self.optimization_settings.maximum_width_and_height as u32
 			})
 			.with_decode_flags(DecodeFlags::GAMMA | DecodeFlags::TRANSPARENCY)
 			.with_context_flags(ContextFlags::IGNORE_ADLER32)
 			.with_output_format(Format::Rgba8)
 			.read_info()?;
+
+		// The size of the raw pixel data for this image. This is used to estimate
+		// how much data is going to be compressed during PNG file optimizations
+		let raw_pixel_data_size = image_info
+			.color_type
+			.samples()
+			.saturating_mul(image_info.bit_depth as usize)
+			.saturating_mul(image_info.width as usize)
+			.saturating_mul(image_info.height as usize);
 
 		let oxipng_input_buf;
 
@@ -192,7 +210,9 @@ impl Decoder for OptimizerDecoder {
 		// At this point we have the PNG data we want to losslessly optimize
 		// in oxipng_input_buf. Do so with OxiPNG
 		let oxipng_options = Options {
-			alphas: {
+			alphas: if self.optimization_settings.skip_alpha_optimizations {
+				IndexSet::new()
+			} else {
 				let mut alpha_optimizations = IndexSet::with_capacity(6);
 				alpha_optimizations.insert(AlphaOptim::Black);
 				alpha_optimizations.insert(AlphaOptim::Down);
@@ -206,7 +226,41 @@ impl Decoder for OptimizerDecoder {
 			backup: false,
 			bit_depth_reduction: true,
 			color_type_reduction: true,
-			deflate: Deflaters::Zopfli,
+			// Compute an appropriate number of Zopfli compression iterations using our
+			// model. If the number of iterations drops to zero, switch to the much faster,
+			// but not so space-efficient, cloudflare-zlib deflater
+			deflate: match zopfli_iterations_time_model.iterations_for_data_size(
+				raw_pixel_data_size.try_into().unwrap_or(u32::MAX),
+				0,
+				15
+			) {
+				0 => Deflaters::Zlib {
+					compression: {
+						// Use the maximum compression level for the best compression.
+						// This is still acceptably fast for bigger images of realistic
+						// sizes
+
+						let mut levels = IndexSet::with_capacity(1);
+						levels.insert(9);
+
+						levels
+					},
+					strategies: {
+						// Try every Zlib strategy to get the best compression possible
+
+						let mut strategies = IndexSet::with_capacity(4);
+						for i in 0..=3 {
+							strategies.insert(i);
+						}
+
+						strategies
+					},
+					window: 15
+				},
+				zopfli_iterations => Deflaters::Zopfli {
+					iterations: NonZeroU8::new(zopfli_iterations).unwrap()
+				}
+			},
 			filter: {
 				let mut optimization_filters = IndexSet::with_capacity(6);
 				for i in 0..=5 {
