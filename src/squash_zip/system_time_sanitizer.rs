@@ -2,7 +2,7 @@ use std::time::{Duration, SystemTime, SystemTimeError};
 use std::{convert::TryFrom, convert::TryInto};
 
 use aes::cipher::generic_array::GenericArray;
-use aes::{Aes128, Block, BlockCipher, BlockDecrypt, BlockEncrypt, NewBlockCipher};
+use aes::{Aes128, Block, BlockDecrypt, BlockEncrypt, NewBlockCipher};
 use const_random::const_random;
 
 use fpe::ff1::{BinaryNumeralString, FF1};
@@ -23,7 +23,7 @@ pub enum SystemTimeSanitizationError {
 	PastSquashTime,
 	#[error("The time is too far into the future")]
 	FutureSquashTime,
-	#[error("Invalid stick parity bit. Did the system identifier change?")]
+	#[error("Invalid stick parity bit. Did the system ID or PackSquash build change?")]
 	CorruptSquashTime
 }
 
@@ -37,9 +37,7 @@ pub enum SystemTimeSanitizationError {
 // If you're trying to reverse the sanitized format, please consider whether doing
 // so is really worth your time and that PackSquash developers made it harder for
 // you because pack files modification dates are inteded to be private.
-pub(super) struct SystemTimeSanitizer<
-	C: NewBlockCipher + BlockCipher + BlockEncrypt + BlockDecrypt + Clone
-> {
+pub(super) struct SystemTimeSanitizer<C: NewBlockCipher + BlockEncrypt + BlockDecrypt + Clone> {
 	ff1_cipher: FF1<C>
 }
 
@@ -55,7 +53,7 @@ pub(super) struct SystemTimeSanitizer<
 const TIME_SANITIZATION_SALT: [u8; 16] = const_random!(u128).to_le_bytes();
 
 /// A 32-bit unsigned integer with the MSB set.
-const STICK_PARITY_BIT: u32 = 1 << 31;
+const STICK_PARITY_BIT_MASK: u32 = 1 << 31;
 
 impl SystemTimeSanitizer<Aes128> {
 	/// Creates a new system time sanitizer that uses AES-128 in CBC mode as its
@@ -74,7 +72,7 @@ impl SystemTimeSanitizer<Aes128> {
 	}
 }
 
-impl<C: NewBlockCipher + BlockCipher + BlockEncrypt + BlockDecrypt + Clone> SystemTimeSanitizer<C> {
+impl<C: NewBlockCipher + BlockEncrypt + BlockDecrypt + Clone> SystemTimeSanitizer<C> {
 	/// Sanitizes the specified [SystemTime], using a tweak for the underlying cipher.
 	/// The tweak is somewhat similar in role to a salt and need not be secret.
 	/// The sanitization process may represent the system time with reduced precision,
@@ -100,9 +98,9 @@ impl<C: NewBlockCipher + BlockCipher + BlockEncrypt + BlockDecrypt + Clone> Syst
 		.map_err(|_| SystemTimeSanitizationError::FutureSquashTime)?;
 
 		// Make sure that the most significant bit is not set, because we use as it as a
-		// stick parity bit that is always set to zero to check that whether the decoding
-		// is plausibly correct
-		if squash_time >= STICK_PARITY_BIT {
+		// stick parity bit that is always set to zero to check that the decoding is
+		// plausibly correct
+		if squash_time >= STICK_PARITY_BIT_MASK {
 			return Err(SystemTimeSanitizationError::FutureSquashTime);
 		}
 
@@ -140,7 +138,7 @@ impl<C: NewBlockCipher + BlockCipher + BlockEncrypt + BlockDecrypt + Clone> Syst
 
 		// If the stick parity bit is set, we know for sure that this Squash Time
 		// is not authentic, because it was tampered with or a key has changed
-		if squash_time >= STICK_PARITY_BIT {
+		if squash_time >= STICK_PARITY_BIT_MASK {
 			return Err(SystemTimeSanitizationError::CorruptSquashTime);
 		}
 
