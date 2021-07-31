@@ -29,7 +29,7 @@ futures = { version = "0.3.16", default-features = false }
 
 getopts = "0.2.21"
 
-serde = { version = "1.0.126", features = ["derive"] }
+serde = { version = "1.0.127", features = ["derive"] }
 toml = "0.5.8"
 
 serde_json = "1.0.66"
@@ -80,14 +80,15 @@ imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
 # directive not being parsed
 # See: https://github.com/phaazon/glsl/pull/138
 glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
-# Use our fork of Zopfli that includes streaming support
+# Use our fork of Zopfli that includes streaming support and the ability to change
+# the number of compression iterations
 zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquash" }
-# Use our fork of fpe that fixes compatibility with newer aes versions
-fpe = { git = "https://github.com/ComunidadAylas/fpe" }
+# Use the latest commit of fpe that fixes compatibility with newer aes versions
+fpe = { git = "https://github.com/str4d/fpe" }
 
 [build-dependencies]
 vergen = { version = "5.1.14", default-features = false, features = ["cargo", "git"] }
-time = "0.2.27"
+time = { version = "0.3.0", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 tokio-test = "0.4.2"

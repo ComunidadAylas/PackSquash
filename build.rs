@@ -20,8 +20,11 @@ fn main() {
 
 	// Set variables with the build dates, for copyright and version strings
 	let build_date = OffsetDateTime::now_utc();
-	let build_year = build_date.year();
-	println!("cargo:rustc-env=BUILD_DATE={}", build_date.format("%F"));
+	let (build_year, build_month, build_day) = build_date.to_calendar_date();
+	println!(
+		"cargo:rustc-env=BUILD_DATE={}-{:02}-{:02}",
+		build_year, build_month as u8, build_day
+	);
 	println!("cargo:rustc-env=BUILD_YEAR={}", build_year);
 
 	// For Windows, generate a script to set the executable resource data
