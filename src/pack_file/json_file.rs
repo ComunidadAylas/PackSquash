@@ -35,8 +35,8 @@ pub struct JsonFile<T: AsyncRead + Unpin + 'static> {
 
 /// Optimizer decoder that transforms JSON files to an optimized representation.
 pub struct OptimizerDecoder {
-	file_length: usize,
-	optimization_settings: JsonFileOptions
+	optimization_settings: JsonFileOptions,
+	reached_eof: bool
 }
 
 /// Represents an error that may happen while optimizing JSON files.
@@ -53,21 +53,27 @@ pub enum OptimizationError {
 
 thread_local!(static DEBLOATER: Debloater = Debloater::new());
 
+// FIXME: actual framing?
+// (i.e. do not hold the entire file in memory before decoding, so that frame != file)
 impl Decoder for OptimizerDecoder {
 	type Item = (Cow<'static, str>, OptimizedBytes<BytesMut>);
 	type Error = OptimizationError;
 
-	fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
-		// FIXME: actual framing?
-		// (i.e. do not hold the entire file in memory before decoding, so that frame != file)
+	fn decode(&mut self, _: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+		return Ok(None);
+	}
 
-		// Check if we have the entire file (i.e. frame)
-		if src.len() < self.file_length {
+	fn decode_eof(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+		// This method will be called when EOF is reached until it returns None. Because we
+		// will only ever output a single item in the stream, always return None if we have
+		// executed once already
+		if self.reached_eof {
 			return Ok(None);
 		}
+		self.reached_eof = true;
 
 		// Parse the JSON so we know how to serialize it again in a compact manner,
-		// and we know it's valid. Also, remove its comments
+		// and we know it's valid. Also remove its comments
 		let mut json_value: Value =
 			serde_json::from_reader(StripComments::new(bom_stripper::strip_utf8_bom(src)))?;
 
@@ -111,8 +117,8 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for JsonFile<T> {
 		FramedRead::with_capacity(
 			self.read,
 			OptimizerDecoder {
-				file_length: self.file_length,
-				optimization_settings: self.optimization_settings
+				optimization_settings: self.optimization_settings,
+				reached_eof: false
 			},
 			self.file_length
 		)

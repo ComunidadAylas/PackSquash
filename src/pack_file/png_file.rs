@@ -37,8 +37,8 @@ pub struct PngFile<T: AsyncRead + Unpin + 'static> {
 
 /// Optimizer decoder that transforms PNG files to an optimized representation.
 pub struct OptimizerDecoder {
-	file_length: usize,
-	optimization_settings: PngFileOptions
+	optimization_settings: PngFileOptions,
+	reached_eof: bool
 }
 
 /// Represents an error that may happen while optimizing PNG files.
@@ -59,18 +59,24 @@ pub enum OptimizationError {
 	Io(#[from] std::io::Error)
 }
 
+// FIXME: actual framing?
+// (i.e. do not hold the entire file in memory before decoding, so that frame != file)
 impl Decoder for OptimizerDecoder {
 	type Item = (Cow<'static, str>, OptimizedBytes<Vec<u8>>);
 	type Error = OptimizationError;
 
-	fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
-		// FIXME: actual framing?
-		// (i.e. do not hold the entire file in memory before decoding, so that frame != file)
+	fn decode(&mut self, _: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+		return Ok(None);
+	}
 
-		// Check if we have the entire file (i.e. frame)
-		if src.len() < self.file_length {
+	fn decode_eof(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+		// This method will be called when EOF is reached until it returns None. Because we
+		// will only ever output a single item in the stream, always return None if we have
+		// executed once already
+		if self.reached_eof {
 			return Ok(None);
 		}
+		self.reached_eof = true;
 
 		let zopfli_iterations_time_model = ZopfliIterationsTimeModel::new(
 			self.optimization_settings.image_data_compression_iterations,
@@ -300,8 +306,8 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for PngFile<T> {
 		FramedRead::with_capacity(
 			self.read,
 			OptimizerDecoder {
-				file_length: self.file_length,
-				optimization_settings: self.optimization_settings
+				optimization_settings: self.optimization_settings,
+				reached_eof: false
 			},
 			self.file_length
 		)
