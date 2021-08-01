@@ -72,7 +72,7 @@ impl Decoder for OptimizerDecoder {
 	type Error = OptimizationError;
 
 	fn decode(&mut self, _: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
-		return Ok(None);
+		Ok(None)
 	}
 
 	fn decode_eof(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
