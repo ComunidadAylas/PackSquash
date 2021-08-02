@@ -23,17 +23,19 @@ PackSquash is also capable of doing the following things, although they are disa
 * Deduplicating identical files within the generated ZIP file. This means that the contents of files that are repeated several times over will be stored only once.
 * Protecting the generated ZIP files, making them harder to read by most ZIP manipulation programs.
 
-## 🔗 Download
+## 🔗 Download and installation
 
-You can get the executable for the latest stable release from [GitHub Releases](https://github.com/ComunidadAylas/PackSquash/releases/latest).
+If you are using a Debian-like Linux distro (Debian, Ubuntu, etc.), the recommended way to install PackSquash is via our APT repository, because it makes the process much more easier, better integrated with your package management programs and more convenient to stay updated, should you choose to do so. Please refer to the [installation guide](https://github.com/ComunidadAylas/PackSquash/wiki/Installation-guide) for details.
 
-Alternatively, if you are into these sort of things, you can download the latest unstable build from [GitHub Actions](https://github.com/ComunidadAylas/PackSquash/actions?query=branch%3Amaster), or build the source yourself.
+Alternatively, for other operating systems, or when you can't use our APT repository for some reason, you can download the executable for the latest stable release from [GitHub Releases](https://github.com/ComunidadAylas/PackSquash/releases/latest).
+
+Finally, if you are into these sort of things, you can download the latest unstable build from [GitHub Actions](https://github.com/ComunidadAylas/PackSquash/actions?query=branch%3Amaster), or build the source yourself.
 
 ## 📝 Usage
 
 PackSquash is a command line application, so it must be executed from a command prompt, a shortcut, a command-line shell or a script. You can customize how it works by means of an options file, which contains per-file compression options and several other parameters. If no options file is specified, or if it is a dash ("-"), the options will be read from the standard input stream (usually, your keyboard or the output of another command). If in doubt, you can check out the command line argument syntax by launching PackSquash with the `-h` parameter.
 
-For more information about the format of the options file, check [the wiki article about it](https://github.com/ComunidadAylas/PackSquash/wiki/Options-files).
+For more information about the format of the options file, check [the Options files wiki article](https://github.com/ComunidadAylas/PackSquash/wiki/Options-files) on GitHub.
 
 If you want a GUI for using PackSquash, or even authoring resource packs in general, you may want to try out the [Quiver](https://github.com/DeflatedPickle/Quiver) project, which is a third-party resource pack creator and manager for Minecraft that integrates with PackSquash. Just install PackSquash dependencies, open the resource pack folder, tweak the options file if you need to, and enjoy!
 
