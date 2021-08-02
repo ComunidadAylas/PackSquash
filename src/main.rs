@@ -25,6 +25,7 @@ fn main() {
 /// Runs PackSquash, parsing the command line parameters and deciding what options file
 /// to read to process a pack.
 fn run() -> i32 {
+	#[cfg(feature = "color-backtrace")]
 	color_backtrace::install();
 
 	let mut options = Options::new();

@@ -556,11 +556,13 @@ dependencies = [
 
 [[package]]
 name = "fpe"
-version = "0.4.0"
-source = "git+https://github.com/str4d/fpe#08058955c3ad943657b542666198e279abe276b8"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcf3e40fc9accc7218e082db8a75aeea244b8f5db73e591774ef93b4276365e6"
 dependencies = [
  "block-modes",
  "cipher",
+ "libm",
  "num-bigint",
  "num-integer",
  "num-traits",
@@ -1028,6 +1030,12 @@ dependencies = [
  "libz-sys",
  "pkg-config",
 ]
+
+[[package]]
+name = "libm"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7d73b3f436185384286bd8098d17ec07c9a7d2388a6599f824d8502b529702a"
 
 [[package]]
 name = "libz-sys"
