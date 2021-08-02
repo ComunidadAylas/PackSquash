@@ -214,6 +214,7 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly
+        target: ${{ env.CARGO_BUILD_TARGET }}
         override: true
         profile: minimal
         components: rust-src
@@ -223,6 +224,8 @@ jobs:
 
     - name: Install cargo-deb
       uses: actions-rs/install@v0.1
+      env:
+        CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
       with:
         crate: cargo-deb
         version: latest
