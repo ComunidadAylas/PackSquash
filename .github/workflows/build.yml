@@ -34,14 +34,14 @@ jobs:
         profile: minimal
         components: rustfmt, clippy, rust-src
 
+    - name: Cache Rust artifacts
+      uses: Swatinem/rust-cache@v1
+
     - name: Install cargo-deb
       uses: actions-rs/install@v0.1
       with:
         crate: cargo-deb
         version: latest
-
-    - name: Cache Rust artifacts
-      uses: Swatinem/rust-cache@v1
 
     - name: Install GStreamer libraries, GStreamer development packages and documentation generation packages
       run: |
@@ -214,19 +214,18 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly
-        target: ${{ env.CARGO_BUILD_TARGET }}
         override: true
         profile: minimal
         components: rust-src
+
+    - name: Cache Rust artifacts
+      uses: Swatinem/rust-cache@v1
 
     - name: Install cargo-deb
       uses: actions-rs/install@v0.1
       with:
         crate: cargo-deb
         version: latest
-
-    - name: Cache Rust artifacts
-      uses: Swatinem/rust-cache@v1
 
     - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
       uses: ryankurte/action-apt@v0.3.0
