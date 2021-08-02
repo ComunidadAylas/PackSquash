@@ -11,7 +11,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  COMMON_CARGO_BUILD_PARAMS: --release
 
 jobs:
   linux-x64-gnu:
@@ -65,10 +64,10 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
     - name: Generate Debian package
-      run: ./build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+      run: ./build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
     - name: Format Rust source code using rustfmt
       run: cargo fmt
@@ -141,7 +140,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
     - name: Set binary resource data
       run: target/set_executable_resource_data.ps1
@@ -188,7 +187,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
@@ -243,10 +242,10 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
     - name: Generate Debian package
-      run: ./build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+      run: ./build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
