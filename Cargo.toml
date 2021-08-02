@@ -105,3 +105,11 @@ opt-level = 3
 lto = "fat"
 codegen-units = 1
 strip = "symbols"
+
+[package.metadata.deb]
+maintainer = "Alejandro González <AlexTMjugador@users.noreply.github.com>"
+copyright = "PackSquash developers"
+license-file = ["LICENSE", "0"]
+extended-description-file = "target/debian/extended_description.txt"
+section = "utils"
+depends = "$auto, gstreamer1.0-plugins-good (>=1.14.0), gstreamer1.0-plugins-bad (>=1.14.0)"

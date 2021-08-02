@@ -34,13 +34,20 @@ jobs:
         profile: minimal
         components: rustfmt, clippy, rust-src
 
+    - name: Install cargo-deb
+      uses: actions-rs/install@v0.1
+      with:
+        crate: cargo-deb
+        version: latest
+
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer libraries and GStreamer development packages
+    - name: Install GStreamer libraries, GStreamer development packages and documentation generation packages
       run: |
         sudo apt-get update && \
-        sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+        sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev && \
+        sudo apt-get install markdown html2text
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
@@ -60,6 +67,9 @@ jobs:
         command: build
         args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
+    - name: Generate Debian package
+      run: ./build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
     - name: Format Rust source code using rustfmt
       run: cargo fmt
 
@@ -75,6 +85,12 @@ jobs:
       with:
         name: 'PackSquash executable (Linux, x64, glibc)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+
+    - name: Upload Debian package
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'Debian package (amd64)'
+        path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
 
   windows-x64-gnu:
 
@@ -203,6 +219,12 @@ jobs:
         profile: minimal
         components: rust-src
 
+    - name: Install cargo-deb
+      uses: actions-rs/install@v0.1
+      with:
+        crate: cargo-deb
+        version: latest
+
     - name: Cache Rust artifacts
       uses: Swatinem/rust-cache@v1
 
@@ -212,14 +234,26 @@ jobs:
         arch: arm64
         packages: gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
 
+    - name: Install documentation generation packages
+      run: sudo apt-get install markdown html2text
+
     - name: Build with optimized standard library
       uses: actions-rs/cargo@v1
       with:
         command: build
         args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
 
+    - name: Generate Debian package
+      run: ./build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std ${{ env.COMMON_CARGO_BUILD_PARAMS }}
+
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with:
         name: 'PackSquash executable (Linux, AArch64-ARM64, glibc)'
         path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+
+    - name: Upload Debian package
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'Debian package (arm64)'
+        path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
