@@ -112,6 +112,8 @@ copyright = "PackSquash developers"
 license-file = ["LICENSE", "0"]
 extended-description-file = "target/debian/extended_package_description.txt"
 section = "utils"
+# TODO: for final v0.3.0 release, increment this to 1, and change APT repo action
+revision = "0"
 # Sadly, automatic dependency detection is suboptimal because it pulls transitive
 # dependencies and does not work fine when cross-compiling. The value for this depends
 # key is manually deduced as follows:
@@ -122,5 +124,5 @@ section = "utils"
 # - Each time a CI runner is updated in a way that may change these versions (distro
 #   update; libc is especially important to get right).
 # - Before each release in the APT repository, just in case, to check that everything's
-#   right
+#   right.
 depends = "gstreamer1.0-plugins-bad (>=1.14.5), gstreamer1.0-plugins-base (>=1.14.5), gstreamer1.0-plugins-good (>=1.14.5), libc6 (>= 2.27)"
