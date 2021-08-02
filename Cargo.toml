@@ -117,8 +117,8 @@ section = "utils"
 # - We override libpcre3 becuase Debian sid ships with older libpcre than
 #   Ubuntu bionic as of August 2, 2021, and older versions seem to work okay
 # - We add GStreamer plugins dependencies because they are loaded at runtime
-#   and cargo-deb can't really detect them. The versions match that of the
-#   other GStreamer dependencies that are automatically added
+#   and cargo-deb can't detect them. The versions match that of the other
+#   GStreamer dependencies that are automatically added
 # The libpcre3 and GStreamer dependencies should be kept updated according to
 # the versions that the CI runners are actually using
 depends = "libpcre3 (>=2:8.39), gstreamer1.0-plugins-good (>=1.14.5), gstreamer1.0-plugins-bad (>=1.14.5), $auto"
