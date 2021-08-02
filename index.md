@@ -7,6 +7,7 @@ show_download: true
 <p align="center"><span style="font-style: italic">Create more. Worry less about distribution and storage intricacies.</span></p>
 
 ## 🔎 How does it work?
+
 PackSquash walks through the pack files that it recognizes in a directory, applying per-file configurable lossy and lossless compression techniques, and builds a ZIP file with the results that can be directly used by Minecraft. Currently, PackSquash can apply the following techniques:
 
 * For PNG images: color quantization to generate a color palette, coupled with lossless bit depth, compression and color type reduction, and metadata removal. The quantization, although it is pretty subtle or even unneeded for common texture sizes, can be disabled if lossless quality is desired. These operations are performed by the well known `imagequant` (used in `pngquant`) and `oxipng` libraries.
@@ -24,22 +25,26 @@ PackSquash is also capable of doing the following things, although they are disa
 * Protecting the generated ZIP files, making them harder to read by most ZIP manipulation programs.
 
 ## 🤔 Does it really work?
+
 Anecdotal evidence shows that, with the default options, version v0.2.1 was capable of reducing the size of the _Witchcraft & Wizardary_ resource pack ZIP file by Floo Network (version 1.6.2) from 118 MiB to 57 MiB, a 51.69% size reduction, and it got better over time. So try it out with your pack, and maybe you will be surprised!
 
 ## 📝 Usage
+
 PackSquash is a command line application, so it must be executed from a command prompt, a shortcut, a command-line shell or a script. You can customize how it works by means of an options file, which contains per-file compression options and several other parameters. If no options file is specified, or if it is a dash ("-"), the options will be read from the standard input stream (usually, your keyboard or the output of another command). If in doubt, you can check out the command line argument syntax by launching PackSquash with the `-h` parameter.
 
-For more information about the format of the options file, check [the wiki article about it](https://github.com/ComunidadAylas/PackSquash/wiki/Options-files).
+For more information about the format of the options file, check [the Options files wiki article](https://github.com/ComunidadAylas/PackSquash/wiki/Options-files) on GitHub.
 
 If you want a GUI for using PackSquash, or even authoring resource packs in general, you may want to try out the [Quiver](https://github.com/DeflatedPickle/Quiver) project, which is a third-party resource pack creator and manager for Minecraft that integrates with PackSquash. Just install PackSquash dependencies, open the resource pack folder, tweak the options file if you need to, and enjoy!
 
 ## ✉️ Contact and support
+
 Like the license says, this software is provided without any warranty, with the hope that you find it useful. But that doesn't mean I don't welcome constructive feedback, suggestions, congratulations or assisting you on your usage of PackSquash (if I can and want to). If you wish to drop me a line for whatever reason related to PackSquash, you can contact me on Discord: _AlexTMjugador#5124_.
 
 Also, if you speak Spanish, you may find that _Comunidad Aylas_, our Spanish-speaking community, suits you well. You can [join us on Discord](https://discord.gg/RVAgQRS). Don't forget to introduce yourself!
 
 ## 🎁 Sponsoring
-You can use all of PackSquash for free for whatever you want, and will always be able to. One of the things I enjoy the most of making free software is the feeling that I'm doing something good and useful for others. With that said, PackSquash is arguably innovative, and some things were only possible to implement thanks to original knowledge of Minecraft internals acquired via static analysis of its deobfuscated code, which is an activity that is commonly referred to as reverse engineering. This is time consuming, and engineers in companies get paid for doing this kind of things. If you want to say "thank you" in a way that words can't describe, or motivate me to stay committed to the project and advance in the [roadmap](https://github.com/ComunidadAylas/PackSquash/projects/1), sending me some money would be a nice way to do so! You can choose any of the platforms below, by clicking on its button:
+
+You can use all of PackSquash for free for whatever you want, and will always be able to. One of the things I enjoy the most of making free software is the feeling that I'm doing something good and useful for others. With that said, PackSquash is arguably innovative, and some things were only possible to implement thanks to original knowledge of Minecraft internals acquired via static analysis of its deobfuscated code, which is an activity that is commonly referred to as reverse engineering. This is time consuming, and engineers in companies get paid for doing this kind of things. If you want to say "thank you" in a way that words can't describe, or motivate me to stay committed to the project and advance in the [roadmap](https://github.com/ComunidadAylas/PackSquash/projects/1), sending me some money would be a nice way to do so! You can choose any of the platforms shown below:
 
 <p align="center"><a href="https://ko-fi.com/K3K758Q08"><img src="https://cdn.ko-fi.com/cdn/kofi2.png?v=2" alt="Buy me a coffee at ko-fi.com" height="36"/></a></p>
 <p align="center"><a href="https://www.paypal.me/alejandrogonzalezg98"><img src="https://icon-library.com/images/paypal-donate-icon/paypal-donate-icon-7.jpg" alt="Donate via PayPal.me" height="64"/></a></p>
