@@ -3,7 +3,7 @@ cargo-features = ["strip"]
 [package]
 name = "packsquash"
 description = "Minecraft resource and data pack optimizer"
-version = "0.3.0-rc.2"
+version = "0.3.1"
 authors = ["Alejandro \"AlexTMjugador\" González"]
 repository = "https://github.com/ComunidadAylas/PackSquash"
 license = "AGPL-3.0"
