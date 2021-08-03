@@ -13,5 +13,7 @@ find . -iname 'packsquash' -type f -perm /ug=x | while read -r executable; do
 	printf 'Dependencies for %s: ' "$executable" && \
 	dpkg-shlibdeps "$executable" -O 2>/dev/null
 done && \
+printf 'GStreamer version: ' && \
+apt-cache show gstreamer1.0-plugins-base | sed -n '/^Version:/{s/^Version: //;p;q}' && \
 { rm -f debian/control; true; } && \
 cd ..
