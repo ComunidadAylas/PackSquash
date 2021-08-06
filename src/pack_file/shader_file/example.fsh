@@ -4,6 +4,10 @@
 
 #version 120
 
+// Test that the #moj_import directive added in 1.17 works fine
+#moj_import <base.fsh>
+#moj_import "common.fsh"
+
 varying vec4 texcoord;
 uniform sampler2D gcolor;
 

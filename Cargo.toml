@@ -20,7 +20,7 @@ thiserror = "1.0.26"
 ahash = "0.7.4"
 
 num_cpus = "1.13.0"
-sysinfo = { version = "0.19.2", default-features = false }
+sysinfo = { version = "0.20.0", default-features = false }
 walkdir = "2.3.2"
 
 tokio = { version = "1.9.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
@@ -43,8 +43,8 @@ rgb = "0.8.27"
 imagequant = "3.0.4-alpha.2"
 oxipng = { version = "5.0.0", default-features = false, features = ["zopfli"] }
 
-gstreamer = { version = "0.17.1", default-features = false }
-gstreamer-app = { version = "0.17.0", default-features = false, features = ["v1_10"] }
+gstreamer = { version = "0.17.2", default-features = false }
+gstreamer-app = { version = "0.17.2", default-features = false, features = ["v1_10"] }
 
 glsl = "6.0.1"
 
@@ -86,7 +86,7 @@ glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
 zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquash" }
 
 [build-dependencies]
-vergen = { version = "5.1.14", default-features = false, features = ["cargo", "git"] }
+vergen = { version = "5.1.15", default-features = false, features = ["cargo", "git"] }
 time = { version = "0.3.0", default-features = false, features = ["std"] }
 
 [dev-dependencies]

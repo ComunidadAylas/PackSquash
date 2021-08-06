@@ -198,9 +198,9 @@ dependencies = [
 
 [[package]]
 name = "cfg-expr"
-version = "0.8.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70a1d12766bbdd5d44caab5df04a9bffec9cd855a1b44b15de5665d70c085f94"
+checksum = "b412e83326147c2bb881f8b40edfbf9905b9b8abaebd0e47ca190ba62fda8f0e"
 dependencies = [
  "smallvec",
 ]
@@ -413,12 +413,6 @@ dependencies = [
  "adler32",
  "byteorder",
 ]
-
-[[package]]
-name = "doc-comment"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fea41bba32d969b513997752735605054bc0dfa92b4c56bf1189f2e174be7a10"
 
 [[package]]
 name = "either"
@@ -769,7 +763,7 @@ dependencies = [
 [[package]]
 name = "glsl"
 version = "6.0.1"
-source = "git+https://github.com/ComunidadAylas/glsl?branch=packsquash#2a0a76e0c55e8ba74084dc656b0a65a15e3b193f"
+source = "git+https://github.com/ComunidadAylas/glsl?branch=packsquash#530f5f6331bcbc3b363e52af76be2db3c6d4fd37"
 dependencies = [
  "nom",
 ]
@@ -787,9 +781,9 @@ dependencies = [
 
 [[package]]
 name = "gstreamer"
-version = "0.17.1"
+version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f71e8c163945a3e0140e6b1ed10d1507da7e71196fedec568cbad92db63d762"
+checksum = "4aa71d1b3f562645e2d3b96c8d5cf1f26174696e37781ef34193311da733f98c"
 dependencies = [
  "bitflags",
  "cfg-if",
@@ -810,9 +804,9 @@ dependencies = [
 
 [[package]]
 name = "gstreamer-app"
-version = "0.17.0"
+version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2ed9c3e9ce3a406ea5026c2d4e094acd8efd61084bb107f8ff97d13f739b542"
+checksum = "f73b8d33b1bbe9f22d0cf56661a1d2a2c9a0e099ea10e5f1f347be5038f5c043"
 dependencies = [
  "bitflags",
  "futures-core",
@@ -840,9 +834,9 @@ dependencies = [
 
 [[package]]
 name = "gstreamer-base"
-version = "0.17.0"
+version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cf50118e1933d9e9e043036f2306d0b9660182ea61a75f266cd9fb3607b7a19"
+checksum = "2c0c1d8c62eb5d08fb80173609f2eea71d385393363146e4e78107facbd67715"
 dependencies = [
  "bitflags",
  "cfg-if",
@@ -983,9 +977,9 @@ dependencies = [
 
 [[package]]
 name = "jobserver"
-version = "0.1.22"
+version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "972f5ae5d1cb9c6ae417789196c803205313edde988685da5e3aae0827b9e7fd"
+checksum = "f5ca711fd837261e14ec9e674f092cbb931d3fa1482b017ae59328ddc6f3212b"
 dependencies = [
  "libc",
 ]
@@ -1433,9 +1427,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.9"
+version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ab49abadf3f9e1c4bc499e8845e152ad87d2ad2d30371841171169e9d75feee"
+checksum = "8383f39639269cde97d255a32bdb68c047337295414940c68bdd30c2e13203ff"
 dependencies = [
  "bitflags",
 ]
@@ -1551,9 +1545,9 @@ dependencies = [
 
 [[package]]
 name = "slab"
-version = "0.4.3"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f173ac3d1a7e3b28003f40de0b5ce7fe2710f9b9dc3fc38664cebee46b3b6527"
+checksum = "c307a32c1c5c437f38c7fd45d753050587732ba8628319fbdf12a7e289ccc590"
 
 [[package]]
 name = "smallvec"
@@ -1620,13 +1614,12 @@ dependencies = [
 
 [[package]]
 name = "sysinfo"
-version = "0.19.2"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e7de153d0438a648bb71e06e300e54fc641685e96af96d49b843f43172d341c"
+checksum = "0af066e6272f2175c1783cfc2ebf3e2d8dfe2c182b00677fdeccbf8291af83fb"
 dependencies = [
  "cfg-if",
  "core-foundation-sys",
- "doc-comment",
  "libc",
  "ntapi",
  "once_cell",
@@ -1889,9 +1882,9 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "vergen"
-version = "5.1.14"
+version = "5.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c11c9ef5475ba009d3c4105e52220a6ded6d760417ec0e7deba1774cf8ced2e"
+checksum = "265455aab08c55a1ab13f07c8d5e25c7d46900f4484dd7cbd682e77171f93f3c"
 dependencies = [
  "anyhow",
  "cfg-if",
