@@ -112,11 +112,13 @@ copyright = "PackSquash developers"
 license-file = ["LICENSE", "0"]
 extended-description-file = "target/debian/extended_package_description.txt"
 section = "utils"
-# TODO: for final v0.3.0 release, increment this, and change APT repo action
-revision = "0"
+# For each release with the same version number (shouldn't be too many),
+# increment this, and change APT repo action
+revision = "1"
 # Sadly, automatic dependency detection is suboptimal because it pulls transitive
-# dependencies and does not work fine when cross-compiling. The value for this depends
-# key is manually deduced as follows:
+# dependencies and does not work fine when cross-compiling.
+#
+# The value for this depends key is manually deduced as follows:
 # - ./build_deb.sh is used, preferably on a CI runner, to get all the relevant dependencies
 #   and their versions.
 # - The list is then manually tweaked to add GStreamer plugins. The version of these plugins
