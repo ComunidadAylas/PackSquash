@@ -77,9 +77,11 @@ oxipng = { git = "https://github.com/ComunidadAylas/oxipng", branch = "packsquas
 # Use the latest commit of imagequant, which allows some zero-copy operations
 imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
 # Use our fork of glsl that allows it to parse files that use DOS-style CRLF line
-# endings, prevalent on Windows environments, and fixes the #elif preprocessor
-# directive not being parsed
-# See: https://github.com/phaazon/glsl/pull/138
+# endings, prevalent on Windows environments, fixes the #elif preprocessor directive
+# not being parsed, improves minification and fixes some incorrect transpiling
+# Related PRs:
+# https://github.com/phaazon/glsl/pull/138
+# https://github.com/ComunidadAylas/glsl/pull/1
 glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
 # Use our fork of Zopfli that includes streaming support and the ability to change
 # the number of compression iterations
