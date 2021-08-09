@@ -87,7 +87,7 @@ zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquas
 
 [build-dependencies]
 vergen = { version = "5.1.15", default-features = false, features = ["cargo", "git"] }
-time = { version = "0.3.0", default-features = false, features = ["std"] }
+time = { version = "0.3.1", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 tokio-test = "0.4.2"
