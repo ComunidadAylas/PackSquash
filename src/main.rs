@@ -63,7 +63,7 @@ fn run() -> i32 {
 		Err(parse_err) => {
 			eprintln!("{}", parse_err);
 			eprintln!(
-				"Use {} -h to see command line argument help",
+				"Run {} -h to see command line argument help",
 				env!("CARGO_BIN_NAME")
 			);
 
@@ -76,7 +76,7 @@ fn run() -> i32 {
 /// read options.
 fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	let user_friendly_options_path = options_file_path.map_or_else(
-		|| Cow::Borrowed("standard input"),
+		|| Cow::Borrowed("standard input (keyboard input or pipe)"),
 		|path| Cow::Borrowed(path)
 	);
 
@@ -86,9 +86,9 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		// Newbies are often confused by terms such as "standard input", so try
 		// to point them in the direction of what they probably want to do
 		println!(
-			"If you are not sure what this means or what to do now, please \n\
-		consider reading the options file documentation over GitHub, as you\n\
-		probably want to write and use one of those instead."
+			"If you are not sure what this means or what to do now, you probably\n\
+			want to write and use an options file with PackSquash. Please check out\n
+			<https://packsquash.page.link/Options-files> for more information.\n"
 		);
 	}
 	println!();
@@ -107,7 +107,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		Ok(options_string) => options_string,
 		Err(err) => {
 			eprintln!(
-				"! Couldn't read the options file at {}: {}",
+				"! Couldn't read the options file from {}: {}",
 				user_friendly_options_path, err
 			);
 
@@ -120,7 +120,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
 			eprintln!(
-				"! An error occurred while parsing the options file at {}: {}",
+				"! An error occurred while parsing the options file from {}: {}",
 				user_friendly_options_path, deserialize_error
 			);
 
@@ -166,12 +166,12 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 					PackSquasherStatus::Warning(warning) => match warning {
 						PackSquasherWarning::LowEntropySystemId => eprintln!(
 							"! Used a low entropy system ID. The dates embedded in the result ZIP file,\n\
-							which reveal when it was generated, may be easier to decrypt. Please read\n\
-							the relevant documentation over GitHub for details."),
+							which reveal when it was generated, may be easier to decrypt. For more information\n\
+							about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"),
 						PackSquasherWarning::VolatileSystemId => eprintln!(
 							"! Used a volatile system ID. You maybe should not reuse the result ZIP file,\n\
-							as unexpected results can occur after you use your device as usual. Please\n\
-							read the relevant documentation over GitHub for details."),
+							as unexpected results can occur after you use your device as usual. For more information\n\
+							about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"),
 						_ => unimplemented!()
 					},
 					_ => unimplemented!()
@@ -194,6 +194,11 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	.map_or_else(
 		|err| {
 			eprintln!("! Pack processing error: {}", err);
+			eprintln!(
+				"A more detailed error message could have been printed before this\n\
+				message. You might find these troubleshooting instructions useful:\n\
+				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>"
+			);
 
 			4
 		},
@@ -254,9 +259,7 @@ fn print_version_information(verbose: bool) {
 	} else {
 		println!("This program comes with ABSOLUTELY NO WARRANTY.");
 		println!("This is free software, and you are welcome to redistribute it");
-		println!(
-			"under certain conditions. Run {} -v for details.",
-			env!("CARGO_BIN_NAME")
-		);
+		println!("under certain conditions. Use the -v command line switch for");
+		println!("more details about these conditions.");
 	}
 }
