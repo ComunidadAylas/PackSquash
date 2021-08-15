@@ -38,7 +38,6 @@ mod tests;
 /// packs may replace and add new sound events to Minecraft.
 pub struct AudioFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
-	file_length_hint: u64,
 	is_ogg: bool,
 	optimization_settings: AudioFileOptions
 }
@@ -446,9 +445,8 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for AudioFile<T> {
 		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
 
 		if matches!(extension, "ogg" | "oga" | "mp3" | "opus" | "flac" | "wav") {
-			file_read_producer().map(|(read, file_length_hint)| Self {
+			file_read_producer().map(|(read, _)| Self {
 				read,
-				file_length_hint,
 				is_ogg: extension == "ogg",
 				optimization_settings: args.optimization_settings
 			})

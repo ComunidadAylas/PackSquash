@@ -18,10 +18,6 @@ async fn successful_process_test(
 ) {
 	let data_stream = AudioFile {
 		read: Builder::new().read(input_data).build(),
-		file_length_hint: input_data
-			.len()
-			.try_into()
-			.expect("The input file is too big"),
 		is_ogg,
 		optimization_settings: settings
 	}
@@ -79,13 +75,11 @@ async fn successful_process_test(
 /// expecting an error on the first stream result.
 async fn error_process_test<T: AsyncRead + Unpin + Send + 'static>(
 	read: T,
-	file_length_hint: u64,
 	is_ogg: bool,
 	settings: AudioFileOptions
 ) {
 	let mut data_stream = AudioFile {
 		read,
-		file_length_hint,
 		is_ogg,
 		optimization_settings: settings
 	}
@@ -178,7 +172,6 @@ async fn channel_mixing_and_pitch_shifting_work() {
 async fn invalid_empty_input_is_handled() {
 	error_process_test(
 		Builder::new().read(&[]).build(),
-		0,     // Input file size
 		false, // Is not Ogg
 		Default::default()
 	)
@@ -193,7 +186,6 @@ async fn invalid_non_empty_input_is_handled() {
 			.wait(Duration::from_millis(100))
 			.read(&[3, 4])
 			.build(),
-		4,     // Input file size
 		false, // Is not Ogg
 		Default::default()
 	)
