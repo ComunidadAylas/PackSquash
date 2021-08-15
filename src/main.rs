@@ -196,11 +196,13 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 			eprintln!("! Pack processing error: {}", err);
 			eprintln!(
 				"A more detailed error message could have been printed before this\n\
-				message. You might find these troubleshooting instructions useful:\n\
+				one. You might find these troubleshooting instructions useful:\n\
 				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>"
 			);
 
-			4
+			// Return a different status code depending on the machine-relevant cause,
+			// so an external script can do whatever it deems fit to handle the error
+			4 + err.machine_relevant_cause() as i32
 		},
 		|_| {
 			let process_time = start_instant.elapsed();

@@ -542,6 +542,47 @@ pub enum PackSquasherError {
 	PackFileError
 }
 
+/// Represents an error cause for a [PackSquasherError] that may be relevant for
+/// another software component to know about, in order to take corrective measures
+/// or do a more user-friendly error handling, and that can not be concluded by
+/// matching on [PackSquasherError] or looking at the status updates.
+#[non_exhaustive]
+pub enum MachineRelevantPackSquasherErrorCause {
+	/// The error is not expected to be acted upon on an automated manner, or
+	/// its human-friendly cause is unknown.
+	NoRelevantCause = 0,
+	/// The error was surely caused by a previously generated file that was deemed
+	/// to contain invalid or unreadable data. This can be due to the file being
+	/// modified outside of PackSquash, or some Squash Time encryption parameters
+	/// changing.
+	///
+	/// Note that it is technically possible for a previously generated file to be corrupt
+	/// in a way that causes I/O errors, but such errors are assumed to not be the fault
+	/// of the file itself. In other words, it might happen that there is no relevant error
+	/// cause even if the previous file is corrupt, but it is guaranteed that, if this
+	/// cause is returned, the previous file is indeed at fault.
+	UnusablePreviousFile
+}
+
+impl PackSquasherError {
+	/// Returns the machine-relevant error cause for this error.
+	pub fn machine_relevant_cause(&self) -> MachineRelevantPackSquasherErrorCause {
+		use crate::squash_zip::system_time_sanitizer::SystemTimeSanitizationError;
+
+		match self {
+			Self::SquashZip(SquashZipError::SystemTimeSanitizationError(
+				SystemTimeSanitizationError::CorruptSquashTime
+			))
+			| Self::SquashZip(SquashZipError::InvalidPreviousZip(_))
+			| Self::SquashZip(SquashZipError::InvalidFileName(_))
+			| Self::SquashZip(SquashZipError::UnknownCompressionMethod(_)) => {
+				MachineRelevantPackSquasherErrorCause::UnusablePreviousFile
+			}
+			_ => MachineRelevantPackSquasherErrorCause::NoRelevantCause
+		}
+	}
+}
+
 /// A entry in a virtual filesystem directory that represents a possible pack file,
 /// obtained via a virtual filesystem directory file iterator.
 pub struct VfsPackFileIterEntry {
