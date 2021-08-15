@@ -31,7 +31,7 @@ mod tests;
 /// The optimization process may be customized via [PngFileOptions].
 pub struct PngFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
-	file_length: usize,
+	file_length_hint: usize,
 	optimization_settings: PngFileOptions
 }
 
@@ -309,7 +309,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for PngFile<T> {
 				optimization_settings: self.optimization_settings,
 				reached_eof: false
 			},
-			self.file_length
+			self.file_length_hint
 		)
 	}
 
@@ -340,10 +340,10 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PngFile<T> {
 					.is_none() && file_path.file_name().unwrap().to_str().unwrap() == "pack.png");
 
 		if !skip {
-			file_read_producer().map(|(read, file_length)| Self {
+			file_read_producer().map(|(read, file_length_hint)| Self {
 				read,
 				// The file is too big to fit in memory if this conversion fails anyway
-				file_length: file_length.try_into().unwrap_or(usize::MAX),
+				file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
 				optimization_settings: args.optimization_settings
 			})
 		} else {

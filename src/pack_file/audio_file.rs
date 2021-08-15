@@ -38,7 +38,7 @@ mod tests;
 /// packs may replace and add new sound events to Minecraft.
 pub struct AudioFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
-	file_length: u64,
+	file_length_hint: u64,
 	is_ogg: bool,
 	optimization_settings: AudioFileOptions
 }
@@ -236,7 +236,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
 			// when it never receives any stream. This is undefined behavior, as it works on
 			// my PC, but not on all the CI runners, and not for every run.
 			// Avoid that madness by just bailing out early if the file is empty
-			if self.file_length == 0 {
+			if self.file_length_hint == 0 {
 				// Mimick the error that GStreamer would output
 				return Err(OptimizationError::GstreamerBool(BoolError::new(
 					"Could not determine type of empty stream",
@@ -271,7 +271,6 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
 			let muxer = ElementFactory::make("oggmux", None).unwrap();
 			let appsink = ElementFactory::make("appsink", None).unwrap();
 
-			appsrc.set_property("size", &(self.file_length as i64))?;
 			appsrc
 				.set_property("max-bytes", &AUDIO_DATA_BUFFER_SIZE_U64)
 				.unwrap();
@@ -462,9 +461,9 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for AudioFile<T> {
 		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
 
 		if matches!(extension, "ogg" | "oga" | "mp3" | "opus" | "flac" | "wav") {
-			file_read_producer().map(|(read, file_length)| Self {
+			file_read_producer().map(|(read, file_length_hint)| Self {
 				read,
-				file_length,
+				file_length_hint,
 				is_ogg: extension == "ogg",
 				optimization_settings: args.optimization_settings
 			})

@@ -31,7 +31,7 @@ async fn successful_process_test(
 	let data_stream = ShaderFile {
 		read: Builder::new().read(input_data).build(),
 		extension,
-		file_length: input_data.len(),
+		file_length_hint: input_data.len(),
 		optimization_settings: settings
 	}
 	.process();
@@ -107,7 +107,7 @@ async fn invalid_input_is_handled() {
 	let mut data_stream = ShaderFile {
 		read: Builder::new().read(&[]).build(),
 		extension: String::from("fsh"),
-		file_length: 0,
+		file_length_hint: 0,
 		optimization_settings: Default::default()
 	}
 	.process();

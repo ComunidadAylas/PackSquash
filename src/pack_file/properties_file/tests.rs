@@ -17,7 +17,7 @@ async fn successful_process_test(
 
 	let data_stream = PropertiesFile {
 		read: Builder::new().read(input_data).build(),
-		file_length: input_data.len(),
+		file_length_hint: input_data.len(),
 		optimization_settings: settings
 	}
 	.process();

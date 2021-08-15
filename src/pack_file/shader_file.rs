@@ -32,7 +32,7 @@ mod tests;
 /// Minecraft mods may support more shaders that can be added or replaced via resource packs.
 pub struct ShaderFile<T: AsyncRead + Unpin + 'static> {
 	read: T,
-	file_length: usize,
+	file_length_hint: usize,
 	extension: String,
 	optimization_settings: ShaderFileOptions
 }
@@ -128,7 +128,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for ShaderFile<T> {
 				optimization_settings: self.optimization_settings,
 				reached_eof: false
 			},
-			self.file_length
+			self.file_length_hint
 		)
 	}
 
@@ -151,10 +151,10 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for ShaderFile<T> {
 		let extension = to_ascii_lowercase_extension(args.path.as_ref());
 
 		if matches!(&*extension, "fsh" | "vsh") {
-			file_read_producer().map(|(read, file_length)| Self {
+			file_read_producer().map(|(read, file_length_hint)| Self {
 				read,
 				// The file is too big to fit in memory if this conversion fails anyway
-				file_length: file_length.try_into().unwrap_or(usize::MAX),
+				file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
 				extension: extension.into_owned(),
 				optimization_settings: args.optimization_settings
 			})

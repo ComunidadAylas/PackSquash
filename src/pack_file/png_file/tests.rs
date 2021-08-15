@@ -22,7 +22,7 @@ async fn successful_process_test(
 
 	let data_stream = PngFile {
 		read: Builder::new().read(input_data).build(),
-		file_length: input_data_len,
+		file_length_hint: input_data_len,
 		optimization_settings: settings
 	}
 	.process();
@@ -129,7 +129,7 @@ async fn lossy_optimization_works() {
 async fn invalid_input_is_handled() {
 	let mut data_stream = PngFile {
 		read: Builder::new().read(&[]).build(),
-		file_length: 0,
+		file_length_hint: 0,
 		optimization_settings: Default::default()
 	}
 	.process();
