@@ -1,7 +1,7 @@
 <p align="center"><img src="https://user-images.githubusercontent.com/31966940/124388201-1f40eb80-dce2-11eb-88e8-3934d7d73c0a.png" alt="PackSquash logo" width="300" height="300"></p>
 <p align="center"><i>Create more. Worry less about distribution and storage intricacies.</i></p>
 
-# PackSquash [![Build](https://github.com/ComunidadAylas/PackSquash/workflows/Build/badge.svg)](https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3ABuild) [![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Total downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/total?label=Downloads)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Discord server online count](https://img.shields.io/discord/85364538328768512?label=Discord&logo=discord)](https://discord.gg/RVAgQRS)
+# PackSquash [![Build](https://github.com/ComunidadAylas/PackSquash/workflows/Build/badge.svg)](https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3ABuild) [![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Total downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/total?label=Downloads)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Discord server online count](https://img.shields.io/discord/85364538328768512?label=Discord&logo=discord)](https://discord.gg/bGUSamzJYp)
 
 A Minecraft resource and data pack optimizer which aims to achieve the best possible compression, performance and protection, improving pack distribution, storage and in-game load times. Anecdotal evidence shows that, with the default options, version v0.2.1 was capable of reducing the size of the _Witchcraft & Wizardary_ resource pack ZIP file by Floo Network (version 1.6.2) from 118 MiB to 57 MiB, a 51.69% size reduction, and it got better over time.
 
@@ -43,7 +43,7 @@ If you want a GUI for using PackSquash, or even authoring resource packs in gene
 
 Like the license says, this software is provided without any warranty, with the hope that you find it useful. But that doesn't mean I don't welcome constructive feedback, suggestions, congratulations or assisting you on your usage of PackSquash (if I can and want to). If you wish to drop me a line for whatever reason related to PackSquash, you can contact me on Discord: _AlexTMjugador#5124_.
 
-Also, if you speak Spanish, you may find that _Comunidad Aylas_, our Spanish-speaking community, suits you well. You can [join us on Discord](https://discord.gg/RVAgQRS). Don't forget to introduce yourself!
+Also, if you speak Spanish, you may find that _Comunidad Aylas_, our Spanish-speaking community, suits you well. You can [join us on Discord](https://discord.gg/bGUSamzJYp). Don't forget to introduce yourself!
 
 ## 🎁 Sponsoring
 
