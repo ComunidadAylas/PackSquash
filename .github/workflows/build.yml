@@ -11,6 +11,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
 
 jobs:
   linux-x64-gnu:
