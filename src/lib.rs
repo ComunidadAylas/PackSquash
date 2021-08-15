@@ -269,7 +269,7 @@ impl PackSquasher {
 							if let Some(tx) = pack_file_status_sender {
 								tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
 									path: RelativePath::from_inner(Cow::Borrowed("-")),
-									optimization_strategy: String::from("Pack directory scan error"),
+									optimization_strategy: Cow::Borrowed("Pack directory scan error"),
 									optimization_error: Some(err.to_string())
 								}))
 								.await
@@ -359,7 +359,7 @@ impl PackSquasher {
 											tx.send(PackSquasherStatus::PackFileProcessed(
 												PackFileStatus {
 													path: pack_file_data.relative_path,
-													optimization_strategy: String::from(
+													optimization_strategy: Cow::Borrowed(
 														"Error opening pack file"
 													),
 													optimization_error: Some(err.to_string())
@@ -434,7 +434,7 @@ impl PackSquasher {
 					if let Some(tx) = pack_file_status_sender {
 						tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
 							path: pack_file_data.relative_path,
-							optimization_strategy: String::from("Skipped"),
+							optimization_strategy: Cow::Borrowed("Skipped"),
 							optimization_error: None
 						}))
 						.await
@@ -596,7 +596,7 @@ pub enum PackSquasherStatus {
 /// successfully or not.
 pub struct PackFileStatus {
 	path: RelativePath<'static>,
-	optimization_strategy: String,
+	optimization_strategy: Cow<'static, str>,
 	optimization_error: Option<String>
 }
 
@@ -697,7 +697,7 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	file_size_hint: u64,
 	squash_zip: Arc<SquashZip<F>>,
 	pack_file_status_sender: Option<Sender<PackSquasherStatus>>,
-	always_compress: bool
+	compress_already_compressed: bool
 ) -> bool {
 	// We may have to change the file extension to a canonical one that's accepted by Minecraft.
 	// Do that early, because we store the file with the canonical extension in the ZIP
@@ -724,7 +724,7 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 			.err()
 			.map(|err| err.to_string());
 
-		optimization_strategy = Cow::Owned(String::from("Copied from previous run"))
+		optimization_strategy = Cow::Borrowed("Copied from previous run");
 	} else {
 		let is_compressed = pack_file.is_compressed();
 
@@ -765,7 +765,7 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 			.add_file(
 				&pack_file_path,
 				processed_pack_file_chunks,
-				!always_compress && is_compressed,
+				!compress_already_compressed && is_compressed,
 				file_size_hint.try_into().unwrap_or(0)
 			)
 			.await
@@ -780,7 +780,7 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	if let Some(tx) = pack_file_status_sender {
 		tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
 			path: pack_file_path,
-			optimization_strategy: optimization_strategy.into_owned(),
+			optimization_strategy,
 			optimization_error
 		}))
 		.await
