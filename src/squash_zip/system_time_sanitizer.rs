@@ -58,7 +58,7 @@ const STICK_PARITY_BIT_MASK: u32 = 1 << 31;
 impl SystemTimeSanitizer<Aes128> {
 	/// Creates a new system time sanitizer that uses AES-128 in CBC mode as its
 	/// underlying cipher.
-	pub fn new() -> Self {
+	pub(super) fn new() -> Self {
 		// Now generate the actual encryption key by encrypting the system-specific
 		// system ID with our application-wide salt. This makes it much harder to
 		// derive the system ID from the ciphertext, even if we know the salt
@@ -77,7 +77,7 @@ impl<C: NewBlockCipher + BlockEncrypt + BlockDecrypt + Clone> SystemTimeSanitize
 	/// The tweak is somewhat similar in role to a salt and need not be secret.
 	/// The sanitization process may represent the system time with reduced precision,
 	/// so desanitizing the result may not yield exactly the same system time.
-	pub fn sanitize(
+	pub(super) fn sanitize(
 		&self,
 		time: &SystemTime,
 		tweak: &[u8]
@@ -122,7 +122,7 @@ impl<C: NewBlockCipher + BlockEncrypt + BlockDecrypt + Clone> SystemTimeSanitize
 	/// guaranteed using a stick parity bit, but such bit can only detect
 	/// non-authentic bytes as such with 50% probability, as any change in the
 	/// tweak, key or bytes is assumed to desanitize to an incorrect random number.
-	pub fn desanitize(
+	pub(super) fn desanitize(
 		&self,
 		sanitized_time: &[u8; 4],
 		tweak: &[u8]

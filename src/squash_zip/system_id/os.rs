@@ -396,7 +396,7 @@ pub(super) fn get_install_date() -> Option<SystemId> {
 fn read_uuid_file<P: AsRef<Path>>(path: P) -> io::Result<String> {
 	use std::io::Read;
 
-	/// The maximum size of a UUID, assuming its hyphenated representation.
+	/// The maximum size of a UUID, assuming its hyphenated representation
 	const UUID_LENGTH: usize = 36;
 
 	let mut buf = [0; UUID_LENGTH];

@@ -39,7 +39,7 @@ mod buffered_async_spooled_temp_file;
 mod obfuscation_engine;
 pub mod relative_path;
 pub mod system_id;
-mod system_time_sanitizer;
+pub mod system_time_sanitizer;
 mod zip_file_record;
 
 #[cfg(test)]
