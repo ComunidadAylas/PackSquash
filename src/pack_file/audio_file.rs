@@ -231,21 +231,6 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
 		// in a closure that returns a result, to be able to use the more ergonomic ?
 		// operator
 		|| -> Result<AudioDataStream<T>, OptimizationError> {
-			// Apparently, as shown thanks to CI runs of the "invalid_empty_input_is_handled"
-			// unit test, GStreamer may not signal finalization of the stream properly
-			// when it never receives any stream. This is undefined behavior, as it works on
-			// my PC, but not on all the CI runners, and not for every run.
-			// Avoid that madness by just bailing out early if the file is empty
-			if self.file_length_hint == 0 {
-				// Mimick the error that GStreamer would output
-				return Err(OptimizationError::GstreamerBool(BoolError::new(
-					"Could not determine type of empty stream",
-					file!(),
-					"",
-					line!()
-				)));
-			}
-
 			// With one task per resource file, this is optimal
 			task::block_in_place(|| {
 				// GStreamer always acquires a mutex lock to check if it was already
