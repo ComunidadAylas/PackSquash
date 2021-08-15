@@ -546,9 +546,12 @@ pub enum PackSquasherError {
 /// another software component to know about, in order to take corrective measures
 /// or do a more user-friendly error handling, and that can not be concluded by
 /// matching on [PackSquasherError] or looking at the status updates.
-// NOTE: the order of the enum variants is important, because we use their discriminant
-// to generate status codes. Only add variants in the end as needed
+// NOTE: the order of the enum variants is important, because their discriminant
+// may be used by client code. Only add variants in the end as needed. Discriminants
+// lesser than zero are reserved for the unlikely scenario that we run out of
+// positive i8 integers only
 #[non_exhaustive]
+#[repr(i8)]
 pub enum MachineRelevantPackSquasherErrorCause {
 	/// The error is not expected to be acted upon on an automated manner, or
 	/// its human-friendly cause is unknown.
