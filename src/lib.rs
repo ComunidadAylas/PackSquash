@@ -304,13 +304,13 @@ impl PackSquasher {
 					macro_rules! process {
 						($pack_file:expr, $pack_file_meta:expr) => {{
 							// We instantiated the pack file, so we got our VFS metadata back
-							let (pack_file_meta, pack_file_size) = $pack_file_meta.unwrap();
+							let (pack_file_meta, pack_file_size_hint) = $pack_file_meta.unwrap();
 
 							process_pack_file(
 								$pack_file,
 								&pack_file_data.relative_path,
 								pack_file_meta.modification_time,
-								pack_file_size,
+								pack_file_size_hint,
 								squash_zip,
 								pack_file_status_sender,
 								packsquasher
@@ -335,8 +335,9 @@ impl PackSquasher {
 							match $file_type::new(
 								|| match vfs.open(&pack_file_data.file_path) {
 									Ok(vfs_file) => {
-										vfs_file_meta = Some((vfs_file.metadata, vfs_file.file_size));
-										Some((vfs_file.file_read, vfs_file.file_size))
+										vfs_file_meta =
+											Some((vfs_file.metadata, vfs_file.file_size_hint));
+										Some((vfs_file.file_read, vfs_file.file_size_hint))
 									}
 									Err(err) => {
 										pack_file_open_error = Some(err);
@@ -552,7 +553,7 @@ pub struct VfsPackFileIterEntry {
 /// metadata is available.
 pub struct VfsFile<R: AsyncRead + Unpin + 'static> {
 	file_read: R,
-	file_size: u64,
+	file_size_hint: u64,
 	metadata: VfsPackFileMetadata
 }
 
@@ -693,7 +694,7 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	pack_file: impl PackFile,
 	relative_path: &RelativePath<'_>,
 	edit_time: Option<SystemTime>,
-	file_size: u64,
+	file_size_hint: u64,
 	squash_zip: Arc<SquashZip<F>>,
 	pack_file_status_sender: Option<Sender<PackSquasherStatus>>,
 	always_compress: bool
@@ -765,7 +766,7 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 				&pack_file_path,
 				processed_pack_file_chunks,
 				!always_compress && is_compressed,
-				file_size.try_into().unwrap_or(0)
+				file_size_hint.try_into().unwrap_or(0)
 			)
 			.await
 			.err()

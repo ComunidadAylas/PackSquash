@@ -68,7 +68,7 @@ impl VirtualFileSystem for OsFilesystem {
 			metadata: VfsPackFileMetadata {
 				modification_time: metadata.modified().ok()
 			},
-			file_size: metadata.len()
+			file_size_hint: metadata.len()
 		})
 	}
 

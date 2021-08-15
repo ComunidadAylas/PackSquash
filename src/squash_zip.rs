@@ -458,14 +458,14 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		path: &RelativePath<'_>,
 		processed_data: S,
 		skip_compression: bool,
-		estimated_file_size: usize
+		file_size_hint: usize
 	) -> Result<(), SquashZipError> {
 		let (local_file_header, mut compressed_data_scratch_file) = self
 			.compress_and_generate_local_header(
 				path,
 				processed_data,
 				skip_compression,
-				estimated_file_size
+				file_size_hint
 			)
 			.await?;
 
@@ -887,7 +887,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		path: &'a RelativePath<'a>,
 		mut processed_data: S,
 		skip_compression: bool,
-		estimated_file_size: usize
+		file_size_hint: usize
 	) -> Result<(LocalFileHeader<'a>, BufferedAsyncSpooledTempFile), SquashZipError> {
 		// Get the Squash Time right now, so it is as close as possible to the time when
 		// we saw whether it was modified or not, which is a good thing. Instantiate the
@@ -898,11 +898,11 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		// Set up our scratch data files
 		let mut processed_data_scratch_file = BufferedAsyncSpooledTempFile::with_capacity(
 			self.settings.spool_buffer_size / 2,
-			estimated_file_size
+			file_size_hint
 		);
 		let mut compressed_data_scratch_file = BufferedAsyncSpooledTempFile::with_capacity(
 			self.settings.spool_buffer_size / 2,
-			estimated_file_size
+			file_size_hint
 		);
 
 		// Store the processed data in the scratch file we created for that purpose.
