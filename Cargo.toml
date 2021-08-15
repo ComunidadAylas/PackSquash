@@ -23,7 +23,7 @@ num_cpus = "1.13.0"
 sysinfo = { version = "0.20.0", default-features = false }
 walkdir = "2.3.2"
 
-tokio = { version = "1.9.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
+tokio = { version = "1.10.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
 tokio-util = { version = "0.6.7", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.7", default-features = false }
 futures = { version = "0.3.16", default-features = false }
@@ -38,7 +38,7 @@ json_comments = "0.2.0"
 jsonpath_lib = "0.3.0"
 
 spng = { version = "0.1.0", default-features = false }
-png = "0.16.8"
+png = "0.17.0"
 rgb = "0.8.27"
 imagequant = "3.0.4-alpha.2"
 oxipng = { version = "5.0.0", default-features = false, features = ["zopfli"] }
