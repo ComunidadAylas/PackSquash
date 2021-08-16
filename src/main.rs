@@ -87,8 +87,8 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		// to point them in the direction of what they probably want to do
 		println!(
 			"If you are not sure what this means or what to do now, you probably\n\
-			want to write and use an options file with PackSquash. Please check out\n
-			<https://packsquash.page.link/Options-files> for more information.\n"
+			want to write and use an options file with PackSquash. Please check out\n\
+			<https://packsquash.page.link/Options-files> for more information."
 		);
 	}
 	println!();

@@ -82,8 +82,8 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PassthroughFile<
 			"ttf" => file_read_producer().map(|(read, _)| Self {
 				read,
 				canonical_extension: "ttf",
-				optimization_strategy_message: "Copied, but might be optimized manually \
-					(more information: <https://packsquash.page.link/Optimizing-TTF-fonts>)",
+				optimization_strategy_message: "Copied, but might be optimized manually. \
+					More information: <https://packsquash.page.link/Optimizing-TTF-fonts>",
 				is_compressed: false
 			}),
 			"bin" => file_read_producer().map(|(read, _)| Self {
