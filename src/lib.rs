@@ -538,7 +538,7 @@ pub enum PackSquasherError {
 	/// Thrown when some error occurs while processing a pack file. More detailed
 	/// information about it can be obtained by reading the corresponding status
 	/// update.
-	#[error("An error occurred while processing a pack file")]
+	#[error("Another error occurred while processing a pack file")]
 	PackFileError
 }
 

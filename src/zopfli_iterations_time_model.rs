@@ -42,7 +42,7 @@ impl ZopfliIterationsTimeModel {
 	/// Computes an optimum number of Zopfli iterations for a data block whose size is known in
 	/// advance, trying to loosely match the time it would take to compress 1 MiB of data, as
 	/// configured in `new()`. The data is assumed to follow a fixed distribution, somewhere between
-	/// a standard  distribution (i.e. the data is random and uncompressible) and a distribution that
+	/// a standard distribution (i.e. the data is random and uncompressible) and a distribution that
 	/// always yields zero bytes (i.e. the data is all zeroes and trivial to compress), biasing towards
 	/// the standard distribution (i.e. the data is somewhat difficult to compress).
 	pub(crate) fn iterations_for_data_size(
