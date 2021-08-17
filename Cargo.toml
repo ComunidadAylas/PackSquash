@@ -37,7 +37,7 @@ serde_json = "1.0.66"
 json_comments = "0.2.0"
 jsonpath_lib = "0.3.0"
 
-spng = { version = "0.1.0", default-features = false }
+spng = { version = "0.2.0-alpha.1", default-features = false }
 png = "0.17.0"
 rgb = "0.8.27"
 imagequant = "3.0.4-alpha.2"
@@ -86,6 +86,8 @@ glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
 # Use our fork of Zopfli that includes streaming support and the ability to change
 # the number of compression iterations
 zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquash" }
+# Use our fork of spng that corrects how some error messages are mapped to strings
+spng = { git = "https://github.com/ComunidadAylas/spng-rs" }
 
 [build-dependencies]
 vergen = { version = "5.1.15", default-features = false, features = ["cargo", "git"] }

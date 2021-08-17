@@ -976,9 +976,9 @@ dependencies = [
 
 [[package]]
 name = "jobserver"
-version = "0.1.23"
+version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5ca711fd837261e14ec9e674f092cbb931d3fa1482b017ae59328ddc6f3212b"
+checksum = "af25a77299a7f711a01975c35a6a424eb6862092cc2d6c72c4ed6cbc56dfc1fa"
 dependencies = [
  "libc",
 ]
@@ -1547,9 +1547,8 @@ checksum = "fe0f37c9e8f3c5a4a66ad655a93c74daac4ad00c441533bf5c6e7990bb42604e"
 
 [[package]]
 name = "spng"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c0da5f94532b18dae90294fae1e30c592c0bcc9be972e40f65e680f5b0b6fdb"
+version = "0.2.0-alpha.1"
+source = "git+https://github.com/ComunidadAylas/spng-rs#277aaed548772298946ccf7e4bb8c2a876a441f7"
 dependencies = [
  "bitflags",
  "libc",
@@ -1558,9 +1557,8 @@ dependencies = [
 
 [[package]]
 name = "spng-sys"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ff5b45827d43bfe613c96fdffd015da649d6b5266c9001d2b647394cc6b8155"
+version = "0.2.0-alpha.1"
+source = "git+https://github.com/ComunidadAylas/spng-rs#277aaed548772298946ccf7e4bb8c2a876a441f7"
 dependencies = [
  "cc",
  "libc",
