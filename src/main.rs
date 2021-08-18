@@ -86,8 +86,8 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		// Newbies are often confused by terms such as "standard input", so try
 		// to point them in the direction of what they probably want to do
 		println!(
-			"If you are not sure what this means or what to do now, you probably\n\
-			want to write and use an options file with PackSquash. Please check out\n\
+			"If you are not sure what this means or what to do now, you probably \
+			want to write and use an options file with PackSquash. Please check out \
 			<https://packsquash.page.link/Options-files> for more information."
 		);
 	}
@@ -165,12 +165,12 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 					PackSquasherStatus::ZipFinish => eprintln!("- Finishing up ZIP file..."),
 					PackSquasherStatus::Warning(warning) => match warning {
 						PackSquasherWarning::LowEntropySystemId => eprintln!(
-							"! Used a low entropy system ID. The dates embedded in the result ZIP file,\n\
-							which reveal when it was generated, may be easier to decrypt. For more information\n\
+							"* Used a low entropy system ID. The dates embedded in the result ZIP file, \
+							which reveal when it was generated, may be easier to decrypt. For more information \
 							about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"),
 						PackSquasherWarning::VolatileSystemId => eprintln!(
-							"! Used a volatile system ID. You maybe should not reuse the result ZIP file,\n\
-							as unexpected results can occur after you use your device as usual. For more information\n\
+							"* Used a volatile system ID. You maybe should not reuse the result ZIP file, \
+							as unexpected results can occur after you use your device as usual. For more information \
 							about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"),
 						_ => unimplemented!()
 					},
@@ -195,8 +195,8 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		|err| {
 			eprintln!("! Pack processing error: {}", err);
 			eprintln!(
-				"A more detailed error message could have been printed before this\n\
-				one. You might find these troubleshooting instructions useful:\n\
+				"A more detailed error message could have been printed before this \
+				one. You might find these troubleshooting instructions useful: \
 				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>"
 			);
 
