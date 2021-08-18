@@ -194,9 +194,16 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	.map_or_else(
 		|err| {
 			eprintln!("! Pack processing error: {}", err);
+
+			// We print both informational and error pack file status updates.
+			// If the error was in one of those, hint the user at the status
+			// update that contains the most information about the error
+			if matches!(err, PackSquasherError::PackFileError) {
+				eprintln!("A more detailed error message should have been printed before this one.");
+			}
+
 			eprintln!(
-				"A more detailed error message could have been printed before this \
-				one. You might find these troubleshooting instructions useful: \
+				"You might find these troubleshooting instructions useful: \
 				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>"
 			);
 
