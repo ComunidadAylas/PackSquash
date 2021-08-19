@@ -26,7 +26,7 @@ use super::{
 #[cfg(test)]
 mod tests;
 
-/// Represents a resource pack PNG image file, which is used to generate textures.
+/// Represents a resource pack PNG image file, which is used for in-game textures.
 ///
 /// The optimization process may be customized via [PngFileOptions].
 pub struct PngFile<T: AsyncRead + Unpin + 'static> {

@@ -254,7 +254,7 @@ impl GlobalOptions {
 				.percentage_of_zip_structures_tuned_for_obfuscation_discretion,
 			workaround_old_java_obfuscation_quirks: self
 				.work_around_minecraft_quirks
-				.contains(MinecraftQuirk::Java8ZipObfuscationQuirks),
+				.contains(MinecraftQuirk::Java8ZipParsing),
 			spool_buffer_size: self.spooling_buffers_size.saturating_mul(1024 * 1024)
 		}
 	}
@@ -364,8 +364,8 @@ impl From<PercentageInteger> for u8 {
 	}
 }
 
-/// A Minecraft file parsing quirk that affects the perceived correctness of the PackSquash
-/// output ZIP and that can be worked around.
+/// A Minecraft file parsing quirk that negatively affects the perceived correctness of
+/// the generated ZIP files and that can be worked around.
 #[derive(Deserialize, Serialize, EnumSetType)]
 #[serde(rename_all = "snake_case")]
 #[enumset(serialize_deny_unknown, serialize_as_list)]
@@ -380,7 +380,7 @@ pub enum MinecraftQuirk {
 	///
 	/// This workaround stops PackSquash from reducing color images to grayscale, which may
 	/// hurt compression. This has no effect for input images that already are in grayscale.
-	GrayscaleTexturesGammaMiscorrection,
+	GrayscaleImagesGammaMiscorrection,
 	/// The latest Minecraft versions, from 1.17 onwards, are compiled for Java 16+, which
 	/// means that they do not support older Java versions. On the other hand, Java 8 was
 	/// used almost ubiquitously with older Minecraft clients, especially in modded
@@ -394,7 +394,7 @@ pub enum MinecraftQuirk {
 	/// can be impacted negatively, though. This quirk does not have any effect if an affected
 	/// ZIP specification conformance level is not used, or if the Minecraft client is run
 	/// using recent Java versions.
-	Java8ZipObfuscationQuirks
+	Java8ZipParsing
 }
 
 /// A Minecraft modification supported by PackSquash that adds file types to packs.
@@ -665,7 +665,7 @@ pub struct PngFileOptions {
 	///
 	/// **Default value**: `false`
 	pub skip_alpha_optimizations: bool,
-	/// Crate-private option set by the [MinecraftQuirk::GrayscaleTexturesGammaMiscorrection]
+	/// Crate-private option set by the [MinecraftQuirk::GrayscaleImagesGammaMiscorrection]
 	/// workaround to not reduce color images to grayscale.
 	///
 	/// **Default value**: `false`
@@ -695,7 +695,7 @@ impl FileOptionsTrait for PngFileOptions {
 	fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
 		self.do_not_reduce_to_grayscale = global_options
 			.work_around_minecraft_quirks
-			.contains(MinecraftQuirk::GrayscaleTexturesGammaMiscorrection);
+			.contains(MinecraftQuirk::GrayscaleImagesGammaMiscorrection);
 		self.skip_pack_icon = global_options.skip_pack_icon;
 
 		self
