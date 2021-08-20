@@ -12,8 +12,8 @@ use crate::config::JsonFileOptions;
 use self::debloater::{DebloatError, Debloater};
 
 use super::{
-	util::bom_stripper, util::to_ascii_lowercase_extension, OptimizedBytes, PackFile,
-	PackFileConstructor, PackFileConstructorArgs
+	util::{strip_utf8_bom, to_ascii_lowercase_extension},
+	OptimizedBytes, PackFile, PackFileConstructor, PackFileConstructorArgs
 };
 
 mod debloater;
@@ -74,8 +74,7 @@ impl Decoder for OptimizerDecoder {
 
 		// Parse the JSON so we know how to serialize it again in a compact manner,
 		// and we know it's valid. Also remove its comments
-		let mut json_value: Value =
-			serde_json::from_reader(StripComments::new(bom_stripper::strip_utf8_bom(src)))?;
+		let mut json_value: Value = serde_json::from_reader(StripComments::new(strip_utf8_bom(src)))?;
 
 		// Now that we have the value struct, clear the input buffer to reuse it for
 		// the optimized JSON serialization

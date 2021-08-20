@@ -163,6 +163,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 						}
 					}
 					PackSquasherStatus::ZipFinish => eprintln!("- Finishing up ZIP file..."),
+					PackSquasherStatus::Notice(notice) => eprintln!("- {}", notice),
 					PackSquasherStatus::Warning(warning) => match warning {
 						PackSquasherWarning::LowEntropySystemId => eprintln!(
 							"* Used a low entropy system ID. The dates embedded in the result ZIP file, \
@@ -180,11 +181,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		});
 
 		// Squash the pack! This blocks until the operation is complete
-		let result = Arc::new(PackSquasher::new(squash_options)?).run::<_, &str>(
-			OsFilesystem,
-			None,
-			Some(sender)
-		);
+		let result = PackSquasher::new().run(OsFilesystem, squash_options, Some(sender));
 
 		// Wait for the CLI thread to process any remaining buffered messages
 		cli_thread.join().ok();

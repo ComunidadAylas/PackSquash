@@ -14,8 +14,8 @@ use tokio_util::codec::{Decoder, FramedRead};
 use crate::config::PropertiesFileOptions;
 
 use super::{
-	util::bom_stripper, util::to_ascii_lowercase_extension, OptimizedBytes, PackFile,
-	PackFileConstructor, PackFileConstructorArgs
+	util::{strip_utf8_bom, to_ascii_lowercase_extension},
+	OptimizedBytes, PackFile, PackFileConstructor, PackFileConstructorArgs
 };
 
 #[cfg(test)]
@@ -119,7 +119,7 @@ impl Decoder for OptimizerDecoder {
 			minified_properties_writer.set_line_ending(LineEnding::LF);
 			minified_properties_writer.set_kv_separator("=").unwrap();
 
-			PropertiesIter::new(bom_stripper::strip_utf8_bom(src)).read_into(|key, value| {
+			PropertiesIter::new(strip_utf8_bom(src)).read_into(|key, value| {
 				minified_properties_writer.write(&key, &value).unwrap();
 			})?;
 

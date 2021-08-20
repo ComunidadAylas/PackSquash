@@ -23,6 +23,8 @@ pub mod shader_file;
 #[doc(cfg(feature = "optifine-support"))]
 pub mod properties_file;
 
+pub use util::strip_utf8_bom;
+
 /// Wraps data that can be referenced as a byte slice to allow dereferecing
 /// it back to a slice, improving ergonomics.
 #[derive(Debug)]

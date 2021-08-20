@@ -17,8 +17,8 @@ use tokio_util::codec::{Decoder, FramedRead};
 use crate::config::ShaderFileOptions;
 
 use super::{
-	util::bom_stripper, util::to_ascii_lowercase_extension, OptimizedBytes, PackFile,
-	PackFileConstructor, PackFileConstructorArgs
+	util::{strip_utf8_bom, to_ascii_lowercase_extension},
+	OptimizedBytes, PackFile, PackFileConstructor, PackFileConstructorArgs
 };
 
 #[cfg(test)]
@@ -85,8 +85,7 @@ impl Decoder for OptimizerDecoder {
 		self.reached_eof = true;
 
 		// Parse the translation unit
-		let translation_unit =
-			TranslationUnit::parse(std::str::from_utf8(bom_stripper::strip_utf8_bom(src))?)?;
+		let translation_unit = TranslationUnit::parse(std::str::from_utf8(strip_utf8_bom(src))?)?;
 
 		if self.optimization_settings.minify {
 			// Transpile the translation unit back to a more compact GLSL string

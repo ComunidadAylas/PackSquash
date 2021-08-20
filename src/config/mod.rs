@@ -7,6 +7,7 @@ use std::{
 };
 
 use enumset::{EnumSet, EnumSetType};
+use globset::{GlobBuilder, GlobSet, GlobSetBuilder};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sysinfo::{RefreshKind, System, SystemExt};
@@ -16,14 +17,11 @@ use crate::squash_zip::SquashZipSettings;
 /// Contains all the options that configure a `PackSquasher` operation. This is the
 /// root level configuration struct for PackSquash, so it is a good starting point
 /// to read the API documentation, after the `PackSquasher` struct.
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[non_exhaustive]
 pub struct SquashOptions {
-	/// The directory where the pack that will be processed resides. If `None`, the
-	/// directory will have to be provided when the squash operation begins, or it
-	/// will return an error. If `Some`, this value will take priority over the
-	/// directory provided at squash operation time, if any.
-	pub pack_directory: Option<PathBuf>,
+	/// The directory where the pack that will be processed resides.
+	pub pack_directory: PathBuf,
 	#[serde(flatten)]
 	/// Global options that tweak how the squash operation works at a pack scale.
 	pub global_options: GlobalOptions,
@@ -34,11 +32,41 @@ pub struct SquashOptions {
 	pub file_options: IndexMap<String, FileOptions>
 }
 
+/// An opaque struct that contains validated and processed [`SquashOptions`] ready
+/// to be used with `PackSquasher`.
+#[derive(Clone)]
+pub struct ProcessedSquashOptions {
+	pub(super) options: SquashOptions,
+	pub(super) file_options_globs: GlobSet
+}
+
+impl TryFrom<SquashOptions> for ProcessedSquashOptions {
+	type Error = globset::Error;
+
+	fn try_from(squash_options: SquashOptions) -> Result<Self, Self::Error> {
+		// Build glob patterns to match file paths with their options
+		let mut globset_builder = GlobSetBuilder::new();
+		for glob_pattern in squash_options.file_options.keys() {
+			globset_builder.add(
+				GlobBuilder::new(glob_pattern)
+					.literal_separator(true)
+					.backslash_escape(true)
+					.build()?
+			);
+		}
+
+		Ok(ProcessedSquashOptions {
+			options: squash_options,
+			file_options_globs: globset_builder.build()?
+		})
+	}
+}
+
 /// Global options that affect how the entire pack is processed. The default values for
 /// these options are meant to be the most reasonable that achieve good compression for
 /// a wide range of use cases without using protection, compression or compressibility-improving
 /// techniques that may pose interoperability problems.
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct GlobalOptions {
@@ -49,6 +77,14 @@ pub struct GlobalOptions {
 	///
 	/// **Default value**: `false`
 	pub skip_pack_icon: bool,
+	/// This option controls whether the pack metadata file, `pack.mcmeta`, will be validated
+	/// or not. Validating this file is a good thing in most circumstances, and you should
+	/// only disable this option if you are extremely concerned about performance, need to
+	/// add a `pack.mcmeta` file to the generated ZIP file later on, want to use PackSquash
+	/// with files that are not a Minecraft pack, or similar reasons.
+	///
+	/// **Default value**: `true`
+	pub validate_pack_metadata_file: bool,
 	/// PackSquash uses a custom ZIP compressor that is able to balance ZIP file
 	/// interoperability and specification intent conformance with increased space savings,
 	/// compressibility and protection against external programs being able to extract files
@@ -134,12 +170,27 @@ pub struct GlobalOptions {
 	///
 	/// **Default value**: `20`
 	pub zip_compression_iterations: u8,
-	/// Some Minecraft versions have some quirks that limit how pack files can be compressed, because
-	/// otherwise they are not correctly interpreted by the game. PackSquash can work around these
-	/// quirks, but doing so may come at the cost of some drawbacks, so this should only be done when
-	/// your pack is affected by them. This option specifies the quirks that will be worked around.
+	/// By default, PackSquash will try to automatically deduce an appropriate set of Minecraft quirks
+	/// that affect how pack files can be optimized, by looking at the pack files. This automatic
+	/// detection works fine in most circumstances, but because quirks affect specific Minecraft
+	/// versions, and maybe only under some conditions, it might be inexact.
 	///
-	/// **Default value**: empty set (no quirks worked around)
+	/// If you know exactly what quirks affect your pack and do not want PackSquash to come up with its
+	/// own set of quirks to work around, set this option to `false`, and configure
+	/// `work_around_minecraft_quirks` accordingly. Otherwise, you can set it to `true`.
+	///
+	/// **Default value**: `true`
+	pub automatic_minecraft_quirks_detection: bool,
+	/// Some Minecraft versions have some quirks that affect how pack files can be optimized. If these
+	/// quirks are ignored, it may happen that those files are no longer correctly interpreted by the
+	/// game. PackSquash can work around these quirks, but doing so may come at the cost of some
+	/// drawbacks. Therefore, when `automatic_minecraft_quirks_detection` is set to `true`, the default
+	/// value, PackSquash tries to deduce a suitable set of quirks from the pack files, and the value
+	/// of this option is ignored. Only if `automatic_minecraft_quirks_detection` is set to `false`
+	/// this option will specify the exact set of quirks that will be worked around.
+	///
+	/// **Default value**: empty set (no quirks worked around, unless
+	/// `automatic_minecraft_quirks_detection` is set to `true` and quirks were detected)
 	pub work_around_minecraft_quirks: EnumSet<MinecraftQuirk>,
 	/// This option controls whether PackSquash will ignore system and hidden files (i.e. whose name
 	/// starts with a dot), not even trying to process them. Under most circumstances, you shouldn't
@@ -150,8 +201,6 @@ pub struct GlobalOptions {
 	/// PackSquash supports pack files added by mods, but, in the interest of keeping its output as
 	/// lean as possible by default, you should indicate what mods do you want to support and include
 	/// in the result ZIP file.
-	///
-	/// This option does not have any effect if PackSquash was compiled without mod support.
 	///
 	/// **Default value**: empty set (do not add any mod-specific files)
 	#[cfg(feature = "mod-support")]
@@ -208,12 +257,14 @@ impl Default for GlobalOptions {
 
 		Self {
 			skip_pack_icon: false,
+			validate_pack_metadata_file: true,
 			zip_spec_conformance_level: Default::default(),
 			size_increasing_zip_obfuscation: false,
 			percentage_of_zip_structures_tuned_for_obfuscation_discretion: PercentageInteger(0),
 			never_store_squash_times: false,
 			recompress_compressed_files: false,
 			zip_compression_iterations: 20,
+			automatic_minecraft_quirks_detection: true,
 			work_around_minecraft_quirks: EnumSet::empty(),
 			ignore_system_and_hidden_files: true,
 			#[cfg(feature = "mod-support")]
@@ -261,7 +312,7 @@ impl GlobalOptions {
 }
 
 /// A ZIP specification intent conformance level that a squash operation can adhere to.
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum ZipSpecConformanceLevel {
@@ -371,11 +422,10 @@ impl From<PercentageInteger> for u8 {
 #[enumset(serialize_deny_unknown, serialize_as_list)]
 #[non_exhaustive]
 pub enum MinecraftQuirk {
-	/// Older versions of Minecraft (1.12.2 was confirmed to be affected and 1.16.2 was
-	/// confirmed not to be; probably all versions until 1.13 are affected) assume that
-	/// grayscale images are in a rather uncommon color space, instead of the more common
-	/// sRGB it assumes for color images. Because PackSquash can compress grayscale color
-	/// images to actual grayscale format to save space, affected Minecraft versions
+	/// Older versions of Minecraft (probably all versions until 1.13 are affected) assume
+	/// that grayscale images are in a rather uncommon color space, instead of the more
+	/// common sRGB it assumes for color images. Because PackSquash can compress grayscale
+	/// color images to actual grayscale format to save space, affected Minecraft versions
 	/// display those images with colors that look "washed-out".
 	///
 	/// This workaround stops PackSquash from reducing color images to grayscale, which may
@@ -395,6 +445,15 @@ pub enum MinecraftQuirk {
 	/// ZIP specification conformance level is not used, or if the Minecraft client is run
 	/// using recent Java versions.
 	Java8ZipParsing
+}
+
+impl MinecraftQuirk {
+	pub(super) const fn as_str(&self) -> &'static str {
+		match self {
+			Self::GrayscaleImagesGammaMiscorrection => "grayscale_images_gamma_miscorrection",
+			Self::Java8ZipParsing => "java8_zip_parsing"
+		}
+	}
 }
 
 /// A Minecraft modification supported by PackSquash that adds file types to packs.

@@ -8,6 +8,7 @@
 #![feature(once_cell)]
 #![feature(type_alias_impl_trait)]
 #![feature(try_find)]
+#![feature(iter_intersperse)]
 #![feature(doc_cfg)]
 #![doc(
 	html_logo_url = "https://user-images.githubusercontent.com/31966940/124388201-1f40eb80-dce2-11eb-88e8-3934d7d73c0a.png"
@@ -18,21 +19,22 @@
 #![deny(rustdoc::private_intra_doc_links)]
 
 use std::borrow::Cow;
-use std::convert::TryInto;
+use std::convert::{Infallible, TryInto};
+use std::hint::unreachable_unchecked;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::{cmp, panic};
-use std::{io, path::Path, time::SystemTime};
+use std::{io, time::SystemTime};
 
 use crate::config::AudioFileOptions;
+use crate::config::FileOptions;
 use crate::config::FileOptionsTrait;
 use crate::config::JsonFileOptions;
 use crate::config::PngFileOptions;
 use crate::config::ShaderFileOptions;
-use crate::config::{FileOptions, SquashOptions};
 use crate::pack_file::audio_file::AudioFile;
 use crate::pack_file::json_file::JsonFile;
 use crate::pack_file::passthrough_file::PassthroughFile;
@@ -49,9 +51,10 @@ use crate::config::PropertiesFileOptions;
 #[cfg(feature = "optifine-support")]
 use crate::pack_file::properties_file::PropertiesFile;
 
+use config::ProcessedSquashOptions;
 use futures::future;
 use futures::StreamExt;
-use globset::{GlobBuilder, GlobSet, GlobSetBuilder};
+use pack_meta::{PackMeta, PackMetaError};
 use squash_zip::{SquashZip, SquashZipError};
 use thiserror::Error;
 use tokio::fs::File;
@@ -59,15 +62,13 @@ use tokio::io::AsyncSeek;
 use tokio::io::BufReader;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::Semaphore;
-use tokio::{
-	io::AsyncRead,
-	runtime::{Builder, Runtime}
-};
+use tokio::{io::AsyncRead, runtime::Builder};
 
 pub use crate::squash_zip::relative_path::RelativePath;
 
 pub mod config;
 mod pack_file;
+mod pack_meta;
 mod squash_zip;
 mod zopfli_iterations_time_model;
 
@@ -77,56 +78,26 @@ mod zopfli_iterations_time_model;
 ///
 /// Once constructed, this struct can be used to run one or several optimization operations
 /// with the same configuration on any pack, in an efficient manner.
-pub struct PackSquasher {
-	options: SquashOptions,
-	runtime: Runtime,
-	file_globs: GlobSet
-}
+pub struct PackSquasher;
 
 impl PackSquasher {
-	/// Creates a new [`PackSquasher`] struct that will squash packs according to the specified
-	/// options.
-	pub fn new(options: SquashOptions) -> Result<Self, PackSquasherError> {
-		let mut globset_builder = GlobSetBuilder::new();
-		for glob_pattern in options.file_options.keys() {
-			globset_builder.add(
-				GlobBuilder::new(glob_pattern)
-					.literal_separator(true)
-					.backslash_escape(true)
-					.build()?
-			);
-		}
-
-		Ok(Self {
-			runtime: Builder::new_multi_thread()
-				.worker_threads(options.global_options.threads.get())
-				// The actual number of blocking threads will be worker threads + 1 + this (1)
-				.max_blocking_threads(1)
-				.thread_name("packsquasher-worker")
-				.build()
-				.unwrap(),
-			file_globs: globset_builder.build()?,
-			options
-		})
+	/// Creates a new [`PackSquasher`] struct that will squash packs.
+	#[allow(clippy::new_without_default)] // It does not make much sense to have a default value
+	pub fn new() -> Self {
+		Self
 	}
 
-	/// Executes the configured squash operation, reading pack files from the provided virtual
-	/// file system, on the specified directory, and waits for it to finish. If a pack directory
-	/// is not provided, it will be read from the [`SquashOptions`] struct provided when this
-	/// struct was instantiated. In that case, if the [`SquashOptions`] doesn't contain a pack
-	/// directory either, an error will be returned.
+	/// Executes the squash operation configured by the specified options, reading pack files from
+	/// the provided virtual file system, and waits for it to finish.
 	///
-	/// Client code can provide an optional channel to this method in the
-	/// `pack_file_status_sender` parameter. Status updates of the squash operation will be
-	/// sent to this channel, which the client code can use as it deems fit.
+	/// Client code can provide an optional channel to this method in the `pack_file_status_sender`
+	/// parameter. Status updates of the squash operation will be sent to this channel, which the
+	/// client code can use as it deems fit.
 	///
 	/// If this function returns successfully, it is guaranteed that a output ZIP file has been
 	/// generated. If it does not, it should be noted that the caller may get more information about
 	/// errors while processing particular pack files via the status updates channel, should they
 	/// happen and that information be desired.
-	///
-	/// Note that, due to the usage of several threads, the [`PackSquasher`] instance must be
-	/// wrapped on an atomically reference counted pointer (`Arc`) to call this method.
 	///
 	/// # Panics
 	/// Reasonable client code can assume that this method does not panic. However, it should
@@ -136,44 +107,107 @@ impl PackSquasher {
 	///
 	/// Therefore, to guarantee that this method produces the expected results, the panic hook
 	/// should not be modified in any way while this method is executing.
-	pub fn run<F: VirtualFileSystem + 'static, P: AsRef<Path>>(
-		self: Arc<Self>,
+	pub fn run<F: VirtualFileSystem + 'static, O: TryInto<ProcessedSquashOptions>>(
+		&self,
 		vfs: F,
-		pack_directory: Option<P>,
+		squash_options: O,
 		pack_file_status_sender: Option<Sender<PackSquasherStatus>>
-	) -> Result<(), PackSquasherError> {
-		let pack_directory = pack_directory
-			.as_ref()
-			.map(|p| p.as_ref())
-			.or_else(|| self.options.pack_directory.as_ref().map(|p| p.as_ref()))
-			.ok_or(PackSquasherError::MissingPackDirectory)?;
+	) -> Result<(), PackSquasherError>
+	where
+		PackSquasherError: From<<O as TryInto<ProcessedSquashOptions>>::Error>
+	{
+		let mut options_holder = squash_options.try_into()?;
 
-		if !vfs.file_type(pack_directory)?.is_dir() {
+		if !vfs
+			.file_type(&options_holder.options.pack_directory)?
+			.is_dir()
+		{
 			return Err(PackSquasherError::InvalidFileType(
 				"The pack directory path must point to a directory, not a file"
 			));
 		}
 
-		let vfs = Arc::new(vfs);
+		let runtime = Builder::new_multi_thread()
+			.worker_threads(options_holder.options.global_options.threads.get())
+			// The actual number of blocking threads will be worker threads + 1 + this (1)
+			.max_blocking_threads(1)
+			.thread_name("packsquasher-worker")
+			.build()
+			.unwrap();
 
-		self.runtime.block_on(async {
+		// Transparently modify the options before doing the actual processing if needed
+		let automatic_quirk_detection = options_holder
+			.options
+			.global_options
+			.automatic_minecraft_quirks_detection;
+		let read_pack_meta = automatic_quirk_detection
+			|| options_holder
+				.options
+				.global_options
+				.validate_pack_metadata_file;
+
+		// Read the pack metadata if we either want to validate it or use automatic quirk detection.
+		// When using automatic quirk detection, we modify the set of quirks according to the
+		// target Minecraft versions that can be deduced from that metadata
+		if read_pack_meta {
+			runtime.block_on(async {
+				let pack_meta = PackMeta::new(&vfs, &options_holder.options.pack_directory).await?;
+
+				if automatic_quirk_detection {
+					let quirks = pack_meta.target_minecraft_versions_quirks();
+
+					options_holder
+						.options
+						.global_options
+						.work_around_minecraft_quirks = quirks;
+
+					if let Some(pack_file_status_sender) = &pack_file_status_sender {
+						if !quirks.is_empty() {
+							let notice_message = format!(
+								"Working around automatically detected Minecraft quirks: {}",
+								quirks
+									.iter()
+									.map(|quirk| quirk.as_str())
+									.intersperse(", ")
+									.collect::<String>()
+							);
+
+							pack_file_status_sender
+								.send(PackSquasherStatus::Notice(Cow::Owned(notice_message)))
+								.await
+								.ok();
+						}
+					}
+				}
+
+				Ok::<_, PackSquasherError>(())
+			})?;
+		}
+
+		let vfs = Arc::new(vfs);
+		let options_holder = Arc::new(options_holder);
+
+		runtime.block_on(async {
 			// Get the iterator over pack files from the virtual file system
 			let pack_file_iter = vfs.file_iterator(
-				pack_directory,
+				&options_holder.options.pack_directory,
 				IteratorTraversalOptions {
-					ignore_system_and_hidden_files: self
+					ignore_system_and_hidden_files: options_holder
 						.options
 						.global_options
 						.ignore_system_and_hidden_files
 				}
 			);
 
-			let squashzip_settings = self.options.global_options.as_squash_zip_settings();
+			let squashzip_settings = options_holder
+				.options
+				.global_options
+				.as_squash_zip_settings();
 
 			// Open the previous ZIP file and buffer it, if possible. Bail out if any I/O
 			// error happens, except if the file does not exist, which is a normal condition
 			let previous_zip = if squashzip_settings.store_squash_time {
-				match File::open(&self.options.global_options.output_file_path).await {
+				match File::open(&options_holder.options.global_options.output_file_path).await {
 					Ok(file) => Some(BufReader::new(file)),
 					Err(err) => {
 						// The previous output file may not exist the first time we run
@@ -198,13 +232,13 @@ impl PackSquasher {
 			// may end up opening a lot of files, needlessly consuming memory and exhausting
 			// open file limits
 			let in_flight_tasks_semaphore = Arc::new(Semaphore::new(cmp::min(
-				self.options.global_options.threads.get() * 2,
+				options_holder.options.global_options.threads.get() * 2,
 				// - 2 because we open the output file and the previous file
 				// - 10 because the OsFilesystem VFS may keep some files open
 				// / 3 because each task may consume 3 descriptors: the pack file itself,
 				// and two temporary files
 				cmp::max(
-					(self
+					(options_holder
 						.options
 						.global_options
 						.open_files_limit
@@ -246,7 +280,7 @@ impl PackSquasher {
 					break;
 				}
 
-				let packsquasher = Arc::clone(&self);
+				let options_holder = Arc::clone(&options_holder);
 				let squash_zip = Arc::clone(&squash_zip);
 				let vfs = Arc::clone(&vfs);
 
@@ -259,7 +293,7 @@ impl PackSquasher {
 				// processing speed
 				let task_permit = in_flight_tasks_semaphore.acquire_owned().await.unwrap();
 
-				pack_file_tasks.push(self.runtime.spawn(async move {
+				pack_file_tasks.push(runtime.spawn(async move {
 					// We will release the permit only after we have completed the task
 					let _ = task_permit;
 
@@ -293,8 +327,9 @@ impl PackSquasher {
 						($file_options:expr) => {
 							PackFileConstructorArgs {
 								path: &pack_file_data.relative_path,
-								optimization_settings: $file_options
-									.tweak_from_global_options(&packsquasher.options.global_options)
+								optimization_settings: $file_options.tweak_from_global_options(
+									&options_holder.options.global_options
+								)
 							}
 						};
 					}
@@ -313,7 +348,7 @@ impl PackSquasher {
 								pack_file_size_hint,
 								squash_zip,
 								pack_file_status_sender,
-								packsquasher
+								options_holder
 									.options
 									.global_options
 									.recompress_compressed_files
@@ -402,11 +437,11 @@ impl PackSquasher {
 					// Try to match configuration-provided file settings and instantiate a pack file
 					// instance with those. The first match that contains settings for this pack file
 					// type "wins"
-					for i in packsquasher
-						.file_globs
+					for i in options_holder
+						.file_options_globs
 						.matches(&*pack_file_data.relative_path)
 					{
-						let file_options = packsquasher.options.file_options[i];
+						let file_options = options_holder.options.file_options[i];
 
 						// Now try to instantiate the pack file type that corresponds to the options
 						process_if_match!(JsonFile, JsonFileOptions, file_options);
@@ -478,7 +513,7 @@ impl PackSquasher {
 			match Arc::try_unwrap(squash_zip) {
 				Ok(squash_zip) => {
 					squash_zip
-						.finish(&self.options.global_options.output_file_path)
+						.finish(&options_holder.options.global_options.output_file_path)
 						.await?
 				}
 				Err(_) => panic!("Unexpected number of strong references to SquashZip")
@@ -538,8 +573,23 @@ pub enum PackSquasherError {
 	/// Thrown when some error occurs while processing a pack file. More detailed
 	/// information about it can be obtained by reading the corresponding status
 	/// update.
-	#[error("Another error occurred while processing a pack file")]
-	PackFileError
+	#[error("An error occurred while processing a pack file")]
+	PackFileError,
+	/// Thrown when an error happened while parsing the pack metadata file,
+	/// `pack.mcmeta`, that defines some basic characteristics of a pack.
+	#[error("pack.mcmeta error: {0}")]
+	PackMetaError(#[from] PackMetaError)
+}
+
+impl From<Infallible> for PackSquasherError {
+	fn from(_: Infallible) -> Self {
+		// SAFETY: by construction, Infallible cannot be instantiated, so this
+		// code can't ever be executed
+		#[allow(unsafe_code)]
+		unsafe {
+			unreachable_unchecked()
+		}
+	}
 }
 
 /// Represents an error cause for a [PackSquasherError] that may be relevant for
@@ -633,8 +683,10 @@ pub enum PackSquasherStatus {
 	/// Every pack file was processed, and the output ZIP file is being
 	/// finished up.
 	ZipFinish,
-	/// A condition about the squash operation that may indicate a
-	/// potential problem.
+	/// An informational message that does not indicate a potential problem.
+	Notice(Cow<'static, str>),
+	/// A condition about the squash operation that may indicate a potential
+	/// problem.
 	Warning(PackSquasherWarning)
 }
 
