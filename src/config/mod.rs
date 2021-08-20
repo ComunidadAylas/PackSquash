@@ -83,6 +83,10 @@ pub struct GlobalOptions {
 	/// add a `pack.mcmeta` file to the generated ZIP file later on, want to use PackSquash
 	/// with files that are not a Minecraft pack, or similar reasons.
 	///
+	/// Even if this option is set to `false`, `pack.mcmeta` may still be read and validated
+	/// if `automatic_minecraft_quirks_detection` is enabled. To guarantee that file is not
+	/// read no matter what, both options should be set to `false`.
+	///
 	/// **Default value**: `true`
 	pub validate_pack_metadata_file: bool,
 	/// PackSquash uses a custom ZIP compressor that is able to balance ZIP file
@@ -178,6 +182,10 @@ pub struct GlobalOptions {
 	/// If you know exactly what quirks affect your pack and do not want PackSquash to come up with its
 	/// own set of quirks to work around, set this option to `false`, and configure
 	/// `work_around_minecraft_quirks` accordingly. Otherwise, you can set it to `true`.
+	///
+	/// When this option is set to `true`, the `pack.mcmeta` file may be read and validated, even if
+	/// `validate_pack_metadata_file` is set to `false`. To guarantee that file is not read no matter
+	/// what, both options should be set to `false`.
 	///
 	/// **Default value**: `true`
 	pub automatic_minecraft_quirks_detection: bool,
