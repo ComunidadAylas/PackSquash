@@ -92,6 +92,7 @@ fn is_system_or_hidden_file(entry: &DirEntry) -> bool {
 				|| file_name.ends_with(".lnk")
 				|| file_name.ends_with(".orig")
 				|| file_name.ends_with(".bak")
+				|| file_name.ends_width(".tmp")
 		} else {
 			file_name == "Network Trash Folder"
 				|| file_name == "Temporary Items"
