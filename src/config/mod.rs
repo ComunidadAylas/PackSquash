@@ -83,9 +83,9 @@ pub struct GlobalOptions {
 	/// add a `pack.mcmeta` file to the generated ZIP file later on, want to use PackSquash
 	/// with files that are not a Minecraft pack, or similar reasons.
 	///
-	/// Even if this option is set to `false`, `pack.mcmeta` may still be read and validated
-	/// if `automatic_minecraft_quirks_detection` is enabled. To guarantee that file is not
-	/// read no matter what, both options should be set to `false`.
+	/// Even if this option is set to `false`, `pack.mcmeta` may still be validated if
+	/// `automatic_minecraft_quirks_detection` is enabled. To guarantee that file is not
+	/// validated no matter what, both options should be set to `false`.
 	///
 	/// **Default value**: `true`
 	pub validate_pack_metadata_file: bool,
@@ -430,8 +430,8 @@ impl From<PercentageInteger> for u8 {
 #[enumset(serialize_deny_unknown, serialize_as_list)]
 #[non_exhaustive]
 pub enum MinecraftQuirk {
-	/// Older versions of Minecraft (probably all versions until 1.13 are affected) assume
-	/// that grayscale images are in a rather uncommon color space, instead of the more
+	/// Older versions of Minecraft (probably all versions since 1.6 until 1.13 are affected)
+	/// assume that grayscale images are in a rather uncommon color space, instead of the more
 	/// common sRGB it assumes for color images. Because PackSquash can compress grayscale
 	/// color images to actual grayscale format to save space, affected Minecraft versions
 	/// display those images with colors that look "washed-out".
@@ -443,7 +443,7 @@ pub enum MinecraftQuirk {
 	/// means that they do not support older Java versions. On the other hand, Java 8 was
 	/// used almost ubiquitously with older Minecraft clients, especially in modded
 	/// environments. However, a lot of things have changed in newer Java versions, including
-	/// low-level details of how ZIP files are read.
+	/// low-level details of how ZIP files are parsed.
 	///
 	/// When a ZIP specification conformance level that adds extraction protection is used,
 	/// this workaround tells PackSquash to use obfuscation techniques that work fine with
@@ -451,7 +451,7 @@ pub enum MinecraftQuirk {
 	/// differences will extremely likely not matter in protection strength. Compressibility
 	/// can be impacted negatively, though. This quirk does not have any effect if an affected
 	/// ZIP specification conformance level is not used, or if the Minecraft client is run
-	/// using recent Java versions.
+	/// using newer Java versions.
 	Java8ZipParsing
 }
 
@@ -699,10 +699,10 @@ pub struct PngFileOptions {
 	///
 	/// When the number of compression iterations drops to zero, which happens when this option
 	/// is set to zero or the texture is pretty big, a much more faster DEFLATE compression
-	/// algorithm is used instead of Zopfli. This extra performance comes at the cost of file
+	/// algorithm is used instead of Zopfli. This extra performance may come at the cost of file
 	/// size. On the other side, the number of iterations is limited to a maximum of 15. Values
 	/// greater than 15 are still useful for this setting, because they change the threshold
-	/// where iterations start being reduced in order to keep an acceptable performance.
+	/// where iterations start being reduced in order to keep acceptable performance levels.
 	///
 	/// **Default value**: `3`
 	pub image_data_compression_iterations: u8,
@@ -725,8 +725,8 @@ pub struct PngFileOptions {
 	/// If `true`, this option prevents the color values of completely transparent pixels from being
 	/// changed in order to achieve better compression. This optimization is visually lossless,
 	/// because completely transparent pixels are invisible no matter their color, and does not
-	/// affect textures that lack an alpha channel. However, if the texture is meant to be edited
-	/// afterwards or contains steganographic data, this optimization may have undesirable side
+	/// affect images that lack an alpha channel. However, if the image is meant to be edited
+	/// further or contains steganographic data, this optimization may have undesirable side
 	/// effects. Disabling alpha optimizations also reduces the time it takes to optimize an
 	/// image, at the cost of a maybe increased file size.
 	///
