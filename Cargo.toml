@@ -118,7 +118,7 @@ extended-description-file = "target/debian/extended_package_description.txt"
 section = "utils"
 # For each release with the same version number (shouldn't be too many),
 # increment this, and change APT repo action
-revision = "2"
+revision = "3"
 # Sadly, automatic dependency detection is suboptimal because it pulls transitive
 # dependencies and does not work fine when cross-compiling.
 #
