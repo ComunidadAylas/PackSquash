@@ -30,7 +30,7 @@ futures = { version = "0.3.16", default-features = false }
 
 getopts = "0.2.21"
 
-serde = { version = "1.0.127", features = ["derive"] }
+serde = { version = "1.0.128", features = ["derive"] }
 toml = "0.5.8"
 
 serde_json = "1.0.66"

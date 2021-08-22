@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::io;
 use std::{convert::TryFrom, path::Path};
 
@@ -44,11 +45,11 @@ impl PackMeta {
 
 		let pack_format_version;
 
-		let mut pack_meta_value = vec![];
-		vfs.open(root_path.as_ref().join("pack.mcmeta"))?
-			.file_read
-			.read_to_end(&mut pack_meta_value)
-			.await?;
+		let mut file = vfs.open(root_path.as_ref().join("pack.mcmeta"))?;
+		let mut pack_meta_value =
+			Vec::with_capacity(file.file_size_hint.try_into().unwrap_or(usize::MAX));
+
+		file.file_read.read_to_end(&mut pack_meta_value).await?;
 
 		// Parse the pack metadata to get its format version and do some basic validation.
 		// We do this parsing manually, instead of using auxiliary structs that derive
@@ -154,7 +155,7 @@ impl PackMeta {
 
 #[cfg(test)]
 mod tests {
-	use std::{convert::TryInto, ffi::OsStr, io, iter::Empty, path::Path};
+	use std::{convert::TryInto, ffi::OsStr, fs::FileType, io, iter::Empty, path::Path};
 
 	use crate::{
 		vfs::{IteratorTraversalOptions, VirtualFileSystem},
@@ -189,7 +190,7 @@ mod tests {
 			}
 		}
 
-		fn file_type<P: AsRef<Path>>(&self, _: P) -> Result<std::fs::FileType, io::Error> {
+		fn file_type<P: AsRef<Path>>(&self, _: P) -> Result<FileType, io::Error> {
 			unimplemented!()
 		}
 	}
