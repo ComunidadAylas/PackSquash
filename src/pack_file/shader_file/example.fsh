@@ -8,6 +8,11 @@
 #moj_import <base.fsh>
 #moj_import "common.fsh"
 
+// Dummy function added to check that it transpiles fine
+float rand(vec2 co, vec2 _) {
+	return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 varying vec4 texcoord;
 uniform sampler2D gcolor;
 
