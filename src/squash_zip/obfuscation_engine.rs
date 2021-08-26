@@ -217,11 +217,11 @@ impl ObfuscationEngine {
 				local_header_disk_number = (random_u32(seed) % 32768) as u16 + 32768;
 			} else {
 				uncompressed_size = if obfuscate_uncompressed_size {
-					0
+					0xFFFFFF7F
 				} else {
 					obfuscated_header.uncompressed_size
 				};
-				local_header_disk_number = 0;
+				local_header_disk_number = u16::MAX;
 			}
 
 			obfuscated_header = CentralDirectoryHeader {
