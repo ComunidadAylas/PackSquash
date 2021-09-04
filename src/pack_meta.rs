@@ -1,6 +1,5 @@
-use std::convert::TryInto;
 use std::io;
-use std::{convert::TryFrom, path::Path};
+use std::path::Path;
 
 use enumset::EnumSet;
 use json_comments::StripComments;
@@ -155,7 +154,7 @@ impl PackMeta {
 
 #[cfg(test)]
 mod tests {
-	use std::{convert::TryInto, ffi::OsStr, fs::FileType, io, iter::Empty, path::Path};
+	use std::{ffi::OsStr, fs::FileType, io, iter::Empty, path::Path};
 
 	use crate::{
 		vfs::{IteratorTraversalOptions, VirtualFileSystem},

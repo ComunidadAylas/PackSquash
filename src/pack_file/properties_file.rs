@@ -1,6 +1,5 @@
 use std::{
 	borrow::Cow,
-	convert::TryInto,
 	error::Error,
 	fmt::{self, Display, Formatter},
 	io

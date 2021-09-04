@@ -1,6 +1,5 @@
 use std::{
 	borrow::Cow,
-	convert::TryInto,
 	num::{NonZeroU8, TryFromIntError},
 	time::Duration
 };
