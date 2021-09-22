@@ -16,14 +16,14 @@ bytes = "1.1.0"
 globset = "0.4.8"
 enumset = { version = "1.0.7", features = ["serde"] }
 indexmap = { version = "1.7.0", default-features = false, features = ["serde-1"] }
-thiserror = "1.0.28"
+thiserror = "1.0.29"
 ahash = "0.7.4"
 
 num_cpus = "1.13.0"
 sysinfo = { version = "0.20.3", default-features = false }
 walkdir = "2.3.2"
 
-tokio = { version = "1.11.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
+tokio = { version = "1.12.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
 tokio-util = { version = "0.6.8", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.7", default-features = false }
 futures = { version = "0.3.17", default-features = false }
@@ -33,17 +33,17 @@ getopts = "0.2.21"
 serde = { version = "1.0.130", features = ["derive"] }
 toml = "0.5.8"
 
-serde_json = "1.0.67"
+serde_json = "1.0.68"
 json_comments = "0.2.0"
 jsonpath_lib = "0.3.0"
 
 spng = { version = "0.2.0-alpha.2", default-features = false }
 png = "0.17.1"
 rgb = "0.8.27"
-imagequant = "3.0.4-alpha.2"
+imagequant = "3.1.0"
 oxipng = { version = "5.0.0", default-features = false, features = ["zopfli"] }
 
-gstreamer = { version = "0.17.3", default-features = false }
+gstreamer = { version = "0.17.4", default-features = false }
 gstreamer-app = { version = "0.17.2", default-features = false, features = ["v1_10"] }
 
 glsl = "6.0.1"
@@ -64,7 +64,7 @@ rand_xoshiro = "0.6.0"
 color-backtrace = { version = "0.5.1", default-features = false, optional = true }
 
 [target.'cfg(windows)'.dependencies]
-winreg = "0.9.0"
+winreg = "0.10.1"
 wmi = "0.9.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
@@ -74,8 +74,6 @@ mach = "0.3.2"
 [patch.crates-io]
 # Use our fork of oxipng that removes a dependency and an unneeded sanity check
 oxipng = { git = "https://github.com/ComunidadAylas/oxipng", branch = "packsquash" }
-# Use the latest commit of imagequant, which allows some zero-copy operations
-imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
 # Use our fork of glsl that allows it to parse files that use DOS-style CRLF line
 # endings, prevalent on Windows environments, fixes the #elif preprocessor directive
 # not being parsed, improves minification and fixes some incorrect transpiling
