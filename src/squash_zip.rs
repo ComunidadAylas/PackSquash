@@ -276,15 +276,9 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 
 			// Keep adding files to the map until there are no more central directory headers
 
-			// Allow blocks in this while condition for several reasons:
-			// - We care about the side effects that evaluating the condition each time does,
-			//   so we can't just store its result in a variable.
-			// - Async closures are unstable, and using them does not really simplify things
-			//   much, because we would then have to care about how the closure borrows its
-			//   environment.
-			// - Any of the above alternatives also result in more lines of code that are not
-			//   particularly more elegant.
-			// Related Clippy issue: https://github.com/rust-lang/rust-clippy/issues/7580
+			// Allow blocks in this while condition, as this Clippy lint is very likely a
+			// false positive in this case. Related issue:
+			// https://github.com/rust-lang/rust-clippy/issues/7580
 			#[allow(clippy::blocks_in_if_conditions)]
 			while {
 				previous_zip.read_exact(&mut buffer[..4]).await?;
