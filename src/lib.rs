@@ -766,18 +766,11 @@ pub mod vfs {
 	/// Contains options that tweak the operation of the [`VirtualFileSystem::file_iterator`]
 	/// method.
 	#[non_exhaustive]
+	#[derive(Default)]
 	pub struct IteratorTraversalOptions {
 		/// Whether system (i.e. clearly not part of a pack file) and hidden files
 		/// (usually, those whose name begins with a dot) are yielded or not.
 		pub ignore_system_and_hidden_files: bool
-	}
-
-	impl Default for IteratorTraversalOptions {
-		fn default() -> Self {
-			Self {
-				ignore_system_and_hidden_files: false
-			}
-		}
 	}
 }
 
