@@ -76,8 +76,8 @@ fn run() -> i32 {
 /// read options.
 fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	let user_friendly_options_path = options_file_path.map_or_else(
-		|| Cow::Borrowed("standard input (keyboard input or pipe)"),
-		|path| Cow::Borrowed(path)
+		|| "standard input (keyboard input or pipe)",
+		|path| path
 	);
 
 	// Tell the user where are we reading the configuration from
@@ -196,11 +196,14 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 			// If the error was in one of those, hint the user at the status
 			// update that contains the most information about the error
 			if matches!(err, PackSquasherError::PackFileError) {
-				eprintln!("A more detailed error message should have been printed before this one.");
+				eprintln!(
+					"Another error message was emitted with more details about the error. \
+					You might need to scroll up to see it."
+				);
 			}
 
 			eprintln!(
-				"You might find these troubleshooting instructions useful: \
+				"These troubleshooting instructions might be useful: \
 				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>"
 			);
 
