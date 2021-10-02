@@ -20,7 +20,7 @@ thiserror = "1.0.29"
 ahash = "0.7.4"
 
 num_cpus = "1.13.0"
-sysinfo = { version = "0.20.3", default-features = false }
+sysinfo = { version = "0.20.4", default-features = false }
 walkdir = "2.3.2"
 
 tokio = { version = "1.12.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
@@ -87,7 +87,7 @@ zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquas
 
 [build-dependencies]
 vergen = { version = "5.1.15", default-features = false, features = ["cargo", "git"] }
-time = { version = "0.3.2", default-features = false, features = ["std"] }
+time = { version = "0.3.3", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 tokio-test = "0.4.2"
