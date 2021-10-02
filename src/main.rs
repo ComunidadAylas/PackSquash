@@ -75,10 +75,8 @@ fn run() -> i32 {
 /// Reads an options file and launches a squash operation to optimize it with the
 /// read options.
 fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
-	let user_friendly_options_path = options_file_path.map_or_else(
-		|| "standard input (keyboard input or pipe)",
-		|path| path
-	);
+	let user_friendly_options_path =
+		options_file_path.map_or_else(|| "standard input (keyboard input or pipe)", |path| path);
 
 	// Tell the user where are we reading the configuration from
 	println!("Reading options from {}...", user_friendly_options_path);
