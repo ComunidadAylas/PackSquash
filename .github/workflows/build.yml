@@ -8,6 +8,11 @@ on:
   release:
     types:
       - published
+  schedule:
+    # Run this workflow each Monday at midnight even if no other
+    # events happen, to guarantee that it completes successfully
+    # in the latest Rust toolchain versions
+    - cron: '0 0 * * MON'
 
 env:
   CARGO_TERM_COLOR: always
