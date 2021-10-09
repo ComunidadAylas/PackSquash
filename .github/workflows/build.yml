@@ -21,7 +21,7 @@ env:
 jobs:
   linux-x64-gnu:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     env:
       CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
@@ -159,7 +159,7 @@ jobs:
 
   macos-x64-darwin:
 
-    runs-on: macos-latest
+    runs-on: macos-11
 
     env:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
@@ -203,7 +203,7 @@ jobs:
 
   linux-aarch64-gnu:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     env:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
