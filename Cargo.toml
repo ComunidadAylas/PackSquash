@@ -3,7 +3,7 @@ cargo-features = ["strip"]
 [package]
 name = "packsquash"
 description = "Minecraft resource and data pack optimizer"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Alejandro \"AlexTMjugador\" González"]
 repository = "https://github.com/ComunidadAylas/PackSquash"
 license = "AGPL-3.0"
@@ -114,7 +114,7 @@ extended-description-file = "target/debian/extended_package_description.txt"
 section = "utils"
 # For each release with the same version number (shouldn't be too many),
 # increment this, and change APT repo action
-revision = "4"
+revision = "0"
 # Sadly, automatic dependency detection is suboptimal because it pulls transitive
 # dependencies and does not work fine when cross-compiling.
 #
