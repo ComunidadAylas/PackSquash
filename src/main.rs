@@ -84,9 +84,9 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 		// Newbies are often confused by terms such as "standard input", so try
 		// to point them in the direction of what they probably want to do
 		println!(
-			"If you are not sure what this means or what to do now, you probably \
-			want to write and use an options file with PackSquash. Please check out \
-			<https://packsquash.page.link/Options-files> for more information."
+			"If you are not sure what this means, try using an external options \
+			file with PackSquash. Please check out <https://packsquash.page.link/Options-files> \
+			for examples and more information."
 		);
 	}
 	println!();
