@@ -4,6 +4,9 @@
 
 #version 120
 
+// Dummy variable added to check that transpilation doesn't mess with the preprocessor directives
+vec3 dummy_variable;
+
 // Test that the #moj_import directive added in 1.17 works fine
 #moj_import <base.fsh>
 #moj_import "common.fsh"

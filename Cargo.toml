@@ -16,7 +16,7 @@ bytes = "1.1.0"
 globset = "0.4.8"
 enumset = { version = "1.0.7", features = ["serde"] }
 indexmap = { version = "1.7.0", default-features = false, features = ["serde-1"] }
-thiserror = "1.0.29"
+thiserror = "1.0.30"
 ahash = "0.7.4"
 
 num_cpus = "1.13.0"
@@ -38,7 +38,7 @@ json_comments = "0.2.0"
 jsonpath_lib = "0.3.0"
 
 spng = { version = "0.2.0-alpha.2", default-features = false }
-png = "0.17.1"
+png = "0.17.2"
 rgb = "0.8.27"
 imagequant = "3.1.0"
 oxipng = { version = "5.0.0", default-features = false, features = ["zopfli"] }
