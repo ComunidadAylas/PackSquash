@@ -8,6 +8,7 @@
 #![feature(once_cell)]
 #![feature(type_alias_impl_trait)]
 #![feature(try_find)]
+#![feature(iter_intersperse)]
 #![feature(doc_cfg)]
 #![doc(
 	html_logo_url = "https://user-images.githubusercontent.com/31966940/124388201-1f40eb80-dce2-11eb-88e8-3934d7d73c0a.png"
