@@ -148,7 +148,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for ShaderFile<T> {
 	) -> Option<Self> {
 		let extension = to_ascii_lowercase_extension(args.path.as_ref());
 
-		if matches!(&*extension, "fsh" | "vsh") {
+		if matches!(&*extension, "fsh" | "vsh" | "glsl") {
 			file_read_producer().map(|(read, file_length_hint)| Self {
 				read,
 				// The file is too big to fit in memory if this conversion fails anyway
