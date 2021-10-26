@@ -275,11 +275,6 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			previous_zip_contents = AHashMap::with_capacity(cdh_entry_count_hint);
 
 			// Keep adding files to the map until there are no more central directory headers
-
-			// Allow blocks in this while condition, as this Clippy lint is very likely a
-			// false positive in this case. Related issue:
-			// https://github.com/rust-lang/rust-clippy/issues/7580
-			#[allow(clippy::blocks_in_if_conditions)]
 			while {
 				previous_zip.read_exact(&mut buffer[..4]).await?;
 				buffer[..4] == [0x50, 0x4B, 0x01, 0x02]
