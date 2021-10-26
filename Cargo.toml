@@ -17,10 +17,10 @@ globset = "0.4.8"
 enumset = { version = "1.0.7", features = ["serde"] }
 indexmap = { version = "1.7.0", default-features = false, features = ["serde-1"] }
 thiserror = "1.0.30"
-ahash = "0.7.4"
+ahash = "0.7.6"
 
 num_cpus = "1.13.0"
-sysinfo = { version = "0.20.4", default-features = false }
+sysinfo = { version = "0.20.5", default-features = false }
 walkdir = "2.3.2"
 
 tokio = { version = "1.12.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
@@ -65,10 +65,10 @@ color-backtrace = { version = "0.5.1", default-features = false, optional = true
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.10.1"
-wmi = "0.9.0"
+wmi = "0.9.1"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-core-foundation = "0.9.1"
+core-foundation = "0.9.2"
 mach = "0.3.2"
 
 [patch.crates-io]
@@ -86,8 +86,8 @@ glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
 zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquash" }
 
 [build-dependencies]
-vergen = { version = "5.1.15", default-features = false, features = ["cargo", "git"] }
-time = { version = "0.3.3", default-features = false, features = ["std"] }
+vergen = { version = "5.1.16", default-features = false, features = ["cargo", "git"] }
+time = { version = "0.3.4", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 tokio-test = "0.4.2"
