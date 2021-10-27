@@ -266,8 +266,7 @@ dependencies = [
 [[package]]
 name = "const-random"
 version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f590d95d011aa80b063ffe3253422ed5aa462af4e9867d43ce8337562bac77c4"
+source = "git+https://github.com/ComunidadAylas/constrandom#406917b42f06056b3aceac6f7f07bafc6ab9e15f"
 dependencies = [
  "const-random-macro",
  "proc-macro-hack",
@@ -276,8 +275,7 @@ dependencies = [
 [[package]]
 name = "const-random-macro"
 version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "615f6e27d000a2bffbc7f2f6a8669179378fa27ee4d0a509e985dfc0a7defb40"
+source = "git+https://github.com/ComunidadAylas/constrandom#406917b42f06056b3aceac6f7f07bafc6ab9e15f"
 dependencies = [
  "getrandom",
  "lazy_static",
@@ -558,9 +556,9 @@ dependencies = [
 
 [[package]]
 name = "fpe"
-version = "0.5.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fcf3e40fc9accc7218e082db8a75aeea244b8f5db73e591774ef93b4276365e6"
+checksum = "cd910db5f9ca4dc3116f8c46367825807aa2b942f72565f16b4be0b208a00a9e"
 dependencies = [
  "block-modes",
  "cipher",
@@ -1360,9 +1358,9 @@ checksum = "dbf0c48bc1d91375ae5c3cd81e3722dff1abcf81a30960240640d223f59fe0e5"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.30"
+version = "1.0.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edc3358ebc67bc8b7fa0c007f945b0b18226f78437d61bec735a9eb96b61ee70"
+checksum = "ba508cc11742c0dc5c1659771673afbab7a0efab23aa17e854cbab0837ed0b43"
 dependencies = [
  "unicode-xid",
 ]
@@ -1609,9 +1607,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.80"
+version = "1.0.81"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d010a1623fbd906d51d650a9916aaefc05ffa0e4053ff7fe601167f3e715d194"
+checksum = "f2afee18b8beb5a596ecb4a2dce128c719b4ba399d34126b9e4396e3f9860966"
 dependencies = [
  "proc-macro2",
  "quote",
