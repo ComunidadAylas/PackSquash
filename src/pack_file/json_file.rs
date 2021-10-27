@@ -144,7 +144,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for JsonFile<T> {
 		mut file_read_producer: F,
 		args: PackFileConstructorArgs<'_, JsonFileOptions>
 	) -> Option<Self> {
-		let extension = to_ascii_lowercase_extension(args.path.as_ref());
+		let extension = to_ascii_lowercase_extension(args.path);
 
 		let is_json_file = matches!(&*extension, "json" | "jsonc" | "mcmeta")
 			|| (args.optimization_settings.allow_optifine_extensions

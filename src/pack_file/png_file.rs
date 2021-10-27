@@ -329,7 +329,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PngFile<T> {
 		args: PackFileConstructorArgs<'_, PngFileOptions>
 	) -> Option<Self> {
 		let file_path = &*args.path;
-		let extension = &*to_ascii_lowercase_extension(file_path.as_ref());
+		let extension = &*to_ascii_lowercase_extension(file_path);
 
 		let skip = !matches!(extension, "png")
 			|| (args.optimization_settings.skip_pack_icon

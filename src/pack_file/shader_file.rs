@@ -146,7 +146,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for ShaderFile<T> {
 		mut file_read_producer: F,
 		args: PackFileConstructorArgs<'_, ShaderFileOptions>
 	) -> Option<Self> {
-		let extension = to_ascii_lowercase_extension(args.path.as_ref());
+		let extension = to_ascii_lowercase_extension(args.path);
 
 		if matches!(&*extension, "fsh" | "vsh" | "glsl") {
 			file_read_producer().map(|(read, file_length_hint)| Self {

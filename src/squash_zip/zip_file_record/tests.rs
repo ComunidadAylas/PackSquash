@@ -49,7 +49,7 @@ async fn central_directory_works_test(use_zip64_extensions: bool) {
 		uncompressed_size: 3,
 		local_header_disk_number: 4,
 		local_header_offset: local_file_header_offset,
-		file_name: FILE_NAME,
+		file_name: RelativePath::from_inner(FILE_NAME),
 		spoof_version_made_by: false
 	};
 
@@ -436,8 +436,7 @@ async fn local_file_header_works() {
 	// test correct behavior on roll
 	let buf = Vec::with_capacity(LOCAL_FILE_HEADER_SIZE);
 
-	let mut loc =
-		LocalFileHeader::new(FILE_NAME).expect("The local file header instantiation should not fail");
+	let mut loc = LocalFileHeader::new(Cow::Owned(RelativePath::from_inner(FILE_NAME)));
 
 	// Test changing fields after instantiation
 	loc.compression_method = CompressionMethod::Deflate;

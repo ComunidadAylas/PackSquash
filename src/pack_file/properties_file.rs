@@ -175,10 +175,8 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PropertiesFile<T
 		args: PackFileConstructorArgs<'_, PropertiesFileOptions>
 	) -> Option<Self> {
 		if !args.optimization_settings.skip
-			&& matches!(
-				&*to_ascii_lowercase_extension(args.path.as_ref()),
-				"properties"
-			) {
+			&& matches!(&*to_ascii_lowercase_extension(args.path), "properties")
+		{
 			file_read_producer().map(|(read, file_length_hint)| Self {
 				read,
 				// The file is too big to fit in memory if this conversion fails anyway

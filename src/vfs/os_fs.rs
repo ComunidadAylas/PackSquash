@@ -155,7 +155,7 @@ mod tests {
 				&file
 					.expect("I/O operations are assumed not to fail during tests")
 					.relative_path
-					.as_ref()
+					.as_str()
 			));
 
 			file_count += 1;

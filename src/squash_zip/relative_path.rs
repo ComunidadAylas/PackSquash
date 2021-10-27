@@ -1,5 +1,5 @@
 use std::{
-	borrow::{Borrow, Cow},
+	borrow::Cow,
 	io,
 	ops::Deref,
 	path::{Path, MAIN_SEPARATOR}
@@ -8,7 +8,8 @@ use std::{
 use thiserror::Error;
 
 /// Represents a relative UTF-8 filesystem path, that doesn't begin with
-/// prefix or root directory components, and only contains normal components.
+/// prefix or root directory components, only contains normal components,
+/// and whose length is limited to 65535 bytes.
 ///
 /// This relative path can be referenced as a string slice that contains its
 /// representation, normalized to always use the forward slash as a component
@@ -18,25 +19,30 @@ use thiserror::Error;
 /// The struct is efficient, because it tries to use smart pointers to avoid
 /// allocating new buffers to represent the relative path, borrowing data when
 /// possible.
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 #[repr(transparent)]
 pub struct RelativePath<'a>(Cow<'a, str>);
 
 /// Represents an error that may happen while converting a path to a relative
 /// path.
 #[derive(Error, Debug)]
-#[error("The specified path contains non UTF-8 characters: {0}")]
-#[repr(transparent)]
-pub struct InvalidPathError<'a>(Cow<'a, str>);
+pub enum InvalidPathError<'a> {
+	#[error("The path contains non UTF-8 characters: {0}")]
+	NonUnicode(Cow<'a, str>),
+	#[error("The path exceeds the 65535 bytes size limit")]
+	TooBig
+}
 
 impl From<InvalidPathError<'_>> for io::Error {
 	fn from(error: InvalidPathError<'_>) -> Self {
 		io::Error::new(
 			io::ErrorKind::Other,
-			format!(
-				"The specified path contains non UTF-8 characters: {}",
-				error.0
-			)
+			match error {
+				InvalidPathError::NonUnicode(error_message) => {
+					InvalidPathError::NonUnicode(Cow::Owned(error_message.into_owned()))
+				}
+				InvalidPathError::TooBig => InvalidPathError::TooBig
+			}
 		)
 	}
 }
@@ -76,14 +82,14 @@ impl<'a> RelativePath<'a> {
 			relative_path_string = Cow::Borrowed(
 				relative_path
 					.to_str()
-					.ok_or_else(|| InvalidPathError(relative_path.as_os_str().to_string_lossy()))?
+					.ok_or_else(|| InvalidPathError::NonUnicode(relative_path.to_string_lossy()))?
 			);
 		} else {
 			relative_path_string = Cow::Owned(
 				descendant_path_components
 					.map(|component| {
 						component.as_os_str().to_str().ok_or_else(|| {
-							InvalidPathError(relative_path.as_os_str().to_string_lossy())
+							InvalidPathError::NonUnicode(relative_path.to_string_lossy())
 						})
 					})
 					.collect::<Result<Vec<&str>, InvalidPathError>>()?
@@ -91,7 +97,29 @@ impl<'a> RelativePath<'a> {
 			);
 		}
 
+		if relative_path_string.len() > u16::MAX as usize {
+			return Err(InvalidPathError::TooBig);
+		}
+
 		Ok(Self(relative_path_string))
+	}
+
+	/// Returns a borrowed view to the UTF-8 string representation of this relative path.
+	/// Although a relative path can be converted to a Rust string by other means, this
+	/// method is more ergonomic to use.
+	pub fn as_str(&self) -> &str {
+		&self.0
+	}
+
+	/// Returns another relative path that owns equivalent path data to this path, so
+	/// that its lifetime bounds can now be indefinitely long.
+	///
+	/// Because this method borrows `self`, it always allocates a new buffer, even if
+	/// this relative path already owned the data. It is also not the same as cloning
+	/// the relative path, as cloning may just copy a reference to already borrowed
+	/// path data, without extending its lifetime.
+	pub fn as_owned(&self) -> RelativePath<'static> {
+		RelativePath(Cow::Owned(self.0.clone().into_owned()))
 	}
 
 	/// Consumes this relative path to get another that owns all the path data it refers
@@ -115,15 +143,16 @@ impl<'a> RelativePath<'a> {
 	/// # Assumptions
 	/// The caller is responsible of providing a string that upholds the expectations
 	/// of this struct; namely, that the string is a normalized, relative path that
-	/// always uses the forward slash (/) as a component separator.
+	/// always uses the forward slash (/) as a component separator, and does not
+	/// exceed 65535 bytes.
 	pub(crate) fn from_inner<T: Into<Cow<'a, str>>>(string: T) -> Self {
 		Self(string.into())
 	}
 }
 
-impl AsRef<str> for RelativePath<'_> {
-	fn as_ref(&self) -> &str {
-		&self.0
+impl AsRef<Path> for RelativePath<'_> {
+	fn as_ref(&self) -> &Path {
+		Path::new(&*self.0)
 	}
 }
 
@@ -132,11 +161,5 @@ impl Deref for RelativePath<'_> {
 
 	fn deref(&self) -> &Self::Target {
 		Path::new(&*self.0)
-	}
-}
-
-impl Borrow<str> for RelativePath<'_> {
-	fn borrow(&self) -> &str {
-		&self.0
 	}
 }

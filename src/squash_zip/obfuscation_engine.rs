@@ -13,7 +13,7 @@ use rand_xoshiro::{
 };
 use tokio::io::{AsyncWrite, AsyncWriteExt};
 
-use crate::config::PercentageInteger;
+use crate::{config::PercentageInteger, RelativePath};
 
 use super::{
 	zip_file_record::{
@@ -90,38 +90,24 @@ impl ObfuscationEngine {
 		Ok(())
 	}
 
-	pub fn obfuscate_local_file_header<'a>(
-		&'a self,
-		local_file_header: LocalFileHeader<'a>
-	) -> LocalFileHeader<'a> {
-		let mut obfuscated_header = local_file_header;
-
+	pub fn obfuscate_local_file_header(&self, local_file_header: &mut LocalFileHeader<'_>) {
 		if let ObfuscationEngine::Obfuscation { .. } = self {
-			let seed = obfuscated_header.crc32 as u64;
+			let seed = local_file_header.crc32 as u64;
 			let discretion = self.use_discretion(seed);
 
-			let compression_method;
-			let squash_time;
-			let crc32;
-			let compressed_size;
-			let uncompressed_size;
-			let file_name;
-			let zero_out_version_needed_to_extract;
-
 			if discretion {
-				compression_method = obfuscated_header.compression_method;
-				squash_time = obfuscated_header.squash_time;
-				crc32 = obfuscated_header.crc32 ^ CRC32_KEY;
-				compressed_size = obfuscated_header.compressed_size + random_u32(seed) % 8 + 1;
-				uncompressed_size = obfuscated_header.uncompressed_size + random_u32(seed) % 8 + 1;
-				file_name = {
+				local_file_header.crc32 ^= CRC32_KEY;
+				local_file_header.compressed_size += random_u32(seed) % 8 + 1;
+				local_file_header.uncompressed_size += random_u32(seed) % 8 + 1;
+				local_file_header.file_name = {
 					let digit_displacement = (random_u32(seed) % 10 + 1) as u8;
 					let mut remaining_file_name_bytes =
-						obfuscated_header.file_name().as_bytes().len() as i32;
+						local_file_header.file_name.as_str().len() as i32;
 
-					Cow::Owned(
-						obfuscated_header
-							.file_name()
+					Cow::Owned(RelativePath::from_inner(
+						local_file_header
+							.file_name
+							.as_str()
 							.chars()
 							.flat_map(|c| {
 								enum ObfuscatedChars {
@@ -160,137 +146,87 @@ impl ObfuscationEngine {
 								remaining_file_name_bytes >= 0
 							})
 							.collect::<String>()
-					)
+					))
 				};
-				zero_out_version_needed_to_extract = false;
 			} else {
-				compression_method = CompressionMethod::Store;
-				squash_time = [0; 4];
-				crc32 = 0;
-				compressed_size = 0;
-				uncompressed_size = 0;
-				file_name = Cow::Borrowed("");
-				zero_out_version_needed_to_extract = true;
+				local_file_header.compression_method = CompressionMethod::Store;
+				local_file_header.squash_time = [0; 4];
+				local_file_header.crc32 = 0;
+				local_file_header.compressed_size = 0;
+				local_file_header.uncompressed_size = 0;
+				local_file_header.file_name = Cow::Owned(RelativePath::from_inner(""));
+				local_file_header.zero_out_version_needed_to_extract = true;
 			}
-
-			obfuscated_header = LocalFileHeader::new(file_name).unwrap();
-			obfuscated_header.compression_method = compression_method;
-			obfuscated_header.crc32 = crc32;
-			obfuscated_header.compressed_size = compressed_size;
-			obfuscated_header.uncompressed_size = uncompressed_size;
-			obfuscated_header.squash_time = squash_time;
-			obfuscated_header.zero_out_version_needed_to_extract = zero_out_version_needed_to_extract;
 		}
-
-		obfuscated_header
 	}
 
-	pub fn obfuscate_central_directory_header<'a>(
-		&'a self,
-		central_directory_header: CentralDirectoryHeader<'a>
-	) -> CentralDirectoryHeader<'a> {
-		let mut obfuscated_header = central_directory_header;
-
+	pub fn obfuscate_central_directory_header(
+		&self,
+		central_directory_header: &mut CentralDirectoryHeader<'_>
+	) {
 		if let ObfuscationEngine::Obfuscation {
 			workaround_old_java_obfuscation_quirks,
 			..
 		} = self
 		{
-			let seed = obfuscated_header.crc32 as u64;
+			let seed = central_directory_header.crc32 as u64;
 			let discretion = self.use_discretion(seed);
 
-			let uncompressed_size;
-			let local_header_disk_number;
-
 			let obfuscate_uncompressed_size = !workaround_old_java_obfuscation_quirks
-				|| (obfuscated_header.compression_method != CompressionMethod::Store
-					&& obfuscated_header.compressed_size != 0);
+				|| (central_directory_header.compression_method != CompressionMethod::Store
+					&& central_directory_header.compressed_size != 0);
 
 			if discretion {
-				uncompressed_size = if !obfuscate_uncompressed_size
-					|| obfuscated_header.compression_method == CompressionMethod::Store
+				if obfuscate_uncompressed_size
+					&& central_directory_header.compression_method != CompressionMethod::Store
 				{
-					obfuscated_header.uncompressed_size
-				} else {
-					4096 + obfuscated_header.compressed_size % 4096
-				};
-				local_header_disk_number = (random_u32(seed) % 32768) as u16 + 32768;
+					central_directory_header.uncompressed_size =
+						4096 + central_directory_header.compressed_size % 4096;
+				}
+				central_directory_header.local_header_disk_number =
+					(random_u32(seed) % 32768) as u16 + 32768;
 			} else {
-				uncompressed_size = if obfuscate_uncompressed_size {
-					0xFFFFFF7F
-				} else {
-					obfuscated_header.uncompressed_size
-				};
-				local_header_disk_number = u16::MAX;
+				if obfuscate_uncompressed_size {
+					central_directory_header.uncompressed_size = 0xFFFFFF7F;
+				}
+				central_directory_header.local_header_disk_number = u16::MAX;
 			}
 
-			obfuscated_header = CentralDirectoryHeader {
-				compression_method: obfuscated_header.compression_method,
-				squash_time: obfuscated_header.squash_time,
-				crc32: obfuscated_header.crc32 ^ CRC32_KEY,
-				compressed_size: obfuscated_header.compressed_size,
-				uncompressed_size,
-				local_header_disk_number,
-				local_header_offset: obfuscated_header.local_header_offset
-					- self.obfuscating_header_size(),
-				file_name: obfuscated_header.file_name,
-				spoof_version_made_by: true
-			};
+			central_directory_header.crc32 ^= CRC32_KEY;
+			central_directory_header.local_header_offset -= self.obfuscating_header_size();
+			central_directory_header.spoof_version_made_by = true;
 		}
-
-		obfuscated_header
 	}
 
 	pub fn obfuscate_end_of_central_directory(
 		&self,
-		end_of_central_directory: EndOfCentralDirectory
-	) -> EndOfCentralDirectory {
-		let mut obfuscated_header = end_of_central_directory;
-
+		end_of_central_directory: &mut EndOfCentralDirectory
+	) {
 		if let ObfuscationEngine::Obfuscation { .. } = self {
-			let seed = obfuscated_header.total_central_directory_entry_count
-				^ obfuscated_header.current_file_offset;
+			let seed = end_of_central_directory.total_central_directory_entry_count
+				^ end_of_central_directory.current_file_offset;
 			let discretion = self.use_discretion(seed);
-
-			let central_directory_entry_count_current_disk;
-			let total_central_directory_entry_count;
-			let total_number_of_disks;
-			let zip64_record_size_offset;
 
 			if discretion {
 				let offset = random_u32(seed) as u64 % 7 + 1;
 
-				central_directory_entry_count_current_disk =
-					obfuscated_header.central_directory_entry_count_current_disk + offset;
-				total_central_directory_entry_count =
-					obfuscated_header.total_central_directory_entry_count + offset;
-				total_number_of_disks = random_u32(seed) % 65536 + 65536;
-				zip64_record_size_offset = (random_u32(seed) % 17) as i8 - 8;
+				end_of_central_directory.central_directory_entry_count_current_disk += offset;
+				end_of_central_directory.total_central_directory_entry_count += offset;
+				end_of_central_directory.total_number_of_disks = random_u32(seed) % 65536 + 65536;
+				end_of_central_directory.zip64_record_size_offset = (random_u32(seed) % 17) as i8 - 8;
 			} else {
-				central_directory_entry_count_current_disk = 0;
-				total_central_directory_entry_count = 0;
-				total_number_of_disks = 0;
-				zip64_record_size_offset = -44;
+				end_of_central_directory.central_directory_entry_count_current_disk = 0;
+				end_of_central_directory.total_central_directory_entry_count = 0;
+				end_of_central_directory.total_number_of_disks = 0;
+				end_of_central_directory.zip64_record_size_offset = -44;
 			}
 
-			obfuscated_header = EndOfCentralDirectory {
-				disk_number: u16::MAX,
-				central_directory_start_disk_number: 0,
-				central_directory_entry_count_current_disk,
-				total_central_directory_entry_count,
-				central_directory_size: obfuscated_header.central_directory_size,
-				central_directory_start_offset: obfuscated_header.central_directory_start_offset
-					- self.obfuscating_header_size(),
-				total_number_of_disks,
-				current_file_offset: obfuscated_header.current_file_offset
-					- self.obfuscating_header_size(),
-				zip64_record_size_offset,
-				spoof_version_made_by: true,
-				zero_out_unused_zip64_fields: !discretion
-			};
+			end_of_central_directory.disk_number = 0xFFFF;
+			end_of_central_directory.central_directory_start_offset -= self.obfuscating_header_size();
+			end_of_central_directory.current_file_offset -= self.obfuscating_header_size();
+			end_of_central_directory.spoof_version_made_by = true;
+			end_of_central_directory.zero_out_unused_zip64_fields = !discretion;
 		}
-
-		obfuscated_header
 	}
 
 	pub fn deobfuscate_crc32(&self, obfuscated_crc32: u32) -> u32 {

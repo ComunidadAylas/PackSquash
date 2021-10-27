@@ -7,6 +7,8 @@ use enumset::{EnumSet, EnumSetType};
 
 use tokio::io::{self, AsyncWrite};
 
+use crate::RelativePath;
+
 use super::SquashZipError;
 
 #[cfg(test)]
@@ -144,8 +146,7 @@ pub(super) struct LocalFileHeader<'a> {
 	pub compressed_size: u32,
 	pub uncompressed_size: u32,
 	pub zero_out_version_needed_to_extract: bool,
-	file_name_length: u16,
-	file_name: Cow<'a, str>
+	pub file_name: Cow<'a, RelativePath<'a>>
 }
 
 /// Magic bytes defined in the ZIP specification whose purpose is signalling
@@ -153,28 +154,27 @@ pub(super) struct LocalFileHeader<'a> {
 const LOCAL_FILE_HEADER_SIGNATURE: [u8; 4] = 0x04034B50_u32.to_le_bytes();
 
 impl<'a> LocalFileHeader<'a> {
-	/// Creates a new local file header record. This operation may fail if the
-	/// file name is too big. The caller must make sure that the following fields
-	/// end up being initialized to an appropriate value before writing the header:
+	/// Creates a new local file header record. The caller must make sure that the
+	/// following fields end up being initialized to an appropriate value before
+	/// writing the header:
 	/// - `compression_method` (by default it is STORE)
 	/// - `crc32` (by default it is 0)
 	/// - `compressed_size` (by default it is 0)
 	/// - `uncompressed_size` (by default it is 0)
 	/// - `squash_time` (by default it is a dummy value)
 	/// - `zero_out_version_needed_to_extract` (by default is `false`)
-	pub fn new<T: Into<Cow<'a, str>>>(file_name: T) -> Result<Self, SquashZipError> {
+	pub fn new<T: Into<Cow<'a, RelativePath<'a>>>>(file_name: T) -> Self {
 		let file_name = file_name.into();
 
-		Ok(Self {
+		Self {
 			compression_method: CompressionMethod::Store,
 			squash_time: DUMMY_SQUASH_TIME,
 			crc32: 0,
 			compressed_size: 0,
 			uncompressed_size: 0,
 			zero_out_version_needed_to_extract: false,
-			file_name_length: file_name.len().try_into()?,
 			file_name
-		})
+		}
 	}
 
 	/// Writes this ZIP file record to the specified output ZIP file. For top performance,
@@ -198,7 +198,7 @@ impl<'a> LocalFileHeader<'a> {
 		} else {
 			0
 		};
-		let general_purpose_bit_flag = get_general_purpose_bit_flag(&self.file_name);
+		let general_purpose_bit_flag = get_general_purpose_bit_flag(self.file_name.as_str());
 		let compression_method = self.compression_method.to_compression_method_field();
 
 		// A 4-byte Squash Time timestamp is stored in the two little-endian two bytes fields
@@ -222,25 +222,19 @@ impl<'a> LocalFileHeader<'a> {
 		cursor.write_all(&self.crc32.to_le_bytes())?;
 		cursor.write_all(&self.compressed_size.to_le_bytes())?;
 		cursor.write_all(&self.uncompressed_size.to_le_bytes())?;
-		cursor.write_all(&self.file_name_length.to_le_bytes())?;
+		cursor.write_all(&(self.file_name.as_str().len() as u16).to_le_bytes())?;
 		// We don't add extra fields in the local file header
 		cursor.write_all(&0u16.to_le_bytes())?;
 
 		io::AsyncWriteExt::write_all(output_zip, &buf).await?;
 
-		io::AsyncWriteExt::write_all(output_zip, self.file_name.as_bytes()).await
+		io::AsyncWriteExt::write_all(output_zip, self.file_name.as_str().as_bytes()).await
 	}
 
 	/// Returns the size that this ZIP file record would take on the file. This
 	/// is the same number of bytes that would be written by [`Self::write()`].
-	pub const fn size(&self) -> u32 {
-		30 + self.file_name_length as u32
-	}
-
-	/// Returns the file name that this ZIP file record would contain when
-	/// written to a file.
-	pub fn file_name(&self) -> &str {
-		&self.file_name
+	pub fn size(&self) -> u32 {
+		30 + self.file_name.as_str().len() as u32
 	}
 }
 
@@ -254,11 +248,7 @@ pub(super) struct CentralDirectoryHeader<'a> {
 	pub uncompressed_size: u32,
 	pub local_header_disk_number: u16,
 	pub local_header_offset: u64,
-	/// It is assumed that the file name is 65535 bytes long or less, as limited by the
-	/// ZIP specification. Failure to uphold this assumption will lead to incorrect
-	/// results. This should not be a problem because the file name length should already
-	/// have been checked previously, while building the local file header.
-	pub file_name: &'a str,
+	pub file_name: RelativePath<'a>,
 	pub spoof_version_made_by: bool
 }
 
@@ -318,7 +308,7 @@ impl<'a> CentralDirectoryHeader<'a> {
 
 		let version_needed_to_extract = version_needed_to_extract(&zip_features_needed_to_extract);
 
-		let general_purpose_bit_flag = get_general_purpose_bit_flag(self.file_name);
+		let general_purpose_bit_flag = get_general_purpose_bit_flag(self.file_name.as_str());
 		let compression_method = self.compression_method.to_compression_method_field();
 
 		cursor.write_all(&CENTRAL_DIRECTORY_HEADER_SIGNATURE)?;
@@ -332,7 +322,7 @@ impl<'a> CentralDirectoryHeader<'a> {
 		cursor.write_all(&self.compressed_size.to_le_bytes())?;
 		cursor.write_all(&self.uncompressed_size.to_le_bytes())?;
 		// End of same operations as local file header
-		cursor.write_all(&(self.file_name.len() as u16).to_le_bytes())?;
+		cursor.write_all(&(self.file_name.as_str().len() as u16).to_le_bytes())?;
 		cursor.write_all(&extra_field_length.to_le_bytes())?;
 		// File comment length
 		cursor.write_all(&[0; 2])?;
@@ -353,7 +343,7 @@ impl<'a> CentralDirectoryHeader<'a> {
 			.to_le_bytes()
 		)?;
 		io::AsyncWriteExt::write_all(output_zip, &buf).await?;
-		io::AsyncWriteExt::write_all(output_zip, self.file_name.as_bytes()).await?;
+		io::AsyncWriteExt::write_all(output_zip, self.file_name.as_str().as_bytes()).await?;
 
 		// ZIP64 extended information extra field
 		if zip64_extensions_required {

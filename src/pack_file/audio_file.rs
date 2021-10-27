@@ -442,7 +442,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for AudioFile<T> {
 		mut file_read_producer: F,
 		args: PackFileConstructorArgs<'_, AudioFileOptions>
 	) -> Option<Self> {
-		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
+		let extension = &*to_ascii_lowercase_extension(args.path);
 
 		if matches!(extension, "ogg" | "oga" | "mp3" | "opus" | "flac" | "wav") {
 			file_read_producer().map(|(read, _)| Self {

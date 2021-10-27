@@ -76,7 +76,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PassthroughFile<
 		mut file_read_producer: F,
 		args: PackFileConstructorArgs<'_, ()>
 	) -> Option<Self> {
-		let extension = &*to_ascii_lowercase_extension(args.path.as_ref());
+		let extension = &*to_ascii_lowercase_extension(args.path);
 
 		match extension {
 			"ttf" => file_read_producer().map(|(read, _)| Self {
@@ -95,7 +95,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PassthroughFile<
 			// Plain text files that are known to be used by Minecraft
 			"txt"
 				if matches!(
-					args.path.as_ref(),
+					args.path.as_str(),
 					"assets/minecraft/texts/end.txt"
 						| "assets/minecraft/texts/credits.txt"
 						| "assets/minecraft/texts/splashes.txt"

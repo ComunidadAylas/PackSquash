@@ -151,12 +151,12 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 						match pack_file_status.optimization_error() {
 							Some(error_description) => eprintln!(
 								"! {}: {}",
-								pack_file_status.path().as_ref(),
+								pack_file_status.path().as_str(),
 								error_description
 							),
 							None => eprintln!(
 								"> {}: {}",
-								pack_file_status.path().as_ref(),
+								pack_file_status.path().as_str(),
 								pack_file_status.optimization_strategy()
 							)
 						}
