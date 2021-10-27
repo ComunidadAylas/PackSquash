@@ -23,12 +23,11 @@ pub fn to_ascii_lowercase_extension<P: AsRef<Path> + ?Sized>(path: &P) -> Cow<'_
 	let extension = Path::new(path.as_ref())
 		.extension()
 		.unwrap_or_else(|| OsStr::new(""))
-		.to_str()
-		.unwrap();
+		.to_string_lossy();
 
 	if extension.chars().any(|c| c.is_ascii_uppercase()) {
 		Cow::Owned(extension.to_ascii_lowercase())
 	} else {
-		Cow::Borrowed(extension)
+		extension
 	}
 }
