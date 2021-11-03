@@ -1,10 +1,7 @@
-use std::{
-	borrow::Cow,
-	fmt::{Debug, Display},
-	io,
-	ops::Deref
-};
+use std::{borrow::Cow, fmt::{Debug, Display}, io, lazy::SyncLazy, ops::Deref};
 
+use enum_iterator::IntoEnumIterator;
+use globset::{Glob, GlobSet, GlobSetBuilder};
 use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_stream::Stream;
@@ -128,4 +125,30 @@ pub struct PackFileConstructorArgs<'a, S> {
 	pub path: &'a RelativePath<'a>,
 	/// The pack file type specific optimization settings.
 	pub optimization_settings: S
+}
+
+/// Represents a type of asset contained in a [`PackFile`]. A pack file can represent several
+/// asset types depending on how Minecraft reads it.
+trait PackFileAssetType: Ord + Copy + Eq + IntoEnumIterator + TryFrom<usize> {
+	/// Compiles a glob pattern that matches [`RelativePath`]s and can be used to identify a
+	/// pack file as containing an asset with this type.
+	fn to_glob_pattern(&self) -> Glob;
+	/// Returns the canonical extension for the pack file that contains this asset type, which
+	/// Minecraft expects.
+	fn canonical_extension(&self) -> &str;
+}
+
+/// Returns a lazily initialized glob set that can be used to identify a [`PackFile`] as belonging
+/// to a [`PackFileAssetType`] from its [`RelativePath`]. The glob patterns are added to the set
+/// in the order their variants are declared in the [`PackFileAssetType`] enum.
+const fn pack_file_asset_type_globset<T: PackFileAssetType>() -> SyncLazy<GlobSet> {
+	SyncLazy::new(|| {
+		let mut globset_builder = GlobSetBuilder::new();
+
+		for asset_type in T::into_enum_iter() {
+			globset_builder.add(asset_type.to_glob_pattern());
+		}
+
+		globset_builder.build().unwrap()
+	})
 }

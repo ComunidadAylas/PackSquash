@@ -3,7 +3,7 @@
 use std::{num::NonZeroUsize, path::PathBuf};
 
 use enumset::{EnumSet, EnumSetType};
-use globset::{GlobBuilder, GlobSet, GlobSetBuilder};
+use globset::{Glob, GlobBuilder, GlobSet, GlobSetBuilder};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sysinfo::{RefreshKind, System, SystemExt};
@@ -43,12 +43,7 @@ impl TryFrom<SquashOptions> for ProcessedSquashOptions {
 		// Build glob patterns to match file paths with their options
 		let mut globset_builder = GlobSetBuilder::new();
 		for glob_pattern in squash_options.file_options.keys() {
-			globset_builder.add(
-				GlobBuilder::new(glob_pattern)
-					.literal_separator(true)
-					.backslash_escape(true)
-					.build()?
-			);
+			globset_builder.add(compile_pack_file_glob_pattern(glob_pattern)?);
 		}
 
 		Ok(ProcessedSquashOptions {
@@ -207,8 +202,8 @@ pub struct GlobalOptions {
 	/// in the result ZIP file.
 	///
 	/// **Default value**: empty set (do not add any mod-specific files)
-	#[cfg(feature = "mod-support")]
-	#[doc(cfg(feature = "mod-support"))]
+	#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
+	#[doc(cfg(any(feature = "optifine-support", feature = "mtr3-support")))]
 	pub allow_mods: EnumSet<MinecraftMod>,
 	/// The output file path where the result ZIP will be written to. This path must not point to a
 	/// folder.
@@ -271,7 +266,7 @@ impl Default for GlobalOptions {
 			automatic_minecraft_quirks_detection: true,
 			work_around_minecraft_quirks: EnumSet::empty(),
 			ignore_system_and_hidden_files: true,
-			#[cfg(feature = "mod-support")]
+			#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 			allow_mods: EnumSet::empty(),
 			threads: hardware_threads.try_into().unwrap(),
 			output_file_path: PathBuf::from("pack.zip"),
@@ -464,8 +459,8 @@ impl MinecraftQuirk {
 #[derive(Deserialize, Serialize, EnumSetType)]
 #[enumset(serialize_deny_unknown, serialize_as_list)]
 #[non_exhaustive]
-#[cfg(feature = "mod-support")]
-#[doc(cfg(feature = "mod-support"))]
+#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
+#[doc(cfg(any(feature = "optifine-support", feature = "mtr3-support")))]
 pub enum MinecraftMod {
 	/// OptiFine.
 	///
@@ -475,7 +470,15 @@ pub enum MinecraftMod {
 	#[serde(rename = "OptiFine")]
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
-	Optifine
+	Optifine,
+	/// Minecraft Transit Railway, version 3.0 and compatibles.
+	///
+	/// Currently, this adds support for the following file types:
+	/// - Blockbench modded entity model projects for custom train models (`.bbmodel`).
+	#[serde(rename = "Minecraft Transit Railway 3")]
+	#[cfg(feature = "mtr3-support")]
+	#[doc(cfg(feature = "mtr3-support"))]
+	MinecraftTransitRailway3
 }
 
 /// Options that customize how some file, of a certain file type, is processed.
@@ -654,7 +657,14 @@ pub struct JsonFileOptions {
 	///
 	/// **Default value**: `false`
 	#[serde(skip)]
-	pub(crate) allow_optifine_extensions: bool
+	#[cfg(feature = "optifine-support")]
+	pub(crate) allow_optifine_files: bool,
+	/// Crate-private option set when [MinecraftMod::MinecraftTransitRailway3] was configured.
+	///
+	/// **Default value**: `false`
+	#[serde(skip)]
+	#[cfg(feature = "mtr3-support")]
+	pub(crate) allow_mtr3_files: bool
 }
 
 impl Default for JsonFileOptions {
@@ -662,18 +672,30 @@ impl Default for JsonFileOptions {
 		Self {
 			minify: true,
 			delete_bloat: true,
-			allow_optifine_extensions: false
+			#[cfg(feature = "optifine-support")]
+			allow_optifine_files: false,
+			#[cfg(feature = "mtr3-support")]
+			allow_mtr3_files: false
 		}
 	}
 }
 
 impl FileOptionsTrait for JsonFileOptions {
-	#[cfg_attr(not(feature = "optifine-support"), allow(unused_mut, unused_variables))]
+	#[cfg_attr(
+		not(any(feature = "optifine-support", feature = "mtr3-support")),
+		allow(unused_mut, unused_variables)
+	)]
 	fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
 		#[cfg(feature = "optifine-support")]
 		{
-			self.allow_optifine_extensions =
-				global_options.allow_mods.contains(MinecraftMod::Optifine);
+			self.allow_optifine_files = global_options.allow_mods.contains(MinecraftMod::Optifine);
+		}
+
+		#[cfg(feature = "mtr3-support")]
+		{
+			self.allow_mtr3_files = global_options
+				.allow_mods
+				.contains(MinecraftMod::MinecraftTransitRailway3);
 		}
 
 		self
@@ -879,4 +901,16 @@ impl FileOptionsTrait for PropertiesFileOptions {
 
 		self
 	}
+}
+
+/// Compiles the specified glob pattern to a matcher that is ready to consume
+/// any relative pack file path, preventing `*` and `?` from matching path
+/// separators, considering `/` as the path separator independently of the
+/// current platform, and enabling backslash escaping. An error will be
+/// returned if the provided glob pattern is invalid.
+pub(crate) fn compile_pack_file_glob_pattern(glob_pattern: &str) -> Result<Glob, globset::Error> {
+	GlobBuilder::new(glob_pattern)
+		.literal_separator(true)
+		.backslash_escape(true)
+		.build()
 }

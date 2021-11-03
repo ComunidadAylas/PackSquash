@@ -4,6 +4,8 @@
 #![deny(unsafe_code)]
 #![feature(const_option)]
 #![feature(const_fn_floating_point_arithmetic)]
+#![feature(const_fn_fn_ptr_basics)]
+#![feature(const_fn_trait_bound)]
 #![feature(new_uninit)]
 #![feature(once_cell)]
 #![feature(type_alias_impl_trait)]
