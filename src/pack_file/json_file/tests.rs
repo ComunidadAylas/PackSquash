@@ -122,15 +122,34 @@ async fn empty_input_is_handled_with_error() {
 }
 
 #[tokio::test]
-async fn strange_value_is_handled_consistently() {
-	successful_process_test(
-		"null",
-		JsonFileAssetType::MinecraftModel,
-		JsonFileOptions {
+async fn unexpected_value_is_handled_with_error() {
+	const NULL_VALUE: &str = "null";
+
+	let mut data_stream = JsonFile {
+		read: Builder::new().read(NULL_VALUE.as_bytes()).build(),
+		file_length_hint: NULL_VALUE.len(),
+		asset_type: JsonFileAssetType::MinecraftModel,
+		optimization_settings: JsonFileOptions {
 			// Debloat, to test debloating too
 			delete_bloat: true,
 			..Default::default()
-		},
+		}
+	}
+	.process();
+
+	data_stream
+		.next()
+		.await
+		.expect("Expected some result for this input")
+		.expect_err("Expected an error for this input");
+}
+
+#[tokio::test]
+async fn strange_value_is_handled_consistently() {
+	successful_process_test(
+		"null",
+		JsonFileAssetType::Generic,
+		Default::default(),
 		"null"
 	)
 	.await;
