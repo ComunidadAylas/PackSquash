@@ -1,4 +1,10 @@
-use std::{borrow::Cow, fmt::{Debug, Display}, io, lazy::SyncLazy, ops::Deref};
+use std::{
+	borrow::Cow,
+	fmt::{Debug, Display},
+	io,
+	lazy::SyncLazy,
+	ops::Deref
+};
 
 use enum_iterator::IntoEnumIterator;
 use globset::{Glob, GlobSet, GlobSetBuilder};
