@@ -1,5 +1,6 @@
 use std::{
 	borrow::Cow,
+	convert::TryFrom,
 	fmt::{Debug, Display},
 	io,
 	lazy::SyncLazy,

@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{convert::TryInto, time::Duration};
 
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;

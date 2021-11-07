@@ -1,4 +1,4 @@
-use std::{borrow::Cow, lazy::SyncLazy};
+use std::{borrow::Cow, convert::TryInto, lazy::SyncLazy};
 
 use bytes::{BufMut, BytesMut};
 use globset::{Glob, GlobSet};

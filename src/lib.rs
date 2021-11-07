@@ -21,7 +21,7 @@
 #![deny(rustdoc::private_intra_doc_links)]
 
 use std::borrow::Cow;
-use std::convert::Infallible;
+use std::convert::{Infallible, TryInto};
 use std::hint::unreachable_unchecked;
 use std::io::ErrorKind;
 use std::path::PathBuf;

@@ -1,6 +1,10 @@
 //! Contains the configuration options needed to create a `PackSquasher` run.
 
-use std::{num::NonZeroUsize, path::PathBuf};
+use std::{
+	convert::{TryFrom, TryInto},
+	num::NonZeroUsize,
+	path::PathBuf
+};
 
 use enumset::{EnumSet, EnumSetType};
 use globset::{Glob, GlobBuilder, GlobSet, GlobSetBuilder};
