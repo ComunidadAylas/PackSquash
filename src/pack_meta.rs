@@ -325,7 +325,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn pack_mcmeta_without_expected_json_estructure() {
+	async fn pack_mcmeta_without_expected_structure() {
 		assert!(
 			PackMeta::new(&MockVfs("42"), "").await.is_err(),
 			"Expected failure reading pack metadata"
