@@ -12,6 +12,11 @@ use thiserror::Error;
 use crate::pack_file::strip_utf8_bom;
 use crate::{config::MinecraftQuirk, vfs::VirtualFileSystem};
 
+/// The pack format version used in Minecraft versions from 1.13 to 1.14.4.
+pub const PACK_FORMAT_VERSION_1_13: i32 = 4;
+/// The pack format version used in Minecraft versions from 1.17 to 1.17.1.
+pub const PACK_FORMAT_VERSION_1_17: i32 = 7;
+
 /// Metadata for a resource or data pack, contained in the `pack.mcmeta` file
 /// in the root folder of a pack.
 ///
@@ -139,13 +144,11 @@ impl PackMeta {
 	pub fn target_minecraft_versions_quirks(&self) -> EnumSet<MinecraftQuirk> {
 		let mut quirks = EnumSet::empty();
 
-		// 4 was first used in 1.13
-		if self.pack_format_version < 4 {
+		if self.pack_format_version < PACK_FORMAT_VERSION_1_13 {
 			quirks |= MinecraftQuirk::GrayscaleImagesGammaMiscorrection;
 		}
 
-		// 7 was first used in 1.17
-		if self.pack_format_version < 7 {
+		if self.pack_format_version < PACK_FORMAT_VERSION_1_17 {
 			quirks |= MinecraftQuirk::Java8ZipParsing;
 		}
 
