@@ -120,14 +120,47 @@ impl PackSquasher {
 	{
 		let mut options_holder = squash_options.try_into()?;
 
+		// When reading from a pack directory that is not a directory, no files will be
+		// processed. Avoid useless computation and help the user out by bailing out early
+		// with a descriptive error message in that case.
+		//
+		// Note that program correctness cannot depend on these conditions staying true
+		// during its execution. These checks are just meant to handle usage mistakes
+		// promptly
 		if !vfs
 			.file_type(&options_holder.options.pack_directory)?
 			.is_dir()
 		{
 			return Err(PackSquasherError::InvalidFileType(
-				"The pack directory path must point to a directory, not a file"
+				"The pack directory path must refer to a directory, not a file"
 			));
 		}
+
+		// On Windows and Linux (and probably most other POSIX OSes), writing to a directory
+		// is an error, and we would try to do so after a maybe time consuming optimization
+		// process. Reading from a directory, at least on those platforms, is like reading from
+		// an empty file, and we would try to do that if the previous ZIP file is to be reused.
+		// Again, to avoid useless computation and help the user out, bail out early with
+		// a descriptive error message. We assume that the path being "not a directory" is
+		// good enough, as the remaining filesystem object types (named pipes, etc.) behave
+		// like regular files, not directories.
+		//
+		// Note that program correctness cannot depend on these conditions staying true during
+		// its execution. These checks are just meant to handle usage mistakes promptly
+		let output_file_path = &options_holder.options.global_options.output_file_path;
+		match vfs.file_type(output_file_path) {
+			Ok(file_type) => {
+				if file_type.is_dir() {
+					return Err(PackSquasherError::InvalidFileType(
+						"The output file path must refer to a file, not a directory"
+					));
+				}
+			}
+			// The output file may not exist yet. This is a normal condition, but it may
+			// indicate that the parent paths do not exist, which is an usage error
+			Err(err) if err.kind() == ErrorKind::NotFound => (),
+			Err(err) => return Err(err.into())
+		};
 
 		let runtime = Builder::new_multi_thread()
 			.worker_threads(options_holder.options.global_options.threads.get())
@@ -190,7 +223,6 @@ impl PackSquasher {
 		let options_holder = Arc::new(options_holder);
 
 		runtime.block_on(async {
-			// Get the iterator over pack files from the virtual file system
 			let pack_file_iter = vfs.file_iterator(
 				&options_holder.options.pack_directory,
 				IteratorTraversalOptions {
@@ -211,14 +243,8 @@ impl PackSquasher {
 			let previous_zip = if squashzip_settings.store_squash_time {
 				match File::open(&options_holder.options.global_options.output_file_path).await {
 					Ok(file) => Some(BufReader::new(file)),
-					Err(err) => {
-						// The previous output file may not exist the first time we run
-						if err.kind() == ErrorKind::NotFound {
-							None
-						} else {
-							return Err(err.into());
-						}
-					}
+					Err(err) if err.kind() == ErrorKind::NotFound => None,
+					Err(err) => return Err(err.into())
 				}
 			} else {
 				None
