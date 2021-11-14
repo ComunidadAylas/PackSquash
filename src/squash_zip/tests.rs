@@ -1,6 +1,10 @@
-use std::{env, path::PathBuf};
+use std::{
+	env,
+	path::{Path, PathBuf}
+};
 
 use tempfile::Builder;
+use tokio::fs::OpenOptions;
 
 use super::*;
 
@@ -47,6 +51,7 @@ fn create_temporary_output_file(test_name: &'static str) -> PathBuf {
 /// PackSquash is able to read back relevant data from the files it generates.
 async fn add_files_finish_and_read_back_test(
 	squash_zip: Option<SquashZip<File>>,
+	output_file_path: Option<PathBuf>,
 	file_count: u8,
 	enable_deduplication: bool,
 	file_name_number: impl Fn(u8) -> u8,
@@ -56,9 +61,14 @@ async fn add_files_finish_and_read_back_test(
 	test_name: &'static str,
 	files_reused_from_previous_run: usize
 ) -> PathBuf {
-	let squash_zip = squash_zip.unwrap_or(
+	let file_path = output_file_path.unwrap_or_else(|| create_temporary_output_file(test_name));
+
+	let squash_zip = if let Some(squash_zip) = squash_zip {
+		squash_zip
+	} else {
 		SquashZip::new(
 			None,
+			create_no_truncate(&file_path).await,
 			SquashZipSettings {
 				zopfli_iterations: 20,
 				store_squash_time: true,
@@ -72,9 +82,7 @@ async fn add_files_finish_and_read_back_test(
 		)
 		.await
 		.expect(INSTANTIATION_FAILURE)
-	);
-
-	let file_path = create_temporary_output_file(test_name);
+	};
 
 	for i in 0..file_count {
 		squash_zip
@@ -96,12 +104,13 @@ async fn add_files_finish_and_read_back_test(
 	}
 
 	squash_zip
-		.finish(&file_path)
+		.finish()
 		.await
 		.expect(UNEXPECTED_OPERATION_FAILURE);
 
 	let squash_zip = SquashZip::new(
 		Some(File::open(&file_path).await.expect(UNEXPECTED_IO_FAILURE)),
+		create_no_truncate(&file_path).await,
 		SquashZipSettings {
 			zopfli_iterations: 20,
 			store_squash_time: true,
@@ -129,6 +138,7 @@ async fn add_files_finish_and_read_back_test(
 async fn add_single_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
 		None,
+		None,
 		1,
 		false,
 		|i| i,
@@ -144,6 +154,7 @@ async fn add_single_finish_and_read_back_works() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn add_empty_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
+		None,
 		None,
 		1,
 		false,
@@ -161,6 +172,7 @@ async fn add_empty_finish_and_read_back_works() {
 async fn add_tiny_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
 		None,
+		None,
 		1,
 		false,
 		|i| i,
@@ -176,6 +188,7 @@ async fn add_tiny_finish_and_read_back_works() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn add_several_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
+		None,
 		None,
 		3,
 		false,
@@ -193,6 +206,7 @@ async fn add_several_finish_and_read_back_works() {
 async fn add_several_finish_and_read_back_with_deduplication_works() {
 	add_files_finish_and_read_back_test(
 		None,
+		None,
 		3,
 		true,
 		|i| i,
@@ -209,6 +223,7 @@ async fn add_several_finish_and_read_back_with_deduplication_works() {
 async fn add_several_compressed_finish_and_read_back_with_deduplication_works() {
 	let bigger_file = add_files_finish_and_read_back_test(
 		None,
+		None,
 		3,
 		true,
 		|i| i,
@@ -221,6 +236,7 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 	.await;
 
 	let smaller_file = add_files_finish_and_read_back_test(
+		None,
 		None,
 		3,
 		true,
@@ -259,6 +275,7 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 async fn add_several_and_read_back_some_duplicates_works() {
 	add_files_finish_and_read_back_test(
 		None,
+		None,
 		3,
 		true,
 		|i| i,
@@ -276,6 +293,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 	// Two different files, visions0.bin and visions1.bin, with bytes 'a' and 'b' repeated
 	let zip_path = add_files_finish_and_read_back_test(
 		None,
+		None,
 		2,
 		true,
 		|i| i,
@@ -289,6 +307,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 
 	let squash_zip = SquashZip::new(
 		Some(File::open(&zip_path).await.expect(UNEXPECTED_IO_FAILURE)),
+		create_no_truncate(&zip_path).await,
 		SquashZipSettings {
 			zopfli_iterations: 20,
 			store_squash_time: true,
@@ -316,6 +335,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 	// visions1.bin must not appear.
 	let zip_path = add_files_finish_and_read_back_test(
 		Some(squash_zip),
+		Some(zip_path),
 		2,
 		true,
 		|i| i + 2,
@@ -329,6 +349,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 
 	let squash_zip = SquashZip::new(
 		Some(File::open(&zip_path).await.expect(UNEXPECTED_IO_FAILURE)),
+		create_no_truncate(&zip_path).await,
 		SquashZipSettings {
 			zopfli_iterations: 20,
 			store_squash_time: true,
@@ -355,4 +376,16 @@ async fn add_several_finish_then_reuse_and_add_works() {
 				file
 			));
 	}
+}
+
+/// Opens the file at the specified path with write access, creating it if it
+/// does not exist, but without truncating its contents if it already does.
+/// Any I/O error that occurs will cause a panic.
+async fn create_no_truncate<P: AsRef<Path>>(path: P) -> File {
+	OpenOptions::new()
+		.write(true)
+		.create(true)
+		.open(path)
+		.await
+		.expect(UNEXPECTED_OPERATION_FAILURE)
 }

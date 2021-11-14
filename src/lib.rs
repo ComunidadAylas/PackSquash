@@ -59,7 +59,7 @@ use futures::StreamExt;
 use pack_meta::{PackMeta, PackMetaError};
 use squash_zip::{SquashZip, SquashZipError};
 use thiserror::Error;
-use tokio::fs::File;
+use tokio::fs::{File, OpenOptions};
 use tokio::io::AsyncSeek;
 use tokio::io::BufReader;
 use tokio::sync::mpsc::Sender;
@@ -251,7 +251,24 @@ impl PackSquasher {
 			};
 
 			// Instantiate SquashZip and the list of join handles to the pack file tasks
-			let squash_zip = SquashZip::new(previous_zip, squashzip_settings).await?;
+			let squash_zip = SquashZip::new(
+				previous_zip,
+				// By design, the previous ZIP is the same file as the output ZIP. Therefore,
+				// it is important that we do not truncate it if it already exists, as otherwise
+				// no data can be read back for reuse. Another reason for not truncating it yet
+				// is that, if an optimization error happens, we will keep the already existing
+				// file untouched, which makes the process feel more atomic (full atomicity is
+				// not guaranteed in general, because if an I/O error happens while writing to
+				// it after its truncation then the previous data will be lost). Therefore,
+				// File::create is not suitable, because it forces truncating
+				OpenOptions::new()
+					.write(true)
+					.create(true)
+					.open(&options_holder.options.global_options.output_file_path)
+					.await?,
+				squashzip_settings
+			)
+			.await?;
 			let mut pack_file_tasks = Vec::with_capacity(squash_zip.previous_file_count());
 			let squash_zip = Arc::new(squash_zip);
 
@@ -539,11 +556,7 @@ impl PackSquasher {
 			// we have just waited for the pack file tasks to conclude, and each task
 			// held one strong reference
 			match Arc::try_unwrap(squash_zip) {
-				Ok(squash_zip) => {
-					squash_zip
-						.finish(&options_holder.options.global_options.output_file_path)
-						.await?
-				}
+				Ok(squash_zip) => squash_zip.finish().await?,
 				Err(_) => panic!("Unexpected number of strong references to SquashZip")
 			};
 
