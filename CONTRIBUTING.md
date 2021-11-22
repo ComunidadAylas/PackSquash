@@ -140,7 +140,7 @@ If your contribution involves editing files in the repository, you'll need to su
 
 Pull requests should follow an etiquette, describe what they change, and show some effort to make them as easy to review as possible. [The pull request guide at the Atlassian blog](https://www.atlassian.com/blog/git/written-unwritten-guide-pull-requests) does a good job explaining how to make a good pull request, and you should read it.
 
-If your PR contains code modifications, you should also update the relevant documentation and make sure that every continuous integration check passes, unless you're explicitly told otherwise, in addition to following the relevant guidelines highlighted in the technologies section of this document.
+If your PR contains code modifications, you should also update the relevant documentation and make sure that every continuous integration check passes, unless you're explicitly told otherwise, in addition to following the relevant guidelines highlighted in the technologies section of this document. In case of doubt or incomplete guidelines, follow the style and design choices of the already existing code.
 
 ## ✒️ Contributor License Agreement (CLA)
 
@@ -150,4 +150,4 @@ Every contributor that submits a PR must explicitly agree to the CLA for their c
 
 We reckon that a CLA might seem a bit overkill for a project like PackSquash, and that some contributors might feel uneasy with the possibility of their work being distributed under a different license. However, we think that letting contributors be aware of the rules under which their work will be used provides safety to them and is a good transparency exercise. In fact, prominent free and open source software projects like Eclipse, Ubuntu and KDE, are already using a CLA for similar reasons.
 
-About the relicensing possibility that our CLA opens, we think of it as a _reserve power_ that will only be used responsibly, to avoid the legal complications that would otherwise arise. With "responsibly", we mean that we will not do take such relicensing decisions lightly, we will only do them after publicly asking and letting our community know about them, and we will always make PackSquash available under an open source license.
+About the relicensing possibility that our CLA opens, we think of it as a _reserve power_ that will only be used responsibly, to avoid the legal complications that would otherwise arise. With "responsibly", we mean that we will not take such relicensing decisions lightly, we will only do them after publicly asking and letting our community know about them, and we will always make PackSquash available under an open source license.
