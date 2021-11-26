@@ -2,23 +2,21 @@
 
 ## Our Pledge
 
-We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste, color, religion, sexual identity and orientation, or any other similar characteristic.
-
-We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
+We as members, contributors, and leaders pledge to make participation in our community a welcoming, diverse, open, harassment-free and fulfilling experience for everyone, regardless of any personal characteristic, to foster a healthy community.
 
 ## Scope
 
-This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community. Examples of representing our community include using an official account, being authorized to speak in the name of it and doing so, or acting as an appointed representative at an event.
+This Code of Conduct applies within all community spaces, and outside of community spaces when an individual is officially representing the community. Examples of representing our community include using an official account, being authorized to speak in the name of it and doing so, or acting as an appointed representative at an event.
 
 Some community spaces may have their own rules, such as our Discord server. In those cases, this Code of Conduct is overruled by the space-specific codes, which in any case should be consistent with our pledge.
 
 ## Our Standards
 
-We strive to:
+To honor our pledge, we strive to:
 
 ### Be considerate
 
-Our work will be used by other people, and we in turn will depend on the work of others. Any decision we take will affect users and colleagues, and we should consider them when making decisions. Feedback should be constructively given and gracefully accepted.
+Our work will be used by other people, and we in turn will depend on the work of others. Any decision we take will affect users and colleagues, and we should consider them when making decisions. Feedback should be constructively given and gracefully accepted. Openness, fairness and equality are among the guiding principles of our acts and decisions.
 
 ### Be respectful
 
@@ -34,6 +32,12 @@ What we produce is a complex whole made of many parts. Collaboration is essentia
 
 Collaboration reduces redundancy and improves the quality of our work. Internally and externally, we celebrate good collaboration. Wherever possible, we work closely with upstream projects and others in the free software community to coordinate our efforts. We prefer to work transparently and involve interested parties as early as possible.
 
+### Be quality-oriented
+
+Even though quality is a broad concept with many definitions and interpretations, in no way we should be satisfied with work that does not follow established best practices, is sketchy, or does not meet reasonable expectations around it.
+
+Quality work is what makes our project stand out as useful in a wide variety of contexts and trustworthy. When we are aware that some work is not of the best quality, we should improve on it. If we cannot do that right away, we must at least manage expectations and plan for its improvement.
+
 ### Value decisiveness, clarity and consensus
 
 Disagreements, social and technical, are normal, but we do not allow them to persist and fester leaving others uncertain of the agreed direction.
@@ -44,21 +48,9 @@ We expect participants in the project to resolve disagreements constructively. W
 
 When somebody leaves or disengages from the project, we ask that they do so in a way that minimises disruption to the project. They should tell people they are leaving and take the proper steps to ensure that others can pick up where they left off.
 
-## Our Non-Standards
-
-Any conduct that goes against our standards is not acceptable. Examples include:
-
-* Violence, threats of violence or violent language directed against another person.
-* Sexist, racist, homophobic, transphobic, ableist or otherwise discriminatory jokes and language.
-* Trolling, insulting or derogatory comments, and personal or political attacks.
-* Public or private harassment.
-* Publishing others' private information, such as a physical or email address, without their explicit permission.
-* Advocating for, or encouraging, any of the above behavior.
-* Other conduct which could reasonably be considered inappropriate in a professional setting.
-
 ## Enforcement Responsibilities
 
-Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful.
+Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior, and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful to this Code of Conduct.
 
 Community leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, and will communicate reasons for moderation decisions when appropriate.
 
