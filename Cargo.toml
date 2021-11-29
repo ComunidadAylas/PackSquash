@@ -22,20 +22,20 @@ num_enum = "0.5.4"
 enum-iterator = "0.7.0"
 
 num_cpus = "1.13.0"
-sysinfo = { version = "0.20.5", default-features = false }
+sysinfo = { version = "0.21.1", default-features = false }
 walkdir = "2.3.2"
 
-tokio = { version = "1.13.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
+tokio = { version = "1.14.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync"] }
 tokio-util = { version = "0.6.9", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.8", default-features = false }
-futures = { version = "0.3.17", default-features = false }
+futures = { version = "0.3.18", default-features = false }
 
 getopts = "0.2.21"
 
 serde = { version = "1.0.130", features = ["derive"] }
 toml = "0.5.8"
 
-serde_json = "1.0.69"
+serde_json = "1.0.72"
 json_comments = "0.2.0"
 jsonpath_lib = "0.3.0"
 
@@ -43,7 +43,7 @@ spng = { version = "0.2.0-alpha.2", default-features = false }
 png = "0.17.2"
 rgb = "0.8.29"
 imagequant = "3.1.0"
-oxipng = { version = "5.0.0", default-features = false, features = ["zopfli"] }
+oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
 
 gstreamer = { version = "0.17.4", default-features = false }
 gstreamer-app = { version = "0.17.2", default-features = false, features = ["v1_10"] }
@@ -53,7 +53,7 @@ glsl = "6.0.1"
 java-properties = { version = "1.4.0", optional = true }
 
 tempfile = "3.2.0"
-crc32fast = "1.2.1"
+crc32fast = "1.2.2"
 zopfli = "0.4.0"
 
 const-random = "0.1.13"
@@ -90,8 +90,8 @@ zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquas
 const-random = { git = "https://github.com/ComunidadAylas/constrandom" }
 
 [build-dependencies]
-vergen = { version = "5.1.17", default-features = false, features = ["cargo", "git"] }
-time = { version = "0.3.4", default-features = false, features = ["std"] }
+vergen = { version = "5.1.18", default-features = false, features = ["cargo", "git"] }
+time = { version = "0.3.5", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 tokio-test = "0.4.2"
