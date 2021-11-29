@@ -239,7 +239,7 @@ jobs:
       uses: ryankurte/action-apt@v0.3.0
       with:
         arch: arm64
-        packages: gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
+        packages: gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64 libgstreamer1.0-0:arm64 libgstreamer-plugins-base1.0-0:arm64
 
     - name: Install documentation generation packages
       run: sudo apt-get install markdown html2text
