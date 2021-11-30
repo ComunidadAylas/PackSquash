@@ -235,11 +235,6 @@ jobs:
         crate: cargo-deb
         version: latest
 
-    - name: Update package list and update packages
-      run: |
-        sudo apt-get update && \
-        sudo apt-get upgrade
-
     - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
       uses: ryankurte/action-apt@v0.3.0
       with:
