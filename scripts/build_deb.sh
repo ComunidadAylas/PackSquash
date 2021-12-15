@@ -3,7 +3,7 @@ mkdir -p target/debian
 
 # Generate extended package description from README.md
 markdown README.md | \
-html2text -nometa -utf8 -style pretty -rcfile .html2textrc | \
+html2text -nometa -utf8 -style pretty -rcfile README.html2textrc | \
 tail -n +11 > target/debian/extended_package_description.txt
 
 # Build the Debian package
@@ -22,4 +22,3 @@ done
 printf 'GStreamer version: '
 apt-cache show gstreamer1.0-plugins-base | sed -n '/^Version:/{s/^Version: //;p}'
 rm -f debian/control || true
-cd ..

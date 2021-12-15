@@ -21,7 +21,9 @@ env:
 jobs:
   linux-x64-gnu:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+
+    container: debian:bullseye-slim
 
     env:
       CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
@@ -51,8 +53,8 @@ jobs:
     - name: Install GStreamer libraries, GStreamer development packages and documentation generation packages
       run: |
         sudo apt-get update && \
-        sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev && \
-        sudo apt-get install markdown html2text
+        sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+                             markdown html2text
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
@@ -73,9 +75,9 @@ jobs:
         args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
     - name: Generate Debian package
-      run: ./build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+      run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
-    - name: Format Rust source code using rustfmt
+    - name: Format Rust source code
       run: cargo fmt
 
     - name: Commit and push Rust source code format changes
@@ -203,7 +205,9 @@ jobs:
 
   linux-aarch64-gnu:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+
+    container: debian:bullseye-slim
 
     env:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
@@ -236,10 +240,10 @@ jobs:
         version: latest
 
     - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
-      uses: ryankurte/action-apt@v0.3.0
-      with:
-        arch: arm64
-        packages: gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
+      run: |
+        sudo dpkg --add-architecture arm64
+        sudo apt-get update
+        sudo apt-get install gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
 
     - name: Install documentation generation packages
       run: sudo apt-get install markdown html2text
@@ -251,7 +255,7 @@ jobs:
         args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
     - name: Generate Debian package
-      run: ./build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+      run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
     - name: Upload binary
       uses: actions/upload-artifact@v2
