@@ -58,7 +58,6 @@ jobs:
         with:
           crate: cargo-deb
           version: latest
-          use-tool-cache: true
 
       - name: Clippy check
         uses: actions-rs/clippy-check@v1
@@ -251,7 +250,6 @@ jobs:
         with:
           crate: cargo-deb
           version: latest
-          use-tool-cache: true
 
       - name: Build with optimized standard library
         uses: actions-rs/cargo@v1
