@@ -57,6 +57,7 @@ jobs:
       with:
         crate: cargo-deb
         version: latest
+        use-tool-cache: true
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
@@ -226,7 +227,8 @@ jobs:
       run: |
         dpkg --add-architecture arm64
         apt-get update
-        apt-get install -yq build-essential curl \
+        # lizlzma-dev is required by cargo-deb
+        apt-get install -yq build-essential liblzma-dev curl \
                             gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
 
     - name: Install latest Rust nightly toolchain
@@ -248,6 +250,7 @@ jobs:
       with:
         crate: cargo-deb
         version: latest
+        use-tool-cache: true
 
     - name: Install documentation generation packages
       run: apt-get install -yq markdown html2text
