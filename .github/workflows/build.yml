@@ -30,77 +30,78 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
+        run: |
+          apt-get update && \
+          # curl is required by rustup
+          apt-get install -yq build-essential git curl \
+                              gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+                              libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+                              markdown html2text
 
-    - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
-      run: |
-        apt-get update && \
-        apt-get install -yq build-essential curl gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-                            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
-                            markdown html2text
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Install latest Rust nightly toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
-        override: true
-        profile: minimal
-        components: rustfmt, clippy, rust-src
+      - name: Install latest Rust nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
+          profile: minimal
+          components: rustfmt, clippy, rust-src
 
-    - name: Cache Rust artifacts
-      uses: Swatinem/rust-cache@v1
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
 
-    - name: Install cargo-deb
-      uses: actions-rs/install@v0.1
-      with:
-        crate: cargo-deb
-        version: latest
-        use-tool-cache: true
+      - name: Install cargo-deb
+        uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-deb
+          version: latest
+          use-tool-cache: true
 
-    - name: Clippy check
-      uses: actions-rs/clippy-check@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        args: --release -- -D warnings
+      - name: Clippy check
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --release
 
-    - name: Run tests
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --release
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --release
 
-    - name: Build with optimized standard library
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+      - name: Build with optimized standard library
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
-    - name: Generate Debian package
-      run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+      - name: Generate Debian package
+        run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
-    - name: Format Rust source code
-      run: cargo fmt
+      - name: Format Rust source code
+        run: cargo fmt
 
-    - name: Commit and push Rust source code format changes
-      uses: EndBug/add-and-commit@v7
-      with:
-        message: 'Format Rust source code using rustfmt'
-        author_name: github-actions[bot]
-        author_email: 41898282+github-actions[bot]@users.noreply.github.com
+      - name: Commit and push Rust source code format changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          message: 'Format Rust source code using rustfmt'
+          author_name: github-actions[bot]
+          author_email: 41898282+github-actions[bot]@users.noreply.github.com
 
-    - name: Upload binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'PackSquash executable (Linux, x64, glibc)'
-        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PackSquash executable (Linux, x64, glibc)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
-    - name: Upload Debian package
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'Debian package (amd64)'
-        path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
+      - name: Upload Debian package
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'Debian package (amd64)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
 
   windows-x64-gnu:
 
@@ -110,57 +111,57 @@ jobs:
       CARGO_BUILD_TARGET: x86_64-pc-windows-gnu
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Install latest Rust nightly toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
-        override: true
-        profile: minimal
-        components: rust-src
+      - name: Install latest Rust nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
+          override: true
+          profile: minimal
+          components: rust-src
 
-    - name: Cache Rust artifacts
-      uses: Swatinem/rust-cache@v1
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer libraries and GStreamer development packages
-      run: |
-        Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.19.1/mingw/gstreamer-1.0-devel-mingw-x86_64-1.19.1.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64.msi'
-        Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64.msi /qn' -Wait
-        "PKG_CONFIG_PATH=C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install GStreamer libraries and GStreamer development packages
+        run: |
+          Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.19.1/mingw/gstreamer-1.0-devel-mingw-x86_64-1.19.1.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64.msi'
+          Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64.msi /qn' -Wait
+          "PKG_CONFIG_PATH=C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-        $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '.tmp', '.zip' } -PassThru
-        Invoke-WebRequest -Uri 'https://ftp.rrze.uni-erlangen.de/xbmc/build-deps/win32/mingw-msys/pkg-config-lite-0.28-1_bin-win32.zip' -OutFile $tmp_file
-        $tmp_file | Expand-Archive -DestinationPath "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1" -Force
-        $tmp_file | Remove-Item
-        "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '.tmp', '.zip' } -PassThru
+          Invoke-WebRequest -Uri 'https://ftp.rrze.uni-erlangen.de/xbmc/build-deps/win32/mingw-msys/pkg-config-lite-0.28-1_bin-win32.zip' -OutFile $tmp_file
+          $tmp_file | Expand-Archive -DestinationPath "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1" -Force
+          $tmp_file | Remove-Item
+          "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-        Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.19.1/mingw/gstreamer-1.0-mingw-x86_64-1.19.1.msi' -OutFile 'gstreamer-1.0-mingw-x86_64.msi'
-        Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-mingw-x86_64.msi /qn' -Wait
-        "C:\gstreamer\1.0\mingw_x86_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.19.1/mingw/gstreamer-1.0-mingw-x86_64-1.19.1.msi' -OutFile 'gstreamer-1.0-mingw-x86_64.msi'
+          Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-mingw-x86_64.msi /qn' -Wait
+          "C:\gstreamer\1.0\mingw_x86_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-    - name: Run tests
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --release
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --release
 
-    - name: Build with optimized standard library
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+      - name: Build with optimized standard library
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
-    - name: Set binary resource data
-      run: target/set_executable_resource_data.ps1
+      - name: Set binary resource data
+        run: target/set_executable_resource_data.ps1
 
-    - name: Upload binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'PackSquash executable (Windows, x64)'
-        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PackSquash executable (Windows, x64)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe
 
   macos-x64-darwin:
 
@@ -170,41 +171,41 @@ jobs:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Install latest Rust nightly toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
-        override: true
-        profile: minimal
-        components: rust-src
+      - name: Install latest Rust nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
+          override: true
+          profile: minimal
+          components: rust-src
 
-    - name: Cache Rust artifacts
-      uses: Swatinem/rust-cache@v1
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
 
-    - name: Install GStreamer libraries and GStreamer development packages
-      run: brew install gst-plugins-good gst-plugins-bad
+      - name: Install GStreamer libraries and GStreamer development packages
+        run: brew install gst-plugins-good gst-plugins-bad
 
-    - name: Run tests
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --release
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --release
 
-    - name: Build with optimized standard library
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+      - name: Build with optimized standard library
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
-    - name: Upload binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'PackSquash executable (macOS, x64)'
-        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PackSquash executable (macOS, x64)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
   linux-aarch64-gnu:
 
@@ -219,59 +220,56 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - name: Install development packages, cross-compilation GCC toolchain, GStreamer libraries, GStreamer development packages and documentation generation packages
+        run: |
+          dpkg --add-architecture arm64
+          apt-get update
+          # lizlzma-dev is required by cargo-deb. curl is required by rustup
+          apt-get install -yq build-essential git liblzma-dev curl \
+                              gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64 \
+                              markdown html2text
 
-    - name: Install development packages, cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
-      run: |
-        dpkg --add-architecture arm64
-        apt-get update
-        # lizlzma-dev is required by cargo-deb
-        apt-get install -yq build-essential liblzma-dev curl \
-                            gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Install latest Rust nightly toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly
-        target: ${{ env.CARGO_BUILD_TARGET }}
-        override: true
-        profile: minimal
-        components: rust-src
+      - name: Install latest Rust nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: ${{ env.CARGO_BUILD_TARGET }}
+          profile: minimal
+          components: rust-src
 
-    - name: Cache Rust artifacts
-      uses: Swatinem/rust-cache@v1
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
 
-    - name: Install cargo-deb
-      uses: actions-rs/install@v0.1
-      env:
-        CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
-      with:
-        crate: cargo-deb
-        version: latest
-        use-tool-cache: true
+      - name: Install cargo-deb
+        uses: actions-rs/install@v0.1
+        env:
+          CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
+        with:
+          crate: cargo-deb
+          version: latest
+          use-tool-cache: true
 
-    - name: Install documentation generation packages
-      run: apt-get install -yq markdown html2text
+      - name: Build with optimized standard library
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
-    - name: Build with optimized standard library
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+      - name: Generate Debian package
+        run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
-    - name: Generate Debian package
-      run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PackSquash executable (Linux, AArch64-ARM64, glibc)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
-    - name: Upload binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'PackSquash executable (Linux, AArch64-ARM64, glibc)'
-        path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
-
-    - name: Upload Debian package
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'Debian package (arm64)'
-        path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
+      - name: Upload Debian package
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'Debian package (arm64)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
