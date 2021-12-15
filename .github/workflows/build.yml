@@ -33,6 +33,13 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
+      run: |
+        apt-get update && \
+        apt-get install build-essential curl gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+                        libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+                        markdown html2text
+
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -49,12 +56,6 @@ jobs:
       with:
         crate: cargo-deb
         version: latest
-
-    - name: Install GStreamer libraries, GStreamer development packages and documentation generation packages
-      run: |
-        sudo apt-get update && \
-        sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
-                             markdown html2text
 
     - name: Clippy check
       uses: actions-rs/clippy-check@v1
@@ -219,6 +220,13 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Install development packages, cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
+      run: |
+        dpkg --add-architecture arm64
+        apt-get update
+        apt-get install build-essential curl \
+                        gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
+
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -239,14 +247,8 @@ jobs:
         crate: cargo-deb
         version: latest
 
-    - name: Install cross-compilation GCC toolchain, GStreamer libraries and GStreamer development packages
-      run: |
-        sudo dpkg --add-architecture arm64
-        sudo apt-get update
-        sudo apt-get install gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
-
     - name: Install documentation generation packages
-      run: sudo apt-get install markdown html2text
+      run: apt-get install markdown html2text
 
     - name: Build with optimized standard library
       uses: actions-rs/cargo@v1
