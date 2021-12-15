@@ -27,6 +27,7 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
+      DEBIAN_FRONTEND: noninteractive
 
     steps:
     - uses: actions/checkout@v2
@@ -36,9 +37,9 @@ jobs:
     - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
       run: |
         apt-get update && \
-        apt-get install build-essential curl gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-                        libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
-                        markdown html2text
+        apt-get install -yq build-essential curl gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+                            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+                            markdown html2text
 
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
@@ -214,6 +215,7 @@ jobs:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
       PKG_CONFIG_ALLOW_CROSS: 1
       PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
+      DEBIAN_FRONTEND: noninteractive
 
     steps:
     - uses: actions/checkout@v2
@@ -224,8 +226,8 @@ jobs:
       run: |
         dpkg --add-architecture arm64
         apt-get update
-        apt-get install build-essential curl \
-                        gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
+        apt-get install -yq build-essential curl \
+                            gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64
 
     - name: Install latest Rust nightly toolchain
       uses: actions-rs/toolchain@v1
@@ -248,7 +250,7 @@ jobs:
         version: latest
 
     - name: Install documentation generation packages
-      run: apt-get install markdown html2text
+      run: apt-get install -yq markdown html2text
 
     - name: Build with optimized standard library
       uses: actions-rs/cargo@v1
