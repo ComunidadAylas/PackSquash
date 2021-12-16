@@ -11,9 +11,11 @@ use std::{
 use tokio::io::BufReader;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::{RelativePath, VfsFile, VfsPackFileIterEntry, VfsPackFileMetadata};
+use crate::RelativePath;
 
-use super::{IteratorTraversalOptions, VirtualFileSystem};
+use super::{
+	IteratorTraversalOptions, VfsFile, VfsPackFileIterEntry, VfsPackFileMetadata, VirtualFileSystem
+};
 
 /// A virtual filesystem implementation that operates with files in the mounted
 /// operating system filesystems. In other words, it is a facade for `std::fs`.

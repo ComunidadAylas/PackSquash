@@ -69,6 +69,8 @@ use tokio::{io::AsyncRead, runtime::Builder};
 pub use crate::squash_zip::relative_path::RelativePath;
 
 pub mod config;
+pub mod vfs;
+
 mod pack_file;
 mod pack_meta;
 mod squash_zip;
@@ -679,26 +681,6 @@ impl PackSquasherError {
 	}
 }
 
-/// A entry in a virtual filesystem directory that represents a possible pack file,
-/// obtained via a virtual filesystem directory file iterator.
-pub struct VfsPackFileIterEntry {
-	relative_path: RelativePath<'static>,
-	file_path: PathBuf
-}
-
-/// An open file in a virtual filesystem, from which data can be read and
-/// metadata is available.
-pub struct VfsFile<R: AsyncRead + Unpin + 'static> {
-	file_read: R,
-	file_size_hint: u64,
-	metadata: VfsPackFileMetadata
-}
-
-/// Metadata of a virtual filesystem file.
-pub struct VfsPackFileMetadata {
-	modification_time: Option<SystemTime>
-}
-
 /// Warnings that [`PackSquasher`] may emit while running a squash operation
 /// to notify about conditions that may require some attention, because they
 /// might signal some potential problem.
@@ -750,7 +732,7 @@ impl PackFileStatus {
 	/// advised to match patterns against it, because these strings may change
 	/// between releases.
 	pub fn optimization_strategy(&self) -> &str {
-		&self.optimization_strategy
+		self.optimization_strategy.as_ref()
 	}
 
 	/// Gets the error that occurred while optimizing this file. If an error
@@ -759,60 +741,6 @@ impl PackFileStatus {
 	/// between versions.
 	pub fn optimization_error(&self) -> Option<&str> {
 		self.optimization_error.as_deref()
-	}
-}
-
-/// Contains virtual file systems implementations to use with [`PackSquasher`].
-pub mod vfs {
-	use std::{fs::FileType, io, path::Path};
-
-	use tokio::io::AsyncRead;
-
-	use crate::{VfsFile, VfsPackFileIterEntry};
-
-	pub mod os_fs;
-
-	/// Defines the contract that any virtual file system must implement.
-	pub trait VirtualFileSystem: Send + Sync {
-		/// The type of the byte source that this virtual file system yields
-		/// when successfully opening files. It reading bytes from this source
-		/// is costly, it is recommended to introduce some buffering for maximum
-		/// performance.
-		type FileRead: AsyncRead + Unpin + Send + 'static;
-		/// The type of the iterator over the files within a path that this virtual
-		/// file system yields.
-		type FileIter: Iterator<Item = Result<VfsPackFileIterEntry, io::Error>>;
-
-		/// Returns an iterator over the files that are in the filesystem subtree
-		/// whose root is at `root_path`, which usually is a directory, according
-		/// to the specified directory traversal options. This means that not only
-		/// direct children of the `root_path` are yielded, but also grandchildren
-		/// and so on. Files that don't hold any readable user data (i.e. directories)
-		/// are not yielded.
-		///
-		/// Any I/O error that may happen is returned as an element in the iterator,
-		/// so getting the iterator itself can't fail.
-		fn file_iterator(
-			&self,
-			root_path: &Path,
-			iterator_traversal_options: IteratorTraversalOptions
-		) -> Self::FileIter;
-
-		/// Opens the file at the specified virtual filesystem path for read-only access.
-		fn open<P: AsRef<Path>>(&self, path: P) -> Result<VfsFile<Self::FileRead>, io::Error>;
-
-		/// Returns the type of the file at the specified virtual filesystem path.
-		fn file_type<P: AsRef<Path>>(&self, path: P) -> Result<FileType, io::Error>;
-	}
-
-	/// Contains options that tweak the operation of the [`VirtualFileSystem::file_iterator`]
-	/// method.
-	#[non_exhaustive]
-	#[derive(Default)]
-	pub struct IteratorTraversalOptions {
-		/// Whether system (i.e. clearly not part of a pack file) and hidden files
-		/// (usually, those whose name begins with a dot) are yielded or not.
-		pub ignore_system_and_hidden_files: bool
 	}
 }
 
