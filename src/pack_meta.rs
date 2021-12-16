@@ -158,5 +158,3 @@ impl PackMeta {
 		quirks
 	}
 }
-
-
