@@ -111,6 +111,11 @@ lto = "fat"
 codegen-units = 1
 strip = "symbols"
 
+[profile.debug-release]
+inherits = "release"
+debug = true
+strip = "none"
+
 [package.metadata.deb]
 maintainer = "Alejandro González <AlexTMjugador@users.noreply.github.com>"
 copyright = "PackSquash developers"
