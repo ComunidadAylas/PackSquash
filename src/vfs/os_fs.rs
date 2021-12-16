@@ -1,6 +1,7 @@
 //! Contains the data types that support a virtual filesystem implementation
 //! that operates with files from the operating system filesystems.
 
+use std::borrow::Cow;
 use std::{
 	fs::{self, File, FileType},
 	io::{self, ErrorKind},
@@ -79,24 +80,35 @@ impl VirtualFileSystem for OsFilesystem {
 
 /// Checks whether a [DirEntry] is a system or hidden file. This operation does no syscalls.
 fn is_system_or_hidden_file(entry: &DirEntry) -> bool {
-	let file_name = entry.file_name().to_string_lossy();
+	let (_file_name_str, file_name): (Cow<'_, str>, &[u8]);
+
+	#[cfg(unix)]
+	{
+		// Fast path
+		file_name = std::os::unix::ffi::OsStrExt::as_bytes(entry.file_name());
+	}
+	#[cfg(not(unix))]
+	{
+		_file_name_str = entry.file_name().to_string_lossy();
+		file_name = _file_name_str.as_bytes()
+	}
 
 	// List based on https://www.toptal.com/developers/gitignore/api/git,windows,linux,macos
-	file_name.starts_with('.')
+	file_name.starts_with(b".")
 		|| if entry.file_type().is_file() {
-			file_name == "desktop.ini"
-				|| file_name == "Desktop.ini"
-				|| file_name == "Thumbs.db"
-				|| file_name == "ehthumbs.db"
-				|| file_name == "ehthumbs_vista.db"
-				|| file_name.ends_with(".lnk")
-				|| file_name.ends_with(".orig")
-				|| file_name.ends_with(".bak")
-				|| file_name.ends_with(".tmp")
+			file_name == b"desktop.ini"
+				|| file_name == b"Desktop.ini"
+				|| file_name == b"Thumbs.db"
+				|| file_name == b"ehthumbs.db"
+				|| file_name == b"ehthumbs_vista.db"
+				|| file_name.ends_with(b".lnk")
+				|| file_name.ends_with(b".orig")
+				|| file_name.ends_with(b".bak")
+				|| file_name.ends_with(b".tmp")
 		} else {
-			file_name == "Network Trash Folder"
-				|| file_name == "Temporary Items"
-				|| file_name == "$RECYCLE.BIN"
+			file_name == b"Network Trash Folder"
+				|| file_name == b"Temporary Items"
+				|| file_name == b"$RECYCLE.BIN"
 		}
 }
 
