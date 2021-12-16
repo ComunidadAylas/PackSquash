@@ -54,7 +54,7 @@ fn run() -> i32 {
 			} else {
 				print_version_information(false);
 				println!();
-				read_options_file_and_process(option_matches.free.first().filter(|path| {
+				read_options_file_and_squash(option_matches.free.first().filter(|path| {
 					// Let "-" behave as if no path was provided
 					path != &"-"
 				}))
@@ -74,7 +74,7 @@ fn run() -> i32 {
 
 /// Reads an options file and launches a squash operation to optimize it with the
 /// read options.
-fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
+fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 	let user_friendly_options_path =
 		options_file_path.map_or_else(|| "standard input (keyboard input or pipe)", |path| path);
 
@@ -134,60 +134,7 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 	let processed_file_count = Arc::new(AtomicU64::new(0));
 	let start_instant = Instant::now();
 
-	|| -> Result<(), PackSquasherError> {
-		let (sender, mut receiver) = channel(64);
-		let processed_file_count = processed_file_count.clone();
-
-		// Spawn our CLI-updating thread. This decouples the pack processing from
-		// the printing of standard streams messages, unless printing to them is
-		// so slow that the channel buffer is filled, in which case the process
-		// threads are slowed down to avoid exhausting memory
-		let cli_thread = thread::spawn(move || {
-			while let Some(status_update) = receiver.blocking_recv() {
-				match status_update {
-					PackSquasherStatus::PackFileProcessed(pack_file_status) => {
-						processed_file_count.fetch_add(1, Ordering::Relaxed);
-
-						match pack_file_status.optimization_error() {
-							Some(error_description) => eprintln!(
-								"! {}: {}",
-								pack_file_status.path().as_str(),
-								error_description
-							),
-							None => eprintln!(
-								"> {}: {}",
-								pack_file_status.path().as_str(),
-								pack_file_status.optimization_strategy()
-							)
-						}
-					}
-					PackSquasherStatus::ZipFinish => eprintln!("- Finishing up ZIP file..."),
-					PackSquasherStatus::Notice(notice) => eprintln!("- {}", notice),
-					PackSquasherStatus::Warning(warning) => match warning {
-						PackSquasherWarning::LowEntropySystemId => eprintln!(
-							"* Used a low entropy system ID. The dates embedded in the result ZIP file, \
-							which reveal when it was generated, may be easier to decrypt. For more information \
-							about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"),
-						PackSquasherWarning::VolatileSystemId => eprintln!(
-							"* Used a volatile system ID. You maybe should not reuse the result ZIP file, \
-							as unexpected results can occur after you use your device as usual. For more information \
-							about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"),
-						_ => unimplemented!()
-					},
-					_ => unimplemented!()
-				}
-			}
-		});
-
-		// Squash the pack! This blocks until the operation is complete
-		let result = PackSquasher::new().run(OsFilesystem, squash_options, Some(sender));
-
-		// Wait for the CLI thread to process any remaining buffered messages
-		cli_thread.join().ok();
-
-		result
-	}()
-	.map_or_else(
+	squash(Arc::clone(&processed_file_count), squash_options).map_or_else(
 		|err| {
 			eprintln!("! Pack processing error: {}", err);
 
@@ -231,6 +178,63 @@ fn read_options_file_and_process(options_file_path: Option<&String>) -> i32 {
 			0
 		}
 	)
+}
+
+fn squash(
+	processed_file_count: Arc<AtomicU64>,
+	squash_options: SquashOptions
+) -> Result<(), PackSquasherError> {
+	let (sender, mut receiver) = channel(64);
+
+	// Spawn our CLI-updating thread. This decouples the pack processing from
+	// the printing of standard streams messages, unless printing to them is
+	// so slow that the channel buffer is filled, in which case the process
+	// threads are slowed down to avoid exhausting memory
+	let cli_thread = thread::spawn(move || {
+		while let Some(status_update) = receiver.blocking_recv() {
+			match status_update {
+				PackSquasherStatus::PackFileProcessed(pack_file_status) => {
+					processed_file_count.fetch_add(1, Ordering::Relaxed);
+
+					match pack_file_status.optimization_error() {
+						Some(error_description) => eprintln!(
+							"! {}: {}",
+							pack_file_status.path().as_str(),
+							error_description
+						),
+						None => eprintln!(
+							"> {}: {}",
+							pack_file_status.path().as_str(),
+							pack_file_status.optimization_strategy()
+						)
+					}
+				}
+				PackSquasherStatus::ZipFinish => eprintln!("- Finishing up ZIP file..."),
+				PackSquasherStatus::Notice(notice) => eprintln!("- {}", notice),
+				PackSquasherStatus::Warning(warning) => match warning {
+					PackSquasherWarning::LowEntropySystemId => eprintln!(
+						"* Used a low entropy system ID. The dates embedded in the result ZIP file, \
+							which reveal when it was generated, may be easier to decrypt. For more information \
+							about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"
+					),
+					PackSquasherWarning::VolatileSystemId => eprintln!(
+						"* Used a volatile system ID. You maybe should not reuse the result ZIP file, \
+							as unexpected results can occur after you use your device as usual. For more information \
+							about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"),
+					_ => unimplemented!()
+				},
+				_ => unimplemented!()
+			}
+		}
+	});
+
+	// Squash the pack! This blocks until the operation is complete
+	let result = PackSquasher::new().run(OsFilesystem, squash_options, Some(sender));
+
+	// Wait for the CLI thread to process any remaining buffered messages
+	cli_thread.join().ok();
+
+	result
 }
 
 /// Prints PackSquash version information to the standard output stream.
