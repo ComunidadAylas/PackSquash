@@ -23,11 +23,10 @@ use tokio_stream::Stream;
 use tokio_util::{codec::FramedRead, io::ReaderStream};
 
 use crate::config::{AudioFileOptions, ChannelMixingOption};
+use crate::pack_file::asset_type::PackFileAssetType;
+use crate::pack_file::AsyncReadAndSizeHint;
 
-use super::{
-	passthrough_file::PassthroughDecoder, util::to_ascii_lowercase_extension, OptimizedBytes,
-	PackFile, PackFileConstructor, PackFileConstructorArgs
-};
+use super::{passthrough_file::PassthroughDecoder, PackFile, PackFileConstructor};
 
 #[cfg(test)]
 mod tests;
@@ -36,7 +35,7 @@ mod tests;
 ///
 /// Vanilla Minecraft uses Ogg Vorbis files for both music and sound effects. Resource
 /// packs may replace and add new sound events to Minecraft.
-pub struct AudioFile<T: AsyncRead + Unpin + 'static> {
+pub struct AudioFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
 	is_ogg: bool,
 	optimization_settings: AudioFileOptions
@@ -67,13 +66,13 @@ pub enum OptimizationError {
 /// Alias for the opaque stream type that provides the processed (optimized) audio
 /// file data, when it was transcoded.
 pub type ProcessedAudioDataStream<T> =
-	impl Stream<Item = Result<MappedBuffer<Readable>, OptimizationError>> + Unpin;
+	impl Stream<Item = Result<MappedBuffer<Readable>, OptimizationError>> + Send + Unpin;
 
 /// Creates a new processed audio file data stream, that will use the specified
 /// GStreamer pipeline, which contains the provided appsrc and appsink elements,
 /// to process audio file bytes read from an [AsyncRead] to an optimized form,
 /// via transcoding.
-fn new_processed_audio_data_stream<T: AsyncRead + Unpin + 'static>(
+fn new_processed_audio_data_stream<T: AsyncRead + Send + Unpin + 'static>(
 	read: T,
 	gstreamer_pipeline: Pipeline,
 	appsrc: &AppSrc,
@@ -153,26 +152,21 @@ fn new_processed_audio_data_stream<T: AsyncRead + Unpin + 'static>(
 
 /// Adapts internal stream structs used by [AudioFile] to a single [Stream]
 /// that matches client code expectations.
-pub enum AudioDataStream<T: AsyncRead + Unpin + 'static> {
+pub enum AudioDataStream<T: AsyncRead + Send + Unpin + 'static> {
 	Transcoded(ProcessedAudioDataStream<T>),
 	PassedThrough(FramedRead<T, PassthroughDecoder>),
 	InitError(tokio_stream::Once<<Self as Stream>::Item>)
 }
 
-impl<T: AsyncRead + Unpin + 'static> Stream for AudioDataStream<T> {
-	type Item = Result<(Cow<'static, str>, OptimizedBytes<ByteBuffer>), OptimizationError>;
+impl<T: AsyncRead + Send + Unpin + 'static> Stream for AudioDataStream<T> {
+	type Item = Result<(Cow<'static, str>, ByteBuffer), OptimizationError>;
 
 	fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
 		// Pass through to the underlying stream, mapping types accordingly
 		match Pin::into_inner(self) {
 			AudioDataStream::Transcoded(stream) => stream.poll_next_unpin(cx).map(|item| {
 				item.map(|result| {
-					result.map(|buf| {
-						(
-							Cow::Borrowed("Transcoded"),
-							OptimizedBytes(ByteBuffer::MappedBuffer(buf))
-						)
-					})
+					result.map(|buf| (Cow::Borrowed("Transcoded"), ByteBuffer::MappedBuffer(buf)))
 				})
 			}),
 			AudioDataStream::PassedThrough(stream) => stream.poll_next_unpin(cx).map(|item| {
@@ -180,10 +174,7 @@ impl<T: AsyncRead + Unpin + 'static> Stream for AudioDataStream<T> {
 					result.map_or_else(
 						|err| Err(err.into()),
 						|(optimization_strategy_message, buf)| {
-							Ok((
-								optimization_strategy_message,
-								OptimizedBytes(ByteBuffer::BytesMut(buf.0))
-							))
+							Ok((optimization_strategy_message, ByteBuffer::BytesMut(buf)))
 						}
 					)
 				})
@@ -210,10 +201,10 @@ impl AsRef<[u8]> for ByteBuffer {
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
+impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 	type ByteChunkType = ByteBuffer;
 	type OptimizationError = OptimizationError;
-	type OptimizedBytesChunksStream = AudioDataStream<T>;
+	type OptimizedByteChunksStream = AudioDataStream<T>;
 
 	fn process(self) -> AudioDataStream<T> {
 		// Bail with a passthrough stream if we want to do so
@@ -229,7 +220,7 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
 		// Perform GStreamer pipeline initialization operations and stream creation
 		// in a closure that returns a result, to be able to use the more ergonomic ?
 		// operator
-		|| -> Result<AudioDataStream<T>, OptimizationError> {
+		(|| -> Result<AudioDataStream<T>, OptimizationError> {
 			// With one task per resource file, this is optimal
 			task::block_in_place(|| {
 				// GStreamer always acquires a mutex lock to check if it was already
@@ -419,15 +410,11 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
 					appsink.downcast_ref::<AppSink>().unwrap()
 				)
 			))
-		}()
+		})()
 		.map_or_else(
 			|err| AudioDataStream::InitError(tokio_stream::once(Err(err))),
 			|stream| stream
 		)
-	}
-
-	fn canonical_extension(&self) -> &str {
-		"ogg"
 	}
 
 	fn is_compressed(&self) -> bool {
@@ -435,23 +422,18 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for AudioFile<T> {
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for AudioFile<T> {
+impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for AudioFile<T> {
 	type OptimizationSettings = AudioFileOptions;
 
-	fn new<F: FnMut() -> Option<(T, u64)>>(
-		mut file_read_producer: F,
-		args: PackFileConstructorArgs<'_, AudioFileOptions>
+	fn new(
+		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<T>>,
+		asset_type: PackFileAssetType,
+		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
-		let extension = &*to_ascii_lowercase_extension(args.path);
-
-		if matches!(extension, "ogg" | "oga" | "mp3" | "opus" | "flac" | "wav") {
-			file_read_producer().map(|(read, _)| Self {
-				read,
-				is_ogg: extension == "ogg",
-				optimization_settings: args.optimization_settings
-			})
-		} else {
-			None
-		}
+		file_read_producer().map(|(read, _)| Self {
+			read,
+			is_ogg: matches!(asset_type, PackFileAssetType::GenericOggVorbisAudio),
+			optimization_settings
+		})
 	}
 }

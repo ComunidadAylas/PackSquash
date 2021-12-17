@@ -22,7 +22,7 @@ async fn successful_process_test(
 	}
 	.process();
 
-	let process_result: Vec<(Cow<'static, str>, OptimizedBytes<ByteBuffer>)> = data_stream
+	let process_result: Vec<(Cow<'static, str>, ByteBuffer)> = data_stream
 		.map(|result| result.expect("No error should happen while decoding"))
 		.collect()
 		.await;

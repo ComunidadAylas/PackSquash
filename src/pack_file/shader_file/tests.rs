@@ -10,7 +10,6 @@ static FRAGMENT_SHADER_DATA: &str = include_str!("example.fsh");
 async fn successful_process_test(
 	input_text: &str,
 	add_bom: bool,
-	extension: String,
 	settings: ShaderFileOptions,
 	expect_smaller_file_size: bool
 ) {
@@ -30,13 +29,12 @@ async fn successful_process_test(
 
 	let data_stream = ShaderFile {
 		read: Builder::new().read(input_data).build(),
-		extension,
 		file_length_hint: input_data.len(),
 		optimization_settings: settings
 	}
 	.process();
 
-	let process_result: Vec<(Cow<'static, str>, OptimizedBytes<BytesMut>)> = data_stream
+	let process_result: Vec<(Cow<'static, str>, BytesMut)> = data_stream
 		.map(|result| result.expect("No error should happen while decoding"))
 		.collect()
 		.await;
@@ -71,7 +69,6 @@ async fn minifying_works() {
 	successful_process_test(
 		FRAGMENT_SHADER_DATA,
 		false, // No BOM
-		String::from("fsh"),
 		ShaderFileOptions { minify: true },
 		true // Smaller size
 	)
@@ -83,7 +80,6 @@ async fn minifying_with_bom_works() {
 	successful_process_test(
 		FRAGMENT_SHADER_DATA,
 		true, // Add BOM
-		String::from("fsh"),
 		ShaderFileOptions { minify: true },
 		true // Smaller size
 	)
@@ -95,7 +91,6 @@ async fn passthrough_works() {
 	successful_process_test(
 		FRAGMENT_SHADER_DATA,
 		false, // No BOM
-		String::from("fsh"),
 		ShaderFileOptions { minify: false },
 		false // Same size
 	)
@@ -106,7 +101,6 @@ async fn passthrough_works() {
 async fn invalid_input_is_handled() {
 	let mut data_stream = ShaderFile {
 		read: Builder::new().read(&[]).build(),
-		extension: String::from("fsh"),
 		file_length_hint: 0,
 		optimization_settings: Default::default()
 	}

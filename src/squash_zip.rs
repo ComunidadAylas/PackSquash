@@ -4,7 +4,6 @@ use std::{
 	io::{self, ErrorKind, Read, SeekFrom},
 	lazy::SyncLazy,
 	num::TryFromIntError,
-	ops::Deref,
 	string::FromUtf8Error,
 	time::SystemTime
 };
@@ -476,7 +475,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// The result ZIP file may be left in an inconsistent state if this method returns
 	/// an error. The caller probably should discard the ZIP file if this happens, by
 	/// not calling any further methods on this instance.
-	pub async fn add_file<T: Deref<Target = [u8]>, S: Stream<Item = T> + Unpin>(
+	pub async fn add_file<T: AsRef<[u8]>, S: Stream<Item = T> + Unpin>(
 		&self,
 		path: &RelativePath<'_>,
 		processed_data: S,
@@ -900,11 +899,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// local file header and a scratch data file that contains its most efficient representation in
 	/// terms of size. The scratch data file stream position is just after the compressed contents, so
 	/// to read the compressed data back client code may need to rewind the file first.
-	async fn compress_and_generate_local_header<
-		'a,
-		T: Deref<Target = [u8]>,
-		S: Stream<Item = T> + Unpin
-	>(
+	async fn compress_and_generate_local_header<'a, T: AsRef<[u8]>, S: Stream<Item = T> + Unpin>(
 		&self,
 		path: &'a RelativePath<'a>,
 		mut processed_data: S,
@@ -931,18 +926,19 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		// Compute its hash and size
 		let mut crc32_hasher = crc32fast::Hasher::new();
 		let mut processed_data_size = 0u32;
-		let processed_data_crc;
 
 		while let Some(data) = processed_data.next().await {
-			processed_data_scratch_file.write_all(&data).await?;
-			crc32_hasher.update(&data);
+			let data = data.as_ref();
+
+			processed_data_scratch_file.write_all(data).await?;
+			crc32_hasher.update(data);
 
 			processed_data_size = processed_data_size
 				.checked_add(data.len().try_into()?)
 				.ok_or(SquashZipError::FileTooBig)?;
 		}
 
-		processed_data_crc = crc32_hasher.finalize();
+		let processed_data_crc = crc32_hasher.finalize();
 
 		let mut compressed_data_size;
 		if skip_compression || self.settings.zopfli_iterations == 0 || processed_data_size == 0 {

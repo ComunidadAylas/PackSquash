@@ -23,7 +23,7 @@ async fn successful_process_test(
 	}
 	.process();
 
-	let process_result: Vec<(Cow<'static, str>, OptimizedBytes<ByteBuffer>)> = data_stream
+	let process_result: Vec<(Cow<'static, str>, ByteBuffer)> = data_stream
 		.map(|result| result.expect("No error should happen while processing"))
 		.collect()
 		.await;
@@ -35,7 +35,7 @@ async fn successful_process_test(
 
 	let mut data = Vec::with_capacity(input_data.len());
 	for (_, partial_data) in process_result {
-		data.extend_from_slice(&*partial_data);
+		data.extend_from_slice(partial_data.as_ref());
 	}
 
 	assert!(

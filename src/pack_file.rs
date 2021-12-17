@@ -1,46 +1,29 @@
 use std::{
 	borrow::Cow,
-	convert::TryFrom,
 	fmt::{Debug, Display},
-	io,
-	lazy::SyncLazy,
-	ops::Deref
+	io
 };
 
-use enum_iterator::IntoEnumIterator;
-use globset::{Glob, GlobSet, GlobSetBuilder};
 use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_stream::Stream;
 
-use crate::RelativePath;
+pub mod asset_type;
 
 mod util;
 
-pub mod audio_file;
-pub mod json_file;
-pub mod passthrough_file;
-pub mod png_file;
-pub mod shader_file;
+mod audio_file;
+mod json_file;
+mod passthrough_file;
+mod png_file;
+mod shader_file;
 
 #[cfg(any(feature = "optifine-support", doc))]
 #[doc(cfg(feature = "optifine-support"))]
-pub mod properties_file;
+mod properties_file;
 
+use crate::pack_file::asset_type::PackFileAssetType;
 pub use util::strip_utf8_bom;
-
-/// Wraps data that can be referenced as a byte slice to allow dereferecing
-/// it back to a slice, improving ergonomics.
-#[derive(Debug)]
-pub struct OptimizedBytes<T: AsRef<[u8]>>(T);
-
-impl<T: AsRef<[u8]>> Deref for OptimizedBytes<T> {
-	type Target = [u8];
-
-	fn deref(&self) -> &Self::Target {
-		self.0.as_ref()
-	}
-}
 
 /// Represents an error that may occur while optimizing a pack file.
 #[derive(Error, Debug)]
@@ -56,24 +39,37 @@ pub enum OptimizationError {
 	IoError(#[from] io::Error)
 }
 
-/// The result of processing a chunk of pack file bytes to an optimized representation.
-#[allow(dead_code)] // Actually used in the PackFile trait definition for nicer syntax
-type OptimizedBytesChunk<T, E> = Result<(Cow<'static, str>, OptimizedBytes<T>), E>;
+/// The result of processing a chunk of pack file bytes to an optimized representation, boxed to
+/// use dynamic dispatch.
+pub type OptimizedBoxedBytesChunk =
+	Result<(Cow<'static, str>, Box<dyn AsRef<[u8]> + Send>), OptimizationError>;
 
-/// A candidate for a Minecraft pack file, that may be processed in order to improve its internal
+/// The result of processing a chunk of pack file bytes to an optimized representation.
+#[allow(dead_code)] // Actually used in OptimizedByteChunksStream bounds
+type OptimizedBytesChunk<T, E> = Result<(Cow<'static, str>, T), E>;
+
+/// A tuple that contains an [`AsyncRead`] for a pack file and its estimated size.
+type AsyncReadAndSizeHint<T> = (T, u64);
+
+/// A Minecraft pack file in some format, that may be processed in order to improve its internal
 /// coding efficiency and/or its compressibility by a lossless data compression algorithm. This
 /// processing can be lossy, although it is always possible to make it lossless; see the concrete
 /// implementation for details.
-pub trait PackFile {
-	/// The type of byte chunks that this pack file produces when being processed.
-	type ByteChunkType: AsRef<[u8]>;
+///
+/// A pack file is aware of its general format, but some details about how it is optimized may
+/// depend on the concrete [`PackFileAssetType`] that it represents. A pack file may represent one
+/// or several asset types, depending on how Minecraft parses it.
+trait PackFile {
+	/// The type of owned byte chunks that this pack file produces when being processed.
+	type ByteChunkType: AsRef<[u8]> + Send + 'static;
 
 	/// An error that may occur while computing the optimized representation of the pack file.
 	type OptimizationError: Into<OptimizationError> + Debug + Display;
 
 	/// The type of the stream that will yield either optimized byte chunks or processing errors for
 	/// this pack file.
-	type OptimizedBytesChunksStream: Stream<Item = OptimizedBytesChunk<Self::ByteChunkType, Self::OptimizationError>>
+	type OptimizedByteChunksStream: Stream<Item = OptimizedBytesChunk<Self::ByteChunkType, Self::OptimizationError>>
+		+ Send
 		+ Unpin
 		+ 'static;
 
@@ -88,16 +84,10 @@ pub trait PackFile {
 	/// Errors may be yielded by the stream returned by this method if some I/O operation goes wrong, the
 	/// pack file is malformed, or any other unrecoverable condition is encountered. In this case, users of
 	/// this method _must_ stop iterating over the result stream inmediately.
-	fn process(self) -> Self::OptimizedBytesChunksStream;
-
-	/// Returns the canonical extension for this pack file.
-	///
-	/// The canonical extension of a pack file is the extension that Minecraft expects when dealing with
-	/// this pack file.
-	fn canonical_extension(&self) -> &str;
+	fn process(self) -> Self::OptimizedByteChunksStream;
 
 	/// Returns whether the contents of this pack file are already internally compressed, and as such any
-	/// attempt to further compress them will likely result in lower than normal space savings.
+	/// attempt to further compress them will likely result in lower than usual space savings.
 	fn is_compressed(&self) -> bool;
 }
 
@@ -107,55 +97,32 @@ pub trait PackFile {
 ///
 /// Every [`PackFile`] must implement this trait in order to be used easily with the already existing
 /// high-level library code.
-pub trait PackFileConstructor<R: AsyncRead + Unpin + 'static>: PackFile + Sized {
+trait PackFileConstructor<R: AsyncRead + Unpin + 'static>: PackFile + Sized {
 	/// The type of optimization settings that have to be used to instantiate the pack file.
 	type OptimizationSettings;
 
-	/// Instantiates this pack file with the provided arguments, which contain optimization settings
-	/// specific to the type, lazily associating it with the read struct that `file_read_producer`
-	/// returns.
+	/// Instantiates this pack file with the provided optimization settings, specific to its asset
+	/// type, lazily associating it with the read struct that `file_read_producer` returns.
 	///
-	/// This operation will not yield a pack file instance if the provided arguments don't actually point
-	/// to a pack file of this type, if the pack file should be skipped, or if the read struct producer function
-	/// returns `None`. It is the responsibility of the caller to deal with any I/O error that may happen
-	/// during the execution of this producer function. If these conditions do not apply, this method is
-	/// guaranteed to suceed and return `Some`.
-	fn new<F: FnMut() -> Option<(R, u64)>>(
-		file_read_producer: F,
-		args: PackFileConstructorArgs<'_, Self::OptimizationSettings>
+	/// This operation will not yield a pack file instance if the pack file should be skipped, or if the
+	/// read struct producer function returns `None`. It is the responsibility of the caller to deal with
+	/// any I/O error that may happen during the execution of this producer function. If these conditions
+	/// do not apply, this method is guaranteed to suceed and return `Some`.
+	fn new(
+		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<R>>,
+		asset_type: PackFileAssetType,
+		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self>;
 }
 
-/// Contains the arguments needed to instantiate a [`PackFile`] via the [`PackFileConstructor`] trait.
-pub struct PackFileConstructorArgs<'a, S> {
-	/// The relative path where this pack file is.
-	pub path: &'a RelativePath<'a>,
-	/// The pack file type specific optimization settings.
-	pub optimization_settings: S
-}
-
-/// Represents a type of asset contained in a [`PackFile`]. A pack file can represent several
-/// asset types depending on how Minecraft reads it.
-trait PackFileAssetType: Ord + Copy + Eq + IntoEnumIterator + TryFrom<usize> {
-	/// Compiles a glob pattern that matches [`RelativePath`]s and can be used to identify a
-	/// pack file as containing an asset with this type.
-	fn to_glob_pattern(&self) -> Glob;
-	/// Returns the canonical extension for the pack file that contains this asset type, which
-	/// Minecraft expects.
-	fn canonical_extension(&self) -> &str;
-}
-
-/// Returns a lazily initialized glob set that can be used to identify a [`PackFile`] as belonging
-/// to a [`PackFileAssetType`] from its [`RelativePath`]. The glob patterns are added to the set
-/// in the order their variants are declared in the [`PackFileAssetType`] enum.
-const fn pack_file_asset_type_globset<T: PackFileAssetType>() -> SyncLazy<GlobSet> {
-	SyncLazy::new(|| {
-		let mut globset_builder = GlobSetBuilder::new();
-
-		for asset_type in T::into_enum_iter() {
-			globset_builder.add(asset_type.to_glob_pattern());
-		}
-
-		globset_builder.build().unwrap()
-	})
+/// Contains the different pieces of data obtained by processing some pack file.
+pub struct PackFileProcessData {
+	/// A stream that contains the byte chunks of the processed pack file data.
+	pub optimized_byte_chunks_stream: Box<dyn Stream<Item = OptimizedBoxedBytesChunk> + Send + Unpin>,
+	/// Represents whether the contents of this pack file are already internally compressed,
+	/// and as such any attempt to further compress them will likely result in lower than
+	/// usual space savings.
+	pub is_compressed: bool,
+	/// The canonical extension for the pack file, which Minecraft expects.
+	pub canonical_extension: &'static str
 }

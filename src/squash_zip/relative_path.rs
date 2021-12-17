@@ -77,15 +77,14 @@ impl<'a> RelativePath<'a> {
 		// forward slash (/). Be smart and avoid any allocations if the
 		// component separator character for the current platform is already
 		// a forward slash
-		let relative_path_string;
-		if MAIN_SEPARATOR == '/' {
-			relative_path_string = Cow::Borrowed(
+		let relative_path_string = if MAIN_SEPARATOR == '/' {
+			Cow::Borrowed(
 				relative_path
 					.to_str()
 					.ok_or_else(|| InvalidPathError::NonUnicode(relative_path.to_string_lossy()))?
-			);
+			)
 		} else {
-			relative_path_string = Cow::Owned(
+			Cow::Owned(
 				descendant_path_components
 					.map(|component| {
 						component.as_os_str().to_str().ok_or_else(|| {
@@ -94,8 +93,8 @@ impl<'a> RelativePath<'a> {
 					})
 					.collect::<Result<Vec<&str>, InvalidPathError>>()?
 					.join("/")
-			);
-		}
+			)
+		};
 
 		if relative_path_string.len() > u16::MAX as usize {
 			return Err(InvalidPathError::TooBig);
@@ -106,9 +105,9 @@ impl<'a> RelativePath<'a> {
 
 	/// Returns a borrowed view to the UTF-8 string representation of this relative path.
 	/// Although a relative path can be converted to a Rust string by other means, this
-	/// method is more ergonomic to use.
+	/// method is more ergonomic to use, and avoids any runtime checks.
 	pub fn as_str(&self) -> &str {
-		&self.0
+		self.0.as_ref()
 	}
 
 	/// Returns another relative path that owns equivalent path data to this path, so

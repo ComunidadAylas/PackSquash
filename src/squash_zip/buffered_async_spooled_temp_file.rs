@@ -136,12 +136,11 @@ impl AsyncRead for BufferedAsyncSpooledTempFile {
 				let remaining_bytes = file_reader.capacity() - file_reader.buffer().len();
 
 				// Avoid blocking if the bytes already are in a memory buffer
-				let bytes_read;
-				if read_buf.len() < remaining_bytes {
-					bytes_read = file_reader.read(read_buf)?;
+				let bytes_read = if read_buf.len() < remaining_bytes {
+					file_reader.read(read_buf)?
 				} else {
-					bytes_read = task::block_in_place(|| file_reader.read(read_buf))?;
-				}
+					task::block_in_place(|| file_reader.read(read_buf))?
+				};
 
 				buf.advance(bytes_read);
 

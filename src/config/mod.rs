@@ -434,6 +434,26 @@ pub enum MinecraftQuirk {
 	/// This workaround stops PackSquash from reducing color images to grayscale, which may
 	/// hurt compression. This has no effect for input images that already are in grayscale.
 	GrayscaleImagesGammaMiscorrection,
+	/// Older versions of Minecraft (probably all versions since 1.6 until 1.13 are affected)
+	/// require banner and shield layer textures to be stored in RGBA format, or else the
+	/// layers they represent won't be applied at all, even if the palette pixels contain
+	/// transparency data. As PackSquash can convert images encoded in RGBA format to palette
+	/// format to save space, it can trigger this quirky behavior.
+	///
+	/// This workaround stops PackSquash from changing the color format of the affected
+	/// textures to a palette, which includes color quantization, as it is used to generate
+	/// a palette. This incurs in some space cost.
+	RestrictiveBannerLayerTextureFormatCheck,
+	/// All currently known Minecraft versions overlay entity layer textures in a way that
+	/// does not account for transparency properly, by taking into account their color and
+	/// not only their transparency values as blending coefficients to use for overlying
+	/// that texture. PackSquash can change the color of transparent pixels, and as such it
+	/// can trigger this behavior.
+	///
+	/// This workaround stops PackSquash from changing the color of transparent pixels and
+	/// quantizing the pixels to a palette to reduce texture file size, as both optimizations
+	/// do not guarantee that the color of transparent pixels will stay exactly the same.
+	BadEntityEyeLayerTextureTransparencyBlending,
 	/// The latest Minecraft versions, from 1.17 onwards, are compiled for Java 16+, which
 	/// means that they do not support older Java versions. On the other hand, Java 8 was
 	/// used almost ubiquitously with older Minecraft clients, especially in modded
@@ -454,6 +474,12 @@ impl MinecraftQuirk {
 	pub(super) const fn as_str(&self) -> &'static str {
 		match self {
 			Self::GrayscaleImagesGammaMiscorrection => "grayscale_images_gamma_miscorrection",
+			Self::RestrictiveBannerLayerTextureFormatCheck => {
+				"restrictive_banner_layer_texture_format_check"
+			}
+			Self::BadEntityEyeLayerTextureTransparencyBlending => {
+				"bad_entity_eye_layer_texture_transparency_blending"
+			}
 			Self::Java8ZipParsing => "java8_zip_parsing"
 		}
 	}
@@ -508,15 +534,56 @@ pub enum FileOptions {
 	PropertiesFileOptions(PropertiesFileOptions)
 }
 
-/// Helper trait that every file options struct contained in [`FileOptions`] variants must
-/// implement.
-pub(crate) trait FileOptionsTrait {
+impl FileOptions {
 	/// Tweaks the value of the crate-private fields that are used to enforce global options
 	/// contained in the [`GlobalOptions`] struct.
 	///
 	/// It is recommended to execute this method just after the default or user provided
 	/// file settings for some pack file were found, before actually using them.
-	fn tweak_from_global_options(self, global_options: &GlobalOptions) -> Self;
+	#[allow(unused_variables, unused_mut)]
+	pub(crate) fn tweak_from_global_options(self, global_options: &GlobalOptions) -> Self {
+		match self {
+			FileOptions::JsonFileOptions(mut file_options) => {
+				#[cfg(feature = "optifine-support")]
+				{
+					file_options.allow_optifine_files =
+						global_options.allow_mods.contains(MinecraftMod::Optifine);
+				}
+
+				#[cfg(feature = "mtr3-support")]
+				{
+					file_options.allow_mtr3_files = global_options
+						.allow_mods
+						.contains(MinecraftMod::MinecraftTransitRailway3);
+				}
+			}
+			FileOptions::PngFileOptions(mut file_options) => {
+				#[cfg(feature = "optifine-support")]
+				{
+					file_options.allow_optifine_files =
+						global_options.allow_mods.contains(MinecraftMod::Optifine);
+				}
+
+				file_options.do_not_reduce_to_grayscale = global_options
+					.work_around_minecraft_quirks
+					.contains(MinecraftQuirk::GrayscaleImagesGammaMiscorrection);
+				file_options.skip_color_type_reduction = global_options
+					.work_around_minecraft_quirks
+					.contains(MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck);
+				file_options.do_not_change_transparent_pixel_colors = global_options
+					.work_around_minecraft_quirks
+					.contains(MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending);
+				file_options.skip_pack_icon = global_options.skip_pack_icon;
+			}
+			#[cfg(feature = "optifine-support")]
+			FileOptions::PropertiesFileOptions(mut file_options) => {
+				file_options.skip = !global_options.allow_mods.contains(MinecraftMod::Optifine);
+			}
+			_ => {}
+		}
+
+		self
+	}
 }
 
 /// Parameters that influence how a audio file is optimized.
@@ -575,12 +642,6 @@ impl Default for AudioFileOptions {
 			minimum_bitrate: 40_000.try_into().unwrap(),
 			maximum_bitrate: 96_000.try_into().unwrap()
 		}
-	}
-}
-
-impl FileOptionsTrait for AudioFileOptions {
-	fn tweak_from_global_options(self, _: &GlobalOptions) -> Self {
-		self
 	}
 }
 
@@ -684,28 +745,6 @@ impl Default for JsonFileOptions {
 	}
 }
 
-impl FileOptionsTrait for JsonFileOptions {
-	#[cfg_attr(
-		not(any(feature = "optifine-support", feature = "mtr3-support")),
-		allow(unused_mut, unused_variables)
-	)]
-	fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
-		#[cfg(feature = "optifine-support")]
-		{
-			self.allow_optifine_files = global_options.allow_mods.contains(MinecraftMod::Optifine);
-		}
-
-		#[cfg(feature = "mtr3-support")]
-		{
-			self.allow_mtr3_files = global_options
-				.allow_mods
-				.contains(MinecraftMod::MinecraftTransitRailway3);
-		}
-
-		self
-	}
-}
-
 /// Parameters that influence how a PNG file is optimized.
 ///
 /// Note that, in any case, any PNG chunks (e.g. metadata) that are not used by Minecraft
@@ -754,12 +793,30 @@ pub struct PngFileOptions {
 	///
 	/// **Default value**: `false`
 	pub skip_alpha_optimizations: bool,
+	/// Crate-private option set when [MinecraftMod::Optifine] was configured.
+	///
+	/// **Default value**: `false`
+	#[serde(skip)]
+	#[cfg(feature = "optifine-support")]
+	pub(crate) allow_optifine_files: bool,
 	/// Crate-private option set by the [MinecraftQuirk::GrayscaleImagesGammaMiscorrection]
 	/// workaround to not reduce color images to grayscale.
 	///
 	/// **Default value**: `false`
 	#[serde(skip)]
 	pub(crate) do_not_reduce_to_grayscale: bool,
+	/// Crate-private option set by the [MinecraftQuirk::RestrictiveBannerLayerTextureBlending]
+	/// workaround to not change the texture color type.
+	///
+	/// **Default value**: `false`
+	#[serde(skip)]
+	pub(crate) skip_color_type_reduction: bool,
+	/// Crate-private option set by the [MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending]
+	/// workaround to not change the texture color type.
+	///
+	/// **Default value**: `false`
+	#[serde(skip)]
+	pub(crate) do_not_change_transparent_pixel_colors: bool,
 	/// Crate-private option set when the `skip_pack_icon` configuration parameter is set.
 	///
 	/// **Default value**: `false`
@@ -774,20 +831,13 @@ impl Default for PngFileOptions {
 			color_quantization_target: Default::default(),
 			maximum_width_and_height: 8192,
 			skip_alpha_optimizations: false,
+			#[cfg(feature = "optifine-support")]
+			allow_optifine_files: false,
 			do_not_reduce_to_grayscale: false,
+			skip_color_type_reduction: false,
+			do_not_change_transparent_pixel_colors: false,
 			skip_pack_icon: false
 		}
-	}
-}
-
-impl FileOptionsTrait for PngFileOptions {
-	fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
-		self.do_not_reduce_to_grayscale = global_options
-			.work_around_minecraft_quirks
-			.contains(MinecraftQuirk::GrayscaleImagesGammaMiscorrection);
-		self.skip_pack_icon = global_options.skip_pack_icon;
-
-		self
 	}
 }
 
@@ -858,12 +908,6 @@ impl Default for ShaderFileOptions {
 	}
 }
 
-impl FileOptionsTrait for ShaderFileOptions {
-	fn tweak_from_global_options(self, _: &GlobalOptions) -> Self {
-		self
-	}
-}
-
 /// Parameters that influence how a properties file is optimized.
 ///
 /// These files are only supported if PackSquash was compiled with OptiFine mod support. Otherwise,
@@ -895,15 +939,6 @@ impl Default for PropertiesFileOptions {
 			minify: true,
 			skip: true
 		}
-	}
-}
-
-#[cfg(feature = "optifine-support")]
-impl FileOptionsTrait for PropertiesFileOptions {
-	fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
-		self.skip = !global_options.allow_mods.contains(MinecraftMod::Optifine);
-
-		self
 	}
 }
 

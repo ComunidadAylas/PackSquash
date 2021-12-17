@@ -1,21 +1,15 @@
-use std::{
-	borrow::Cow,
-	convert::TryInto,
-	error::Error,
-	fmt::{self, Display, Formatter},
-	io
-};
+use std::{borrow::Cow, convert::TryInto, io};
 
 use bytes::BytesMut;
 use java_properties::{LineEnding, PropertiesError, PropertiesIter, PropertiesWriter};
+use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
 use crate::config::PropertiesFileOptions;
 
 use super::{
-	util::{strip_utf8_bom, to_ascii_lowercase_extension},
-	OptimizedBytes, PackFile, PackFileConstructor, PackFileConstructorArgs
+	util::strip_utf8_bom, AsyncReadAndSizeHint, PackFile, PackFileAssetType, PackFileConstructor
 };
 
 #[cfg(test)]
@@ -33,7 +27,7 @@ mod tests;
 ///
 /// [1]: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Properties.html#load(java.io.Reader)
 /// [2]: https://github.com/sp614x/optifine/tree/master/OptiFineDoc/doc
-pub struct PropertiesFile<T: AsyncRead + Unpin + 'static> {
+pub struct PropertiesFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
 	file_length_hint: usize,
 	optimization_settings: PropertiesFileOptions
@@ -46,33 +40,12 @@ pub struct OptimizerDecoder {
 }
 
 /// Represents an error that may happen while optimizing properties files.
-#[derive(Debug)]
-pub struct OptimizationError {
-	description: String
-}
-
-impl Error for OptimizationError {}
-
-impl Display for OptimizationError {
-	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-		f.write_fmt(format_args!("Parse or I/O error: {}", self.description))
-	}
-}
-
-impl From<PropertiesError> for OptimizationError {
-	fn from(err: PropertiesError) -> Self {
-		Self {
-			description: err.to_string()
-		}
-	}
-}
-
-impl From<io::Error> for OptimizationError {
-	fn from(err: io::Error) -> Self {
-		Self {
-			description: err.to_string()
-		}
-	}
+#[derive(Error, Debug)]
+pub enum OptimizationError {
+	#[error("Properties parse error: {0}")]
+	InvalidProperties(#[from] PropertiesError),
+	#[error("I/O error: {0}")]
+	Io(#[from] io::Error)
 }
 
 /// Helper enum to allow clients of [PropertiesFile] consume bytes from different
@@ -95,7 +68,7 @@ impl AsRef<[u8]> for ByteBuffer {
 // FIXME: actual framing?
 // (i.e. do not hold the entire file in memory before decoding, so that frame != file)
 impl Decoder for OptimizerDecoder {
-	type Item = (Cow<'static, str>, OptimizedBytes<ByteBuffer>);
+	type Item = (Cow<'static, str>, ByteBuffer);
 	type Error = OptimizationError;
 
 	fn decode(&mut self, _: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
@@ -128,7 +101,7 @@ impl Decoder for OptimizerDecoder {
 
 			Ok(Some((
 				Cow::Borrowed("Minified"),
-				OptimizedBytes(ByteBuffer::Vec(minified_file_buf))
+				ByteBuffer::Vec(minified_file_buf)
 			)))
 		} else {
 			// Parse the properties file to check its correctness,
@@ -137,16 +110,16 @@ impl Decoder for OptimizerDecoder {
 
 			Ok(Some((
 				Cow::Borrowed("Validated and copied"),
-				OptimizedBytes(ByteBuffer::BytesMut(src.split_off(0)))
+				ByteBuffer::BytesMut(src.split_off(0))
 			)))
 		}
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static> PackFile for PropertiesFile<T> {
+impl<T: AsyncRead + Send + Unpin + 'static> PackFile for PropertiesFile<T> {
 	type ByteChunkType = ByteBuffer;
 	type OptimizationError = OptimizationError;
-	type OptimizedBytesChunksStream = FramedRead<T, OptimizerDecoder>;
+	type OptimizedByteChunksStream = FramedRead<T, OptimizerDecoder>;
 
 	fn process(self) -> FramedRead<T, OptimizerDecoder> {
 		FramedRead::with_capacity(
@@ -159,33 +132,28 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for PropertiesFile<T> {
 		)
 	}
 
-	fn canonical_extension(&self) -> &str {
-		"properties"
-	}
-
 	fn is_compressed(&self) -> bool {
 		false
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PropertiesFile<T> {
+impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for PropertiesFile<T> {
 	type OptimizationSettings = PropertiesFileOptions;
 
-	fn new<F: FnMut() -> Option<(T, u64)>>(
-		mut file_read_producer: F,
-		args: PackFileConstructorArgs<'_, PropertiesFileOptions>
+	fn new(
+		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<T>>,
+		_: PackFileAssetType,
+		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
-		if !args.optimization_settings.skip
-			&& matches!(&*to_ascii_lowercase_extension(args.path), "properties")
-		{
-			file_read_producer().map(|(read, file_length_hint)| Self {
-				read,
-				// The file is too big to fit in memory if this conversion fails anyway
-				file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
-				optimization_settings: args.optimization_settings
+		(!optimization_settings.skip)
+			.then(|| {
+				file_read_producer().map(|(read, file_length_hint)| Self {
+					read,
+					// The file is too big to fit in memory if this conversion fails anyway
+					file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
+					optimization_settings
+				})
 			})
-		} else {
-			None
-		}
+			.flatten()
 	}
 }

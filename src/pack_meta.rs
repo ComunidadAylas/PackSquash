@@ -149,11 +149,15 @@ impl PackMeta {
 
 		if self.pack_format_version < PACK_FORMAT_VERSION_1_13 {
 			quirks |= MinecraftQuirk::GrayscaleImagesGammaMiscorrection;
+			quirks |= MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck;
 		}
 
 		if self.pack_format_version < PACK_FORMAT_VERSION_1_17 {
 			quirks |= MinecraftQuirk::Java8ZipParsing;
 		}
+
+		// All known Minecraft versions are affected by this quirk
+		quirks |= MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending;
 
 		quirks
 	}

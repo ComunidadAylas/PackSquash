@@ -172,7 +172,7 @@ impl ObfuscationEngine {
 			let seed = central_directory_header.crc32 as u64;
 			let discretion = self.use_discretion(seed);
 
-			let obfuscate_uncompressed_size = !workaround_old_java_obfuscation_quirks
+			let obfuscate_uncompressed_size = !*workaround_old_java_obfuscation_quirks
 				|| (central_directory_header.compression_method != CompressionMethod::Store
 					&& central_directory_header.compressed_size != 0);
 

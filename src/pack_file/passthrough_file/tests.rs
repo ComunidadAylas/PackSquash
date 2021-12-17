@@ -10,13 +10,12 @@ static BYTES: [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
 async fn successful_process_test(input_data: &[u8]) {
 	let data_stream = PassthroughFile {
 		read: Builder::new().read(input_data).build(),
-		canonical_extension: "bin",
 		is_compressed: false,
 		optimization_strategy_message: "Copied"
 	}
 	.process();
 
-	let process_result: Vec<(Cow<'static, str>, OptimizedBytes<BytesMut>)> = data_stream
+	let process_result: Vec<(Cow<'static, str>, BytesMut)> = data_stream
 		.map(|result| result.expect("No error should happen while decoding"))
 		.collect()
 		.await;

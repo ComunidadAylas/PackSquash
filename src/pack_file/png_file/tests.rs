@@ -22,12 +22,13 @@ async fn successful_process_test(
 
 	let data_stream = PngFile {
 		read: Builder::new().read(input_data).build(),
+		asset_type: PackFileAssetType::GenericTexture,
 		file_length_hint: input_data_len,
 		optimization_settings: settings
 	}
 	.process();
 
-	let process_result: Vec<(Cow<'static, str>, OptimizedBytes<Vec<u8>>)> = data_stream
+	let process_result: Vec<(Cow<'static, str>, Vec<u8>)> = data_stream
 		.map(|result| result.expect("No error should happen while decoding"))
 		.collect()
 		.await;
@@ -129,6 +130,7 @@ async fn lossy_optimization_works() {
 async fn invalid_input_is_handled() {
 	let mut data_stream = PngFile {
 		read: Builder::new().read(&[]).build(),
+		asset_type: PackFileAssetType::GenericTexture,
 		file_length_hint: 0,
 		optimization_settings: Default::default()
 	}

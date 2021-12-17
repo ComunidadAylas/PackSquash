@@ -12,7 +12,7 @@ static PRETTIFIED_JSON_DATA: &str = include_str!("example_prettified.json");
 /// expecting a successful result that equals the expected string.
 async fn successful_process_test(
 	input_data: &str,
-	asset_type: JsonFileAssetType,
+	asset_type: PackFileAssetType,
 	settings: JsonFileOptions,
 	expected_result: &str
 ) {
@@ -26,7 +26,7 @@ async fn successful_process_test(
 	}
 	.process();
 
-	let process_result: Vec<(Cow<'static, str>, OptimizedBytes<BytesMut>)> = data_stream
+	let process_result: Vec<(Cow<'static, str>, BytesMut)> = data_stream
 		.map(|result| result.expect("No error should happen while decoding"))
 		.collect()
 		.await;
@@ -49,7 +49,7 @@ async fn successful_process_test(
 async fn minifying_works() {
 	successful_process_test(
 		JSON_DATA,
-		JsonFileAssetType::Generic,
+		PackFileAssetType::GenericJson,
 		JsonFileOptions {
 			minify: true,
 			..Default::default()
@@ -66,7 +66,7 @@ async fn minifying_with_bom_works() {
 
 	successful_process_test(
 		&json_data_with_bom,
-		JsonFileAssetType::Generic,
+		PackFileAssetType::GenericJson,
 		JsonFileOptions {
 			minify: true,
 			..Default::default()
@@ -80,7 +80,7 @@ async fn minifying_with_bom_works() {
 async fn prettifying_works() {
 	successful_process_test(
 		JSON_DATA,
-		JsonFileAssetType::Generic,
+		PackFileAssetType::GenericJson,
 		JsonFileOptions {
 			minify: false,
 			..Default::default()
@@ -94,7 +94,7 @@ async fn prettifying_works() {
 async fn minifying_and_debloating_model_works() {
 	successful_process_test(
 		JSON_DATA,
-		JsonFileAssetType::MinecraftModel,
+		PackFileAssetType::MinecraftModel,
 		JsonFileOptions {
 			minify: true,
 			..Default::default()
@@ -109,7 +109,7 @@ async fn empty_input_is_handled_with_error() {
 	let mut data_stream = JsonFile {
 		read: Builder::new().read(&[]).build(),
 		file_length_hint: 0,
-		asset_type: JsonFileAssetType::Generic,
+		asset_type: PackFileAssetType::GenericJson,
 		optimization_settings: Default::default()
 	}
 	.process();
@@ -128,7 +128,7 @@ async fn unexpected_value_is_handled_with_error() {
 	let mut data_stream = JsonFile {
 		read: Builder::new().read(NULL_VALUE.as_bytes()).build(),
 		file_length_hint: NULL_VALUE.len(),
-		asset_type: JsonFileAssetType::MinecraftModel,
+		asset_type: PackFileAssetType::MinecraftModel,
 		optimization_settings: JsonFileOptions {
 			// Debloat, to test debloating too
 			delete_bloat: true,
@@ -148,7 +148,7 @@ async fn unexpected_value_is_handled_with_error() {
 async fn strange_value_is_handled_consistently() {
 	successful_process_test(
 		"null",
-		JsonFileAssetType::Generic,
+		PackFileAssetType::GenericJson,
 		Default::default(),
 		"null"
 	)

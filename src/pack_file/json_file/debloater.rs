@@ -3,7 +3,7 @@ use std::{cell::Cell, lazy::OnceCell};
 use jsonpath_lib::SelectorMut;
 use serde_json::Value;
 
-use super::JsonFileAssetType;
+use super::PackFileAssetType;
 
 /// Provides a short syntax to create a [SelectorMut] from a JSONPath string.
 macro_rules! jsonpath_selectormut {
@@ -40,17 +40,17 @@ impl Debloater {
 	/// A boolean value is returned indicating whether a debloat attempt was made to
 	/// this file. Note that, even if such an attempt was made, the JSON might not
 	/// have been modified.
-	pub fn debloat(&self, parsed_json: &mut Value, asset_type: JsonFileAssetType) -> bool {
+	pub fn debloat(&self, parsed_json: &mut Value, asset_type: PackFileAssetType) -> bool {
 		// Use the appropriate JSONPath selectors for this asset type. If this
 		// asset type has no applicable selectors, bail out early
 		match asset_type {
-			JsonFileAssetType::MinecraftModel => debloat_value(
+			PackFileAssetType::MinecraftModel => debloat_value(
 				parsed_json,
 				&self.minecraft_model_bloat_selectors,
 				compile_minecraft_model_bloat_selectors
 			),
 			#[cfg(feature = "mtr3-support")]
-			JsonFileAssetType::Mtr3CustomTrainModel => debloat_value(
+			PackFileAssetType::Mtr3CustomTrainModel => debloat_value(
 				parsed_json,
 				&self.mtr3_train_model_bloat_selectors,
 				compile_mtr3_train_model_bloat_selectors

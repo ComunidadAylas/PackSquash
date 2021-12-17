@@ -18,10 +18,7 @@ use tokio_util::codec::{Decoder, FramedRead};
 
 use crate::{config::PngFileOptions, zopfli_iterations_time_model::ZopfliIterationsTimeModel};
 
-use super::{
-	util::to_ascii_lowercase_extension, OptimizedBytes, PackFile, PackFileConstructor,
-	PackFileConstructorArgs
-};
+use super::{AsyncReadAndSizeHint, PackFile, PackFileAssetType, PackFileConstructor};
 
 #[cfg(test)]
 mod tests;
@@ -29,14 +26,16 @@ mod tests;
 /// Represents a resource pack PNG image file, which is used for in-game textures.
 ///
 /// The optimization process may be customized via [PngFileOptions].
-pub struct PngFile<T: AsyncRead + Unpin + 'static> {
+pub struct PngFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
 	file_length_hint: usize,
+	asset_type: PackFileAssetType,
 	optimization_settings: PngFileOptions
 }
 
 /// Optimizer decoder that transforms PNG files to an optimized representation.
 pub struct OptimizerDecoder {
+	asset_type: PackFileAssetType,
 	optimization_settings: PngFileOptions,
 	reached_eof: bool
 }
@@ -62,7 +61,7 @@ pub enum OptimizationError {
 // FIXME: actual framing?
 // (i.e. do not hold the entire file in memory before decoding, so that frame != file)
 impl Decoder for OptimizerDecoder {
-	type Item = (Cow<'static, str>, OptimizedBytes<Vec<u8>>);
+	type Item = (Cow<'static, str>, Vec<u8>);
 	type Error = OptimizationError;
 
 	fn decode(&mut self, _: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
@@ -83,6 +82,14 @@ impl Decoder for OptimizerDecoder {
 			7.0 / 8.0
 		);
 		let color_quantization_target = self.optimization_settings.color_quantization_target;
+
+		let do_color_type_changes = self.asset_type != PackFileAssetType::BannerLayer
+			|| !self.optimization_settings.skip_color_type_reduction;
+		let change_transparent_pixel_colors = self.asset_type != PackFileAssetType::EyeLayer
+			|| !self
+				.optimization_settings
+				.do_not_change_transparent_pixel_colors;
+
 		let maximum_colors = color_quantization_target.max_colors();
 		let quality_description;
 
@@ -108,10 +115,12 @@ impl Decoder for OptimizerDecoder {
 
 		let oxipng_input_buf;
 
-		// Perform quantization if desired and if useful
-		// (i.e. there are more pixels than possible colors)
+		// Perform quantization if desired and if useful (i.e. there are more pixels
+		// than possible colors, and no option stops us from doing so)
 		if color_quantization_target.should_quantize()
 			&& image_info.width * image_info.height > maximum_colors
+			&& do_color_type_changes
+			&& change_transparent_pixel_colors
 		{
 			let mut quantization_result;
 
@@ -207,16 +216,18 @@ impl Decoder for OptimizerDecoder {
 			quality_description =
 				Cow::Owned(format!("{}%", quantization_result.quantization_quality()));
 		} else {
-			// When not performing quantization, pixel colors will never be changed
+			// When not performing quantization, pixel colors will not be changed visibly
 			drop(png_reader);
 			oxipng_input_buf = src.split_off(0); // This sets src capacity to 0
-			quality_description = Cow::Borrowed("lossless");
+			quality_description = Cow::Borrowed("visually lossless");
 		}
 
 		// At this point we have the PNG data we want to losslessly optimize
 		// in oxipng_input_buf. Do so with OxiPNG
 		let oxipng_options = Options {
-			alphas: if self.optimization_settings.skip_alpha_optimizations {
+			alphas: if self.optimization_settings.skip_alpha_optimizations
+				|| !change_transparent_pixel_colors
+			{
 				IndexSet::new()
 			} else {
 				let mut alpha_optimizations = IndexSet::with_capacity(6);
@@ -230,8 +241,8 @@ impl Decoder for OptimizerDecoder {
 				alpha_optimizations
 			},
 			backup: false,
-			bit_depth_reduction: true,
-			color_type_reduction: true,
+			bit_depth_reduction: do_color_type_changes,
+			color_type_reduction: do_color_type_changes,
 			// Compute an appropriate number of Zopfli compression iterations using our
 			// model. If the number of iterations drops to zero, switch to the much faster,
 			// but not so space-efficient, cloudflare-zlib deflater
@@ -280,7 +291,8 @@ impl Decoder for OptimizerDecoder {
 			idat_recoding: true,
 			interlace: Some(0), // No interlacing (smaller file size)
 			palette_reduction: true,
-			grayscale_reduction: !self.optimization_settings.do_not_reduce_to_grayscale,
+			grayscale_reduction: !self.optimization_settings.do_not_reduce_to_grayscale
+				&& do_color_type_changes,
 			preserve_attrs: false,
 			pretend: false,
 			strip: Headers::All,
@@ -292,20 +304,21 @@ impl Decoder for OptimizerDecoder {
 
 		Ok(Some((
 			Cow::Owned(format!("Optimized with {} quality", quality_description)),
-			OptimizedBytes(optimized_png)
+			optimized_png
 		)))
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static> PackFile for PngFile<T> {
+impl<T: AsyncRead + Send + Unpin + 'static> PackFile for PngFile<T> {
 	type ByteChunkType = Vec<u8>;
 	type OptimizationError = OptimizationError;
-	type OptimizedBytesChunksStream = FramedRead<T, OptimizerDecoder>;
+	type OptimizedByteChunksStream = FramedRead<T, OptimizerDecoder>;
 
 	fn process(self) -> FramedRead<T, OptimizerDecoder> {
 		FramedRead::with_capacity(
 			self.read,
 			OptimizerDecoder {
+				asset_type: self.asset_type,
 				optimization_settings: self.optimization_settings,
 				reached_eof: false
 			},
@@ -313,41 +326,36 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for PngFile<T> {
 		)
 	}
 
-	fn canonical_extension(&self) -> &str {
-		"png"
-	}
-
 	fn is_compressed(&self) -> bool {
 		true
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for PngFile<T> {
+impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for PngFile<T> {
 	type OptimizationSettings = PngFileOptions;
 
-	fn new<F: FnMut() -> Option<(T, u64)>>(
-		mut file_read_producer: F,
-		args: PackFileConstructorArgs<'_, PngFileOptions>
+	fn new(
+		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<T>>,
+		asset_type: PackFileAssetType,
+		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
-		let file_path = &*args.path;
-		let extension = &*to_ascii_lowercase_extension(file_path);
+		let skip = match asset_type {
+			#[cfg(feature = "optifine-support")]
+			PackFileAssetType::OptifineTexture => !optimization_settings.allow_optifine_files,
+			PackFileAssetType::PackIcon => optimization_settings.skip_pack_icon,
+			_ => false
+		};
 
-		let skip = !matches!(extension, "png")
-			|| (args.optimization_settings.skip_pack_icon
-				&& file_path
-					.parent()
-					.filter(|parent_path| !parent_path.as_os_str().is_empty())
-					.is_none() && file_path.file_name().unwrap().to_str().unwrap() == "pack.png");
-
-		if !skip {
-			file_read_producer().map(|(read, file_length_hint)| Self {
-				read,
-				// The file is too big to fit in memory if this conversion fails anyway
-				file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
-				optimization_settings: args.optimization_settings
+		(!skip)
+			.then(|| {
+				file_read_producer().map(|(read, file_length_hint)| Self {
+					read,
+					// The file is too big to fit in memory if this conversion fails anyway
+					file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
+					asset_type,
+					optimization_settings
+				})
 			})
-		} else {
-			None
-		}
+			.flatten()
 	}
 }

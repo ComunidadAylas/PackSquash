@@ -17,8 +17,7 @@ use tokio_util::codec::{Decoder, FramedRead};
 use crate::config::ShaderFileOptions;
 
 use super::{
-	util::{strip_utf8_bom, to_ascii_lowercase_extension},
-	OptimizedBytes, PackFile, PackFileConstructor, PackFileConstructorArgs
+	util::strip_utf8_bom, AsyncReadAndSizeHint, PackFile, PackFileAssetType, PackFileConstructor
 };
 
 #[cfg(test)]
@@ -30,10 +29,9 @@ mod tests;
 /// packs for several effects, like the "creeper vision" showed while spectating a Creeper,
 /// and the "Super Secret Settings" button that was ultimately removed.
 /// Minecraft mods may support more shaders that can be added or replaced via resource packs.
-pub struct ShaderFile<T: AsyncRead + Unpin + 'static> {
+pub struct ShaderFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
 	file_length_hint: usize,
-	extension: String,
 	optimization_settings: ShaderFileOptions
 }
 
@@ -68,7 +66,7 @@ pub enum OptimizationError {
 // FIXME: actual framing?
 // (i.e. do not hold the entire file in memory before decoding, so that frame != file)
 impl Decoder for OptimizerDecoder {
-	type Item = (Cow<'static, str>, OptimizedBytes<BytesMut>);
+	type Item = (Cow<'static, str>, BytesMut);
 	type Error = OptimizationError;
 
 	fn decode(&mut self, _: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
@@ -100,25 +98,22 @@ impl Decoder for OptimizerDecoder {
 				&translation_unit
 			);
 
-			Ok(Some((
-				Cow::Borrowed("Minified"),
-				OptimizedBytes(buf_writer.into_inner())
-			)))
+			Ok(Some((Cow::Borrowed("Minified"), buf_writer.into_inner())))
 		} else {
 			// The shader is okay, but we don't want to minify it, so just
 			// return an owned view of the read bytes
 			Ok(Some((
 				Cow::Borrowed("Validated and copied"),
-				OptimizedBytes(src.split_off(0))
+				src.split_off(0)
 			)))
 		}
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static> PackFile for ShaderFile<T> {
+impl<T: AsyncRead + Send + Unpin + 'static> PackFile for ShaderFile<T> {
 	type ByteChunkType = BytesMut;
 	type OptimizationError = OptimizationError;
-	type OptimizedBytesChunksStream = FramedRead<T, OptimizerDecoder>;
+	type OptimizedByteChunksStream = FramedRead<T, OptimizerDecoder>;
 
 	fn process(self) -> FramedRead<T, OptimizerDecoder> {
 		FramedRead::with_capacity(
@@ -131,34 +126,24 @@ impl<T: AsyncRead + Unpin + 'static> PackFile for ShaderFile<T> {
 		)
 	}
 
-	fn canonical_extension(&self) -> &str {
-		&self.extension
-	}
-
 	fn is_compressed(&self) -> bool {
 		false
 	}
 }
 
-impl<T: AsyncRead + Unpin + 'static> PackFileConstructor<T> for ShaderFile<T> {
+impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for ShaderFile<T> {
 	type OptimizationSettings = ShaderFileOptions;
 
-	fn new<F: FnMut() -> Option<(T, u64)>>(
-		mut file_read_producer: F,
-		args: PackFileConstructorArgs<'_, ShaderFileOptions>
+	fn new(
+		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<T>>,
+		_: PackFileAssetType,
+		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
-		let extension = to_ascii_lowercase_extension(args.path);
-
-		if matches!(&*extension, "fsh" | "vsh" | "glsl") {
-			file_read_producer().map(|(read, file_length_hint)| Self {
-				read,
-				// The file is too big to fit in memory if this conversion fails anyway
-				file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
-				extension: extension.into_owned(),
-				optimization_settings: args.optimization_settings
-			})
-		} else {
-			None
-		}
+		file_read_producer().map(|(read, file_length_hint)| Self {
+			read,
+			// The file is too big to fit in memory if this conversion fails anyway
+			file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
+			optimization_settings
+		})
 	}
 }
