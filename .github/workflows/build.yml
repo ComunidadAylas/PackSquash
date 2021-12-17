@@ -60,7 +60,7 @@ jobs:
           version: latest
 
       - name: Cargo deny check
-        uses: EmbarkStudios/cargo-deny-action@v1
+        uses: ComunidadAylas/cargo-deny-action@main
 
       - name: Clippy check
         uses: actions-rs/clippy-check@v1
