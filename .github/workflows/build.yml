@@ -33,6 +33,7 @@ jobs:
           toolchain: nightly
           profile: minimal
           components: rustfmt, clippy
+          default: true
 
       - name: Cargo deny check
         uses: ComunidadAylas/cargo-deny-action@main
@@ -257,7 +258,8 @@ jobs:
       - name: Install latest Rust nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
+          toolchain: nightly
+          target: ${{ env.CARGO_BUILD_TARGET }}
           profile: minimal
           components: rust-src
 
