@@ -59,6 +59,9 @@ jobs:
           crate: cargo-deb
           version: latest
 
+      - name: Cargo deny check
+        uses: EmbarkStudios/cargo-deny-action@v1
+
       - name: Clippy check
         uses: actions-rs/clippy-check@v1
         with:

@@ -109,7 +109,7 @@ dependencies = [
  "cc",
  "cfg-if",
  "libc",
- "miniz_oxide 0.4.4",
+ "miniz_oxide",
  "object",
  "rustc-demangle",
 ]
@@ -162,12 +162,6 @@ checksum = "a40b47ad93e1a5404e6c18dec46b628214fee441c70f4ab5d6942142cc268a3d"
 dependencies = [
  "memchr",
 ]
-
-[[package]]
-name = "build_const"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4ae4235e6dac0694637c763029ecea1a2ec9e4e06ec2729bd21ba4d9c863eb7"
 
 [[package]]
 name = "bytemuck"
@@ -306,15 +300,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95059428f66df56b63431fdb4e1947ed2190586af5c5a8a8b71122bdf5a7f469"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "crc"
-version = "1.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d663548de7f5cca343f1e0a48d14dcfb0e9eb4e079ec58883b7251539fa10aeb"
-dependencies = [
- "build_const",
 ]
 
 [[package]]
@@ -934,9 +919,8 @@ dependencies = [
 
 [[package]]
 name = "imagequant"
-version = "3.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7920a93733f72255a09ad0401b5529e9200bbf7953861dd16f1ce882b0392c3f"
+version = "3.2.0"
+source = "git+https://github.com/ImageOptim/libimagequant#50be7407ffd8633f4d685b3ce0440fddd2580389"
 dependencies = [
  "fallible_collections",
  "imagequant-sys",
@@ -946,9 +930,8 @@ dependencies = [
 
 [[package]]
 name = "imagequant-sys"
-version = "3.1.1+sys2.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aed58eefc96c8ea2809404d433b5045916957f47e516513bf90ea73e10a79c84"
+version = "3.1.2+sys2.17.0"
+source = "git+https://github.com/ImageOptim/libimagequant#50be7407ffd8633f4d685b3ce0440fddd2580389"
 dependencies = [
  "bitflags",
  "cc",
@@ -1125,15 +1108,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "miniz_oxide"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2b29bd4bc3f33391105ebee3589c19197c4271e3e5a9ec9bfe8127eeff8f082"
-dependencies = [
- "adler",
-]
-
-[[package]]
 name = "muldiv"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1254,17 +1228,17 @@ checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 [[package]]
 name = "oxipng"
 version = "5.0.1"
-source = "git+https://github.com/ComunidadAylas/oxipng?branch=packsquash#479ae8453024879a9db98f5229047907ba8dab17"
+source = "git+https://github.com/ComunidadAylas/oxipng?branch=packsquash#ddc2d4ebeacb6cd7254238c756f002efde24fc5a"
 dependencies = [
  "bit-vec",
  "byteorder",
  "cloudflare-zlib",
- "crc 2.1.0",
+ "crc",
  "crossbeam-channel",
  "indexmap",
  "itertools",
  "log",
- "miniz_oxide 0.5.1",
+ "miniz_oxide",
  "rgb",
  "rustc_version",
  "zopfli",
@@ -1388,7 +1362,7 @@ dependencies = [
  "crc32fast",
  "deflate",
  "encoding",
- "miniz_oxide 0.4.4",
+ "miniz_oxide",
 ]
 
 [[package]]
@@ -1610,18 +1584,18 @@ checksum = "568a8e6258aa33c13358f81fd834adb854c6f7c9468520910a9b1e8fac068012"
 
 [[package]]
 name = "serde"
-version = "1.0.131"
+version = "1.0.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4ad69dfbd3e45369132cc64e6748c2d65cdfb001a2b1c232d128b4ad60561c1"
+checksum = "8b9875c23cf305cd1fd7eb77234cbb705f21ea6a72c637a5c6db5fe4b8e7f008"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.131"
+version = "1.0.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b710a83c4e0dff6a3d511946b95274ad9ca9e5d3ae497b63fda866ac955358d2"
+checksum = "ecc0db5cb2556c0e558887d9bbdcf6ac4471e83ff66cf696e5419024d1606276"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1907,9 +1881,9 @@ dependencies = [
 
 [[package]]
 name = "typed-arena"
-version = "1.7.0"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9b2228007eba4120145f785df0f6c92ea538f5a3635a612ecf4e334c8c1446d"
+checksum = "0685c84d5d54d1c26f7d3eb96cd41550adb97baed141a761cf335d3d33bcd0ae"
 
 [[package]]
 name = "typenum"
@@ -2088,11 +2062,11 @@ checksum = "85e60b0d1b5f99db2556934e21937020776a5d31520bf169e851ac44e6420214"
 [[package]]
 name = "zopfli"
 version = "0.4.0"
-source = "git+https://github.com/ComunidadAylas/zopfli?branch=packsquash#03288fa856781e1966c2ab2c8c87f5734295192b"
+source = "git+https://github.com/ComunidadAylas/zopfli?branch=packsquash#83920bae8ae70a4a064a56fd2368f74677202196"
 dependencies = [
  "adler32",
  "byteorder",
- "crc 1.8.1",
+ "crc",
  "iter-read",
  "typed-arena",
 ]
