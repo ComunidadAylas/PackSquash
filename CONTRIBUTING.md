@@ -17,6 +17,7 @@ The next sections outline contributing guidelines and related tidbits of informa
   - [✔️ Cargo test runner](#️-cargo-test-runner)
   - [📎 Clippy](#-clippy)
   - [📝 rustfmt](#-rustfmt)
+  - [✨ Other Cargo subcommands](#other-cargo-subcommands)
 - [✏️ Submitting a pull request (PR)](#️-submitting-a-pull-request-pr)
   - [✒️ Contributor License Agreement (CLA)](#️-contributor-license-agreement-cla)
 
@@ -133,6 +134,17 @@ To get started with Clippy, make sure that your Rust toolchain includes the Clip
 As with Clippy, running rustfmt helps making your code contribution look as others expect, enforcing a consistent style over the codebase and saving trivial reviews proposing whitespace changes. All the code you contribute must be formatted as if rustfmt was run on it. If you think that the style it enforces is bad for some reason, please state why and try to suggest how to improve it.
 
 To get started with rustfmt, make sure that your Rust toolchain includes the rustfmt component, by running `rustup component add rustfmt`. After that's done, you can run rustfmt with `cargo fmt`, just like any other Cargo command. Remember to use the rustfmt component bundled with the nightly toolchain, not the stable one!
+
+## ✨ Other Cargo subcommands
+
+Depending on the scope of your changes to PackSquash code, you might also find these subcommands useful:
+
+- `cargo update` (install with `cargo install cargo-update`): updates all the dependencies specified in `Cargo.toml`. Useful for keeping up to date.
+- `cargo upgrade`: updates the dependencies locked in `Cargo.lock`, but does not change the `Cargo.toml` file. Useful for keeping up to date, usually in combination with `cargo update`.
+- `cargo bloat` (install with `cargo install cargo-bloat`): shows what functions and crates take the most space in the generated executable. Useful for optimizating code size.
+- `cargo cache` (install with `cargo install cargo-cache`): shows the size of the local Cargo cache on your computer, what things take what disk space on it, and allows cleaning it easily with `cargo cache -a`. Useful to save quite a bit of disk space when there are stale source code downloads in that cache.
+- `cargo deny` (install with `cargo install cargo-deny`): audits the dependency chain for known security vulnerabilities, license incompatibilities, dependencies on several versions of the same crate, and so on. Useful for doing a better dependency selection.
+- `cargo tree`: shows the dependency tree of the project, including transitive dependencies. Useful for managing dependencies and optimizing code size.
 
 # ✏️ Submitting a pull request (PR)
 
