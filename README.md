@@ -33,9 +33,11 @@ Finally, if you are into these sort of things, you can download the latest unsta
 
 ## 📝 Usage
 
-PackSquash is a command line application, so it must be executed from a command prompt, a shortcut, a command-line shell or a script. You can customize how it works by means of an options file, which contains per-file compression options and several other parameters. If no options file is specified, or if it is a dash ("-"), the options will be read from the standard input stream (usually, your keyboard or the output of another command). If in doubt, you can check out the command line argument syntax by launching PackSquash with the `-h` parameter.
+PackSquash is a command line application, so it must be executed from a command prompt, a shortcut, a command-line shell or a script. You can customize how it works by using an options file, which contains per-file compression options and several other parameters. If no options file is specified, or if it is a dash ("-"), the options will be read from the standard input stream (usually, your keyboard or the output of another command). If in doubt, you can check out the command line argument syntax by launching PackSquash with the `-h` parameter.
 
 For more information about the format of the options file, check [the Options files wiki article](https://github.com/ComunidadAylas/PackSquash/wiki/Options-files) on GitHub.
+
+If your pack lives on a GitHub repository and you are looking for an easy way to use PackSquash in GitHub Actions workflows, you'll probably be interested in [the official PackSquash action](https://github.com/marketplace/actions/packsquash).
 
 If you want a GUI for using PackSquash, or even authoring resource packs in general, you may want to try out the [Quiver](https://github.com/DeflatedPickle/Quiver) project, which is a third-party resource pack creator and manager for Minecraft that integrates with PackSquash. Just install PackSquash dependencies, open the resource pack folder, tweak the options file if you need to, and enjoy!
 
