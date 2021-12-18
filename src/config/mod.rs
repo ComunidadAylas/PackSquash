@@ -315,7 +315,7 @@ impl GlobalOptions {
 }
 
 /// A ZIP specification intent conformance level that a squash operation can adhere to.
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum ZipSpecConformanceLevel {
@@ -541,9 +541,9 @@ impl FileOptions {
 	/// It is recommended to execute this method just after the default or user provided
 	/// file settings for some pack file were found, before actually using them.
 	#[allow(unused_variables, unused_mut)]
-	pub(crate) fn tweak_from_global_options(self, global_options: &GlobalOptions) -> Self {
-		match self {
-			FileOptions::JsonFileOptions(mut file_options) => {
+	pub(crate) fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
+		match &mut self {
+			FileOptions::JsonFileOptions(file_options) => {
 				#[cfg(feature = "optifine-support")]
 				{
 					file_options.allow_optifine_files =
@@ -557,7 +557,7 @@ impl FileOptions {
 						.contains(MinecraftMod::MinecraftTransitRailway3);
 				}
 			}
-			FileOptions::PngFileOptions(mut file_options) => {
+			FileOptions::PngFileOptions(file_options) => {
 				#[cfg(feature = "optifine-support")]
 				{
 					file_options.allow_optifine_files =
@@ -576,7 +576,7 @@ impl FileOptions {
 				file_options.skip_pack_icon = global_options.skip_pack_icon;
 			}
 			#[cfg(feature = "optifine-support")]
-			FileOptions::PropertiesFileOptions(mut file_options) => {
+			FileOptions::PropertiesFileOptions(file_options) => {
 				file_options.skip = !global_options.allow_mods.contains(MinecraftMod::Optifine);
 			}
 			_ => {}
