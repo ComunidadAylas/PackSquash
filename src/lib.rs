@@ -507,14 +507,6 @@ pub enum PackSquasherError {
 	/// Thrown when a I/O error occurs during the operation.
 	#[error("I/O error: {0}")]
 	IoError(#[from] io::Error),
-	/// Thrown when a pack directory was not provided in the [`SquashOptions`]
-	/// struct, neither when trying to run the squash operation.
-	#[error("The pack directory was not provided")]
-	MissingPackDirectory,
-	/// Thrown when the pack directory path in the virtual file system contains non
-	/// UTF-8 characters.
-	#[error("The pack directory path contains non UTF-8 characters")]
-	InvalidPackDirectoryPath,
 	/// Thrown when the pack directory is not a directory, or the output file
 	/// path is a directory.
 	#[error("Invalid file type: {0}")]
