@@ -1,4 +1,4 @@
-//! Contains virtual file systems implementations to use with [`PackSquasher`].
+//! Contains virtual file systems implementations to use with `PackSquasher`.
 
 use std::path::PathBuf;
 use std::time::SystemTime;

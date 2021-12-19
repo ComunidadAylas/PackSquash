@@ -45,8 +45,8 @@ rgb = "0.8.30"
 imagequant = "3.1.0"
 oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
 
-gstreamer = { version = "0.17.4", default-features = false }
-gstreamer-app = { version = "0.17.2", default-features = false, features = ["v1_10"] }
+gstreamer = { version = "0.17.4", default-features = false, optional = true }
+gstreamer-app = { version = "0.17.2", default-features = false, features = ["v1_10"], optional = true }
 
 glsl = "6.0.1"
 
@@ -100,7 +100,9 @@ tokio-test = "0.4.2"
 
 [features]
 # Support all kinds of files added by modifications and fancy panic messages by default
-default = ["mod-support", "color-backtrace"]
+default = ["mod-support", "audio-transcoding", "color-backtrace"]
+
+audio-transcoding = ["gstreamer", "gstreamer-app"]
 # This feature will include support for all the mods that PackSquash will ever support
 mod-support = ["optifine-support", "mtr3-support"]
 

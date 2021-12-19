@@ -1,3 +1,6 @@
+//! Contains code to identify the asset type of a pack file, which is used to define and enhance the
+//! optimizations that can be done to a file.
+
 use std::{convert::TryFrom, fmt::Debug};
 
 use enum_iterator::IntoEnumIterator;
@@ -6,6 +9,7 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 use num_enum::TryFromPrimitive;
 use tokio::io::AsyncRead;
 
+#[cfg(feature = "audio-transcoding")]
 use crate::pack_file::audio_file::AudioFile;
 use crate::pack_file::json_file::JsonFile;
 use crate::pack_file::passthrough_file::PassthroughFile;
@@ -21,12 +25,12 @@ use crate::{
 use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor, PackFileProcessData};
 
 /// Represents a relevant pack file asset type, stored in a pack file. A [`PackFile`] can
-/// contain assets of several types.
+/// represent assets of several types. An asset type adds constraints on the data format
+/// of a [`PackFile`], or otherwise has characteristics that are relevant for optimization.
 // When adding or removing variants from this enumeration, make sure to update the PackFileAssetTypeMatches
 // implementation too
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, TryFromPrimitive, IntoEnumIterator)]
 #[repr(usize)]
-#[non_exhaustive]
 pub(super) enum PackFileAssetType {
 	/// A Minecraft metadata asset, with `.mcmeta` extension. These files describe properties
 	/// of textures and the pack itself.
@@ -57,6 +61,8 @@ pub(super) enum PackFileAssetType {
 	/// PackSquash easier to distribute and test, only audio files with the extensions `.mp3`,
 	/// `.opus`, `.flac` and `.wav` are supported. As Minecraft does not support these formats,
 	/// they will be converted to Ogg Vorbis, with `.ogg` extension.
+	#[cfg(feature = "audio-transcoding")]
+	#[doc(cfg(feature = "audio-transcoding"))]
 	GenericAudio,
 
 	/// The `pack.png` pack icon file, located at the root directory of the pack.
@@ -154,6 +160,7 @@ impl PackFileAssetType {
 			Self::GenericOggVorbisAudio => compile_hardcoded_pack_file_glob_pattern(
 				"assets/*/sounds/**/?*.{ogg,oga}"
 			),
+			#[cfg(feature = "audio-transcoding")]
 			Self::GenericAudio => compile_hardcoded_pack_file_glob_pattern(
 				"assets/*/sounds/**/?*.{mp3,opus,flac,wav}"
 			),
@@ -297,7 +304,9 @@ impl PackFileAssetType {
 			#[cfg(feature = "mtr3-support")]
 			Self::Mtr3CustomTrainModel => "bbmodel",
 			Self::GenericJson => "json",
-			Self::GenericOggVorbisAudio | Self::GenericAudio => "ogg",
+			Self::GenericOggVorbisAudio => "ogg",
+			#[cfg(feature = "audio-transcoding")]
+			Self::GenericAudio => "ogg",
 			Self::PackIcon | Self::BannerLayer | Self::EyeLayer => "png",
 			#[cfg(feature = "optifine-support")]
 			Self::OptifineTexture => "png",
@@ -411,8 +420,13 @@ impl PackFileAssetTypeMatches {
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				PackFileAssetType::GenericJson if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				#[cfg(feature = "audio-transcoding")]
 				PackFileAssetType::GenericOggVorbisAudio if let Some(FileOptions::AudioFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(AudioFile, optimization_settings),
+				#[cfg(not(feature = "audio-transcoding"))]
+				PackFileAssetType::GenericOggVorbisAudio if file_options.is_none() =>
+					return_pack_file_to_process_data!(PassthroughFile, ()),
+				#[cfg(feature = "audio-transcoding")]
 				PackFileAssetType::GenericAudio if let Some(FileOptions::AudioFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(AudioFile, optimization_settings),
 				PackFileAssetType::PackIcon if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>

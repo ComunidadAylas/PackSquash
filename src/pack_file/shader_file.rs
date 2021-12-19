@@ -1,3 +1,5 @@
+//! Contains code to optimize shader files.
+
 use std::{
 	borrow::Cow,
 	convert::TryInto,

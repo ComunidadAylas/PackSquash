@@ -1,3 +1,5 @@
+//! Contains code to optimize audio files.
+
 use futures::{
 	future,
 	stream::{poll_fn, select},

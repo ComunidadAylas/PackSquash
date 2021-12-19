@@ -1,3 +1,5 @@
+//! Implements a debloater (i.e. unused key or value remover) for JSON files.
+
 use std::{cell::Cell, lazy::OnceCell};
 
 use jsonpath_lib::SelectorMut;

@@ -1,3 +1,6 @@
+//! Container and high-level module for structs that optimize some pack file according to its data
+//! format.
+
 use std::{
 	borrow::Cow,
 	fmt::{Debug, Display},
@@ -12,13 +15,15 @@ pub mod asset_type;
 
 mod util;
 
+#[cfg(feature = "audio-transcoding")]
+#[doc(cfg(feature = "audio-transcoding"))]
 mod audio_file;
 mod json_file;
 mod passthrough_file;
 mod png_file;
 mod shader_file;
 
-#[cfg(any(feature = "optifine-support", doc))]
+#[cfg(feature = "optifine-support")]
 #[doc(cfg(feature = "optifine-support"))]
 mod properties_file;
 
@@ -29,6 +34,8 @@ pub use util::strip_utf8_bom;
 #[derive(Error, Debug)]
 #[error("{0}")]
 pub enum OptimizationError {
+	#[cfg(feature = "audio-transcoding")]
+	#[doc(cfg(feature = "audio-transcoding"))]
 	AudioFile(#[from] audio_file::OptimizationError),
 	JsonFile(#[from] json_file::OptimizationError),
 	PngFile(#[from] png_file::OptimizationError),

@@ -1,3 +1,6 @@
+//! Implements sanitization (i.e. format-preserving encryption) for [`SystemTime`]s to convert them
+//! to Squash Times and back.
+
 use std::time::{Duration, SystemTime, SystemTimeError};
 use std::{convert::TryFrom, convert::TryInto};
 

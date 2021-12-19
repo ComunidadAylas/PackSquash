@@ -1,3 +1,13 @@
+//! Implements several obfuscation techniques for ZIP file records. This module is purposefully
+//! less documented than others.
+//
+// This obfuscation is not rocket science. You've won. Please consider whether
+// circumventing it is ethical and worth your time. Please be civil and do not
+// circumvent it publicly just because you hold a grudge against someone or
+// something. Please use your knowledge to do good things and help shape a
+// better world, not just for bragging, ripping off the work of others or other
+// questionable means.
+
 use std::{
 	borrow::Cow,
 	cell::Cell,
@@ -34,15 +44,6 @@ const CRC32_KEY: u32 = {
 
 thread_local!(static RNG: Cell<Option<Xoshiro128Plus>> = Cell::new(None));
 
-/// Implements several obfuscation techniques for ZIP file records. This struct is
-/// purposefully less documented than others.
-//
-// This obfuscation is not rocket science. You've won. Please consider whether
-// circumventing it is ethical and worth your time. Please be civil and do not
-// circumvent it publicly just because you hold a grudge against someone or
-// something. Please use your knowledge to do good things and help shape a
-// better world, not just for bragging, ripping off the work of others or other
-// questionable means.
 pub(super) enum ObfuscationEngine {
 	NoObfuscation,
 	Obfuscation {

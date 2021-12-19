@@ -31,12 +31,12 @@ use std::sync::Arc;
 use std::{cmp, panic};
 use std::{io, time::SystemTime};
 
-use crate::config::{
-	AudioFileOptions, FileOptions, JsonFileOptions, PngFileOptions, ShaderFileOptions, SquashOptions
-};
+use crate::config::{FileOptions, JsonFileOptions, PngFileOptions, ShaderFileOptions, SquashOptions};
 use crate::squash_zip::system_id;
 use crate::vfs::{IteratorTraversalOptions, VfsPackFileIterEntry, VirtualFileSystem};
 
+#[cfg(feature = "audio-transcoding")]
+use crate::config::AudioFileOptions;
 #[cfg(feature = "optifine-support")]
 use crate::config::PropertiesFileOptions;
 
@@ -403,6 +403,7 @@ impl PackSquasher {
 						// but this is an audio file), in which case we should try defaults too
 						for default_file_options in [
 							Some(FileOptions::JsonFileOptions(JsonFileOptions::default())),
+							#[cfg(feature = "audio-transcoding")]
 							Some(FileOptions::AudioFileOptions(AudioFileOptions::default())),
 							Some(FileOptions::PngFileOptions(PngFileOptions::default())),
 							#[cfg(feature = "optifine-support")]

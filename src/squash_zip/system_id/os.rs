@@ -15,8 +15,8 @@ use std::{fs, io, path::Path};
 /// on most Unix-like systems.
 ///
 /// Further reading:
-/// - https://www.freedesktop.org/software/systemd/man/machine-id.html
-/// - https://unix.stackexchange.com/questions/396052/missing-etc-machine-id-on-freebsd-trueos-dragonfly-bsd-et-al
+/// - <https://www.freedesktop.org/software/systemd/man/machine-id.html>
+/// - <https://unix.stackexchange.com/questions/396052/missing-etc-machine-id-on-freebsd-trueos-dragonfly-bsd-et-al>
 #[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
 pub(super) fn get_dbus_machine_id() -> Option<SystemId> {
 	u128::from_str_radix(
@@ -42,8 +42,8 @@ pub(super) fn get_dbus_machine_id() -> Option<SystemId> {
 /// procfs being mounted at /proc.
 ///
 /// Further reading:
-/// - https://www.kernel.org/doc/html/latest/admin-guide/sysctl/kernel.html#random
-/// - http://0pointer.de/blog/projects/ids.html
+/// - <https://www.kernel.org/doc/html/latest/admin-guide/sysctl/kernel.html#random>
+/// - <http://0pointer.de/blog/projects/ids.html>
 #[cfg(any(target_os = "linux", target_os = "android"))]
 pub(super) fn get_boot_id() -> Option<SystemId> {
 	use uuid::Uuid;
@@ -66,9 +66,9 @@ pub(super) fn get_boot_id() -> Option<SystemId> {
 /// machine ID, so it's a good fallback.
 ///
 /// Further reading:
-/// - https://www.freebsd.org/cgi/man.cgi?query=sysctl&apropos=0&sektion=0&manpath=FreeBSD+14.0-current&arch=default&format=html
-/// - https://unix.stackexchange.com/questions/396052/missing-etc-machine-id-on-freebsd-trueos-dragonfly-bsd-et-al
-/// - https://github.com/netdata/netdata/issues/2682#issuecomment-327721829
+/// - <https://www.freebsd.org/cgi/man.cgi?query=sysctl&apropos=0&sektion=0&manpath=FreeBSD+14.0-current&arch=default&format=html>
+/// - <https://unix.stackexchange.com/questions/396052/missing-etc-machine-id-on-freebsd-trueos-dragonfly-bsd-et-al>
+/// - <https://github.com/netdata/netdata/issues/2682#issuecomment-327721829>
 #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
 pub(super) fn get_kernel_host_id() -> Option<SystemId> {
 	use std::ffi::{CStr, CString};
@@ -79,7 +79,7 @@ pub(super) fn get_kernel_host_id() -> Option<SystemId> {
 	extern "C" {
 		/// `int sysctlbyname(const char* name, void* oldp, size_t* oldlenp, void* newp, size_t newlen)`, from `#include <sys/sysctl.h>`.
 		///
-		/// Documentation: https://www.freebsd.org/cgi/man.cgi?query=sysctlbyname&apropos=0&sektion=0&manpath=FreeBSD+14.0-current&arch=default&format=html
+		/// Documentation: <https://www.freebsd.org/cgi/man.cgi?query=sysctlbyname&apropos=0&sektion=0&manpath=FreeBSD+14.0-current&arch=default&format=html>
 		fn sysctlbyname(
 			name: *const c_char,
 			oldp: *mut c_void,
@@ -128,7 +128,7 @@ pub(super) fn get_kernel_host_id() -> Option<SystemId> {
 /// to dummy, unsafe values.
 ///
 /// Further reading:
-/// - https://lists.freebsd.org/pipermail/freebsd-hackers/2007-February/019456.html
+/// - <https://lists.freebsd.org/pipermail/freebsd-hackers/2007-February/019456.html>
 #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
 pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 	use std::ffi::{CStr, CString};
@@ -138,18 +138,18 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 	extern "C" {
 		/// `int kenv(int action, const char* name, char* value, int len)`, from `#include <kenv.h>`.
 		///
-		/// Documentation: https://www.freebsd.org/cgi/man.cgi?query=kenv&sektion=2&format=html
+		/// Documentation: <https://www.freebsd.org/cgi/man.cgi?query=kenv&sektion=2&format=html>
 		fn kenv(action: c_int, name: *const c_char, value: *mut c_char, len: c_int) -> c_int;
 	}
 
 	/// Constant for the KENV_GET action.
 	///
-	/// Source: http://fxr.watson.org/fxr/source/sys/kenv.h?im=10
+	/// Source: <http://fxr.watson.org/fxr/source/sys/kenv.h?im=10>
 	const KENV_GET: c_int = 0;
 
 	/// Maximum value length.
 	///
-	/// Source: http://fxr.watson.org/fxr/source/sys/kenv.h?im=10
+	/// Source: <http://fxr.watson.org/fxr/source/sys/kenv.h?im=10>
 	const KENV_MVALLEN: usize = 128;
 
 	let dmi_product_uuid_key = CString::new("smbios.system.uuid").unwrap();
@@ -189,13 +189,13 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 /// not specified.
 ///
 /// Further reading:
-/// - http://mirror.informatimago.com/next/developer.apple.com/technotes/tn/tn1103.html
-/// - https://developer.apple.com/documentation/corefoundation/
-/// - https://developer.apple.com/documentation/iokit/
-/// - https://docs.rs/io-kit-sys/0.1.0/io_kit_sys/
-/// - https://svartalf.info/posts/2019-05-31-poking-the-macos-io-kit-with-rust
-/// - https://github.com/svartalf/rust-battery/blob/20233871e16b0e7083281df560875110a0cac93b/battery/src/platform/darwin/iokit/sys.rs
-/// - https://github.com/servo/core-foundation-rs/blob/master/core-foundation
+/// - <http://mirror.informatimago.com/next/developer.apple.com/technotes/tn/tn1103.html>
+/// - <https://developer.apple.com/documentation/corefoundation/>
+/// - <https://developer.apple.com/documentation/iokit/>
+/// - <https://docs.rs/io-kit-sys/0.1.0/io_kit_sys/>
+/// - <https://svartalf.info/posts/2019-05-31-poking-the-macos-io-kit-with-rust>
+/// - <https://github.com/svartalf/rust-battery/blob/20233871e16b0e7083281df560875110a0cac93b/battery/src/platform/darwin/iokit/sys.rs>
+/// - <https://github.com/servo/core-foundation-rs/blob/master/core-foundation>
 #[cfg(target_os = "macos")]
 #[allow(unsafe_code, non_camel_case_types)]
 pub(super) fn get_platform_serial_number() -> Option<SystemId> {
@@ -216,10 +216,10 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 	extern "C" {
 		static kIOMasterPortDefault: mach_port_t;
 
-		/// Documentation: https://developer.apple.com/documentation/iokit/1514687-ioservicematching?language=objc
+		/// Documentation: <https://developer.apple.com/documentation/iokit/1514687-ioservicematching?language=objc>
 		fn IOServiceMatching(name: *const c_char) -> CFMutableDictionaryRef;
 
-		/// Documentation: https://developer.apple.com/documentation/iokit/1514535-ioservicegetmatchingservice?language=objc
+		/// Documentation: <https://developer.apple.com/documentation/iokit/1514535-ioservicegetmatchingservice?language=objc>
 		fn IOServiceGetMatchingService(
 			masterPort: mach_port_t,
 			matching: CFDictionaryRef
@@ -233,7 +233,7 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 			options: IOOptionBits
 		) -> CFTypeRef;
 
-		/// Documentation: https://developer.apple.com/documentation/iokit/1514627-ioobjectrelease?language=objc
+		/// Documentation: <https://developer.apple.com/documentation/iokit/1514627-ioobjectrelease?language=objc>
 		fn IOObjectRelease(object: io_object_t) -> kern_return_t;
 	}
 
@@ -299,10 +299,10 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 /// from the network configuration (worst case scenario) or read from /etc/hostid.
 ///
 /// Further reading:
-/// - https://pubs.opengroup.org/onlinepubs/9699919799/functions/gethostid.html
-/// - https://man7.org/linux/man-pages/man3/gethostid.3.html
-/// - https://www.freebsd.org/cgi/man.cgi?query=gethostid&sektion=3&apropos=0&manpath=freebsd
-/// - https://docs.oracle.com/cd/E86824_01/html/E54766/gethostid-3c.html
+/// - <https://pubs.opengroup.org/onlinepubs/9699919799/functions/gethostid.html>
+/// - <https://man7.org/linux/man-pages/man3/gethostid.3.html>
+/// - <https://www.freebsd.org/cgi/man.cgi?query=gethostid&sektion=3&apropos=0&manpath=freebsd>
+/// - <https://docs.oracle.com/cd/E86824_01/html/E54766/gethostid-3c.html>
 #[cfg(unix)]
 pub(super) fn get_host_id() -> Option<SystemId> {
 	use std::os::raw::c_long;
@@ -310,7 +310,7 @@ pub(super) fn get_host_id() -> Option<SystemId> {
 	extern "C" {
 		/// `long gethostid()`, from `#include <unistd.h>`.
 		///
-		/// Documentation: https://pubs.opengroup.org/onlinepubs/9699919799/functions/gethostid.html
+		/// Documentation: <https://pubs.opengroup.org/onlinepubs/9699919799/functions/gethostid.html>
 		fn gethostid() -> c_long;
 	}
 
@@ -341,7 +341,7 @@ pub(super) fn get_machine_id() -> Option<SystemId> {
 /// UUID is not available.
 ///
 /// Further reading:
-/// - https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-computersystemproduct
+/// - <https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-computersystemproduct>
 #[cfg(windows)]
 pub(super) fn get_product_id() -> Option<SystemId> {
 	use serde::Deserialize;

@@ -518,6 +518,8 @@ pub enum MinecraftMod {
 pub enum FileOptions {
 	/// The options for transcoding audio files to a more space-efficient format that is
 	/// accepted by Minecraft.
+	#[cfg(feature = "audio-transcoding")]
+	#[doc(cfg(feature = "audio-transcoding"))]
 	AudioFileOptions(AudioFileOptions),
 	/// The options that control how JSON files are optimized.
 	JsonFileOptions(JsonFileOptions),
@@ -590,6 +592,8 @@ impl FileOptions {
 #[derive(Deserialize, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
+#[cfg(feature = "audio-transcoding")]
+#[doc(cfg(feature = "audio-transcoding"))]
 pub struct AudioFileOptions {
 	/// If `true`, input audio files that are already Ogg won't be transcoded again. This preserves
 	/// their original quality and improves performance, but may come at a cost in space savings.
@@ -632,6 +636,7 @@ pub struct AudioFileOptions {
 	pub maximum_bitrate: PositiveI32
 }
 
+#[cfg(feature = "audio-transcoding")]
 impl Default for AudioFileOptions {
 	fn default() -> Self {
 		Self {
@@ -648,6 +653,8 @@ impl Default for AudioFileOptions {
 /// A channel mixing strategy for some audio file, contained in [`AudioFileOptions`].
 #[derive(Deserialize, Clone, Copy)]
 #[serde(untagged)]
+#[cfg(feature = "audio-transcoding")]
+#[doc(cfg(feature = "audio-transcoding"))]
 pub enum ChannelMixingOption {
 	/// Downmix or upmix the sound channels in the input file to generate an output
 	/// file with the specified number of channels.
@@ -660,6 +667,7 @@ pub enum ChannelMixingOption {
 	Skip
 }
 
+#[cfg(feature = "audio-transcoding")]
 impl Default for ChannelMixingOption {
 	fn default() -> Self {
 		ChannelMixingOption::Skip
@@ -671,8 +679,11 @@ impl Default for ChannelMixingOption {
 #[derive(Deserialize, Clone, Copy)]
 #[serde(try_from = "i32")]
 #[repr(transparent)]
+#[cfg(feature = "audio-transcoding")]
+#[doc(cfg(feature = "audio-transcoding"))]
 pub struct PositiveI32(i32);
 
+#[cfg(feature = "audio-transcoding")]
 impl PositiveI32 {
 	/// Creates a [`PositiveI32`] struct that holds the specified integer. This will
 	/// fail if the specified integer is not in the expected interval.
@@ -681,6 +692,7 @@ impl PositiveI32 {
 	}
 }
 
+#[cfg(feature = "audio-transcoding")]
 impl TryFrom<i32> for PositiveI32 {
 	type Error = &'static str;
 
@@ -693,6 +705,7 @@ impl TryFrom<i32> for PositiveI32 {
 	}
 }
 
+#[cfg(feature = "audio-transcoding")]
 impl From<PositiveI32> for i32 {
 	fn from(value: PositiveI32) -> Self {
 		value.0
@@ -805,7 +818,7 @@ pub struct PngFileOptions {
 	/// **Default value**: `false`
 	#[serde(skip)]
 	pub(crate) do_not_reduce_to_grayscale: bool,
-	/// Crate-private option set by the [MinecraftQuirk::RestrictiveBannerLayerTextureBlending]
+	/// Crate-private option set by the [MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck]
 	/// workaround to not change the texture color type.
 	///
 	/// **Default value**: `false`

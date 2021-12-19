@@ -1,3 +1,5 @@
+//! Contains code to optimize PNG files.
+
 use std::{
 	borrow::Cow,
 	convert::TryInto,

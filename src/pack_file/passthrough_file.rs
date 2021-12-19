@@ -1,3 +1,5 @@
+//! Contains code to optimize files that will just be copied without optimizations.
+
 use std::{borrow::Cow, io::Error};
 
 use bytes::BytesMut;
@@ -70,6 +72,12 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for Passthrou
 		_: Self::OptimizationSettings
 	) -> Option<Self> {
 		match asset_type {
+			#[cfg(not(feature = "audio-transcoding"))]
+			PackFileAssetType::GenericOggVorbisAudio => file_read_producer().map(|(read, _)| Self {
+				read,
+				optimization_strategy_message: "Copied",
+				is_compressed: true
+			}),
 			PackFileAssetType::TrueTypeFont => file_read_producer().map(|(read, _)| Self {
 				read,
 				optimization_strategy_message: "Copied, but might be optimized manually. \
@@ -98,10 +106,7 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for Passthrou
 				optimization_strategy_message: "Copied",
 				is_compressed: false
 			}),
-			_ => unreachable!(
-				"Tried to optimize an unexpected asset type as passthrough: {:?}",
-				asset_type
-			)
+			_ => unreachable!("Passing through unexpected asset type: {:?}", asset_type)
 		}
 	}
 }

@@ -1,3 +1,6 @@
+//! Helper module that implements a buffered, asynchronous and spooled temporary file for internal
+//! usage.
+
 use std::{
 	cmp,
 	fs::File,

@@ -1,3 +1,6 @@
+//! Contains helper structs to parse the pack metadata file for information relevant for
+//! optimization purposes.
+
 use std::convert::TryInto;
 use std::io;
 use std::{convert::TryFrom, path::Path};
@@ -24,8 +27,8 @@ pub const PACK_FORMAT_VERSION_1_17: i32 = 7;
 /// in the root folder of a pack.
 ///
 /// References:
-/// - https://minecraft.fandom.com/wiki/Resource_Pack#Contents
-/// - https://minecraft.fandom.com/wiki/Data_Pack#pack.mcmeta
+/// - <https://minecraft.fandom.com/wiki/Resource_Pack#Contents>
+/// - <https://minecraft.fandom.com/wiki/Data_Pack#pack.mcmeta>
 /// - Minecraft class `net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer`
 pub struct PackMeta {
 	pack_format_version: i32

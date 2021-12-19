@@ -1,3 +1,5 @@
+//! Contains code to optimize JSON files.
+
 use std::{borrow::Cow, convert::TryInto};
 
 use bytes::{BufMut, BytesMut};

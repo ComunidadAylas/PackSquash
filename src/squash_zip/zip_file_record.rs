@@ -1,3 +1,5 @@
+//! Contains the ZIP file record objects that compose a ZIP file.
+
 use std::{
 	borrow::Cow,
 	io::{Cursor, Error, Write}
@@ -33,7 +35,7 @@ const DUMMY_SQUASH_TIME: [u8; 4] = ((0b0000000_0001_00001 << 16) as u32).to_le_b
 
 /// The MS-DOS read-only file attribute. Used to signal the intent for the files
 /// to not be modified after extraction, although this isn't always honoured.
-/// See: https://docs.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
+/// See: <https://docs.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants>
 const FILE_ATTRIBUTE_READONLY: u32 = 0x1;
 
 /// A ZIP file format feature needed to extract a file in a ZIP file, as defined in

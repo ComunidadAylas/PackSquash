@@ -1,3 +1,5 @@
+//! Implements a custom ZIP compressor that is tailored for PackSquash use cases.
+
 use std::{
 	borrow::Cow,
 	convert::{TryFrom, TryInto},

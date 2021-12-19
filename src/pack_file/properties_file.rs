@@ -1,3 +1,5 @@
+//! Contains code to optimize properties files.
+
 use std::{borrow::Cow, convert::TryInto, io};
 
 use bytes::BytesMut;

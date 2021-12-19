@@ -1,3 +1,6 @@
+//! Implements a ZIP friendly, UTF-8 relative path object with several useful operations
+//! and properties.
+
 use std::{
 	borrow::Cow,
 	io,
