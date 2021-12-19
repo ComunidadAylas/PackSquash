@@ -126,6 +126,57 @@ jobs:
           name: 'Debian package (amd64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
 
+  linux-x64-musl:
+
+    runs-on: ubuntu-latest
+
+    container: alpine:3.13
+
+    env:
+      CARGO_BUILD_TARGET: x86_64-unknown-linux-musl
+
+    steps:
+      - name: Install development packages, GStreamer libraries and GStreamer development packages
+        run: |
+          apk update
+          # curl is required by rustup
+          apk add build-base git curl \
+                  gstreamer-dev gst-plugins-base-dev \
+                  gst-plugins-good gst-plugins-bad
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install latest Rust nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
+          profile: minimal
+          components: rust-src
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --release
+
+      - name: Build with optimized standard library
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PackSquash executable (Linux, x64, musl)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+
   windows-x64-gnu:
 
     runs-on: windows-latest
@@ -304,3 +355,86 @@ jobs:
         with:
           name: 'Debian package (arm64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
+
+  linux-aarch64-musl:
+
+    runs-on: ubuntu-latest
+
+    container: alpine:3.13
+
+    env:
+      CARGO_BUILD_TARGET: aarch64-unknown-linux-musl
+      PKG_CONFIG_ALLOW_CROSS: 1
+      GSTREAMER_SYSROOT: /tmp/gstreamer-aarch64-linux-musl
+
+    steps:
+      - name: Install cross-compilation GCC toolchain
+        run: |
+          # There is no readily available cross-compilation toolchain package in Alpine for our target.
+          # There is no cross-compilation toolchain package available on Debian that targets musl, either.
+          # So use a third-party toolchain. Luckily, a toolchain is just a partial sysroot we can merge directly
+          apk update
+          # curl is also required by rustup. GNU tar is needed due to the --wildcards option and --exclude'ing dirs
+          apk add curl tar
+          curl -o aarch64-linux-musl.tgz https://more.musl.cc/10/x86_64-linux-musl/aarch64-linux-musl-cross.tgz
+          tar -xf aarch64-linux-musl.tgz --strip-components=1 --exclude=usr -C /
+          rm -f aarch64-linux-musl.tgz
+
+      - name: Install development packages and GStreamer development packages
+        run: |
+          apk add build-base git \
+                  gstreamer-dev gst-plugins-base-dev
+
+      - name: Create minimal sysroot with Aarch64 shared libraries and musl dynamic loader interpreter
+        run: |
+          # This is a nightmarish workaround for the lack of multiarch support in Alpine.
+          # Debian has multiarch support, but the GStreamer arm64 Debian packages end up linking with glibc if done
+          # badly, and do not define musl triplets for pkgconfig at all
+          mkdir -p "$GSTREAMER_SYSROOT"
+          echo 'aarch64' > /etc/apk/arch
+          apk fetch -R --no-cache --allow-untrusted gstreamer-dev gst-plugins-base-dev musl
+          for gstreamer_apk in *.apk; do
+            tar -xf "$gstreamer_apk" -C "$GSTREAMER_SYSROOT" \
+              --wildcards 'usr/lib/lib*.so*' --wildcards 'lib/lib*.so*' --wildcards 'lib/ld*.so*' \
+              >/dev/null 2>&1 || true
+          done
+          rm -f *.apk
+          echo 'x86_64' > /etc/apk/arch
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install latest Rust nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: ${{ env.CARGO_BUILD_TARGET }}
+          profile: minimal
+          components: rust-src
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
+
+      - name: Build with optimized standard library
+        uses: actions-rs/cargo@v1
+        env:
+          # GStreamer's x86_64 already sets up include paths and what libraries to link to nicely,
+          # among other things. But there is no way on Earth it knows where to find the Aarch64
+          # dynamic libraries we put in our custom sysroot, so let's help the gcc linker out with
+          # that
+          RUSTFLAGS: >
+            -C link-args=-L${{ env.GSTREAMER_SYSROOT }}/lib
+            -C link-args=-Wl,-rpath-link=${{ env.GSTREAMER_SYSROOT }}/lib
+            -C link-args=-L${{ env.GSTREAMER_SYSROOT }}/usr/lib
+            -C link-args=-Wl,-rpath-link=${{ env.GSTREAMER_SYSROOT }}/usr/lib
+        with:
+          command: build
+          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PackSquash executable (Linux, aarch64, musl)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
