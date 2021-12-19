@@ -37,7 +37,7 @@ jobs:
 
       - name: Install GStreamer libraries and development packages
         run: |
-          sudo apt-get update && \
+          sudo apt-get update
           sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
       - name: Clippy check
@@ -71,7 +71,7 @@ jobs:
     steps:
       - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
         run: |
-          apt-get update && \
+          apt-get update
           # curl is required by rustup
           apt-get install -yq build-essential git curl \
                               gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
@@ -88,7 +88,7 @@ jobs:
         with:
           toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
           profile: minimal
-          components: rustfmt, clippy, rust-src
+          components: rust-src
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v1
@@ -240,8 +240,7 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
-      PKG_CONFIG_ALLOW_CROSS: 1
-      PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
+      PKG_CONFIG: /usr/share/pkg-config-crosswrapper
       DEBIAN_FRONTEND: noninteractive
 
     steps:
