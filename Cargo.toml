@@ -99,7 +99,7 @@ time = { version = "0.3.5", default-features = false, features = ["std"] }
 tokio-test = "0.4.2"
 
 [features]
-# Support all kinds of files added by modifications and fancy panic messages by default
+# Support all kinds of files added by modifications, audio transcoding and fancy panic messages by default
 default = ["mod-support", "audio-transcoding", "color-backtrace"]
 
 audio-transcoding = ["gstreamer", "gstreamer-app"]
