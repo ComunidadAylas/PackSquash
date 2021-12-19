@@ -130,7 +130,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: alpine:3.13
+    container: alpine:latest
 
     env:
       CARGO_BUILD_TARGET: x86_64-unknown-linux-musl
@@ -154,7 +154,6 @@ jobs:
         with:
           toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
           profile: minimal
-          components: rust-src
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v1
@@ -169,7 +168,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+          args: --release
 
       - name: Upload binary
         uses: actions/upload-artifact@v2
@@ -291,7 +290,8 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
-      PKG_CONFIG: /usr/share/pkg-config-crosswrapper
+      PKG_CONFIG_ALLOW_CROSS: 1
+      PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
       DEBIAN_FRONTEND: noninteractive
 
     steps:
@@ -360,7 +360,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: alpine:3.13
+    container: alpine:latest
 
     env:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-musl
@@ -376,7 +376,7 @@ jobs:
           apk update
           # curl is also required by rustup. GNU tar is needed due to the --wildcards option and --exclude'ing dirs
           apk add curl tar
-          curl -o aarch64-linux-musl.tgz https://more.musl.cc/10/x86_64-linux-musl/aarch64-linux-musl-cross.tgz
+          curl -o aarch64-linux-musl.tgz https://more.musl.cc/x86_64-linux-musl/aarch64-linux-musl-cross.tgz
           tar -xf aarch64-linux-musl.tgz --strip-components=1 --exclude=usr -C /
           rm -f aarch64-linux-musl.tgz
 
@@ -412,7 +412,6 @@ jobs:
           toolchain: nightly
           target: ${{ env.CARGO_BUILD_TARGET }}
           profile: minimal
-          components: rust-src
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v1
@@ -431,7 +430,7 @@ jobs:
             -C link-args=-Wl,-rpath-link=${{ env.GSTREAMER_SYSROOT }}/usr/lib
         with:
           command: build
-          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+          args: --release
 
       - name: Upload binary
         uses: actions/upload-artifact@v2
