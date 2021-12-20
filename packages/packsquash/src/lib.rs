@@ -346,7 +346,8 @@ impl PackSquasher {
 								tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
 									path: RelativePath::from_inner(Cow::Borrowed("-")),
 									optimization_strategy: Cow::Borrowed("Pack directory scan error"),
-									optimization_error: Some(err.to_string())
+									optimization_error: Some(err.to_string()),
+									skipped: false
 								}))
 								.await
 								.ok();
@@ -426,7 +427,8 @@ impl PackSquasher {
 						tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
 							path: pack_file_data.relative_path,
 							optimization_strategy: Cow::Borrowed("Skipped"),
-							optimization_error: None
+							optimization_error: None,
+							skipped: true
 						}))
 						.await
 						.ok();
@@ -619,7 +621,8 @@ pub enum PackSquasherStatus {
 pub struct PackFileStatus {
 	path: RelativePath<'static>,
 	optimization_strategy: Cow<'static, str>,
-	optimization_error: Option<String>
+	optimization_error: Option<String>,
+	skipped: bool
 }
 
 impl PackFileStatus {
@@ -642,6 +645,13 @@ impl PackFileStatus {
 	/// between versions.
 	pub fn optimization_error(&self) -> Option<&str> {
 		self.optimization_error.as_deref()
+	}
+
+	/// Checks whether this file was processed successfully, but not included in
+	/// the generated ZIP file either because it was deemed to be unnecessary or
+	/// PackSquash did not recognize it.
+	pub const fn skipped(&self) -> bool {
+		self.skipped
 	}
 }
 
@@ -705,7 +715,8 @@ async fn match_and_process_pack_file<R: AsyncRead + AsyncSeek + Unpin>(
 			tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
 				path: pack_file_data.relative_path.as_owned(),
 				optimization_strategy: Cow::Borrowed("Error opening pack file"),
-				optimization_error: Some(err.to_string())
+				optimization_error: Some(err.to_string()),
+				skipped: false
 			}))
 			.await
 			.ok();
@@ -816,7 +827,8 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 		tx.send(PackSquasherStatus::PackFileProcessed(PackFileStatus {
 			path: pack_file_path,
 			optimization_strategy,
-			optimization_error
+			optimization_error,
+			skipped: false
 		}))
 		.await
 		.ok();

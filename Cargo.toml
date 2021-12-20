@@ -1,77 +1,7 @@
 cargo-features = ["strip"]
 
-[package]
-name = "packsquash"
-description = "Minecraft resource and data pack optimizer"
-version = "0.3.1"
-authors = ["Alejandro \"AlexTMjugador\" González"]
-repository = "https://github.com/ComunidadAylas/PackSquash"
-license = "AGPL-3.0-or-later"
-readme = "README.md"
-publish = false
-edition = "2018"
-
-[dependencies]
-bytes = "1.1.0"
-globset = "0.4.8"
-enumset = { version = "1.0.8", features = ["serde"] }
-indexmap = { version = "1.7.0", default-features = false, features = ["serde-1"] }
-thiserror = "1.0.30"
-ahash = "0.7.6"
-num_enum = "0.5.4"
-enum-iterator = "0.7.0"
-
-num_cpus = "1.13.0"
-sysinfo = { version = "0.22.2", default-features = false }
-walkdir = "2.3.2"
-
-tokio = { version = "1.15.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
-tokio-util = { version = "0.6.9", default-features = false, features = ["codec", "io"] }
-tokio-stream = { version = "0.1.8", default-features = false }
-futures = { version = "0.3.17", default-features = false }
-
-getopts = "0.2.21"
-
-serde = { version = "1.0.132", features = ["derive"] }
-toml = "0.5.8"
-
-serde_json = "1.0.73"
-json_comments = "0.2.0"
-jsonpath_lib = "0.3.0"
-
-spng = { version = "0.2.0-alpha.2", default-features = false }
-png = "0.17.2"
-rgb = "0.8.30"
-imagequant = "3.1.0"
-oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
-
-gstreamer = { version = "0.17.4", default-features = false, optional = true }
-gstreamer-app = { version = "0.17.2", default-features = false, features = ["v1_10"], optional = true }
-
-glsl = "6.0.1"
-
-java-properties = { version = "1.4.0", optional = true }
-
-tempfile = "3.2.0"
-crc32fast = "1.3.0"
-zopfli = "0.4.0"
-
-const-random = "0.1.13"
-aes = "0.7.5"
-fpe = "0.5.1"
-uuid = "0.8.2"
-entropy = "0.4.1"
-rand_xoshiro = "0.6.0"
-
-color-backtrace = { version = "0.5.1", default-features = false, optional = true }
-
-[target.'cfg(windows)'.dependencies]
-winreg = "0.10.1"
-wmi = "0.9.2"
-
-[target.'cfg(target_os = "macos")'.dependencies]
-core-foundation = "0.9.2"
-mach = "0.3.2"
+[workspace]
+members = ["packages/*"]
 
 [patch.crates-io]
 # Use our fork of oxipng that removes a dependency and an unneeded sanity check
@@ -91,24 +21,6 @@ const-random = { git = "https://github.com/ComunidadAylas/constrandom" }
 # Use the latest commits of imagequant that fix the SPDX license identifier in its Cargo manifest
 imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
 
-[build-dependencies]
-vergen = { version = "6.0.0", default-features = false, features = ["cargo", "git"] }
-time = { version = "0.3.5", default-features = false, features = ["std"] }
-
-[dev-dependencies]
-tokio-test = "0.4.2"
-
-[features]
-# Support all kinds of files added by modifications, audio transcoding and fancy panic messages by default
-default = ["mod-support", "audio-transcoding", "color-backtrace"]
-
-audio-transcoding = ["gstreamer", "gstreamer-app"]
-# This feature will include support for all the mods that PackSquash will ever support
-mod-support = ["optifine-support", "mtr3-support"]
-
-optifine-support = ["java-properties"]
-mtr3-support = []
-
 [profile.release]
 opt-level = 3
 lto = "fat"
@@ -119,16 +31,3 @@ strip = "symbols"
 inherits = "release"
 debug = true
 strip = "none"
-
-[package.metadata.deb]
-maintainer = "Alejandro González <AlexTMjugador@users.noreply.github.com>"
-copyright = "PackSquash developers"
-license-file = ["LICENSE", "0"]
-extended-description-file = "target/debian/extended_package_description.txt"
-section = "utils"
-# For each release with the same version number (shouldn't be too many),
-# increment this, and change APT repo action
-revision = "0"
-depends = """
-$auto, \
-gstreamer1.0-plugins-bad (>= 1.16.2), gstreamer1.0-plugins-base (>= 1.16.2), gstreamer1.0-plugins-good (>= 1.16.2)"""

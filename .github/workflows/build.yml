@@ -16,6 +16,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_DEB_VERSION: 1.34.0
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
 
 jobs:
@@ -97,7 +98,7 @@ jobs:
         uses: actions-rs/install@v0.1
         with:
           crate: cargo-deb
-          version: latest
+          version: ${{ env.CARGO_DEB_VERSION }}
 
       - name: Run tests
         uses: actions-rs/cargo@v1
@@ -111,19 +112,19 @@ jobs:
           command: build
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
-      - name: Generate Debian package
-        run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+      - name: Generate CLI Debian package
+        run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
-      - name: Upload binary
+      - name: Upload CLI binary
         uses: actions/upload-artifact@v2
         with:
           name: 'PackSquash executable (Linux, x64, glibc)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
-      - name: Upload Debian package
+      - name: Upload Debian packages
         uses: actions/upload-artifact@v2
         with:
-          name: 'Debian package (amd64)'
+          name: 'Debian packages (amd64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
 
   windows-x64-gnu:
@@ -226,7 +227,7 @@ jobs:
           command: build
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
-      - name: Upload binary
+      - name: Upload CLI binary
         uses: actions/upload-artifact@v2
         with:
           name: 'PackSquash executable (macOS, x64)'
@@ -277,7 +278,7 @@ jobs:
           CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
         with:
           crate: cargo-deb
-          version: latest
+          version: ${{ env.CARGO_DEB_VERSION }}
 
       - name: Run tests
         uses: actions-rs/cargo@v1
@@ -291,17 +292,17 @@ jobs:
           command: build
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
-      - name: Generate Debian package
-        run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+      - name: Generate CLI Debian package
+        run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
-      - name: Upload binary
+      - name: Upload CLI binary
         uses: actions/upload-artifact@v2
         with:
           name: 'PackSquash executable (Linux, AArch64-ARM64, glibc)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
-      - name: Upload Debian package
+      - name: Upload Debian packages
         uses: actions/upload-artifact@v2
         with:
-          name: 'Debian package (arm64)'
+          name: 'Debian packages (arm64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb

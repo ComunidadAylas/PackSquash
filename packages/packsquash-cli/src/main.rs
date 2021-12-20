@@ -2,12 +2,7 @@ use std::{
 	borrow::Cow,
 	env, fs,
 	io::{self, Read},
-	process,
-	sync::{
-		atomic::{AtomicU64, Ordering},
-		Arc
-	},
-	thread,
+	process, thread,
 	time::Instant
 };
 
@@ -83,9 +78,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 	if options_file_path.is_none() {
 		// Newbies are often confused by terms such as "standard input", so try
 		// to point them in the direction of what they probably want to do
-		println!(
-			"If you are not sure what this means, try using an external options file with PackSquash."
-		);
+		println!("If you are not sure what this means, try using an external options file.");
 		println!(
 			"Please check out <https://packsquash.page.link/Options-files> for examples and more information."
 		);
@@ -131,10 +124,9 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 	println!();
 
 	let output_file_path = squash_options.global_options.output_file_path.clone();
-	let processed_file_count = Arc::new(AtomicU64::new(0));
 	let start_instant = Instant::now();
 
-	squash(Arc::clone(&processed_file_count), squash_options).map_or_else(
+	squash(squash_options).map_or_else(
 		|err| {
 			eprintln!("! Pack processing error: {}", err);
 
@@ -143,7 +135,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 			// update that contains the most information about the error
 			if matches!(err, PackSquasherError::PackFileError) {
 				eprintln!(
-					"Another error message was emitted with more details about the error. \
+					"Another error message with more details about the error was emitted before. \
 					You might need to scroll up to see it."
 				);
 			}
@@ -157,11 +149,11 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 			// so an external script can do whatever it deems fit to handle the error
 			(128 + err.machine_relevant_cause() as i16) as i32
 		},
-		|_| {
+		|file_counts| {
 			let process_time = start_instant.elapsed();
 
 			println!(
-				"{} ({} files, {}.{:03} s)",
+				"{} ({} pack files, {} pack files stored, {}.{:03} s)",
 				output_file_path.metadata().ok().map_or_else(
 					|| Cow::Borrowed("Pack processed"),
 					|metadata| Cow::Owned(format!(
@@ -170,7 +162,14 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 						metadata.len() as f64 / (1024.0 * 1024.0)
 					))
 				),
-				Arc::try_unwrap(processed_file_count).unwrap().into_inner(),
+				file_counts.map_or_else(
+					|| Cow::Borrowed("unknown"),
+					|(total_file_count, _)| Cow::Owned(format!("{}", total_file_count))
+				),
+				file_counts.map_or_else(
+					|| Cow::Borrowed("unknown"),
+					|(_, processed_file_count)| Cow::Owned(format!("{}", processed_file_count))
+				),
 				process_time.as_secs(),
 				process_time.subsec_millis()
 			);
@@ -180,10 +179,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 	)
 }
 
-fn squash(
-	processed_file_count: Arc<AtomicU64>,
-	squash_options: SquashOptions
-) -> Result<(), PackSquasherError> {
+fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquasherError> {
 	let (sender, mut receiver) = channel(64);
 
 	// Spawn our CLI-updating thread. This decouples the pack processing from
@@ -191,10 +187,14 @@ fn squash(
 	// so slow that the channel buffer is filled, in which case the process
 	// threads are slowed down to avoid exhausting memory
 	let cli_thread = thread::spawn(move || {
+		let mut total_file_count = 0;
+		let mut processed_file_count = 0;
+
 		while let Some(status_update) = receiver.blocking_recv() {
 			match status_update {
 				PackSquasherStatus::PackFileProcessed(pack_file_status) => {
-					processed_file_count.fetch_add(1, Ordering::Relaxed);
+					total_file_count += 1;
+					processed_file_count += 1 - pack_file_status.skipped() as u64;
 
 					match pack_file_status.optimization_error() {
 						Some(error_description) => eprintln!(
@@ -226,15 +226,20 @@ fn squash(
 				_ => unimplemented!()
 			}
 		}
+
+		(total_file_count, processed_file_count)
 	});
 
 	// Squash the pack! This blocks until the operation is complete
-	let result = PackSquasher::new().run(OsFilesystem, squash_options, Some(sender));
-
-	// Wait for the CLI thread to process any remaining buffered messages
-	cli_thread.join().ok();
-
-	result
+	PackSquasher::new()
+		.run(OsFilesystem, squash_options, Some(sender))
+		.map(|_| {
+			// Wait for the CLI thread to process any remaining buffered messages, and get the file
+			// counts from it. Our thread is simple enough to conclude that it will not panic, but
+			// be extra safe and not unwrap. We don't want to throw all of the work out of the window
+			// for a non-critical error
+			cli_thread.join().ok()
+		})
 }
 
 /// Prints PackSquash version information to the standard output stream.

@@ -28,29 +28,29 @@ fn main() {
 	println!("cargo:rustc-env=BUILD_YEAR={}", build_year);
 
 	// For Windows, generate a script to set the executable resource data
+	#[cfg(windows)]
 	set_windows_executable_resource_data();
 }
 
 /// Generates a PowerShell script that sets the resource data of the executable generated
 /// by this build. This resource data embeds an icon in the file and makes it look nice.
+#[cfg(windows)]
 fn set_windows_executable_resource_data() {
-	#[cfg(windows)]
-	{
-		use std::{env, fs};
+	use std::{env, fs};
 
-		fn escape_quotations(string: String) -> String {
-			string.replace('\'', "''").replace('"', "\\\"")
-		}
+	fn escape_quotations(string: String) -> String {
+		string.replace('\'', "''").replace('"', "\\\"")
+	}
 
-		let script = format!(
-			r#"
+	let script = format!(
+		r#"
 # Automatically generated PowerShell script to set PackSquash executable resource data.
 # Invoke after the executable is built
 
 # -----
 $rcedit_download_url = 'https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe'
-$packsquash_exe = '{}\target\{}\{}\{}.exe'
-$icon_path = '{}\src\app_icon.ico'
+$packsquash_exe = 'target\{}\{}\packsquash.exe'
+$icon_path = 'common\assets\app_icon.ico'
 $basename = Split-Path "$packsquash_exe" -Leaf
 $name = 'PackSquash'
 $company = 'Comunidad Aylas'
@@ -72,20 +72,16 @@ Invoke-WebRequest -Uri "$rcedit_download_url" -OutFile $rcedit
 --set-version-string 'OriginalFilename' "$basename" `
 --set-version-string 'InternalName' "$basename" `
 --set-icon "$icon_path""#,
-			escape_quotations(env::var("CARGO_MANIFEST_DIR").unwrap()),
-			escape_quotations(env::var("TARGET").unwrap()),
-			escape_quotations(env::var("PROFILE").unwrap()),
-			escape_quotations(env::var("CARGO_PKG_NAME").unwrap()),
-			escape_quotations(env::var("CARGO_MANIFEST_DIR").unwrap()),
-			escape_quotations(env::var("CARGO_PKG_DESCRIPTION").unwrap()),
-			escape_quotations(env::var("CARGO_PKG_VERSION").unwrap()),
-			// Can't actually get the Git semver here due to vergen limitations,
-			// so use the closest thing available instead
-			escape_quotations(env::var("CARGO_PKG_VERSION").unwrap()),
-			escape_quotations(env::var("CARGO_PKG_AUTHORS").unwrap())
-		);
+		escape_quotations(env::var("TARGET").unwrap()),
+		escape_quotations(env::var("PROFILE").unwrap()),
+		escape_quotations(env::var("CARGO_PKG_DESCRIPTION").unwrap()),
+		escape_quotations(env::var("CARGO_PKG_VERSION").unwrap()),
+		// Can't actually get the Git semver here due to vergen limitations,
+		// so use the closest thing available instead
+		escape_quotations(env::var("CARGO_PKG_VERSION").unwrap()),
+		escape_quotations(env::var("CARGO_PKG_AUTHORS").unwrap())
+	);
 
-		fs::write("target/set_executable_resource_data.ps1", script)
-			.expect("Couldn't create the script that changes the executable resource metadata");
-	}
+	fs::write("../../target/set_executable_resource_data.ps1", script)
+		.expect("Couldn't create the script that changes the executable resource metadata");
 }
