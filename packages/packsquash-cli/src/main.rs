@@ -13,6 +13,12 @@ use packsquash::{
 };
 use tokio::sync::mpsc::channel;
 
+macro_rules! packsquash_title {
+	() => {
+		"PackSquash"
+	};
+}
+
 fn main() {
 	process::exit(run());
 }
@@ -20,6 +26,9 @@ fn main() {
 /// Runs PackSquash, parsing the command line parameters and deciding what options file
 /// to read to process a pack.
 fn run() -> i32 {
+	#[cfg(feature = "crossterm")]
+	TerminalTitle::Idle.show();
+
 	#[cfg(feature = "color-backtrace")]
 	color_backtrace::install();
 
@@ -190,11 +199,19 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 		let mut total_file_count = 0;
 		let mut processed_file_count = 0;
 
+		#[cfg(feature = "crossterm")]
+		let mut terminal_title_state = TerminalTitle::ProcessingPack1.show();
+
 		while let Some(status_update) = receiver.blocking_recv() {
 			match status_update {
 				PackSquasherStatus::PackFileProcessed(pack_file_status) => {
 					total_file_count += 1;
 					processed_file_count += 1 - pack_file_status.skipped() as u64;
+
+					#[cfg(feature = "crossterm")]
+					{
+						terminal_title_state = terminal_title_state.show().next();
+					}
 
 					match pack_file_status.optimization_error() {
 						Some(error_description) => eprintln!(
@@ -209,7 +226,14 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 						)
 					}
 				}
-				PackSquasherStatus::ZipFinish => eprintln!("- Finishing up ZIP file..."),
+				PackSquasherStatus::ZipFinish => {
+					eprintln!("- Finishing up ZIP file...");
+
+					#[cfg(feature = "crossterm")]
+					{
+						TerminalTitle::Finishing.show();
+					}
+				}
 				PackSquasherStatus::Notice(notice) => eprintln!("- {}", notice),
 				PackSquasherStatus::Warning(warning) => match warning {
 					PackSquasherWarning::LowEntropySystemId => eprintln!(
@@ -245,7 +269,8 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 /// Prints PackSquash version information to the standard output stream.
 fn print_version_information(verbose: bool) {
 	println!(
-		"PackSquash {} ({}, {}) for {}",
+		"{} {} ({}, {}) for {}",
+		packsquash_title!(),
 		env!("VERGEN_GIT_SEMVER_LIGHTWEIGHT"),
 		env!("VERGEN_CARGO_PROFILE"),
 		env!("BUILD_DATE"),
@@ -278,5 +303,47 @@ fn print_version_information(verbose: bool) {
 		println!("This is free software, and you are welcome to redistribute it");
 		println!("under certain conditions. Use the -v command line switch for");
 		println!("more details about these conditions.");
+	}
+}
+
+#[derive(Copy, Clone)]
+#[cfg(feature = "crossterm")]
+enum TerminalTitle {
+	Idle,
+	ProcessingPack1,
+	ProcessingPack2,
+	ProcessingPack3,
+	ProcessingPack4,
+	Finishing
+}
+
+#[cfg(feature = "crossterm")]
+impl TerminalTitle {
+	fn next(self) -> Self {
+		match self {
+			Self::Idle => Self::Idle,
+			Self::ProcessingPack1 => Self::ProcessingPack2,
+			Self::ProcessingPack2 => Self::ProcessingPack3,
+			Self::ProcessingPack3 => Self::ProcessingPack4,
+			Self::ProcessingPack4 => Self::ProcessingPack1,
+			Self::Finishing => Self::Finishing
+		}
+	}
+
+	fn show(self) -> Self {
+		use crossterm::ExecutableCommand;
+
+		io::stdout()
+			.execute(crossterm::terminal::SetTitle(match self {
+				Self::Idle => packsquash_title!(),
+				Self::ProcessingPack1 => concat!("[-] ", packsquash_title!(), " - Optimizing"),
+				Self::ProcessingPack2 => concat!("[\\] ", packsquash_title!(), " - Optimizing"),
+				Self::ProcessingPack3 => concat!("[|] ", packsquash_title!(), " - Optimizing"),
+				Self::ProcessingPack4 => concat!("[/] ", packsquash_title!(), " - Optimizing"),
+				Self::Finishing => concat!("[ ] ", packsquash_title!(), " - Finishing")
+			}))
+			.ok();
+
+		self
 	}
 }
