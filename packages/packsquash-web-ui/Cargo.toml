@@ -1,0 +1,33 @@
+[package]
+name = "packsquash-web-ui"
+description = "Minecraft resource and data pack optimizer (web UI)"
+version = "0.4.0"
+authors = ["Alejandro \"AlexTMjugador\" González"]
+repository = "https://github.com/ComunidadAylas/PackSquash"
+license = "AGPL-3.0-or-later"
+readme = "../../README.md"
+publish = false
+edition = "2021"
+
+[dependencies]
+# TODO evaluate dependency on Actix according to the final binary size
+actix-web = { version = "3.3.3", default-features = false }
+web-view = "0.7.3"
+
+rust-embed = "6.3.0"
+mime_guess = "2.0.3"
+
+[package.metadata.deb]
+maintainer = "Alejandro González <AlexTMjugador@users.noreply.github.com>"
+copyright = "PackSquash developers"
+license-file = ["../../LICENSE", "0"]
+extended-description-file = "target/debian/extended_package_description.txt"
+suggests = "packsquash (= 0.4.0)"
+replaces = "packsquash"
+section = "utils"
+# For each release with the same version number (shouldn't be too many),
+# increment this, and change APT repo action
+revision = "0"
+depends = """
+$auto, \
+gstreamer1.0-plugins-bad (>= 1.16.2), gstreamer1.0-plugins-base (>= 1.16.2), gstreamer1.0-plugins-good (>= 1.16.2)"""
