@@ -9,7 +9,7 @@ repository = "https://github.com/ComunidadAylas/PackSquash"
 license = "AGPL-3.0-or-later"
 readme = "../../README.md"
 publish = false
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 packsquash = { path = "../packsquash", version = "0.3.1" }
