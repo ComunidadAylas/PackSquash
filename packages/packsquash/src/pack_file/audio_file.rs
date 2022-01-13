@@ -49,6 +49,9 @@ const AUDIO_DATA_BUFFER_SIZE: usize = 32 * 1024;
 const AUDIO_DATA_BUFFER_SIZE_U32: u32 = AUDIO_DATA_BUFFER_SIZE as u32;
 const AUDIO_DATA_BUFFER_SIZE_U64: u64 = AUDIO_DATA_BUFFER_SIZE_U32 as u64;
 
+/// The maximum duration of the audio data that will be put on an Ogg page.
+const MAX_OGG_PAGE_DURATION: u64 = 5_000_000_000;
+
 /// Represents an error that may happen while optimizing audio files.
 #[derive(Error, Debug)]
 #[non_exhaustive]
@@ -281,6 +284,15 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 				"max-bitrate",
 				&i32::from(self.optimization_settings.maximum_bitrate)
 			)?;
+
+			// Reduce Ogg page overhead by increasing maximum page duration. This slows down
+			// seeks, but the Minecraft sound engine only plays audio sources through
+			muxer
+				.set_property("max-delay", &MAX_OGG_PAGE_DURATION)
+				.unwrap();
+			muxer
+				.set_property("max-page-delay", &MAX_OGG_PAGE_DURATION)
+				.unwrap();
 
 			appsink.set_property("sync", &false).unwrap(); // Output at max speed, not realtime
 			appsink
