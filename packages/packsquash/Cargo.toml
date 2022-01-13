@@ -42,6 +42,7 @@ oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
 
 gstreamer = { version = "0.17.4", default-features = false, optional = true }
 gstreamer-app = { version = "0.17.2", default-features = false, features = ["v1_10"], optional = true }
+gstreamer-audio = { version = "0.17.2", default-features = false, optional = true }
 
 glsl = "6.0.1"
 
@@ -73,7 +74,7 @@ tokio-test = "0.4.2"
 # Support audio transcoding and all kinds of files added by modifications by default
 default = ["audio-transcoding", "mod-support"]
 
-audio-transcoding = ["gstreamer", "gstreamer-app"]
+audio-transcoding = ["gstreamer", "gstreamer-app", "gstreamer-audio"]
 # This feature will include support for all the mods that PackSquash will ever support
 mod-support = ["optifine-support", "mtr3-support"]
 

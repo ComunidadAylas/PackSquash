@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::{convert::TryInto, time::Duration};
 
 use tokio_stream::StreamExt;
@@ -6,15 +7,18 @@ use tokio_test::io::Builder;
 use super::*;
 
 static FLAC_AUDIO_DATA: &[u8] = include_bytes!("dtmf_tone.flac");
+static FLAC_AUDIO_DATA_8KHZ: &[u8] = include_bytes!("dtmf_tone_8khz.flac");
 static OGG_AUDIO_DATA: &[u8] = include_bytes!("dtmf_tone.ogg");
 
 /// Processes the given input data as a [AudioFile], using the provided settings,
 /// expecting a successful result.
-async fn successful_process_test(
+async fn successful_process_test<T: Into<i32>>(
 	input_data: &[u8],
 	is_ogg: bool,
 	settings: AudioFileOptions,
-	expect_same_file_size: bool
+	expect_same_file_size: bool,
+	expected_channels: u8,
+	expected_sample_rate: T
 ) {
 	let data_stream = AudioFile {
 		read: Builder::new().read(input_data).build(),
@@ -69,6 +73,20 @@ async fn successful_process_test(
 		data[35..=38] == [0; 4],
 		"The processed audio file is not valid Ogg Vorbis data"
 	);
+
+	assert_eq!(
+		expected_channels, data[39],
+		"The processed audio file has an unexpected channel count"
+	);
+
+	assert_eq!(
+		u32::try_from(expected_sample_rate.into())
+			.unwrap()
+			.to_le_bytes(),
+		data[40..=43],
+		"The processed audio file has an unexpected sampling frequency: {}",
+		u32::from_le_bytes(data[40..=43].try_into().unwrap())
+	);
 }
 
 /// Processes the given input data as a [AudioFile], using the provided settings,
@@ -100,7 +118,9 @@ async fn transcoding_works() {
 		FLAC_AUDIO_DATA,
 		false, // Is not Ogg
 		Default::default(),
-		false // Smaller file size
+		false,                                          // Smaller file size
+		1,                                              // One channel (mono)
+		AudioFileOptions::default().sampling_frequency  // Default sampling frequency
 	)
 	.await
 }
@@ -114,7 +134,9 @@ async fn passthrough_works() {
 			transcode_ogg: false,
 			..Default::default()
 		},
-		true // Same file size
+		true,  // Same file size
+		1,     // One channel (mono)
+		44100  // Default sampling frequency
 	)
 	.await
 }
@@ -131,7 +153,9 @@ async fn pitch_shifting_works() {
 			target_pitch: 1.25,
 			..Default::default()
 		},
-		false // Smaller file size
+		false,                                          // Smaller file size
+		1,                                              // One channel (mono)
+		AudioFileOptions::default().sampling_frequency  // Default sampling frequency
 	)
 	.await
 }
@@ -145,13 +169,15 @@ async fn channel_mixing_works() {
 			channels: ChannelMixingOption::ToChannels(2.try_into().unwrap()),
 			..Default::default()
 		},
-		false // Smaller file size
+		false,                                          // Bigger file size
+		2,                                              // Two channels (stereo)
+		AudioFileOptions::default().sampling_frequency  // Default sampling frequency
 	)
 	.await
 }
 
-// The GStreamer SoundTouch plugin has portability issues,
-// and is not available on all GStreamer distributions
+// The GStreamer SoundTouch plugin has portability issues: tt is not available on all GStreamer
+// distributions
 #[cfg(any(target_os = "linux", windows))]
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn channel_mixing_and_pitch_shifting_work() {
@@ -163,7 +189,31 @@ async fn channel_mixing_and_pitch_shifting_work() {
 			channels: ChannelMixingOption::ToChannels(2.try_into().unwrap()),
 			..Default::default()
 		},
-		false // Smaller file size
+		false,                                          // Smaller file size
+		2,                                              // Two channels (stereo)
+		AudioFileOptions::default().sampling_frequency  // Default sampling frequency
+	)
+	.await
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn transcoded_audio_is_not_upsampled() {
+	successful_process_test(
+		FLAC_AUDIO_DATA_8KHZ,
+		true, // Is Ogg
+		AudioFileOptions {
+			// Mix to stereo because libvorbis' vorbis_encode_setup_managed returns an error code,
+			// which GStreamer reports as a "negotiation problem", for 8 kHz mono source audio data.
+			// The underlying cause of this error is that a internal call to get_setup_template in
+			// libvorbis code fails, as no hardcoded setup data matches that channel and sampling
+			// frequency combination. See:
+			// https://github.com/xiph/vorbis/blob/4e1155cc77a2c672f3dd18f9a32dbf1404693289/lib/vorbisenc.c#L154-L187
+			channels: ChannelMixingOption::ToChannels(2.try_into().unwrap()),
+			..Default::default()
+		},
+		false, // Smaller file size
+		2,     // Two channels (stereo) due to channel mixing
+		8000   // Sampling frequency of the original audio data
 	)
 	.await
 }

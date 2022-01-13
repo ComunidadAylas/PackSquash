@@ -10,6 +10,7 @@ use gstreamer::{
 	Pipeline, Sample, State, StateChangeError, TagMergeMode, TagSetter
 };
 
+use std::convert::TryInto;
 use std::{
 	borrow::Cow,
 	pin::Pin,
@@ -19,6 +20,7 @@ use std::{
 use bytes::BytesMut;
 use gstreamer::{buffer::Readable, MappedBuffer};
 use gstreamer_app::{AppSink, AppSrc};
+use gstreamer_audio::AudioInfo;
 use thiserror::Error;
 use tokio::{io::AsyncRead, task};
 use tokio_stream::Stream;
@@ -264,17 +266,6 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 
 			resampler.set_property("quality", &10).unwrap(); // Good quality resampling
 
-			resampler_filter.set_property(
-				"caps",
-				&Caps::new_simple(
-					"audio/x-raw",
-					&[(
-						"rate",
-						&i32::from(self.optimization_settings.sampling_frequency)
-					)]
-				)
-			)?;
-
 			encoder.set_property(
 				"min-bitrate",
 				&i32::from(self.optimization_settings.minimum_bitrate)
@@ -353,11 +344,11 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 			}
 
 			// Handle the demuxer receiving a source pad
+			let requested_sampling_frequency = self.optimization_settings.sampling_frequency.into();
 			let result_audio_channels = self.optimization_settings.channels;
-			decoder.connect_pad_added(move |decoder, _| {
+			decoder.connect_pad_added(move |decoder, src_pad| {
 				// The decoder has just received a audio source.
-				// Get the target element, and then its sink, to connect the
-				// decoder source pad to it
+				// Get the target element, and then its sink, to connect the decoder source pad to it
 				let sink_element = if let Some(pitch_shifter) = pitch_shifter.as_ref() {
 					pitch_shifter
 				} else {
@@ -369,6 +360,25 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 				if sink_pad.is_linked() {
 					return;
 				}
+
+				let audio_info = AudioInfo::from_caps(&*src_pad.current_caps().unwrap()).unwrap();
+				let source_sampling_frequency = audio_info.rate().try_into().unwrap();
+
+				// Resample to the requested sampling frequency in the options only if it is lower than the
+				// source sampling frequency, as upsampling would only bloat the file size with no benefits
+				// in this case
+				resampler_filter
+					.set_property(
+						"caps",
+						&Caps::new_simple(
+							"audio/x-raw",
+							&[(
+								"rate",
+								&i32::min(requested_sampling_frequency, source_sampling_frequency)
+							)]
+						)
+					)
+					.unwrap();
 
 				if let ChannelMixingOption::ToChannels(num_channels) = result_audio_channels {
 					// We want to mix to some number of channels, so configure the
