@@ -176,7 +176,7 @@ async fn channel_mixing_works() {
 	.await
 }
 
-// The GStreamer SoundTouch plugin has portability issues: tt is not available on all GStreamer
+// The GStreamer SoundTouch plugin has portability issues: it is not available on all GStreamer
 // distributions
 #[cfg(any(target_os = "linux", windows))]
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
