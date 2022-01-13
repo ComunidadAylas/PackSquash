@@ -166,6 +166,13 @@ impl PackSquasher {
 			.build()
 			.unwrap();
 
+		// For libraries that use rayon for internal parallelism (i.e. libimagequant), make sure
+		// that we do not spawn additional threads
+		rayon::ThreadPoolBuilder::new()
+			.num_threads(1)
+			.build_global()
+			.ok();
+
 		let automatic_quirk_detection = options_holder
 			.options
 			.global_options

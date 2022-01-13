@@ -138,9 +138,9 @@ impl Decoder for OptimizerDecoder {
 
 				// Get the quantization attributes to use
 				let mut quantization_attributes = Attributes::new();
-				quantization_attributes.set_max_colors(maximum_colors.try_into()?);
-				quantization_attributes.set_speed(2);
-				quantization_attributes.set_quality(0, 100);
+				quantization_attributes.set_max_colors(maximum_colors)?;
+				quantization_attributes.set_speed(2)?;
+				quantization_attributes.set_quality(0, 100)?;
 
 				// Quantize the image
 				let mut iq_image = Image::new(
@@ -151,21 +151,10 @@ impl Decoder for OptimizerDecoder {
 					0.0 // sRGB
 				)?;
 
-				quantization_result = quantization_attributes.quantize(&iq_image)?;
-				quantization_result.set_dithering_level(1.0);
+				quantization_result = quantization_attributes.quantize(&mut iq_image)?;
+				quantization_result.set_dithering_level(1.0)?;
 
-				let mut buf = Box::new_uninit_slice(image_info.buffer_size / 4);
-				quantization_result.remap_into(&mut iq_image, &mut *buf)?;
-
-				(
-					quantization_result.palette_ref(),
-					// SAFETY: if remap_into returns successfully, it is guaranteed that
-					// the buffer was fully initialized
-					#[allow(unsafe_code)]
-					unsafe {
-						buf.assume_init()
-					}
-				)
+				quantization_result.remapped(&mut iq_image)?
 			};
 
 			// Set up a fast encoder for a temporary PNG that will hold the result
@@ -215,8 +204,10 @@ impl Decoder for OptimizerDecoder {
 			oxipng_input_buf = png_writer.into_inner();
 
 			// Use imagequant's estimation of how much quality we kept
-			quality_description =
-				Cow::Owned(format!("{}%", quantization_result.quantization_quality()));
+			quality_description = Cow::Owned(format!(
+				"{}%",
+				quantization_result.quantization_quality().unwrap_or(0)
+			));
 		} else {
 			// When not performing quantization, pixel colors will not be changed visibly
 			drop(png_reader);
