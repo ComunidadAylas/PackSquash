@@ -49,7 +49,7 @@ const AUDIO_DATA_BUFFER_SIZE: usize = 32 * 1024;
 const AUDIO_DATA_BUFFER_SIZE_U32: u32 = AUDIO_DATA_BUFFER_SIZE as u32;
 const AUDIO_DATA_BUFFER_SIZE_U64: u64 = AUDIO_DATA_BUFFER_SIZE_U32 as u64;
 
-/// The maximum duration of the audio data that will be put on an Ogg page.
+/// The maximum duration of the audio data that will be put on a single Ogg page.
 const MAX_OGG_PAGE_DURATION: u64 = 5_000_000_000;
 
 /// Represents an error that may happen while optimizing audio files.
@@ -70,7 +70,7 @@ pub enum OptimizationError {
 
 /// Alias for the opaque stream type that provides the processed (optimized) audio
 /// file data, when it was transcoded.
-pub type ProcessedAudioDataStream<T> =
+pub type ProcessedAudioDataStream<T: AsyncRead + Send + Unpin + 'static> =
 	impl Stream<Item = Result<MappedBuffer<Readable>, OptimizationError>> + Send + Unpin;
 
 /// Creates a new processed audio file data stream, that will use the specified
@@ -228,13 +228,12 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 		(|| -> Result<AudioDataStream<T>, OptimizationError> {
 			// With one task per resource file, this is optimal
 			task::block_in_place(|| {
-				// GStreamer always acquires a mutex lock to check if it was already
-				// initialized, and if so returns successfully, so there's no point
-				// for PackSquash to introduce extra synchronization to guarantee that
-				// this is only called once. This behavior is unlikely to change, because
-				// it is a reasonable expectation of the documentation, which states
-				// that the method returns success "if GStreamer could be initialized"
-				// (it doesn't specify now or before).
+				// GStreamer always acquires a mutex lock to check if it was already initialized,
+				// and if so returns successfully, so there's no point for PackSquash to introduce
+				// extra synchronization to guarantee that this is only called once. This behavior
+				// is unlikely to change, because it is a reasonable expectation of the docs, which
+				// state that the method returns success "if GStreamer could be initialized" (it
+				// doesn't specify now or before).
 				// See: https://github.com/GStreamer/gstreamer/blob/44bdad58f623e50a07476c0f40f8ff7543396f7c/gst/gst.c#L411
 				gstreamer::init().unwrap()
 			});
@@ -244,7 +243,7 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 			// Create the pipeline elements
 			let appsrc = ElementFactory::make("appsrc", None).unwrap();
 			let decoder = ElementFactory::make("decodebin", None).unwrap(); // Contains a demuxer + decoder
-			let converter = ElementFactory::make("audioconvert", None).unwrap();
+			let converter = ElementFactory::make("audioconvert", None).unwrap(); // Make sure vorbisenc receives f32le samples
 			let resampler = ElementFactory::make("audioresample", None).unwrap();
 			let resampler_filter = ElementFactory::make("capsfilter", None).unwrap();
 			let encoder = ElementFactory::make("vorbisenc", None).unwrap();
@@ -320,9 +319,8 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 			appsrc.link(&decoder)?;
 			Element::link_many(&[&resampler, &resampler_filter, &encoder, &muxer, &appsink])?;
 
-			// Discard all event-provided tags. As the encoder is
-			// not simultaneously a tag reader, and we not explicitly
-			// add any tags, the resulting file will have no tags
+			// Discard all event-provided tags. As the encoder is not simultaneously a tag reader,
+			// and we not explicitly add any tags, the resulting file will have no tags
 			encoder
 				.downcast_ref::<TagSetter>()
 				.unwrap()
