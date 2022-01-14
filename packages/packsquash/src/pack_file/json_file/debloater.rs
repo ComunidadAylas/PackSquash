@@ -23,7 +23,7 @@ macro_rules! jsonpath_selectormut {
 /// Instantiating this struct involves compiling JSONPath expressions, so users
 /// are encouraged to reuse instances across JSON files.
 pub(super) struct Debloater {
-	minecraft_model_bloat_selectors: OnceCell<Cell<[SelectorMut; 1]>>,
+	minecraft_model_bloat_selectors: OnceCell<Cell<[SelectorMut; 2]>>,
 	#[cfg(feature = "mtr3-support")]
 	mtr3_train_model_bloat_selectors: OnceCell<Cell<Vec<SelectorMut>>>
 }
@@ -99,10 +99,12 @@ fn debloat_value<T: AsMut<[SelectorMut]> + Default, F: FnOnce() -> Cell<T>>(
 }
 
 /// Compiles JSONPath selectors to remove bloat from Minecraft model assets.
-fn compile_minecraft_model_bloat_selectors() -> Cell<[SelectorMut; 1]> {
+fn compile_minecraft_model_bloat_selectors() -> Cell<[SelectorMut; 2]> {
 	Cell::new([
 		// Blockbench credits (can be disabled in its options)
-		jsonpath_selectormut!("$.credit")
+		jsonpath_selectormut!("$.credit"),
+		// Blockbench groups (no affect on Minecraft)
+		jsonpath_selectormut!("$.groups")
 	])
 }
 
