@@ -103,7 +103,7 @@ fn compile_minecraft_model_bloat_selectors() -> Cell<[SelectorMut; 2]> {
 	Cell::new([
 		// Blockbench credits (can be disabled in its options)
 		jsonpath_selectormut!("$.credit"),
-		// Blockbench groups (no affect on Minecraft)
+		// Blockbench groups (their export can be disabled in its options)
 		jsonpath_selectormut!("$.groups")
 	])
 }
