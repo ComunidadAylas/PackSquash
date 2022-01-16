@@ -75,8 +75,8 @@ impl Decoder for OptimizerDecoder {
 		}
 		self.reached_eof = true;
 
-		// Parse the JSON so we know how to serialize it again in a compact manner,
-		// and we know it's valid. Also remove its comments
+		// Parse the JSON so we know how to serialize it again in a compact manner, and we
+		// know it's valid. Also remove its comments
 		let mut json_value: Value = serde_json::from_reader(StripComments::new(strip_utf8_bom(src)))?;
 
 		// All concrete asset types start with a JSON object (aka struct, map)
@@ -158,7 +158,8 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for JsonFile<
 	) -> Option<Self> {
 		let skip = match asset_type {
 			#[cfg(feature = "optifine-support")]
-			PackFileAssetType::OptifineTexture => !optimization_settings.allow_optifine_files,
+			PackFileAssetType::OptifineCustomEntityModel
+			| PackFileAssetType::OptifineCustomEntityModelPart => !optimization_settings.allow_optifine_files,
 			#[cfg(feature = "mtr3-support")]
 			PackFileAssetType::Mtr3CustomTrainModel => !optimization_settings.allow_mtr3_files,
 			_ => false
