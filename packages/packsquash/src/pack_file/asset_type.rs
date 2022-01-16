@@ -318,7 +318,7 @@ impl PackFileAssetType {
 			Self::TranslationUnitSegment => "glsl",
 			Self::TrueTypeFont => "ttf",
 			Self::FontCharacterSizes => "bin",
-			Self::Text => "text",
+			Self::Text => "txt",
 			Self::NbtStructure => "nbt",
 			Self::CommandsFunction => "mcfunction"
 		}
