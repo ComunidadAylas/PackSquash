@@ -75,12 +75,21 @@ impl Decoder for OptimizerDecoder {
 		}
 		self.reached_eof = true;
 
-		// Parse the JSON so we know how to serialize it again in a compact manner, and we
-		// know it's valid. Also remove its comments
-		let mut json_value: Value = serde_json::from_reader(StripComments::new(strip_utf8_bom(src)))?;
+		// Parse the JSON so we know how to serialize it again in a compact manner, and whether
+		// it's valid. Check whether we should parse and discard comments, too
+		let mut json_value: Value = if self.optimization_settings.always_allow_comments
+			|| asset_type_has_comments_extension(self.asset_type)
+		{
+			serde_json::from_reader(StripComments::new(strip_utf8_bom(src)))?
+		} else {
+			serde_json::from_slice(strip_utf8_bom(src))?
+		};
 
 		// All concrete asset types start with a JSON object (aka struct, map)
-		if self.asset_type != PackFileAssetType::GenericJson && !json_value.is_object() {
+		if self.asset_type != PackFileAssetType::GenericJson
+			&& self.asset_type != PackFileAssetType::GenericJsonWithComments
+			&& !json_value.is_object()
+		{
 			return Err(OptimizationError::UnexpectedValue(
 				"The root JSON element must be an object"
 			));
@@ -159,9 +168,14 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for JsonFile<
 		let skip = match asset_type {
 			#[cfg(feature = "optifine-support")]
 			PackFileAssetType::OptifineCustomEntityModel
-			| PackFileAssetType::OptifineCustomEntityModelPart => !optimization_settings.allow_optifine_files,
+			| PackFileAssetType::OptifineCustomEntityModelWithComments
+			| PackFileAssetType::OptifineCustomEntityModelPart
+			| PackFileAssetType::OptifineCustomEntityModelPartWithComments => {
+				!optimization_settings.allow_optifine_files
+			}
 			#[cfg(feature = "mtr3-support")]
-			PackFileAssetType::Mtr3CustomTrainModel => !optimization_settings.allow_mtr3_files,
+			PackFileAssetType::Mtr3CustomTrainModel
+			| PackFileAssetType::Mtr3CustomTrainModelWithComments => !optimization_settings.allow_mtr3_files,
 			_ => false
 		};
 
@@ -176,5 +190,21 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for JsonFile<
 				})
 			})
 			.flatten()
+	}
+}
+
+/// Checks whether the specified asset type is an extension type whose file extension
+/// signals that its JSON data might have comments.
+const fn asset_type_has_comments_extension(asset_type: PackFileAssetType) -> bool {
+	match asset_type {
+		PackFileAssetType::MinecraftMetadataWithComments
+		| PackFileAssetType::MinecraftModelWithComments
+		| PackFileAssetType::GenericJsonWithComments => true,
+		#[cfg(feature = "optifine-support")]
+		PackFileAssetType::OptifineCustomEntityModelWithComments
+		| PackFileAssetType::OptifineCustomEntityModelPartWithComments => true,
+		#[cfg(feature = "mtr3-support")]
+		PackFileAssetType::Mtr3CustomTrainModelWithComments => true,
+		_ => false
 	}
 }

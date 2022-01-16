@@ -46,13 +46,16 @@ impl Debloater {
 		// Use the appropriate JSONPath selectors for this asset type. If this
 		// asset type has no applicable selectors, bail out early
 		match asset_type {
-			PackFileAssetType::MinecraftModel => debloat_value(
-				parsed_json,
-				&self.minecraft_model_bloat_selectors,
-				compile_minecraft_model_bloat_selectors
-			),
+			PackFileAssetType::MinecraftModel | PackFileAssetType::MinecraftModelWithComments => {
+				debloat_value(
+					parsed_json,
+					&self.minecraft_model_bloat_selectors,
+					compile_minecraft_model_bloat_selectors
+				)
+			}
 			#[cfg(feature = "mtr3-support")]
-			PackFileAssetType::Mtr3CustomTrainModel => debloat_value(
+			PackFileAssetType::Mtr3CustomTrainModel
+			| PackFileAssetType::Mtr3CustomTrainModelWithComments => debloat_value(
 				parsed_json,
 				&self.mtr3_train_model_bloat_selectors,
 				compile_mtr3_train_model_bloat_selectors

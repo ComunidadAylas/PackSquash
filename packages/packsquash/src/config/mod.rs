@@ -731,6 +731,13 @@ pub struct JsonFileOptions {
 	/// **Default value**: `true` (delete superfluous keys)
 	#[serde(rename = "delete_bloat_keys")]
 	pub delete_bloat: bool,
+	/// If `true`, PackSquash will allow comments in JSON files whose usual extension does not end
+	/// with an extra `c` letter, which explicitly marks the file as following a extended JSON
+	/// format that can contain comments. If `false`, comments will only be allowed in JSON files
+	/// with those specific extensions.
+	///
+	/// **Default value**: `true` (allow comments in the JSON file, no matter its extension)
+	pub always_allow_comments: bool,
 	/// Crate-private option set when [MinecraftMod::Optifine] was configured.
 	///
 	/// **Default value**: `false`
@@ -750,6 +757,7 @@ impl Default for JsonFileOptions {
 		Self {
 			minify: true,
 			delete_bloat: true,
+			always_allow_comments: true,
 			#[cfg(feature = "optifine-support")]
 			allow_optifine_files: false,
 			#[cfg(feature = "mtr3-support")]

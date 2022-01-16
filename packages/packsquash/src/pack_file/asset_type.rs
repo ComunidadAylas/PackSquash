@@ -35,25 +35,44 @@ pub(super) enum PackFileAssetType {
 	/// A Minecraft metadata asset, with `.mcmeta` extension. These files describe properties
 	/// of textures and the pack itself.
 	MinecraftMetadata,
-	/// A Minecraft block or entity model in vanilla format, with `.json` or `.jsonc` extension.
+	/// A Minecraft metadata asset, maybe with comments and `.mcmetac` extension.
+	MinecraftMetadataWithComments,
+	/// A Minecraft block or entity model in vanilla format, with `.json` extension.
 	MinecraftModel,
+	/// A Minecraft block or entity model in vanilla format, maybe with comments and
+	/// `.jsonc` extension.
+	MinecraftModelWithComments,
 	/// An OptiFine custom entity model, with `.jem` extension.
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
 	OptifineCustomEntityModel,
+	/// An OptiFine custom entity model, maybe with comments and `.jemc` extension.
+	#[cfg(feature = "optifine-support")]
+	#[doc(cfg(feature = "optifine-support"))]
+	OptifineCustomEntityModelWithComments,
 	/// An OptiFine custom entity model part, with `.jpm` extension.
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
 	OptifineCustomEntityModelPart,
+	/// An OptiFine custom entity model part, maybe with comments and `.jpmc` extension.
+	#[cfg(feature = "optifine-support")]
+	#[doc(cfg(feature = "optifine-support"))]
+	OptifineCustomEntityModelPartWithComments,
 	/// A Blockbench modded entity model project which contains custom train models for the
 	/// Minecraft Transit Railway 3 mod, with `.bbmodel` extension.
 	#[cfg(feature = "mtr3-support")]
 	#[doc(cfg(feature = "mtr3-support"))]
 	Mtr3CustomTrainModel,
-	/// Any asset in JSON format, with `.json` or `.jsonc` extension. Because this is a
-	/// generic asset type, no optimizations specific to a particular JSON structure will
-	/// be done.
+	/// A Blockbench modded entity model project which contains custom train models for the
+	/// Minecraft Transit Railway 3 mod, maybe with comments and `.bbmodelc` extension.
+	#[cfg(feature = "mtr3-support")]
+	#[doc(cfg(feature = "mtr3-support"))]
+	Mtr3CustomTrainModelWithComments,
+	/// Any asset in JSON format, with `.json` extension. Because this is a generic asset type,
+	/// no optimizations specific to a particular JSON structure will be done.
 	GenericJson,
+	/// Any asset in JSON format, maybe with comments and `.jsonc` extension.
+	GenericJsonWithComments,
 
 	/// Any audio asset in Ogg Vorbis format. Minecraft expects the `.ogg` extension for them.
 	GenericOggVorbisAudio,
@@ -121,6 +140,9 @@ impl PackFileAssetType {
 			Self::MinecraftMetadata => compile_hardcoded_pack_file_glob_pattern(
 				"{pack.mcmeta,assets/*/textures/**/?*.mcmeta}"
 			),
+			Self::MinecraftMetadataWithComments => compile_hardcoded_pack_file_glob_pattern(
+				"{pack.mcmetac,assets/*/textures/**/?*.mcmetac}"
+			),
 			Self::MinecraftModel => {
 				// It is technically possible in vanilla resource packs to have a model file
 				// in folders other than "block" and "item", and in namespaces other than
@@ -131,17 +153,26 @@ impl PackFileAssetType {
 				// vanilla block and item models as such, with few false positives. Mods can
 				// define a subfolder like "modname_block" to signal that their models are
 				// not to be parsed as vanilla models
-				compile_hardcoded_pack_file_glob_pattern(
-					"assets/*/models/{block,item}/**/?*.{json,jsonc}"
-				)
+				compile_hardcoded_pack_file_glob_pattern("assets/*/models/{block,item}/**/?*.json")
+			}
+			Self::MinecraftModelWithComments => {
+				compile_hardcoded_pack_file_glob_pattern("assets/*/models/{block,item}/**/?*.jsonc")
 			}
 			#[cfg(feature = "optifine-support")]
 			Self::OptifineCustomEntityModel => compile_hardcoded_pack_file_glob_pattern(
 				"assets/minecraft/{mcpatcher,optifine}/cem/?*.jem"
 			),
 			#[cfg(feature = "optifine-support")]
+			Self::OptifineCustomEntityModelWithComments => compile_hardcoded_pack_file_glob_pattern(
+				"assets/minecraft/{mcpatcher,optifine}/cem/?*.jemc"
+			),
+			#[cfg(feature = "optifine-support")]
 			Self::OptifineCustomEntityModelPart => compile_hardcoded_pack_file_glob_pattern(
 				"assets/minecraft/{mcpatcher,optifine}/cem/?*.jpm"
+			),
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineCustomEntityModelPartWithComments => compile_hardcoded_pack_file_glob_pattern(
+				"assets/minecraft/{mcpatcher,optifine}/cem/?*.jpmc"
 			),
 			#[cfg(feature = "mtr3-support")]
 			Self::Mtr3CustomTrainModel => {
@@ -150,27 +181,43 @@ impl PackFileAssetType {
 				// namespace
 				compile_hardcoded_pack_file_glob_pattern("assets/mtr/**/?*.bbmodel")
 			}
+			#[cfg(feature = "mtr3-support")]
+			Self::Mtr3CustomTrainModelWithComments => {
+				compile_hardcoded_pack_file_glob_pattern("assets/mtr/**/?*.bbmodelc")
+			}
 			Self::GenericJson => {
 				// This is really generic on purpose, as exhaustively matching all the JSON
 				// files a Minecraft resource pack can contain, even if we limit ourselves
 				// to vanilla, is a recipe for extreme maintenance effort
-				compile_hardcoded_pack_file_glob_pattern("{assets,data}/*/**/?*.{json,jsonc}")
+				compile_hardcoded_pack_file_glob_pattern("{assets,data}/*/**/?*.json")
+			}
+			Self::GenericJsonWithComments => {
+				compile_hardcoded_pack_file_glob_pattern("{assets,data}/*/**/?*.jsonc")
 			}
 
-			Self::GenericOggVorbisAudio => compile_hardcoded_pack_file_glob_pattern(
-				"assets/*/sounds/**/?*.{ogg,oga}"
-			),
+			Self::GenericOggVorbisAudio => {
+				compile_hardcoded_pack_file_glob_pattern("assets/*/sounds/**/?*.{ogg,oga}")
+			}
 			#[cfg(feature = "audio-transcoding")]
-			Self::GenericAudio => compile_hardcoded_pack_file_glob_pattern(
-				"assets/*/sounds/**/?*.{mp3,opus,flac,wav}"
-			),
+			Self::GenericAudio => {
+				compile_hardcoded_pack_file_glob_pattern("assets/*/sounds/**/?*.{mp3,opus,flac,wav}")
+			}
 
 			Self::PackIcon => compile_hardcoded_pack_file_glob_pattern("pack.png"),
 			Self::BannerLayer => compile_hardcoded_pack_file_glob_pattern(
-				"assets/minecraft/textures/entity/{banner/?*.png,banner_base.png,shield/?*.png,shield_base.png,shield_base_nopattern.png}"
+				"assets/minecraft/textures/entity/{\
+					banner/?*.png,\
+					banner_base.png,\
+					shield/?*.png,\
+					shield_base.png,\
+					shield_base_nopattern.png}"
 			),
 			Self::EyeLayer => compile_hardcoded_pack_file_glob_pattern(
-				"assets/minecraft/textures/entity/{enderman/enderman_eyes.png,enderdragon/dragon_eyes.png,spider_eyes.png,phantom_eyes.png}"
+				"assets/minecraft/textures/entity/{\
+					enderman/enderman_eyes.png,\
+					enderdragon/dragon_eyes.png,\
+					spider_eyes.png,\
+					phantom_eyes.png}"
 			),
 			#[cfg(feature = "optifine-support")]
 			Self::OptifineTexture => {
@@ -247,8 +294,12 @@ impl PackFileAssetType {
 			// definition files are read from, Minecraft performs a simple string
 			// concatenation of a prefix path, the file name and the extension. Therefore,
 			// subdirectories are possible
-			Self::VertexShader => compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/{core,program}/**/?*.vsh"),
-			Self::FragmentShader => compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/{core,program}/**/?*.fsh"),
+			Self::VertexShader => {
+				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/{core,program}/**/?*.vsh")
+			}
+			Self::FragmentShader => {
+				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/{core,program}/**/?*.fsh")
+			}
 			Self::TranslationUnitSegment => {
 				// Even though such possibility is not used in the vanilla resource pack,
 				// core shaders can use C-style relative imports which are resolved from the
@@ -264,7 +315,7 @@ impl PackFileAssetType {
 				compile_hardcoded_pack_file_glob_pattern(
 					"assets/*/shaders/{core,program,include}/**/?*.glsl"
 				)
-			},
+			}
 
 			Self::TrueTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.ttf"),
 			Self::FontCharacterSizes => {
@@ -279,7 +330,7 @@ impl PackFileAssetType {
 				compile_hardcoded_pack_file_glob_pattern(
 					"assets/minecraft/texts/{end,splashes,credits}.txt"
 				)
-			},
+			}
 			Self::NbtStructure => {
 				compile_hardcoded_pack_file_glob_pattern("data/*/structures/**/?*.nbt")
 			}
@@ -295,15 +346,15 @@ impl PackFileAssetType {
 	/// dealing with the asset contained in the pack file.
 	const fn canonical_extension(self) -> &'static str {
 		match self {
-			Self::MinecraftModel => "json",
-			Self::MinecraftMetadata => "mcmeta",
+			Self::MinecraftModel | Self::MinecraftModelWithComments => "json",
+			Self::MinecraftMetadata | Self::MinecraftMetadataWithComments => "mcmeta",
 			#[cfg(feature = "optifine-support")]
-			Self::OptifineCustomEntityModel => "jem",
+			Self::OptifineCustomEntityModel | Self::OptifineCustomEntityModelWithComments => "jem",
 			#[cfg(feature = "optifine-support")]
-			Self::OptifineCustomEntityModelPart => "jpm",
+			Self::OptifineCustomEntityModelPart | Self::OptifineCustomEntityModelPartWithComments => "jpm",
 			#[cfg(feature = "mtr3-support")]
-			Self::Mtr3CustomTrainModel => "bbmodel",
-			Self::GenericJson => "json",
+			Self::Mtr3CustomTrainModel | Self::Mtr3CustomTrainModelWithComments => "bbmodel",
+			Self::GenericJson | Self::GenericJsonWithComments => "json",
 			Self::GenericOggVorbisAudio => "ogg",
 			#[cfg(feature = "audio-transcoding")]
 			Self::GenericAudio => "ogg",
@@ -407,18 +458,33 @@ impl PackFileAssetTypeMatches {
 			match asset_type {
 				PackFileAssetType::MinecraftMetadata if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::MinecraftMetadataWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				PackFileAssetType::MinecraftModel if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::MinecraftModelWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				#[cfg(feature = "optifine-support")]
 				PackFileAssetType::OptifineCustomEntityModel if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				#[cfg(feature = "optifine-support")]
+				PackFileAssetType::OptifineCustomEntityModelWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				#[cfg(feature = "optifine-support")]
 				PackFileAssetType::OptifineCustomEntityModelPart if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				#[cfg(feature = "optifine-support")]
+				PackFileAssetType::OptifineCustomEntityModelPartWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				#[cfg(feature = "mtr3-support")]
 				PackFileAssetType::Mtr3CustomTrainModel if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				#[cfg(feature = "mtr3-support")]
+				PackFileAssetType::Mtr3CustomTrainModelWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				PackFileAssetType::GenericJson if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::GenericJsonWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				#[cfg(feature = "audio-transcoding")]
 				PackFileAssetType::GenericOggVorbisAudio if let Some(FileOptions::AudioFileOptions(optimization_settings)) = file_options =>

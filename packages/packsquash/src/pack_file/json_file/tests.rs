@@ -45,6 +45,28 @@ async fn successful_process_test(
 	assert_eq!(&data, expected_result);
 }
 
+/// Processes the given input data as a [JsonFile], using the provided settings,
+/// expecting an unsuccessful result.
+async fn unsuccessful_process_test(
+	input_data: &[u8],
+	asset_type: PackFileAssetType,
+	settings: JsonFileOptions
+) {
+	let mut data_stream = JsonFile {
+		read: Builder::new().read(input_data).build(),
+		file_length_hint: input_data.len(),
+		asset_type,
+		optimization_settings: settings
+	}
+	.process();
+
+	data_stream
+		.next()
+		.await
+		.expect("Expected some result for this input")
+		.expect_err("Expected an error for this input");
+}
+
 #[tokio::test]
 async fn minifying_works() {
 	successful_process_test(
@@ -69,6 +91,24 @@ async fn minifying_with_bom_works() {
 		PackFileAssetType::GenericJson,
 		JsonFileOptions {
 			minify: true,
+			..Default::default()
+		},
+		MINIFIED_JSON_DATA
+	)
+	.await
+}
+
+#[tokio::test]
+async fn minifying_with_comments_works() {
+	let mut json_data_with_comment = String::from(JSON_DATA);
+	json_data_with_comment.insert_str(0, "// This is a comment\n");
+
+	successful_process_test(
+		&json_data_with_comment,
+		PackFileAssetType::GenericJson,
+		JsonFileOptions {
+			minify: true,
+			always_allow_comments: true,
 			..Default::default()
 		},
 		MINIFIED_JSON_DATA
@@ -105,47 +145,73 @@ async fn minifying_and_debloating_model_works() {
 }
 
 #[tokio::test]
-async fn empty_input_is_handled_with_error() {
-	let mut data_stream = JsonFile {
-		read: Builder::new().read(&[]).build(),
-		file_length_hint: 0,
-		asset_type: PackFileAssetType::GenericJson,
-		optimization_settings: Default::default()
-	}
-	.process();
+async fn comments_are_always_allowed_for_specific_extensions() {
+	let mut json_data_with_comment = String::from(JSON_DATA);
+	json_data_with_comment.insert_str(0, "// This is a comment\n");
 
-	data_stream
-		.next()
-		.await
-		.expect("Expected some result for this input")
-		.expect_err("Expected an error for this input");
+	successful_process_test(
+		&json_data_with_comment,
+		PackFileAssetType::GenericJsonWithComments,
+		JsonFileOptions {
+			minify: true,
+			delete_bloat: false,
+			always_allow_comments: false,
+			..Default::default()
+		},
+		MINIFIED_JSON_DATA
+	)
+	.await;
+}
+
+#[tokio::test]
+async fn comments_are_rejected_when_not_allowed() {
+	let mut json_data_with_comment = String::from(JSON_DATA);
+	json_data_with_comment.insert_str(0, "// This is a comment\n");
+
+	unsuccessful_process_test(
+		json_data_with_comment.as_bytes(),
+		PackFileAssetType::GenericJson,
+		JsonFileOptions {
+			always_allow_comments: false,
+			..Default::default()
+		}
+	)
+	.await;
+}
+
+#[tokio::test]
+async fn empty_input_is_handled_with_error() {
+	unsuccessful_process_test(&[], PackFileAssetType::GenericJson, Default::default()).await;
 }
 
 #[tokio::test]
 async fn unexpected_value_is_handled_with_error() {
 	const NULL_VALUE: &str = "null";
 
-	let mut data_stream = JsonFile {
-		read: Builder::new().read(NULL_VALUE.as_bytes()).build(),
-		file_length_hint: NULL_VALUE.len(),
-		asset_type: PackFileAssetType::MinecraftModel,
-		optimization_settings: JsonFileOptions {
+	unsuccessful_process_test(
+		NULL_VALUE.as_bytes(),
+		PackFileAssetType::MinecraftModel,
+		JsonFileOptions {
 			// Debloat, to test debloating too
 			delete_bloat: true,
 			..Default::default()
 		}
-	}
-	.process();
-
-	data_stream
-		.next()
-		.await
-		.expect("Expected some result for this input")
-		.expect_err("Expected an error for this input");
+	)
+	.await;
 }
 
 #[tokio::test]
 async fn strange_value_is_handled_consistently() {
+	// Non-object or array values are allowed by the RFC 8259 (which obsoletes RFC 4627) and ECMA-404
+	// standards. Programs that strictly conform to RFC 4627 (for example, Gson in strict mode) will
+	// reject such values. PackSquash follows the latest standards, so it allows such values. If
+	// Minecraft or some mod actually needs them, then a parser capable of reading them will be used.
+	//
+	// The only concern here is if interoperability with software that parses JSON according to RFC
+	// 4627 is needed. In such cases PackSquash would not make the JSON files less interoperable than
+	// before, and such files are hopelessly unusable with such software anyway. Our goal is to
+	// enforce JSON correctness, not specific file schemas or restrictions imposed by obsolete
+	// standards
 	successful_process_test(
 		"null",
 		PackFileAssetType::GenericJson,
