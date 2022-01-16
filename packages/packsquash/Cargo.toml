@@ -20,7 +20,6 @@ num_enum = "0.5.6"
 enum-iterator = "0.7.0"
 
 num_cpus = "1.13.1"
-rayon = "1.5.1"
 sysinfo = { version = "0.22.5", default-features = false }
 walkdir = "2.3.2"
 
@@ -31,19 +30,19 @@ futures = { version = "0.3.19", default-features = false }
 
 serde = { version = "1.0.133", features = ["derive"] }
 
-serde_json = "1.0.74"
+serde_json = "1.0.75"
 json_comments = "0.2.0"
 jsonpath_lib = "0.3.0"
 
 spng = { version = "0.2.0-alpha.2", default-features = false }
 png = "0.17.2"
 rgb = "0.8.31"
-imagequant = "4.0.0-beta.4"
+imagequant = { version = "4.0.0-beta.7", default-features = false }
 oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
 
-gstreamer = { version = "0.17.4", default-features = false, optional = true }
-gstreamer-app = { version = "0.17.2", default-features = false, features = ["v1_10"], optional = true }
-gstreamer-audio = { version = "0.17.2", default-features = false, optional = true }
+gstreamer = { version = "0.18.0", default-features = false, optional = true }
+gstreamer-app = { version = "0.18.0", default-features = false, features = ["v1_10"], optional = true }
+gstreamer-audio = { version = "0.18.0", default-features = false, optional = true }
 
 glsl = "6.0.1"
 

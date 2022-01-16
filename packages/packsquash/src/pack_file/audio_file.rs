@@ -252,43 +252,33 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 			let muxer = ElementFactory::make("oggmux", None).unwrap();
 			let appsink = ElementFactory::make("appsink", None).unwrap();
 
-			appsrc
-				.set_property("max-bytes", &AUDIO_DATA_BUFFER_SIZE_U64)
-				.unwrap();
+			appsrc.set_property("max-bytes", AUDIO_DATA_BUFFER_SIZE_U64);
 
-			decoder.set_property("expose-all-streams", &false).unwrap();
-			decoder
-				.set_property(
-					"caps",
-					&Caps::new_simple("audio/x-raw", &[]) // Only decode audio streams
-				)
-				.unwrap();
+			decoder.set_property("expose-all-streams", false);
+			decoder.set_property(
+				"caps",
+				Caps::new_simple("audio/x-raw", &[]) // Only decode audio streams
+			);
 
-			resampler.set_property("quality", &10).unwrap(); // Good quality resampling
+			resampler.set_property("quality", 10i32); // Good quality resampling
 
-			encoder.set_property(
+			encoder.try_set_property(
 				"min-bitrate",
-				&i32::from(self.optimization_settings.minimum_bitrate)
+				i32::from(self.optimization_settings.minimum_bitrate)
 			)?;
-			encoder.set_property(
+			encoder.try_set_property(
 				"max-bitrate",
-				&i32::from(self.optimization_settings.maximum_bitrate)
+				i32::from(self.optimization_settings.maximum_bitrate)
 			)?;
 
 			// Reduce Ogg page overhead by increasing maximum page duration. This slows down
 			// seeks, but the Minecraft sound engine only plays audio sources through
-			muxer
-				.set_property("max-delay", &MAX_OGG_PAGE_DURATION)
-				.unwrap();
-			muxer
-				.set_property("max-page-delay", &MAX_OGG_PAGE_DURATION)
-				.unwrap();
+			muxer.set_property("max-delay", MAX_OGG_PAGE_DURATION);
+			muxer.set_property("max-page-delay", MAX_OGG_PAGE_DURATION);
 
-			appsink.set_property("sync", &false).unwrap(); // Output at max speed, not realtime
-			appsink
-				.set_property("blocksize", &AUDIO_DATA_BUFFER_SIZE_U32)
-				.unwrap();
-			appsink.set_property("max-buffers", &8u32).unwrap();
+			appsink.set_property("sync", false); // Output at max speed, not realtime
+			appsink.set_property("blocksize", AUDIO_DATA_BUFFER_SIZE_U32);
+			appsink.set_property("max-buffers", 8u32);
 
 			// decodebin (demuxer + decoder) needs to be linked later with the next step, because in the
 			// beginning it doesn't have a source pad: it acquires it on the fly after probing the input
@@ -333,9 +323,9 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 				// we shift the pitch here to 1 / 0.5 = 2 (double the pitch), so the pitch shifts
 				// cancel each other out
 				pitch_shifter_element
-					.set_property("pitch", &(1.0 / self.optimization_settings.target_pitch))?;
+					.try_set_property("pitch", 1.0 / self.optimization_settings.target_pitch)?;
 				pitch_shifter_element
-					.set_property("tempo", &(1.0 / self.optimization_settings.target_pitch))?;
+					.try_set_property("tempo", 1.0 / self.optimization_settings.target_pitch)?;
 
 				gstreamer_pipeline.add(&pitch_shifter_element).unwrap();
 				pitch_shifter_element.link(&resampler)?;
@@ -367,32 +357,25 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 				// Resample to the requested sampling frequency in the options only if it is lower than the
 				// source sampling frequency, as upsampling would only bloat the file size with no benefits
 				// in this case
-				resampler_filter
-					.set_property(
-						"caps",
-						&Caps::new_simple(
-							"audio/x-raw",
-							&[(
-								"rate",
-								&i32::min(requested_sampling_frequency, source_sampling_frequency)
-							)]
-						)
+				resampler_filter.set_property(
+					"caps",
+					&Caps::new_simple(
+						"audio/x-raw",
+						&[(
+							"rate",
+							&i32::min(requested_sampling_frequency, source_sampling_frequency)
+						)]
 					)
-					.unwrap();
+				);
 
 				if let ChannelMixingOption::ToChannels(num_channels) = result_audio_channels {
 					// We want to mix to some number of channels, so configure the
 					// necessary caps filter (channel mix filter)
 					let channel_mix_filter = ElementFactory::make("capsfilter", None).unwrap();
-					channel_mix_filter
-						.set_property(
-							"caps",
-							&Caps::new_simple(
-								"audio/x-raw",
-								&[("channels", &i32::from(num_channels))]
-							)
-						)
-						.unwrap();
+					channel_mix_filter.set_property(
+						"caps",
+						&Caps::new_simple("audio/x-raw", &[("channels", &i32::from(num_channels))])
+					);
 
 					// Get the pipeline, which is the parent of any element in the
 					// pipeline, and add the new caps filter to it
