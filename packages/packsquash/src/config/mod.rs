@@ -496,7 +496,7 @@ pub enum MinecraftMod {
 	///
 	/// Currently, this adds support for the following file types:
 	/// - Properties files (`.properties`).
-	/// - Custom entity model files (`.jem` and `.jpm`).
+	/// - Custom entity model files (`.jem`, `.jemc`, `.jpm` and `.jpmc`).
 	#[serde(rename = "OptiFine")]
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
@@ -504,7 +504,7 @@ pub enum MinecraftMod {
 	/// Minecraft Transit Railway, version 3.0 and compatibles.
 	///
 	/// Currently, this adds support for the following file types:
-	/// - Blockbench modded entity model projects for custom train models (`.bbmodel`).
+	/// - Blockbench modded entity model projects for custom train models (`.bbmodel` and `.bbmodelc`).
 	#[serde(rename = "Minecraft Transit Railway 3")]
 	#[cfg(feature = "mtr3-support")]
 	#[doc(cfg(feature = "mtr3-support"))]
