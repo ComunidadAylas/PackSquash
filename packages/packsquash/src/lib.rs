@@ -122,8 +122,8 @@ impl PackSquasher {
 		// during its execution. These checks are just meant to handle usage mistakes
 		// promptly
 		if !vfs
-			.file_type(&options_holder.options.pack_directory)?
-			.is_dir()
+			.file_type(&options_holder.options.pack_directory)
+			.map_or_else(|_| true, |file_type| file_type.is_dir())
 		{
 			return Err(PackSquasherError::InvalidFileType(
 				"The pack directory path must refer to a directory, not a file"
@@ -142,22 +142,14 @@ impl PackSquasher {
 		// Note that program correctness cannot depend on these conditions staying true during
 		// its execution. These checks are just meant to handle usage mistakes promptly
 		let output_file_path = &options_holder.options.global_options.output_file_path;
-		match vfs.file_type(output_file_path) {
-			Ok(file_type) => {
-				if file_type.is_dir() {
-					return Err(PackSquasherError::InvalidFileType(
-						"The output file path must refer to a file, not a directory"
-					));
-				}
-			}
-			Err(err) => {
-				// The output file may not exist yet. This is a normal condition, but it may
-				// indicate that the parent paths do not exist, which is an usage error
-				if err.kind() != ErrorKind::NotFound {
-					return Err(err.into());
-				}
-			}
-		};
+		if vfs
+			.file_type(output_file_path)
+			.map_or_else(|_| false, |file_type| file_type.is_dir())
+		{
+			return Err(PackSquasherError::InvalidFileType(
+				"The output file path must refer to a file, not a directory"
+			));
+		}
 
 		let runtime = Builder::new_multi_thread()
 			.worker_threads(options_holder.options.global_options.threads.get())
