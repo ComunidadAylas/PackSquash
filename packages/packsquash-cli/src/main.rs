@@ -237,7 +237,7 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 				PackSquasherStatus::Warning(warning) => match warning {
 					PackSquasherWarning::UnusablePreviousZip(err) => eprintln!(
 						"* The previous ZIP file could not be read. It will not be used to speed up processing. \
-							Cause: {}",
+							Was the file last modified by PackSquash? Cause: {}",
 						err
 					),
 					PackSquasherWarning::LowEntropySystemId => eprintln!(

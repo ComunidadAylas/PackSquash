@@ -111,13 +111,13 @@ pub enum SquashZipError {
 /// Represents an error that may occur while parsing a previously generated ZIP file.
 #[derive(Error, Debug)]
 pub enum PreviousZipParseError {
-	#[error("Invalid data: {0}. Was the file last modified by PackSquash?")]
+	#[error("Invalid data: {0}")]
 	Invalid(&'static str),
-	#[error("A filename is not valid UTF-8: {0}. Was the file last modified by PackSquash?")]
+	#[error("A filename is not valid UTF-8: {0}")]
 	InvalidFileName(#[from] FromUtf8Error),
-	#[error("Unknown compression method: {0}. Was the file last modified by PackSquash?")]
+	#[error("Unknown compression method: {0}")]
 	UnknownCompressionMethod(u16),
-	#[error("ZIP file timestamp error: {0}. Was the file last modified by PackSquash?")]
+	#[error("ZIP file timestamp error: {0}")]
 	SystemTimeSanitizationError(#[from] SystemTimeSanitizationError),
 	#[error("I/O error: {0}")]
 	Io(#[from] io::Error)
