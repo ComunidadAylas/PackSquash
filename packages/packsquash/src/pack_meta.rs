@@ -8,9 +8,8 @@ use std::{convert::TryFrom, path::Path};
 use enumset::EnumSet;
 use json_comments::StripComments;
 use serde_json::Value;
-use tokio::io::AsyncReadExt;
-
 use thiserror::Error;
+use tokio::io::AsyncReadExt;
 
 use crate::pack_file::strip_utf8_bom;
 use crate::{config::MinecraftQuirk, vfs::VirtualFileSystem};
@@ -23,8 +22,8 @@ pub const PACK_FORMAT_VERSION_1_13: i32 = 4;
 /// The pack format version used in Minecraft versions from 1.17 to 1.17.1.
 pub const PACK_FORMAT_VERSION_1_17: i32 = 7;
 
-/// Metadata for a resource or data pack, contained in the `pack.mcmeta` file
-/// in the root folder of a pack.
+/// Metadata for a resource or data pack, contained in the `pack.mcmeta` or
+/// `pack.mcmetac` file in the root folder of a pack.
 ///
 /// References:
 /// - <https://minecraft.fandom.com/wiki/Resource_Pack#Contents>
@@ -52,11 +51,13 @@ impl PackMeta {
 		root_path: P
 	) -> Result<Self, PackMetaError> {
 		const PACK_FORMAT_VERSION_IS_NOT_INTEGER: &str =
-			"\"pack_format_version\" is not a Java integer";
+			"\"pack_format\" version is not a Java integer";
 
 		let pack_format_version;
 
-		let mut file = vfs.open(root_path.as_ref().join("pack.mcmeta"))?;
+		let mut file = vfs
+			.open(root_path.as_ref().join("pack.mcmetac"))
+			.or_else(|_| vfs.open(root_path.as_ref().join("pack.mcmeta")))?;
 		let mut pack_meta_value =
 			Vec::with_capacity(file.file_size_hint.try_into().unwrap_or(usize::MAX));
 

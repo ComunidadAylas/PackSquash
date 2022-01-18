@@ -1,9 +1,10 @@
 use std::{convert::TryInto, ffi::OsStr, fs::FileType, io, iter::Empty, path::Path};
 
+use tokio_test::io::{Builder, Mock};
+
 use crate::vfs::{
 	IteratorTraversalOptions, VfsFile, VfsPackFileIterEntry, VfsPackFileMetadata, VirtualFileSystem
 };
-use tokio_test::io::{Builder, Mock};
 
 use super::PackMeta;
 
@@ -19,7 +20,8 @@ impl VirtualFileSystem for MockVfs {
 	}
 
 	fn open<P: AsRef<Path>>(&self, path: P) -> Result<VfsFile<Self::FileRead>, io::Error> {
-		if path.as_ref().as_os_str() == OsStr::new("pack.mcmeta") {
+		let path = path.as_ref().as_os_str();
+		if path == OsStr::new("pack.mcmeta") || path == OsStr::new("pack.mcmetac") {
 			Ok(VfsFile {
 				file_read: Builder::new().read(self.0.as_bytes()).build(),
 				file_size_hint: self.0.len().try_into().unwrap_or(u64::MAX),
