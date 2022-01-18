@@ -70,13 +70,17 @@ mod zopfli_iterations_time_model;
 ///
 /// Once constructed, this struct can be used to run one or several optimization operations
 /// with the same configuration on any pack, in an efficient manner.
-pub struct PackSquasher;
+pub struct PackSquasher {
+	asset_type_matcher: Arc<PackFileAssetTypeMatcher>
+}
 
 impl PackSquasher {
 	/// Creates a new [`PackSquasher`] struct that will squash packs.
 	#[allow(clippy::new_without_default)] // It does not make much sense to have a default value
 	pub fn new() -> Self {
-		Self
+		Self {
+			asset_type_matcher: Arc::new(PackFileAssetTypeMatcher::new())
+		}
 	}
 
 	/// Executes the squash operation configured by the specified options, reading pack files from
@@ -215,7 +219,6 @@ impl PackSquasher {
 
 		let vfs = Arc::new(vfs);
 		let options_holder = Arc::new(options_holder);
-		let asset_type_matcher = Arc::new(PackFileAssetTypeMatcher::new());
 
 		runtime.block_on(async {
 			let pack_file_iter = vfs.file_iterator(
@@ -344,7 +347,7 @@ impl PackSquasher {
 				}
 
 				let options_holder = Arc::clone(&options_holder);
-				let asset_type_matcher = Arc::clone(&asset_type_matcher);
+				let asset_type_matcher = Arc::clone(&self.asset_type_matcher);
 				let squash_zip = Arc::clone(&squash_zip);
 				let vfs = Arc::clone(&vfs);
 
