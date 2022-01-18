@@ -31,22 +31,8 @@ use std::sync::Arc;
 use std::{cmp, panic};
 use std::{io, time::SystemTime};
 
-use crate::config::{FileOptions, JsonFileOptions, PngFileOptions, ShaderFileOptions, SquashOptions};
-use crate::squash_zip::system_id;
-use crate::vfs::{IteratorTraversalOptions, VfsPackFileIterEntry, VirtualFileSystem};
-
-#[cfg(feature = "audio-transcoding")]
-use crate::config::AudioFileOptions;
-#[cfg(feature = "optifine-support")]
-use crate::config::PropertiesFileOptions;
-
-use crate::pack_file::asset_type::{PackFileAssetTypeMatcher, PackFileAssetTypeMatches};
-use crate::pack_file::PackFileProcessData;
-use config::ProcessedSquashOptions;
 use futures::future;
 use futures::StreamExt;
-use pack_meta::{PackMeta, PackMetaError};
-use squash_zip::{SquashZip, SquashZipError};
 use thiserror::Error;
 use tokio::fs::{File, OpenOptions};
 use tokio::io::AsyncSeek;
@@ -55,7 +41,20 @@ use tokio::sync::mpsc::Sender;
 use tokio::sync::Semaphore;
 use tokio::{io::AsyncRead, runtime::Builder};
 
+use config::ProcessedSquashOptions;
+use pack_meta::{PackMeta, PackMetaError};
+use squash_zip::{SquashZip, SquashZipError};
+
+#[cfg(feature = "audio-transcoding")]
+use crate::config::AudioFileOptions;
+#[cfg(feature = "optifine-support")]
+use crate::config::PropertiesFileOptions;
+use crate::config::{FileOptions, JsonFileOptions, PngFileOptions, ShaderFileOptions, SquashOptions};
+use crate::pack_file::asset_type::{PackFileAssetTypeMatcher, PackFileAssetTypeMatches};
+use crate::pack_file::PackFileProcessData;
 pub use crate::squash_zip::relative_path::RelativePath;
+use crate::squash_zip::{system_id, PreviousZipParseError};
+use crate::vfs::{IteratorTraversalOptions, VfsPackFileIterEntry, VirtualFileSystem};
 
 pub mod config;
 pub mod vfs;
@@ -247,8 +246,7 @@ impl PackSquasher {
 			};
 
 			// Instantiate SquashZip and the list of join handles to the pack file tasks
-			let squash_zip = SquashZip::new(
-				previous_zip,
+			let squash_zip = {
 				// By design, the previous ZIP is the same file as the output ZIP. Therefore,
 				// it is important that we do not truncate it if it already exists, as otherwise
 				// no data can be read back for reuse. Another reason for not truncating it yet
@@ -257,14 +255,38 @@ impl PackSquasher {
 				// not guaranteed in general, because if an I/O error happens while writing to
 				// it after its truncation then the previous data will be lost). Therefore,
 				// File::create is not suitable, because it forces truncating
-				OpenOptions::new()
+				let output_zip_file = OpenOptions::new()
 					.write(true)
 					.create(true)
 					.open(&options_holder.options.global_options.output_file_path)
-					.await?,
-				squashzip_settings
-			)
-			.await?;
+					.await?;
+
+				match SquashZip::new(previous_zip, output_zip_file, squashzip_settings).await {
+					Ok(squash_zip) => squash_zip,
+					Err((
+						SquashZipError::PreviousZipParseError(err),
+						output_zip_file,
+						squashzip_settings
+					)) => {
+						// Something went wrong while reading the previous ZIP. We can continue the
+						// optimization process, albeit with reduced performance. Warn the user about
+						// that and try again without using a previous ZIP
+						if let Some(pack_file_status_sender) = &pack_file_status_sender {
+							pack_file_status_sender
+								.send(PackSquasherStatus::Warning(
+									PackSquasherWarning::UnusablePreviousZip(err)
+								))
+								.await
+								.ok();
+						}
+
+						SquashZip::new(None, output_zip_file, squashzip_settings)
+							.await
+							.map_err(|(err, _, _)| err)?
+					}
+					Err((err, _, _)) => return Err(err.into())
+				}
+			};
 			let mut pack_file_tasks = Vec::with_capacity(squash_zip.previous_file_count());
 			let squash_zip = Arc::new(squash_zip);
 
@@ -522,7 +544,7 @@ pub enum PackSquasherError {
 	#[error("An error occurred while processing a pack file")]
 	PackFileError,
 	/// Thrown when an error happened while parsing the pack metadata file,
-	/// `pack.mcmeta`, that defines some basic characteristics of a pack.
+	/// which defines some basic characteristics of a pack.
 	#[error("Pack metadata file error: {0}")]
 	PackMetaError(#[from] PackMetaError)
 }
@@ -538,61 +560,20 @@ impl From<Infallible> for PackSquasherError {
 	}
 }
 
-/// Represents an error cause for a [PackSquasherError] that may be relevant for
-/// another software component to know about, in order to take corrective measures
-/// or do a more user-friendly error handling, and that can not be concluded by
-/// matching on [PackSquasherError] or looking at the status updates.
-// NOTE: the order of the enum variants is important, because their discriminant
-// may be used by client code. Only add variants in the end as needed. Discriminants
-// lesser than zero are reserved for the unlikely scenario that we run out of
-// positive i8 integers only
-#[non_exhaustive]
-#[repr(i8)]
-pub enum MachineRelevantPackSquasherErrorCause {
-	/// The error is not expected to be acted upon on an automated manner, or
-	/// its human-friendly cause is unknown.
-	NoRelevantCause = 0,
-	/// The error was surely caused by a previously generated file that was deemed
-	/// to contain invalid or unreadable data. This can be due to the file being
-	/// modified outside of PackSquash, or some Squash Time encryption parameters
-	/// changing.
-	///
-	/// Note that it is technically possible for a previously generated file to be corrupt
-	/// in a way that causes I/O errors, but such errors are assumed to not be the fault
-	/// of the file itself. In other words, it might happen that there is no relevant error
-	/// cause even if the previous file is corrupt, but it is guaranteed that, if this
-	/// cause is returned, the previous file is indeed at fault.
-	UnusablePreviousFile
-}
-
-impl PackSquasherError {
-	/// Returns the machine-relevant error cause for this error.
-	pub fn machine_relevant_cause(&self) -> MachineRelevantPackSquasherErrorCause {
-		use crate::squash_zip::system_time_sanitizer::SystemTimeSanitizationError;
-
-		match self {
-			Self::SquashZip(SquashZipError::SystemTimeSanitizationError(
-				SystemTimeSanitizationError::CorruptSquashTime
-			))
-			| Self::SquashZip(SquashZipError::InvalidPreviousZip(_))
-			| Self::SquashZip(SquashZipError::InvalidFileName(_))
-			| Self::SquashZip(SquashZipError::UnknownCompressionMethod(_)) => {
-				MachineRelevantPackSquasherErrorCause::UnusablePreviousFile
-			}
-			_ => MachineRelevantPackSquasherErrorCause::NoRelevantCause
-		}
-	}
-}
-
 /// Warnings that [`PackSquasher`] may emit while running a squash operation
 /// to notify about conditions that may require some attention, because they
 /// might signal some potential problem.
 ///
-/// Although these warnings are currently emitted just before finishing the
-/// squash operation, that behavior is subject to change in the future, so
-/// it shouldn't be relied upon.
+/// Although these warnings are currently emitted just before starting and
+/// finishing the squash operation, that behavior is subject to change in the
+/// future, so it shouldn't be relied upon.
 #[non_exhaustive]
 pub enum PackSquasherWarning {
+	/// The previously generated ZIP file will not be used to speed up pack
+	/// processing, because some error occurred while parsing it. These errors
+	/// are usually caused due to the system identifier changing, a previously
+	/// failed optimization process, or using different PackSquash versions.
+	UnusablePreviousZip(PreviousZipParseError),
 	/// A system identifier with low entropy was used to encrypt data, which
 	/// may render that data easier to decrypt.
 	LowEntropySystemId,

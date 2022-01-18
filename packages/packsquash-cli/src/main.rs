@@ -7,11 +7,12 @@ use std::{
 };
 
 use getopts::{Options, ParsingStyle};
+use tokio::sync::mpsc::channel;
+
 use packsquash::{
 	config::SquashOptions, vfs::os_fs::OsFilesystem, PackSquasher, PackSquasherError,
 	PackSquasherStatus, PackSquasherWarning
 };
-use tokio::sync::mpsc::channel;
 
 macro_rules! packsquash_title {
 	() => {
@@ -154,9 +155,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>"
 			);
 
-			// Return a different status code depending on the machine-relevant cause,
-			// so an external script can do whatever it deems fit to handle the error
-			(128 + err.machine_relevant_cause() as i16) as i32
+			128
 		},
 		|file_counts| {
 			let process_time = start_instant.elapsed();
@@ -236,6 +235,11 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 				}
 				PackSquasherStatus::Notice(notice) => eprintln!("- {}", notice),
 				PackSquasherStatus::Warning(warning) => match warning {
+					PackSquasherWarning::UnusablePreviousZip(err) => eprintln!(
+						"* The previous ZIP file could not be read. It will not be used to speed up processing. \
+							Cause: {}",
+						err
+					),
 					PackSquasherWarning::LowEntropySystemId => eprintln!(
 						"* Used a low entropy system ID. The dates embedded in the result ZIP file, \
 							which reveal when it was generated, may be easier to decrypt. For more information \

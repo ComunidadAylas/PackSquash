@@ -11,7 +11,7 @@ use tokio::io::{self, AsyncWrite};
 
 use crate::RelativePath;
 
-use super::SquashZipError;
+use super::PreviousZipParseError;
 
 #[cfg(test)]
 mod tests;
@@ -120,11 +120,11 @@ impl CompressionMethod {
 	/// field value.
 	pub(super) const fn from_compression_method_field(
 		field: u16
-	) -> Result<CompressionMethod, SquashZipError> {
+	) -> Result<CompressionMethod, PreviousZipParseError> {
 		match field {
 			0 => Ok(CompressionMethod::Store),
 			8 => Ok(CompressionMethod::Deflate),
-			_ => Err(SquashZipError::UnknownCompressionMethod(field))
+			_ => Err(PreviousZipParseError::UnknownCompressionMethod(field))
 		}
 	}
 }
