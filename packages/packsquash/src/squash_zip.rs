@@ -705,12 +705,12 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 
 		// Set up our scratch data files
 		let mut processed_data_scratch_file = BufferedAsyncSpooledTempFile::with_capacity(
-			self.settings.spool_buffer_size / 2,
-			file_size_hint
+			file_size_hint,
+			self.settings.spool_buffer_size / 2
 		);
 		let mut compressed_data_scratch_file = BufferedAsyncSpooledTempFile::with_capacity(
-			self.settings.spool_buffer_size / 2,
-			file_size_hint
+			file_size_hint,
+			self.settings.spool_buffer_size / 2
 		);
 
 		// Store the processed data in the scratch file we created for that purpose.
