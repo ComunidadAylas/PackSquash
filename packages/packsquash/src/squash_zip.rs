@@ -2,6 +2,7 @@
 
 use std::{
 	borrow::Cow,
+	collections::hash_map::Entry,
 	convert::{TryFrom, TryInto},
 	io::{self, ErrorKind, Read, SeekFrom},
 	lazy::SyncLazy,
@@ -77,7 +78,6 @@ struct PreviousFile {
 /// needed to generate the actual central directory header at some point.
 struct PartialCentralDirectoryHeader {
 	local_header_offset: u64,
-	file_name: RelativePath<'static>,
 	compression_method: CompressionMethod,
 	squash_time: [u8; 4],
 	crc32: u32,
@@ -94,6 +94,7 @@ struct HashAndSize {
 
 /// Represents an error that may happen during a fallible SquashZip operation.
 #[derive(Error, Debug)]
+#[non_exhaustive]
 pub enum SquashZipError {
 	#[error("Could not read the previous ZIP: {0}")]
 	PreviousZipParseError(#[from] PreviousZipParseError),
@@ -105,12 +106,15 @@ pub enum SquashZipError {
 	SystemTimeSanitizationError(#[from] SystemTimeSanitizationError),
 	#[error("No such file in the previous ZIP: {0}")]
 	NoSuchPreviousFile(String),
+	#[error("Tried to add a file with the same path twice: {0}")]
+	FileAlreadyAdded(RelativePath<'static>),
 	#[error("I/O error: {0}")]
 	Io(#[from] io::Error)
 }
 
 /// Represents an error that may occur while parsing a previously generated ZIP file.
 #[derive(Error, Debug)]
+#[non_exhaustive]
 pub enum PreviousZipParseError {
 	#[error("Invalid data: {0}")]
 	Invalid(&'static str),
@@ -183,7 +187,7 @@ struct MutableSquashZipState<F: AsyncRead + AsyncSeek + Unpin> {
 	output_zip: BufferedAsyncSpooledTempFile,
 	previous_zip: Option<F>,
 	processed_local_headers: AHashMap<HashAndSize, Vec<(u64, u32)>>,
-	central_directory_data: Vec<PartialCentralDirectoryHeader>
+	central_directory_data: AHashMap<RelativePath<'static>, PartialCentralDirectoryHeader>
 }
 
 /// The system time sanitizer that SquashZip will use for sanitizing and
@@ -216,6 +220,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	) -> Result<Self, (SquashZipError, SquashZipSettings)> {
 		let obfuscation_engine = ObfuscationEngine::from_squash_zip_settings(&settings);
 		let mut output_zip = BufferedAsyncSpooledTempFile::new(settings.spool_buffer_size);
+
 		let previous_zip_contents = if let Some(previous_zip) = &mut previous_zip {
 			match read_previous_zip_contents(previous_zip, &obfuscation_engine).await {
 				Ok(previous_zip_contents) => previous_zip_contents,
@@ -247,7 +252,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				output_zip,
 				previous_zip,
 				processed_local_headers: AHashMap::with_capacity(previous_zip_contents.len()),
-				central_directory_data: Vec::with_capacity(previous_zip_contents.len())
+				central_directory_data: AHashMap::with_capacity(previous_zip_contents.len())
 			}),
 			previous_zip_contents
 		})
@@ -287,11 +292,10 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		let state = &mut *self.state.lock().await;
 		let output_zip = &mut state.output_zip;
 
-		let mut empty_vec;
+		let mut empty_vec = vec![];
 		let matching_local_headers = if !self.settings.enable_deduplication {
 			// We can't reuse local file headers if deduplication is disabled.
 			// Consider that no headers ever match
-			empty_vec = vec![];
 			&mut empty_vec
 		} else {
 			state
@@ -348,14 +352,14 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				.is_none() && bytes_compared == local_file_header.compressed_size;
 
 			if already_stored {
-				// We know for sure we found a matching file, so just add another pointer to
+				// We know for sure we found a matching file, so just add another pointer to an
 				// existing local header in the central directory
 				add_partial_central_directory_header(
 					path,
 					&local_file_header,
 					*matching_header_offset,
 					&mut state.central_directory_data
-				);
+				)?;
 
 				// Seek to where the next local header would be
 				output_zip
@@ -384,7 +388,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				&local_file_header,
 				new_local_file_header_offset,
 				&mut state.central_directory_data
-			);
+			)?;
 
 			self.obfuscation_engine
 				.obfuscate_local_file_header(&mut local_file_header);
@@ -441,7 +445,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		// summarised as follows:
 		// 1. Check if the file is in map 1) (hash, size) -> (LOC offset list).
 		//    1.1. It is (there is an entry and a comparison is successful): don't add LOC,
-		//         just add CEN pushing to 2) (partial CEN data list).
+		//         just add CEN inserting to 2) (partial CEN data map).
 		//    1.2. It isn't (there is no entry or comparisons are unsuccessful): add LOC,
 		//         add new LOC to 1), add CEN entry to 2) and copy previous file data to the
 		//         output file.
@@ -472,11 +476,10 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		let state = &mut *self.state.lock().await;
 		let output_zip = &mut state.output_zip;
 
-		let mut empty_vec;
+		let mut empty_vec = vec![];
 		let matching_local_headers = if !self.settings.enable_deduplication {
 			// We can't reuse local file headers if deduplication is disabled.
 			// Consider that no headers ever match
-			empty_vec = vec![];
 			&mut empty_vec
 		} else {
 			state
@@ -562,7 +565,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 					&local_file_header,
 					*matching_header_offset,
 					&mut state.central_directory_data
-				);
+				)?;
 
 				// Seek to where the next local header would be
 				output_zip
@@ -591,7 +594,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				&local_file_header,
 				new_local_file_header_offset,
 				&mut state.central_directory_data
-			);
+			)?;
 
 			self.obfuscation_engine
 				.obfuscate_local_file_header(&mut local_file_header);
@@ -633,7 +636,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		let central_directory_start_offset = output_zip.seek(SeekFrom::Current(0)).await?;
 
 		// First, write the central directory file headers
-		for header_data in central_directory_data {
+		for (file_name, header_data) in central_directory_data {
 			let mut central_directory_header = CentralDirectoryHeader {
 				compression_method: header_data.compression_method,
 				squash_time: header_data.squash_time,
@@ -642,7 +645,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				uncompressed_size: header_data.uncompressed_size,
 				local_header_disk_number: 0,
 				local_header_offset: header_data.local_header_offset,
-				file_name: header_data.file_name,
+				file_name,
 				spoof_version_made_by: false
 			};
 
@@ -1019,21 +1022,32 @@ async fn read_previous_zip_contents<F: AsyncRead + AsyncSeek + Unpin>(
 	Ok(previous_zip_contents)
 }
 
-/// Adds a partial central directory header to the specified partial central directory headers list,
+/// Adds a partial central directory header to the specified partial central directory headers map,
 /// which is used when finishing up the ZIP file to generate the central directory.
+///
+/// An error will be returned if the central directory headers map already contains an entry for
+/// the specified file path, as in that case the generated ZIP file would be semantically nonsensical
+/// (i.e. there's not enough information for a program to know what version of the file to extract,
+/// and choosing one over another means that the other just wastes space anyway).
 fn add_partial_central_directory_header(
 	path: &RelativePath<'_>,
 	local_file_header: &LocalFileHeader<'_>,
 	local_file_header_offset: u64,
-	central_directory_data: &mut Vec<PartialCentralDirectoryHeader>
-) {
-	central_directory_data.push(PartialCentralDirectoryHeader {
-		local_header_offset: local_file_header_offset,
-		file_name: path.as_owned(),
-		compression_method: local_file_header.compression_method,
-		squash_time: local_file_header.squash_time,
-		crc32: local_file_header.crc32,
-		compressed_size: local_file_header.compressed_size,
-		uncompressed_size: local_file_header.uncompressed_size
-	});
+	central_directory_data: &mut AHashMap<RelativePath<'static>, PartialCentralDirectoryHeader>
+) -> Result<(), SquashZipError> {
+	match central_directory_data.entry(path.as_owned()) {
+		Entry::Vacant(entry) => {
+			entry.insert(PartialCentralDirectoryHeader {
+				local_header_offset: local_file_header_offset,
+				compression_method: local_file_header.compression_method,
+				squash_time: local_file_header.squash_time,
+				crc32: local_file_header.crc32,
+				compressed_size: local_file_header.compressed_size,
+				uncompressed_size: local_file_header.uncompressed_size
+			});
+
+			Ok(())
+		}
+		Entry::Occupied(entry) => Err(SquashZipError::FileAlreadyAdded(entry.replace_key()))
+	}
 }

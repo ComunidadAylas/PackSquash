@@ -360,3 +360,29 @@ async fn add_several_finish_then_reuse_and_add_works() {
 			.unwrap_or_else(|| panic!("Expected file not read back from output ZIP: {}", file));
 	}
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn several_files_with_same_path_are_handled_properly() {
+	let squash_zip = SquashZip::new(
+		None::<File>,
+		SquashZipSettings {
+			zopfli_iterations: 0,
+			store_squash_time: false,
+			enable_obfuscation: false,
+			enable_deduplication: false,
+			enable_size_increasing_obfuscation: false,
+			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
+			workaround_old_java_obfuscation_quirks: false,
+			spool_buffer_size: SPOOL_BUFFER_SIZE
+		}
+	)
+	.await
+	.map_err(|(err, _)| err)
+	.expect(INSTANTIATION_FAILURE);
+
+	let file_path = &RelativePath::from_inner("virtual/visions0.bin");
+	let add_file = || squash_zip.add_file(file_path, tokio_stream::once([0]), true, 1);
+
+	add_file().await.expect(UNEXPECTED_OPERATION_FAILURE);
+	add_file().await.expect_err(UNEXPECTED_OPERATION_FAILURE);
+}

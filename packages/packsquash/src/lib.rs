@@ -11,6 +11,7 @@
 #![feature(type_alias_impl_trait)]
 #![feature(try_find)]
 #![feature(iter_intersperse)]
+#![feature(map_entry_replace)]
 #![feature(doc_cfg)]
 #![feature(if_let_guard)]
 #![doc(
