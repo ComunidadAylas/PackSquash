@@ -99,11 +99,16 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for Passthrou
 			PackFileAssetType::NbtStructure => file_read_producer().map(|(read, _)| Self {
 				read,
 				optimization_strategy_message: "Copied",
-				is_compressed: false
+				is_compressed: true
 			}),
 			PackFileAssetType::CommandsFunction => file_read_producer().map(|(read, _)| Self {
 				read,
 				optimization_strategy_message: "Copied",
+				is_compressed: false
+			}),
+			PackFileAssetType::Custom => file_read_producer().map(|(read, _)| Self {
+				read,
+				optimization_strategy_message: "Copied (custom asset)",
 				is_compressed: false
 			}),
 			_ => unreachable!("Passing through unexpected asset type: {:?}", asset_type)

@@ -533,7 +533,10 @@ pub enum FileOptions {
 	/// representation.
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
-	PropertiesFileOptions(PropertiesFileOptions)
+	PropertiesFileOptions(PropertiesFileOptions),
+	/// Options that influence how custom files that the user explicitly wants to include in the
+	/// pack are processed.
+	CustomFileOptions(CustomFileOptions)
 }
 
 impl FileOptions {
@@ -961,6 +964,19 @@ impl Default for PropertiesFileOptions {
 			skip: true
 		}
 	}
+}
+
+/// Parameters that define a custom pack file, which PackSquash doesn't expect
+/// and skips by default, but that the pack author desires to put in the
+/// generated ZIP file.
+#[derive(Deserialize, Clone, Copy)]
+#[serde(deny_unknown_fields)]
+#[non_exhaustive]
+pub struct CustomFileOptions {
+	/// If `true`, the custom file will be copied to the generated ZIP file as-is,
+	/// without using any specific optimizations. A `false` value explicitly asks
+	/// for the default behavior of skipping the file.
+	pub force_include: bool
 }
 
 /// Compiles the specified glob pattern to a matcher that is ready to consume

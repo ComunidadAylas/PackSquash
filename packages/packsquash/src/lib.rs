@@ -356,50 +356,64 @@ impl PackSquasher {
 						}
 					};
 
-					let asset_type_matches =
-						asset_type_matcher.matches_for(&pack_file_data.relative_path);
+					let have_default_options;
+					let asset_type_matches = {
+						let asset_type_matches =
+							asset_type_matcher.matches_for(&pack_file_data.relative_path);
 
-					// Do not waste time trying options if that would be useless
-					if !asset_type_matches.is_empty() {
-						/// Ergonomic wrapper for `match_and_process_pack_file`.
-						macro_rules! try_process_with_file_options {
-							($file_options:expr) => {
-								match_and_process_pack_file(
-									&options_holder.options,
-									$file_options.map(|file_options| {
-										file_options.tweak_from_global_options(
-											&options_holder.options.global_options
-										)
-									}),
-									&*squash_zip,
-									&*vfs,
-									&asset_type_matches,
-									&pack_file_data,
-									&*pack_file_optimization_failed,
-									pack_file_status_sender.as_ref()
-								)
-								.await
-							};
+						if !asset_type_matches.is_empty() {
+							// Use the found matches. Every matched asset type has default options
+							// if none are specified in the options file
+							have_default_options = true;
+							asset_type_matches
+						} else {
+							// Consider a tentative match for a custom asset, which must be specified
+							// in the file options. As such, there are no default options
+							have_default_options = false;
+							PackFileAssetTypeMatches::of_custom_asset_type()
 						}
+					};
 
-						// Try to match configuration-provided file settings and process the pack file
-						// with those. The first match that contains settings for this pack file type
-						// "wins"
-						for i in options_holder
-							.file_options_globs
-							.matches(&*pack_file_data.relative_path)
-						{
-							let file_options = options_holder.options.file_options[i];
+					/// Ergonomic wrapper for `match_and_process_pack_file`.
+					macro_rules! try_process_with_file_options {
+						($file_options:expr) => {
+							match_and_process_pack_file(
+								&options_holder.options,
+								$file_options.map(|file_options| {
+									file_options.tweak_from_global_options(
+										&options_holder.options.global_options
+									)
+								}),
+								&*squash_zip,
+								&*vfs,
+								&asset_type_matches,
+								&pack_file_data,
+								&*pack_file_optimization_failed,
+								pack_file_status_sender.as_ref()
+							)
+							.await
+						};
+					}
 
-							if try_process_with_file_options!(Some(file_options)) {
-								return;
-							}
+					// Try to match configuration-provided file settings and process the pack file
+					// with those. The first match that contains settings for this pack file type
+					// "wins"
+					for i in options_holder
+						.file_options_globs
+						.matches(&*pack_file_data.relative_path)
+					{
+						let file_options = options_holder.options.file_options[i];
+
+						if try_process_with_file_options!(Some(file_options)) {
+							return;
 						}
+					}
 
-						// If we get here, this pack file either did not match any file settings,
-						// in which case we should try defaults, or the file settings it matched
-						// were not appropriate for its type (i.e. all matches were for JSON files,
-						// but this is an audio file), in which case we should try defaults too
+					// If we get here, this pack file either did not match any file settings,
+					// in which case we should try defaults, or the file settings it matched
+					// were not appropriate for its type (i.e. all matches were for JSON files,
+					// but this is an audio file), in which case we should try defaults too
+					if have_default_options {
 						for default_file_options in [
 							Some(FileOptions::JsonFileOptions(JsonFileOptions::default())),
 							#[cfg(feature = "audio-transcoding")]
@@ -657,7 +671,7 @@ async fn match_and_process_pack_file<R: AsyncRead + AsyncSeek + Unpin>(
 
 		pack_file_process_failed = !process_pack_file(
 			process_data,
-			&pack_file_data.relative_path,
+			pack_file_data.relative_path.as_owned(),
 			vfs_file_meta.modification_time,
 			pack_file_size_hint,
 			squash_zip,
@@ -699,7 +713,7 @@ async fn match_and_process_pack_file<R: AsyncRead + AsyncSeek + Unpin>(
 /// The return value is `true` if no error occurred, and `false` if some error happened.
 async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 	pack_file_process_data: PackFileProcessData,
-	relative_path: &RelativePath<'_>,
+	relative_path: RelativePath<'static>,
 	edit_time: Option<SystemTime>,
 	file_size_hint: u64,
 	squash_zip: &SquashZip<F>,
@@ -708,13 +722,16 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 ) -> bool {
 	// We may have to change the file extension to a canonical one that's accepted by Minecraft.
 	// Do that early, because we store the file with the canonical extension in the ZIP
-	let pack_file_path = RelativePath::from_inner(
-		relative_path
-			.with_extension(pack_file_process_data.canonical_extension)
-			.into_os_string()
-			.into_string()
-			.unwrap()
-	);
+	let pack_file_path = match pack_file_process_data.canonical_extension {
+		Some(canonical_extension) => RelativePath::from_inner(
+			relative_path
+				.with_extension(canonical_extension)
+				.into_os_string()
+				.into_string()
+				.unwrap()
+		),
+		None => relative_path
+	};
 
 	let copy_previous_file = squash_zip.file_process_time(&pack_file_path).map_or_else(
 		|| false,

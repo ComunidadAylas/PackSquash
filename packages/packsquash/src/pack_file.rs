@@ -130,6 +130,7 @@ pub struct PackFileProcessData {
 	/// and as such any attempt to further compress them will likely result in lower than
 	/// usual space savings.
 	pub is_compressed: bool,
-	/// The canonical extension for the pack file, which Minecraft expects.
-	pub canonical_extension: &'static str
+	/// The canonical extension for the pack file, which Minecraft expects. It might be `None`
+	/// if the pack file is already known to have a canonical extension.
+	pub canonical_extension: Option<&'static str>
 }

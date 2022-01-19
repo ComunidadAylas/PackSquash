@@ -1,7 +1,7 @@
 //! Contains code to identify the asset type of a pack file, which is used to define and enhance the
 //! optimizations that can be done to a file.
 
-use std::{convert::TryFrom, fmt::Debug};
+use std::{borrow::Cow, convert::TryFrom, fmt::Debug};
 
 use enum_iterator::IntoEnumIterator;
 use futures::StreamExt;
@@ -18,7 +18,7 @@ use crate::pack_file::png_file::PngFile;
 use crate::pack_file::properties_file::PropertiesFile;
 use crate::pack_file::shader_file::ShaderFile;
 use crate::{
-	config::{compile_pack_file_glob_pattern, FileOptions},
+	config::{compile_pack_file_glob_pattern, CustomFileOptions, FileOptions},
 	RelativePath
 };
 
@@ -31,6 +31,9 @@ use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor, PackFileProcess
 // implementation too
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, TryFromPrimitive, IntoEnumIterator)]
 #[repr(usize)]
+// Clippy is blind and can't see that usize::MAX fits, by definition, in an usize, no matter the arch.
+// Related issue: https://github.com/rust-lang/rust-clippy/issues/8043
+#[allow(clippy::enum_clike_unportable_variant)]
 pub(super) enum PackFileAssetType {
 	/// A Minecraft metadata asset, with `.mcmeta` extension. These files describe properties
 	/// of textures and the pack itself.
@@ -129,7 +132,13 @@ pub(super) enum PackFileAssetType {
 	NbtStructure,
 	/// A vanilla Minecraft data pack function, which is a list of commands that can be executed
 	/// and referred to as a whole. Its extension is `.mcfunction`.
-	CommandsFunction
+	CommandsFunction,
+
+	/// A custom asset type, defined by the end user, whose contents are opaque to PackSquash and
+	/// processed without any specific optimizations. Custom assets can never be matched by using
+	/// [`PackFileAssetTypeMatcher`].
+	// Always keep this variant last. Not doing so will violate assumptions in the code below
+	Custom = usize::MAX
 }
 
 impl PackFileAssetType {
@@ -337,41 +346,56 @@ impl PackFileAssetType {
 			Self::CommandsFunction => {
 				compile_hardcoded_pack_file_glob_pattern("data/*/functions/**/?*.mcfunction")
 			}
+
+			Self::Custom => unreachable!()
 		}
 	}
 
-	/// Returns the canonical extension for the pack file that contains this asset type.
+	/// Returns the canonical extension for the pack file that contains this asset type. The
+	/// canonical extension of a pack file is the extension that Minecraft expects when dealing
+	/// with the asset contained in the pack file.
 	///
-	/// The canonical extension of a pack file is the extension that Minecraft expects when
-	/// dealing with the asset contained in the pack file.
-	const fn canonical_extension(self) -> &'static str {
+	/// The canonical extension may be `None` if the asset type is known to already have a
+	/// canonical extension by definition, and thus the extension does not need to be
+	/// canonicalized.
+	const fn canonical_extension(self) -> Option<&'static str> {
 		match self {
-			Self::MinecraftModel | Self::MinecraftModelWithComments => "json",
-			Self::MinecraftMetadata | Self::MinecraftMetadataWithComments => "mcmeta",
+			Self::MinecraftMetadata => None,
+			Self::MinecraftMetadataWithComments => Some("mcmeta"),
+			Self::MinecraftModel => None,
+			Self::MinecraftModelWithComments => Some("json"),
 			#[cfg(feature = "optifine-support")]
-			Self::OptifineCustomEntityModel | Self::OptifineCustomEntityModelWithComments => "jem",
+			Self::OptifineCustomEntityModel => None,
 			#[cfg(feature = "optifine-support")]
-			Self::OptifineCustomEntityModelPart | Self::OptifineCustomEntityModelPartWithComments => "jpm",
+			Self::OptifineCustomEntityModelWithComments => Some("jem"),
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineCustomEntityModelPart => None,
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineCustomEntityModelPartWithComments => Some("jpm"),
 			#[cfg(feature = "mtr3-support")]
-			Self::Mtr3CustomTrainModel | Self::Mtr3CustomTrainModelWithComments => "bbmodel",
-			Self::GenericJson | Self::GenericJsonWithComments => "json",
-			Self::GenericOggVorbisAudio => "ogg",
+			Self::Mtr3CustomTrainModel => None,
+			#[cfg(feature = "mtr3-support")]
+			Self::Mtr3CustomTrainModelWithComments => Some("bbmodel"),
+			Self::GenericJson => None,
+			Self::GenericJsonWithComments => Some("json"),
+			Self::GenericOggVorbisAudio => Some("ogg"),
 			#[cfg(feature = "audio-transcoding")]
-			Self::GenericAudio => "ogg",
-			Self::PackIcon | Self::BannerLayer | Self::EyeLayer => "png",
+			Self::GenericAudio => Some("ogg"),
+			Self::PackIcon | Self::BannerLayer | Self::EyeLayer => None,
 			#[cfg(feature = "optifine-support")]
-			Self::OptifineTexture => "png",
-			Self::GenericTexture => "png",
+			Self::OptifineTexture => None,
+			Self::GenericTexture => None,
 			#[cfg(feature = "optifine-support")]
-			Self::GenericProperties => "properties",
-			Self::VertexShader => "vsh",
-			Self::FragmentShader => "fsh",
-			Self::TranslationUnitSegment => "glsl",
-			Self::TrueTypeFont => "ttf",
-			Self::FontCharacterSizes => "bin",
-			Self::Text => "txt",
-			Self::NbtStructure => "nbt",
-			Self::CommandsFunction => "mcfunction"
+			Self::GenericProperties => None,
+			Self::VertexShader => None,
+			Self::FragmentShader => None,
+			Self::TranslationUnitSegment => None,
+			Self::TrueTypeFont => None,
+			Self::FontCharacterSizes => None,
+			Self::Text => None,
+			Self::NbtStructure => None,
+			Self::CommandsFunction => None,
+			Self::Custom => None
 		}
 	}
 }
@@ -389,7 +413,10 @@ impl PackFileAssetTypeMatcher {
 	pub fn new() -> Self {
 		let mut globset_builder = GlobSetBuilder::new();
 
-		for asset_type in PackFileAssetType::into_enum_iter() {
+		// Make sure we skip the last asset type, which represents a custom, non-matchable asset
+		for asset_type in
+			PackFileAssetType::into_enum_iter().take(PackFileAssetType::VARIANT_COUNT - 1)
+		{
 			globset_builder.add(asset_type.to_glob_pattern());
 		}
 
@@ -403,12 +430,13 @@ impl PackFileAssetTypeMatcher {
 	/// are encouraged to not do gratuitous matches.
 	pub fn matches_for(&self, path: &RelativePath<'_>) -> PackFileAssetTypeMatches {
 		PackFileAssetTypeMatches {
-			matches: self
-				.asset_type_globset
-				.matches(path) // Calls matches_candidate_into, which returns indices in ascending order
-				.into_iter()
-				.map(|asset_type_index| PackFileAssetType::try_from(asset_type_index).unwrap())
-				.collect()
+			matches: Cow::Owned(
+				self.asset_type_globset
+					.matches(path) // Calls matches_candidate_into, which returns indices in ascending order
+					.into_iter()
+					.map(|asset_type_index| PackFileAssetType::try_from(asset_type_index).unwrap())
+					.collect()
+			)
 		}
 	}
 }
@@ -416,10 +444,18 @@ impl PackFileAssetTypeMatcher {
 /// A set of asset type matches for a pack file, given its [`RelativePath`]. This struct is
 /// constructed by the [`PackFileAssetTypeMatcher::matches_for`] method.
 pub struct PackFileAssetTypeMatches {
-	matches: Vec<PackFileAssetType>
+	matches: Cow<'static, [PackFileAssetType]>
 }
 
 impl PackFileAssetTypeMatches {
+	/// Returns a [`PackFileAssetTypeMatches`] that represents a single match with the
+	/// [`PackFileAssetType::Custom`] asset type.
+	pub fn of_custom_asset_type() -> Self {
+		Self {
+			matches: Cow::Borrowed(&[PackFileAssetType::Custom])
+		}
+	}
+
 	/// Checks whether there are no matches in this set, so that the `process_data` would always
 	/// return `None`.
 	pub fn is_empty(&self) -> bool {
@@ -441,7 +477,7 @@ impl PackFileAssetTypeMatches {
 		file_options: Option<FileOptions>,
 		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<R>>
 	) -> Option<PackFileProcessData> {
-		for asset_type in &self.matches {
+		for asset_type in &*self.matches {
 			macro_rules! return_pack_file_to_process_data {
 				($file_type:ident, $optimization_settings:expr) => {
 					return pack_file_to_process_data(
@@ -520,6 +556,10 @@ impl PackFileAssetTypeMatches {
 				| PackFileAssetType::Text
 				| PackFileAssetType::NbtStructure
 				| PackFileAssetType::CommandsFunction if file_options.is_none() =>
+					return_pack_file_to_process_data!(PassthroughFile, ()),
+				PackFileAssetType::Custom if let Some(
+					FileOptions::CustomFileOptions(CustomFileOptions { force_include: true, .. })
+				) = file_options =>
 					return_pack_file_to_process_data!(PassthroughFile, ()),
 				_ => {
 					// The file options do not match the asset type, but maybe we have more asset types to try
