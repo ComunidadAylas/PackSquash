@@ -34,12 +34,11 @@ use std::{io, time::SystemTime};
 use futures::future;
 use futures::StreamExt;
 use thiserror::Error;
-use tokio::fs::{File, OpenOptions};
 use tokio::io::AsyncSeek;
 use tokio::io::BufReader;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::Semaphore;
-use tokio::{io::AsyncRead, runtime::Builder};
+use tokio::{fs::File, io::AsyncRead, runtime::Builder};
 
 use config::ProcessedSquashOptions;
 use pack_meta::{PackMeta, PackMetaError};
@@ -240,29 +239,10 @@ impl PackSquasher {
 				None
 			};
 
-			// Instantiate SquashZip and the list of join handles to the pack file tasks
-			let squash_zip = {
-				// By design, the previous ZIP is the same file as the output ZIP. Therefore,
-				// it is important that we do not truncate it if it already exists, as otherwise
-				// no data can be read back for reuse. Another reason for not truncating it yet
-				// is that, if an optimization error happens, we will keep the already existing
-				// file untouched, which makes the process feel more atomic (full atomicity is
-				// not guaranteed in general, because if an I/O error happens while writing to
-				// it after its truncation then the previous data will be lost). Therefore,
-				// File::create is not suitable, because it forces truncating
-				let output_zip_file = OpenOptions::new()
-					.write(true)
-					.create(true)
-					.open(&options_holder.options.global_options.output_file_path)
-					.await?;
-
-				match SquashZip::new(previous_zip, output_zip_file, squashzip_settings).await {
+			let squash_zip = Arc::new(
+				match SquashZip::new(previous_zip, squashzip_settings).await {
 					Ok(squash_zip) => squash_zip,
-					Err((
-						SquashZipError::PreviousZipParseError(err),
-						output_zip_file,
-						squashzip_settings
-					)) => {
+					Err((SquashZipError::PreviousZipParseError(err), squashzip_settings)) => {
 						// Something went wrong while reading the previous ZIP. We can continue the
 						// optimization process, albeit with reduced performance. Warn the user about
 						// that and try again without using a previous ZIP
@@ -275,15 +255,15 @@ impl PackSquasher {
 								.ok();
 						}
 
-						SquashZip::new(None, output_zip_file, squashzip_settings)
+						SquashZip::new(None, squashzip_settings)
 							.await
-							.map_err(|(err, _, _)| err)?
+							.map_err(|(err, _)| err)?
 					}
-					Err((err, _, _)) => return Err(err.into())
+					Err((err, _)) => return Err(err.into())
 				}
-			};
+			);
+
 			let mut pack_file_tasks = Vec::with_capacity(squash_zip.previous_file_count());
-			let squash_zip = Arc::new(squash_zip);
 
 			// Instantiate a semaphore that will help us limit the number of in-flight tasks.
 			// This is needed because if we spawn those tasks faster than we finish them we
@@ -486,7 +466,11 @@ impl PackSquasher {
 			// we have just waited for the pack file tasks to conclude, and each task
 			// held one strong reference
 			match Arc::try_unwrap(squash_zip) {
-				Ok(squash_zip) => squash_zip.finish().await?,
+				Ok(squash_zip) => {
+					squash_zip
+						.finish(&options_holder.options.global_options.output_file_path)
+						.await?
+				}
 				Err(_) => panic!("Unexpected number of strong references to SquashZip")
 			};
 

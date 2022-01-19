@@ -6,6 +6,7 @@ use std::{
 	io::{self, ErrorKind, Read, SeekFrom},
 	lazy::SyncLazy,
 	num::TryFromIntError,
+	path::Path,
 	string::FromUtf8Error,
 	time::SystemTime
 };
@@ -173,8 +174,7 @@ pub struct SquashZip<F: AsyncRead + AsyncSeek + Unpin> {
 	zopfli_iterations_time_model: ZopfliIterationsTimeModel,
 	obfuscation_engine: ObfuscationEngine,
 	previous_zip_contents: AHashMap<RelativePath<'static>, PreviousFile>,
-	state: Mutex<MutableSquashZipState<F>>,
-	output_zip_file: File
+	state: Mutex<MutableSquashZipState<F>>
 }
 
 /// Holds the mutable state of a [`SquashZip`] struct, allowing to mutate
@@ -203,11 +203,6 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// also assumed to have Squash Time information (i.e. that it was
 	/// generated with the `store_squash_time` option set).
 	///
-	/// The resulting output ZIP will be stored at the specified
-	/// `output_zip_file`. For more details on how this struct deals
-	/// with this file, please check out the documentation of the
-	/// `finish` method.
-	///
 	/// Any error that may occur during the creation of the instance,
 	/// including (but not limited to) errors related to reading the
 	/// previous ZIP file, doesn't have to be fatal. In case an error
@@ -217,15 +212,14 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// parameters.
 	pub async fn new(
 		mut previous_zip: Option<F>,
-		output_zip_file: File,
 		settings: SquashZipSettings
-	) -> Result<Self, (SquashZipError, File, SquashZipSettings)> {
+	) -> Result<Self, (SquashZipError, SquashZipSettings)> {
 		let obfuscation_engine = ObfuscationEngine::from_squash_zip_settings(&settings);
 		let mut output_zip = BufferedAsyncSpooledTempFile::new(settings.spool_buffer_size);
 		let previous_zip_contents = if let Some(previous_zip) = &mut previous_zip {
 			match read_previous_zip_contents(previous_zip, &obfuscation_engine).await {
 				Ok(previous_zip_contents) => previous_zip_contents,
-				Err(err) => return Err((err.into(), output_zip_file, settings))
+				Err(err) => return Err((err.into(), settings))
 			}
 		} else {
 			// No previous contents if no previous file to read their data from
@@ -239,7 +233,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			)
 			.await
 		{
-			return Err((err.into(), output_zip_file, settings));
+			return Err((err.into(), settings));
 		}
 
 		Ok(Self {
@@ -255,8 +249,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				processed_local_headers: AHashMap::with_capacity(previous_zip_contents.len()),
 				central_directory_data: Vec::with_capacity(previous_zip_contents.len())
 			}),
-			previous_zip_contents,
-			output_zip_file
+			previous_zip_contents
 		})
 	}
 
@@ -627,15 +620,11 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	}
 
 	/// Finishes this ZIP file, writing any needed remaining data structures and flushing all
-	/// the data to the file that was specified when this struct was constructed.
+	/// the data to a new file in the specified path.
 	///
 	/// This operation ends the lifecycle of this SquashZip instance, consuming it, so no
 	/// further operations can be done on the ZIP file after this method returns.
-	///
-	/// The specified file will be truncated to zero length before flushing data to it,
-	/// in order to overwrite its contents. It is assumed that its cursor is at the beginning
-	/// of the file.
-	pub async fn finish(mut self) -> Result<(), SquashZipError> {
+	pub async fn finish<P: AsRef<Path>>(self, path: P) -> Result<(), SquashZipError> {
 		let state = self.state.into_inner();
 		let central_directory_data = state.central_directory_data;
 		let mut output_zip = state.output_zip;
@@ -689,8 +678,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		// This also implicitly flushes any buffer, so any error during flushing will be returned
 		output_zip.seek(SeekFrom::Start(0)).await?;
 
-		self.output_zip_file.set_len(0).await?;
-		tokio::io::copy(&mut output_zip, &mut self.output_zip_file).await?;
+		tokio::io::copy(&mut output_zip, &mut File::create(path).await?).await?;
 
 		Ok(())
 	}
