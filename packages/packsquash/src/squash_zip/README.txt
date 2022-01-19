@@ -27,7 +27,7 @@ but in a multithreaded way, by using a spooled temporary file per thread instead
    spec conformance is not desired this allows to check whether a file with the
    same data was already added to the ZIP file.
    6.1. If it is in map 1), compare the file data we have just added with the file
-        datas we have already stored and are pointed to by the offset list.
+        data we have already stored and are pointed to by the offset list.
         6.1.1. If some file data matches (bitwise comparison succeeds), add an
                entry (partial CEN data list, with matched file local header offset)
                to the list 2) and discard the local file header and data added in
