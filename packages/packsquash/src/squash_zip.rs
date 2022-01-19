@@ -266,9 +266,9 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// In that case, it is an error to call both methods for the same file: behavior is
 	/// **undefined**.
 	///
-	/// Adding several files with the same path will not cause this function to fail,
-	/// but doing so will generate ZIP files that make little sense on a semantic level
-	/// for no good reasons. Therefore, doing so is not recommended.
+	/// Adding several files with the same path will cause this function to fail, as doing
+	/// so would generate ZIP files that make little sense on a semantic level for no good
+	/// reasons.
 	///
 	/// The result ZIP file may be left in an inconsistent state if this method returns
 	/// an error. The caller probably should discard the ZIP file if this happens, by
