@@ -20,7 +20,7 @@ num_enum = "0.5.6"
 enum-iterator = "0.7.0"
 
 num_cpus = "1.13.1"
-sysinfo = { version = "0.22.5", default-features = false }
+sysinfo = { version = "0.23.0", default-features = false }
 walkdir = "2.3.2"
 
 tokio = { version = "1.15.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
@@ -40,7 +40,7 @@ rgb = "0.8.31"
 imagequant = { version = "4.0.0-beta.7", default-features = false }
 oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
 
-gstreamer = { version = "0.18.0", default-features = false, optional = true }
+gstreamer = { version = "0.18.1", default-features = false, optional = true }
 gstreamer-app = { version = "0.18.0", default-features = false, features = ["v1_10"], optional = true }
 gstreamer-audio = { version = "0.18.0", default-features = false, optional = true }
 
