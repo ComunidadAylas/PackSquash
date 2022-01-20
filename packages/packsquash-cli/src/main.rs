@@ -146,7 +146,10 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 
 	squash(squash_options).map_or_else(
 		|err| {
-			eprintln!("{}! Pack processing error: {}{}", CLI_COLOR_RED, err, CLI_COLOR_DEFAULT);
+			eprintln!(
+				"{}! Pack processing error: {}{}",
+				CLI_COLOR_RED, err, CLI_COLOR_DEFAULT
+			);
 
 			// We print both informational and error pack file status updates.
 			// If the error was in one of those, hint the user at the status
@@ -256,7 +259,9 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 						TerminalTitle::Finishing.show();
 					}
 				}
-				PackSquasherStatus::Notice(notice) => eprintln!("{}- {}{}", CLI_COLOR_CYAN, notice, CLI_COLOR_DEFAULT),
+				PackSquasherStatus::Notice(notice) => {
+					eprintln!("{}- {}{}", CLI_COLOR_CYAN, notice, CLI_COLOR_DEFAULT)
+				}
 				PackSquasherStatus::Warning(warning) => match warning {
 					PackSquasherWarning::UnusablePreviousZip(err) => eprintln!(
 						"{}* The previous ZIP file could not be read. It will not be used to speed up processing. \
