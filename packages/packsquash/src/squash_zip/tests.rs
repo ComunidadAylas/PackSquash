@@ -5,6 +5,8 @@ use std::{
 
 use tempfile::Builder;
 
+use pretty_assertions::assert_eq;
+
 use super::*;
 
 static INSTANTIATION_FAILURE: &str = "No error should happen while creating the SquashZip instance";

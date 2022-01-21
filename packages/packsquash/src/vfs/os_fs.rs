@@ -120,6 +120,7 @@ mod tests {
 
 	use std::fs::File;
 
+	use pretty_assertions::assert_eq;
 	use tempfile::Builder;
 
 	#[test]

@@ -1,3 +1,4 @@
+use pretty_assertions::assert_eq;
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
 
