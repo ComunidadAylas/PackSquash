@@ -1,3 +1,4 @@
+use crossterm::style::{Color, ResetColor, SetForegroundColor};
 use std::{
 	borrow::Cow,
 	env, fs,
@@ -5,7 +6,6 @@ use std::{
 	process, thread,
 	time::Instant
 };
-use crossterm::style::{Color, ResetColor, SetForegroundColor};
 
 use getopts::{Options, ParsingStyle};
 use tokio::sync::mpsc::channel;
@@ -67,7 +67,12 @@ fn run() -> i32 {
 			}
 		}
 		Err(parse_err) => {
-			eprintln!("{}{}{}", SetForegroundColor(Color::Red), parse_err, ResetColor);
+			eprintln!(
+				"{}{}{}",
+				SetForegroundColor(Color::Red),
+				parse_err,
+				ResetColor
+			);
 			eprintln!(
 				"{}Run {} -h to see command line argument help{}",
 				SetForegroundColor(Color::Red),
@@ -113,7 +118,10 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		Err(err) => {
 			eprintln!(
 				"{}! Couldn't read the options file from {}: {}{}",
-				SetForegroundColor(Color::Red), user_friendly_options_path, err, ResetColor
+				SetForegroundColor(Color::Red),
+				user_friendly_options_path,
+				err,
+				ResetColor
 			);
 
 			return 2;
@@ -126,7 +134,10 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		Err(deserialize_error) => {
 			eprintln!(
 				"{}! An error occurred while parsing the options file from {}: {}{}",
-				SetForegroundColor(Color::Red), user_friendly_options_path, deserialize_error, ResetColor
+				SetForegroundColor(Color::Red),
+				user_friendly_options_path,
+				deserialize_error,
+				ResetColor
 			);
 
 			return 3;
@@ -143,7 +154,9 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		|err| {
 			eprintln!(
 				"{}! Pack processing error: {}{}",
-				SetForegroundColor(Color::Red), err, ResetColor
+				SetForegroundColor(Color::Red),
+				err,
+				ResetColor
 			);
 
 			// We print both informational and error pack file status updates.
@@ -153,14 +166,16 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 				eprintln!(
 					"{}Another error message with more details about the error was emitted before. \
 					You might need to scroll up to see it.{}",
-					SetForegroundColor(Color::Red), ResetColor
+					SetForegroundColor(Color::Red),
+					ResetColor
 				);
 			}
 
 			eprintln!(
 				"{}These troubleshooting instructions might be useful: \
 				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>{}",
-				SetForegroundColor(Color::Red), ResetColor
+				SetForegroundColor(Color::Red),
+				ResetColor
 			);
 
 			128
@@ -255,7 +270,12 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 					}
 				}
 				PackSquasherStatus::Notice(notice) => {
-					eprintln!("{}- {}{}", SetForegroundColor(Color::Cyan), notice, ResetColor)
+					eprintln!(
+						"{}- {}{}",
+						SetForegroundColor(Color::Cyan),
+						notice,
+						ResetColor
+					)
 				}
 				PackSquasherStatus::Warning(warning) => match warning {
 					PackSquasherWarning::UnusablePreviousZip(err) => eprintln!(
