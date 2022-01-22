@@ -5,6 +5,7 @@ use std::{
 	process, thread,
 	time::Instant
 };
+use crossterm::style::{Color, ResetColor, SetForegroundColor};
 
 use getopts::{Options, ParsingStyle};
 use tokio::sync::mpsc::channel;
@@ -19,12 +20,6 @@ macro_rules! packsquash_title {
 		"PackSquash"
 	};
 }
-
-const CLI_COLOR_RED: &str = "\x1b[31m";
-const CLI_COLOR_GREEN: &str = "\x1b[32m";
-const CLI_COLOR_YELLOW: &str = "\x1b[33m";
-const CLI_COLOR_CYAN: &str = "\x1b[36m";
-const CLI_COLOR_DEFAULT: &str = "\x1b[39m";
 
 fn main() {
 	process::exit(run());
@@ -72,12 +67,12 @@ fn run() -> i32 {
 			}
 		}
 		Err(parse_err) => {
-			eprintln!("{}{}{}", CLI_COLOR_RED, parse_err, CLI_COLOR_DEFAULT);
+			eprintln!("{}{}{}", SetForegroundColor(Color::Red), parse_err, ResetColor);
 			eprintln!(
 				"{}Run {} -h to see command line argument help{}",
-				CLI_COLOR_RED,
+				SetForegroundColor(Color::Red),
 				env!("CARGO_BIN_NAME"),
-				CLI_COLOR_DEFAULT
+				ResetColor
 			);
 
 			1
@@ -118,7 +113,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		Err(err) => {
 			eprintln!(
 				"{}! Couldn't read the options file from {}: {}{}",
-				CLI_COLOR_RED, user_friendly_options_path, err, CLI_COLOR_DEFAULT
+				SetForegroundColor(Color::Red), user_friendly_options_path, err, ResetColor
 			);
 
 			return 2;
@@ -131,7 +126,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		Err(deserialize_error) => {
 			eprintln!(
 				"{}! An error occurred while parsing the options file from {}: {}{}",
-				CLI_COLOR_RED, user_friendly_options_path, deserialize_error, CLI_COLOR_DEFAULT
+				SetForegroundColor(Color::Red), user_friendly_options_path, deserialize_error, ResetColor
 			);
 
 			return 3;
@@ -148,7 +143,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		|err| {
 			eprintln!(
 				"{}! Pack processing error: {}{}",
-				CLI_COLOR_RED, err, CLI_COLOR_DEFAULT
+				SetForegroundColor(Color::Red), err, ResetColor
 			);
 
 			// We print both informational and error pack file status updates.
@@ -158,14 +153,14 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 				eprintln!(
 					"{}Another error message with more details about the error was emitted before. \
 					You might need to scroll up to see it.{}",
-					CLI_COLOR_RED, CLI_COLOR_DEFAULT
+					SetForegroundColor(Color::Red), ResetColor
 				);
 			}
 
 			eprintln!(
 				"{}These troubleshooting instructions might be useful: \
 				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>{}",
-				CLI_COLOR_RED, CLI_COLOR_DEFAULT
+				SetForegroundColor(Color::Red), ResetColor
 			);
 
 			128
@@ -175,7 +170,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 
 			println!(
 				"{}{} ({} pack files, {} pack files stored, {}.{:03} s){}",
-				CLI_COLOR_GREEN,
+				SetForegroundColor(Color::Green),
 				output_file_path.metadata().ok().map_or_else(
 					|| Cow::Borrowed("Pack processed"),
 					|metadata| Cow::Owned(format!(
@@ -194,7 +189,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 				),
 				process_time.as_secs(),
 				process_time.subsec_millis(),
-				CLI_COLOR_DEFAULT
+				ResetColor
 			);
 
 			0
@@ -230,23 +225,23 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 					match pack_file_status.optimization_error() {
 						Some(error_description) => eprintln!(
 							"{}! {}: {}{}",
-							CLI_COLOR_RED,
+							SetForegroundColor(Color::Red),
 							pack_file_status.path().as_str(),
 							error_description,
-							CLI_COLOR_DEFAULT
+							ResetColor
 						),
 						None => {
 							let prefix = if pack_file_status.skipped() {
-								CLI_COLOR_YELLOW
+								SetForegroundColor(Color::Yellow)
 							} else {
-								""
+								SetForegroundColor(Color::Reset)
 							};
 							eprintln!(
 								"{}> {}: {}{}",
 								prefix,
 								pack_file_status.path().as_str(),
 								pack_file_status.optimization_strategy(),
-								CLI_COLOR_DEFAULT
+								ResetColor
 							)
 						}
 					}
@@ -260,25 +255,25 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 					}
 				}
 				PackSquasherStatus::Notice(notice) => {
-					eprintln!("{}- {}{}", CLI_COLOR_CYAN, notice, CLI_COLOR_DEFAULT)
+					eprintln!("{}- {}{}", SetForegroundColor(Color::Cyan), notice, ResetColor)
 				}
 				PackSquasherStatus::Warning(warning) => match warning {
 					PackSquasherWarning::UnusablePreviousZip(err) => eprintln!(
 						"{}* The previous ZIP file could not be read. It will not be used to speed up processing. \
 							Was the file last modified by PackSquash? Cause: {}{}",
-						CLI_COLOR_YELLOW, err, CLI_COLOR_DEFAULT
+						SetForegroundColor(Color::Yellow), err, ResetColor
 					),
 					PackSquasherWarning::LowEntropySystemId => eprintln!(
 						"{}* Used a low entropy system ID. The dates embedded in the result ZIP file, \
 							which reveal when it was generated, may be easier to decrypt. For more information \
 							about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>{}",
-						CLI_COLOR_YELLOW, CLI_COLOR_DEFAULT
+						SetForegroundColor(Color::Yellow), ResetColor
 					),
 					PackSquasherWarning::VolatileSystemId => eprintln!(
 						"{}* Used a volatile system ID. You maybe should not reuse the result ZIP file, \
 							as unexpected results can occur after you use your device as usual. For more information \
 							about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>{}",
-						CLI_COLOR_YELLOW, CLI_COLOR_DEFAULT
+						SetForegroundColor(Color::Yellow), ResetColor
 					),
 					_ => unimplemented!()
 				},
