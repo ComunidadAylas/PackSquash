@@ -231,14 +231,14 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 							ResetColor
 						),
 						None => {
-							let prefix = if pack_file_status.skipped() {
+							let color = if pack_file_status.skipped() {
 								SetForegroundColor(Color::Yellow)
 							} else {
 								SetForegroundColor(Color::Reset)
 							};
 							eprintln!(
 								"{}> {}: {}{}",
-								prefix,
+								color,
 								pack_file_status.path().as_str(),
 								pack_file_status.optimization_strategy(),
 								ResetColor
