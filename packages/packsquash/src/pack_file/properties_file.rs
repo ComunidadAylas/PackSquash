@@ -147,15 +147,11 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for Propertie
 		_: PackFileAssetType,
 		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
-		(!optimization_settings.skip)
-			.then(|| {
-				file_read_producer().map(|(read, file_length_hint)| Self {
-					read,
-					// The file is too big to fit in memory if this conversion fails anyway
-					file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
-					optimization_settings
-				})
-			})
-			.flatten()
+		file_read_producer().map(|(read, file_length_hint)| Self {
+			read,
+			// The file is too big to fit in memory if this conversion fails anyway
+			file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
+			optimization_settings
+		})
 	}
 }

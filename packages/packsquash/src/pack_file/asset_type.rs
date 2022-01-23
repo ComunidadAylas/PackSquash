@@ -1,14 +1,14 @@
 //! Contains code to identify the asset type of a pack file, which is used to define and enhance the
 //! optimizations that can be done to a file.
 
-use std::{borrow::Cow, convert::TryFrom, fmt::Debug};
+use std::{borrow::Cow, fmt::Debug};
 
-use enum_iterator::IntoEnumIterator;
+use enumset::{EnumSet, EnumSetType};
 use futures::StreamExt;
 use globset::{Glob, GlobSet, GlobSetBuilder};
-use num_enum::TryFromPrimitive;
 use tokio::io::AsyncRead;
 
+use crate::config::GlobalOptions;
 #[cfg(feature = "audio-transcoding")]
 use crate::pack_file::audio_file::AudioFile;
 use crate::pack_file::json_file::JsonFile;
@@ -28,13 +28,10 @@ use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor, PackFileProcess
 /// represent assets of several types. An asset type adds constraints on the data format
 /// of a [`PackFile`], or otherwise has characteristics that are relevant for optimization.
 // When adding or removing variants from this enumeration, make sure to update the PackFileAssetTypeMatches
-// implementation too
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, TryFromPrimitive, IntoEnumIterator)]
+// and tweak_asset_types_mask_from_global_options implementations too
+#[derive(Debug, EnumSetType)]
 #[repr(usize)]
-// Clippy is blind and can't see that usize::MAX fits, by definition, in an usize, no matter the arch.
-// Related issue: https://github.com/rust-lang/rust-clippy/issues/8043
-#[allow(clippy::enum_clike_unportable_variant)]
-pub(super) enum PackFileAssetType {
+pub enum PackFileAssetType {
 	/// A Minecraft metadata asset, with `.mcmeta` extension. These files describe properties
 	/// of textures and the pack itself.
 	MinecraftMetadata,
@@ -124,9 +121,11 @@ pub(super) enum PackFileAssetType {
 	/// legacy Unicode fonts, with `.bin` extension.
 	FontCharacterSizes,
 	/// A UTF-8 plain text file that is shown in-game in some form, with `.txt` extension.
-	/// These texts are currently used for the End Poem and splash texts. In previous versions
-	/// they were also used for credit text.
+	/// These texts are currently used for the End Poem and splash texts.
 	Text,
+	/// A UTF-8 plain text file with the game credits, and `.txt` extension. This file was used
+	/// in Minecraft versions before 1.17.
+	LegacyTextCredits,
 	/// A structure file in NBT format, compressed with gzip. Used by data packs. Its extension
 	/// is `.nbt`.
 	NbtStructure,
@@ -137,8 +136,8 @@ pub(super) enum PackFileAssetType {
 	/// A custom asset type, defined by the end user, whose contents are opaque to PackSquash and
 	/// processed without any specific optimizations. Custom assets can never be matched by using
 	/// [`PackFileAssetTypeMatcher`].
-	// Always keep this variant last. Not doing so will violate assumptions in the code below
-	Custom = usize::MAX
+	// For better style, keep this variant last (i.e. only add new ones above)
+	Custom
 }
 
 impl PackFileAssetType {
@@ -336,9 +335,10 @@ impl PackFileAssetType {
 				// them in the future, and in fact the credits text file was replaced by a
 				// JSON file. After all, we live in a post "XML fever" world, where JSON is
 				// the new plain text data exchange format adequate for any purpose ;)
-				compile_hardcoded_pack_file_glob_pattern(
-					"assets/minecraft/texts/{end,splashes,credits}.txt"
-				)
+				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/texts/{end,splashes}.txt")
+			}
+			Self::LegacyTextCredits => {
+				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/texts/credits.txt")
 			}
 			Self::NbtStructure => {
 				compile_hardcoded_pack_file_glob_pattern("data/*/structures/**/?*.nbt")
@@ -392,7 +392,7 @@ impl PackFileAssetType {
 			Self::TranslationUnitSegment => None,
 			Self::TrueTypeFont => None,
 			Self::FontCharacterSizes => None,
-			Self::Text => None,
+			Self::Text | Self::LegacyTextCredits => None,
 			Self::NbtStructure => None,
 			Self::CommandsFunction => None,
 			Self::Custom => None
@@ -404,24 +404,26 @@ impl PackFileAssetType {
 /// In turn, the asset type determines how that pack file should be optimized according to some
 /// settings.
 pub struct PackFileAssetTypeMatcher {
-	asset_type_globset: GlobSet
+	asset_type_globset: GlobSet,
+	asset_types_mask: EnumSet<PackFileAssetType>
 }
 
 impl PackFileAssetTypeMatcher {
 	/// Returns a new matcher that can be used to determine the asset type of a pack file, given its
-	/// [`RelativePath`].
-	pub fn new() -> Self {
+	/// [`RelativePath`]. A mask is used to limit what asset types can match. If the mask contains
+	/// the custom asset type, [PackFileAssetType::Custom], it will be silently excluded from the mask.
+	pub fn new(asset_types_mask: EnumSet<PackFileAssetType>) -> Self {
 		let mut globset_builder = GlobSetBuilder::new();
+		let asset_types_mask = asset_types_mask - PackFileAssetType::Custom;
 
-		// Make sure we skip the last asset type, which represents a custom, non-matchable asset
-		for asset_type in
-			PackFileAssetType::into_enum_iter().take(PackFileAssetType::VARIANT_COUNT - 1)
-		{
+		// The iteration is done in ascending discriminant order
+		for asset_type in asset_types_mask.iter() {
 			globset_builder.add(asset_type.to_glob_pattern());
 		}
 
 		Self {
-			asset_type_globset: globset_builder.build().unwrap()
+			asset_type_globset: globset_builder.build().unwrap(),
+			asset_types_mask
 		}
 	}
 
@@ -434,7 +436,9 @@ impl PackFileAssetTypeMatcher {
 				self.asset_type_globset
 					.matches(path) // Calls matches_candidate_into, which returns indices in ascending order
 					.into_iter()
-					.map(|asset_type_index| PackFileAssetType::try_from(asset_type_index).unwrap())
+					.map(|asset_type_index| {
+						self.asset_types_mask.iter().nth(asset_type_index).unwrap()
+					})
 					.collect()
 			)
 		}
@@ -554,6 +558,7 @@ impl PackFileAssetTypeMatches {
 				PackFileAssetType::TrueTypeFont
 				| PackFileAssetType::FontCharacterSizes
 				| PackFileAssetType::Text
+				| PackFileAssetType::LegacyTextCredits
 				| PackFileAssetType::NbtStructure
 				| PackFileAssetType::CommandsFunction if file_options.is_none() =>
 					return_pack_file_to_process_data!(PassthroughFile, ()),
@@ -571,6 +576,41 @@ impl PackFileAssetTypeMatches {
 		// The file options do not match with any matched asset type
 		None
 	}
+}
+
+/// Removes asset types from the specified mask that are not appropriate for the given global options.
+/// This takes into account options such as the set of allowed mods.
+pub fn tweak_asset_types_mask_from_global_options(
+	mut asset_types_mask: EnumSet<PackFileAssetType>,
+	global_options: &GlobalOptions
+) -> EnumSet<PackFileAssetType> {
+	#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
+	use crate::config::MinecraftMod;
+
+	if global_options.skip_pack_icon {
+		asset_types_mask -= PackFileAssetType::PackIcon;
+	}
+
+	#[cfg(feature = "optifine-support")]
+	if !global_options.allow_mods.contains(MinecraftMod::Optifine) {
+		asset_types_mask -= PackFileAssetType::OptifineCustomEntityModel
+			| PackFileAssetType::OptifineCustomEntityModelWithComments
+			| PackFileAssetType::OptifineCustomEntityModelPart
+			| PackFileAssetType::OptifineCustomEntityModelPartWithComments
+			| PackFileAssetType::OptifineTexture
+			| PackFileAssetType::GenericProperties;
+	}
+
+	#[cfg(feature = "mtr3-support")]
+	if !global_options
+		.allow_mods
+		.contains(MinecraftMod::MinecraftTransitRailway3)
+	{
+		asset_types_mask -= PackFileAssetType::Mtr3CustomTrainModel
+			| PackFileAssetType::Mtr3CustomTrainModelWithComments;
+	}
+
+	asset_types_mask
 }
 
 /// Converts a maybe [`PackFile`] of some statically-known concrete type, of some asset type, to the

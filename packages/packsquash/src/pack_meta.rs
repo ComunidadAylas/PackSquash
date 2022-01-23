@@ -11,6 +11,7 @@ use serde_json::Value;
 use thiserror::Error;
 use tokio::io::AsyncReadExt;
 
+use crate::pack_file::asset_type::PackFileAssetType;
 use crate::pack_file::strip_utf8_bom;
 use crate::{config::MinecraftQuirk, vfs::VirtualFileSystem};
 
@@ -164,5 +165,25 @@ impl PackMeta {
 		quirks |= MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending;
 
 		quirks
+	}
+
+	/// Returns a maybe pessimistic set of pack file asset types that Minecraft and
+	/// its mods can read from a pack.
+	///
+	/// This is done by looking at the `pack_format` version in the pack metadata,
+	/// as that version specifies a range of Minecraft versions that the pack is
+	/// meant to be compatible with. If only a subset of Minecraft versions that
+	/// a `pack_format` version targets use some asset type, that type will be
+	/// returned in the set. Similarly, if the Minecraft versions a `pack_format`
+	/// version targets may or may not use some asset type, that asset type will
+	/// be returned too.
+	pub fn target_minecraft_version_asset_type_mask(&self) -> EnumSet<PackFileAssetType> {
+		let mut asset_type_mask = EnumSet::all();
+
+		if self.pack_format_version >= PACK_FORMAT_VERSION_1_17 {
+			asset_type_mask -= PackFileAssetType::LegacyTextCredits;
+		}
+
+		asset_type_mask
 	}
 }

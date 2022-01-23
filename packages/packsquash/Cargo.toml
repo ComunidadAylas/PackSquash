@@ -16,8 +16,6 @@ enumset = { version = "1.0.8", features = ["serde"] }
 indexmap = { version = "1.8.0", default-features = false, features = ["serde-1"] }
 thiserror = "1.0.30"
 ahash = "0.7.6"
-num_enum = "0.5.6"
-enum-iterator = "0.7.0"
 
 num_cpus = "1.13.1"
 sysinfo = { version = "0.23.0", default-features = false }

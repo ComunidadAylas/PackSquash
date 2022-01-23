@@ -1313,27 +1313,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num_enum"
-version = "0.5.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "720d3ea1055e4e4574c0c0b0f8c3fd4f24c4cdaf465948206dea090b57b526ad"
-dependencies = [
- "num_enum_derive",
-]
-
-[[package]]
-name = "num_enum_derive"
-version = "0.5.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d992b768490d7fe0d8586d9b5745f6c49f557da6d81dc982b1d167ad4edbb21"
-dependencies = [
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "object"
 version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1399,7 +1378,6 @@ dependencies = [
  "core-foundation",
  "crc32fast",
  "entropy",
- "enum-iterator",
  "enumset",
  "fpe",
  "futures",
@@ -1415,7 +1393,6 @@ dependencies = [
  "jsonpath_lib",
  "mach",
  "num_cpus",
- "num_enum",
  "oxipng",
  "png",
  "pretty_assertions",

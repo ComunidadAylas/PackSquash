@@ -165,36 +165,22 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for JsonFile<
 		asset_type: PackFileAssetType,
 		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
-		let skip = match asset_type {
-			#[cfg(feature = "optifine-support")]
-			PackFileAssetType::OptifineCustomEntityModel
-			| PackFileAssetType::OptifineCustomEntityModelWithComments
-			| PackFileAssetType::OptifineCustomEntityModelPart
-			| PackFileAssetType::OptifineCustomEntityModelPartWithComments => {
-				!optimization_settings.allow_optifine_files
-			}
-			#[cfg(feature = "mtr3-support")]
-			PackFileAssetType::Mtr3CustomTrainModel
-			| PackFileAssetType::Mtr3CustomTrainModelWithComments => !optimization_settings.allow_mtr3_files,
-			_ => false
-		};
-
-		(!skip)
-			.then(|| {
-				file_read_producer().map(|(read, file_length_hint)| Self {
-					read,
-					// The file is too big to fit in memory if this conversion fails anyway
-					file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
-					asset_type,
-					optimization_settings
-				})
-			})
-			.flatten()
+		file_read_producer().map(|(read, file_length_hint)| Self {
+			read,
+			// The file is too big to fit in memory if this conversion fails anyway
+			file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
+			asset_type,
+			optimization_settings
+		})
 	}
 }
 
 /// Checks whether the specified asset type is an extension type whose file extension
 /// signals that its JSON data might have comments.
+#[cfg_attr(
+	not(any(feature = "optifine-support", feature = "mtr3-support")),
+	allow(clippy::match_like_matches_macro)
+)]
 const fn asset_type_has_comments_extension(asset_type: PackFileAssetType) -> bool {
 	match asset_type {
 		PackFileAssetType::MinecraftMetadataWithComments

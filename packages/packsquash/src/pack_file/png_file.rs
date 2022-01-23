@@ -332,23 +332,12 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for PngFile<T
 		asset_type: PackFileAssetType,
 		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
-		let skip = match asset_type {
-			#[cfg(feature = "optifine-support")]
-			PackFileAssetType::OptifineTexture => !optimization_settings.allow_optifine_files,
-			PackFileAssetType::PackIcon => optimization_settings.skip_pack_icon,
-			_ => false
-		};
-
-		(!skip)
-			.then(|| {
-				file_read_producer().map(|(read, file_length_hint)| Self {
-					read,
-					// The file is too big to fit in memory if this conversion fails anyway
-					file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
-					asset_type,
-					optimization_settings
-				})
-			})
-			.flatten()
+		file_read_producer().map(|(read, file_length_hint)| Self {
+			read,
+			// The file is too big to fit in memory if this conversion fails anyway
+			file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
+			asset_type,
+			optimization_settings
+		})
 	}
 }

@@ -179,8 +179,8 @@ pub struct GlobalOptions {
 	/// `work_around_minecraft_quirks` accordingly. Otherwise, you can set it to `true`.
 	///
 	/// When this option is set to `true`, the `pack.mcmeta` file may be read and validated, even if
-	/// `validate_pack_metadata_file` is set to `false`. To guarantee that file is not read no matter
-	/// what, both options should be set to `false`.
+	/// `validate_pack_metadata_file` and `automatic_asset_types_mask_detection` are set to `false`.
+	/// To guarantee that file is not read no matter what, these options should be all set to `false`.
 	///
 	/// **Default value**: `true`
 	pub automatic_minecraft_quirks_detection: bool,
@@ -195,6 +195,22 @@ pub struct GlobalOptions {
 	/// **Default value**: empty set (no quirks worked around, unless
 	/// `automatic_minecraft_quirks_detection` is set to `true` and quirks were detected)
 	pub work_around_minecraft_quirks: EnumSet<MinecraftQuirk>,
+	/// By default, PackSquash will try to automatically deduce the appropriate set of pack files to
+	/// include in the generated ZIP by checking what Minecraft versions it targets, according to the
+	/// pack format version. This works fine in most circumstances, and saves space if the pack contains
+	/// legacy or too new files for the targeted Minecraft version, but it might be not desirable
+	/// sometimes.
+	///
+	/// If you want PackSquash to include every pack file it recognizes and is enabled in `allow_mods`
+	/// no matter what, set this option to `false`. Otherwise, leave it set to `true` to let it
+	/// exclude files that are known to be not relevant.
+	///
+	/// When this option is set to `true`, the `pack.mcmeta` file may be read and validated, even if
+	/// `validate_pack_metadata_file` and `automatic_minecraft_quirks_detection` are set to `false`.
+	/// To guarantee that file is not read no matter what, these options should be all set to `false`.
+	///
+	/// **Default value**: `true`
+	pub automatic_asset_types_mask_detection: bool,
 	/// This option controls whether PackSquash will ignore system and hidden files (i.e. whose name
 	/// starts with a dot), not even trying to process them. Under most circumstances, you shouldn't
 	/// need to disable this option.
@@ -269,6 +285,7 @@ impl Default for GlobalOptions {
 			zip_compression_iterations: 20,
 			automatic_minecraft_quirks_detection: true,
 			work_around_minecraft_quirks: EnumSet::empty(),
+			automatic_asset_types_mask_detection: true,
 			ignore_system_and_hidden_files: true,
 			#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 			allow_mods: EnumSet::empty(),
@@ -545,46 +562,17 @@ impl FileOptions {
 	///
 	/// It is recommended to execute this method just after the default or user provided
 	/// file settings for some pack file were found, before actually using them.
-	#[allow(unused_variables, unused_mut)]
 	pub(crate) fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
-		match &mut self {
-			FileOptions::JsonFileOptions(file_options) => {
-				#[cfg(feature = "optifine-support")]
-				{
-					file_options.allow_optifine_files =
-						global_options.allow_mods.contains(MinecraftMod::Optifine);
-				}
-
-				#[cfg(feature = "mtr3-support")]
-				{
-					file_options.allow_mtr3_files = global_options
-						.allow_mods
-						.contains(MinecraftMod::MinecraftTransitRailway3);
-				}
-			}
-			FileOptions::PngFileOptions(file_options) => {
-				#[cfg(feature = "optifine-support")]
-				{
-					file_options.allow_optifine_files =
-						global_options.allow_mods.contains(MinecraftMod::Optifine);
-				}
-
-				file_options.do_not_reduce_to_grayscale = global_options
-					.work_around_minecraft_quirks
-					.contains(MinecraftQuirk::GrayscaleImagesGammaMiscorrection);
-				file_options.skip_color_type_reduction = global_options
-					.work_around_minecraft_quirks
-					.contains(MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck);
-				file_options.do_not_change_transparent_pixel_colors = global_options
-					.work_around_minecraft_quirks
-					.contains(MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending);
-				file_options.skip_pack_icon = global_options.skip_pack_icon;
-			}
-			#[cfg(feature = "optifine-support")]
-			FileOptions::PropertiesFileOptions(file_options) => {
-				file_options.skip = !global_options.allow_mods.contains(MinecraftMod::Optifine);
-			}
-			_ => {}
+		if let FileOptions::PngFileOptions(file_options) = &mut self {
+			file_options.do_not_reduce_to_grayscale = global_options
+				.work_around_minecraft_quirks
+				.contains(MinecraftQuirk::GrayscaleImagesGammaMiscorrection);
+			file_options.skip_color_type_reduction = global_options
+				.work_around_minecraft_quirks
+				.contains(MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck);
+			file_options.do_not_change_transparent_pixel_colors = global_options
+				.work_around_minecraft_quirks
+				.contains(MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending);
 		}
 
 		self
@@ -740,19 +728,7 @@ pub struct JsonFileOptions {
 	/// with those specific extensions.
 	///
 	/// **Default value**: `true` (allow comments in the JSON file, no matter its extension)
-	pub always_allow_comments: bool,
-	/// Crate-private option set when [MinecraftMod::Optifine] was configured.
-	///
-	/// **Default value**: `false`
-	#[serde(skip)]
-	#[cfg(feature = "optifine-support")]
-	pub(crate) allow_optifine_files: bool,
-	/// Crate-private option set when [MinecraftMod::MinecraftTransitRailway3] was configured.
-	///
-	/// **Default value**: `false`
-	#[serde(skip)]
-	#[cfg(feature = "mtr3-support")]
-	pub(crate) allow_mtr3_files: bool
+	pub always_allow_comments: bool
 }
 
 impl Default for JsonFileOptions {
@@ -760,11 +736,7 @@ impl Default for JsonFileOptions {
 		Self {
 			minify: true,
 			delete_bloat: true,
-			always_allow_comments: true,
-			#[cfg(feature = "optifine-support")]
-			allow_optifine_files: false,
-			#[cfg(feature = "mtr3-support")]
-			allow_mtr3_files: false
+			always_allow_comments: true
 		}
 	}
 }
@@ -817,12 +789,6 @@ pub struct PngFileOptions {
 	///
 	/// **Default value**: `false`
 	pub skip_alpha_optimizations: bool,
-	/// Crate-private option set when [MinecraftMod::Optifine] was configured.
-	///
-	/// **Default value**: `false`
-	#[serde(skip)]
-	#[cfg(feature = "optifine-support")]
-	pub(crate) allow_optifine_files: bool,
 	/// Crate-private option set by the [MinecraftQuirk::GrayscaleImagesGammaMiscorrection]
 	/// workaround to not reduce color images to grayscale.
 	///
@@ -840,12 +806,7 @@ pub struct PngFileOptions {
 	///
 	/// **Default value**: `false`
 	#[serde(skip)]
-	pub(crate) do_not_change_transparent_pixel_colors: bool,
-	/// Crate-private option set when the `skip_pack_icon` configuration parameter is set.
-	///
-	/// **Default value**: `false`
-	#[serde(skip)]
-	pub(crate) skip_pack_icon: bool
+	pub(crate) do_not_change_transparent_pixel_colors: bool
 }
 
 impl Default for PngFileOptions {
@@ -855,12 +816,9 @@ impl Default for PngFileOptions {
 			color_quantization_target: Default::default(),
 			maximum_width_and_height: 8192,
 			skip_alpha_optimizations: false,
-			#[cfg(feature = "optifine-support")]
-			allow_optifine_files: false,
 			do_not_reduce_to_grayscale: false,
 			skip_color_type_reduction: false,
-			do_not_change_transparent_pixel_colors: false,
-			skip_pack_icon: false
+			do_not_change_transparent_pixel_colors: false
 		}
 	}
 }
@@ -948,21 +906,13 @@ pub struct PropertiesFileOptions {
 	///
 	/// **Default value**: `true` (minify)
 	#[serde(rename = "minify_properties")]
-	pub minify: bool,
-	/// Crate-private option set to false when [MinecraftMod::Optifine] was configured.
-	///
-	/// **Default value**: `true`
-	#[serde(skip)]
-	pub(crate) skip: bool
+	pub minify: bool
 }
 
 #[cfg(feature = "optifine-support")]
 impl Default for PropertiesFileOptions {
 	fn default() -> Self {
-		Self {
-			minify: true,
-			skip: true
-		}
+		Self { minify: true }
 	}
 }
 

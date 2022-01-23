@@ -22,6 +22,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(rustdoc::private_intra_doc_links)]
 
+use enumset::EnumSet;
 use std::borrow::Cow;
 use std::convert::{Infallible, TryInto};
 use std::hint::unreachable_unchecked;
@@ -50,7 +51,9 @@ use crate::config::AudioFileOptions;
 #[cfg(feature = "optifine-support")]
 use crate::config::PropertiesFileOptions;
 use crate::config::{FileOptions, JsonFileOptions, PngFileOptions, ShaderFileOptions, SquashOptions};
-use crate::pack_file::asset_type::{PackFileAssetTypeMatcher, PackFileAssetTypeMatches};
+use crate::pack_file::asset_type::{
+	tweak_asset_types_mask_from_global_options, PackFileAssetTypeMatcher, PackFileAssetTypeMatches
+};
 use crate::pack_file::PackFileProcessData;
 pub use crate::squash_zip::relative_path::RelativePath;
 use crate::squash_zip::{system_id, PreviousZipParseError};
@@ -70,17 +73,13 @@ mod zopfli_iterations_time_model;
 ///
 /// Once constructed, this struct can be used to run one or several optimization operations
 /// with the same configuration on any pack, in an efficient manner.
-pub struct PackSquasher {
-	asset_type_matcher: Arc<PackFileAssetTypeMatcher>
-}
+pub struct PackSquasher;
 
 impl PackSquasher {
 	/// Creates a new [`PackSquasher`] struct that will squash packs.
 	#[allow(clippy::new_without_default)] // It does not make much sense to have a default value
 	pub fn new() -> Self {
-		Self {
-			asset_type_matcher: Arc::new(PackFileAssetTypeMatcher::new())
-		}
+		Self
 	}
 
 	/// Executes the squash operation configured by the specified options, reading pack files from
@@ -166,14 +165,25 @@ impl PackSquasher {
 			.global_options
 			.automatic_minecraft_quirks_detection;
 
+		let automatic_asset_type_mask_detection = options_holder
+			.options
+			.global_options
+			.automatic_asset_types_mask_detection;
+
 		let read_pack_meta = automatic_quirk_detection
+			|| automatic_asset_type_mask_detection
 			|| options_holder
 				.options
 				.global_options
 				.validate_pack_metadata_file;
 
+		// By default, allow every known asset type to match pack files. This will be adjusted later
+		// depending on the options and automatic asset type mask detection, if enabled
+		let mut asset_types_mask = EnumSet::all();
+
 		// Transparently modify the options before doing the actual processing we want to read the
-		// pack metadata, either to validate it or use automatic quirk detection
+		// pack metadata, either to validate it, use automatic quirk detection or detect an asset
+		// type mask
 		if read_pack_meta {
 			runtime.block_on(async {
 				let pack_meta = PackMeta::new(&vfs, &options_holder.options.pack_directory).await?;
@@ -205,11 +215,21 @@ impl PackSquasher {
 					}
 				}
 
+				if automatic_asset_type_mask_detection {
+					asset_types_mask = pack_meta.target_minecraft_version_asset_type_mask();
+				}
+
 				Ok::<_, PackSquasherError>(())
 			})?;
 		}
 
 		let vfs = Arc::new(vfs);
+		let asset_type_matcher = Arc::new(PackFileAssetTypeMatcher::new(
+			tweak_asset_types_mask_from_global_options(
+				asset_types_mask,
+				&options_holder.options.global_options
+			)
+		));
 		let options_holder = Arc::new(options_holder);
 
 		runtime.block_on(async {
@@ -320,7 +340,7 @@ impl PackSquasher {
 				}
 
 				let options_holder = Arc::clone(&options_holder);
-				let asset_type_matcher = Arc::clone(&self.asset_type_matcher);
+				let asset_type_matcher = Arc::clone(&asset_type_matcher);
 				let squash_zip = Arc::clone(&squash_zip);
 				let vfs = Arc::clone(&vfs);
 
