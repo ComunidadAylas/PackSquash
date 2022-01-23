@@ -728,6 +728,7 @@ pub struct JsonFileOptions {
 	/// with those specific extensions.
 	///
 	/// **Default value**: `true` (allow comments in the JSON file, no matter its extension)
+	#[serde(rename = "always_allow_json_comments")]
 	pub always_allow_comments: bool
 }
 
