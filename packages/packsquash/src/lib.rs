@@ -354,9 +354,6 @@ impl PackSquasher {
 				let task_permit = in_flight_tasks_semaphore.acquire_owned().await.unwrap();
 
 				pack_file_tasks.push(runtime.spawn(async move {
-					// We will release the permit only after we have completed the task
-					let _ = task_permit;
-
 					let pack_file_data = match pack_file_data {
 						Ok(data) => data,
 						Err(err) => {
@@ -465,6 +462,9 @@ impl PackSquasher {
 						.await
 						.ok();
 					}
+
+					// We're done with this pack file. Release the permit
+					drop(task_permit);
 				}));
 			}
 
