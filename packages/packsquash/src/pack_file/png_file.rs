@@ -8,7 +8,7 @@ use std::{
 };
 
 use bytes::{BufMut, BytesMut};
-use imagequant::{liq_error, Attributes, Image};
+use imagequant::{liq_error, Attributes};
 use indexmap::IndexSet;
 use oxipng::{AlphaOptim, Deflaters, Headers, Options, PngError};
 use png::{BitDepth, ColorType, Compression, EncodingError, FilterType};
@@ -143,8 +143,7 @@ impl Decoder for OptimizerDecoder {
 				quantization_attributes.set_quality(0, 100)?;
 
 				// Quantize the image
-				let mut iq_image = Image::new(
-					&quantization_attributes,
+				let mut iq_image = quantization_attributes.new_image_borrowed(
 					original_pixels.as_rgba(),
 					image_info.width.try_into()?,
 					image_info.height.try_into()?,
