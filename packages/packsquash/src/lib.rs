@@ -24,7 +24,7 @@
 
 use enumset::EnumSet;
 use std::borrow::Cow;
-use std::convert::{Infallible, TryInto};
+use std::convert::Infallible;
 use std::hint::unreachable_unchecked;
 use std::io::ErrorKind;
 use std::pin::Pin;

@@ -1,6 +1,6 @@
 //! Contains code to optimize JSON files.
 
-use std::{borrow::Cow, convert::TryInto};
+use std::borrow::Cow;
 
 use bytes::{BufMut, BytesMut};
 use json_comments::StripComments;

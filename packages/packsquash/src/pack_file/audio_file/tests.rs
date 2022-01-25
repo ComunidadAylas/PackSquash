@@ -1,6 +1,5 @@
 use pretty_assertions::assert_eq;
-use std::convert::TryFrom;
-use std::{convert::TryInto, time::Duration};
+use std::time::Duration;
 
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;

@@ -1,9 +1,8 @@
 //! Contains helper structs to parse the pack metadata file for information relevant for
 //! optimization purposes.
 
-use std::convert::TryInto;
 use std::io;
-use std::{convert::TryFrom, path::Path};
+use std::path::Path;
 
 use enumset::EnumSet;
 use json_comments::StripComments;

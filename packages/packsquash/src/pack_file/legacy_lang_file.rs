@@ -2,7 +2,6 @@ use ahash::AHashSet;
 use futures::{future, StreamExt};
 use regex::Regex;
 use std::borrow::Cow;
-use std::convert::TryInto;
 use std::fmt::{Display, Formatter};
 use std::lazy::SyncLazy;
 use std::num::NonZeroUsize;

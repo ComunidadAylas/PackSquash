@@ -1,4 +1,4 @@
-use std::{convert::TryInto, ffi::OsStr, fs::FileType, io, iter::Empty, path::Path};
+use std::{ffi::OsStr, fs::FileType, io, iter::Empty, path::Path};
 
 use tokio_test::io::{Builder, Mock};
 

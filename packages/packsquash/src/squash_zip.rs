@@ -3,7 +3,6 @@
 use std::{
 	borrow::Cow,
 	collections::hash_map::Entry,
-	convert::{TryFrom, TryInto},
 	io::{self, ErrorKind, Read, SeekFrom},
 	lazy::SyncLazy,
 	num::TryFromIntError,

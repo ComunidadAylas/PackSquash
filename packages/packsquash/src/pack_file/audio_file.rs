@@ -10,7 +10,6 @@ use gstreamer::{
 	Pipeline, Sample, State, StateChangeError, TagMergeMode, TagSetter
 };
 
-use std::convert::TryInto;
 use std::{
 	borrow::Cow,
 	pin::Pin,

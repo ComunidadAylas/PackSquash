@@ -1,6 +1,6 @@
 //! Contains code to optimize properties files.
 
-use std::{borrow::Cow, convert::TryInto, io};
+use std::{borrow::Cow, io};
 
 use bytes::BytesMut;
 use java_properties::{LineEnding, PropertiesError, PropertiesIter, PropertiesWriter};
