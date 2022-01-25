@@ -52,7 +52,6 @@ pub type OptimizedBoxedBytesChunk =
 	Result<(Cow<'static, str>, Box<dyn AsRef<[u8]> + Send>), OptimizationError>;
 
 /// The result of processing a chunk of pack file bytes to an optimized representation.
-#[allow(dead_code)] // Actually used in OptimizedByteChunksStream bounds
 type OptimizedBytesChunk<T, E> = Result<(Cow<'static, str>, T), E>;
 
 /// A tuple that contains an [`AsyncRead`] for a pack file and its estimated size.
@@ -90,7 +89,7 @@ trait PackFile {
 	/// # Errors
 	/// Errors may be yielded by the stream returned by this method if some I/O operation goes wrong, the
 	/// pack file is malformed, or any other unrecoverable condition is encountered. In this case, users of
-	/// this method _must_ stop iterating over the result stream inmediately.
+	/// this method _must_ stop iterating over the result stream immediately.
 	fn process(self) -> Self::OptimizedByteChunksStream;
 
 	/// Returns whether the contents of this pack file are already internally compressed, and as such any

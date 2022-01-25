@@ -1,3 +1,4 @@
+use crate::pack_file::util::BOM;
 use pretty_assertions::assert_eq;
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
@@ -85,7 +86,7 @@ async fn minifying_works() {
 #[tokio::test]
 async fn minifying_with_bom_works() {
 	let mut json_data_with_bom = String::from(JSON_DATA);
-	json_data_with_bom.insert(0, '\u{feff}');
+	json_data_with_bom.insert(0, BOM);
 
 	successful_process_test(
 		&json_data_with_bom,

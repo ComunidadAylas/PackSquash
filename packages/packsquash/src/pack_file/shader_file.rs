@@ -29,8 +29,8 @@ mod tests;
 ///
 /// Vanilla Minecraft uses fragment and vertex shaders that can be replaced by resource
 /// packs for several effects, like the "creeper vision" showed while spectating a Creeper,
-/// and the "Super Secret Settings" button that was ultimately removed.
-/// Minecraft mods may support more shaders that can be added or replaced via resource packs.
+/// and the "Super Secret Settings" button that was ultimately removed. Minecraft mods may
+/// support more shaders that can be added or replaced via resource packs.
 pub struct ShaderFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
 	file_length_hint: usize,

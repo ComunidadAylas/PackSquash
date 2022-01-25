@@ -1,3 +1,4 @@
+use crate::pack_file::util::BOM;
 use pretty_assertions::assert_eq;
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
@@ -21,7 +22,7 @@ async fn successful_process_test(
 		let mut input_data = Cow::Borrowed(input_text);
 
 		if add_bom {
-			input_data.to_mut().insert(0, '\u{feff}');
+			input_data.to_mut().insert(0, BOM);
 		}
 
 		input_data
