@@ -23,7 +23,7 @@ color-backtrace = { version = "0.5.1", default-features = false, optional = true
 crossterm = { version = "0.22.1", optional = true }
 
 [build-dependencies]
-vergen = { version = "6.0.0", default-features = false, features = ["cargo", "git"] }
+vergen = { version = "6.0.1", default-features = false, features = ["cargo", "git"] }
 time = { version = "0.3.6", default-features = false, features = ["std"] }
 
 [features]

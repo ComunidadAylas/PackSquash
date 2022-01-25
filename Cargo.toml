@@ -16,9 +16,7 @@ glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
 # Use our fork of Zopfli that includes streaming support and the ability to change
 # the number of compression iterations
 zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquash" }
-# Use our fork of const-random that fixes a spurious Rust Analyzer error lint
-const-random = { git = "https://github.com/ComunidadAylas/constrandom" }
-# Use the latest commits of imagequant that fix the SPDX license identifier in its Cargo manifest
+# Use the latest commits of imagequant that fix an off-by-one error that prevents quantization
 imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
 
 [profile.release]

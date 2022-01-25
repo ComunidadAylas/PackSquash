@@ -35,10 +35,10 @@ jsonpath_lib = "0.3.0"
 spng = { version = "0.2.0-alpha.2", default-features = false }
 png = "0.17.2"
 rgb = "0.8.31"
-imagequant = { version = "4.0.0-beta.8", default-features = false }
+imagequant = { version = "4.0.0-beta.9", default-features = false }
 oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
 
-gstreamer = { version = "0.18.1", default-features = false, optional = true }
+gstreamer = { version = "0.18.2", default-features = false, optional = true }
 gstreamer-app = { version = "0.18.0", default-features = false, features = ["v1_10"], optional = true }
 gstreamer-audio = { version = "0.18.0", default-features = false, optional = true }
 
