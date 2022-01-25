@@ -50,7 +50,10 @@ use squash_zip::{SquashZip, SquashZipError};
 use crate::config::AudioFileOptions;
 #[cfg(feature = "optifine-support")]
 use crate::config::PropertiesFileOptions;
-use crate::config::{FileOptions, JsonFileOptions, PngFileOptions, ShaderFileOptions, SquashOptions};
+use crate::config::{
+	FileOptions, JsonFileOptions, LegacyLanguageFileOptions, PngFileOptions, ShaderFileOptions,
+	SquashOptions
+};
 use crate::pack_file::asset_type::{
 	tweak_asset_types_mask_from_global_options, PackFileAssetTypeMatcher, PackFileAssetTypeMatches
 };
@@ -441,6 +444,9 @@ impl PackSquasher {
 								PropertiesFileOptions::default()
 							)),
 							Some(FileOptions::ShaderFileOptions(ShaderFileOptions::default())),
+							Some(FileOptions::LegacyLanguageFileOptions(
+								LegacyLanguageFileOptions::default()
+							)),
 							None
 						] {
 							if try_process_with_file_options!(default_file_options) {

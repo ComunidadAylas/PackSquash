@@ -551,8 +551,12 @@ pub enum FileOptions {
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
 	PropertiesFileOptions(PropertiesFileOptions),
+	/// Options that influence how legacy language files are converted to a more
+	/// distribution-friendly representation.
+	LegacyLanguageFileOptions(LegacyLanguageFileOptions),
 	/// Options that influence how custom files that the user explicitly wants to include in the
 	/// pack are processed.
+	// For better style, keep this variant last
 	CustomFileOptions(CustomFileOptions)
 }
 
@@ -888,6 +892,43 @@ pub struct ShaderFileOptions {
 impl Default for ShaderFileOptions {
 	fn default() -> Self {
 		Self { minify: true }
+	}
+}
+
+/// Parameters that influence how a legacy language file is optimized.
+#[derive(Deserialize, Clone, Copy)]
+#[serde(default, deny_unknown_fields)]
+#[non_exhaustive]
+pub struct LegacyLanguageFileOptions {
+	/// If `true`, the legacy language file will be minified: empty lines and comments will be
+	/// removed. This saves space and improves parsing performance. If `false`, the file will
+	/// still be validated for errors, but left as-is. Line endings are normalized to Unix style
+	/// (using a single LF character) no matter what.
+	///
+	/// **Default value**: `true` (minify)
+	#[serde(rename = "minify_legacy_language")]
+	pub minify: bool,
+	/// If `true`, the BOM in the first line of the file will be stripped. This normally saves
+	/// space and avoids user confusion, as the BOM is normally introduced inadvertently, and
+	/// Minecraft interprets the BOM as being part of the line. Therefore, the BOM may undesirably
+	/// become part of the key of the first language string, causing it not to work, or prevent
+	/// a comment from being parsed as such.
+	///
+	/// However, if a pack relies on the BOM being there because it refers to the first language
+	/// string with a BOM, this behavior might have undesirable consequences. In such cases, set
+	/// this option to `false` to leave the BOM alone.
+	///
+	/// **Default value**: `true` (strip the BOM from the first line of the file)
+	#[serde(rename = "strip_legacy_language_bom")]
+	pub strip_bom: bool
+}
+
+impl Default for LegacyLanguageFileOptions {
+	fn default() -> Self {
+		Self {
+			minify: true,
+			strip_bom: true
+		}
 	}
 }
 

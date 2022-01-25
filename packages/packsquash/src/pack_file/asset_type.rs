@@ -12,6 +12,7 @@ use crate::config::GlobalOptions;
 #[cfg(feature = "audio-transcoding")]
 use crate::pack_file::audio_file::AudioFile;
 use crate::pack_file::json_file::JsonFile;
+use crate::pack_file::legacy_lang_file::LegacyLanguageFile;
 use crate::pack_file::passthrough_file::PassthroughFile;
 use crate::pack_file::png_file::PngFile;
 #[cfg(feature = "optifine-support")]
@@ -114,6 +115,10 @@ pub enum PackFileAssetType {
 	/// extension. Also known as "include shader", even though these assets are not
 	/// standalone shaders by themselves.
 	TranslationUnitSegment,
+
+	/// A legacy language strings file, used in Minecraft version 1.12.2 and below, with
+	/// `.lang` extension.
+	LegacyLanguageFile,
 
 	/// A font in TrueType format, with `.ttf` extension.
 	TrueTypeFont,
@@ -325,6 +330,10 @@ impl PackFileAssetType {
 				)
 			}
 
+			Self::LegacyLanguageFile => {
+				compile_hardcoded_pack_file_glob_pattern("assets/*/lang/**/?*.lang")
+			}
+
 			Self::TrueTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.ttf"),
 			Self::FontCharacterSizes => {
 				compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.bin")
@@ -390,6 +399,7 @@ impl PackFileAssetType {
 			Self::VertexShader => None,
 			Self::FragmentShader => None,
 			Self::TranslationUnitSegment => None,
+			Self::LegacyLanguageFile => None,
 			Self::TrueTypeFont => None,
 			Self::FontCharacterSizes => None,
 			Self::Text | Self::LegacyTextCredits => None,
@@ -555,6 +565,8 @@ impl PackFileAssetTypeMatches {
 					return_pack_file_to_process_data!(ShaderFile, optimization_settings),
 				PackFileAssetType::TranslationUnitSegment if let Some(FileOptions::ShaderFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(ShaderFile, optimization_settings),
+				PackFileAssetType::LegacyLanguageFile if let Some(FileOptions::LegacyLanguageFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(LegacyLanguageFile, optimization_settings),
 				PackFileAssetType::TrueTypeFont
 				| PackFileAssetType::FontCharacterSizes
 				| PackFileAssetType::Text

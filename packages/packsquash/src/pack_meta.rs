@@ -180,6 +180,10 @@ impl PackMeta {
 	pub fn target_minecraft_version_asset_type_mask(&self) -> EnumSet<PackFileAssetType> {
 		let mut asset_type_mask = EnumSet::all();
 
+		if self.pack_format_version >= PACK_FORMAT_VERSION_1_13 {
+			asset_type_mask -= PackFileAssetType::LegacyLanguageFile;
+		}
+
 		if self.pack_format_version >= PACK_FORMAT_VERSION_1_17 {
 			asset_type_mask -= PackFileAssetType::LegacyTextCredits;
 		}

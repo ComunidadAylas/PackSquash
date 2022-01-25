@@ -19,6 +19,7 @@ mod util;
 #[doc(cfg(feature = "audio-transcoding"))]
 mod audio_file;
 mod json_file;
+mod legacy_lang_file;
 mod passthrough_file;
 mod png_file;
 mod shader_file;
@@ -43,6 +44,7 @@ pub enum OptimizationError {
 	#[doc(cfg(feature = "optifine-support"))]
 	PropertiesFile(#[from] properties_file::OptimizationError),
 	ShaderFile(#[from] shader_file::OptimizationError),
+	LegacyLanguageFile(#[from] legacy_lang_file::OptimizationError),
 	IoError(#[from] io::Error)
 }
 
