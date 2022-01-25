@@ -62,7 +62,7 @@ impl<'a> RelativePath<'a> {
 	/// or symlink resolving is performed, as those may expose the physical
 	/// structure, which may be different than the logical, expected directory
 	/// structure.
-	pub fn new<P1: AsRef<Path> + ?Sized, P2: AsRef<Path> + ?Sized>(
+	pub(crate) fn new<P1: AsRef<Path> + ?Sized, P2: AsRef<Path> + ?Sized>(
 		ancestor_path: &P1,
 		descendant_path: &'a P2
 	) -> Result<Self, InvalidPathError<'a>> {
