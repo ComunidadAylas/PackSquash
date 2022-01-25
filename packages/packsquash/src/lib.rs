@@ -3,7 +3,6 @@
 
 #![deny(unsafe_code)]
 #![forbid(unsafe_op_in_unsafe_fn)]
-#![deny(unused_crate_dependencies)]
 #![deny(clippy::await_holding_lock)]
 #![feature(doc_cfg)]
 #![feature(if_let_guard)]
