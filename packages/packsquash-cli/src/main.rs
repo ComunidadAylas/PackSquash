@@ -340,11 +340,11 @@ impl TerminalTitle {
 		io::stdout()
 			.execute(crossterm::terminal::SetTitle(match self {
 				Self::Idle => packsquash_title!(),
-				Self::ProcessingPack1 => concat!("[-] ", packsquash_title!(), " - Optimizing"),
-				Self::ProcessingPack2 => concat!("[\\] ", packsquash_title!(), " - Optimizing"),
-				Self::ProcessingPack3 => concat!("[|] ", packsquash_title!(), " - Optimizing"),
-				Self::ProcessingPack4 => concat!("[/] ", packsquash_title!(), " - Optimizing"),
-				Self::Finishing => concat!("[ ] ", packsquash_title!(), " - Finishing")
+				Self::ProcessingPack1 => concat!(packsquash_title!(), " - Optimizing [-]"),
+				Self::ProcessingPack2 => concat!(packsquash_title!(), " - Optimizing [\\]"),
+				Self::ProcessingPack3 => concat!(packsquash_title!(), " - Optimizing [|]"),
+				Self::ProcessingPack4 => concat!(packsquash_title!(), " - Optimizing [/]"),
+				Self::Finishing => concat!(packsquash_title!(), " - Finishing [ ]")
 			}))
 			.ok();
 
