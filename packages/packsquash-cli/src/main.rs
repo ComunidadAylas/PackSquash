@@ -63,7 +63,7 @@ fn run() -> i32 {
 				0
 			} else {
 				print_version_information(false);
-				trace!("");
+				println!();
 				read_options_file_and_squash(option_matches.free.first().filter(|path| {
 					// Let "-" behave as if no path was provided
 					path != &"-"
@@ -98,7 +98,6 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 			"Please check out <https://packsquash.page.link/Options-files> for examples and more information."
 		);
 	}
-	info!("");
 
 	// Read the TOML configuration data from the specified source
 	let options_string = match match options_file_path {
@@ -114,7 +113,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		Ok(options_string) => options_string,
 		Err(err) => {
 			error!(
-				"! Couldn't read the options file from {}: {}",
+				"Couldn't read the options file from {}: {}",
 				user_friendly_options_path, err,
 			);
 
@@ -127,7 +126,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
 			error!(
-				"! An error occurred while parsing the options file from {}: {}",
+				"An error occurred while parsing the options file from {}: {}",
 				user_friendly_options_path, deserialize_error
 			);
 
@@ -136,14 +135,13 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 	};
 
 	info!("Options read. Processing pack...");
-	info!("");
 
 	let output_file_path = squash_options.global_options.output_file_path.clone();
 	let start_instant = Instant::now();
 
 	squash(squash_options).map_or_else(
 		|err| {
-			error!("! Pack processing error: {}", err);
+			error!("Pack processing error: {}", err);
 
 			// We print both informational and error pack file status updates.
 			// If the error was in one of those, hint the user at the status
@@ -219,20 +217,20 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 
 					match pack_file_status.optimization_error() {
 						Some(error_description) => error!(
-							"! {}: {}",
+							"{}: {}",
 							pack_file_status.path().as_str(),
 							error_description
 						),
 						None => {
 							if pack_file_status.skipped() {
 								warn!(
-									"> {}: {}",
+									"{}: {}",
 									pack_file_status.path().as_str(),
 									pack_file_status.optimization_strategy()
 								)
 							} else {
 								trace!(
-									"> {}: {}",
+									"{}: {}",
 									pack_file_status.path().as_str(),
 									pack_file_status.optimization_strategy()
 								)
@@ -241,7 +239,7 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 					}
 				}
 				PackSquasherStatus::ZipFinish => {
-					info!("- Finishing up ZIP file...");
+					info!("Finishing up ZIP file...");
 
 					#[cfg(feature = "crossterm")]
 					{
@@ -249,21 +247,21 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 					}
 				}
 				PackSquasherStatus::Notice(notice) => {
-					info!("- {}", notice)
+					info!("{}", notice)
 				}
 				PackSquasherStatus::Warning(warning) => match warning {
 					PackSquasherWarning::UnusablePreviousZip(err) => warn!(
-						"* The previous ZIP file could not be read. It will not be used to speed up processing. \
+						"The previous ZIP file could not be read. It will not be used to speed up processing. \
 							Was the file last modified by PackSquash? Cause: {}",
 						err
 					),
 					PackSquasherWarning::LowEntropySystemId => warn!(
-						"* Used a low entropy system ID. The dates embedded in the result ZIP file, \
+						"Used a low entropy system ID. The dates embedded in the result ZIP file, \
 							which reveal when it was generated, may be easier to decrypt. For more information \
 							about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"
 					),
 					PackSquasherWarning::VolatileSystemId => warn!(
-						"* Used a volatile system ID. You maybe should not reuse the result ZIP file, \
+						"Used a volatile system ID. You maybe should not reuse the result ZIP file, \
 							as unexpected results can occur after you use your device as usual. For more information \
 							about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"
 					),
@@ -388,15 +386,16 @@ fn formatted_builder() -> Builder {
 		use std::io::Write;
 
 		let mut style = f.style();
+		let (color, icon) = match record.level() {
+			Level::Error => (Color::Red, "!"),
+			Level::Warn => (Color::Yellow, "*"),
+			Level::Info => (Color::Cyan, "-"),
+			Level::Debug => (Color::Green, "#"),
+			Level::Trace => (Color::White, ">")
+		};
 		let message = style
-			.set_color(match record.level() {
-				Level::Error => Color::Red,
-				Level::Warn => Color::Yellow,
-				Level::Info => Color::Cyan,
-				Level::Debug => Color::Green,
-				Level::Trace => Color::White
-			})
-			.value(record.args());
+			.set_color(color)
+			.value(format!("{} {}", icon, record.args()));
 
 		writeln!(f, "{}", message)
 	});
