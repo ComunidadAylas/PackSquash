@@ -1,4 +1,5 @@
-use crossterm::style::{Color, ResetColor, SetForegroundColor};
+use env_logger::fmt::Color;
+use env_logger::Builder;
 use std::{
 	borrow::Cow,
 	env, fs,
@@ -8,6 +9,7 @@ use std::{
 };
 
 use getopts::{Options, ParsingStyle};
+use log::{debug, error, info, trace, warn, Level, LevelFilter};
 use tokio::sync::mpsc::channel;
 
 use packsquash::{
@@ -28,6 +30,8 @@ fn main() {
 /// Runs PackSquash, parsing the command line parameters and deciding what options file
 /// to read to process a pack.
 fn run() -> i32 {
+	init_logger();
+
 	#[cfg(feature = "crossterm")]
 	TerminalTitle::Idle.show();
 
@@ -44,13 +48,13 @@ fn run() -> i32 {
 		Ok(option_matches) => {
 			if option_matches.opt_present("h") {
 				print_version_information(true);
-				println!();
-				println!("Usage:");
-				print!(
+				trace!("");
+				trace!("Usage:");
+				trace!(
 					"    {} [OPTION]... [options file path]",
 					env!("CARGO_BIN_NAME")
 				);
-				println!("{}", options.usage(""));
+				trace!("{}", options.usage(""));
 
 				0
 			} else if option_matches.opt_present("v") {
@@ -59,7 +63,7 @@ fn run() -> i32 {
 				0
 			} else {
 				print_version_information(false);
-				println!();
+				trace!("");
 				read_options_file_and_squash(option_matches.free.first().filter(|path| {
 					// Let "-" behave as if no path was provided
 					path != &"-"
@@ -67,17 +71,10 @@ fn run() -> i32 {
 			}
 		}
 		Err(parse_err) => {
-			eprintln!(
-				"{}{}{}",
-				SetForegroundColor(Color::Red),
-				parse_err,
-				ResetColor
-			);
-			eprintln!(
-				"{}Run {} -h to see command line argument help{}",
-				SetForegroundColor(Color::Red),
-				env!("CARGO_BIN_NAME"),
-				ResetColor
+			error!("{}", parse_err);
+			error!(
+				"Run {} -h to see command line argument help",
+				env!("CARGO_BIN_NAME")
 			);
 
 			1
@@ -92,16 +89,16 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		options_file_path.map_or_else(|| "standard input (keyboard input or pipe)", |path| path);
 
 	// Tell the user where are we reading the configuration from
-	println!("Reading options from {}...", user_friendly_options_path);
+	info!("Reading options from {}...", user_friendly_options_path);
 	if options_file_path.is_none() {
 		// Newbies are often confused by terms such as "standard input", so try
 		// to point them in the direction of what they probably want to do
-		println!("If you are not sure what this means, try using an external options file.");
-		println!(
+		info!("If you are not sure what this means, try using an external options file.");
+		info!(
 			"Please check out <https://packsquash.page.link/Options-files> for examples and more information."
 		);
 	}
-	println!();
+	info!("");
 
 	// Read the TOML configuration data from the specified source
 	let options_string = match match options_file_path {
@@ -116,12 +113,9 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 	} {
 		Ok(options_string) => options_string,
 		Err(err) => {
-			eprintln!(
-				"{}! Couldn't read the options file from {}: {}{}",
-				SetForegroundColor(Color::Red),
-				user_friendly_options_path,
-				err,
-				ResetColor
+			error!(
+				"! Couldn't read the options file from {}: {}",
+				user_friendly_options_path, err,
 			);
 
 			return 2;
@@ -132,50 +126,38 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 	let squash_options = match toml::from_str::<SquashOptions>(&options_string) {
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
-			eprintln!(
-				"{}! An error occurred while parsing the options file from {}: {}{}",
-				SetForegroundColor(Color::Red),
-				user_friendly_options_path,
-				deserialize_error,
-				ResetColor
+			error!(
+				"! An error occurred while parsing the options file from {}: {}",
+				user_friendly_options_path, deserialize_error
 			);
 
 			return 3;
 		}
 	};
 
-	println!("Options read. Processing pack...");
-	println!();
+	info!("Options read. Processing pack...");
+	info!("");
 
 	let output_file_path = squash_options.global_options.output_file_path.clone();
 	let start_instant = Instant::now();
 
 	squash(squash_options).map_or_else(
 		|err| {
-			eprintln!(
-				"{}! Pack processing error: {}{}",
-				SetForegroundColor(Color::Red),
-				err,
-				ResetColor
-			);
+			error!("! Pack processing error: {}", err);
 
 			// We print both informational and error pack file status updates.
 			// If the error was in one of those, hint the user at the status
 			// update that contains the most information about the error
 			if matches!(err, PackSquasherError::PackFileError) {
-				eprintln!(
-					"{}Another error message with more details about the error was emitted before. \
-					You might need to scroll up to see it.{}",
-					SetForegroundColor(Color::Red),
-					ResetColor
+				error!(
+					"Another error message with more details about the error was emitted before. \
+					You might need to scroll up to see it."
 				);
 			}
 
-			eprintln!(
-				"{}These troubleshooting instructions might be useful: \
-				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>{}",
-				SetForegroundColor(Color::Red),
-				ResetColor
+			error!(
+				"These troubleshooting instructions might be useful: \
+				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>"
 			);
 
 			128
@@ -183,9 +165,8 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		|file_counts| {
 			let process_time = start_instant.elapsed();
 
-			println!(
-				"{}{} ({} pack files, {} pack files stored, {}.{:03} s){}",
-				SetForegroundColor(Color::Green),
+			debug!(
+				"{} ({} pack files, {} pack files stored, {}.{:03} s)",
 				output_file_path.metadata().ok().map_or_else(
 					|| Cow::Borrowed("Pack processed"),
 					|metadata| Cow::Owned(format!(
@@ -203,8 +184,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 					|(_, processed_file_count)| Cow::Owned(format!("{}", processed_file_count))
 				),
 				process_time.as_secs(),
-				process_time.subsec_millis(),
-				ResetColor
+				process_time.subsec_millis()
 			);
 
 			0
@@ -238,31 +218,30 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 					}
 
 					match pack_file_status.optimization_error() {
-						Some(error_description) => eprintln!(
-							"{}! {}: {}{}",
-							SetForegroundColor(Color::Red),
+						Some(error_description) => error!(
+							"! {}: {}",
 							pack_file_status.path().as_str(),
-							error_description,
-							ResetColor
+							error_description
 						),
 						None => {
-							let color = if pack_file_status.skipped() {
-								SetForegroundColor(Color::Yellow)
+							if pack_file_status.skipped() {
+								warn!(
+									"> {}: {}",
+									pack_file_status.path().as_str(),
+									pack_file_status.optimization_strategy()
+								)
 							} else {
-								SetForegroundColor(Color::Reset)
+								trace!(
+									"> {}: {}",
+									pack_file_status.path().as_str(),
+									pack_file_status.optimization_strategy()
+								)
 							};
-							eprintln!(
-								"{}> {}: {}{}",
-								color,
-								pack_file_status.path().as_str(),
-								pack_file_status.optimization_strategy(),
-								ResetColor
-							)
 						}
 					}
 				}
 				PackSquasherStatus::ZipFinish => {
-					eprintln!("- Finishing up ZIP file...");
+					info!("- Finishing up ZIP file...");
 
 					#[cfg(feature = "crossterm")]
 					{
@@ -270,30 +249,23 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 					}
 				}
 				PackSquasherStatus::Notice(notice) => {
-					eprintln!(
-						"{}- {}{}",
-						SetForegroundColor(Color::Cyan),
-						notice,
-						ResetColor
-					)
+					info!("- {}", notice)
 				}
 				PackSquasherStatus::Warning(warning) => match warning {
-					PackSquasherWarning::UnusablePreviousZip(err) => eprintln!(
-						"{}* The previous ZIP file could not be read. It will not be used to speed up processing. \
-							Was the file last modified by PackSquash? Cause: {}{}",
-						SetForegroundColor(Color::Yellow), err, ResetColor
+					PackSquasherWarning::UnusablePreviousZip(err) => warn!(
+						"* The previous ZIP file could not be read. It will not be used to speed up processing. \
+							Was the file last modified by PackSquash? Cause: {}",
+						err
 					),
-					PackSquasherWarning::LowEntropySystemId => eprintln!(
-						"{}* Used a low entropy system ID. The dates embedded in the result ZIP file, \
+					PackSquasherWarning::LowEntropySystemId => warn!(
+						"* Used a low entropy system ID. The dates embedded in the result ZIP file, \
 							which reveal when it was generated, may be easier to decrypt. For more information \
-							about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>{}",
-						SetForegroundColor(Color::Yellow), ResetColor
+							about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"
 					),
-					PackSquasherWarning::VolatileSystemId => eprintln!(
-						"{}* Used a volatile system ID. You maybe should not reuse the result ZIP file, \
+					PackSquasherWarning::VolatileSystemId => warn!(
+						"* Used a volatile system ID. You maybe should not reuse the result ZIP file, \
 							as unexpected results can occur after you use your device as usual. For more information \
-							about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>{}",
-						SetForegroundColor(Color::Yellow), ResetColor
+							about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"
 					),
 					_ => unimplemented!()
 				},
@@ -318,7 +290,7 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 
 /// Prints PackSquash version information to the standard output stream.
 fn print_version_information(verbose: bool) {
-	println!(
+	trace!(
 		"{} {} ({}, {}) for {}",
 		packsquash_title!(),
 		env!("VERGEN_GIT_SEMVER_LIGHTWEIGHT"),
@@ -326,33 +298,33 @@ fn print_version_information(verbose: bool) {
 		env!("BUILD_DATE"),
 		env!("VERGEN_CARGO_TARGET_TRIPLE")
 	);
-	println!("{}", env!("CARGO_PKG_DESCRIPTION"));
-	println!();
+	trace!("{}", env!("CARGO_PKG_DESCRIPTION"));
+	trace!("");
 
 	if verbose {
-		println!(
+		trace!(
 			"Copyright (C) {} {}",
 			env!("BUILD_YEAR"),
 			env!("CARGO_PKG_AUTHORS")
 		);
-		println!();
-		println!("This program is free software: you can redistribute it and/or modify");
-		println!("it under the terms of the GNU Affero General Public License as");
-		println!("published by the Free Software Foundation, either version 3 of the");
-		println!("License, or (at your option) any later version.");
-		println!();
-		println!("This program is distributed free of charge in the hope that it will");
-		println!("be useful, but WITHOUT ANY WARRANTY; without even the implied warranty");
-		println!("of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
-		println!("GNU Affero General Public License for more details.");
-		println!();
-		println!("You should have received a copy of the GNU Affero General Public License");
-		println!("along with this program. If not, see <https://www.gnu.org/licenses/>.");
+		trace!("");
+		trace!("This program is free software: you can redistribute it and/or modify");
+		trace!("it under the terms of the GNU Affero General Public License as");
+		trace!("published by the Free Software Foundation, either version 3 of the");
+		trace!("License, or (at your option) any later version.");
+		trace!("");
+		trace!("This program is distributed free of charge in the hope that it will");
+		trace!("be useful, but WITHOUT ANY WARRANTY; without even the implied warranty");
+		trace!("of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
+		trace!("GNU Affero General Public License for more details.");
+		trace!("");
+		trace!("You should have received a copy of the GNU Affero General Public License");
+		trace!("along with this program. If not, see <https://www.gnu.org/licenses/>.");
 	} else {
-		println!("This program comes with ABSOLUTELY NO WARRANTY.");
-		println!("This is free software, and you are welcome to redistribute it");
-		println!("under certain conditions. Use the -v command line switch for");
-		println!("more details about these conditions.");
+		trace!("This program comes with ABSOLUTELY NO WARRANTY.");
+		trace!("This is free software, and you are welcome to redistribute it");
+		trace!("under certain conditions. Use the -v command line switch for");
+		trace!("more details about these conditions.");
 	}
 }
 
@@ -396,4 +368,38 @@ impl TerminalTitle {
 
 		self
 	}
+}
+
+fn init_logger() {
+	let mut builder = formatted_builder();
+
+	if let Ok(s) = ::std::env::var("RUST_LOG") {
+		builder.parse_filters(&s);
+	}
+
+	builder.try_init().unwrap();
+}
+
+fn formatted_builder() -> Builder {
+	let mut builder = Builder::new();
+
+	builder.filter(Some("packsquash"), LevelFilter::Trace);
+	builder.format(|f, record| {
+		use std::io::Write;
+
+		let mut style = f.style();
+		let message = style
+			.set_color(match record.level() {
+				Level::Error => Color::Red,
+				Level::Warn => Color::Yellow,
+				Level::Info => Color::Cyan,
+				Level::Debug => Color::Green,
+				Level::Trace => Color::White
+			})
+			.value(record.args());
+
+		writeln!(f, "{}", message)
+	});
+
+	builder
 }
