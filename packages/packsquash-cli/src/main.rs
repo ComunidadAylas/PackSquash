@@ -51,10 +51,10 @@ fn run() -> i32 {
 				trace!("");
 				trace!("Usage:");
 				trace!(
-					"    {} [OPTION]... [options file path]",
-					env!("CARGO_BIN_NAME")
+					"    {} [OPTION]... [options file path]{}",
+					env!("CARGO_BIN_NAME"),
+					options.usage("")
 				);
-				trace!("{}", options.usage(""));
 
 				0
 			} else if option_matches.opt_present("v") {
