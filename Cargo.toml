@@ -25,7 +25,7 @@ lto = "fat"
 codegen-units = 1
 strip = "symbols"
 
-[profile.debug-release]
+[profile.bench]
 inherits = "release"
 debug = true
 strip = "none"

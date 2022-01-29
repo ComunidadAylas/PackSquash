@@ -210,3 +210,10 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/vim,rust,linux,macos,windows,visualstudiocode
+
+# Packs for tests and benchmarks, stored externally
+/packages/packsquash/benches/data/packs
+
+# Convenience file for authorized developers to put a value for the PRIVATE_TEST_PACKS_PASSWORD
+# environment variable, which can be sourced in a shell. This file MUST NOT be committed
+/scripts/test-packs/password-var.inc

@@ -33,6 +33,7 @@ default = ["crossterm", "color-backtrace"]
 [[bin]]
 name = "packsquash-cli"
 filename = "packsquash"
+bench = false
 
 [package.metadata.deb]
 name = "packsquash"

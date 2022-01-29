@@ -71,6 +71,14 @@ mach = "0.3.2"
 tokio-test = "0.4.2"
 pretty_assertions = "1.0.0"
 
+criterion = { version = "0.3.5", features = ["real_blackbox", "html_reports"] }
+tar = { version = "0.4.38", default-features = false }
+xz2 = "0.1.6"
+
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+criterion-perf-events = "0.1.4"
+perfcnt = "0.7.2"
+
 [features]
 # Support audio transcoding and all kinds of files added by modifications by default
 default = ["audio-transcoding", "mod-support"]
@@ -81,3 +89,7 @@ mod-support = ["optifine-support", "mtr3-support"]
 
 optifine-support = ["java-properties"]
 mtr3-support = []
+
+[[bench]]
+name = "benches"
+harness = false
