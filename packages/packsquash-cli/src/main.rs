@@ -72,9 +72,9 @@ fn run() -> i32 {
 			}
 		}
 		Err(parse_err) => {
-			error!("{}", parse_err);
 			error!(
-				"Run {} -h to see command line argument help",
+				"{}\nRun {} -h to see command line argument help",
+				parse_err,
 				env!("CARGO_BIN_NAME")
 			);
 
@@ -90,15 +90,18 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 		options_file_path.map_or_else(|| "standard input (keyboard input or pipe)", |path| path);
 
 	// Tell the user where are we reading the configuration from
-	info!("Reading options from {}...", user_friendly_options_path);
-	if options_file_path.is_none() {
-		// Newbies are often confused by terms such as "standard input", so try
-		// to point them in the direction of what they probably want to do
-		info!("If you are not sure what this means, try using an external options file.");
-		info!(
-			"Please check out <https://packsquash.page.link/Options-files> for examples and more information."
-		);
-	}
+	info!(
+		"Reading options from {}...{}",
+		user_friendly_options_path,
+		if options_file_path.is_none() {
+			// Newbies are often confused by terms such as "standard input", so try
+			// to point them in the direction of what they probably want to do
+			"\nIf you are not sure what this means, try using an external options file.\
+			 \nPlease check out <https://packsquash.page.link/Options-files> for examples and more information."
+		} else {
+			""
+		}
+	);
 
 	// Read the TOML configuration data from the specified source
 	let options_string = match match options_file_path {
@@ -142,21 +145,20 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 
 	squash(squash_options).map_or_else(
 		|err| {
-			error!("Pack processing error: {}", err);
-
-			// We print both informational and error pack file status updates.
-			// If the error was in one of those, hint the user at the status
-			// update that contains the most information about the error
-			if matches!(err, PackSquasherError::PackFileError) {
-				error!(
-					"Another error message with more details about the error was emitted before. \
-					You might need to scroll up to see it."
-				);
-			}
-
 			error!(
-				"These troubleshooting instructions might be useful: \
-				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>"
+				"Pack processing error: {}{}\n\
+				These troubleshooting instructions might be useful: \
+				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>",
+				err,
+				// We print both informational and error pack file status updates.
+				// If the error was in one of those, hint the user at the status
+				// update that contains the most information about the error
+				if matches!(err, PackSquasherError::PackFileError) {
+					"\nAnother error message with more details about the error was emitted before. \
+					You might need to scroll up to see it."
+				} else {
+					""
+				}
 			);
 
 			128
@@ -394,9 +396,10 @@ fn formatted_builder() -> Builder {
 			Level::Debug => (Color::Green, Emoji::new("🍀", "#")),
 			Level::Trace => (Color::White, Emoji::new("🏁", ">"))
 		};
-		let message = style
-			.set_color(color)
-			.value(format!("{} {}", icon, record.args()));
+		let message = style.set_color(color).value(
+			format!("{} {}", icon, record.args())
+				.replace("\n", &*Emoji::new("\n   ", "\n  ").to_string())
+		);
 
 		writeln!(f, "{}", message)
 	});
