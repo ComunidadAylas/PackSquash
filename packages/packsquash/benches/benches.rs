@@ -4,11 +4,11 @@ use std::path::Path;
 use std::time::Duration;
 
 use criterion::{measurement::Measurement, BatchSize, BenchmarkGroup, Criterion, SamplingMode};
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
 use criterion_perf_events::Perf;
 use enumset::EnumSet;
 use indexmap::IndexMap;
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
 use perfcnt::linux::{
 	HardwareEventType, PerfCounterBuilderLinux as PerfCounterBuilder, SoftwareEventType
 };
@@ -75,7 +75,7 @@ fn jilchu_chronos_micro_pack<M: Measurement + 'static>(
 	benchmark_group: &mut BenchmarkGroup<'_, M>,
 	pack_dataset: &mut PackDataset
 ) {
-	benchmark_group.bench_function("jilchu_chronos_micro", |b| {
+	benchmark_group.bench_function("jilchu_chronos_micro_pack", |b| {
 		b.iter_batched(
 			|| {
 				squash_options(
@@ -105,7 +105,7 @@ custom_criterion_group! {
 	targets = empty_pack
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
 custom_criterion_group! {
 	name = tiny_benches_instruction_count;
 	config = Criterion::default()
@@ -117,7 +117,7 @@ custom_criterion_group! {
 	targets = empty_pack
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
 custom_criterion_group! {
 	name = tiny_benches_context_switches;
 	config = Criterion::default()
@@ -139,7 +139,7 @@ custom_criterion_group! {
 	targets = aylas_khron_micro_pack, jilchu_chronos_micro_pack
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
 custom_criterion_group! {
 	name = small_benches_instruction_count;
 	config = Criterion::default()
@@ -152,7 +152,7 @@ custom_criterion_group! {
 	targets = aylas_khron_micro_pack, jilchu_chronos_micro_pack
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
 custom_criterion_group! {
 	name = small_benches_context_switches;
 	config = Criterion::default()
@@ -165,9 +165,9 @@ custom_criterion_group! {
 	targets = aylas_khron_micro_pack, jilchu_chronos_micro_pack
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64"))))]
 custom_criterion_main!(tiny_benches_wall_time, small_benches_wall_time);
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
 custom_criterion_main!(
 	tiny_benches_wall_time,
 	small_benches_wall_time,
