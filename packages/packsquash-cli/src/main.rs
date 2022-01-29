@@ -48,13 +48,13 @@ fn run() -> i32 {
 		Ok(option_matches) => {
 			if option_matches.opt_present("h") {
 				print_version_information(true);
-				trace!("");
-				trace!("Usage:");
-				trace!(
-					"    {} [OPTION]... [options file path]{}",
-					env!("CARGO_BIN_NAME"),
-					options.usage("")
+				println!();
+				println!("Usage:");
+				print!(
+					"    {} [OPTION]... [options file path]",
+					env!("CARGO_BIN_NAME")
 				);
+				println!("{}", options.usage(""));
 
 				0
 			} else if option_matches.opt_present("v") {
@@ -290,7 +290,7 @@ fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquas
 
 /// Prints PackSquash version information to the standard output stream.
 fn print_version_information(verbose: bool) {
-	trace!(
+	println!(
 		"{} {} ({}, {}) for {}",
 		packsquash_title!(),
 		env!("VERGEN_GIT_SEMVER_LIGHTWEIGHT"),
@@ -298,33 +298,33 @@ fn print_version_information(verbose: bool) {
 		env!("BUILD_DATE"),
 		env!("VERGEN_CARGO_TARGET_TRIPLE")
 	);
-	trace!("{}", env!("CARGO_PKG_DESCRIPTION"));
-	trace!("");
+	println!("{}", env!("CARGO_PKG_DESCRIPTION"));
+	println!();
 
 	if verbose {
-		trace!(
+		println!(
 			"Copyright (C) {} {}",
 			env!("BUILD_YEAR"),
 			env!("CARGO_PKG_AUTHORS")
 		);
-		trace!("");
-		trace!("This program is free software: you can redistribute it and/or modify");
-		trace!("it under the terms of the GNU Affero General Public License as");
-		trace!("published by the Free Software Foundation, either version 3 of the");
-		trace!("License, or (at your option) any later version.");
-		trace!("");
-		trace!("This program is distributed free of charge in the hope that it will");
-		trace!("be useful, but WITHOUT ANY WARRANTY; without even the implied warranty");
-		trace!("of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
-		trace!("GNU Affero General Public License for more details.");
-		trace!("");
-		trace!("You should have received a copy of the GNU Affero General Public License");
-		trace!("along with this program. If not, see <https://www.gnu.org/licenses/>.");
+		println!();
+		println!("This program is free software: you can redistribute it and/or modify");
+		println!("it under the terms of the GNU Affero General Public License as");
+		println!("published by the Free Software Foundation, either version 3 of the");
+		println!("License, or (at your option) any later version.");
+		println!();
+		println!("This program is distributed free of charge in the hope that it will");
+		println!("be useful, but WITHOUT ANY WARRANTY; without even the implied warranty");
+		println!("of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
+		println!("GNU Affero General Public License for more details.");
+		println!();
+		println!("You should have received a copy of the GNU Affero General Public License");
+		println!("along with this program. If not, see <https://www.gnu.org/licenses/>.");
 	} else {
-		trace!("This program comes with ABSOLUTELY NO WARRANTY.");
-		trace!("This is free software, and you are welcome to redistribute it");
-		trace!("under certain conditions. Use the -v command line switch for");
-		trace!("more details about these conditions.");
+		println!("This program comes with ABSOLUTELY NO WARRANTY.");
+		println!("This is free software, and you are welcome to redistribute it");
+		println!("under certain conditions. Use the -v command line switch for");
+		println!("more details about these conditions.");
 	}
 }
 
