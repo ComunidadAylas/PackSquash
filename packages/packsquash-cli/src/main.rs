@@ -10,6 +10,7 @@ use std::{
 
 use getopts::{Options, ParsingStyle};
 use log::{debug, error, info, trace, warn, Level, LevelFilter};
+use terminal_emoji::Emoji;
 use tokio::sync::mpsc::channel;
 
 use packsquash::{
@@ -387,11 +388,11 @@ fn formatted_builder() -> Builder {
 
 		let mut style = f.style();
 		let (color, icon) = match record.level() {
-			Level::Error => (Color::Red, "!"),
-			Level::Warn => (Color::Yellow, "*"),
-			Level::Info => (Color::Cyan, "-"),
-			Level::Debug => (Color::Green, "#"),
-			Level::Trace => (Color::White, ">")
+			Level::Error => (Color::Red, Emoji::new("❌", "!")),
+			Level::Warn => (Color::Yellow, Emoji::new("👉", "*")),
+			Level::Info => (Color::Cyan, Emoji::new("🔔", "-")),
+			Level::Debug => (Color::Green, Emoji::new("🍀", "#")),
+			Level::Trace => (Color::White, Emoji::new("🏁", ">"))
 		};
 		let message = style
 			.set_color(color)

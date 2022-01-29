@@ -1652,6 +1652,7 @@ dependencies = [
  "getopts",
  "log",
  "packsquash",
+ "terminal-emoji",
  "time 0.3.7",
  "tokio",
  "toml",
@@ -2278,6 +2279,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dfed899f0eb03f32ee8c6a0aabdb8a7949659e3466561fc0adf54e26d88c5f4"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "terminal-emoji"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8143568e8d5270b3b8f573ab8bb11a556a5c9e4becdc12241a7eef4c54a55170"
+dependencies = [
+ "terminal-supports-emoji",
+]
+
+[[package]]
+name = "terminal-supports-emoji"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8873a7a1f2d286cfedc10663a722309b1c74092852cf149aee738cbe901c6eb"
+dependencies = [
+ "atty",
+ "lazy_static",
 ]
 
 [[package]]
