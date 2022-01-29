@@ -16,8 +16,6 @@ glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
 # Use our fork of Zopfli that includes streaming support and the ability to change
 # the number of compression iterations
 zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquash" }
-# Use the latest commits of imagequant that fix an off-by-one error that prevents quantization
-imagequant = { git = "https://github.com/ImageOptim/libimagequant" }
 
 [profile.release]
 opt-level = 3
