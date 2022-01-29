@@ -14,7 +14,6 @@ use crate::squash_zip::SquashZipSettings;
 /// root level configuration struct for PackSquash, so it is a good starting point
 /// to read the API documentation, after the `PackSquasher` struct.
 #[derive(Clone, Deserialize)]
-#[non_exhaustive]
 pub struct SquashOptions {
 	/// The directory where the pack that will be processed resides.
 	pub pack_directory: PathBuf,
