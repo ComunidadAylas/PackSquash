@@ -21,12 +21,12 @@ num_cpus = "1.13.1"
 sysinfo = { version = "0.23.0", default-features = false }
 walkdir = "2.3.2"
 
-tokio = { version = "1.15.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
+tokio = { version = "1.16.1", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
 tokio-util = { version = "0.6.9", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.8", default-features = false }
 futures = { version = "0.3.19", default-features = false }
 
-serde = { version = "1.0.135", features = ["derive"] }
+serde = { version = "1.0.136", features = ["derive"] }
 
 serde_json = "1.0.78"
 json_comments = "0.2.0"
@@ -71,7 +71,7 @@ mach = "0.3.2"
 tokio-test = "0.4.2"
 pretty_assertions = "1.0.0"
 
-criterion = { version = "0.3.5", features = ["real_blackbox", "html_reports"] }
+criterion = { version = "0.3.5", features = ["html_reports"] }
 tar = { version = "0.4.38", default-features = false }
 xz2 = "0.1.6"
 

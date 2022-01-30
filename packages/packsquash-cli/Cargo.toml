@@ -17,14 +17,14 @@ packsquash = { path = "../packsquash", version = "0.3.1" }
 getopts = "0.2.21"
 toml = "0.5.8"
 
-tokio = { version = "1.15.0", default-features = false }
+tokio = { version = "1.16.1", default-features = false }
 
 color-backtrace = { version = "0.5.1", default-features = false, optional = true }
 crossterm = { version = "0.22.1", optional = true }
 
 [build-dependencies]
-vergen = { version = "6.0.1", default-features = false, features = ["cargo", "git"] }
-time = { version = "0.3.6", default-features = false, features = ["std"] }
+vergen = { version = "6.0.2", default-features = false, features = ["cargo", "git"] }
+time = { version = "0.3.7", default-features = false, features = ["std"] }
 
 [features]
 # Support fancy terminal interaction and panic messages by default

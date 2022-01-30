@@ -848,6 +848,6 @@ struct BoxedDynAsByteSliceRef(Box<dyn AsRef<[u8]> + Send>);
 
 impl AsRef<[u8]> for BoxedDynAsByteSliceRef {
 	fn as_ref(&self) -> &[u8] {
-		(&*self.0).as_ref()
+		(*self.0).as_ref()
 	}
 }
