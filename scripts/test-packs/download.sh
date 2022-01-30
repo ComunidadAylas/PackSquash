@@ -6,17 +6,12 @@ if ! command -v python3 >/dev/null 2>&1; then
 	false
 fi
 
-if ! command -v pip3 >/dev/null 2>&1; then
-	echo "! pip for Python 3 was not found. Please make sure it is installed and in the PATH variable." >&2
-	false
-fi
-
 # Get the directory where this script resides
 SCRIPT_DIR="$(dirname -- "$0")"
 readonly SCRIPT_DIR
 
 # Create a working directory for our Python download script and move to it
-VENV_DIR=$(mktemp -d -t packget.XXX)
+VENV_DIR=$(mktemp -d -t packdownload.XXX)
 readonly VENV_DIR
 trap 'rm -rf "$VENV_DIR" || true' EXIT INT TERM
 

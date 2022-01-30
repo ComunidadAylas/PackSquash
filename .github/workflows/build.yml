@@ -2,8 +2,6 @@ name: Build
 
 on:
   push:
-    branches-ignore:
-      - 'dependabot/**'
   pull_request:
   release:
     types:
@@ -113,7 +111,7 @@ jobs:
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: Generate CLI Debian package
-        run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
+        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
       - name: Upload CLI binary
         uses: actions/upload-artifact@v2
@@ -293,7 +291,7 @@ jobs:
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: Generate CLI Debian package
-        run: ./scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
+        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
       - name: Upload CLI binary
         uses: actions/upload-artifact@v2
@@ -306,3 +304,75 @@ jobs:
         with:
           name: 'Debian packages (arm64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
+
+  benchmark:
+
+    runs-on: ubuntu-latest
+
+    container: debian:bullseye-slim
+
+    # Benchmark failure is not critical enough to fail the whole workflow.
+    # We will keep an eye on them anyway, though
+    continue-on-error: true
+
+    # Make sure that benchmarks stay quick, and handle them being stuck promptly
+    timeout-minutes: 30
+
+    # Ignore PRs outside the repository. First-time would-be contributors need to have their
+    # workflows approved anyway, but at best it might be confusing to see commits of PRs mixed
+    # with the mainline. Workflows triggered by PRs don't have access to secrets anyway
+    if: success() && github.event_name != 'pull_request'
+
+    # Only benchmark potentially good code
+    needs: [ static-analysis, linux-x64-gnu, windows-x64-gnu, macos-x64-darwin, linux-aarch64-gnu ]
+
+    env:
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+      - name: Install development packages, GStreamer libraries, GStreamer development packages and benchmark script packages
+        run: |
+          apt-get update
+          # curl is required by rustup
+          apt-get install -yq build-essential git curl \
+                              gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+                              libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+                              python3-venv gpg
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Install latest Rust nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
+
+      - name: Download test packs dataset
+        run: scripts/test-packs/download.sh
+
+      - name: Decrypt private test packs in dataset
+        env:
+          PRIVATE_TEST_PACKS_PASSWORD: ${{ secrets.PRIVATE_TEST_PACKS_PASSWORD }}
+        run: scripts/test-packs/decrypt.sh
+
+      - name: Run quick benchmarks
+        run: cargo bench -- --output-format=bencher | tee /run/bench_results.txt
+
+      - name: Publish quick benchmarks results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: 'PackSquash library quick benchmarks'
+          tool: cargo
+          output-file-path: /run/bench_results.txt
+          benchmark-data-dir-path: dev/benches
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          comment-always: true
+          comment-on-alert: true
+          alert-threshold: 150%
+          fail-on-alert: false
+          max-items-in-chart: 50

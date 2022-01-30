@@ -94,6 +94,9 @@ mod-support = ["optifine-support", "mtr3-support"]
 optifine-support = ["java-properties"]
 mtr3-support = []
 
+[lib]
+bench = false
+
 [[bench]]
 name = "benches"
 harness = false
