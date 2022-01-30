@@ -1,3 +1,4 @@
+use atty::Stream::Stdout;
 use env_logger::fmt::Color;
 use env_logger::Builder;
 use std::{
@@ -10,7 +11,6 @@ use std::{
 
 use getopts::{Options, ParsingStyle};
 use log::{debug, error, info, trace, warn, Level, LevelFilter};
-use terminal_emoji::Emoji;
 use tokio::sync::mpsc::channel;
 
 use packsquash::{
@@ -31,18 +31,19 @@ fn main() {
 /// Runs PackSquash, parsing the command line parameters and deciding what options file
 /// to read to process a pack.
 fn run() -> i32 {
-	init_logger();
-
 	#[cfg(feature = "crossterm")]
 	TerminalTitle::Idle.show();
 
 	#[cfg(feature = "color-backtrace")]
 	color_backtrace::install();
 
+	let enable_emoji_default = supports_emoji();
+
 	let mut options = Options::new();
 
 	options.optflag("h", "help", "Prints information about the command line arguments accepted by this application and exits")
 		.optflag("v", "version", "Prints version and copyright information of the application, then exits")
+		.optflagopt("e", "emoji", &*format!("Enable emoji in output (default: {})", enable_emoji_default), "true/false")
 		.parsing_style(ParsingStyle::StopAtFirstFree);
 
 	match options.parse(env::args().skip(1)) {
@@ -63,15 +64,30 @@ fn run() -> i32 {
 
 				0
 			} else {
-				print_version_information(false);
-				println!();
-				read_options_file_and_squash(option_matches.free.first().filter(|path| {
-					// Let "-" behave as if no path was provided
-					path != &"-"
-				}))
+				match option_matches.opt_get_default("e", enable_emoji_default) {
+					Ok(enable_emoji) => {
+						init_logger(enable_emoji);
+
+						print_version_information(false);
+						println!();
+						read_options_file_and_squash(option_matches.free.first().filter(|path| {
+							// Let "-" behave as if no path was provided
+							path != &"-"
+						}))
+					}
+					Err(parse_err) => {
+						init_logger(enable_emoji_default);
+
+						error!("emoji: {}", parse_err);
+
+						1
+					}
+				}
 			}
 		}
 		Err(parse_err) => {
+			init_logger(enable_emoji_default);
+
 			error!(
 				"{}\nRun {} -h to see command line argument help",
 				parse_err,
@@ -371,8 +387,8 @@ impl TerminalTitle {
 	}
 }
 
-fn init_logger() {
-	let mut builder = formatted_builder();
+fn init_logger(enable_emoji: bool) {
+	let mut builder = formatted_builder(enable_emoji);
 
 	if let Ok(s) = ::std::env::var("RUST_LOG") {
 		builder.parse_filters(&s);
@@ -381,28 +397,56 @@ fn init_logger() {
 	builder.try_init().unwrap();
 }
 
-fn formatted_builder() -> Builder {
+fn formatted_builder(enable_emoji: bool) -> Builder {
 	let mut builder = Builder::new();
 
 	builder.filter(Some("packsquash"), LevelFilter::Trace);
-	builder.format(|f, record| {
+	builder.format(move |f, record| {
 		use std::io::Write;
 
 		let mut style = f.style();
 		let (color, icon) = match record.level() {
-			Level::Error => (Color::Red, Emoji::new("❌", "!")),
-			Level::Warn => (Color::Yellow, Emoji::new("👉", "*")),
-			Level::Info => (Color::Cyan, Emoji::new("🔔", "-")),
-			Level::Debug => (Color::Green, Emoji::new("🍀", "#")),
-			Level::Trace => (Color::White, Emoji::new("🏁", ">"))
+			Level::Error => (Color::Red, if enable_emoji { "❌" } else { "!" }),
+			Level::Warn => (Color::Yellow, if enable_emoji { "👉" } else { "*" }),
+			Level::Info => (Color::Cyan, if enable_emoji { "🔔" } else { "-" }),
+			Level::Debug => (Color::Green, if enable_emoji { "🍀" } else { "#" }),
+			Level::Trace => (Color::White, if enable_emoji { "🏁" } else { ">" })
 		};
 		let message = style.set_color(color).value(
 			format!("{} {}", icon, record.args())
-				.replace("\n", &*Emoji::new("\n   ", "\n  ").to_string())
+				.replace("\n", if enable_emoji { "\n   " } else { "\n  " })
 		);
 
 		writeln!(f, "{}", message)
 	});
 
 	builder
+}
+
+// From terminal-supports-emoji, but false for Unix other than Mac.
+// This is because even if it supports UTF8, it may not support emoji.
+// https://github.com/mainrs/terminal-supports-emoji-rs/blob/1ead98a8372dd85946576e4447ed9d40b36f00db/src/lib.rs
+
+#[cfg(windows)]
+fn platform_supports_emoji() -> bool {
+	std::env::var("WT_SESSION").is_ok()
+}
+
+#[cfg(target_os = "macos")]
+fn platform_supports_emoji() -> bool {
+	true
+}
+
+#[cfg(all(unix, not(target_os = "macos")))]
+fn platform_supports_emoji() -> bool {
+	false
+}
+
+#[cfg(all(not(unix), not(windows)))]
+fn platform_supports_emoji() -> bool {
+	false
+}
+
+fn supports_emoji() -> bool {
+	platform_supports_emoji() && atty::is(Stdout)
 }
