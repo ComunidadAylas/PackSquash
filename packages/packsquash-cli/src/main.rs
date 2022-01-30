@@ -407,7 +407,7 @@ fn formatted_builder(enable_emoji: bool) -> Builder {
 		let mut style = f.style();
 		let (color, icon) = match record.level() {
 			Level::Error => (Color::Red, if enable_emoji { "❌" } else { "!" }),
-			Level::Warn => (Color::Yellow, if enable_emoji { "👉" } else { "*" }),
+			Level::Warn => (Color::Yellow, if enable_emoji { "⚡️" } else { "*" }),
 			Level::Info => (Color::Cyan, if enable_emoji { "🔔" } else { "-" }),
 			Level::Debug => (Color::Green, if enable_emoji { "🍀" } else { "#" }),
 			Level::Trace => (Color::White, if enable_emoji { "🏁" } else { ">" })
