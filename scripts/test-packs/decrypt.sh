@@ -24,4 +24,3 @@ done
 
 echo
 echo "All the private test packs at $TEST_PACKS_PATH were decrypted to $DECRYPTED_TEST_PACKS_PATH. Any decrypted pack is private and MUST NOT be uploaded or copied as-is anywhere."
-echo

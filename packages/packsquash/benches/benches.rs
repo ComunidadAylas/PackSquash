@@ -12,6 +12,7 @@ use indexmap::IndexMap;
 use perfcnt::linux::{
 	HardwareEventType, PerfCounterBuilderLinux as PerfCounterBuilder, SoftwareEventType
 };
+use tempfile::NamedTempFile;
 
 use pack_dataset::PackDataset;
 use packsquash::{
@@ -188,13 +189,17 @@ fn squash_pack(squash_options: ProcessedSquashOptions) {
 }
 
 /// Returns the [`SquashOptions`] to use for optimizing a pack identified by its path,
-/// initialized using the specified global and file options.
+/// initialized using the specified global and file options. The output file path will
+/// be set to point to the temporary files directory.
 fn squash_options<'dataset, P: AsRef<Path> + ?Sized>(
 	pack_dataset: &mut PackDataset<'dataset>,
 	relative_pack_path: &'dataset P,
-	global_options: GlobalOptions,
+	mut global_options: GlobalOptions,
 	file_options: IndexMap<String, FileOptions>
 ) -> ProcessedSquashOptions {
+	let (_, temporary_output_path) = NamedTempFile::new().unwrap().keep().unwrap();
+	global_options.output_file_path = temporary_output_path;
+
 	ProcessedSquashOptions::try_from(SquashOptions {
 		pack_directory: pack_dataset.get(relative_pack_path).unwrap().path().into(),
 		global_options,

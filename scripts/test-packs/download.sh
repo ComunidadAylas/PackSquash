@@ -22,4 +22,4 @@ python3 -m venv "$VENV_DIR"
 . "$VENV_DIR/bin/activate"
 
 pip3 install -r "$SCRIPT_DIR"/requirements.txt
-"$SCRIPT_DIR"/download-gdrive-packs-folder.py "$@"
+"$SCRIPT_DIR"/download-gdrive-packs-folder.py "$@" 2>&1

@@ -359,8 +359,11 @@ jobs:
           PRIVATE_TEST_PACKS_PASSWORD: ${{ secrets.PRIVATE_TEST_PACKS_PASSWORD }}
         run: scripts/test-packs/decrypt.sh
 
+      # GitHub-hosted runners restrict access to the perf_event_open syscall for some event types we
+      # are interested in, so we can't run benchmarks that measure the troublesome performance counters.
+      # See: https://github.com/actions/virtual-environments/issues/4974
       - name: Run quick benchmarks
-        run: cargo bench -- --output-format=bencher | tee /run/bench_results.txt
+        run: cargo bench -- --output-format=bencher 'wall_time|context_switches' | tee /run/bench_results.txt
 
       - name: Publish quick benchmarks results
         uses: benchmark-action/github-action-benchmark@v1

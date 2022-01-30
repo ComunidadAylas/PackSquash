@@ -29,4 +29,3 @@ done
 
 echo
 echo "All the private test packs at $DECRYPTED_TEST_PACKS_PATH were encrypted. You may now upload $TEST_PACKS_PATH publicly."
-echo
