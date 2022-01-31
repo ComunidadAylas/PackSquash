@@ -67,13 +67,18 @@ fn run() -> i32 {
 
 				0
 			} else {
+				let enable_color = if enable_color_default {
+					!option_matches.opt_present("no-color")
+				} else {
+					option_matches.opt_present("color")
+				};
 				// Treat --emoji as --emoji=true
 				let enable_emoji = match option_matches.opt_default("emoji", "true") {
 					Some(emoji) => {
 						match emoji.parse::<bool>() {
 							Ok(enable) => enable,
 							Err(parse_err) => {
-								init_logger(enable_emoji_default, enable_color_default);
+								init_logger(enable_emoji_default, enable_color);
 
 								error!("emoji: {}", parse_err);
 
@@ -82,11 +87,6 @@ fn run() -> i32 {
 						}
 					}
 					None => enable_emoji_default,
-				};
-				let enable_color = if enable_color_default {
-					!option_matches.opt_present("no-color")
-				} else {
-					option_matches.opt_present("color")
 				};
 				init_logger(enable_emoji, enable_color);
 
