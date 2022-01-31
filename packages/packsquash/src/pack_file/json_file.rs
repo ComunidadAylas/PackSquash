@@ -10,13 +10,12 @@ use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
 use crate::config::JsonFileOptions;
-
-use self::debloater::Debloater;
+use crate::pack_file::asset_type::PackFileAssetType;
+use crate::pack_file::AsyncReadAndSizeHint;
 
 use super::{util::strip_utf8_bom, PackFile, PackFileConstructor};
 
-use crate::pack_file::asset_type::PackFileAssetType;
-use crate::pack_file::AsyncReadAndSizeHint;
+use self::debloater::Debloater;
 
 mod debloater;
 
@@ -148,6 +147,7 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for JsonFile<T> {
 				optimization_settings: self.optimization_settings,
 				reached_eof: false
 			},
+			// FIXME consider refactoring this when we have a global memory budget
 			self.file_length_hint
 		)
 	}

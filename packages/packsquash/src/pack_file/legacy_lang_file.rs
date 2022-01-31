@@ -1,6 +1,3 @@
-use ahash::AHashSet;
-use futures::{future, StreamExt};
-use regex::Regex;
 use std::borrow::Cow;
 use std::fmt::{Display, Formatter};
 use std::lazy::SyncLazy;
@@ -8,13 +5,17 @@ use std::num::NonZeroUsize;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use crate::config::LegacyLanguageFileOptions;
-use crate::pack_file::asset_type::PackFileAssetType;
-use crate::pack_file::AsyncReadAndSizeHint;
+use ahash::AHashSet;
+use futures::{future, StreamExt};
+use regex::Regex;
 use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_stream::Stream;
 use tokio_util::codec::{FramedRead, LinesCodec, LinesCodecError};
+
+use crate::config::LegacyLanguageFileOptions;
+use crate::pack_file::asset_type::PackFileAssetType;
+use crate::pack_file::AsyncReadAndSizeHint;
 
 use super::{OptimizedBytesChunk, PackFile, PackFileConstructor};
 
@@ -61,7 +62,6 @@ static FORMAT_SPECIFIER_REGEX: SyncLazy<Regex> = SyncLazy::new(|| {
 /// - OpenJDK 11 implementation of class `java.util.Formatter`
 pub struct LegacyLanguageFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
-	file_length_hint: usize,
 	optimization_settings: LegacyLanguageFileOptions
 }
 
@@ -195,14 +195,11 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for LegacyLanguageFile<T> {
 		let minify = self.optimization_settings.minify;
 		let strip_bom = self.optimization_settings.strip_bom;
 
-		MarkLastDecorator::new(FramedRead::with_capacity(
+		MarkLastDecorator::new(FramedRead::new(
 			self.read,
 			// Limit line length to 16 KiB to bound memory consumption and be nice to Minecraft.
 			// Longer lines are probably an error, and will negatively affect Minecraft performance
-			LinesCodec::new_with_max_length(16 * 1024),
-			// FIXME consider limiting the value of the size hint in this and other parts of the code
-			// depending on the global memory budget (see FIXME below)
-			self.file_length_hint
+			LinesCodec::new_with_max_length(16 * 1024)
 		))
 		.filter_map(move |(line_result, is_last)| {
 			let processed_line_result = line_result.map_or_else(
@@ -238,10 +235,8 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for LegacyLan
 		_: PackFileAssetType,
 		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
-		file_read_producer().map(|(read, file_length_hint)| Self {
+		file_read_producer().map(|(read, _)| Self {
 			read,
-			// The file is too big to fit in memory if this conversion fails anyway
-			file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
 			optimization_settings
 		})
 	}
