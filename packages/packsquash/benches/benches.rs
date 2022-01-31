@@ -98,6 +98,34 @@ fn jilchu_chronos_micro_pack<M: Measurement + 'static>(
 	});
 }
 
+/// Benchmarks the optimization of a resource pack with ~15 files that has lots of assets
+/// of every type, meant to be used with quite a bit of mods.
+fn aiamded_breadstick_micro_pack<M: Measurement + 'static>(
+	benchmark_group: &mut BenchmarkGroup<'_, M>,
+	pack_dataset: &mut PackDataset
+) {
+	benchmark_group.bench_function("aiamded_breadstick_micro_pack", |b| {
+		b.iter_batched(
+			|| {
+				squash_options(
+					pack_dataset,
+					"private/aiamded_breadstick_micro.tar.xz",
+					{
+						let mut global_options = GlobalOptions::default();
+
+						global_options.allow_mods = EnumSet::all();
+
+						global_options
+					},
+					IndexMap::default()
+				)
+			},
+			squash_pack,
+			BatchSize::SmallInput
+		)
+	});
+}
+
 custom_criterion_group! {
 	name = tiny_benches_wall_time;
 	config = Criterion::default()
@@ -137,7 +165,7 @@ custom_criterion_group! {
 		.measurement_time(Duration::from_secs(45))
 		.sample_size(15);
 	sampling_mode = SamplingMode::Auto;
-	targets = aylas_khron_micro_pack, jilchu_chronos_micro_pack
+	targets = aylas_khron_micro_pack, jilchu_chronos_micro_pack, aiamded_breadstick_micro_pack
 }
 
 #[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
@@ -150,7 +178,7 @@ custom_criterion_group! {
 		.with_measurement(Perf::new(PerfCounterBuilder::from_hardware_event(HardwareEventType::Instructions)));
 	// This perf counter is highly deterministic and little sensitive to external noise, so less samples are okay
 	sampling_mode = SamplingMode::Flat;
-	targets = aylas_khron_micro_pack, jilchu_chronos_micro_pack
+	targets = aylas_khron_micro_pack, jilchu_chronos_micro_pack, aiamded_breadstick_micro_pack
 }
 
 #[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
@@ -163,7 +191,7 @@ custom_criterion_group! {
 		.with_measurement(Perf::new(PerfCounterBuilder::from_software_event(SoftwareEventType::ContextSwitches)));
 	// This perf counter is highly deterministic and little sensitive to external noise, so less samples are okay
 	sampling_mode = SamplingMode::Flat;
-	targets = aylas_khron_micro_pack, jilchu_chronos_micro_pack
+	targets = aylas_khron_micro_pack, jilchu_chronos_micro_pack, aiamded_breadstick_micro_pack
 }
 
 #[cfg(not(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64"))))]
