@@ -38,12 +38,15 @@ fn run() -> i32 {
 	color_backtrace::install();
 
 	let enable_emoji_default = supports_emoji();
+	let enable_color_default = atty::is(Stdout);
 
 	let mut options = Options::new();
 
 	options.optflag("h", "help", "Prints information about the command line arguments accepted by this application and exits")
 		.optflag("v", "version", "Prints version and copyright information of the application, then exits")
 		.optflagopt("e", "emoji", &*format!("Enable emoji in output (default: {})", enable_emoji_default), "true/false")
+		.optflag("", "color", "Enable color in output")
+		.optflag("", "no-color", "Disable color in output")
 		.parsing_style(ParsingStyle::StopAtFirstFree);
 
 	match options.parse(env::args().skip(1)) {
@@ -66,7 +69,12 @@ fn run() -> i32 {
 			} else {
 				match option_matches.opt_get_default("e", enable_emoji_default) {
 					Ok(enable_emoji) => {
-						init_logger(enable_emoji);
+						let enable_color = if enable_color_default {
+							!option_matches.opt_present("no-color")
+						} else {
+							option_matches.opt_present("color")
+						};
+						init_logger(enable_emoji, enable_color);
 
 						print_version_information(false);
 						println!();
@@ -76,7 +84,7 @@ fn run() -> i32 {
 						}))
 					}
 					Err(parse_err) => {
-						init_logger(enable_emoji_default);
+						init_logger(enable_emoji_default, enable_color_default);
 
 						error!("emoji: {}", parse_err);
 
@@ -86,7 +94,7 @@ fn run() -> i32 {
 			}
 		}
 		Err(parse_err) => {
-			init_logger(enable_emoji_default);
+			init_logger(enable_emoji_default, enable_color_default);
 
 			error!(
 				"{}\nRun {} -h to see command line argument help",
@@ -387,8 +395,8 @@ impl TerminalTitle {
 	}
 }
 
-fn init_logger(enable_emoji: bool) {
-	let mut builder = formatted_builder(enable_emoji);
+fn init_logger(enable_emoji: bool, enable_color: bool) {
+	let mut builder = formatted_builder(enable_emoji, enable_color);
 
 	if let Ok(s) = ::std::env::var("RUST_LOG") {
 		builder.parse_filters(&s);
@@ -397,7 +405,7 @@ fn init_logger(enable_emoji: bool) {
 	builder.try_init().unwrap();
 }
 
-fn formatted_builder(enable_emoji: bool) -> Builder {
+fn formatted_builder(enable_emoji: bool, enable_color: bool) -> Builder {
 	let mut builder = Builder::new();
 
 	builder.filter(Some("packsquash"), LevelFilter::Trace);
@@ -412,7 +420,10 @@ fn formatted_builder(enable_emoji: bool) -> Builder {
 			Level::Debug => (Color::Green, if enable_emoji { "🍀" } else { "#" }),
 			Level::Trace => (Color::White, if enable_emoji { "🏁" } else { ">" })
 		};
-		let message = style.set_color(color).value(
+		if enable_color {
+			style.set_color(color);
+		}
+		let message = style.value(
 			format!("{} {}", icon, record.args())
 				.replace("\n", if enable_emoji { "\n   " } else { "\n  " })
 		);
