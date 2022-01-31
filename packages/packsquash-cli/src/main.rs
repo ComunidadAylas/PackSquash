@@ -67,30 +67,35 @@ fn run() -> i32 {
 
 				0
 			} else {
-				match option_matches.opt_get_default("emoji", enable_emoji_default) {
-					Ok(enable_emoji) => {
-						let enable_color = if enable_color_default {
-							!option_matches.opt_present("no-color")
-						} else {
-							option_matches.opt_present("color")
-						};
-						init_logger(enable_emoji, enable_color);
+				// Treat --emoji as --emoji=true
+				let enable_emoji = match option_matches.opt_default("emoji", "true") {
+					Some(emoji) => {
+						match emoji.parse::<bool>() {
+							Ok(enable) => enable,
+							Err(parse_err) => {
+								init_logger(enable_emoji_default, enable_color_default);
 
-						print_version_information(false);
-						println!();
-						read_options_file_and_squash(option_matches.free.first().filter(|path| {
-							// Let "-" behave as if no path was provided
-							path != &"-"
-						}))
+								error!("emoji: {}", parse_err);
+
+								return 1;
+							}
+						}
 					}
-					Err(parse_err) => {
-						init_logger(enable_emoji_default, enable_color_default);
+					None => enable_emoji_default,
+				};
+				let enable_color = if enable_color_default {
+					!option_matches.opt_present("no-color")
+				} else {
+					option_matches.opt_present("color")
+				};
+				init_logger(enable_emoji, enable_color);
 
-						error!("emoji: {}", parse_err);
-
-						1
-					}
-				}
+				print_version_information(false);
+				println!();
+				read_options_file_and_squash(option_matches.free.first().filter(|path| {
+					// Let "-" behave as if no path was provided
+					path != &"-"
+				}))
 			}
 		}
 		Err(parse_err) => {
