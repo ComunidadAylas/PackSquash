@@ -74,19 +74,17 @@ fn run() -> i32 {
 				};
 				// Treat --emoji as --emoji=true
 				let enable_emoji = match option_matches.opt_default("emoji", "true") {
-					Some(emoji) => {
-						match emoji.parse::<bool>() {
-							Ok(enable) => enable,
-							Err(parse_err) => {
-								init_logger(enable_emoji_default, enable_color);
+					Some(emoji) => match emoji.parse::<bool>() {
+						Ok(enable) => enable,
+						Err(parse_err) => {
+							init_logger(enable_emoji_default, enable_color);
 
-								error!("emoji: {}", parse_err);
+							error!("emoji: {}", parse_err);
 
-								return 1;
-							}
+							return 1;
 						}
-					}
-					None => enable_emoji_default,
+					},
+					None => enable_emoji_default
 				};
 				init_logger(enable_emoji, enable_color);
 
