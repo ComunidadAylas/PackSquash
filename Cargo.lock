@@ -1676,8 +1676,9 @@ checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
 name = "perfcnt"
-version = "0.7.2"
-source = "git+https://github.com/ComunidadAylas/rust-perfcnt#7a8be2ff8892499de000ac7000598f87332df58c"
+version = "0.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8f94885300e262ef461aa9fd1afbf7df3caf9e84e271a74925d1c6c8b24830f"
 dependencies = [
  "bitflags",
  "byteorder",
@@ -2208,8 +2209,9 @@ dependencies = [
 
 [[package]]
 name = "system-deps"
-version = "6.0.0"
-source = "git+https://github.com/ComunidadAylas/system-deps#9d4eadae9f25ffffbf71337ef0b25d7eeb223ec5"
+version = "6.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad3a97fdef3daf935d929b3e97e5a6a680cd4622e40c2941ca0875d6566416f8"
 dependencies = [
  "cfg-expr",
  "heck",

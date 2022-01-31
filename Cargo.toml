@@ -32,11 +32,6 @@ csv = { git = "https://github.com/BurntSushi/rust-csv", rev = "41c71ed3" }
 # the changes were authored by jbreitbart.
 # Related PR: https://github.com/rbranson/rust-mmap/pull/13
 mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
-# Use our fork of perfcnt that reduces incompatible dependencies versions
-perfcnt = { git = "https://github.com/ComunidadAylas/rust-perfcnt" }
-# Use our fork of the system-deps build dependency that reduces incompatible dependencies
-# versions
-system-deps = { git = "https://github.com/ComunidadAylas/system-deps" }
 
 [profile.release]
 opt-level = 3

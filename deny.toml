@@ -108,7 +108,7 @@ skip-tree = [
 	# An ancient nom is pulled by the development dependency for
 	# benchmarking perfcnt. Let's ignore that for now. It doesn't
 	# affect the final user executables at all
-	{ name = "perfcnt", version = "=0.7.2" }
+	{ name = "perfcnt", version = "=0.7.3" }
 ]
 
 [sources]
