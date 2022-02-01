@@ -1,6 +1,6 @@
 use atty::Stream::Stdout;
 use env_logger::fmt::Color;
-use env_logger::Builder;
+use env_logger::{Builder, WriteStyle};
 use std::{
 	borrow::Cow,
 	env, fs,
@@ -37,8 +37,8 @@ fn run() -> i32 {
 	#[cfg(feature = "color-backtrace")]
 	color_backtrace::install();
 
-	let enable_emoji_default = supports_emoji();
-	let enable_color_default = atty::is(Stdout);
+	let enable_emoji_default = enable_emoji_default();
+	let enable_color_default = enable_color_default();
 
 	let mut options = Options::new();
 
@@ -404,6 +404,7 @@ fn formatted_builder(enable_emoji: bool, enable_color: bool) -> Builder {
 	let mut builder = Builder::new();
 
 	builder.filter(Some("packsquash"), LevelFilter::Trace);
+	builder.write_style(WriteStyle::Always);
 	builder.format(move |f, record| {
 		use std::io::Write;
 
@@ -453,6 +454,55 @@ fn platform_supports_emoji() -> bool {
 	false
 }
 
-fn supports_emoji() -> bool {
-	platform_supports_emoji() && atty::is(Stdout)
+fn enable_emoji_default() -> bool {
+	match (
+		env::var_os("EMOJI").is_some(),
+		env::var_os("NO_EMOJI").is_some()
+	) {
+		(true, false) => true,
+		(false, true) => false,
+		_ => platform_supports_emoji() && atty::is(Stdout)
+	}
+}
+
+// From termcolor, but ignore NO_COLOR
+// https://github.com/BurntSushi/termcolor/blob/dc7e7b93830579716fc180925a17551dee5cfddc/src/lib.rs#L233-L269
+
+#[cfg(not(windows))]
+fn env_allows_color() -> bool {
+	match env::var_os("TERM") {
+		// If TERM isn't set, then we are in a weird environment that
+		// probably doesn't support colors.
+		None => return false,
+		Some(k) => {
+			if k == "dumb" {
+				return false;
+			}
+		}
+	}
+	true
+}
+
+#[cfg(windows)]
+fn env_allows_color() -> bool {
+	// On Windows, if TERM isn't set, then we shouldn't automatically
+	// assume that colors aren't allowed. This is unlike Unix environments
+	// where TERM is more rigorously set.
+	if let Some(k) = env::var_os("TERM") {
+		if k == "dumb" {
+			return false;
+		}
+	}
+	true
+}
+
+fn enable_color_default() -> bool {
+	match (
+		env::var_os("COLOR").is_some(),
+		env::var_os("NO_COLOR").is_some()
+	) {
+		(true, false) => true,
+		(false, true) => false,
+		_ => env_allows_color() && atty::is(Stdout)
+	}
 }
