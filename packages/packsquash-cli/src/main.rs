@@ -44,7 +44,8 @@ fn run() -> i32 {
 
 	options.optflag("h", "help", "Prints information about the command line arguments accepted by this application and exits")
 		.optflag("v", "version", "Prints version and copyright information of the application, then exits")
-		.optflagopt("", "emoji", &*format!("Enable emoji in output (default: {})", enable_emoji_default), "true/false")
+		.optflag("", "emoji", "Enable emoji in output")
+		.optflag("", "no-emoji", "Disable emoji in output")
 		.optflag("", "color", "Enable color in output")
 		.optflag("", "no-color", "Disable color in output")
 		.parsing_style(ParsingStyle::StopAtFirstFree);
@@ -67,24 +68,15 @@ fn run() -> i32 {
 
 				0
 			} else {
+				let enable_emoji = if enable_emoji_default {
+					!option_matches.opt_present("no-emoji")
+				} else {
+					option_matches.opt_present("emoji")
+				};
 				let enable_color = if enable_color_default {
 					!option_matches.opt_present("no-color")
 				} else {
 					option_matches.opt_present("color")
-				};
-				// Treat --emoji as --emoji=true
-				let enable_emoji = match option_matches.opt_default("emoji", "true") {
-					Some(emoji) => match emoji.parse::<bool>() {
-						Ok(enable) => enable,
-						Err(parse_err) => {
-							init_logger(enable_emoji_default, enable_color);
-
-							error!("emoji: {}", parse_err);
-
-							return 1;
-						}
-					},
-					None => enable_emoji_default
 				};
 				init_logger(enable_emoji, enable_color);
 
