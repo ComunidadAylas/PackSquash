@@ -1,6 +1,3 @@
-use atty::Stream::Stdout;
-use env_logger::fmt::Color;
-use env_logger::{Builder, WriteStyle};
 use std::{
 	borrow::Cow,
 	env, fs,
@@ -9,6 +6,8 @@ use std::{
 	time::{Duration, Instant}
 };
 
+use env_logger::fmt::Color;
+use env_logger::{Builder, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
 use log::{debug, error, info, trace, warn, Level, LevelFilter};
 use tokio::{runtime, select, sync::mpsc::channel, time::sleep};
@@ -37,17 +36,37 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 		title_controller.show();
 	}
 
-	let enable_emoji_default = enable_emoji_default();
-	let enable_color_default = enable_color_default();
+	let environment_allows_emoji = environment_allows_emoji();
+	let environment_allows_color = environment_allows_color();
 
 	let mut options = Options::new();
 
 	options.optflag("h", "help", "Prints information about the command line arguments accepted by this application and exits")
 		.optflag("v", "version", "Prints version and copyright information of the application, then exits")
-		.optflag("", "emoji", "Enable emoji in output")
-		.optflag("", "no-emoji", "Disable emoji in output")
-		.optflag("", "color", "Enable color in output")
-		.optflag("", "no-color", "Disable color in output")
+		.optflag(
+			"",
+			"emoji",
+			"Always enable emojis in status messages for interactive usage. \
+			This is equivalent to setting the PACKSQUASH_EMOJI or EMOJI environment variables to \"show\""
+		)
+		.optflag(
+			"",
+			"no-emoji",
+			"Always disable emojis status messages for interactive usage. \
+			 This is equivalent to defining the NO_EMOJI environment variable, or setting PACKSQUASH_EMOJI or EMOJI to something else than \"show\""
+		)
+		.optflag(
+			"",
+			"color",
+			"Always enable color in output messages for interactive usage. \
+			This is equivalent to setting the PACKSQUASH_COLOR or COLOR environment variables to \"show\""
+		)
+		.optflag(
+			"",
+			"no-color",
+			"Always disable color in output messages for interactive usage. \
+			This is equivalent to defining the NO_COLOR environment variable, or setting PACKSQUASH_COLOR or COLOR to something else than \"show\""
+		)
 		.parsing_style(ParsingStyle::StopAtFirstFree);
 
 	match options.parse(env::args().skip(1)) {
@@ -68,16 +87,18 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 
 				0
 			} else {
-				let enable_emoji = if enable_emoji_default {
+				let enable_emoji = if environment_allows_emoji {
 					!option_matches.opt_present("no-emoji")
 				} else {
 					option_matches.opt_present("emoji")
 				};
-				let enable_color = if enable_color_default {
+
+				let enable_color = if environment_allows_color {
 					!option_matches.opt_present("no-color")
 				} else {
 					option_matches.opt_present("color")
 				};
+
 				init_logger(enable_emoji, enable_color);
 
 				print_version_information(false);
@@ -92,7 +113,7 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 			}
 		}
 		Err(parse_err) => {
-			init_logger(enable_emoji_default, enable_color_default);
+			init_logger(environment_allows_emoji, environment_allows_color);
 
 			error!(
 				"{}\nRun {} -h to see command line argument help",
@@ -397,119 +418,106 @@ fn print_version_information(verbose: bool) {
 	}
 }
 
-fn init_logger(enable_emoji: bool, enable_color: bool) {
-	let mut builder = formatted_builder(enable_emoji, enable_color);
+fn init_logger(mut enable_emoji: bool, enable_colors: bool) {
+	let mut logger_builder = Builder::new();
 
-	if let Ok(s) = ::std::env::var("RUST_LOG") {
-		builder.parse_filters(&s);
+	// Only enable emojis if they are going to be logged to an interactive terminal
+	enable_emoji = enable_emoji && atty::is(atty::Stream::Stderr);
+
+	logger_builder
+		.target(Target::Stderr)
+		.write_style(if enable_colors && atty::is(atty::Stream::Stderr) {
+			WriteStyle::Always
+		} else {
+			WriteStyle::Never
+		})
+		// Hide log messages from libraries by default
+		.filter(Some("packsquash"), LevelFilter::max())
+		.format(move |f, record| {
+			use std::io::Write;
+
+			let (level_color, level_icon, level_bold_style) = match record.level() {
+				Level::Error => (Color::Red, if enable_emoji { '❌' } else { '!' }, true),
+				Level::Warn => (Color::Yellow, if enable_emoji { '⚡' } else { '*' }, false),
+				Level::Info => (Color::Cyan, if enable_emoji { '🔷' } else { '-' }, false),
+				Level::Debug => (Color::Green, if enable_emoji { '🍀' } else { '#' }, false),
+				Level::Trace => (Color::White, if enable_emoji { '🏁' } else { '>' }, false)
+			};
+
+			let mut style = f.style();
+			style.set_color(level_color).set_bold(level_bold_style);
+
+			let message = style.value(
+				format!("{} {}", level_icon, record.args())
+					// Emojis are usually displayed with a non-monospaced font that is wider
+					// than other characters. Output an extra space as a hack to look pretty
+					.replace('\n', if enable_emoji { "\n   " } else { "\n  " })
+			);
+
+			writeln!(f, "{}", message)
+		});
+
+	if let Ok(log_filters) = env::var("PACKSQUASH_LOG").or_else(|_| env::var("RUST_LOG")) {
+		logger_builder.parse_filters(&log_filters);
 	}
 
-	builder.try_init().unwrap();
+	logger_builder.init();
 }
 
-fn formatted_builder(enable_emoji: bool, enable_color: bool) -> Builder {
-	let mut builder = Builder::new();
+fn terminal_can_display_color() -> bool {
+	let term = env::var_os("TERM");
+	let term_is_dumb = |term| term != "dumb" && term != "unknown";
 
-	builder.filter(Some("packsquash"), LevelFilter::Trace);
-	builder.write_style(WriteStyle::Always);
-	builder.format(move |f, record| {
-		use std::io::Write;
-
-		let mut style = f.style();
-		let (color, icon) = match record.level() {
-			Level::Error => (Color::Red, if enable_emoji { "❌" } else { "!" }),
-			Level::Warn => (Color::Yellow, if enable_emoji { "⚡️" } else { "*" }),
-			Level::Info => (Color::Cyan, if enable_emoji { "🔎" } else { "-" }),
-			Level::Debug => (Color::Green, if enable_emoji { "🍀" } else { "#" }),
-			Level::Trace => (Color::White, if enable_emoji { "🏁" } else { ">" })
-		};
-		if enable_color {
-			style.set_color(color);
-		}
-		let message = style.value(
-			format!("{} {}", icon, record.args())
-				.replace("\n", if enable_emoji { "\n   " } else { "\n  " })
-		);
-
-		writeln!(f, "{}", message)
-	});
-
-	builder
+	term.map_or(
+		// On Unix-like platforms, TERM must be set, or else things are probably
+		// broken and colors won't work. On Windows and other platforms that is not
+		// the case. We assume that if the terminal is not dumb then colors are supported
+		cfg!(unix),
+		term_is_dumb
+	)
 }
 
-// From terminal-supports-emoji, but false for Unix other than Mac.
-// This is because even if it supports UTF8, it may not support emoji.
-// https://github.com/mainrs/terminal-supports-emoji-rs/blob/1ead98a8372dd85946576e4447ed9d40b36f00db/src/lib.rs
-
-#[cfg(windows)]
-fn platform_supports_emoji() -> bool {
-	std::env::var("WT_SESSION").is_ok()
-}
-
-#[cfg(target_os = "macos")]
-fn platform_supports_emoji() -> bool {
-	true
-}
-
-#[cfg(all(unix, not(target_os = "macos")))]
-fn platform_supports_emoji() -> bool {
-	false
-}
-
-#[cfg(all(not(unix), not(windows)))]
-fn platform_supports_emoji() -> bool {
-	false
-}
-
-fn enable_emoji_default() -> bool {
-	match (
-		env::var_os("EMOJI").is_some(),
-		env::var_os("NO_EMOJI").is_some()
-	) {
-		(true, false) => true,
-		(false, true) => false,
-		_ => platform_supports_emoji() && atty::is(Stdout)
+fn environment_allows_color() -> bool {
+	if let Some(color_mode) = env::var_os("PACKSQUASH_COLOR").or_else(|| env::var_os("COLOR")) {
+		// The PACKSQUASH_COLOR and COLOR environment variables, in that priority order,
+		// allow overriding any decision made
+		color_mode == "show"
+	} else if env::var_os("NO_COLOR").is_some() {
+		// The NO_COLOR environment variable allows disabling color no matter what
+		false
+	} else {
+		// Otherwise, if no special environment variable is set, just check if the
+		// terminal can reliably display color
+		terminal_can_display_color()
 	}
 }
 
-// From termcolor, but ignore NO_COLOR
-// https://github.com/BurntSushi/termcolor/blob/dc7e7b93830579716fc180925a17551dee5cfddc/src/lib.rs#L233-L269
-
-#[cfg(not(windows))]
-fn env_allows_color() -> bool {
-	match env::var_os("TERM") {
-		// If TERM isn't set, then we are in a weird environment that
-		// probably doesn't support colors.
-		None => return false,
-		Some(k) => {
-			if k == "dumb" {
-				return false;
-			}
-		}
+fn terminal_can_display_emoji() -> bool {
+	if cfg!(windows) {
+		// On Windows, the new Windows Terminal and Unix-like terminals support emojis.
+		// Any sane Windows install has fonts set up in a way that will show emojis
+		env::var_os("WT_SESSION").is_some() || env::var_os("TERM").is_some()
+	} else {
+		// Only macOS reliably supports emojis. UTF-8 support is almost universal on Unixes,
+		// but the monospaced fonts used in terminal emulators usually do not contain emojis,
+		// and the fallback to fonts that contain them requires a cooperative terminal emulator
+		// and is brittle. It may be necessary to tweak fontconfig files in a way that does not
+		// break anything else. See: https://gist.github.com/IgnoredAmbience/7c99b6cf9a8b73c9312a71d1209d9bbb
+		cfg!(target_os = "macos")
 	}
-	true
 }
 
-#[cfg(windows)]
-fn env_allows_color() -> bool {
-	// On Windows, if TERM isn't set, then we shouldn't automatically
-	// assume that colors aren't allowed. This is unlike Unix environments
-	// where TERM is more rigorously set.
-	if let Some(k) = env::var_os("TERM") {
-		if k == "dumb" {
-			return false;
-		}
-	}
-	true
-}
-
-fn enable_color_default() -> bool {
-	match (
-		env::var_os("COLOR").is_some(),
-		env::var_os("NO_COLOR").is_some()
-	) {
-		(true, false) => true,
-		(false, true) => false,
-		_ => env_allows_color() && atty::is(Stdout)
+fn environment_allows_emoji() -> bool {
+	if let Some(emoji_mode) = env::var_os("PACKSQUASH_EMOJI").or_else(|| env::var_os("EMOJI")) {
+		// The PACKSQUASH_EMOJI and EMOJI environment variables, in that priority order,
+		// allow overriding any decision made
+		emoji_mode == "show"
+	} else if env::var_os("NO_EMOJI").is_some() {
+		// The NO_EMOJI environment variable allows disabling emojis no matter what
+		false
+	} else {
+		// Otherwise, if no special environment variable is set, just check if the
+		// terminal can reliably display emojis
+		terminal_can_display_emoji()
 	}
 }
