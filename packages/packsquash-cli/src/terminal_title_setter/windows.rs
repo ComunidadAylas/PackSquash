@@ -79,13 +79,13 @@ impl<'title> TerminalTitleSetterTrait<'title> for WindowsTerminalTitleSetter {
 							},
 							|console| {
 								// stderr is associated with a console
-								enable_vt_processing(console).map(|_| Some(Stream::Stderr))
+								enable_vt_processing(console).and_then(|_| Some(Stream::Stderr))
 							}
 						)
 					},
 					|console| {
 						// stdout is associated with a console
-						enable_vt_processing(console).map(|_| Some(Stream::Stdout))
+						enable_vt_processing(console).and_then(|_| Some(Stream::Stdout))
 					}
 				)
 			}
@@ -158,6 +158,6 @@ impl<'title> From<&'title str> for WindowsTerminalTitleString<'title> {
 /// Enables virtual terminal proccessing (i.e. ANSI escape sequence support) for
 /// the specified console. `Some(())` is returned if the VT processing mode
 /// could be enabled; otherwise, `None` is returned.
-fn enable_vt_processing(console: Console) -> Option<()> {
+fn enable_vt_processing(mut console: Console) -> Option<()> {
 	console.set_virtual_terminal_processing(true).ok()
 }
