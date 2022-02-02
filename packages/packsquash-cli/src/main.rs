@@ -424,13 +424,14 @@ fn print_version_information(verbose: bool) {
 /// application operation information.
 fn init_logger(mut enable_emoji: bool, enable_colors: bool) {
 	let mut logger_builder = Builder::new();
+	let log_target_is_tty = atty::is(atty::Stream::Stderr);
 
 	// Only enable emojis if they are going to be logged to an interactive terminal
-	enable_emoji = enable_emoji && atty::is(atty::Stream::Stderr);
+	enable_emoji = enable_emoji && log_target_is_tty;
 
 	logger_builder
 		.target(Target::Stderr)
-		.write_style(if enable_colors && atty::is(atty::Stream::Stderr) {
+		.write_style(if enable_colors && log_target_is_tty {
 			WriteStyle::Always
 		} else {
 			WriteStyle::Never
