@@ -74,8 +74,9 @@ pub struct GlobalOptions {
 	/// with files that are not a Minecraft pack, or similar reasons.
 	///
 	/// Even if this option is set to `false`, `pack.mcmeta` may still be validated if
-	/// `automatic_minecraft_quirks_detection` is enabled. To guarantee that file is not
-	/// validated no matter what, both options should be set to `false`.
+	/// `automatic_minecraft_quirks_detection` or `automatic_asset_types_mask_detection` are
+	/// enabled. To guarantee that file is not validated no matter what, both options should be
+	/// set to `false`.
 	///
 	/// **Default value**: `true`
 	pub validate_pack_metadata_file: bool,

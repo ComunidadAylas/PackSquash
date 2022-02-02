@@ -31,7 +31,6 @@ async fn successful_process_test(
 
 	let data_stream = LegacyLanguageFile {
 		read: Builder::new().read(input_data).build(),
-		file_length_hint: input_data.len(),
 		optimization_settings: settings
 	}
 	.process();
@@ -72,7 +71,6 @@ async fn unsuccessful_process_test(
 
 	let data_stream = LegacyLanguageFile {
 		read: Builder::new().read(input_data).build(),
-		file_length_hint: input_data.len(),
 		optimization_settings: settings
 	}
 	.process();

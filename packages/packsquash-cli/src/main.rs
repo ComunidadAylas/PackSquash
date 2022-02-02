@@ -5,37 +5,37 @@ use std::{
 	borrow::Cow,
 	env, fs,
 	io::{self, Read},
-	process, thread,
-	time::Instant
+	process,
+	time::{Duration, Instant}
 };
 
 use getopts::{Options, ParsingStyle};
 use log::{debug, error, info, trace, warn, Level, LevelFilter};
-use tokio::sync::mpsc::channel;
+use tokio::{runtime, select, sync::mpsc::channel, time::sleep};
 
 use packsquash::{
 	config::SquashOptions, vfs::os_fs::OsFilesystem, PackSquasher, PackSquasherError,
 	PackSquasherStatus, PackSquasherWarning
 };
+use terminal_title_controller::TerminalTitleController;
 
-macro_rules! packsquash_title {
-	() => {
-		"PackSquash"
-	};
-}
+mod terminal_title_controller;
+mod terminal_title_setter;
 
 fn main() {
-	process::exit(run());
+	#[cfg(feature = "color-backtrace")]
+	color_backtrace::install();
+
+	process::exit(run(TerminalTitleController::new()));
 }
 
 /// Runs PackSquash, parsing the command line parameters and deciding what options file
 /// to read to process a pack.
-fn run() -> i32 {
-	#[cfg(feature = "crossterm")]
-	TerminalTitle::Idle.show();
-
-	#[cfg(feature = "color-backtrace")]
-	color_backtrace::install();
+fn run(title_controller: Option<TerminalTitleController>) -> i32 {
+	// Show initial title
+	if let Some(title_controller) = &title_controller {
+		title_controller.show();
+	}
 
 	let enable_emoji_default = enable_emoji_default();
 	let enable_color_default = enable_color_default();
@@ -82,10 +82,13 @@ fn run() -> i32 {
 
 				print_version_information(false);
 				println!();
-				read_options_file_and_squash(option_matches.free.first().filter(|path| {
-					// Let "-" behave as if no path was provided
-					path != &"-"
-				}))
+				read_options_file_and_squash(
+					option_matches.free.first().filter(|path| {
+						// Let "-" behave as if no path was provided
+						path != &"-"
+					}),
+					title_controller
+				)
 			}
 		}
 		Err(parse_err) => {
@@ -104,7 +107,10 @@ fn run() -> i32 {
 
 /// Reads an options file and launches a squash operation to optimize it with the
 /// read options.
-fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
+fn read_options_file_and_squash(
+	options_file_path: Option<&String>,
+	title_controller: Option<TerminalTitleController>
+) -> i32 {
 	let user_friendly_options_path =
 		options_file_path.map_or_else(|| "standard input (keyboard input or pipe)", |path| path);
 
@@ -162,7 +168,7 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 	let output_file_path = squash_options.global_options.output_file_path.clone();
 	let start_instant = Instant::now();
 
-	squash(squash_options).map_or_else(
+	squash(squash_options, title_controller).map_or_else(
 		|err| {
 			error!(
 				"Pack processing error: {}{}\n\
@@ -212,107 +218,150 @@ fn read_options_file_and_squash(options_file_path: Option<&String>) -> i32 {
 	)
 }
 
-fn squash(squash_options: SquashOptions) -> Result<Option<(u64, u64)>, PackSquasherError> {
+fn squash(
+	squash_options: SquashOptions,
+	mut title_controller: Option<TerminalTitleController>
+) -> Result<Option<(u64, u64)>, PackSquasherError> {
 	let (sender, mut receiver) = channel(64);
 
-	// Spawn our CLI-updating thread. This decouples the pack processing from
-	// the printing of standard streams messages, unless printing to them is
-	// so slow that the channel buffer is filled, in which case the process
-	// threads are slowed down to avoid exhausting memory
-	let cli_thread = thread::spawn(move || {
+	// Move on to the "processing" title phase
+	if let Some(title_controller) = &mut title_controller {
+		title_controller.next_title_phase();
+		title_controller.show();
+	}
+
+	// Build the runtime we're going to use to concurrently wait for status messages and update
+	// the title on a single thread: updating the display
+	let runtime = runtime::Builder::new_current_thread()
+		.enable_time()
+		.build()
+		.unwrap();
+
+	let cli_update_task = runtime.spawn(async move {
+		/// The maximum interval of time between two progress ticks of the title. Used to assure
+		/// the user that progress is being made even when something takes a while to optimize.
+		const PROGRESS_TICK_INTERVAL: Duration = Duration::from_secs(1);
+
 		let mut total_file_count = 0;
 		let mut processed_file_count = 0;
+		let progress_tick_timer = sleep(PROGRESS_TICK_INTERVAL);
 
-		#[cfg(feature = "crossterm")]
-		let mut terminal_title_state = TerminalTitle::ProcessingPack1.show();
+		tokio::pin!(progress_tick_timer);
 
-		while let Some(status_update) = receiver.blocking_recv() {
-			match status_update {
-				PackSquasherStatus::PackFileProcessed(pack_file_status) => {
-					total_file_count += 1;
-					processed_file_count += 1 - pack_file_status.skipped() as u64;
+		loop {
+			select! {
+				// Give priority to status updates
+				biased;
 
-					#[cfg(feature = "crossterm")]
-					{
-						terminal_title_state = terminal_title_state.show().next();
-					}
+				status_update_message = receiver.recv() => match status_update_message {
+					Some(status_update) => match status_update {
+						PackSquasherStatus::PackFileProcessed(pack_file_status) => {
+							total_file_count += 1;
+							processed_file_count += 1 - pack_file_status.skipped() as u64;
 
-					match pack_file_status.optimization_error() {
-						Some(error_description) => error!(
-							"{}: {}",
-							pack_file_status.path().as_str(),
-							error_description
-						),
-						None => {
-							if pack_file_status.skipped() {
-								warn!(
+							match pack_file_status.optimization_error() {
+								Some(error_description) => error!(
 									"{}: {}",
 									pack_file_status.path().as_str(),
-									pack_file_status.optimization_strategy()
-								)
-							} else {
-								trace!(
-									"{}: {}",
-									pack_file_status.path().as_str(),
-									pack_file_status.optimization_strategy()
-								)
+									error_description
+								),
+								None => {
+									if pack_file_status.skipped() {
+										warn!(
+											"{}: {}",
+											pack_file_status.path().as_str(),
+											pack_file_status.optimization_strategy()
+										)
+									} else {
+										trace!(
+											"{}: {}",
+											pack_file_status.path().as_str(),
+											pack_file_status.optimization_strategy()
+										)
+									};
+								}
 							};
-						}
-					}
-				}
-				PackSquasherStatus::ZipFinish => {
-					info!("Finishing up ZIP file...");
 
-					#[cfg(feature = "crossterm")]
-					{
-						TerminalTitle::Finishing.show();
+							if let Some(title_controller) = &mut title_controller {
+								title_controller.advance_and_show();
+
+								// Prevent the forceful title progress tick from running too soon after this
+								progress_tick_timer
+									.as_mut()
+									.reset(tokio::time::Instant::now() + PROGRESS_TICK_INTERVAL);
+							}
+						}
+						PackSquasherStatus::ZipFinish => {
+							info!("Finishing up ZIP file...");
+
+							// Move on to the "finishing" title phase
+							if let Some(title_controller) = &mut title_controller {
+								title_controller.next_title_phase();
+								title_controller.show();
+							}
+						}
+						PackSquasherStatus::Notice(notice) => info!("{}", notice),
+						PackSquasherStatus::Warning(warning) => match warning {
+							PackSquasherWarning::UnusablePreviousZip(err) => warn!(
+								"The previous ZIP file could not be read. It will not be used to speed up processing. \
+									Was the file last modified by PackSquash? Cause: {}",
+								err
+							),
+							PackSquasherWarning::LowEntropySystemId => warn!(
+								"Used a low entropy system ID. The dates embedded in the result ZIP file, \
+									which reveal when it was generated, may be easier to decrypt. For more information \
+									about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"
+							),
+							PackSquasherWarning::VolatileSystemId => warn!(
+								"Used a volatile system ID. You maybe should not reuse the result ZIP file, \
+									as unexpected results can occur after you use your device as usual. For more information \
+									about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"
+							),
+							_ => unimplemented!()
+						},
+						_ => unimplemented!()
+					}
+					None => {
+						// PackSquasher has finished its work, and it will not send any other messages
+						break
+					}
+				},
+				_ = &mut progress_tick_timer => {
+					// We have not yet received any message from the PackSquasher. Change the title
+					// so that we give the user the illusion of some progress, and then schedule
+					// another progress tick
+					if let Some(title_controller) = &mut title_controller {
+						title_controller.advance_and_show();
+
+						progress_tick_timer
+							.as_mut()
+							.reset(tokio::time::Instant::now() + PROGRESS_TICK_INTERVAL);
 					}
 				}
-				PackSquasherStatus::Notice(notice) => {
-					info!("{}", notice)
-				}
-				PackSquasherStatus::Warning(warning) => match warning {
-					PackSquasherWarning::UnusablePreviousZip(err) => warn!(
-						"The previous ZIP file could not be read. It will not be used to speed up processing. \
-							Was the file last modified by PackSquash? Cause: {}",
-						err
-					),
-					PackSquasherWarning::LowEntropySystemId => warn!(
-						"Used a low entropy system ID. The dates embedded in the result ZIP file, \
-							which reveal when it was generated, may be easier to decrypt. For more information \
-							about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"
-					),
-					PackSquasherWarning::VolatileSystemId => warn!(
-						"Used a volatile system ID. You maybe should not reuse the result ZIP file, \
-							as unexpected results can occur after you use your device as usual. For more information \
-							about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"
-					),
-					_ => unimplemented!()
-				},
-				_ => unimplemented!()
 			}
 		}
 
 		(total_file_count, processed_file_count)
 	});
 
-	// Squash the pack! This blocks until the operation is complete
-	PackSquasher::new()
-		.run(OsFilesystem, squash_options, Some(sender))
-		.map(|_| {
-			// Wait for the CLI thread to process any remaining buffered messages, and get the file
-			// counts from it. Our thread is simple enough to conclude that it will not panic, but
-			// be extra safe and not unwrap. We don't want to throw all of the work out of the window
-			// for a non-critical error
-			cli_thread.join().ok()
-		})
+	// Squash the pack! This blocks until the operation is complete, so we can't run it in this thread
+	let packsquasher = runtime
+		.spawn_blocking(|| PackSquasher::new().run(OsFilesystem, squash_options, Some(sender)));
+
+	runtime.block_on(async {
+		// Wait for completion. Unwrap the handle because any panic in the thread is fatal anyway,
+		// and we should propagate it
+		match packsquasher.await.unwrap() {
+			Ok(_) => Ok(cli_update_task.await.ok()),
+			Err(err) => Err(err)
+		}
+	})
 }
 
 /// Prints PackSquash version information to the standard output stream.
 fn print_version_information(verbose: bool) {
 	println!(
-		"{} {} ({}, {}) for {}",
-		packsquash_title!(),
+		"PackSquash {} ({}, {}) for {}",
 		env!("VERGEN_GIT_SEMVER_LIGHTWEIGHT"),
 		env!("VERGEN_CARGO_PROFILE"),
 		env!("BUILD_DATE"),
@@ -345,48 +394,6 @@ fn print_version_information(verbose: bool) {
 		println!("This is free software, and you are welcome to redistribute it");
 		println!("under certain conditions. Use the -v command line switch for");
 		println!("more details about these conditions.");
-	}
-}
-
-#[derive(Copy, Clone)]
-#[cfg(feature = "crossterm")]
-enum TerminalTitle {
-	Idle,
-	ProcessingPack1,
-	ProcessingPack2,
-	ProcessingPack3,
-	ProcessingPack4,
-	Finishing
-}
-
-#[cfg(feature = "crossterm")]
-impl TerminalTitle {
-	fn next(self) -> Self {
-		match self {
-			Self::Idle => Self::Idle,
-			Self::ProcessingPack1 => Self::ProcessingPack2,
-			Self::ProcessingPack2 => Self::ProcessingPack3,
-			Self::ProcessingPack3 => Self::ProcessingPack4,
-			Self::ProcessingPack4 => Self::ProcessingPack1,
-			Self::Finishing => Self::Finishing
-		}
-	}
-
-	fn show(self) -> Self {
-		use crossterm::ExecutableCommand;
-
-		io::stdout()
-			.execute(crossterm::terminal::SetTitle(match self {
-				Self::Idle => packsquash_title!(),
-				Self::ProcessingPack1 => concat!(packsquash_title!(), " - Optimizing [-]"),
-				Self::ProcessingPack2 => concat!(packsquash_title!(), " - Optimizing [\\]"),
-				Self::ProcessingPack3 => concat!(packsquash_title!(), " - Optimizing [|]"),
-				Self::ProcessingPack4 => concat!(packsquash_title!(), " - Optimizing [/]"),
-				Self::Finishing => concat!(packsquash_title!(), " - Finishing [ ]")
-			}))
-			.ok();
-
-		self
 	}
 }
 
