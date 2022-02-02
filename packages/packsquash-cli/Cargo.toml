@@ -17,18 +17,23 @@ packsquash = { path = "../packsquash", version = "0.3.1" }
 getopts = "0.2.21"
 toml = "0.5.8"
 
-tokio = { version = "1.16.1", default-features = false }
+tokio = { version = "1.16.1", default-features = false, features = ["rt", "time"] }
 
 color-backtrace = { version = "0.5.1", default-features = false, optional = true }
-crossterm = { version = "0.22.1", optional = true }
+
+atty = "0.2.14"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", default-features = false, features = ["consoleapi"] }
+winapi-util = "0.1.5"
 
 [build-dependencies]
 vergen = { version = "6.0.2", default-features = false, features = ["cargo", "git"] }
 time = { version = "0.3.7", default-features = false, features = ["std"] }
 
 [features]
-# Support fancy terminal interaction and panic messages by default
-default = ["crossterm", "color-backtrace"]
+# Support pretty panic messages by default
+default = ["color-backtrace"]
 
 [[bin]]
 name = "packsquash-cli"
