@@ -133,7 +133,7 @@ fn read_options_file_and_squash(
 	title_controller: Option<TerminalTitleController>
 ) -> i32 {
 	let user_friendly_options_path =
-		options_file_path.map_or_else(|| "standard input (keyboard input or pipe)", |path| path);
+		options_file_path.map_or("standard input (keyboard input or pipe)", |path| path);
 
 	// Tell the user where are we reading the configuration from
 	info!(
