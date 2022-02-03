@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1643836886771,
+  "lastUpdate": 1643913451419,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -177,6 +177,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1617156609,
             "range": "± 45885911",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "34268371+sya-ri@users.noreply.github.com",
+            "name": "sya-ri",
+            "username": "sya-ri"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c8c6be5f594fd55b1655313379025f2e0f0238dd",
+          "message": "Change cli to colored output (#46)\n\n* feat: change cli to colored output\r\n\r\n* style: run rustfmt\r\n\r\n* refactor: use crossterm for styling\r\n\r\n* refactor: change variable name\r\n\r\n* style: run rustfmt\r\n\r\n* refactor: Use log crate for output\r\n\r\n* tweak: Remove usage line break\r\n\r\n* tweak: Change usage, version info output to use println\r\n\r\n* refactor: Changed to print icon in log formatter\r\n\r\n* tweak: Add an icon each message log\r\n\r\n* tweak: Improve multi-line message icon\r\n\r\n* feat: Add emoji option\r\n\r\n* tweak: Change warn icon to high_voltage\r\n\r\n* tweak: Change notice icon to right_pointing_magnifying_glass\r\n\r\n* feat: Add color, no-color option\r\n\r\n* tweak: Delete emoji option short name\r\n\r\n* tweak: Treat --emoji as --emoji=true\r\n\r\nUntil now, --emoji was treated as --emoji=default\r\n\r\n* tweak: Change to use color option in emoji parse error\r\n\r\n* style: fmt\r\n\r\n* feat: Add --no-emoji option\r\n\r\n* feat: Support env var for changing output format\r\n\r\n* chore: streamline some changes, minor refactors\r\n\r\n* chore: replace superfluous map_or_else with map_or\r\n\r\n* refactor: move new functions to their own module\r\n\r\nThis is tidier and allows keeping both modules more cohesive.\r\n\r\n* refactor: extract duplicate atty call to a variable\r\n\r\n* chore(terminal_can_display_color): fix incorrect default value\r\n\r\n* chore: revert to env. vars and switches overriding color and emoji\r\n\r\nAn important use case for those switches is being able to print colors\r\nand emojis to non-TTYs, which previously wasn't possible.\r\n\r\n* fix: flush stream to make sure title ANSI escape seqs are handed off\r\n\r\nNot doing so caused the title to not update apparently randomly.\r\n\r\nCo-authored-by: Alejandro González <AlexTMjugador@users.noreply.github.com>",
+          "timestamp": "2022-02-03T18:58:12+01:00",
+          "tree_id": "09c07e74d3cbfcd740f71eedf2b4290f31997a9d",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c8c6be5f594fd55b1655313379025f2e0f0238dd"
+        },
+        "date": 1643913450725,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 16033396,
+            "range": "± 697794",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1143617746,
+            "range": "± 28602155",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12815266203,
+            "range": "± 226444210",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1555304181,
+            "range": "± 39964076",
             "unit": "ns/iter"
           }
         ]
