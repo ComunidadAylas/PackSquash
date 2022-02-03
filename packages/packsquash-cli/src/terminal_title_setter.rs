@@ -40,5 +40,10 @@ fn write_ansi_set_window_title_escape_sequence<W: Write>(mut w: W, string: &str)
 	// OSC = ESC ]
 	// Ps = 2 = Change Window Title to Pt
 	// OSC Ps ; Pt BEL
+	// See: https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Tektronix-4014-Mode
 	write!(w, "\x1B]2;{}\x07", string).ok();
+
+	// Flushing is needed because the stream may be (line-)buffered, preventing
+	// the title from being updated promptly
+	w.flush().ok();
 }
