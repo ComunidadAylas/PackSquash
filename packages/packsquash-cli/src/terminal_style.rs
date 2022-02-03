@@ -8,7 +8,7 @@ fn terminal_can_display_color() -> bool {
 		// On Unix-like platforms, TERM must be set, or else things are probably
 		// broken and colors won't work. On Windows and other platforms that is not
 		// the case. We assume that if the terminal is not dumb then colors are supported
-		cfg!(unix),
+		cfg!(not(unix)),
 		term_is_dumb
 	)
 }
