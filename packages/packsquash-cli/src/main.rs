@@ -6,17 +6,27 @@ use std::{
 	time::{Duration, Instant}
 };
 
+use env_logger::fmt::Color;
+use env_logger::{Builder, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
+use log::{debug, error, info, trace, warn, Level, LevelFilter};
 use tokio::{runtime, select, sync::mpsc::channel, time::sleep};
 
 use packsquash::{
 	config::SquashOptions, vfs::os_fs::OsFilesystem, PackSquasher, PackSquasherError,
 	PackSquasherStatus, PackSquasherWarning
 };
+use terminal_style::{environment_allows_color, environment_allows_emoji};
 use terminal_title_controller::TerminalTitleController;
 
+mod terminal_style;
 mod terminal_title_controller;
 mod terminal_title_setter;
+
+/// The log target where status messages will be sent to.
+const LOG_TARGET: Target = Target::Stderr;
+/// The [`atty`] stream that matches the [`LOG_TARGET`] constant.
+const LOG_TARGET_STREAM: atty::Stream = atty::Stream::Stderr;
 
 fn main() {
 	#[cfg(feature = "color-backtrace")]
@@ -33,10 +43,38 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 		title_controller.show();
 	}
 
+	let log_target_is_tty = atty::is(LOG_TARGET_STREAM);
+	let enable_emoji_default = environment_allows_emoji() && log_target_is_tty;
+	let enable_color_default = environment_allows_color() && log_target_is_tty;
+
 	let mut options = Options::new();
 
 	options.optflag("h", "help", "Prints information about the command line arguments accepted by this application and exits")
 		.optflag("v", "version", "Prints version and copyright information of the application, then exits")
+		.optflag(
+			"",
+			"emoji",
+			"Always enable emojis in status messages. \
+			This is equivalent to setting the PACKSQUASH_EMOJI or EMOJI environment variables to \"show\""
+		)
+		.optflag(
+			"",
+			"no-emoji",
+			"Always disable emojis status messages. \
+			 This is equivalent to defining the NO_EMOJI environment variable, or setting PACKSQUASH_EMOJI or EMOJI to something else than \"show\""
+		)
+		.optflag(
+			"",
+			"color",
+			"Always enable color in messages. \
+			This is equivalent to setting the PACKSQUASH_COLOR or COLOR environment variables to \"show\""
+		)
+		.optflag(
+			"",
+			"no-color",
+			"Always disable color in messages. \
+			This is equivalent to defining the NO_COLOR environment variable, or setting PACKSQUASH_COLOR or COLOR to something else than \"show\""
+		)
 		.parsing_style(ParsingStyle::StopAtFirstFree);
 
 	match options.parse(env::args().skip(1)) {
@@ -57,6 +95,20 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 
 				0
 			} else {
+				let enable_emoji = if enable_emoji_default {
+					!option_matches.opt_present("no-emoji")
+				} else {
+					option_matches.opt_present("emoji")
+				};
+
+				let enable_color = if enable_color_default {
+					!option_matches.opt_present("no-color")
+				} else {
+					option_matches.opt_present("color")
+				};
+
+				init_logger(enable_emoji, enable_color);
+
 				print_version_information(false);
 				println!();
 				read_options_file_and_squash(
@@ -69,9 +121,11 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 			}
 		}
 		Err(parse_err) => {
-			eprintln!("{}", parse_err);
-			eprintln!(
-				"Run {} -h to see command line argument help",
+			init_logger(enable_emoji_default, enable_color_default);
+
+			error!(
+				"{}\nRun {} -h to see command line argument help",
+				parse_err,
 				env!("CARGO_BIN_NAME")
 			);
 
@@ -87,19 +141,21 @@ fn read_options_file_and_squash(
 	title_controller: Option<TerminalTitleController>
 ) -> i32 {
 	let user_friendly_options_path =
-		options_file_path.map_or_else(|| "standard input (keyboard input or pipe)", |path| path);
+		options_file_path.map_or("standard input (keyboard input or pipe)", |path| path);
 
 	// Tell the user where are we reading the configuration from
-	println!("Reading options from {}...", user_friendly_options_path);
-	if options_file_path.is_none() {
-		// Newbies are often confused by terms such as "standard input", so try
-		// to point them in the direction of what they probably want to do
-		println!("If you are not sure what this means, try using an external options file.");
-		println!(
-			"Please check out <https://packsquash.page.link/Options-files> for examples and more information."
-		);
-	}
-	println!();
+	info!(
+		"Reading options from {}...{}",
+		user_friendly_options_path,
+		if options_file_path.is_none() {
+			// Newbies are often confused by terms such as "standard input", so try
+			// to point them in the direction of what they probably want to do
+			"\nIf you are not sure what this means, try using an external options file.\
+			 \nPlease check out <https://packsquash.page.link/Options-files> for examples and more information."
+		} else {
+			""
+		}
+	);
 
 	// Read the TOML configuration data from the specified source
 	let options_string = match match options_file_path {
@@ -114,9 +170,9 @@ fn read_options_file_and_squash(
 	} {
 		Ok(options_string) => options_string,
 		Err(err) => {
-			eprintln!(
-				"! Couldn't read the options file from {}: {}",
-				user_friendly_options_path, err
+			error!(
+				"Couldn't read the options file from {}: {}",
+				user_friendly_options_path, err,
 			);
 
 			return 2;
@@ -127,8 +183,8 @@ fn read_options_file_and_squash(
 	let squash_options = match toml::from_str::<SquashOptions>(&options_string) {
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
-			eprintln!(
-				"! An error occurred while parsing the options file from {}: {}",
+			error!(
+				"An error occurred while parsing the options file from {}: {}",
 				user_friendly_options_path, deserialize_error
 			);
 
@@ -136,29 +192,27 @@ fn read_options_file_and_squash(
 		}
 	};
 
-	println!("Options read. Processing pack...");
-	println!();
+	info!("Options read. Processing pack...");
 
 	let output_file_path = squash_options.global_options.output_file_path.clone();
 	let start_instant = Instant::now();
 
 	squash(squash_options, title_controller).map_or_else(
 		|err| {
-			eprintln!("! Pack processing error: {}", err);
-
-			// We print both informational and error pack file status updates.
-			// If the error was in one of those, hint the user at the status
-			// update that contains the most information about the error
-			if matches!(err, PackSquasherError::PackFileError) {
-				eprintln!(
-					"Another error message with more details about the error was emitted before. \
+			error!(
+				"Pack processing error: {}{}\n\
+				These troubleshooting instructions might be useful: \
+				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>",
+				err,
+				// We print both informational and error pack file status updates.
+				// If the error was in one of those, hint the user at the status
+				// update that contains the most information about the error
+				if matches!(err, PackSquasherError::PackFileError) {
+					"\nAnother error message with more details about the error was emitted before. \
 					You might need to scroll up to see it."
-				);
-			}
-
-			eprintln!(
-				"These troubleshooting instructions might be useful: \
-				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>"
+				} else {
+					""
+				}
 			);
 
 			128
@@ -166,7 +220,7 @@ fn read_options_file_and_squash(
 		|file_counts| {
 			let process_time = start_instant.elapsed();
 
-			println!(
+			debug!(
 				"{} ({} pack files, {} pack files stored, {}.{:03} s)",
 				output_file_path.metadata().ok().map_or_else(
 					|| Cow::Borrowed("Pack processed"),
@@ -235,16 +289,26 @@ fn squash(
 							processed_file_count += 1 - pack_file_status.skipped() as u64;
 
 							match pack_file_status.optimization_error() {
-								Some(error_description) => eprintln!(
-									"! {}: {}",
+								Some(error_description) => error!(
+									"{}: {}",
 									pack_file_status.path().as_str(),
 									error_description
 								),
-								None => eprintln!(
-									"> {}: {}",
-									pack_file_status.path().as_str(),
-									pack_file_status.optimization_strategy()
-								)
+								None => {
+									if pack_file_status.skipped() {
+										warn!(
+											"{}: {}",
+											pack_file_status.path().as_str(),
+											pack_file_status.optimization_strategy()
+										)
+									} else {
+										trace!(
+											"{}: {}",
+											pack_file_status.path().as_str(),
+											pack_file_status.optimization_strategy()
+										)
+									};
+								}
 							};
 
 							if let Some(title_controller) = &mut title_controller {
@@ -257,7 +321,7 @@ fn squash(
 							}
 						}
 						PackSquasherStatus::ZipFinish => {
-							eprintln!("- Finishing up ZIP file...");
+							info!("Finishing up ZIP file...");
 
 							// Move on to the "finishing" title phase
 							if let Some(title_controller) = &mut title_controller {
@@ -265,22 +329,22 @@ fn squash(
 								title_controller.show();
 							}
 						}
-						PackSquasherStatus::Notice(notice) => eprintln!("- {}", notice),
+						PackSquasherStatus::Notice(notice) => info!("{}", notice),
 						PackSquasherStatus::Warning(warning) => match warning {
-							PackSquasherWarning::UnusablePreviousZip(err) => eprintln!(
-								"* The previous ZIP file could not be read. It will not be used to speed \
-									up processing. Was the file last modified by PackSquash? Cause: {}",
+							PackSquasherWarning::UnusablePreviousZip(err) => warn!(
+								"The previous ZIP file could not be read. It will not be used to speed up processing. \
+									Was the file last modified by PackSquash? Cause: {}",
 								err
 							),
-							PackSquasherWarning::LowEntropySystemId => eprintln!(
-								"* Used a low entropy system ID. The dates embedded in the result ZIP file, \
-									which reveal when it was generated, may be easier to decrypt. For more \
-									information about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"
+							PackSquasherWarning::LowEntropySystemId => warn!(
+								"Used a low entropy system ID. The dates embedded in the result ZIP file, \
+									which reveal when it was generated, may be easier to decrypt. For more information \
+									about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"
 							),
-							PackSquasherWarning::VolatileSystemId => eprintln!(
-								"* Used a volatile system ID. You maybe should not reuse the result ZIP file, \
-									as unexpected results can occur after you use your device as usual. For more \
-									information about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"
+							PackSquasherWarning::VolatileSystemId => warn!(
+								"Used a volatile system ID. You maybe should not reuse the result ZIP file, \
+									as unexpected results can occur after you use your device as usual. For more information \
+									about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"
 							),
 							_ => unimplemented!()
 						},
@@ -360,4 +424,49 @@ fn print_version_information(verbose: bool) {
 		println!("under certain conditions. Use the -v command line switch for");
 		println!("more details about these conditions.");
 	}
+}
+
+/// Initializes the logging of the application, responsible of showing to the user relevant
+/// application operation information.
+fn init_logger(enable_emoji: bool, enable_colors: bool) {
+	let mut logger_builder = Builder::new();
+
+	logger_builder
+		.target(LOG_TARGET)
+		.write_style(if enable_colors {
+			WriteStyle::Always
+		} else {
+			WriteStyle::Never
+		})
+		// Hide log messages from libraries by default
+		.filter(Some("packsquash"), LevelFilter::max())
+		.format(move |f, record| {
+			use std::io::Write;
+
+			let (level_color, level_icon, level_bold_style) = match record.level() {
+				Level::Error => (Color::Red, if enable_emoji { '❌' } else { '!' }, true),
+				Level::Warn => (Color::Yellow, if enable_emoji { '⚡' } else { '*' }, false),
+				Level::Info => (Color::Cyan, if enable_emoji { '🔷' } else { '-' }, false),
+				Level::Debug => (Color::Green, if enable_emoji { '🍀' } else { '#' }, false),
+				Level::Trace => (Color::White, if enable_emoji { '🏁' } else { '>' }, false)
+			};
+
+			let mut style = f.style();
+			style.set_color(level_color).set_bold(level_bold_style);
+
+			let message = style.value(
+				format!("{} {}", level_icon, record.args())
+					// Emojis are usually displayed with a non-monospaced font that is wider
+					// than other characters. Output an extra space as a hack to look pretty
+					.replace('\n', if enable_emoji { "\n   " } else { "\n  " })
+			);
+
+			writeln!(f, "{}", message)
+		});
+
+	if let Ok(log_filters) = env::var("PACKSQUASH_LOG").or_else(|_| env::var("RUST_LOG")) {
+		logger_builder.parse_filters(&log_filters);
+	}
+
+	logger_builder.init();
 }
