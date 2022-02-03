@@ -23,6 +23,11 @@ mod terminal_style;
 mod terminal_title_controller;
 mod terminal_title_setter;
 
+/// The log target where status messages will be sent to.
+const LOG_TARGET: Target = Target::Stderr;
+/// The [`atty`] stream that matches the [`LOG_TARGET`] constant.
+const LOG_TARGET_STREAM: atty::Stream = atty::Stream::Stderr;
+
 fn main() {
 	#[cfg(feature = "color-backtrace")]
 	color_backtrace::install();
@@ -38,8 +43,9 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 		title_controller.show();
 	}
 
-	let environment_allows_emoji = environment_allows_emoji();
-	let environment_allows_color = environment_allows_color();
+	let log_target_is_tty = atty::is(LOG_TARGET_STREAM);
+	let enable_emoji_default = environment_allows_emoji() && log_target_is_tty;
+	let enable_color_default = environment_allows_color() && log_target_is_tty;
 
 	let mut options = Options::new();
 
@@ -48,25 +54,25 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 		.optflag(
 			"",
 			"emoji",
-			"Always enable emojis in status messages for interactive usage. \
+			"Always enable emojis in status messages. \
 			This is equivalent to setting the PACKSQUASH_EMOJI or EMOJI environment variables to \"show\""
 		)
 		.optflag(
 			"",
 			"no-emoji",
-			"Always disable emojis status messages for interactive usage. \
+			"Always disable emojis status messages. \
 			 This is equivalent to defining the NO_EMOJI environment variable, or setting PACKSQUASH_EMOJI or EMOJI to something else than \"show\""
 		)
 		.optflag(
 			"",
 			"color",
-			"Always enable color in output messages for interactive usage. \
+			"Always enable color in messages. \
 			This is equivalent to setting the PACKSQUASH_COLOR or COLOR environment variables to \"show\""
 		)
 		.optflag(
 			"",
 			"no-color",
-			"Always disable color in output messages for interactive usage. \
+			"Always disable color in messages. \
 			This is equivalent to defining the NO_COLOR environment variable, or setting PACKSQUASH_COLOR or COLOR to something else than \"show\""
 		)
 		.parsing_style(ParsingStyle::StopAtFirstFree);
@@ -89,13 +95,13 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 
 				0
 			} else {
-				let enable_emoji = if environment_allows_emoji {
+				let enable_emoji = if enable_emoji_default {
 					!option_matches.opt_present("no-emoji")
 				} else {
 					option_matches.opt_present("emoji")
 				};
 
-				let enable_color = if environment_allows_color {
+				let enable_color = if enable_color_default {
 					!option_matches.opt_present("no-color")
 				} else {
 					option_matches.opt_present("color")
@@ -115,7 +121,7 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 			}
 		}
 		Err(parse_err) => {
-			init_logger(environment_allows_emoji, environment_allows_color);
+			init_logger(enable_emoji_default, enable_color_default);
 
 			error!(
 				"{}\nRun {} -h to see command line argument help",
@@ -422,16 +428,12 @@ fn print_version_information(verbose: bool) {
 
 /// Initializes the logging of the application, responsible of showing to the user relevant
 /// application operation information.
-fn init_logger(mut enable_emoji: bool, enable_colors: bool) {
+fn init_logger(enable_emoji: bool, enable_colors: bool) {
 	let mut logger_builder = Builder::new();
-	let log_target_is_tty = atty::is(atty::Stream::Stderr);
-
-	// Only enable emojis if they are going to be logged to an interactive terminal
-	enable_emoji = enable_emoji && log_target_is_tty;
 
 	logger_builder
-		.target(Target::Stderr)
-		.write_style(if enable_colors && log_target_is_tty {
+		.target(LOG_TARGET)
+		.write_style(if enable_colors {
 			WriteStyle::Always
 		} else {
 			WriteStyle::Never

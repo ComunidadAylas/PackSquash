@@ -14,7 +14,8 @@ fn terminal_can_display_color() -> bool {
 }
 
 /// Checks whether the running environment (i.e. terminal and environment variables combination)
-/// allows displaying color.
+/// allows displaying color. This does not take into account whether any output will actually
+/// go to an interactive terminal.
 pub fn environment_allows_color() -> bool {
 	if let Some(color_mode) = env::var_os("PACKSQUASH_COLOR").or_else(|| env::var_os("COLOR")) {
 		// The PACKSQUASH_COLOR and COLOR environment variables, in that priority order,
@@ -46,7 +47,8 @@ fn terminal_can_display_emoji() -> bool {
 }
 
 /// Checks whether the running environment (i.e. terminal and environment variables combination)
-/// allows displaying emoji.
+/// allows displaying emoji. This does not take into account whether any output will actually
+/// go to an interactive terminal.
 pub fn environment_allows_emoji() -> bool {
 	if let Some(emoji_mode) = env::var_os("PACKSQUASH_EMOJI").or_else(|| env::var_os("EMOJI")) {
 		// The PACKSQUASH_EMOJI and EMOJI environment variables, in that priority order,
