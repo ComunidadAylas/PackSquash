@@ -12,19 +12,18 @@
       }
       body {
         color: #4a4a4a;
-        margin: 8px;
+        margin: 0;
         font-size: 1em;
         font-weight: 400;
-      }
-      header {
-        margin-bottom: 8px;
-        display: flex;
-        flex-direction: column;
       }
       main {
         width: 100%;
         display: flex;
         flex-direction: column;
+      }
+      footer {
+        display: flex;
+        justify-content: space-between;
       }
       a {
         color: #3273dc;
@@ -45,19 +44,15 @@
         background-color: #2793da;
         flex: none;
       }
-      .spacer {
-        flex: auto;
-      }
       .small {
         font-size: 0.75rem;
       }
       footer {
-        margin-top: 16px;
+        margin: 8px;
         display: flex;
         align-items: center;
-      }
-      .header-label {
-        margin-right: 4px;
+        flex-wrap: wrap;
+        grid-gap: 4px;
       }
       .benchmark-set {
         margin: 8px 0;
@@ -66,7 +61,7 @@
         flex-direction: column;
       }
       .benchmark-title {
-        font-size: 3rem;
+        font-size: 2rem;
         font-weight: 600;
         word-break: break-word;
         text-align: center;
@@ -87,21 +82,20 @@
   </head>
 
   <body>
-    <header id="header">
-      <div class="header-item">
-        <strong class="header-label">Last Update:</strong>
-        <span id="last-update"></span>
-      </div>
-      <div class="header-item">
-        <strong class="header-label">Repository:</strong>
-        <a id="repository-link" rel="noopener"></a>
-      </div>
-    </header>
     <main id="main"></main>
     <footer>
       <button id="dl-button">Download data as JSON</button>
-      <div class="spacer"></div>
-      <div class="small">Powered by <a rel="noopener" href="https://github.com/marketplace/actions/continuous-benchmark">github-action-benchmark</a></div>
+      <div class="small">
+        <div>
+          <span>Last Update:</span>
+          <span id="last-update"></span>
+        </div>
+        <div>
+          <span>Repository:</span>
+          <a id="repository-link" rel="noopener"></a>
+        </div>
+        <div>Powered by <a rel="noopener" href="https://github.com/marketplace/actions/continuous-benchmark">github-action-benchmark</a></div>
+      </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.2/dist/Chart.min.js"></script>
@@ -124,6 +118,10 @@
         };
 
         function init() {
+          function formatDate(date) {
+            return date.getFullYear() + '/' + (date.getMonth() + 1).toString().padStart(2, '0') + '/' + date.getDate().toString().padStart(2, '0') + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+          }
+
           function collectBenchesPerTestCase(entries) {
             const map = new Map();
             for (const entry of entries) {
@@ -144,10 +142,10 @@
           const data = window.BENCHMARK_DATA;
 
           // Render header
-          document.getElementById('last-update').textContent = new Date(data.lastUpdate).toString();
+          document.getElementById('last-update').textContent = formatDate(new Date(data.lastUpdate));
           const repoLink = document.getElementById('repository-link');
           repoLink.href = data.repoUrl;
-          repoLink.textContent = data.repoUrl;
+          repoLink.textContent = data.repoUrl.split('https://github.com/')[1];
 
           // Render footer
           document.getElementById('dl-button').onclick = () => {
@@ -202,6 +200,7 @@
                     },
                     ticks: {
                       beginAtZero: true,
+                      userCallback: value => value.toLocaleString()
                     }
                   }
                 ],
@@ -211,14 +210,21 @@
                   afterTitle: items => {
                     const {index} = items[0];
                     const data = dataset[index];
-                    return '\n' + data.commit.message + '\n\n' + data.commit.timestamp + ' committed by @' + data.commit.committer.username + '\n';
+                    const author = data.commit.author.username;
+                    const committer = data.commit.committer.username;
+                    let usernames = '@ ' + author;
+                    if (committer !== author) {
+                      usernames += ' and @ ' + committer;
+                    }
+                    return '\n' + data.commit.message + '\n\n' + data.commit.timestamp + ' committed by ' + usernames + '\n';
                   },
                   label: item => {
-                    let label = item.value;
+                    let label = parseInt(item.value).toLocaleString();
                     const { range, unit } = dataset[item.index].bench;
                     label += ' ' + unit;
                     if (range) {
-                      label += ' (' + range + ')';
+                      const r = range.split(' ');
+                      label += ' (' + r[0] + ' ' + parseInt(r[1]).toLocaleString() + ')';
                     }
                     return label;
                   },
