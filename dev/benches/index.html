@@ -151,7 +151,7 @@
           document.getElementById('last-update').textContent = formatDate(new Date(data.lastUpdate));
           const repoLink = document.getElementById('repository-link');
           repoLink.href = data.repoUrl;
-          repoLink.textContent = data.repoUrl;
+          repoLink.textContent = data.repoUrl.split('https://github.com/')[1];
 
           // Render footer
           document.getElementById('dl-button').onclick = () => {
