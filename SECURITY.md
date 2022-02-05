@@ -17,18 +17,23 @@ information assets. The information assets include the computer PackSquash runs
 on, the networks it is connected to, or any data stored on it.
 
 Security vulnerabilities are a serious matter. They are **not** mere user or
-environmental errors that might have undesirable consequences, neither they are
-known limitations about some features (for example, the pack protection feature
-is known to be able to be circumvented due to fundamental limits on how it
-works). Please think twice about reporting a security vulnerability. Keeping the
-noise to the minimum helps us focus on matters worth our attention.
+environmental errors that might have undesirable consequences. Please think
+twice about reporting a security vulnerability. Keeping the noise to the minimum
+helps us focus on matters worth our attention.
+
+Circumvention techniques for the pack protection feature, while they arguably
+may not be considered actionable vulnerabilities due to fundamental
+characteristics of how it works, are in scope for this security policy, and
+should be dealt with like if they were. However, we ask for some substantial
+effort to be made into assessing whether a particular circumvention technique
+may already be known before reporting it.
 
 ## Supported Versions
 
 For practical reasons, we will only accept security reports that affect the
-latest stable releases or the latest unstable builds. In other words, we will not
-backport any changes to older versions of our software. This might change in the
-future or under exceptional circumstances.
+latest stable releases or the latest unstable builds. In other words, we will
+not backport any changes to older versions of our software. This might change in
+the future or under exceptional circumstances.
 
 Any change to address some security vulnerability will be part of the next
 release. Releases are published at our discretion, considering the impact and
@@ -44,5 +49,5 @@ At our discretion, we will try to review your report and notify you about its
 resolution. Accepted security vulnerabilities will be responsibly disclosed via
 GitHub's security advisories feature, and maybe other security advisory
 databases too (RustSec, etc.). Responsible disclosure will happen after the
-vulnerability has been resolved, and we deem that its most egregious impacts have
-been mitigated.
+vulnerability has been resolved, and we deem that its most egregious impacts
+have been mitigated.
