@@ -200,6 +200,7 @@
                     },
                     ticks: {
                       beginAtZero: true,
+                      userCallback: value => value.toLocaleString()
                     }
                   }
                 ],
@@ -218,11 +219,12 @@
                     return '\n' + data.commit.message + '\n\n' + data.commit.timestamp + ' committed by ' + usernames + '\n';
                   },
                   label: item => {
-                    let label = item.value;
+                    let label = parseInt(item.value).toLocaleString();
                     const { range, unit } = dataset[item.index].bench;
                     label += ' ' + unit;
                     if (range) {
-                      label += ' (' + range + ')';
+                      const r = range.split(' ');
+                      label += ' (' + r[0] + ' ' + parseInt(r[1]).toLocaleString() + ')';
                     }
                     return label;
                   },
