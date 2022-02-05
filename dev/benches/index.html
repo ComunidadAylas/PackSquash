@@ -124,6 +124,10 @@
         };
 
         function init() {
+          function formatDate(date) {
+            return date.getFullYear() + '/' + (date.getMonth() + 1).toString().padStart(2, '0') + '/' + date.getDate().toString().padStart(2, '0') + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+          }
+
           function collectBenchesPerTestCase(entries) {
             const map = new Map();
             for (const entry of entries) {
@@ -144,7 +148,7 @@
           const data = window.BENCHMARK_DATA;
 
           // Render header
-          document.getElementById('last-update').textContent = new Date(data.lastUpdate).toString();
+          document.getElementById('last-update').textContent = formatDate(new Date(data.lastUpdate));
           const repoLink = document.getElementById('repository-link');
           repoLink.href = data.repoUrl;
           repoLink.textContent = data.repoUrl;
