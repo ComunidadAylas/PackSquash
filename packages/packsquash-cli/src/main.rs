@@ -44,8 +44,8 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 	}
 
 	let log_target_is_tty = atty::is(LOG_TARGET_STREAM);
-	let enable_emoji_default = environment_allows_emoji() && log_target_is_tty;
-	let enable_color_default = environment_allows_color() && log_target_is_tty;
+	let enable_emoji_default = environment_allows_emoji(log_target_is_tty);
+	let enable_color_default = environment_allows_color(log_target_is_tty);
 
 	let mut options = Options::new();
 
