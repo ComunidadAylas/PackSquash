@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1643913451419,
+  "lastUpdate": 1644025195589,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -225,6 +225,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1555304181,
             "range": "± 39964076",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "34268371+sya-ri@users.noreply.github.com",
+            "name": "sya-ri",
+            "username": "sya-ri"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "49fa1d105d6dd2c6083c876be48d5f32c9d20d18",
+          "message": "workflow: Fix windows build (#49)",
+          "timestamp": "2022-02-05T02:02:32+01:00",
+          "tree_id": "4b2eb5807970a08e70dc482d75c237d062f6ca4f",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/49fa1d105d6dd2c6083c876be48d5f32c9d20d18"
+        },
+        "date": 1644025195018,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12152149,
+            "range": "± 831440",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 834254623,
+            "range": "± 18936728",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 8955428631,
+            "range": "± 182298031",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1255745468,
+            "range": "± 36177497",
             "unit": "ns/iter"
           }
         ]
