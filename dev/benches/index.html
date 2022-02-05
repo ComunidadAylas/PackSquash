@@ -211,7 +211,13 @@
                   afterTitle: items => {
                     const {index} = items[0];
                     const data = dataset[index];
-                    return '\n' + data.commit.message + '\n\n' + data.commit.timestamp + ' committed by @' + data.commit.committer.username + '\n';
+                    const author = data.commit.author.username;
+                    const committer = data.commit.committer.username;
+                    let usernames = '@ ' + author;
+                    if (committer !== author) {
+                      usernames += ' and @ ' + committer;
+                    }
+                    return '\n' + data.commit.message + '\n\n' + data.commit.timestamp + ' committed by ' + usernames + '\n';
                   },
                   label: item => {
                     let label = item.value;
