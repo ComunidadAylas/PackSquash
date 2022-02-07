@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1644025195589,
+  "lastUpdate": 1644196855226,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -273,6 +273,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1255745468,
             "range": "± 36177497",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Alejandro González",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "a3f1de6ce9b9f9842e9573129419f1610dd44f14",
+          "message": "sec: clarify the scope of the security policy",
+          "timestamp": "2022-02-05T22:14:24Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a3f1de6ce9b9f9842e9573129419f1610dd44f14"
+        },
+        "date": 1644196854088,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 15018626,
+            "range": "± 1540977",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1003023157,
+            "range": "± 33030604",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11150811445,
+            "range": "± 229056468",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1525685352,
+            "range": "± 47908919",
             "unit": "ns/iter"
           }
         ]
