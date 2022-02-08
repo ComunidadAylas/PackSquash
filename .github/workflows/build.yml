@@ -138,7 +138,7 @@ jobs:
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
+          target: ${{ env.CARGO_BUILD_TARGET }}
           profile: minimal
           components: rust-src
 
