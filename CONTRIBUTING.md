@@ -158,7 +158,7 @@ following points:
   title at all.
 - _Make sure that the topic you are going to open an issue about does not
   already have an issue_. Having two separate issues to talk about the same
-  thing serves no purpose. Please check if there are issues about your topic
+  thing serves no purpose. Please check if there are issues with your topic
   before creating a new one.
 - _Follow the issue topic templates if available_. The templates are meant to
   guide you in making a good issue, and you should not remove sections from them
@@ -238,7 +238,7 @@ best to at least mention how they could be refactored to work in stable Rust.
 The `rust-toolchain` file sets up an
 [override](https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file)
 to ensure that you are using the latest nightly Rust toolchain, but you can also
-globally use the nightly toolchain by default by running `rustup default nightly`.
+globally use the nightly toolchain by default after running `rustup default nightly`.
 
 Finally, on Windows platforms, PackSquash targets the MinGW-w64 (GNU GCC) Rust
 toolchain, instead of the Microsoft Visual C (MSVC) toolchain bundled with
@@ -275,12 +275,12 @@ manager for Rust. It also takes care of compiling software artifacts, including
 PackSquash itself, and executing build scripts, which in the case of C libraries
 PackSquash depends on invoke the platform C compiler to build them.
 
-For the most part, building PackSquash with Cargo is easy. After installing the
-latest nightly Rust toolchain, running `cargo build` on the repository root
-folder should be enough to produce a working debug executable. In reality,
-however, that will not work out of the box due to C libraries that depend on a
-properly configured platform C toolchain and development files. The best way to
-get these set up is to look at the [CI build
+For the most part, building PackSquash with Cargo is easy. After installing Rust
+and Cargo, running `cargo build` on the repository root folder should be enough
+to produce a working debug executable. In reality, however, that will not work
+out of the box due to C libraries that depend on a properly configured platform
+C toolchain and development files. The best way to get these set up is to look
+at the [CI build
 workflow](https://github.com/ComunidadAylas/PackSquash/blob/master/.github/workflows/build.yml)
 and replicate its steps on your machine.
 
