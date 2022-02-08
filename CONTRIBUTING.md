@@ -234,9 +234,11 @@ be removed or changed at any time. Also, in the future, this will also make life
 more difficult for those that use PackSquash as a Rust library because they
 might desire to limit themselves to a stable, time-invariant Rust version in
 their projects. If your changes depend on some unstable feature, it would be
-best to at least mention how they could be refactored to work in stable Rust. To
-ensure that you are using the nightly Rust toolchain for everything you do, run
-a command like `rustup default nightly`.
+best to at least mention how they could be refactored to work in stable Rust.
+The `rust-toolchain` file sets up an
+[override](https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file)
+to ensure that you are using the latest nightly Rust toolchain, but you can also
+globally use the nightly toolchain by default by running `rustup default nightly`.
 
 Finally, on Windows platforms, PackSquash targets the MinGW-w64 (GNU GCC) Rust
 toolchain, instead of the Microsoft Visual C (MSVC) toolchain bundled with

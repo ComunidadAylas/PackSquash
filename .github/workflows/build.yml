@@ -26,13 +26,11 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v2
 
-      - name: Install latest Rust nightly toolchain
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
           profile: minimal
           components: rustfmt, clippy
-          default: true
 
       - name: Install GStreamer libraries and development packages
         run: |
@@ -82,10 +80,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install latest Rust nightly toolchain
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
           profile: minimal
           components: rust-src
 
@@ -138,11 +135,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install latest Rust nightly toolchain
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
-          override: true
           profile: minimal
           components: rust-src
 
@@ -199,11 +195,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install latest Rust nightly toolchain
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-${{ env.CARGO_BUILD_TARGET }}
-          override: true
           profile: minimal
           components: rust-src
 
@@ -259,10 +253,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install latest Rust nightly toolchain
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
           target: ${{ env.CARGO_BUILD_TARGET }}
           profile: minimal
           components: rust-src
@@ -342,10 +335,9 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v2
 
-      - name: Install latest Rust nightly toolchain
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
           profile: minimal
 
       - name: Cache Rust artifacts
