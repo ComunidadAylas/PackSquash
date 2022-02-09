@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1644403523475,
+  "lastUpdate": 1644403582854,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -415,6 +415,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1280154185,
             "range": "± 7865311",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b6cb3a87e84e8e6122f3e9881185c67207354630",
+          "message": "chore(deps): bump gstreamer from 0.18.2 to 0.18.3 (#55)\n\nBumps gstreamer from 0.18.2 to 0.18.3.\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: gstreamer\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-02-09T11:07:59+01:00",
+          "tree_id": "b7a12f8e604079a34434a8b11ede5bf3ad76440c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b6cb3a87e84e8e6122f3e9881185c67207354630"
+        },
+        "date": 1644403581805,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14008475,
+            "range": "± 193188",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 946959542,
+            "range": "± 12266038",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10938299024,
+            "range": "± 46431346",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1357091905,
+            "range": "± 6817672",
             "unit": "ns/iter"
           }
         ]
