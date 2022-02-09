@@ -49,7 +49,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cargo deny check
-        uses: ComunidadAylas/cargo-deny-action@main
+        uses: EmbarkStudios/cargo-deny-action@v1
 
       - name: Format Rust source code
         run: cargo fmt
@@ -374,7 +374,7 @@ jobs:
       # are interested in, so we can't run benchmarks that measure the troublesome performance counters.
       # See: https://github.com/actions/virtual-environments/issues/4974
       - name: Run quick benchmarks
-        run: cargo bench -- --output-format=bencher 'wall_time|context_switches' | tee /run/bench_results.txt
+        run: cargo bench -- --output-format=bencher 'wall_time' | tee /run/bench_results.txt
 
       - name: Publish quick benchmarks results
         uses: benchmark-action/github-action-benchmark@v1
