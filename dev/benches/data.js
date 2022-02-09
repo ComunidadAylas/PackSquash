@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1644406967353,
+  "lastUpdate": 1644427979636,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -655,6 +655,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1569608770,
             "range": "± 12475567",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d2242c7515245705daa8b16285d298b72d9f3044",
+          "message": "ci(workflow): fix displayed errors in benches. Test to use upstream cargo deny action",
+          "timestamp": "2022-02-09T18:07:45+01:00",
+          "tree_id": "ef65c89b2293a77295e187038af120c571e2d3da",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d2242c7515245705daa8b16285d298b72d9f3044"
+        },
+        "date": 1644427978959,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12357666,
+            "range": "± 359961",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 881359581,
+            "range": "± 24483339",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 9645323708,
+            "range": "± 481795214",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1302513115,
+            "range": "± 44742910",
             "unit": "ns/iter"
           }
         ]
