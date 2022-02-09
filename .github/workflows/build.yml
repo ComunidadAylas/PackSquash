@@ -3,6 +3,9 @@ name: Build
 on:
   push:
   pull_request:
+    types:
+      - opened
+      - synchronize
   release:
     types:
       - published
@@ -19,6 +22,9 @@ env:
 
 jobs:
   static-analysis:
+
+    # Only run for pull requests on forks, or if this is not a pull request
+    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
 
     runs-on: ubuntu-latest
 
@@ -56,6 +62,9 @@ jobs:
           author_email: 41898282+github-actions[bot]@users.noreply.github.com
 
   linux-x64-gnu:
+
+    # Only run for pull requests on forks, or if this is not a pull request
+    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
 
     runs-on: ubuntu-latest
 
@@ -124,6 +133,9 @@ jobs:
 
   windows-x64-gnu:
 
+    # Only run for pull requests on forks, or if this is not a pull request
+    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
+
     runs-on: windows-latest
 
     env:
@@ -185,6 +197,9 @@ jobs:
 
   macos-x64-darwin:
 
+    # Only run for pull requests on forks, or if this is not a pull request
+    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
+
     runs-on: macos-11
 
     env:
@@ -227,6 +242,9 @@ jobs:
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
   linux-aarch64-gnu:
+
+    # Only run for pull requests on forks, or if this is not a pull request
+    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
 
     runs-on: ubuntu-latest
 
@@ -301,6 +319,11 @@ jobs:
 
   benchmark:
 
+    # Ignore PRs outside the repository. First-time would-be contributors need to have their
+    # workflows approved anyway, but at best it might be confusing to see commits of PRs mixed
+    # with the mainline. Workflows triggered by PRs don't have access to secrets either
+    if: success() && github.event_name != 'pull_request'
+
     runs-on: ubuntu-latest
 
     container: debian:bullseye-slim
@@ -312,12 +335,7 @@ jobs:
     # Make sure that benchmarks stay quick, and handle them being stuck promptly
     timeout-minutes: 30
 
-    # Ignore PRs outside the repository. First-time would-be contributors need to have their
-    # workflows approved anyway, but at best it might be confusing to see commits of PRs mixed
-    # with the mainline. Workflows triggered by PRs don't have access to secrets anyway
-    if: success() && github.event_name != 'pull_request'
-
-    # Only benchmark potentially good code
+    # Only benchmark code that passes all the checks
     needs: [ static-analysis, linux-x64-gnu, windows-x64-gnu, macos-x64-darwin, linux-aarch64-gnu ]
 
     env:
