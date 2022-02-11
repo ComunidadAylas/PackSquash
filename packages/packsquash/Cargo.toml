@@ -52,7 +52,7 @@ zopfli = "0.4.0"
 smaz = "0.1.0"
 
 const-random = "0.1.13"
-aes = "0.7.5"
+aes = "0.8.0"
 fpe = "0.5.1"
 uuid = "0.8.2"
 entropy = "0.4.1"
