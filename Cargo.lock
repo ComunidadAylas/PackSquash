@@ -130,7 +130,7 @@ dependencies = [
  "cc",
  "cfg-if",
  "libc",
- "miniz_oxide",
+ "miniz_oxide 0.4.4",
  "object",
  "rustc-demangle",
 ]
@@ -547,9 +547,9 @@ dependencies = [
 
 [[package]]
 name = "deflate"
-version = "0.9.1"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f95bf05dffba6e6cce8dfbb30def788154949ccd9aed761b472119c21e01c70"
+checksum = "c86f7e25f518f4b81808a2cf1c50996a61f5c2eb394b2393bd87f2a4780a432f"
 dependencies = [
  "adler32",
 ]
@@ -1347,6 +1347,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "miniz_oxide"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2b29bd4bc3f33391105ebee3589c19197c4271e3e5a9ec9bfe8127eeff8f082"
+dependencies = [
+ "adler",
+]
+
+[[package]]
 name = "mmap"
 version = "0.1.1"
 source = "git+https://github.com/ComunidadAylas/rust-mmap#c7619e302cbde9cfa50d1779ae769cdb2cc02230"
@@ -1518,7 +1527,7 @@ dependencies = [
  "indexmap",
  "itertools",
  "log",
- "miniz_oxide",
+ "miniz_oxide 0.4.4",
  "rgb",
  "rustc_version",
  "zopfli",
@@ -1735,15 +1744,14 @@ dependencies = [
 
 [[package]]
 name = "png"
-version = "0.17.2"
+version = "0.17.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c845088517daa61e8a57eee40309347cea13f273694d1385c553e7a57127763b"
+checksum = "8e8f1882177b17c98ec33a51f5910ecbf4db92ca0def706781a1f8d0c661f393"
 dependencies = [
  "bitflags",
  "crc32fast",
  "deflate",
- "encoding",
- "miniz_oxide",
+ "miniz_oxide 0.5.1",
 ]
 
 [[package]]
