@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1644858729278,
+  "lastUpdate": 1644858821775,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -845,6 +845,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1363328768,
             "range": "± 6708982",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6bf46da799c04b96f8a26eedc6af471ab39dc9ee",
+          "message": "chore(deps): bump serde_json from 1.0.78 to 1.0.79 (#62)\n\nBumps [serde_json](https://github.com/serde-rs/json) from 1.0.78 to 1.0.79.\r\n- [Release notes](https://github.com/serde-rs/json/releases)\r\n- [Commits](https://github.com/serde-rs/json/compare/v1.0.78...v1.0.79)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: serde_json\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-02-14T17:38:34+01:00",
+          "tree_id": "badb605ee427eb4d2a116fa5fddf02a72d409ffb",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6bf46da799c04b96f8a26eedc6af471ab39dc9ee"
+        },
+        "date": 1644858821188,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 17480743,
+            "range": "± 787374",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1157568302,
+            "range": "± 14891436",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12862133476,
+            "range": "± 227296288",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1692423205,
+            "range": "± 42614749",
             "unit": "ns/iter"
           }
         ]
