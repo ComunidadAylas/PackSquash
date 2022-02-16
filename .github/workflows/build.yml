@@ -43,10 +43,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
-      - name: Clippy check
+      - name: Check workflow write permission
+        id: check_write_permission
+        uses: scherermichael-oss/action-has-permission@1.0.6
+
+      - name: Clippy check (with annotations)
         uses: actions-rs/clippy-check@v1
+        if: steps.check_write_permission.outputs.has-permission
         with:
+          args: --all-targets -- -D warnings
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clippy check (without annotations)
+        if: ${{ !steps.check_write_permission.outputs.has-permission }}
+        run: cargo clippy --all-targets -- -D warnings
 
       - name: Cargo deny check
         uses: EmbarkStudios/cargo-deny-action@v1
