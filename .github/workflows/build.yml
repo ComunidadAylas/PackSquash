@@ -46,6 +46,8 @@ jobs:
       - name: Check workflow write permission
         id: check_write_permission
         uses: scherermichael-oss/action-has-permission@1.0.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Clippy check (with annotations)
         uses: actions-rs/clippy-check@v1
