@@ -16,12 +16,6 @@ glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
 # Use our fork of Zopfli that includes streaming support and the ability to change
 # the number of compression iterations
 zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquash" }
-# imagequant supposedly released a new version with a fix for a critical off-by-one error
-# that we've submitted, but it looks like it didn't make it. Compare the following:
-# https://docs.rs/imagequant/4.0.0-beta.9/src/imagequant/remap.rs.html#35
-# https://github.com/ImageOptim/libimagequant/blob/b6171712c95b9e79e551323b14ea861f4187bf73/src/remap.rs#L35
-# Therefore, patch it until a release is made with the fix
-imagequant = { git = "https://github.com/ImageOptim/libimagequant", rev = "01681360" }
 
 # Use a newer commit of the csv crate, that's pulled in by development dependencies
 # for benchmarking, that depends on a itoa version consistent with the rest of the

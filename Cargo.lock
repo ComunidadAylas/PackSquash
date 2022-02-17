@@ -1138,8 +1138,9 @@ dependencies = [
 
 [[package]]
 name = "imagequant"
-version = "4.0.0-beta.9"
-source = "git+https://github.com/ImageOptim/libimagequant?rev=01681360#01681360f035d494399d8b46db037455c0d8fbe5"
+version = "4.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "49f533cecb7eb061d19dee3c938d0e302c02193270497483e1b662a0a1a5e343"
 dependencies = [
  "arrayvec",
  "fallible_collections",

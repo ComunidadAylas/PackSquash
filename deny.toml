@@ -114,7 +114,7 @@ skip-tree = [
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
-allow-git = ["https://github.com/ImageOptim/libimagequant", "https://github.com/BurntSushi/rust-csv"]
+allow-git = ["https://github.com/BurntSushi/rust-csv"]
 
 [sources.allow-org]
 github = ["ComunidadAylas"]
