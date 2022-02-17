@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1644858834099,
+  "lastUpdate": 1645094456886,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -941,6 +941,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1630371439,
             "range": "± 30071851",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "4e19ed0aecee6eaf6660d16054caf729080c5a0b",
+          "message": "chore(clippy): fix lints",
+          "timestamp": "2022-02-17T11:01:25+01:00",
+          "tree_id": "670828b0d22eddb04a52990e6ce9344261b5f99e",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/4e19ed0aecee6eaf6660d16054caf729080c5a0b"
+        },
+        "date": 1645094456160,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14192737,
+            "range": "± 222952",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 975758155,
+            "range": "± 12787612",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11038953865,
+            "range": "± 120054086",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1357431845,
+            "range": "± 5785975",
             "unit": "ns/iter"
           }
         ]
