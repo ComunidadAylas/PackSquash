@@ -50,6 +50,7 @@ fn create_temporary_output_file(test_name: &'static str) -> PathBuf {
 /// Generic helper function that adds the specified number of files to a new temporary
 /// output ZIP file, finishes the ZIP file, and then reads it back, asserting that
 /// PackSquash is able to read back relevant data from the files it generates.
+#[allow(clippy::too_many_arguments)] // Alternatives are not really more readable
 async fn add_files_finish_and_read_back_test(
 	squash_zip: Option<SquashZip<File>>,
 	file_count: u8,

@@ -186,7 +186,7 @@ mod tests {
 	#[test]
 	fn single_component_dot_relative_path_works() {
 		let mut file_iter = OsFilesystem.file_iterator(
-			&Path::new("."),
+			Path::new("."),
 			IteratorTraversalOptions {
 				ignore_system_and_hidden_files: true
 			}
@@ -201,7 +201,7 @@ mod tests {
 	#[test]
 	fn single_component_double_dot_relative_path_works() {
 		let mut file_iter = OsFilesystem.file_iterator(
-			&Path::new(".."),
+			Path::new(".."),
 			IteratorTraversalOptions {
 				ignore_system_and_hidden_files: true
 			}

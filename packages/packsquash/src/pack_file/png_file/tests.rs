@@ -52,7 +52,7 @@ async fn successful_process_test(
 		}
 		processed_data_size = data.len();
 
-		if env::var("WRITE_PNG_TEST_RESULTS").unwrap_or(String::from("0")) == "1" {
+		if env::var("WRITE_PNG_TEST_RESULTS").unwrap_or_else(|_| String::from("0")) == "1" {
 			fs::write(format!("target/png_test_result_{}.png", test_name), &data).unwrap();
 		}
 
