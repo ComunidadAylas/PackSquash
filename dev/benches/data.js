@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1645094456886,
+  "lastUpdate": 1645406237807,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -989,6 +989,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1357431845,
             "range": "± 5785975",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "id": "4e19ed0aecee6eaf6660d16054caf729080c5a0b",
+          "message": "chore(clippy): fix lints",
+          "timestamp": "2022-02-17T10:01:25Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/4e19ed0aecee6eaf6660d16054caf729080c5a0b"
+        },
+        "date": 1645406237301,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 16260099,
+            "range": "± 399049",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1132486946,
+            "range": "± 15409989",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13171574024,
+            "range": "± 191937961",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1706825344,
+            "range": "± 15354504",
             "unit": "ns/iter"
           }
         ]
