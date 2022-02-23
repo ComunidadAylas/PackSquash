@@ -23,10 +23,11 @@ env:
 jobs:
   static-analysis:
 
-    # Only run for pull requests on forks, or if this is not a pull request
-    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
-
     runs-on: ubuntu-latest
+
+    # Only run if this is not a pull request, or for pull requests on forks
+    if: github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
       - name: Checkout source
@@ -75,9 +76,6 @@ jobs:
 
   linux-x64-gnu:
 
-    # Only run for pull requests on forks, or if this is not a pull request
-    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
-
     runs-on: ubuntu-latest
 
     container: debian:bullseye-slim
@@ -85,6 +83,10 @@ jobs:
     env:
       CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
       DEBIAN_FRONTEND: noninteractive
+
+    # Only run if this is not a pull request, or for pull requests on forks
+    if: github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
       - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
@@ -145,14 +147,15 @@ jobs:
 
   windows-x64-gnu:
 
-    # Only run for pull requests on forks, or if this is not a pull request
-    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
-
     runs-on: windows-latest
 
     env:
       CARGO_BUILD_TARGET: x86_64-pc-windows-gnu
       PKG_CONFIG_ALLOW_CROSS: 1
+
+    # Only run if this is not a pull request, or for pull requests on forks
+    if: github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
       - name: Checkout source
@@ -209,13 +212,14 @@ jobs:
 
   macos-x64-darwin:
 
-    # Only run for pull requests on forks, or if this is not a pull request
-    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
-
     runs-on: macos-11
 
     env:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
+
+    # Only run if this is not a pull request, or for pull requests on forks
+    if: github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
       - name: Checkout source
@@ -255,9 +259,6 @@ jobs:
 
   linux-aarch64-gnu:
 
-    # Only run for pull requests on forks, or if this is not a pull request
-    if: github.event_name != 'pull_request' || github.repository != 'ComunidadAylas/PackSquash'
-
     runs-on: ubuntu-latest
 
     container: debian:bullseye-slim
@@ -267,6 +268,10 @@ jobs:
       PKG_CONFIG_ALLOW_CROSS: 1
       PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
       DEBIAN_FRONTEND: noninteractive
+
+    # Only run if this is not a pull request, or for pull requests on forks
+    if: github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
       - name: Install development packages, cross-compilation GCC toolchain, GStreamer libraries, GStreamer development packages and documentation generation packages
@@ -331,11 +336,6 @@ jobs:
 
   benchmark:
 
-    # Ignore PRs outside the repository. First-time would-be contributors need to have their
-    # workflows approved anyway, but at best it might be confusing to see commits of PRs mixed
-    # with the mainline. Workflows triggered by PRs don't have access to secrets either
-    if: success() && github.event_name != 'pull_request'
-
     runs-on: ubuntu-latest
 
     container: debian:bullseye-slim
@@ -352,6 +352,13 @@ jobs:
 
     env:
       DEBIAN_FRONTEND: noninteractive
+      PRIVATE_TEST_PACKS_PASSWORD: ${{ secrets.PRIVATE_TEST_PACKS_PASSWORD }}
+
+    # Ignore runs that don't have the secret needed to decrypt packs (this happens for PRs outside
+    # the repository, or Dependabot runs). First-time would-be contributors need to have their
+    # workflows approved anyway, but at best it might be confusing to see commits of PRs mixed
+    # with the mainline. Workflows triggered by PRs don't have access to secrets either
+    if: success() && env.PRIVATE_TEST_PACKS_PASSWORD != ''
 
     steps:
       - name: Install development packages, GStreamer libraries, GStreamer development packages and benchmark script packages
@@ -378,8 +385,6 @@ jobs:
         run: scripts/test-packs/download.sh
 
       - name: Decrypt private test packs in dataset
-        env:
-          PRIVATE_TEST_PACKS_PASSWORD: ${{ secrets.PRIVATE_TEST_PACKS_PASSWORD }}
         run: scripts/test-packs/decrypt.sh
 
       # GitHub-hosted runners restrict access to the perf_event_open syscall for some event types we
