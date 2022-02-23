@@ -1,9 +1,5 @@
 use std::borrow::Cow;
-use std::fmt::{Display, Formatter};
 use std::lazy::SyncLazy;
-use std::num::NonZeroUsize;
-use std::pin::Pin;
-use std::task::{Context, Poll};
 
 use ahash::AHashSet;
 use futures::{future, StreamExt};
@@ -15,6 +11,7 @@ use tokio_util::codec::{FramedRead, LinesCodec, LinesCodecError};
 
 use crate::config::LegacyLanguageFileOptions;
 use crate::pack_file::asset_type::PackFileAssetType;
+use crate::pack_file::util::{LineNumber, MarkLastDecorator};
 use crate::pack_file::AsyncReadAndSizeHint;
 
 use super::{OptimizedBytesChunk, PackFile, PackFileConstructor};
@@ -76,110 +73,6 @@ pub enum OptimizationError {
 	InvalidFormatString(LineNumber),
 	#[error("Error while reading a line: {0}")]
 	TextLineRead(#[from] LinesCodecError)
-}
-
-/// A stream that decorates another stream, mapping its items to a pair that indicates whether
-/// that item is the last in the stream or not. This is done by buffering the last item temporarily,
-/// until a new one arrives (so it isn't the last one) or the end of the stream is reached (so the
-/// last item is indeed the last).
-///
-/// Please note that the concept of "last item" is not well-defined for streams that are not
-/// fused (i.e. that return some item after they signal the end of the stream).
-struct MarkLastDecorator<T: Unpin, S: Stream<Item = T> + Unpin> {
-	inner: S,
-	previous_item: Option<T>
-}
-
-impl<T: Unpin, S: Stream<Item = T> + Unpin> MarkLastDecorator<T, S> {
-	/// Creates a new [`IdentifyLast`] decorator stream for the specified stream.
-	fn new(inner: S) -> Self {
-		Self {
-			inner,
-			previous_item: None
-		}
-	}
-}
-
-impl<T: Unpin, S: Stream<Item = T> + Unpin> Stream for MarkLastDecorator<T, S> {
-	type Item = (T, bool);
-
-	fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-		match self.inner.poll_next_unpin(cx) {
-			Poll::Pending => {
-				// We're either waiting for the next item of the stream, or to be notified that
-				// it ended. Wait until we know what's next
-				Poll::Pending
-			}
-			Poll::Ready(Some(item)) => {
-				// The inner stream yielded a new item, but we don't know if it's the last one
-				match self.previous_item.replace(item) {
-					Some(previous_item) => {
-						// The previous item is now known to not be the last, as we've just got
-						// another
-						Poll::Ready(Some((previous_item, false)))
-					}
-					None => {
-						// This is the first item yielded by the underlying stream. We don't have
-						// anything to return yet, so poll again. This will only recurse once, because
-						// even if the stream yields another item immediately, we would then have a
-						// previous item
-						self.poll_next(cx)
-					}
-				}
-			}
-			Poll::Ready(None) => {
-				// The stream has ended. The item we buffered is known to be the last one.
-				// If there is no buffered item, either because the inner stream yielded no items
-				// or we've already yielded the buffered item, propagate the end of the stream
-				if let Some(previous_item) = self.previous_item.take() {
-					Poll::Ready(Some((previous_item, true)))
-				} else {
-					Poll::Ready(None)
-				}
-			}
-		}
-	}
-
-	fn size_hint(&self) -> (usize, Option<usize>) {
-		self.inner.size_hint()
-	}
-}
-
-/// An opaque type that maintains a text line counter that can be displayed.
-#[derive(Debug, Clone, Copy)]
-#[repr(transparent)]
-pub struct LineNumber(Option<NonZeroUsize>);
-
-impl LineNumber {
-	/// Creates a new line number counter that would display a line number of 1.
-	const fn new() -> Self {
-		Self(Some(NonZeroUsize::new(1).unwrap()))
-	}
-
-	/// Checks whether this line number counter would display a line number of 1
-	/// (i.e. it was just created, or it still points to the first line).
-	const fn is_first(&self) -> bool {
-		if let Some(line_number) = self.0 {
-			line_number.get() == 1
-		} else {
-			false
-		}
-	}
-
-	/// Increments the line number counter to point to the next line. This method
-	/// is overflow-safe.
-	fn increment(&mut self) {
-		self.0 = self.0.and_then(|line_number| line_number.checked_add(1));
-	}
-}
-
-impl Display for LineNumber {
-	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-		match self.0 {
-			Some(line_number) => line_number.fmt(f),
-			None => f.write_str("unknown")
-		}
-	}
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFile for LegacyLanguageFile<T> {

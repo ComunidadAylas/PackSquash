@@ -18,6 +18,7 @@ mod util;
 #[cfg(feature = "audio-transcoding")]
 #[doc(cfg(feature = "audio-transcoding"))]
 mod audio_file;
+mod commands_function_file;
 mod json_file;
 mod legacy_lang_file;
 mod passthrough_file;
@@ -45,6 +46,7 @@ pub enum OptimizationError {
 	PropertiesFile(#[from] properties_file::OptimizationError),
 	ShaderFile(#[from] shader_file::OptimizationError),
 	LegacyLanguageFile(#[from] legacy_lang_file::OptimizationError),
+	CommandsFunctionFile(#[from] commands_function_file::OptimizationError),
 	IoError(#[from] io::Error)
 }
 

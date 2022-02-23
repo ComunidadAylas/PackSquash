@@ -11,6 +11,7 @@ use tokio::io::AsyncRead;
 use crate::config::GlobalOptions;
 #[cfg(feature = "audio-transcoding")]
 use crate::pack_file::audio_file::AudioFile;
+use crate::pack_file::commands_function_file::CommandsFunctionFile;
 use crate::pack_file::json_file::JsonFile;
 use crate::pack_file::legacy_lang_file::LegacyLanguageFile;
 use crate::pack_file::passthrough_file::PassthroughFile;
@@ -567,12 +568,13 @@ impl PackFileAssetTypeMatches {
 					return_pack_file_to_process_data!(ShaderFile, optimization_settings),
 				PackFileAssetType::LegacyLanguageFile if let Some(FileOptions::LegacyLanguageFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(LegacyLanguageFile, optimization_settings),
+				PackFileAssetType::CommandsFunction if let Some(FileOptions::CommandsFunctionFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(CommandsFunctionFile, optimization_settings),
 				PackFileAssetType::TrueTypeFont
 				| PackFileAssetType::FontCharacterSizes
 				| PackFileAssetType::Text
 				| PackFileAssetType::LegacyTextCredits
-				| PackFileAssetType::NbtStructure
-				| PackFileAssetType::CommandsFunction if file_options.is_none() =>
+				| PackFileAssetType::NbtStructure if file_options.is_none() =>
 					return_pack_file_to_process_data!(PassthroughFile, ()),
 				PackFileAssetType::Custom if let Some(
 					FileOptions::CustomFileOptions(CustomFileOptions { force_include: true, .. })
