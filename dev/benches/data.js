@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1645437423416,
+  "lastUpdate": 1645656202616,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -1131,6 +1131,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1478145393,
             "range": "± 30808965",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "b19ef4141ccaf4cd7f87c421de4c2ec0d9df256a",
+          "message": "ci: addendum to 7bc59a7a44297777a9c9815693c8993cc79ce0b7\n\nIt looks like GitHub doesn't support reading environment variables from\nif expressions at job position for some reason. Let's work around that\nby hardcoding the Dependabot branch name prefix...",
+          "timestamp": "2022-02-23T23:03:20+01:00",
+          "tree_id": "a9c02a0f804c5c7a61b167e4d7eefe93cd7fdca1",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b19ef4141ccaf4cd7f87c421de4c2ec0d9df256a"
+        },
+        "date": 1645656202033,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 16530736,
+            "range": "± 959157",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1095226557,
+            "range": "± 20936711",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12685756810,
+            "range": "± 179917971",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1690979994,
+            "range": "± 31729011",
             "unit": "ns/iter"
           }
         ]
