@@ -26,7 +26,9 @@ pub struct CommandsFunctionFile<T: AsyncRead + Send + Unpin + 'static> {
 #[derive(Error, Debug)]
 pub enum OptimizationError {
 	#[error("Error while reading a line: {0}")]
-	TextLineRead(#[from] LinesCodecError)
+	TextLineRead(#[from] LinesCodecError),
+	#[error("Format error: Remove the leading slash in value of line {0}")]
+	RemoveLeadingSlash(LineNumber)
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CommandsFunctionFile<T> {
@@ -109,8 +111,10 @@ fn process_line<L: Into<String>>(
 
 	// Check whether the line is a comment. If so, bail out by copying or skipping
 	// it. It's copied only if we're not minifying
-	if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
+	if trimmed_line.is_empty() || trimmed_line.starts_with('#') || trimmed_line.starts_with("//") {
 		(!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED))
+	} else if trimmed_line.starts_with('/') {
+		Some(Err(OptimizationError::RemoveLeadingSlash(line_number)))
 	} else if minify {
 		Some(prepare_for_output(trimmed_line, is_last, MINIFIED))
 	} else {
