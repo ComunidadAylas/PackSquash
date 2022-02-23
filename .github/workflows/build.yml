@@ -352,13 +352,12 @@ jobs:
 
     env:
       DEBIAN_FRONTEND: noninteractive
-      PRIVATE_TEST_PACKS_PASSWORD: ${{ secrets.PRIVATE_TEST_PACKS_PASSWORD }}
 
     # Ignore runs that don't have the secret needed to decrypt packs (this happens for PRs outside
     # the repository, or Dependabot runs). First-time would-be contributors need to have their
     # workflows approved anyway, but at best it might be confusing to see commits of PRs mixed
     # with the mainline. Workflows triggered by PRs don't have access to secrets either
-    if: success() && env.PRIVATE_TEST_PACKS_PASSWORD != ''
+    if: success() && github.event_name != 'pull_request' && !startsWith(github.ref_name, 'dependabot/')
 
     steps:
       - name: Install development packages, GStreamer libraries, GStreamer development packages and benchmark script packages
@@ -385,6 +384,8 @@ jobs:
         run: scripts/test-packs/download.sh
 
       - name: Decrypt private test packs in dataset
+        env:
+          PRIVATE_TEST_PACKS_PASSWORD: ${{ secrets.PRIVATE_TEST_PACKS_PASSWORD }}
         run: scripts/test-packs/decrypt.sh
 
       # GitHub-hosted runners restrict access to the perf_event_open syscall for some event types we
