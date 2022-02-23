@@ -105,20 +105,16 @@ fn process_line<L: Into<String>>(
 		line.remove(0);
 	}
 
+	let trimmed_line = line.trim();
+
 	// Check whether the line is a comment. If so, bail out by copying or skipping
 	// it. It's copied only if we're not minifying
-	if line.trim_start().starts_with('#') {
-		return (!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED));
-	}
-
-	if line.trim().is_empty() {
+	if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
 		(!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED))
+	} else if minify {
+		Some(prepare_for_output(trimmed_line, is_last, MINIFIED))
 	} else {
-		if minify {
-			Some(prepare_for_output(line.trim(), is_last, MINIFIED))
-		} else {
-			Some(prepare_for_output(line, is_last, NOT_MINIFIED))
-		}
+		Some(prepare_for_output(line, is_last, NOT_MINIFIED))
 	}
 }
 
