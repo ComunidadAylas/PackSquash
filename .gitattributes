@@ -1,7 +1,7 @@
 # Make sure LF is used for line endings in text files that are
 # used for comparing expected results in unit tests
-packages/packsquash/src/pack_file/json_file/*.json				       eol=lf
-packages/packsquash/src/pack_file/properties_file/*.properties	       eol=lf
-packages/packsquash/src/pack_file/shader_file/*.fsh				       eol=lf
+packages/packsquash/src/pack_file/json_file/*.json                     eol=lf
+packages/packsquash/src/pack_file/properties_file/*.properties         eol=lf
+packages/packsquash/src/pack_file/shader_file/*.fsh                    eol=lf
 packages/packsquash/src/pack_file/legacy_lang_file/*.lang              eol=lf
 packages/packsquash/src/pack_file/commands_function_file/*.mcfunction  eol=lf
