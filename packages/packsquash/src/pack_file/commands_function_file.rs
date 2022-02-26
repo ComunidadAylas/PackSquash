@@ -43,7 +43,6 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CommandsFunctionFile<T>
 		let mut line_number = LineNumber::new();
 
 		let minify = self.optimization_settings.minify;
-		let strip_bom = self.optimization_settings.strip_bom;
 
 		MarkLastDecorator::new(FramedRead::new(
 			self.read,
@@ -54,7 +53,7 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CommandsFunctionFile<T>
 		.filter_map(move |(line_result, is_last)| {
 			let processed_line_result = line_result.map_or_else(
 				|err| Some(Err(err.into())),
-				|line| process_line(line, is_last, line_number, minify, strip_bom)
+				|line| process_line(line, is_last, line_number, minify)
 			);
 
 			line_number.increment();
@@ -90,8 +89,7 @@ fn process_line<L: Into<String>>(
 	line: L,
 	is_last: bool,
 	line_number: LineNumber,
-	minify: bool,
-	strip_bom: bool
+	minify: bool
 ) -> Option<OptimizedBytesChunk<Vec<u8>, OptimizationError>> {
 	const MINIFIED: &str = "Minified";
 	const NOT_MINIFIED: &str = "Copied";
@@ -105,7 +103,7 @@ fn process_line<L: Into<String>>(
 	// work than Mojang ;). This might break packs that dealt with the BOM by
 	// including it in the key references elsewhere, so only do it if the option
 	// is enabled
-	if line_number.is_first() && strip_bom && line.chars().next().map_or(false, |c| c == '\u{feff}') {
+	if line_number.is_first() && line.chars().next().map_or(false, |c| c == '\u{feff}') {
 		line.remove(0);
 	}
 

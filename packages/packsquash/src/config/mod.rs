@@ -943,28 +943,12 @@ pub struct CommandsFunctionFileOptions {
 	///
 	/// **Default value**: `true` (minify)
 	#[serde(rename = "minify_commands_function")]
-	pub minify: bool,
-	/// If `true`, the BOM in the first line of the file will be stripped. This normally saves
-	/// space and avoids user confusion, as the BOM is normally introduced inadvertently, and
-	/// Minecraft interprets the BOM as being part of the line. Therefore, the BOM may undesirably
-	/// become part of the key of the first command string, causing it not to work, or prevent
-	/// a comment from being parsed as such.
-	///
-	/// However, if a pack relies on the BOM being there because it refers to the first command
-	/// string with a BOM, this behavior might have undesirable consequences. In such cases, set
-	/// this option to `false` to leave the BOM alone.
-	///
-	/// **Default value**: `true` (strip the BOM from the first line of the file)
-	#[serde(rename = "strip_commands_function_bom")]
-	pub strip_bom: bool
+	pub minify: bool
 }
 
 impl Default for CommandsFunctionFileOptions {
 	fn default() -> Self {
-		Self {
-			minify: true,
-			strip_bom: true
-		}
+		Self { minify: true }
 	}
 }
 

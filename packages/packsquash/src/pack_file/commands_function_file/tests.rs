@@ -107,25 +107,9 @@ async fn minifying_with_bom_and_bom_stripping_works() {
 		true,
 		CommandsFunctionFileOptions {
 			minify: true,
-			strip_bom: true,
 			..Default::default()
 		},
 		MINIFIED_CMD_DATA
-	)
-	.await
-}
-
-#[tokio::test]
-async fn passthrough_without_bom_works() {
-	successful_process_test(
-		CMD_DATA,
-		false,
-		CommandsFunctionFileOptions {
-			minify: false,
-			strip_bom: false,
-			..Default::default()
-		},
-		CMD_DATA
 	)
 	.await
 }
@@ -137,7 +121,6 @@ async fn passthrough_with_bom_and_bom_stripping_works() {
 		true,
 		CommandsFunctionFileOptions {
 			minify: false,
-			strip_bom: true,
 			..Default::default()
 		},
 		CMD_DATA
