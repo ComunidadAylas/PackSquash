@@ -150,8 +150,8 @@ async fn leading_slash_command() {
 		CMD_DATA_LEADING_SLASH,
 		false,
 		Default::default(),
-		|err| matches!(err, OptimizationError::RemoveLeadingSlash(_)),
-		"Expected an remove leading slash error"
+		|err| matches!(err, OptimizationError::GratuitousLeadingSlash(_)),
+		"Expected an gratuitous leading slash error"
 	)
 	.await
 }

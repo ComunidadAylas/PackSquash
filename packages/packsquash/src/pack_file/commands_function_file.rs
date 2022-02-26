@@ -27,8 +27,8 @@ pub struct CommandsFunctionFile<T: AsyncRead + Send + Unpin + 'static> {
 pub enum OptimizationError {
 	#[error("Error while reading a line: {0}")]
 	TextLineRead(#[from] LinesCodecError),
-	#[error("Format error: Remove the leading slash in value of line {0}")]
-	RemoveLeadingSlash(LineNumber)
+	#[error("Format error: Gratuitous leading slash in command at line {0}")]
+	GratuitousLeadingSlash(LineNumber)
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CommandsFunctionFile<T> {
@@ -114,7 +114,7 @@ fn process_line<L: Into<String>>(
 	if trimmed_line.is_empty() || trimmed_line.starts_with('#') || trimmed_line.starts_with("//") {
 		(!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED))
 	} else if trimmed_line.starts_with('/') {
-		Some(Err(OptimizationError::RemoveLeadingSlash(line_number)))
+		Some(Err(OptimizationError::GratuitousLeadingSlash(line_number)))
 	} else if minify {
 		Some(prepare_for_output(trimmed_line, is_last, MINIFIED))
 	} else {
