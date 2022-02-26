@@ -120,10 +120,10 @@ fn process_line<L: Into<String>>(
 		// Check that it does not contain a leading slash, which the game rejects
 		if trimmed_line.starts_with("//") {
 			// Expect to use # instead.
-			return Some(Err(OptimizationError::DoubleSlashComment(line_number)))
+			return Some(Err(OptimizationError::DoubleSlashComment(line_number)));
 		} else if trimmed_line.starts_with('/') {
 			// Expect to remove /.
-			return Some(Err(OptimizationError::GratuitousLeadingSlash(line_number)))
+			return Some(Err(OptimizationError::GratuitousLeadingSlash(line_number)));
 		}
 
 		if minify {
