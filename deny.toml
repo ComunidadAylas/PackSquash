@@ -98,7 +98,10 @@ ignore = true
 # https://embarkstudios.github.io/cargo-deny/checks/bans/cfg.html
 [bans]
 multiple-versions = "warn"
-wildcards = "deny"
+# Temporarily set to warn instead of deny to ignore a dev-dependency
+# without explicit version requirements in color-backtrace transitive
+# dependencies. It's best to have a warning than skipping crates here
+wildcards = "warn"
 highlight = "all"
 skip = [
 	# chrono depends on this old version of the time crate
@@ -114,7 +117,7 @@ skip-tree = [
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
-allow-git = ["https://github.com/BurntSushi/rust-csv"]
+allow-git = ["https://github.com/BurntSushi/rust-csv", "https://github.com/rust-lang/backtrace-rs"]
 
 [sources.allow-org]
 github = ["ComunidadAylas"]

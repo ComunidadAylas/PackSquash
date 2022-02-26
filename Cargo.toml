@@ -26,6 +26,10 @@ csv = { git = "https://github.com/BurntSushi/rust-csv", rev = "41c71ed3" }
 # the changes were authored by jbreitbart.
 # Related PR: https://github.com/rbranson/rust-mmap/pull/13
 mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
+# Use a newer commit of the backtrace crate, that's pulled in as a transitive dependency
+# for color-backtrace, that depends on a miniz_oxide version consistent with the rest
+# of the crates ecosystem. Related PR: https://github.com/rust-lang/backtrace-rs/pull/463
+backtrace = { git = "https://github.com/rust-lang/backtrace-rs", rev = "38cb2d55" }
 
 [profile.release]
 opt-level = 3
