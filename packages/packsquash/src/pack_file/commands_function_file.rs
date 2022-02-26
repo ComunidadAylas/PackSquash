@@ -28,7 +28,9 @@ pub enum OptimizationError {
 	#[error("Error while reading a line: {0}")]
 	TextLineRead(#[from] LinesCodecError),
 	#[error("Format error: Gratuitous leading slash in command at line {0}")]
-	GratuitousLeadingSlash(LineNumber)
+	GratuitousLeadingSlash(LineNumber),
+	#[error("Format error: Double-slash comment in command at line {0}, use # instead")]
+	DoubleSlashComment(LineNumber)
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CommandsFunctionFile<T> {
@@ -111,8 +113,10 @@ fn process_line<L: Into<String>>(
 
 	// Check whether the line is a comment. If so, bail out by copying or skipping
 	// it. It's copied only if we're not minifying
-	if trimmed_line.is_empty() || trimmed_line.starts_with('#') || trimmed_line.starts_with("//") {
+	if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
 		(!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED))
+	} else if trimmed_line.starts_with("//") {
+		Some(Err(OptimizationError::DoubleSlashComment(line_number)))
 	} else if trimmed_line.starts_with('/') {
 		Some(Err(OptimizationError::GratuitousLeadingSlash(line_number)))
 	} else if minify {

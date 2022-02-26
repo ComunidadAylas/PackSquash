@@ -1,5 +1,4 @@
 # This is a comment
-// Slash comment is deprecated but supported
 say @a hello
 
     # This is an indented comment

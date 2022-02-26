@@ -7,6 +7,7 @@ use super::*;
 static CMD_DATA: &str = include_str!("example.mcfuntion");
 static MINIFIED_CMD_DATA: &str = include_str!("example_minified.mcfuntion");
 static CMD_DATA_LEADING_SLASH: &str = include_str!("leading_slash.mcfuntion");
+static CMD_DATA_LEADING_DOUBLE_SLASH: &str = include_str!("leading_double_slash.mcfuntion");
 
 /// Processes the given input data as a [CommandsFunctionFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
@@ -152,6 +153,18 @@ async fn leading_slash_command() {
 		Default::default(),
 		|err| matches!(err, OptimizationError::GratuitousLeadingSlash(_)),
 		"Expected an gratuitous leading slash error"
+	)
+	.await
+}
+
+#[tokio::test]
+async fn leading_double_slash_command() {
+	unsuccessful_process_test(
+		CMD_DATA_LEADING_DOUBLE_SLASH,
+		false,
+		Default::default(),
+		|err| matches!(err, OptimizationError::DoubleSlashComment(_)),
+		"Expected an double-slash comment error"
 	)
 	.await
 }
