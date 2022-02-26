@@ -111,8 +111,8 @@ fn process_line<L: Into<String>>(
 
 	let trimmed_line = line.trim();
 
-	// Check whether the line is a comment. If so, bail out by copying or skipping
-	// it. It's copied only if we're not minifying
+	// Check whether the line is empty or a comment. If so, bail out by copying or
+	// skipping it, depending on whether we're minifying
 	if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
 		(!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED))
 	} else if trimmed_line.starts_with("//") {
