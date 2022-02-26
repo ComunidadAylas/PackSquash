@@ -50,7 +50,7 @@ impl LineNumber {
 
 	/// Checks whether this line number counter would display a line number of 1
 	/// (i.e. it was just created, or it still points to the first line).
-	pub(crate) const fn is_first(&self) -> bool {
+	pub const fn is_first(&self) -> bool {
 		if let Some(line_number) = self.0 {
 			line_number.get() == 1
 		} else {
@@ -60,7 +60,7 @@ impl LineNumber {
 
 	/// Increments the line number counter to point to the next line. This method
 	/// is overflow-safe.
-	pub(crate) fn increment(&mut self) {
+	pub fn increment(&mut self) {
 		self.0 = self.0.and_then(|line_number| line_number.checked_add(1));
 	}
 }
@@ -88,7 +88,7 @@ pub struct MarkLastDecorator<T: Unpin, S: Stream<Item = T> + Unpin> {
 
 impl<T: Unpin, S: Stream<Item = T> + Unpin> MarkLastDecorator<T, S> {
 	/// Creates a new [`IdentifyLast`] decorator stream for the specified stream.
-	pub(crate) fn new(inner: S) -> Self {
+	pub fn new(inner: S) -> Self {
 		Self {
 			inner,
 			previous_item: None
