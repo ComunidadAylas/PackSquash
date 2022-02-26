@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1645783753533,
+  "lastUpdate": 1645883877126,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -1275,6 +1275,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1718514519,
             "range": "± 104101213",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "e1487d545322b5d10b44027eb604d38299991520",
+          "message": "chore: update dependencies. Remove duplicate miniz_oxide versions\n\nThese changes should improve executable size and build time, as\nminiz_oxide is one of the slowest crates to compile, and compiling two\nseparate versions of it does not help.",
+          "timestamp": "2022-02-26T14:20:56+01:00",
+          "tree_id": "857911c383c44c71e5e537959b2d213bf60d3d02",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e1487d545322b5d10b44027eb604d38299991520"
+        },
+        "date": 1645883876594,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13685624,
+            "range": "± 1044317",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 919454868,
+            "range": "± 16238789",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 9984597370,
+            "range": "± 88447784",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1337482888,
+            "range": "± 9217972",
             "unit": "ns/iter"
           }
         ]
