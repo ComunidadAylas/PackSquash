@@ -1,6 +1,7 @@
-use crate::pack_file::util::BOM;
 use pretty_assertions::assert_eq;
 use tokio_test::io::Builder;
+
+use crate::pack_file::util::BOM;
 
 use super::*;
 
@@ -101,7 +102,7 @@ async fn minifying_works() {
 }
 
 #[tokio::test]
-async fn minifying_with_bom_and_bom_stripping_works() {
+async fn minifying_with_bom_works() {
 	successful_process_test(
 		CMD_DATA,
 		true,
@@ -115,7 +116,7 @@ async fn minifying_with_bom_and_bom_stripping_works() {
 }
 
 #[tokio::test]
-async fn passthrough_with_bom_and_bom_stripping_works() {
+async fn passthrough_with_bom_works() {
 	successful_process_test(
 		CMD_DATA,
 		true,
@@ -129,25 +130,25 @@ async fn passthrough_with_bom_and_bom_stripping_works() {
 }
 
 #[tokio::test]
-async fn leading_slash_command() {
+async fn command_with_leading_slash_is_handled() {
 	unsuccessful_process_test(
 		CMD_DATA_LEADING_SLASH,
 		false,
 		Default::default(),
 		|err| matches!(err, OptimizationError::GratuitousLeadingSlash(_)),
-		"Expected an gratuitous leading slash error"
+		"Expected a gratuitous leading slash error"
 	)
 	.await
 }
 
 #[tokio::test]
-async fn leading_double_slash_command() {
+async fn comment_with_double_slash_delimiter_is_handled() {
 	unsuccessful_process_test(
 		CMD_DATA_LEADING_DOUBLE_SLASH,
 		false,
 		Default::default(),
 		|err| matches!(err, OptimizationError::DoubleSlashComment(_)),
-		"Expected an double-slash comment error"
+		"Expected a double slash comment error"
 	)
 	.await
 }

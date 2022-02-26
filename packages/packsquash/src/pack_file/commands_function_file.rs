@@ -27,9 +27,9 @@ pub struct CommandsFunctionFile<T: AsyncRead + Send + Unpin + 'static> {
 pub enum OptimizationError {
 	#[error("Error while reading a line: {0}")]
 	TextLineRead(#[from] LinesCodecError),
-	#[error("Format error: Gratuitous leading slash in command at line {0}")]
+	#[error("Format error: Gratuitous leading slash in command at line {0}. Please remove it")]
 	GratuitousLeadingSlash(LineNumber),
-	#[error("Format error: Double-slash comment in command at line {0}, use # instead")]
+	#[error("Format error: Comment delimited by a double slash at line {0}. Please use # instead")]
 	DoubleSlashComment(LineNumber)
 }
 
@@ -98,11 +98,9 @@ fn process_line<L: Into<String>>(
 
 	// The lines codec takes care of stripping line breaks from the line, even if
 	// Windows line endings (CR + LF) are used. However, we should remove the BOM in
-	// the first line if present. This would remove the BOM prefix from the key of
-	// the first command string, avoiding pack author confusion and doing a better
-	// work than Mojang ;). This might break packs that dealt with the BOM by
-	// including it in the key references elsewhere, so only do it if the option
-	// is enabled
+	// the first line if present. This fixes problems derived from empty or comment
+	// lines being parsed as commands instead, and commands being parsed with a strange
+	// character in the beginning, in addition of saving space
 	if line_number.is_first() && line.chars().next().map_or(false, |c| c == '\u{feff}') {
 		line.remove(0);
 	}
@@ -115,12 +113,12 @@ fn process_line<L: Into<String>>(
 		(!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED))
 	} else {
 		// The line will be parsed as a command.
-		// Check that it does not contain a leading slash, which the game rejects
+		// Check that there are no leading slashes, which the game rejects
 		if trimmed_line.starts_with("//") {
-			// Expect to use # instead.
+			// # must be used instead. Most Minecraft versions reject this comment delimiter
 			return Some(Err(OptimizationError::DoubleSlashComment(line_number)));
 		} else if trimmed_line.starts_with('/') {
-			// Expect to remove /.
+			// No leading slash is required by most Minecraft versions
 			return Some(Err(OptimizationError::GratuitousLeadingSlash(line_number)));
 		}
 
