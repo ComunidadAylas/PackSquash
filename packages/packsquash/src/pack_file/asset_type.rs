@@ -99,6 +99,14 @@ pub enum PackFileAssetType {
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
 	OptifineTexture,
+	/// A texture used for train models and maybe other assets in the Minecraft Transit Railway
+	/// 3 mod, located within the `assets/mtr/custom_directory` directory. The mod can deal with
+	/// textures located in the more common `assets/namespace/textures` directory supported by
+	/// the `GenericTexture` asset type, but widely deployed resource packs for this mod place
+	/// them in that directory.
+	#[cfg(feature = "mtr3-support")]
+	#[doc(cfg(feature = "mtr3-support"))]
+	Mtr3CustomGenericTexture,
 	/// Any texture in PNG format, with `.png` extension.
 	GenericTexture,
 
@@ -238,6 +246,10 @@ impl PackFileAssetType {
 				// define paths to files in different folders in OptiFine files. As a compromise,
 				// let any PNG file within OptiFine go through
 				compile_hardcoded_pack_file_glob_pattern("assets/*/{mcpatcher,optifine}/**/?*.png")
+			}
+			#[cfg(feature = "mtr3-support")]
+			Self::Mtr3CustomGenericTexture => {
+				compile_hardcoded_pack_file_glob_pattern("assets/mtr/custom_directory/**/?*.png")
 			}
 			Self::GenericTexture => {
 				// Some mods might accept textures in any resource location, but to keep things tidier
@@ -393,6 +405,8 @@ impl PackFileAssetType {
 			Self::PackIcon | Self::BannerLayer | Self::EyeLayer => None,
 			#[cfg(feature = "optifine-support")]
 			Self::OptifineTexture => None,
+			#[cfg(feature = "mtr3-support")]
+			Self::Mtr3CustomGenericTexture => None,
 			Self::GenericTexture => None,
 			#[cfg(feature = "optifine-support")]
 			Self::GenericProperties => None,
@@ -554,6 +568,9 @@ impl PackFileAssetTypeMatches {
 				#[cfg(feature = "optifine-support")]
 				PackFileAssetType::OptifineTexture if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(PngFile, optimization_settings),
+				#[cfg(feature = "mtr3-support")]
+				PackFileAssetType::Mtr3CustomGenericTexture if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(PngFile, optimization_settings),
 				PackFileAssetType::GenericTexture if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(PngFile, optimization_settings),
 				#[cfg(feature = "optifine-support")]
@@ -619,7 +636,8 @@ pub fn tweak_asset_types_mask_from_global_options(
 		.contains(MinecraftMod::MinecraftTransitRailway3)
 	{
 		asset_types_mask -= PackFileAssetType::Mtr3CustomTrainModel
-			| PackFileAssetType::Mtr3CustomTrainModelWithComments;
+			| PackFileAssetType::Mtr3CustomTrainModelWithComments
+			| PackFileAssetType::Mtr3CustomGenericTexture;
 	}
 
 	asset_types_mask
