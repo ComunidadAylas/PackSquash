@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1645899476954,
+  "lastUpdate": 1645912898022,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -1371,6 +1371,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1270733344,
             "range": "± 15971807",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "ee5ec79281dcc70c57d979fe39bbbd71706fc512",
+          "message": "feat(mtr3): support textures in mtr/custom_directory again\n\nWith the introduction of asset types and proper path matching instead of\njust blindly optimizing files by broad type, we started skipping PNG\nfiles that are outside of the vanilla-like assets/<namespace>/textures\nfolder. However, the example MTR3 resource pack, on which widely\ndeployed MTR3 resource packs are based on, decided to put custom\ntextures on a directory that does not conform to the more common\nhierarchy: assets/mtr/custom_directory.\n\nThe mod can deal with textures being placed in either directory, and\nit's my personal opinion that putting them following the vanilla-like\nhierarchy looks more tidy. However, them being in a different hierarchy\nalso allows PackSquash to do more effective filtering of undesired mod\nfiles when the MTR3 mod is not allowed in the options. To avoid breaking\nmost MTR3 packs and take advantage of this likely unintended design\nchoice, let's support MTR3 custom textures inside the custom_directory\nfolder again, but only if the MTR3 mod is allowed in the options.",
+          "timestamp": "2022-02-26T22:26:52+01:00",
+          "tree_id": "07566e7cda715be1ce542141a973f63aaa82285f",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ee5ec79281dcc70c57d979fe39bbbd71706fc512"
+        },
+        "date": 1645912897080,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13031429,
+            "range": "± 1095465",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 912657014,
+            "range": "± 60497579",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 9553760476,
+            "range": "± 543591113",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1367100061,
+            "range": "± 56710933",
             "unit": "ns/iter"
           }
         ]
