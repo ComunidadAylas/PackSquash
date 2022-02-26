@@ -11,6 +11,10 @@ use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_stream::Stream;
 
+pub use util::strip_utf8_bom;
+
+use crate::pack_file::asset_type::PackFileAssetType;
+
 pub mod asset_type;
 
 mod util;
@@ -18,7 +22,7 @@ mod util;
 #[cfg(feature = "audio-transcoding")]
 #[doc(cfg(feature = "audio-transcoding"))]
 mod audio_file;
-mod commands_function_file;
+mod command_function_file;
 mod json_file;
 mod legacy_lang_file;
 mod passthrough_file;
@@ -28,9 +32,6 @@ mod shader_file;
 #[cfg(feature = "optifine-support")]
 #[doc(cfg(feature = "optifine-support"))]
 mod properties_file;
-
-use crate::pack_file::asset_type::PackFileAssetType;
-pub use util::strip_utf8_bom;
 
 /// Represents an error that may occur while optimizing a pack file.
 #[derive(Error, Debug)]
@@ -46,7 +47,7 @@ pub enum OptimizationError {
 	PropertiesFile(#[from] properties_file::OptimizationError),
 	ShaderFile(#[from] shader_file::OptimizationError),
 	LegacyLanguageFile(#[from] legacy_lang_file::OptimizationError),
-	CommandsFunctionFile(#[from] commands_function_file::OptimizationError),
+	CommandFunctionFile(#[from] command_function_file::OptimizationError),
 	IoError(#[from] io::Error)
 }
 

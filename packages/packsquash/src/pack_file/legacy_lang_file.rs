@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::lazy::SyncLazy;
 
 use ahash::AHashSet;
@@ -11,7 +10,7 @@ use tokio_util::codec::{FramedRead, LinesCodec, LinesCodecError};
 
 use crate::config::LegacyLanguageFileOptions;
 use crate::pack_file::asset_type::PackFileAssetType;
-use crate::pack_file::util::{LineNumber, MarkLastDecorator};
+use crate::pack_file::util::{prepare_line_for_output, LineNumber, MarkLastDecorator};
 use crate::pack_file::AsyncReadAndSizeHint;
 
 use super::{OptimizedBytesChunk, PackFile, PackFileConstructor};
@@ -165,7 +164,7 @@ fn process_line<L: Into<String>>(
 	// Check whether the line is a comment. If so, bail out by copying or skipping
 	// it. It's copied only if we're not minifying
 	if line.starts_with('#') {
-		return (!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED));
+		return (!minify).then(|| prepare_line_for_output(line, is_last, NOT_MINIFIED));
 	}
 
 	match line.split_once('=') {
@@ -199,7 +198,7 @@ fn process_line<L: Into<String>>(
 				return Some(Err(OptimizationError::InvalidFormatString(line_number)));
 			}
 
-			Some(prepare_for_output(
+			Some(prepare_line_for_output(
 				line,
 				is_last,
 				if minify { MINIFIED } else { NOT_MINIFIED }
@@ -211,27 +210,10 @@ fn process_line<L: Into<String>>(
 			// this line, but be more strict about it because this clutters the file
 			// for no good reason
 			if line.trim().is_empty() {
-				(!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED))
+				(!minify).then(|| prepare_line_for_output(line, is_last, NOT_MINIFIED))
 			} else {
 				Some(Err(OptimizationError::MissingSeparator(line_number)))
 			}
 		}
 	}
-}
-
-/// Prepares a line for output to the processed representation of this file, adding a line break
-/// if necessary.
-fn prepare_for_output<L: Into<String>, D: Into<Cow<'static, str>>>(
-	line: L,
-	is_last: bool,
-	description: D
-) -> OptimizedBytesChunk<Vec<u8>, OptimizationError> {
-	let mut line = line.into();
-
-	// Add a Unix-style line break if there are more lines. We don't need a newline at the end
-	if !is_last {
-		line.push('\n');
-	}
-
-	Ok((description.into(), line.into_bytes()))
 }

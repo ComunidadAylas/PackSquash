@@ -1,14 +1,12 @@
-use std::borrow::Cow;
-
 use futures::{future, StreamExt};
 use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_stream::Stream;
 use tokio_util::codec::{FramedRead, LinesCodec, LinesCodecError};
 
-use crate::config::CommandsFunctionFileOptions;
+use crate::config::CommandFunctionFileOptions;
 use crate::pack_file::asset_type::PackFileAssetType;
-use crate::pack_file::util::{LineNumber, MarkLastDecorator};
+use crate::pack_file::util::{prepare_line_for_output, LineNumber, MarkLastDecorator};
 use crate::pack_file::AsyncReadAndSizeHint;
 
 use super::{OptimizedBytesChunk, PackFile, PackFileConstructor};
@@ -16,13 +14,28 @@ use super::{OptimizedBytesChunk, PackFile, PackFileConstructor};
 #[cfg(test)]
 mod tests;
 
-/// Represents a line-oriented text file.
-pub struct CommandsFunctionFile<T: AsyncRead + Send + Unpin + 'static> {
+/// Represents a line-oriented text file that contains commands for a vanilla Minecraft command
+/// function. After being trimmed, each line is parsed as either a command, a comment or an empty
+/// line. Comment lines are those whose first character is `#`. Empty lines do not contain characters
+/// (note that trimming removes any ASCII whitespace character, whose codepoint is less than 0x20).
+/// Commands are lines that are not comments or empty lines, and they must not begin with a `/`
+/// character in almost every Minecraft version. In a handful of pre-releases `//` was also supported
+/// as a comment delimiter sequence, but the rest of Minecraft versions reject such delimiter. No
+/// escape sequences are supported: any character is potentially valid in a command, and every
+/// command fits in a single line.
+///
+/// Currently, command functions are only found in data packs. Minecraft uses its own parsing code
+/// to read these files.
+///
+/// References:
+/// - <https://minecraft.fandom.com/wiki/Function_(Java_Edition)>
+/// - Minecraft class `net.minecraft.commands.CommandFunction`
+pub struct CommandFunctionFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
-	optimization_settings: CommandsFunctionFileOptions
+	optimization_settings: CommandFunctionFileOptions
 }
 
-/// Represents an error that may happen while optimizing commands function files.
+/// Represents an error that may happen while optimizing command function files.
 #[derive(Error, Debug)]
 pub enum OptimizationError {
 	#[error("Error while reading a line: {0}")]
@@ -33,7 +46,7 @@ pub enum OptimizationError {
 	DoubleSlashComment(LineNumber)
 }
 
-impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CommandsFunctionFile<T> {
+impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CommandFunctionFile<T> {
 	type ByteChunkType = Vec<u8>;
 	type OptimizationError = OptimizationError;
 	type OptimizedByteChunksStream =
@@ -67,8 +80,8 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CommandsFunctionFile<T>
 	}
 }
 
-impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for CommandsFunctionFile<T> {
-	type OptimizationSettings = CommandsFunctionFileOptions;
+impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for CommandFunctionFile<T> {
+	type OptimizationSettings = CommandFunctionFileOptions;
 
 	fn new(
 		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<T>>,
@@ -110,7 +123,7 @@ fn process_line<L: Into<String>>(
 	// Check whether the line is empty or a comment. If so, bail out by copying or
 	// skipping it, depending on whether we're minifying
 	if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
-		(!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED))
+		(!minify).then(|| prepare_line_for_output(line, is_last, NOT_MINIFIED))
 	} else {
 		// The line will be parsed as a command.
 		// Check that there are no leading slashes, which the game rejects
@@ -123,26 +136,9 @@ fn process_line<L: Into<String>>(
 		}
 
 		if minify {
-			Some(prepare_for_output(trimmed_line, is_last, MINIFIED))
+			Some(prepare_line_for_output(trimmed_line, is_last, MINIFIED))
 		} else {
-			Some(prepare_for_output(line, is_last, NOT_MINIFIED))
+			Some(prepare_line_for_output(line, is_last, NOT_MINIFIED))
 		}
 	}
-}
-
-/// Prepares a line for output to the processed representation of this file, adding a line break
-/// if necessary.
-fn prepare_for_output<L: Into<String>, D: Into<Cow<'static, str>>>(
-	line: L,
-	is_last: bool,
-	description: D
-) -> OptimizedBytesChunk<Vec<u8>, OptimizationError> {
-	let mut line = line.into();
-
-	// Add a Unix-style line break if there are more lines. We don't need a newline at the end
-	if !is_last {
-		line.push('\n');
-	}
-
-	Ok((description.into(), line.into_bytes()))
 }

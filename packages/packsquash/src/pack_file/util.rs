@@ -1,11 +1,15 @@
 //! Contains miscellaneous small helper functions that are used for processing pack files.
 
-use futures::StreamExt;
-use std::fmt::{Display, Formatter};
+use std::borrow::Cow;
+use std::fmt::{Debug, Display, Formatter};
 use std::num::NonZeroUsize;
 use std::pin::Pin;
 use std::task::{Context, Poll};
+
+use futures::StreamExt;
 use tokio_stream::Stream;
+
+use super::{OptimizationError, OptimizedBytesChunk};
 
 /// The Unicode byte order mark character.
 #[cfg(test)]
@@ -68,7 +72,7 @@ impl LineNumber {
 impl Display for LineNumber {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		match self.0 {
-			Some(line_number) => line_number.fmt(f),
+			Some(line_number) => Display::fmt(&line_number, f),
 			None => f.write_str("unknown")
 		}
 	}
@@ -139,4 +143,25 @@ impl<T: Unpin, S: Stream<Item = T> + Unpin> Stream for MarkLastDecorator<T, S> {
 	fn size_hint(&self) -> (usize, Option<usize>) {
 		self.inner.size_hint()
 	}
+}
+
+/// Prepares a line for output to the processed representation of a text file, adding a line break
+/// if necessary.
+pub fn prepare_line_for_output<
+	L: Into<String>,
+	D: Into<Cow<'static, str>>,
+	E: Into<OptimizationError> + Debug + Display
+>(
+	line: L,
+	is_last: bool,
+	description: D
+) -> OptimizedBytesChunk<Vec<u8>, E> {
+	let mut line = line.into();
+
+	// Add a Unix-style line break if there are more lines. We don't need a newline at the end
+	if !is_last {
+		line.push('\n');
+	}
+
+	Ok((description.into(), line.into_bytes()))
 }

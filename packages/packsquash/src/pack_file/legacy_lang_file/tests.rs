@@ -1,6 +1,9 @@
-use crate::pack_file::util::BOM;
+use std::borrow::Cow;
+
 use pretty_assertions::assert_eq;
 use tokio_test::io::Builder;
+
+use crate::pack_file::util::BOM;
 
 use super::*;
 

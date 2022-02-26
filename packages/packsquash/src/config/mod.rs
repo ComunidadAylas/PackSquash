@@ -550,9 +550,9 @@ pub enum FileOptions {
 	/// Options that influence how legacy language files are converted to a more
 	/// distribution-friendly representation.
 	LegacyLanguageFileOptions(LegacyLanguageFileOptions),
-	/// Options that influence how commands function files are converted to a more
+	/// Options that influence how command function files are converted to a more
 	/// distribution-friendly representation.
-	CommandsFunctionFileOptions(CommandsFunctionFileOptions),
+	CommandFunctionFileOptions(CommandFunctionFileOptions),
 	/// Options that influence how custom files that the user explicitly wants to include in the
 	/// pack are processed.
 	// For better style, keep this variant last
@@ -931,22 +931,22 @@ impl Default for LegacyLanguageFileOptions {
 	}
 }
 
-/// Parameters that influence how a commands function file is optimized.
+/// Parameters that influence how a command function file is optimized.
 #[derive(Deserialize, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
-pub struct CommandsFunctionFileOptions {
-	/// If `true`, the commands function file will be minified: empty lines and comments will be
+pub struct CommandFunctionFileOptions {
+	/// If `true`, the command function file will be minified: empty lines and comments will be
 	/// removed. This saves space and improves parsing performance. If `false`, the file will
 	/// still be validated for errors, but left as-is. Line endings are normalized to Unix style
 	/// (using a single LF character) no matter what.
 	///
 	/// **Default value**: `true` (minify)
-	#[serde(rename = "minify_commands_function")]
+	#[serde(rename = "minify_command_function")]
 	pub minify: bool
 }
 
-impl Default for CommandsFunctionFileOptions {
+impl Default for CommandFunctionFileOptions {
 	fn default() -> Self {
 		Self { minify: true }
 	}

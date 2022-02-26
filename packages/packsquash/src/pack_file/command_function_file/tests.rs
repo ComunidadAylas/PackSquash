@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use pretty_assertions::assert_eq;
 use tokio_test::io::Builder;
 
@@ -5,17 +7,17 @@ use crate::pack_file::util::BOM;
 
 use super::*;
 
-static CMD_DATA: &str = include_str!("example.mcfuntion");
-static MINIFIED_CMD_DATA: &str = include_str!("example_minified.mcfuntion");
-static CMD_DATA_LEADING_SLASH: &str = include_str!("leading_slash.mcfuntion");
-static CMD_DATA_LEADING_DOUBLE_SLASH: &str = include_str!("leading_double_slash.mcfuntion");
+static FUNCTION_DATA: &str = include_str!("example.mcfuntion");
+static MINIFIED_FUNCTION_DATA: &str = include_str!("example_minified.mcfuntion");
+static FUNCTION_DATA_LEADING_SLASH: &str = include_str!("leading_slash.mcfuntion");
+static FUNCTION_DATA_LEADING_DOUBLE_SLASH: &str = include_str!("leading_double_slash.mcfuntion");
 
-/// Processes the given input data as a [CommandsFunctionFile], using the provided settings,
+/// Processes the given input data as a [CommandFunctionFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
 async fn successful_process_test(
 	input_text: &str,
 	add_bom: bool,
-	settings: CommandsFunctionFileOptions,
+	settings: CommandFunctionFileOptions,
 	expected_result: &str
 ) {
 	let input_text = {
@@ -29,7 +31,7 @@ async fn successful_process_test(
 	};
 	let input_data = input_text.as_bytes();
 
-	let data_stream = CommandsFunctionFile {
+	let data_stream = CommandFunctionFile {
 		read: Builder::new().read(input_data).build(),
 		optimization_settings: settings
 	}
@@ -49,12 +51,12 @@ async fn successful_process_test(
 	assert_eq!(&data, expected_result);
 }
 
-/// Processes the given input data as a [CommandsFunctionFile], using the provided settings,
+/// Processes the given input data as a [CommandFunctionFile], using the provided settings,
 /// expecting some error to happen.
 async fn unsuccessful_process_test(
 	input_text: &str,
 	add_bom: bool,
-	settings: CommandsFunctionFileOptions,
+	settings: CommandFunctionFileOptions,
 	mut error_matcher: impl FnMut(OptimizationError) -> bool,
 	failed_assertion_message: &'static str
 ) {
@@ -69,7 +71,7 @@ async fn unsuccessful_process_test(
 	};
 	let input_data = input_text.as_bytes();
 
-	let data_stream = CommandsFunctionFile {
+	let data_stream = CommandFunctionFile {
 		read: Builder::new().read(input_data).build(),
 		optimization_settings: settings
 	}
@@ -90,13 +92,13 @@ async fn unsuccessful_process_test(
 #[tokio::test]
 async fn minifying_works() {
 	successful_process_test(
-		CMD_DATA,
+		FUNCTION_DATA,
 		false,
-		CommandsFunctionFileOptions {
+		CommandFunctionFileOptions {
 			minify: true,
 			..Default::default()
 		},
-		MINIFIED_CMD_DATA
+		MINIFIED_FUNCTION_DATA
 	)
 	.await
 }
@@ -104,13 +106,27 @@ async fn minifying_works() {
 #[tokio::test]
 async fn minifying_with_bom_works() {
 	successful_process_test(
-		CMD_DATA,
+		FUNCTION_DATA,
 		true,
-		CommandsFunctionFileOptions {
+		CommandFunctionFileOptions {
 			minify: true,
 			..Default::default()
 		},
-		MINIFIED_CMD_DATA
+		MINIFIED_FUNCTION_DATA
+	)
+	.await
+}
+
+#[tokio::test]
+async fn passthrough_works() {
+	successful_process_test(
+		FUNCTION_DATA,
+		false,
+		CommandFunctionFileOptions {
+			minify: false,
+			..Default::default()
+		},
+		FUNCTION_DATA
 	)
 	.await
 }
@@ -118,13 +134,13 @@ async fn minifying_with_bom_works() {
 #[tokio::test]
 async fn passthrough_with_bom_works() {
 	successful_process_test(
-		CMD_DATA,
+		FUNCTION_DATA,
 		true,
-		CommandsFunctionFileOptions {
+		CommandFunctionFileOptions {
 			minify: false,
 			..Default::default()
 		},
-		CMD_DATA
+		FUNCTION_DATA
 	)
 	.await
 }
@@ -132,7 +148,7 @@ async fn passthrough_with_bom_works() {
 #[tokio::test]
 async fn command_with_leading_slash_is_handled() {
 	unsuccessful_process_test(
-		CMD_DATA_LEADING_SLASH,
+		FUNCTION_DATA_LEADING_SLASH,
 		false,
 		Default::default(),
 		|err| matches!(err, OptimizationError::GratuitousLeadingSlash(_)),
@@ -144,7 +160,7 @@ async fn command_with_leading_slash_is_handled() {
 #[tokio::test]
 async fn comment_with_double_slash_delimiter_is_handled() {
 	unsuccessful_process_test(
-		CMD_DATA_LEADING_DOUBLE_SLASH,
+		FUNCTION_DATA_LEADING_DOUBLE_SLASH,
 		false,
 		Default::default(),
 		|err| matches!(err, OptimizationError::DoubleSlashComment(_)),
