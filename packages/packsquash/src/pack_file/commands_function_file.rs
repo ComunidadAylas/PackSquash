@@ -46,9 +46,9 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CommandsFunctionFile<T>
 
 		MarkLastDecorator::new(FramedRead::new(
 			self.read,
-			// Limit line length to 16 KiB to bound memory consumption and be nice to Minecraft.
+			// Limit line length to 16 MiB to bound memory consumption and be nice to Minecraft.
 			// Longer lines are probably an error, and will negatively affect Minecraft performance
-			LinesCodec::new_with_max_length(16 * 1024)
+			LinesCodec::new_with_max_length(16 * 1024 * 1024)
 		))
 		.filter_map(move |(line_result, is_last)| {
 			let processed_line_result = line_result.map_or_else(
