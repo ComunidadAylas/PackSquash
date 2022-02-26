@@ -115,14 +115,22 @@ fn process_line<L: Into<String>>(
 	// skipping it, depending on whether we're minifying
 	if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
 		(!minify).then(|| prepare_for_output(line, is_last, NOT_MINIFIED))
-	} else if trimmed_line.starts_with("//") {
-		Some(Err(OptimizationError::DoubleSlashComment(line_number)))
-	} else if trimmed_line.starts_with('/') {
-		Some(Err(OptimizationError::GratuitousLeadingSlash(line_number)))
-	} else if minify {
-		Some(prepare_for_output(trimmed_line, is_last, MINIFIED))
 	} else {
-		Some(prepare_for_output(line, is_last, NOT_MINIFIED))
+		// The line will be parsed as a command.
+		// Check that it does not contain a leading slash, which the game rejects
+		if trimmed_line.starts_with("//") {
+			// Expect to use # instead.
+			return Some(Err(OptimizationError::DoubleSlashComment(line_number)))
+		} else if trimmed_line.starts_with('/') {
+			// Expect to remove /.
+			return Some(Err(OptimizationError::GratuitousLeadingSlash(line_number)))
+		}
+
+		if minify {
+			Some(prepare_for_output(trimmed_line, is_last, MINIFIED))
+		} else {
+			Some(prepare_for_output(line, is_last, NOT_MINIFIED))
+		}
 	}
 }
 
