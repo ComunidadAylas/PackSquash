@@ -11,6 +11,7 @@ use tokio::io::AsyncRead;
 use crate::config::GlobalOptions;
 #[cfg(feature = "audio-transcoding")]
 use crate::pack_file::audio_file::AudioFile;
+use crate::pack_file::command_function_file::CommandFunctionFile;
 use crate::pack_file::json_file::JsonFile;
 use crate::pack_file::legacy_lang_file::LegacyLanguageFile;
 use crate::pack_file::passthrough_file::PassthroughFile;
@@ -142,9 +143,9 @@ pub enum PackFileAssetType {
 	/// A structure file in NBT format, compressed with gzip. Used by data packs. Its extension
 	/// is `.nbt`.
 	NbtStructure,
-	/// A vanilla Minecraft data pack function, which is a list of commands that can be executed
-	/// and referred to as a whole. Its extension is `.mcfunction`.
-	CommandsFunction,
+	/// A vanilla Minecraft data pack command function, which contains a list of commands that
+	/// can be executed and referred to as a whole. Its extension is `.mcfunction`.
+	CommandFunction,
 
 	/// A custom asset type, defined by the end user, whose contents are opaque to PackSquash and
 	/// processed without any specific optimizations. Custom assets can never be matched by using
@@ -364,7 +365,7 @@ impl PackFileAssetType {
 			Self::NbtStructure => {
 				compile_hardcoded_pack_file_glob_pattern("data/*/structures/**/?*.nbt")
 			}
-			Self::CommandsFunction => {
+			Self::CommandFunction => {
 				compile_hardcoded_pack_file_glob_pattern("data/*/functions/**/?*.mcfunction")
 			}
 
@@ -418,7 +419,7 @@ impl PackFileAssetType {
 			Self::FontCharacterSizes => None,
 			Self::Text | Self::LegacyTextCredits => None,
 			Self::NbtStructure => None,
-			Self::CommandsFunction => None,
+			Self::CommandFunction => None,
 			Self::Custom => None
 		}
 	}
@@ -584,12 +585,13 @@ impl PackFileAssetTypeMatches {
 					return_pack_file_to_process_data!(ShaderFile, optimization_settings),
 				PackFileAssetType::LegacyLanguageFile if let Some(FileOptions::LegacyLanguageFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(LegacyLanguageFile, optimization_settings),
+				PackFileAssetType::CommandFunction if let Some(FileOptions::CommandFunctionFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(CommandFunctionFile, optimization_settings),
 				PackFileAssetType::TrueTypeFont
 				| PackFileAssetType::FontCharacterSizes
 				| PackFileAssetType::Text
 				| PackFileAssetType::LegacyTextCredits
-				| PackFileAssetType::NbtStructure
-				| PackFileAssetType::CommandsFunction if file_options.is_none() =>
+				| PackFileAssetType::NbtStructure if file_options.is_none() =>
 					return_pack_file_to_process_data!(PassthroughFile, ()),
 				PackFileAssetType::Custom if let Some(
 					FileOptions::CustomFileOptions(CustomFileOptions { force_include: true, .. })

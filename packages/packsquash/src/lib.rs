@@ -22,7 +22,6 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(rustdoc::private_intra_doc_links)]
 
-use enumset::EnumSet;
 use std::borrow::Cow;
 use std::convert::Infallible;
 use std::hint::unreachable_unchecked;
@@ -33,6 +32,7 @@ use std::sync::Arc;
 use std::{cmp, panic};
 use std::{io, time::SystemTime};
 
+use enumset::EnumSet;
 use futures::future;
 use futures::StreamExt;
 use thiserror::Error;
@@ -51,8 +51,8 @@ use crate::config::AudioFileOptions;
 #[cfg(feature = "optifine-support")]
 use crate::config::PropertiesFileOptions;
 use crate::config::{
-	FileOptions, JsonFileOptions, LegacyLanguageFileOptions, PngFileOptions, ShaderFileOptions,
-	SquashOptions
+	CommandFunctionFileOptions, FileOptions, JsonFileOptions, LegacyLanguageFileOptions,
+	PngFileOptions, ShaderFileOptions, SquashOptions
 };
 use crate::pack_file::asset_type::{
 	tweak_asset_types_mask_from_global_options, PackFileAssetTypeMatcher, PackFileAssetTypeMatches
@@ -446,6 +446,9 @@ impl PackSquasher {
 							Some(FileOptions::ShaderFileOptions(ShaderFileOptions::default())),
 							Some(FileOptions::LegacyLanguageFileOptions(
 								LegacyLanguageFileOptions::default()
+							)),
+							Some(FileOptions::CommandFunctionFileOptions(
+								CommandFunctionFileOptions::default()
 							)),
 							None
 						] {

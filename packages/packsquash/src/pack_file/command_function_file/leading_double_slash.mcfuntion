@@ -1,0 +1,2 @@
+// This is an invalid double-slash comment
+say @a hello
