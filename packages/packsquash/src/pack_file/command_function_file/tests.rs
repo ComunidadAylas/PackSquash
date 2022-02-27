@@ -7,10 +7,10 @@ use crate::pack_file::util::BOM;
 
 use super::*;
 
-static FUNCTION_DATA: &str = include_str!("example.mcfuntion");
-static MINIFIED_FUNCTION_DATA: &str = include_str!("example_minified.mcfuntion");
-static FUNCTION_DATA_LEADING_SLASH: &str = include_str!("leading_slash.mcfuntion");
-static FUNCTION_DATA_LEADING_DOUBLE_SLASH: &str = include_str!("leading_double_slash.mcfuntion");
+static FUNCTION_DATA: &str = include_str!("example.mcfunction");
+static MINIFIED_FUNCTION_DATA: &str = include_str!("example_minified.mcfunction");
+static FUNCTION_DATA_LEADING_SLASH: &str = include_str!("leading_slash.mcfunction");
+static FUNCTION_DATA_LEADING_DOUBLE_SLASH: &str = include_str!("leading_double_slash.mcfunction");
 
 /// Processes the given input data as a [CommandFunctionFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
