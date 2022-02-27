@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1645912898022,
+  "lastUpdate": 1645965893601,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -1419,6 +1419,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1367100061,
             "range": "± 56710933",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "f9082cd04f96a84cda020de302bf875dc69448c3",
+          "message": "fix(command_function_file/tests): typo in test data extensions\n\nThe extensions of the sample data files were .mcfuntion, not .mcfunction\n(note the lack of a c). I totally missed this before merging PR #68, so\nlet's correct it. This caused the .gitattributes EOL settings being\napparently ignored, as they matched .mcfunction files, not .mcfuntion\nfiles.",
+          "timestamp": "2022-02-27T13:06:25+01:00",
+          "tree_id": "f276b6f091e237329289dc72953401f387fab7ab",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f9082cd04f96a84cda020de302bf875dc69448c3"
+        },
+        "date": 1645965892613,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14065667,
+            "range": "± 663826",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 964381664,
+            "range": "± 23273674",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10463219211,
+            "range": "± 107981178",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1436107965,
+            "range": "± 25218667",
             "unit": "ns/iter"
           }
         ]
