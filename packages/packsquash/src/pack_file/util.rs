@@ -11,8 +11,7 @@ use tokio_stream::Stream;
 
 use super::{OptimizationError, OptimizedBytesChunk};
 
-/// The Unicode byte order mark character.
-#[cfg(test)]
+/// The Unicode byte order mark character (BOM).
 pub static BOM: char = '\u{feff}';
 /// The UTF-8 representation of the Unicode byte order mark character.
 pub static BOM_UTF8: [u8; 3] = [0xEF, 0xBB, 0xBF];
@@ -36,8 +35,6 @@ pub fn strip_utf8_bom(buf: &[u8]) -> &[u8] {
 pub fn starts_with_bom<T: AsRef<[u8]>>(buf: T) -> bool {
 	let buf = buf.as_ref();
 
-	// These bytes are the UTF-8 representation of character 0xFEFF
-	// (BYTE ORDER MARK)
 	buf.len() >= BOM_UTF8.len() && buf[..BOM_UTF8.len()] == BOM_UTF8
 }
 

@@ -6,7 +6,7 @@ use tokio_util::codec::{FramedRead, LinesCodec, LinesCodecError};
 
 use crate::config::CommandFunctionFileOptions;
 use crate::pack_file::asset_type::PackFileAssetType;
-use crate::pack_file::util::{prepare_line_for_output, LineNumber, MarkLastDecorator};
+use crate::pack_file::util::{prepare_line_for_output, LineNumber, MarkLastDecorator, BOM};
 use crate::pack_file::AsyncReadAndSizeHint;
 
 use super::{OptimizedBytesChunk, PackFile, PackFileConstructor};
@@ -114,7 +114,7 @@ fn process_line<L: Into<String>>(
 	// the first line if present. This fixes problems derived from empty or comment
 	// lines being parsed as commands instead, and commands being parsed with a strange
 	// character in the beginning, in addition of saving space
-	if line_number.is_first() && line.chars().next().map_or(false, |c| c == '\u{feff}') {
+	if line_number.is_first() && line.chars().next().map_or(false, |c| c == BOM) {
 		line.remove(0);
 	}
 

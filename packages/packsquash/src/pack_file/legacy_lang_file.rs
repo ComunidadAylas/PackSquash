@@ -10,7 +10,7 @@ use tokio_util::codec::{FramedRead, LinesCodec, LinesCodecError};
 
 use crate::config::LegacyLanguageFileOptions;
 use crate::pack_file::asset_type::PackFileAssetType;
-use crate::pack_file::util::{prepare_line_for_output, LineNumber, MarkLastDecorator};
+use crate::pack_file::util::{prepare_line_for_output, LineNumber, MarkLastDecorator, BOM};
 use crate::pack_file::AsyncReadAndSizeHint;
 
 use super::{OptimizedBytesChunk, PackFile, PackFileConstructor};
@@ -157,7 +157,7 @@ fn process_line<L: Into<String>>(
 	// work than Mojang ;). This might break packs that dealt with the BOM by
 	// including it in the key references elsewhere, so only do it if the option
 	// is enabled
-	if line_number.is_first() && strip_bom && line.chars().next().map_or(false, |c| c == '\u{feff}') {
+	if line_number.is_first() && strip_bom && line.chars().next().map_or(false, |c| c == BOM) {
 		line.remove(0);
 	}
 
