@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1645983815399,
+  "lastUpdate": 1646012175047,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -1515,6 +1515,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1546873835,
             "range": "± 19456343",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "id": "9257c123b2d5390fb49a12681385edd58c398e3c",
+          "message": "chore: replace repeated BOM constant with reference to static variable",
+          "timestamp": "2022-02-27T17:11:16Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9257c123b2d5390fb49a12681385edd58c398e3c"
+        },
+        "date": 1646012174480,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14846756,
+            "range": "± 192628",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 945415926,
+            "range": "± 8113876",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10647801280,
+            "range": "± 29588191",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1384512829,
+            "range": "± 8004981",
             "unit": "ns/iter"
           }
         ]
