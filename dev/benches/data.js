@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1646157471030,
+  "lastUpdate": 1646184865427,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -1657,6 +1657,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1361320461,
             "range": "± 4639652",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c885ebcdc9316cee057895a2cc317dae4aee4c6d",
+          "message": "chore(deps): bump rgb from 0.8.31 to 0.8.32 (#72)\n\nBumps [rgb](https://github.com/kornelski/rust-rgb) from 0.8.31 to 0.8.32.\r\n- [Release notes](https://github.com/kornelski/rust-rgb/releases)\r\n- [Commits](https://github.com/kornelski/rust-rgb/commits)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: rgb\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-03-01T18:11:51+01:00",
+          "tree_id": "22dde89b38dc0900740fcc562c771fb7476d1566",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c885ebcdc9316cee057895a2cc317dae4aee4c6d"
+        },
+        "date": 1646184864797,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 16759521,
+            "range": "± 1489707",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1080648197,
+            "range": "± 24611124",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12024209988,
+            "range": "± 212321132",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1555218857,
+            "range": "± 19024339",
             "unit": "ns/iter"
           }
         ]
