@@ -28,7 +28,10 @@ chmod +x "$APPIMAGE_WORKDIR/linuxdeploy-x86_64.AppImage"
 wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gstreamer/12e0e983f9e01f4e450ef2534cfec10e8aab2539/linuxdeploy-plugin-gstreamer.sh
 chmod +x "$APPIMAGE_WORKDIR/linuxdeploy-plugin-gstreamer.sh"
 
+# Set the APPIMAGE_EXTRACT_AND_RUN environment variable to not depend on FUSE,
+# which is troublesome in Docker containers
 echo '> Running linuxdeploy'
+APPIMAGE_EXTRACT_AND_RUN=1 \
 VERSION="$(git describe --tags --dirty=-custom)" GSTREAMER_INCLUDE_BAD_PLUGINS=1 NO_APPSTREAM=1 \
 UPDATE_INFORMATION='gh-releases-zsync|ComunidadAylas|PackSquash|latest|PackSquash-*x86_64.AppImage.zsync' \
 "$APPIMAGE_WORKDIR/linuxdeploy-x86_64.AppImage" --appdir="$APPIMAGE_WORKDIR/AppDir" \
