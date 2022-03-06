@@ -96,8 +96,8 @@ jobs:
       - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
         run: |
           apt-get update
-          # curl is required by rustup
-          apt-get install -yq build-essential git curl \
+          # curl is required by rustup. wget is required by our AppImage generation script
+          apt-get install -yq build-essential git curl wget \
                               gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
                               libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
                               markdown html2text
@@ -137,7 +137,7 @@ jobs:
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
-      - name: Generate AppImage
+      - name: Generate CLI AppImage
         run: scripts/build_appimage.sh
 
       - name: Upload CLI binary
@@ -152,16 +152,16 @@ jobs:
           name: 'Debian packages (amd64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
 
-      - name: Upload AppImage
+      - name: Upload CLI AppImage
         uses: actions/upload-artifact@v2
         with:
-          name: 'AppImage (x64)'
+          name: 'CLI AppImage (x64)'
           path: target/appimage/PackSquash-*-x86_64.AppImage
 
-      - name: Upload AppImage update diff
+      - name: Upload CLI AppImage update diff
         uses: actions/upload-artifact@v2
         with:
-          name: 'AppImage zsync (x64)'
+          name: 'CLI AppImage zsync (x64)'
           path: target/appimage/PackSquash-*-x86_64.AppImage.zsync
 
   windows-x64-gnu:
