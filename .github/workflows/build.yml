@@ -82,7 +82,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim
+    container: debian:stretch-slim
 
     env:
       CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
@@ -96,8 +96,8 @@ jobs:
       - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
         run: |
           apt-get update
-          # curl is required by rustup. wget is required by our AppImage generation script
-          apt-get install -yq build-essential git curl wget \
+          # curl is required by rustup. wget and patchelf are required by our AppImage generation script
+          apt-get install -yq build-essential git curl wget patchelf \
                               gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
                               libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
                               markdown html2text
@@ -280,7 +280,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim
+    container: debian:stretch-slim
 
     env:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
@@ -357,7 +357,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim
+    container: debian:stretch-slim
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
