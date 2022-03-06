@@ -42,7 +42,8 @@ jobs:
       - name: Install GStreamer libraries and development packages
         run: |
           sudo apt-get update
-          sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+          sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+                               desktop-file-utils
 
       - name: Check workflow write permission
         id: check_write_permission
@@ -63,6 +64,9 @@ jobs:
 
       - name: Cargo deny check
         uses: EmbarkStudios/cargo-deny-action@v1
+
+      - name: Check PackSquash Linux desktop entries correctness
+        run: desktop-file-validate common/assets/*.desktop
 
       - name: Format Rust source code
         run: cargo fmt
@@ -133,6 +137,9 @@ jobs:
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
+      - name: Generate AppImage
+        run: scripts/build_appimage.sh
+
       - name: Upload CLI binary
         uses: actions/upload-artifact@v2
         with:
@@ -144,6 +151,18 @@ jobs:
         with:
           name: 'Debian packages (amd64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'AppImage (x64)'
+          path: target/appimage/PackSquash-*-x86_64.AppImage
+
+      - name: Upload AppImage update diff
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'AppImage zsync (x64)'
+          path: target/appimage/PackSquash-*-x86_64.AppImage.zsync
 
   windows-x64-gnu:
 
