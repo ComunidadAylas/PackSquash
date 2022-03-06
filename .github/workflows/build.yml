@@ -280,7 +280,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:buster-slim
+    container: debian:bullseye-slim
 
     env:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
