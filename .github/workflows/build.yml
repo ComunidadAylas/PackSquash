@@ -145,6 +145,8 @@ jobs:
         env:
           APPDIR: AppDir
           REPO_DIR: /build-repo
+          TARGET_APPIMAGE_ARCH: x86_64
+          TARGET_APPIMAGE_APT_ARCH: amd64
         with:
           recipe: appimage/recipe.yml
 
