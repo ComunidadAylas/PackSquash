@@ -19,6 +19,8 @@ env:
   CARGO_TERM_COLOR: always
   CARGO_DEB_VERSION: 1.34.0
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
+  APPDIR: AppDir
+  REPO_DIR: /pkgs
 
 jobs:
   static-analysis:
@@ -143,8 +145,6 @@ jobs:
       - name: Generate CLI AppImage
         uses: AppImageCrafters/build-appimage@master
         env:
-          APPDIR: AppDir
-          REPO_DIR: /pkgs
           TARGET_APPIMAGE_ARCH: x86_64
           TARGET_APPIMAGE_APT_ARCH: amd64
         with:
@@ -351,6 +351,17 @@ jobs:
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
+      - name: Set VERSION environment variable
+        run: echo "VERSION=$(git describe --tags --dirty=-custom)" >> $GITHUB_ENV
+
+      - name: Generate CLI AppImage
+        uses: AppImageCrafters/build-appimage@master
+        env:
+          TARGET_APPIMAGE_ARCH: aarch64
+          TARGET_APPIMAGE_APT_ARCH: arm64
+        with:
+          recipe: appimage/recipe.yml
+
       - name: Upload CLI binary
         uses: actions/upload-artifact@v2
         with:
@@ -362,6 +373,18 @@ jobs:
         with:
           name: 'Debian packages (arm64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/*.deb
+
+      - name: Upload CLI AppImage
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'CLI AppImage (arm64)'
+          path: PackSquash-*-aarch64.AppImage
+
+      - name: Upload CLI AppImage update diff
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'CLI AppImage zsync (arm64)'
+          path: PackSquash-*-aarch64.AppImage.zsync
 
   benchmark:
 
