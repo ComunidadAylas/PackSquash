@@ -2,10 +2,10 @@
 Type=Application
 Version=1.0
 Name=PackSquash
+Icon=packsquash
 Comment=A Minecraft: Java Edition resource and data pack optimizer.
 TryExec=packsquash
 Exec=packsquash %f
 Terminal=true
-Icon=packsquash
 Keywords=minecraft;resource;data;pack
 Categories=ConsoleOnly;Utility;Archiving;Compression

@@ -1,0 +1,93 @@
+version: 1
+
+script:
+  # Clean up directories created by the recipe
+  - rm "$APPDIR" -rf || true
+  - rm "$REPO_DIR" -rf || true
+  # Create a temporary Debian repository folder to put the generated Debian
+  # packages on, so we can install it like any other packages
+  - mkdir -p "$REPO_DIR"
+  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_amd64.deb "$REPO_DIR"
+  - CWD="$PWD" && cd "$REPO_DIR" && apt-ftparchive packages . > Packages && cd "$CWD"
+  # The following two commands are a workaround for the local APT package not
+  # being saved to the archives directory, as expected by appimage-builder
+  - mkdir -p appimage-builder-cache/apt/archives
+  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_amd64.deb appimage-builder-cache/apt/archives
+  # Copy PackSquash icon asset, like linuxdeploy would do
+  - mkdir -p "$APPDIR"/usr/share/icons/hicolor/256x256/apps
+  - cp -f common/assets/app_icon.png "$APPDIR"/usr/share/icons/hicolor/256x256/apps/packsquash.png
+  # Copy PackSquash desktop definition file. app_info below is used to
+  # autogenerate a desktop file if needed, but if there is one present
+  # appimage-builder uses it
+  - mkdir -p "$APPDIR"/usr/share/applications
+  - cp -f common/assets/com.github.comunidadaylas.packsquash.desktop "$APPDIR"/usr/share/applications
+
+AppDir:
+  path: !ENV ${APPDIR}
+
+  app_info:
+    id: com.github.comunidadaylas.packsquash
+    name: PackSquash
+    icon: packsquash
+    version: !ENV ${VERSION}
+    exec: usr/bin/packsquash
+
+  apt:
+    arch: amd64
+    sources:
+      # The key_url was hacked together from the recipe documentation examples
+      # and the errors that showed up when it was absent. Maybe there is a
+      # better way to get it?
+      - sourceline: deb [arch=amd64] https://deb.debian.org/debian/ bullseye main
+        key_url: http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x648ACFD622F3D138
+      - sourceline: !ENV 'deb [trusted=yes] file:${REPO_DIR}/ ./'
+
+    # Including our whole package is pretty elegant, isn't it? :)
+    include:
+      - packsquash
+
+    exclude:
+      - dbus-user-session
+      - dbus-system-bus-common
+      - dbus
+      - dbus-session-bus-common
+      - dbus-bin
+      - dbus-daemon
+
+  files:
+    exclude:
+      # Development and documentation files
+      - usr/include
+      - usr/share/man
+      - usr/share/doc
+      # systemd units
+      - usr/lib/systemd
+      - lib/systemd
+      # udev rules
+      - lib/udev
+
+  test:
+    # Test on distros representative of the most common families.
+    # TODO use a more thorough test command that exercises GStreamer
+    bullseye:
+      image: debian:stretch-slim
+      command: ./AppRun --version
+    focal:
+      image: ubuntu:bionic
+      command: ./AppRun --version
+    fedora:
+      image: fedora:34
+      command: ./AppRun --version
+    arch:
+      image: archlinux:base
+      command: ./AppRun --version
+    suse:
+      image: opensuse/leap:15
+      command: ./AppRun --version
+    alpine:
+      image: alpine:3
+      command: ./AppRun --version
+
+AppImage:
+  arch: x86_64
+  update-information: gh-releases-zsync|ComunidadAylas|PackSquash|latest|PackSquash-*x86_64.AppImage.zsync
