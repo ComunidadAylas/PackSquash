@@ -82,7 +82,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:buster-slim
+    container: debian:bullseye-slim
 
     env:
       CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
@@ -357,7 +357,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:buster-slim
+    container: debian:bullseye-slim
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
