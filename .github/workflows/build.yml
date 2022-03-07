@@ -96,8 +96,8 @@ jobs:
       - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
         run: |
           apt-get update
-          # curl is required by rustup. wget and patchelf are required by our AppImage generation script
-          apt-get install -yq build-essential git curl wget patchelf \
+          # curl is required by rustup
+          apt-get install -yq build-essential git curl \
                               gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
                               libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
                               markdown html2text
@@ -137,8 +137,16 @@ jobs:
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
+      - name: Set VERSION environment variable
+        run: echo "VERSION=$(git describe --tags --dirty=-custom)" >> $GITHUB_ENV
+
       - name: Generate CLI AppImage
-        run: scripts/build_appimage.sh
+        uses: AppImageCrafters/build-appimage@master
+        env:
+          APPDIR: AppDir
+          REPO_DIR: /build-repo
+        with:
+          recipe: appimage/recipe.yml
 
       - name: Upload CLI binary
         uses: actions/upload-artifact@v2

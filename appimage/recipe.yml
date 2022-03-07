@@ -1,3 +1,6 @@
+# Reference:
+# https://appimage-builder.readthedocs.io/en/latest/reference/version_1.html
+
 version: 1
 
 script:
