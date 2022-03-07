@@ -144,7 +144,7 @@ jobs:
         uses: AppImageCrafters/build-appimage@master
         env:
           APPDIR: AppDir
-          REPO_DIR: /build-repo
+          REPO_DIR: /pkgs
           TARGET_APPIMAGE_ARCH: x86_64
           TARGET_APPIMAGE_APT_ARCH: amd64
         with:
@@ -166,13 +166,13 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: 'CLI AppImage (x64)'
-          path: target/appimage/PackSquash-*-x86_64.AppImage
+          path: PackSquash-*-x86_64.AppImage
 
       - name: Upload CLI AppImage update diff
         uses: actions/upload-artifact@v2
         with:
           name: 'CLI AppImage zsync (x64)'
-          path: target/appimage/PackSquash-*-x86_64.AppImage.zsync
+          path: PackSquash-*-x86_64.AppImage.zsync
 
   windows-x64-gnu:
 

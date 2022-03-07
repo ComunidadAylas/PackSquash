@@ -67,7 +67,7 @@ export PATH="$PATH:$APPIMAGE_WORKDIR"
 
 echo '> Running appimage-builder'
 
-APPDIR="$APPIMAGE_WORKDIR/AppDir" REPO_DIR="$APPIMAGE_WORKDIR/repo" \
+APPDIR="$APPIMAGE_WORKDIR/AppDir" REPO_DIR="$APPIMAGE_WORKDIR/pkgs" \
 VERSION="$(git describe --tags --dirty=-custom)" \
 TARGET_APPIMAGE_ARCH=$(uname -m) \
 TARGET_APPIMAGE_APT_ARCH=$(dpkg-architecture -q DEB_HOST_ARCH) \
