@@ -67,12 +67,11 @@ export PATH="$PATH:$APPIMAGE_WORKDIR"
 
 echo '> Running appimage-builder'
 
-# Set the APPIMAGE_EXTRACT_AND_RUN environment variable to not depend on FUSE,
-# which is troublesome in Docker containers
 APPDIR="$APPIMAGE_WORKDIR/AppDir" REPO_DIR="$APPIMAGE_WORKDIR/repo" \
 VERSION="$(git describe --tags --dirty=-custom)" \
-APPIMAGE_EXTRACT_AND_RUN=1 \
-appimage-builder --recipe appimage/recipe.yml --skip-tests
+TARGET_APPIMAGE_ARCH=$(uname -m) \
+TARGET_APPIMAGE_APT_ARCH=$(dpkg-architecture -q DEB_HOST_ARCH) \
+appimage-builder --recipe appimage/recipe.yml
 
 echo '> Cleaning up appimage-builder cache'
 rm -rf appimage-builder-cache 2>/dev/null || true

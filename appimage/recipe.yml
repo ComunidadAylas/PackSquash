@@ -10,12 +10,12 @@ script:
   # Create a temporary Debian repository folder to put the generated Debian
   # packages on, so we can install it like any other packages
   - mkdir -p "$REPO_DIR"
-  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_amd64.deb "$REPO_DIR"
+  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_${TARGET_APPIMAGE_APT_ARCH}.deb "$REPO_DIR"
   - CWD="$PWD" && cd "$REPO_DIR" && apt-ftparchive packages . > Packages && cd "$CWD"
   # The following two commands are a workaround for the local APT package not
   # being saved to the archives directory, as expected by appimage-builder
   - mkdir -p appimage-builder-cache/apt/archives
-  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_amd64.deb appimage-builder-cache/apt/archives
+  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_${TARGET_APPIMAGE_APT_ARCH}.deb appimage-builder-cache/apt/archives
   # Copy PackSquash icon asset, like linuxdeploy would do
   - mkdir -p "$APPDIR"/usr/share/icons/hicolor/256x256/apps
   - cp -f common/assets/app_icon.png "$APPDIR"/usr/share/icons/hicolor/256x256/apps/packsquash.png
@@ -36,12 +36,12 @@ AppDir:
     exec: usr/bin/packsquash
 
   apt:
-    arch: amd64
+    arch: !ENV ${TARGET_APPIMAGE_APT_ARCH}
     sources:
       # The key_url was hacked together from the recipe documentation examples
       # and the errors that showed up when it was absent. Maybe there is a
       # better way to get it?
-      - sourceline: deb [arch=amd64] https://deb.debian.org/debian/ bullseye main
+      - sourceline: !ENV 'deb [arch=${TARGET_APPIMAGE_APT_ARCH}] https://deb.debian.org/debian/ bullseye main'
         key_url: http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x648ACFD622F3D138
       - sourceline: !ENV 'deb [trusted=yes] file:${REPO_DIR}/ ./'
 
@@ -92,5 +92,5 @@ AppDir:
       command: ./AppRun --version
 
 AppImage:
-  arch: x86_64
-  update-information: gh-releases-zsync|ComunidadAylas|PackSquash|latest|PackSquash-*x86_64.AppImage.zsync
+  arch: !ENV ${TARGET_APPIMAGE_ARCH}
+  update-information: !ENV 'gh-releases-zsync|ComunidadAylas|PackSquash|latest|PackSquash-*${TARGET_APPIMAGE_ARCH}.AppImage.zsync'
