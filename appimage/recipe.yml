@@ -11,7 +11,8 @@ script:
   # packages on, so we can install it like any other packages
   - mkdir -p "$REPO_DIR"
   - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_${TARGET_APPIMAGE_APT_ARCH}.deb "$REPO_DIR"
-  - CWD="$PWD" && cd "$REPO_DIR" && apt-ftparchive packages . > Packages && cd "$CWD"
+  - CWD="$PWD" && cd "$REPO_DIR" && { command -v apt-ftparchive >/dev/null 2>&1 || apt-get install -yq apt-utils; } &&
+    apt-ftparchive packages . > Packages && cd "$CWD"
   # The following two commands are a workaround for the local APT package not
   # being saved to the archives directory, as expected by appimage-builder
   - mkdir -p appimage-builder-cache/apt/archives

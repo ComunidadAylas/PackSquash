@@ -22,7 +22,7 @@ fi
 # Create a temporary working directory for this AppImage script
 APPIMAGE_WORKDIR=$(mktemp -d -t packsquash-appimagebuild.XXX)
 readonly APPIMAGE_WORKDIR
-trap 'rm -rf "$APPIMAGE_WORKDIR" || true' EXIT INT TERM
+trap '{ rm -rf "$APPIMAGE_WORKDIR" || true; } && { rm -rf appimage-builder-cache || true; }' EXIT INT TERM
 
 # Set up a virtual environment so that we do not pollute the global Python
 # packages list with the packages we need to install
@@ -72,9 +72,6 @@ VERSION="$(git describe --tags --dirty=-custom)" \
 TARGET_APPIMAGE_ARCH=$(uname -m) \
 TARGET_APPIMAGE_APT_ARCH=$(dpkg-architecture -q DEB_HOST_ARCH) \
 appimage-builder --recipe appimage/recipe.yml
-
-echo '> Cleaning up appimage-builder cache'
-rm -rf appimage-builder-cache 2>/dev/null || true
 
 echo "> Moving generated AppImage to $TARGET_APPIMAGE_DIR"
 mkdir -p "$TARGET_APPIMAGE_DIR"
