@@ -11,9 +11,8 @@ script:
   # packages on, so we can install it like any other packages
   - mkdir -p "$REPO_DIR"
   - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_${TARGET_APPIMAGE_APT_ARCH}.deb "$REPO_DIR"
-  - CWD="$PWD" && cd "$REPO_DIR" && {
-    command -v apt-ftparchive >/dev/null 2>&1 || { apt-get update && apt-get install -yq apt-utils; }; } &&
-    apt-ftparchive packages . > Packages && cd "$CWD"
+  - command -v apt-ftparchive >/dev/null 2>&1 || { apt-get update && apt-get install -yq apt-utils; }
+  - CWD="$PWD" && cd "$REPO_DIR" && apt-ftparchive packages . > Packages && cd "$CWD"
   # The following two commands are a workaround for the local APT package not
   # being saved to the archives directory, as expected by appimage-builder
   - mkdir -p appimage-builder-cache/apt/archives
@@ -52,24 +51,38 @@ AppDir:
       - packsquash
 
     exclude:
+      - systemd-timesyncd
+      - libpam-systemd
+      - libpam-modules
       - dbus-user-session
       - dbus-system-bus-common
       - dbus
       - dbus-session-bus-common
       - dbus-bin
       - dbus-daemon
+      - login
+      - dmsetup
+      - sensible-utils
+      - libcryptsetup12
+      - libdevmapper1.02.1
 
   files:
     exclude:
       # Development and documentation files
       - usr/include
+      - usr/share/bug
       - usr/share/man
       - usr/share/doc
+      - usr/share/doc-base
+      - usr/share/lintian
+      - usr/share/sounds
       # systemd units
       - usr/lib/systemd
       - lib/systemd
       # udev rules
       - lib/udev
+      # root utility programs
+      - usr/sbin
 
   test:
     # Test on distros representative of the most common families.
