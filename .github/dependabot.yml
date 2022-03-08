@@ -5,8 +5,8 @@ updates:
   schedule:
     interval: daily
     time: "04:00"
-  open-pull-requests-limit: 10
-  assignees:
-  - AlexTMjugador
+  open-pull-requests-limit: 3
+  reviewers:
+  - ComunidadAylas/packsquash-developers
   labels:
   - dependencies
