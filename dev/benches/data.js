@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1646691896734,
+  "lastUpdate": 1646736458350,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -1849,6 +1849,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1644062617,
             "range": "± 82085461",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4b6cc0c6d250a2f77c404ab4552c585207d1e719",
+          "message": "dependabot: tweak configuration",
+          "timestamp": "2022-03-08T11:07:42+01:00",
+          "tree_id": "86fd003ce2ca5cb8ff7c3c8b20d30843d14208a1",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/4b6cc0c6d250a2f77c404ab4552c585207d1e719"
+        },
+        "date": 1646736457765,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 16411422,
+            "range": "± 1017034",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1097708477,
+            "range": "± 12086137",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12775417962,
+            "range": "± 50448686",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1640192756,
+            "range": "± 66437057",
             "unit": "ns/iter"
           }
         ]
