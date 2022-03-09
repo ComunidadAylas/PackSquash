@@ -80,7 +80,7 @@ xz2 = "0.1.6"
 # framework is Linux-only, too, so benchmarks based on criterion-perf-events can only
 # run on x86 Linux systems
 [target.'cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))'.dev-dependencies]
-criterion-perf-events = "0.1.4"
+criterion-perf-events = "0.2.0"
 perfcnt = "0.7.3"
 
 [features]
