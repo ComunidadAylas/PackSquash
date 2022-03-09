@@ -416,7 +416,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eba5111e09fabb08bfaedbe28c832876bb38d4f9519f715466332880d80b0eac"
 dependencies = [
  "criterion",
- "perfcnt",
+ "perfcnt 0.7.3",
 ]
 
 [[package]]
@@ -1552,7 +1552,7 @@ dependencies = [
  "mach",
  "num_cpus",
  "oxipng",
- "perfcnt",
+ "perfcnt 0.8.0",
  "png",
  "pretty_assertions",
  "rand_xoshiro",
@@ -1643,7 +1643,20 @@ dependencies = [
  "mmap",
  "nom 4.2.3",
  "phf",
- "x86",
+ "x86 0.45.0",
+]
+
+[[package]]
+name = "perfcnt"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ba1fd955270ca6f8bd8624ec0c4ee1a251dd3cc0cc18e1e2665ca8f5acb1501"
+dependencies = [
+ "bitflags",
+ "libc",
+ "mmap",
+ "nom 4.2.3",
+ "x86 0.47.0",
 ]
 
 [[package]]
@@ -2622,6 +2635,21 @@ name = "x86"
 version = "0.45.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "637be4bacc6c06570eb05a3ba513f81d63e52862ced82db542215dd48dbab1e5"
+dependencies = [
+ "bit_field",
+ "bitflags",
+ "csv",
+ "phf",
+ "phf_codegen",
+ "raw-cpuid",
+ "serde_json",
+]
+
+[[package]]
+name = "x86"
+version = "0.47.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "55b5be8cc34d017d8aabec95bc45a43d0f20e8b2a31a453cabc804fe996f8dca"
 dependencies = [
  "bit_field",
  "bitflags",
