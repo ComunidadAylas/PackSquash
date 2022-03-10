@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1646822293855,
+  "lastUpdate": 1646948627342,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -1993,6 +1993,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1491842086,
             "range": "± 39728510",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7cf21f6336fbc0cf88b66ab1e1e8c60c6e9b2fe1",
+          "message": "chore(deps): bump java-properties from 1.4.0 to 1.4.1 (#79)\n\nBumps [java-properties](https://github.com/adamcrume/java-properties) from 1.4.0 to 1.4.1.\r\n- [Release notes](https://github.com/adamcrume/java-properties/releases)\r\n- [Commits](https://github.com/adamcrume/java-properties/compare/v1.4.0...v1.4.1)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: java-properties\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-03-10T22:06:32+01:00",
+          "tree_id": "7c0d2050750099b15e09e8eb1c713e0f643a9c6c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7cf21f6336fbc0cf88b66ab1e1e8c60c6e9b2fe1"
+        },
+        "date": 1646948626694,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14997154,
+            "range": "± 235106",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 963368391,
+            "range": "± 10970009",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10921933741,
+            "range": "± 63427259",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1361039974,
+            "range": "± 4637024",
             "unit": "ns/iter"
           }
         ]
