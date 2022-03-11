@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1646948627342,
+  "lastUpdate": 1647034693087,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -2041,6 +2041,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1361039974,
             "range": "± 4637024",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "946320d6af81a0fa730e862c0c2fe60afb63fb4a",
+          "message": "fix(appimage/recipe): run tests and change Alpine image used\n\nAs expected, all the defined tests passed, with the only exception of\nthe Alpine test, because appimage-builder runs useradd before the actual\ntest command, and the base Alpine images do not have that command\ninstalled.\n\nTherefore, to fix the Alpine test it was enough to use a custom image\nbased on alpine:3 with a single layer to install the package, by running\n`apk add --no-cache shadow`.",
+          "timestamp": "2022-03-11T22:02:46+01:00",
+          "tree_id": "6f63e3dcfbfa34fa9062f315511ecd3a9970f8a7",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/946320d6af81a0fa730e862c0c2fe60afb63fb4a"
+        },
+        "date": 1647034691894,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 18326619,
+            "range": "± 1276548",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1191588372,
+            "range": "± 22566748",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13285806029,
+            "range": "± 360349639",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1691339439,
+            "range": "± 13208145",
             "unit": "ns/iter"
           }
         ]
