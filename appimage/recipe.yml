@@ -103,7 +103,10 @@ AppDir:
       image: opensuse/leap:15
       command: ./AppRun --version
     alpine:
-      image: alpine:3
+      # The upstream alpine:3 would work if it had the shadow package,
+      # because the test preparation commands run useradd. Therefore,
+      # use a custom image that's like alpine:3 but with that package
+      image: comunidadaylas/alpine-appimage-test:latest
       command: ./AppRun --version
 
 AppImage:
