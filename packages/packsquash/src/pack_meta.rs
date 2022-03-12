@@ -185,6 +185,8 @@ impl PackMeta {
 
 		if self.pack_format_version >= PACK_FORMAT_VERSION_1_17 {
 			asset_type_mask -= PackFileAssetType::LegacyTextCredits;
+		} else {
+			asset_type_mask -= PackFileAssetType::TranslationUnitSegment;
 		}
 
 		asset_type_mask
