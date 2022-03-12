@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1647034693087,
+  "lastUpdate": 1647096261734,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -2089,6 +2089,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1691339439,
             "range": "± 13208145",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "e33605a9d7f04c6de2d79a345dd932813c4266ce",
+          "message": "tweak: exclude include shaders from asset mask when targeting MC < 1.17\n\nAlthough the Minecraft wiki is not clear at all about this, support for\ninclude shaders and their associated #moj_import directive was added on\n1.17. Therefore, it does not make sense to optimize those files when\ntargeting older versions.",
+          "timestamp": "2022-03-12T15:06:38+01:00",
+          "tree_id": "a925d1e578d4b9936e866611e1867c6b710c780d",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e33605a9d7f04c6de2d79a345dd932813c4266ce"
+        },
+        "date": 1647096261178,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14615971,
+            "range": "± 208935",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 934324326,
+            "range": "± 11102466",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10641607697,
+            "range": "± 75375715",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1372117772,
+            "range": "± 3746643",
             "unit": "ns/iter"
           }
         ]
