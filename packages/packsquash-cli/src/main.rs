@@ -208,7 +208,7 @@ fn read_options_file_and_squash(
 				// If the error was in one of those, hint the user at the status
 				// update that contains the most information about the error
 				if matches!(err, PackSquasherError::PackFileError) {
-					"\nAnother error message with more details about the error was emitted before. \
+					"\nAnother error message with more information was emitted before. \
 					You might need to scroll up to see it."
 				} else {
 					""

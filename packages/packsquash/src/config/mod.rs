@@ -447,15 +447,15 @@ pub enum MinecraftQuirk {
 	/// This workaround stops PackSquash from reducing color images to grayscale, which may
 	/// hurt compression. This has no effect for input images that already are in grayscale.
 	GrayscaleImagesGammaMiscorrection,
-	/// Older versions of Minecraft (probably all versions since 1.6 until 1.13 are affected)
+	/// Older versions of Minecraft (probably all versions from 1.6 until 1.13 are affected)
 	/// require banner and shield layer textures to be stored in RGBA format, or else the
-	/// layers they represent won't be applied at all, even if the palette pixels contain
+	/// layers they represent won't be applied at all, even if the palette contains
 	/// transparency data. As PackSquash can convert images encoded in RGBA format to palette
 	/// format to save space, it can trigger this quirky behavior.
 	///
 	/// This workaround stops PackSquash from changing the color format of the affected
 	/// textures to a palette, which includes color quantization, as it is used to generate
-	/// a palette. This incurs in some space cost.
+	/// a palette. This incurs some space costs.
 	RestrictiveBannerLayerTextureFormatCheck,
 	/// All currently known Minecraft versions overlay entity layer textures in a way that
 	/// does not account for transparency properly, by taking into account their color and
@@ -465,7 +465,7 @@ pub enum MinecraftQuirk {
 	///
 	/// This workaround stops PackSquash from changing the color of transparent pixels and
 	/// quantizing the pixels to a palette to reduce texture file size, as both optimizations
-	/// do not guarantee that the color of transparent pixels will stay exactly the same.
+	/// do not guarantee that the color of transparent pixels will stay the same.
 	BadEntityEyeLayerTextureTransparencyBlending,
 	/// The latest Minecraft versions, from 1.17 onwards, are compiled for Java 16+, which
 	/// means that they do not support older Java versions. On the other hand, Java 8 was
@@ -986,8 +986,8 @@ impl Default for PropertiesFileOptions {
 #[non_exhaustive]
 pub struct CustomFileOptions {
 	/// If `true`, the custom file will be copied to the generated ZIP file as-is,
-	/// without using any specific optimizations. A `false` value explicitly asks
-	/// for the default behavior of skipping the file.
+	/// without any specific optimizations. A `false` value explicitly asks for
+	/// the default behavior of skipping the file.
 	pub force_include: bool
 }
 
