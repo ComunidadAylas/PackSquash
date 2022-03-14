@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1647252491008,
+  "lastUpdate": 1647289719368,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
@@ -2233,6 +2233,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1653160504,
             "range": "± 83623451",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c3232e7d6a6a69ba86f921a0f750d112e5ec0b85",
+          "message": "chore(deps): bump pretty_assertions from 1.1.0 to 1.2.0 (#81)\n\nBumps [pretty_assertions](https://github.com/colin-kiegel/rust-pretty-assertions) from 1.1.0 to 1.2.0.\r\n- [Release notes](https://github.com/colin-kiegel/rust-pretty-assertions/releases)\r\n- [Changelog](https://github.com/colin-kiegel/rust-pretty-assertions/blob/main/CHANGELOG.md)\r\n- [Commits](https://github.com/colin-kiegel/rust-pretty-assertions/commits)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: pretty_assertions\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-minor\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-03-14T21:01:21+01:00",
+          "tree_id": "2df227f9a3f48ba215b72916226183abfb0ad9b4",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c3232e7d6a6a69ba86f921a0f750d112e5ec0b85"
+        },
+        "date": 1647289718562,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 17065093,
+            "range": "± 939990",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1158189876,
+            "range": "± 27056733",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13010564532,
+            "range": "± 248933749",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1659437553,
+            "range": "± 72213949",
             "unit": "ns/iter"
           }
         ]
