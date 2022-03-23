@@ -32,7 +32,7 @@ winapi-util = "0.1.5"
 
 [build-dependencies]
 vergen = { version = "6.0.2", default-features = false, features = ["cargo", "git"] }
-time = { version = "0.3.7", default-features = false, features = ["std"] }
+time = { version = "0.3.9", default-features = false, features = ["std"] }
 
 [features]
 # Support pretty panic messages by default
