@@ -17,12 +17,12 @@ applies per-file configurable lossy and lossless compression techniques, and
 builds a ZIP file that can be directly used by the game. Currently, PackSquash
 can apply the following specific techniques:
 
-* For PNG images: color quantization to generate a color palette, coupled with
-  lossless bit depth, compression and color type reduction, and metadata
-  removal. The quantization, although it is pretty subtle or even unneeded for
-  common texture sizes, can be disabled if lossless quality is desired. These
-  operations are performed by the well-known `imagequant` (used in `pngquant`)
-  and `oxipng` libraries.
+* For PNG images: color quantization to generate a color palette, lossless bit
+  depth, compression and color type reduction, and metadata removal. The
+  quantization, although it is pretty subtle or even unneeded for common texture
+  sizes, can be disabled if lossless quality is desired. These operations are
+  performed by the well-known `imagequant` (used in `pngquant`) and `oxipng`
+  libraries.
 * For Ogg (.ogg and .oga), MP3, Opus, FLAC, and WAV files: channel mixing,
   downsampling, transcoding, pitch shifting, and tag removal. The default
   settings are meant to be good enough for in-game music, such that most
@@ -42,9 +42,9 @@ can apply the following specific techniques:
   whitespace. As with JSON files, PackSquash will perform basic validation on
   them.
 * For legacy language files (.lang; used in Minecraft 1.12.2 and lower):
-  minification, by removing blank lines and comments. Duplicate keys and
-  non-blank lines that are not comments and do not contain a key-value separator
-  are treated as errors, which helps catch mistakes and keep your files tidy.
+  minification, removing blank lines and comments. Duplicate keys and non-blank
+  lines that are not comments and do not contain a key-value separator are
+  treated as errors, which helps catch mistakes and keep your files tidy.
 * For OptiFine properties files (Java .properties; only if OptiFine mod support
   is enabled): minification, by removing unneeded whitespace. As with JSON
   files, performing minification requires parsing the file, so PackSquash will
@@ -78,43 +78,19 @@ user:
 
 ## 🔗 Download and installation
 
-If you use a Debian-like Linux distro (Debian, Ubuntu, etc.), the recommended
-way to install PackSquash is via our APT repository because it makes the process
-much easier, better integrated with your package management programs, and more
-convenient to stay updated, should you choose to do so. Please refer to the
-[installation
+PackSquash is distributed for a bunch of operating systems and environments.
+Check out the [installation
 guide](https://github.com/ComunidadAylas/PackSquash/wiki/Installation-guide) for
-details.
-
-Alternatively, for other operating systems, or when you can't use our APT
-repository for some reason, you can download the executable for the latest
-stable release from [GitHub
-Releases](https://github.com/ComunidadAylas/PackSquash/releases/latest).
-
-Finally, if you are into these sorts of things, you can download the latest
-unstable build from [GitHub
-Actions](https://github.com/ComunidadAylas/PackSquash/actions?query=branch%3Amaster),
-or build the source yourself.
+details on how to download and get PackSquash.
 
 ## 📝 Usage
 
 PackSquash is a command-line application, so it must be executed from a command
 prompt, a shortcut, a command-line shell, or a script. You can customize how it
-works by using an options file, which contains per-file compression options and
-several other parameters. If no options file is specified, or if it is a dash
-("-"), the options will be read from the standard input stream (usually, your
-keyboard or the output of another command). If in doubt, you can check out the
-command line argument syntax by launching PackSquash with the `-h` parameter.
-
-For more information about the format of the options file, check [the Options
-files wiki
-article](https://github.com/ComunidadAylas/PackSquash/wiki/Options-files) on
-GitHub.
-
-If your pack lives on a GitHub repository, and you are looking for an easy way
-to use PackSquash in GitHub Actions workflows, you'll probably be interested in
-[the official PackSquash
-action](https://github.com/marketplace/actions/packsquash).
+works via
+[options](https://github.com/ComunidadAylas/PackSquash/wiki/Options-files). In
+addition, it also accepts some command-line arguments. You can know about these
+by launching PackSquash with the `-h` or `--help` argument.
 
 If you want a GUI for using PackSquash or even authoring resource packs in
 general, you may want to try out the
@@ -158,6 +134,6 @@ shown below:
 In principle, I will use any funds I receive for personal spending. However, I
 may decide to introduce sponsor tiers and perks (retroactively, benefiting those
 who sponsored the project before they got introduced too), add more payment
-methods, share the funds with other high-profile contributors or use them for
+methods, share the funds with other high-profile contributors, or use them for
 donations and campaigns. I will be transparent about any major decisions I make
 about this, communicating them in public announcements.
