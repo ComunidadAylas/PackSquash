@@ -137,3 +137,11 @@ who sponsored the project before they got introduced too), add more payment
 methods, share the funds with other high-profile contributors, or use them for
 donations and campaigns. I will be transparent about any major decisions I make
 about this, communicating them in public announcements.
+
+## ✅ Acknowledgments
+
+Special thanks to JetBrains s.r.o. for providing core PackSquash developers
+with a free open source development license for CLion and other development
+tools.
+
+<p align="center"><a href="https://jb.gg/OpenSourceSupport"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.svg" alt="JetBrains logo"/></a></p>
