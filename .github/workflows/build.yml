@@ -267,7 +267,7 @@ jobs:
 
       - name: Install GStreamer libraries and GStreamer development packages
         run: curl -o /tmp/gstreamer.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-1.20.1-universal.pkg &&
-          sudo installer -pkg /tmp/gstreamer.pkg -target /
+          sudo installer -verbose -pkg /tmp/gstreamer.pkg -target /
 
       - name: Run tests
         uses: actions-rs/cargo@v1
