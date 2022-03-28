@@ -246,6 +246,7 @@ jobs:
     env:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
       PKG_CONFIG: /Library/Frameworks/GStreamer.framework/Versions/1.0/bin/pkg-config
+      PKG_CONFIG_PATH: /Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
@@ -272,6 +273,7 @@ jobs:
           sudo installer -pkg /tmp/gstreamer.pkg -target /
           curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg
           sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
+          sed '/^Libs: /s/$/ -Wl,-rpath-link=${libdir}/' /Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig/gstreamer-1.0.pc
 
       - name: Run tests
         uses: actions-rs/cargo@v1
