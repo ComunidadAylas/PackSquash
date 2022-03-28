@@ -278,6 +278,7 @@ jobs:
           # See: https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/371
           printf '#!/bin/sh\npkg-config --define-prefix "$@"\n' > /usr/local/bin/pkg-config-define-prefix
           chmod +x /usr/local/bin/pkg-config-define-prefix
+          ls -lR /Library/Frameworks/GStreamer.framework
 
       - name: Run tests
         uses: actions-rs/cargo@v1
