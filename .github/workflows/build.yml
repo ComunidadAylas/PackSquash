@@ -267,7 +267,9 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Install GStreamer libraries and GStreamer development packages
-        run: curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg &&
+        run: curl -o /tmp/gstreamer.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-1.20.1-universal.pkg &&
+          sudo installer -pkg /tmp/gstreamer.pkg -target / &&
+          curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg &&
           sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
 
       - name: Run tests
