@@ -245,8 +245,7 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
-      PKG_CONFIG: pkg-config-define-prefix
-      PKG_CONFIG_PATH: /Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig
+      PKG_CONFIG: /Library/Frameworks/GStreamer.framework/Versions/1.0/bin/pkg-config
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
@@ -273,12 +272,6 @@ jobs:
           sudo installer -pkg /tmp/gstreamer.pkg -target /
           curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg
           sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
-          # This wrapper script is needed because Homebrew's pkg-config does not set --define-prefix
-          # and GStreamer recently started to rely on that for building to work.
-          # See: https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/371
-          printf '#!/bin/sh\npkg-config --define-prefix "$@"\n' > /usr/local/bin/pkg-config-define-prefix
-          chmod +x /usr/local/bin/pkg-config-define-prefix
-          ls -lR /Library/Frameworks/GStreamer.framework
 
       - name: Run tests
         uses: actions-rs/cargo@v1
