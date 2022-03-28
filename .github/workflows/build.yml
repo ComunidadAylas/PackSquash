@@ -266,8 +266,8 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Install GStreamer libraries and GStreamer development packages
-        run: brew search gst-plugins-good@ &&
-          brew install gst-plugins-good@1.18.5 gst-plugins-bad@1.18.5
+        run: brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/167af130e21d24481a5c87801241f22249d7ad7c/Formula/gst-plugins-good.rb
+          https://raw.githubusercontent.com/Homebrew/homebrew-core/167af130e21d24481a5c87801241f22249d7ad7c/Formula/gst-plugins-bad.rb
 
       - name: Run tests
         uses: actions-rs/cargo@v1
