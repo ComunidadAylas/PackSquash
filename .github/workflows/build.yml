@@ -245,7 +245,7 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
-      PKG_CONFIG: pkg-config --define-prefix
+      PKG_CONFIG: /Library/Frameworks/GStreamer.framework/Commands/pkg-config
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
