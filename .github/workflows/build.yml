@@ -245,6 +245,7 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
+      PKG_CONFIG: pkg-config --define-prefix
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
@@ -266,12 +267,8 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Install GStreamer libraries and GStreamer development packages
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: 1
-        run: curl -o /tmp/gst-plugins-good.rb https://raw.githubusercontent.com/Homebrew/homebrew-core/167af130e21d24481a5c87801241f22249d7ad7c/Formula/gst-plugins-good.rb &&
-          brew install /tmp/gst-plugins-good.rb &&
-          curl -o /tmp/gst-plugins-bad.rb https://raw.githubusercontent.com/Homebrew/homebrew-core/167af130e21d24481a5c87801241f22249d7ad7c/Formula/gst-plugins-bad.rb &&
-          brew install /tmp/gst-plugins-bad.rb
+        run: curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg &&
+          sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
 
       - name: Run tests
         uses: actions-rs/cargo@v1
