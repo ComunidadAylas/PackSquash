@@ -268,9 +268,11 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Install GStreamer libraries and GStreamer development packages
-        run: curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg &&
-          sudo installer -pkg /tmp/gstreamer-devel.pkg -target / &&
+        run: |
+          curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg
+          sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
           printf '#!/bin/sh\npkg-config --define-prefix "$@"\n' > /usr/local/bin/pkg-config-define-prefix
+          chmod +x /usr/local/bin/pkg-config-define-prefix
 
       - name: Run tests
         uses: actions-rs/cargo@v1
