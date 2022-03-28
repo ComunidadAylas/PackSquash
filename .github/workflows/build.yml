@@ -269,8 +269,13 @@ jobs:
 
       - name: Install GStreamer libraries and GStreamer development packages
         run: |
+          curl -o /tmp/gstreamer.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-1.20.1-universal.pkg
+          sudo installer -pkg /tmp/gstreamer.pkg -target /
           curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg
           sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
+          # This wrapper script is needed because Homebrew's pkg-config does not set --define-prefix
+          # and GStreamer recently started to rely on that for building to work.
+          # See: https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/371
           printf '#!/bin/sh\npkg-config --define-prefix "$@"\n' > /usr/local/bin/pkg-config-define-prefix
           chmod +x /usr/local/bin/pkg-config-define-prefix
 
