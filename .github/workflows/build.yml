@@ -139,7 +139,7 @@ jobs:
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
-      - name: Set VERSION environment variable
+      - name: Set VERSION environment variable for AppImage
         run: echo "VERSION=$(git describe --tags --dirty=-custom)" >> $GITHUB_ENV
 
       - name: Generate CLI AppImage
@@ -364,7 +364,7 @@ jobs:
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
-      - name: Set VERSION environment variable
+      - name: Set VERSION environment variable for AppImage
         run: echo "VERSION=$(git describe --tags --dirty=-custom)" >> $GITHUB_ENV
 
       - name: Generate CLI AppImage
