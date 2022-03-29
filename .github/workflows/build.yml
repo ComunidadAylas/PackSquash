@@ -273,19 +273,21 @@ jobs:
           sudo installer -pkg /tmp/gstreamer.pkg -target /
           curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg
           sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
-          sudo sed -i'' -e '/^Libs: /s/$/ -Wl,-rpath-link=${libdir}/' /Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig/gstreamer-1.0.pc
 
-      - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release
+      #- name: Run tests
+      #  uses: actions-rs/cargo@v1
+      #  with:
+      #    command: test
+      #    args: --release
 
       - name: Build with optimized standard library
         uses: actions-rs/cargo@v1
         with:
           command: build
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+
+      - name: Debug generated ELF
+        run: otool -l target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash && exit 1
 
       - name: Upload CLI binary
         uses: actions/upload-artifact@v2
