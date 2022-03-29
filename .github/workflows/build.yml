@@ -245,8 +245,8 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
-      PKG_CONFIG: /Library/Frameworks/GStreamer.framework/Commands/pkg-config
-      PKG_CONFIG_PATH: /Library/Frameworks/GStreamer.framework/Libraries/pkgconfig
+      PKG_CONFIG: /Library/Frameworks/GStreamer.framework/Versions/Current/bin/pkg-config
+      PKG_CONFIG_PATH: /Library/Frameworks/GStreamer.framework/Versions/Current/lib/pkgconfig
       RUSTFLAGS: >
         -C link-args=-Wl,-rpath,/Library/Frameworks/GStreamer.framework/Versions/1.0/lib
 
