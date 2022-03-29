@@ -249,7 +249,6 @@ jobs:
       PKG_CONFIG_PATH: /Library/Frameworks/GStreamer.framework/Libraries/pkgconfig
       RUSTFLAGS: >
         -C link-args=-Wl,-rpath,/Library/Frameworks/GStreamer.framework/Versions/1.0/lib
-        -C link-args=-Wl,-rpath-link,/Library/Frameworks/GStreamer.framework/Versions/1.0/lib
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
@@ -276,6 +275,7 @@ jobs:
           sudo installer -pkg /tmp/gstreamer.pkg -target /
           curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg
           sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
+          sudo sed -i'' -e '/^Libs: /s/$/ -Wl,-rpath-link=${libdir}/' /Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig/gstreamer-1.0.pc
 
       - name: Run tests
         uses: actions-rs/cargo@v1
