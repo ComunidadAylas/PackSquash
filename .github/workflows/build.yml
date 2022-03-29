@@ -247,6 +247,11 @@ jobs:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
       PKG_CONFIG: /Library/Frameworks/GStreamer.framework/Versions/Current/bin/pkg-config
       PKG_CONFIG_PATH: /Library/Frameworks/GStreamer.framework/Versions/Current/lib/pkgconfig
+      # Setting rpath manually is needed because GStreamer libraries became relocatable on macOS
+      # for 1.20.1 and Rust GStreamer build systems do not set it properly yet.
+      # Related reads:
+      # https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/807
+      # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/338
       RUSTFLAGS: >
         -C link-args=-Wl,-rpath,/Library/Frameworks/GStreamer.framework/Versions/1.0/lib
 
