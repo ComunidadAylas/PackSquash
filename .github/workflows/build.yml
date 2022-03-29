@@ -249,6 +249,7 @@ jobs:
       PKG_CONFIG_PATH: /Library/Frameworks/GStreamer.framework/Libraries/pkgconfig
       RUSTFLAGS: >
         -C link-args=-Wl,-rpath,/Library/Frameworks/GStreamer.framework/Versions/1.0/lib
+        -C link-args=-Wl,-rpath-link,/Library/Frameworks/GStreamer.framework/Versions/1.0/lib
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
