@@ -1,50 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1648050721619,
+  "lastUpdate": 1648553493114,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "cb67cf04fbe0a1fa4a04ac5e06a024e4683d7b7b",
-          "message": "bench: minor tweaks to make it behave nicer",
-          "timestamp": "2022-01-30T19:36:35+01:00",
-          "tree_id": "e2c5b16db24169235601048fcb6b71b1583a09de",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/cb67cf04fbe0a1fa4a04ac5e06a024e4683d7b7b"
-        },
-        "date": 1643569414584,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 15636473,
-            "range": "± 540268",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1347088048,
-            "range": "± 18596201",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 8948381333,
-            "range": "± 79685396",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2375,6 +2333,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1368835814,
             "range": "± 7185586",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "11a5e1c3bd1848168beb69f750988b9b6f88db4e",
+          "message": "chore(audio_files/test): run pitch shifting tests on macOS\n\nThe upstream GStreamer .pkg distribution seems to include\r\nthe SoundTouch plugin. Let's see if that's true.",
+          "timestamp": "2022-03-29T12:47:43+02:00",
+          "tree_id": "2e220716e0b3ac43850423c00d82c4af01b45bc1",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/11a5e1c3bd1848168beb69f750988b9b6f88db4e"
+        },
+        "date": 1648553492554,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14844736,
+            "range": "± 217568",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 938740111,
+            "range": "± 7092560",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10542517836,
+            "range": "± 32228348",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1354282882,
+            "range": "± 8937612",
             "unit": "ns/iter"
           }
         ]
