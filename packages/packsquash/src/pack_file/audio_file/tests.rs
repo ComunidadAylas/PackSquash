@@ -141,9 +141,6 @@ async fn passthrough_works() {
 	.await
 }
 
-// The GStreamer SoundTouch plugin has portability issues,
-// and is not available on all GStreamer distributions
-#[cfg(any(target_os = "linux", windows))]
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn pitch_shifting_works() {
 	successful_process_test(
@@ -176,9 +173,6 @@ async fn channel_mixing_works() {
 	.await
 }
 
-// The GStreamer SoundTouch plugin has portability issues: it is not available on all GStreamer
-// distributions
-#[cfg(any(target_os = "linux", windows))]
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn channel_mixing_and_pitch_shifting_work() {
 	successful_process_test(
