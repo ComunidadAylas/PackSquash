@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1648906676967,
+  "lastUpdate": 1648906714136,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "f3e77a919d63f9e0406649bfcb31b33a3ad1b5a8",
-          "message": "chore: fix Windows build",
-          "timestamp": "2022-02-02T21:50:52+01:00",
-          "tree_id": "be5d68c2d11073ed6057a35335a21b30908e7ad4",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f3e77a919d63f9e0406649bfcb31b33a3ad1b5a8"
-        },
-        "date": 1643836886166,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 16433635,
-            "range": "± 988139",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1111122330,
-            "range": "± 18611501",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12881803127,
-            "range": "± 120843324",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1617156609,
-            "range": "± 45885911",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1377559804,
             "range": "± 10674290",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "c9c77d012e924d9258ed8af4c3eef26d5987ead5",
+          "message": "ci(experimental/x32): try out x64 x32 ABI builds\n\nThe ILP32 data model used by this target has the nice property in theory\nof reducing code size, as pointers are still 32-bit, like in 32-bit\narchitectures. However, it support is very lacking. Let's see how things\nbreak.",
+          "timestamp": "2022-04-02T15:01:09+02:00",
+          "tree_id": "5668fc07e8e28cc55f5be2c1c909c61cce2df61c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c9c77d012e924d9258ed8af4c3eef26d5987ead5"
+        },
+        "date": 1648906712903,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13213413,
+            "range": "± 748279",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 961459928,
+            "range": "± 33920695",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 9784234489,
+            "range": "± 244408533",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1374037829,
+            "range": "± 32741383",
             "unit": "ns/iter"
           }
         ]
