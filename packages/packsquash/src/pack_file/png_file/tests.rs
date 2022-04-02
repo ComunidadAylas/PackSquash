@@ -10,6 +10,9 @@ use super::*;
 
 static PNG_DATA: &[u8] = include_bytes!("example.png");
 static ENDERMAN_EYES_DATA: &[u8] = include_bytes!("enderman_eyes.png");
+/// Somewhat extreme but realistic example of a texture whose size increases
+/// 7x when color quantized and dithered with the default options.
+static DITHERBOMB_DATA: &[u8] = include_bytes!("ditherbomb.png");
 
 /// Processes the given input data as a [PngFile], using the provided settings,
 /// expecting a successful result.
@@ -164,7 +167,7 @@ async fn entity_eye_blending_workaround_works() {
 		ENDERMAN_EYES_DATA,
 		PngFileOptions {
 			color_quantization_target: ColorQuantizationTarget::EightBitDepth,
-			do_not_change_transparent_pixel_colors: true,
+			working_around_transparent_pixel_colors_change_quirk: true,
 			..Default::default()
 		},
 		true,  // Same pixels
@@ -182,7 +185,7 @@ async fn banner_layer_check_workaround_works() {
 		PNG_DATA,
 		PngFileOptions {
 			color_quantization_target: ColorQuantizationTarget::EightBitDepth,
-			skip_color_type_reduction: true,
+			working_around_color_type_change_quirk: true,
 			..Default::default()
 		},
 		false, // Not necessarily the same pixels
@@ -190,6 +193,42 @@ async fn banner_layer_check_workaround_works() {
 		true,  // Same color type
 		PackFileAssetType::BannerLayer,
 		"banner_layer_check_workaround_works"
+	)
+	.await
+}
+
+#[tokio::test]
+async fn ditherbomb_does_not_get_bigger() {
+	successful_process_test(
+		DITHERBOMB_DATA,
+		PngFileOptions {
+			color_quantization_target: ColorQuantizationTarget::Auto,
+			color_quantization_dithering_level: 1.0.try_into().unwrap(),
+			..Default::default()
+		},
+		true, // Should fall back to the first pass result
+		true, // The first pass strips some non-critical chunks
+		true, // Should fall back to the first pass result
+		PackFileAssetType::GenericTexture,
+		"ditherbomb_does_not_get_bigger"
+	)
+	.await
+}
+
+#[tokio::test]
+async fn ditherbomb_can_be_defused() {
+	successful_process_test(
+		DITHERBOMB_DATA,
+		PngFileOptions {
+			color_quantization_target: ColorQuantizationTarget::Auto,
+			color_quantization_dithering_level: 0.0.try_into().unwrap(),
+			..Default::default()
+		},
+		false, // Not necessarily the same pixels
+		true,  // No dithering is enough to make the optimizations work as expected
+		false, // Not necessarily the same color type
+		PackFileAssetType::GenericTexture,
+		"ditherbomb_can_be_defused"
 	)
 	.await
 }

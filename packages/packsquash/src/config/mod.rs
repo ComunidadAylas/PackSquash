@@ -561,13 +561,13 @@ impl FileOptions {
 	/// file settings for some pack file were found, before actually using them.
 	pub(crate) fn tweak_from_global_options(mut self, global_options: &GlobalOptions) -> Self {
 		if let FileOptions::PngFileOptions(file_options) = &mut self {
-			file_options.do_not_reduce_to_grayscale = global_options
+			file_options.working_around_grayscale_reduction_quirk = global_options
 				.work_around_minecraft_quirks
 				.contains(MinecraftQuirk::GrayscaleImagesGammaMiscorrection);
-			file_options.skip_color_type_reduction = global_options
+			file_options.working_around_color_type_change_quirk = global_options
 				.work_around_minecraft_quirks
 				.contains(MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck);
-			file_options.do_not_change_transparent_pixel_colors = global_options
+			file_options.working_around_transparent_pixel_colors_change_quirk = global_options
 				.work_around_minecraft_quirks
 				.contains(MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending);
 		}
@@ -762,6 +762,24 @@ pub struct PngFileOptions {
 	///
 	/// **Default value**: [ColorQuantizationTarget::EightBitDepth] (quantize to 256 colors)
 	pub color_quantization_target: ColorQuantizationTarget,
+	/// The level of dithering that will be applied when quantizing colors, between 0 and 1. This
+	/// option has no effect if `color_quantization_target` is set to not perform color quantization.
+	///
+	/// Dithering is a technique that improves the perceived color depth of color-quantized images
+	/// by diffusing the color palette in areas that lost color information. The dithered areas
+	/// appear more like they had their original colors, reducing color banding artifacts. However,
+	/// dithering can introduce noisy, hard-to-compress diffusion patterns.
+	///
+	/// In most images, especially natural-looking ones, color quantization saves enough space to
+	/// compensate for the decreased dithered areas compressibility, so lots of dithering is a good
+	/// idea because it both gives better-looking results and reduces file sizes. Extreme
+	/// counterexamples are images composed of big blocks of plain colors whose color is not in the
+	/// quantized palette: in this case dithering will negatively affect compression while yielding a
+	/// worse look than only completely replacing those plain colors by colors in the palette, so
+	/// reducing the dithering level is warranted.
+	///
+	/// **Default value**: `0.85`
+	pub color_quantization_dithering_level: UnitIntervalFloat,
 	/// The maximum width and height of the images that will be accepted. This parameter
 	/// sets a high bound of memory usage by PackSquash and helps authoring packs with
 	/// reasonable texture sizes.
@@ -783,19 +801,19 @@ pub struct PngFileOptions {
 	///
 	/// **Default value**: `false`
 	#[serde(skip)]
-	pub(crate) do_not_reduce_to_grayscale: bool,
+	pub(crate) working_around_grayscale_reduction_quirk: bool,
 	/// Crate-private option set by the [MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck]
 	/// workaround to not change the texture color type.
 	///
 	/// **Default value**: `false`
 	#[serde(skip)]
-	pub(crate) skip_color_type_reduction: bool,
+	pub(crate) working_around_color_type_change_quirk: bool,
 	/// Crate-private option set by the [MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending]
 	/// workaround to not change the texture color type.
 	///
 	/// **Default value**: `false`
 	#[serde(skip)]
-	pub(crate) do_not_change_transparent_pixel_colors: bool
+	pub(crate) working_around_transparent_pixel_colors_change_quirk: bool
 }
 
 impl Default for PngFileOptions {
@@ -803,11 +821,12 @@ impl Default for PngFileOptions {
 		Self {
 			image_data_compression_iterations: 3,
 			color_quantization_target: Default::default(),
+			color_quantization_dithering_level: UnitIntervalFloat(0.85),
 			maximum_width_and_height: 8192,
 			skip_alpha_optimizations: false,
-			do_not_reduce_to_grayscale: false,
-			skip_color_type_reduction: false,
-			do_not_change_transparent_pixel_colors: false
+			working_around_grayscale_reduction_quirk: false,
+			working_around_color_type_change_quirk: false,
+			working_around_transparent_pixel_colors_change_quirk: false
 		}
 	}
 }
@@ -825,12 +844,15 @@ pub enum ColorQuantizationTarget {
 	/// The image will be quantized to at most 16 colors.
 	FourBitDepth,
 	/// The image will be quantized to at most 256 colors.
-	EightBitDepth
+	EightBitDepth,
+	/// The image will be quantized to at most 256 colors if and
+	/// only if doing so saves space.
+	Auto
 }
 
 impl Default for ColorQuantizationTarget {
 	fn default() -> Self {
-		Self::EightBitDepth
+		Self::Auto
 	}
 }
 
@@ -842,20 +864,51 @@ impl ColorQuantizationTarget {
 			Self::OneBitDepth => 1,
 			Self::TwoBitDepth => 2,
 			Self::FourBitDepth => 4,
-			Self::EightBitDepth => 8
+			Self::EightBitDepth => 8,
+			Self::Auto => 8
 		}
 	}
 
 	/// Gets the maximum number of colors that an image with this color
 	/// quantization target can possibly have.
 	pub(crate) const fn max_colors(&self) -> u32 {
-		u32::checked_pow(2, self.depth() as u32).unwrap()
+		1 << self.depth()
 	}
 
 	/// Returns whether color quantization should be performed at all
 	/// to meet this color quantization target.
 	pub(crate) const fn should_quantize(&self) -> bool {
 		self.depth() > 0
+	}
+
+	/// Returns whether this quantization target requires quantization to
+	/// be performed, even if it negatively impacts file size.
+	pub(crate) const fn is_quantization_required(&self) -> bool {
+		self.should_quantize() && !matches!(self, Self::Auto)
+	}
+}
+
+/// A helper struct that contains an 32-bit floating point number guaranteed to be
+/// in the `[0, 1]` interval.
+#[derive(Deserialize, Clone, Copy)]
+#[serde(try_from = "f32")]
+#[repr(transparent)]
+pub struct UnitIntervalFloat(f32);
+
+impl TryFrom<f32> for UnitIntervalFloat {
+	type Error = &'static str;
+
+	fn try_from(value: f32) -> Result<Self, Self::Error> {
+		(0.0..=1.0)
+			.contains(&value)
+			.then(|| UnitIntervalFloat(value))
+			.ok_or("The specified value is not a decimal number between 0 and 1, inclusive")
+	}
+}
+
+impl From<UnitIntervalFloat> for f32 {
+	fn from(value: UnitIntervalFloat) -> Self {
+		value.0
 	}
 }
 
