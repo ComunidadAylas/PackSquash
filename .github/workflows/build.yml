@@ -403,7 +403,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim
+    container: debian:sid-slim
 
     env:
       CARGO_BUILD_TARGET: x86_64-unknown-linux-gnux32
@@ -419,9 +419,9 @@ jobs:
       - name: Install development packages, cross-compilation GCC toolchain, GStreamer libraries, GStreamer development packages and documentation generation packages
         run: |
           apt-get update
-          apt-get install debian-ports-archive-keyring
+          apt-get install -yq debian-ports-archive-keyring
           dpkg --add-architecture x32
-          echo 'deb http://ftp.ports.debian.org/debian-ports/ unstable main non-free contrib' >> /etc/apt/sources.list
+          echo 'deb http://ftp.ports.debian.org/debian-ports/ sid main non-free contrib' >> /etc/apt/sources.list
           apt-get update
           # lizlzma-dev is required by cargo-deb. curl is required by rustup
           apt-get install -yq build-essential git liblzma-dev curl \
