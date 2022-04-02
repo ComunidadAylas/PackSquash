@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1648668303479,
+  "lastUpdate": 1648906676967,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "d14489f6101ba61f02ca6df789f7d54d9355aec7",
-          "message": "chore(legacy_lang_file): fix tests not building due to changes\n\nIn a previous commit we did some changes to the legacy language file\nprocessing code that made a file size hint unnecessary, but forgot to\nupdate the tests accordingly.\n\nRefs: a0216fb884b705571503008c3744171f36a269dd",
-          "timestamp": "2022-02-02T16:37:01+01:00",
-          "tree_id": "d896483438478c15ae153726e82ac92b923afc81",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d14489f6101ba61f02ca6df789f7d54d9355aec7"
-        },
-        "date": 1643818806017,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14285221,
-            "range": "± 575498",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 970018377,
-            "range": "± 33082868",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10537447725,
-            "range": "± 181676237",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1443014907,
-            "range": "± 19341628",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1453824222,
             "range": "± 19298405",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "11eb1a02be6372360bec1510d8de5b39ab633b78",
+          "message": "ci(experimental/x32): target Debian testing\n\nThe unofficial x32 port of Debian does not follow the usual release\ncadence and it usually breaks. Let's see if moving to this other version\nworks.",
+          "timestamp": "2022-04-02T15:07:05+02:00",
+          "tree_id": "0ee5f528d86a999e39ca2f77e762ba0fa2967d5c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/11eb1a02be6372360bec1510d8de5b39ab633b78"
+        },
+        "date": 1648906676475,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13129511,
+            "range": "± 236815",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 938895395,
+            "range": "± 2258387",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10540436476,
+            "range": "± 196023102",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1377559804,
+            "range": "± 10674290",
             "unit": "ns/iter"
           }
         ]
