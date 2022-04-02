@@ -406,14 +406,6 @@ impl Default for ZipSpecConformanceLevel {
 #[repr(transparent)]
 pub struct PercentageInteger(u8);
 
-impl PercentageInteger {
-	/// Creates a [`PercentageInteger`] struct that holds the specified integer. This will
-	/// fail if the specified integer is not in the expected interval.
-	pub fn new(percentage: u8) -> Result<Self, <Self as TryFrom<u8>>::Error> {
-		percentage.try_into()
-	}
-}
-
 impl TryFrom<u8> for PercentageInteger {
 	type Error = &'static str;
 
@@ -525,6 +517,8 @@ pub enum MinecraftMod {
 }
 
 /// Options that customize how some file, of a certain file type, is processed.
+// When adding new variants to this enum, please update the lib.rs file too, so
+// the default options are used for new file types too
 #[derive(Deserialize, Clone, Copy)]
 #[serde(untagged)]
 #[non_exhaustive]
@@ -636,10 +630,10 @@ impl Default for AudioFileOptions {
 		Self {
 			transcode_ogg: true,
 			channels: Default::default(),
-			sampling_frequency: 32_000.try_into().unwrap(),
+			sampling_frequency: PositiveI32(32_000),
 			target_pitch: 1.0,
-			minimum_bitrate: 40_000.try_into().unwrap(),
-			maximum_bitrate: 96_000.try_into().unwrap()
+			minimum_bitrate: PositiveI32(40_000),
+			maximum_bitrate: PositiveI32(96_000)
 		}
 	}
 }
@@ -676,15 +670,6 @@ impl Default for ChannelMixingOption {
 #[cfg(feature = "audio-transcoding")]
 #[doc(cfg(feature = "audio-transcoding"))]
 pub struct PositiveI32(i32);
-
-#[cfg(feature = "audio-transcoding")]
-impl PositiveI32 {
-	/// Creates a [`PositiveI32`] struct that holds the specified integer. This will
-	/// fail if the specified integer is not in the expected interval.
-	pub fn new(value: i32) -> Result<Self, <Self as TryFrom<i32>>::Error> {
-		value.try_into()
-	}
-}
 
 #[cfg(feature = "audio-transcoding")]
 impl TryFrom<i32> for PositiveI32 {
