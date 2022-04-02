@@ -53,7 +53,11 @@ async fn successful_process_test(
 		processed_data_size = data.len();
 
 		if env::var("WRITE_PNG_TEST_RESULTS").unwrap_or_else(|_| String::from("0")) == "1" {
-			fs::write(format!("target/png_test_result_{}.png", test_name), &data).unwrap();
+			fs::write(
+				format!("../../target/png_test_result_{}.png", test_name),
+				&data
+			)
+			.expect("No error should happen while writing a test result to disk")
 		}
 
 		let (image_info, mut png_reader) = spng::Decoder::new(&*data)
@@ -100,8 +104,14 @@ async fn successful_process_test(
 		"The processed PNG should have the same pixels as the original PNG"
 	);
 
-	eprintln!("Original PNG size: {} bytes", input_data_len);
-	eprintln!("Processed PNG size: {} bytes", processed_data_size);
+	eprintln!(
+		"Original PNG size: {} bytes, color type: {:?}",
+		input_data_len, original_color_type
+	);
+	eprintln!(
+		"Processed PNG size: {} bytes, color type: {:?}",
+		processed_data_size, processed_color_type
+	);
 	assert!(
 		!expect_smaller_file_size || processed_data_size < input_data_len,
 		"The processed PNG should be smaller than the original PNG"
