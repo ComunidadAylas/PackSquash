@@ -369,6 +369,21 @@ these subcommands to be handy:
 - `cargo tree`: shows the dependency tree of the project, including transitive
   dependencies. Useful for managing dependencies and optimizing code size.
 
+## 👍 Useful scripts
+
+The `scripts` directory of the repository contains some useful scripts that you
+can run with any POSIX-compliant shell (on Windows, try Git Bash or MinGW; on
+Linux or macOS, use your favorite shell).
+
+Among those scripts, the most useful one available to everyone and unrelated to
+distribution is `manual_packsquash_test.sh`. By default, this script will build
+and run PackSquash in release mode to optimize the pack at the `test_pack`
+directory, creating a `pack.mcmeta` file for a resource pack if it does not
+exist. The pack format version and directory can be set with the `-v` and
+`-d` options, respectively. This script is meant to make it more convenient to
+do manual end-to-end PackSquash tests. Feel free to adapt your local copy as you
+see fit for your activities.
+
 # ✏️ Submitting a pull request (PR)
 
 If your contribution involves editing files in the repository, you will need to
