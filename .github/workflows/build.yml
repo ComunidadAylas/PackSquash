@@ -399,6 +399,79 @@ jobs:
           name: 'PackSquash CLI AppImage zsync (arm64)'
           path: PackSquash-*-aarch64.AppImage.zsync
 
+  linux-x64-gnux32:
+
+    runs-on: ubuntu-latest
+
+    container: debian:bullseye-slim
+
+    env:
+      CARGO_BUILD_TARGET: x86_64-unknown-linux-gnux32
+      PKG_CONFIG_ALLOW_CROSS: 1
+      PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnux32/pkgconfig
+      DEBIAN_FRONTEND: noninteractive
+
+    # Only run if this is not a pull request, or for pull requests on forks
+    if: github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
+
+    steps:
+      - name: Install development packages, cross-compilation GCC toolchain, GStreamer libraries, GStreamer development packages and documentation generation packages
+        run: |
+          apt-get update
+          apt-get install debian-ports-archive-keyring
+          dpkg --add-architecture x32
+          echo 'deb http://ftp.ports.debian.org/debian-ports/ unstable main non-free contrib' >> /etc/apt/sources.list
+          apt-get update
+          # lizlzma-dev is required by cargo-deb. curl is required by rustup
+          apt-get install -yq build-essential git liblzma-dev curl \
+                              gcc-multilib-x86-64-linux-gnux32 libgstreamer-plugins-base1.0-dev:x32 \
+                              markdown html2text
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          target: ${{ env.CARGO_BUILD_TARGET }}
+          profile: minimal
+          components: rust-src
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
+
+      - name: Install cargo-deb
+        uses: actions-rs/install@v0.1
+        env:
+          CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
+        with:
+          crate: cargo-deb
+          version: ${{ env.CARGO_DEB_VERSION }}
+
+      - name: Build with optimized standard library
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+
+      - name: Generate CLI Debian package
+        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
+
+      - name: Upload CLI binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PackSquash executable (Linux, x64 x32 ABI, glibc)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+
+      - name: Upload CLI Debian package
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PackSquash CLI Debian package (x32)'
+          path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
+
   benchmark:
 
     runs-on: ubuntu-latest
