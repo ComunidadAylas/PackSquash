@@ -13,12 +13,12 @@ edition = "2021"
 bytes = "1.1.0"
 globset = "0.4.8"
 enumset = { version = "1.0.8", features = ["serde"] }
-indexmap = { version = "1.8.0", default-features = false, features = ["serde-1"] }
+indexmap = { version = "1.8.1", default-features = false, features = ["serde-1"] }
 thiserror = "1.0.30"
 ahash = "0.7.6"
 
 num_cpus = "1.13.1"
-sysinfo = { version = "0.23.5", default-features = false }
+sysinfo = { version = "0.23.6", default-features = false }
 walkdir = "2.3.2"
 
 tokio = { version = "1.17.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
@@ -69,7 +69,7 @@ mach = "0.3.2"
 
 [dev-dependencies]
 tokio-test = "0.4.2"
-pretty_assertions = "1.2.0"
+pretty_assertions = "1.2.1"
 
 criterion = { version = "0.3.5", features = ["html_reports"] }
 tar = { version = "0.4.38", default-features = false }
@@ -80,8 +80,8 @@ xz2 = "0.1.6"
 # framework is Linux-only, too, so benchmarks based on criterion-perf-events can only
 # run on x86 Linux systems
 [target.'cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))'.dev-dependencies]
-criterion-perf-events = "0.1.4"
-perfcnt = "0.7.3"
+criterion-perf-events = "0.2.0"
+perfcnt = "0.8.0"
 
 [features]
 # Support audio transcoding and all kinds of files added by modifications by default
