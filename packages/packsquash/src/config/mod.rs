@@ -750,7 +750,7 @@ pub struct PngFileOptions {
 	/// greater than 15 are still useful for this setting, because they change the threshold
 	/// where iterations start being reduced in order to keep acceptable performance levels.
 	///
-	/// **Default value**: `3`
+	/// **Default value**: `5`
 	pub image_data_compression_iterations: u8,
 	/// Controls how the colors of the image will be quantized.
 	///
@@ -819,7 +819,7 @@ pub struct PngFileOptions {
 impl Default for PngFileOptions {
 	fn default() -> Self {
 		Self {
-			image_data_compression_iterations: 3,
+			image_data_compression_iterations: 5,
 			color_quantization_target: Default::default(),
 			color_quantization_dithering_level: UnitIntervalFloat(0.85),
 			maximum_width_and_height: 8192,

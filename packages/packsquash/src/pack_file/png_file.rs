@@ -112,6 +112,7 @@ impl Decoder for OptimizerDecoder {
 		// Second pass: perform quantization if desired and if useful (i.e., there are more pixels
 		// than possible colors, and no option stops us from doing so)
 		let second_pass_quality;
+		let second_pass_pixel_data_size;
 		let second_pass_result = {
 			// Now it's a good time to read the PNG IHDR and other information chunks to validate
 			// it. We should do this check no matter if the image is quantized or not
@@ -130,6 +131,9 @@ impl Decoder for OptimizerDecoder {
 				&& can_change_color_type
 				&& can_change_transparent_pixel_colors
 			{
+				// At most one byte per pixel when using color palettes
+				second_pass_pixel_data_size = png_info.width.saturating_mul(png_info.height);
+
 				Some(color_quantize(
 					png_reader,
 					png_info,
@@ -139,6 +143,11 @@ impl Decoder for OptimizerDecoder {
 						.into()
 				)?)
 			} else {
+				second_pass_pixel_data_size = (png_info.color_type.samples() as u32
+					* ((png_info.bit_depth as u32 + 15) / 8 - 1))
+					.saturating_mul(png_info.width)
+					.saturating_mul(png_info.height);
+
 				None
 			}
 		};
@@ -153,6 +162,7 @@ impl Decoder for OptimizerDecoder {
 				second_pass_quality = None;
 				Cow::Borrowed(&first_pass_png)
 			},
+			second_pass_pixel_data_size,
 			self.optimization_settings.image_data_compression_iterations,
 			can_change_color_type,
 			can_change_transparent_pixel_colors,
@@ -190,8 +200,7 @@ impl Decoder for OptimizerDecoder {
 		// the user. While this has the desired properties of never increasing the input PNG file
 		// size when quantization is not forced and executing each pass a single time, explicit
 		// user configuration of the quantization parameters may be needed to achieve the most
-		// optimal PNG we are capable of. Luckily, the points above are fairly rare to happen
-		// in practice
+		// optimal PNG we are capable of. Luckily, the points above are fairly rare
 		let (optimized_png, optimization_strategy_message) = if !color_quantization_target
 			.is_quantization_required()
 			&& first_pass_png.len() < third_pass_png.len()
@@ -408,6 +417,7 @@ fn color_quantize<R>(
 /// more efficient than RGBA format).
 fn visually_lossless_optimize(
 	input_png: Cow<'_, [u8]>,
+	pixel_data_size: u32,
 	zopfli_compression_iterations: u8,
 	can_change_color_type: bool,
 	can_change_transparent_pixel_colors: bool,
@@ -436,11 +446,18 @@ fn visually_lossless_optimize(
 		// Compute an appropriate number of Zopfli compression iterations using our
 		// model. If the number of iterations drops to zero, switch to the much faster,
 		// but not so space-efficient, cloudflare-zlib deflater
-		deflate: match zopfli_iterations_model.iterations_for_data_size(
-			input_png.len().try_into().unwrap_or(u32::MAX),
-			0,
-			15
-		) {
+		deflate: match zopfli_iterations_model
+			.iterations_for_data_size(
+				// OxiPNG does one Zopfli compression attempt per PNG filter configured below,
+				// and returns the combination that yields the best result, so it's desired to
+				// consider that the data size was multiplied by the number of filters to bound
+				// execution time properly
+				pixel_data_size.saturating_mul(3),
+				0,
+				23
+			)
+			.saturating_sub(8)
+		{
 			0 => Deflaters::Zlib {
 				compression: {
 					// Use the maximum compression level for the best compression.
@@ -467,15 +484,21 @@ fn visually_lossless_optimize(
 			}
 		},
 		filter: {
-			let mut optimization_filters = IndexSet::with_capacity(6);
-			for i in 0..=5 {
-				optimization_filters.insert(i);
+			const OPTIMIZATION_FILTERS: [u8; 3] = [
+				0, // No filter (surprisingly good)
+				4, // Paeth
+				5  // Per-scanline filter chosen with MAD heuristic
+			];
+
+			let mut optimization_filters = IndexSet::with_capacity(OPTIMIZATION_FILTERS.len());
+			for filter in OPTIMIZATION_FILTERS {
+				optimization_filters.insert(filter);
 			}
 
 			optimization_filters
 		},
 		fix_errors: true, // Ignore CRC for speed. We assume a reliable data source
-		force: true,
+		force: false,     // Give up with the second pass result if we can't reduce size further
 		idat_recoding: true,
 		interlace: Some(0), // No interlacing (smaller file size)
 		palette_reduction: true,

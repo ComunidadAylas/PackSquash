@@ -198,7 +198,6 @@ async fn banner_layer_check_workaround_works() {
 }
 
 #[tokio::test]
-#[ignore = "Takes too long to run"]
 async fn ditherbomb_does_not_get_bigger() {
 	successful_process_test(
 		DITHERBOMB_DATA,
@@ -217,7 +216,6 @@ async fn ditherbomb_does_not_get_bigger() {
 }
 
 #[tokio::test]
-#[ignore = "Takes too long to run"]
 async fn ditherbomb_can_be_defused() {
 	successful_process_test(
 		DITHERBOMB_DATA,
