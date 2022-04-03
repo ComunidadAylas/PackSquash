@@ -322,7 +322,7 @@ jobs:
           apt-get update
           # lizlzma-dev is required by cargo-deb. curl is required by rustup
           apt-get install -yq build-essential git liblzma-dev curl \
-                              gcc-aarch64-linux-gnu libgstreamer1.0-dev:arm64 libgstreamer-plugins-base1.0-dev:arm64 \
+                              gcc-aarch64-linux-gnu libgstreamer-plugins-base1.0-dev:arm64 \
                               qemu-user gstreamer1.0-plugins-good:arm64 gstreamer1.0-plugins-bad:arm64 \
                               markdown html2text
 
