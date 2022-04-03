@@ -2,7 +2,6 @@
 
 use std::{
 	borrow::Cow,
-	lazy::SyncLazy,
 	num::{NonZeroU8, TryFromIntError},
 	time::Duration
 };
@@ -11,9 +10,9 @@ use bytes::BytesMut;
 use imagequant::{liq_error, Attributes};
 use indexmap::IndexSet;
 use oxipng::{AlphaOptim, Deflaters, Headers, Options, PngError};
-use png::{BitDepth, ColorType, Compression, EncodingError, FilterType};
+use png::EncodingError;
 use rgb::FromSlice;
-use spng::{ContextFlags, DecodeFlags, Format, Limits, OutputInfo};
+use spng::{ContextFlags, DecodeFlags, Format, OutputInfo};
 use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
@@ -49,6 +48,8 @@ pub struct OptimizerDecoder {
 #[derive(Error, Debug)]
 #[non_exhaustive]
 pub enum OptimizationError {
+	#[error("Invalid PNG: {0}")]
+	StripValidateError(&'static str),
 	#[error("PNG decode error: {0}")]
 	PngDecoding(#[from] spng::Error),
 	#[error("PNG encode error: {0}")]
@@ -107,7 +108,10 @@ impl Decoder for OptimizerDecoder {
 		// First pass: strip non-critical PNG chunks we won't use. At worst this does nothing
 		// to the input PNG, and at best it reduces its size, reducing memory requirements for
 		// the next passes. It's relatively cheap to do this, although not free
-		let first_pass_png = strip_unnecessary_chunks(src.split_off(0))?;
+		let first_pass_png = strip_unnecessary_chunks(
+			src.split_off(0),
+			self.optimization_settings.maximum_width_and_height
+		)?;
 
 		// Second pass: perform quantization if desired and if useful (i.e., there are more pixels
 		// than possible colors, and no option stops us from doing so)
@@ -117,10 +121,6 @@ impl Decoder for OptimizerDecoder {
 			// Now it's a good time to read the PNG IHDR and other information chunks to validate
 			// it. We should do this check no matter if the image is quantized or not
 			let (png_info, png_reader) = spng::Decoder::new(&*first_pass_png)
-				.with_limits(Limits {
-					max_width: self.optimization_settings.maximum_width_and_height as u32,
-					max_height: self.optimization_settings.maximum_width_and_height as u32
-				})
 				.with_decode_flags(DecodeFlags::GAMMA | DecodeFlags::TRANSPARENCY)
 				.with_context_flags(ContextFlags::IGNORE_ADLER32)
 				.with_output_format(Format::Rgba8)
@@ -275,40 +275,93 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for PngFile<T
 /// Performs a single, fast optimization to an input PNG image: removing non-critical
 /// chunks that will not be parsed by any expected downstream decoder. This can never
 /// increase the input PNG image size, only decrease or maintain it.
-fn strip_unnecessary_chunks(input_png: BytesMut) -> Result<Vec<u8>, PngError> {
-	/// OxiPNG configuration for doing the aforementioned optimization.
-	static ONLY_STRIP_CHUNKS_OPTIONS: SyncLazy<Options> = SyncLazy::new(|| {
-		Options {
-			backup: false,
-			fix_errors: true, // Ignore CRC for speed. We assume a reliable data source
-			pretend: false,
-			force: true,
-			preserve_attrs: false,
-			// The following options configure OxiPNG to not touch the image data (IDAT chunk)
-			// in any way, where the most optimizations happen
-			filter: IndexSet::new(),
-			interlace: None,
-			alphas: IndexSet::new(),
-			bit_depth_reduction: false,
-			color_type_reduction: false,
-			palette_reduction: false,
-			grayscale_reduction: false,
-			idat_recoding: false,
-			// Strip headers that neither we or Minecraft will ever use. gAMA and tRNS may
-			// be used by our spng decoder
-			strip: Headers::Keep(IndexSet::from_iter(
-				[String::from("gAMA"), String::from("tRNS")].into_iter()
-			)),
-			// Ignored due to idat_recoding == false
-			deflate: Deflaters::Zopfli {
-				iterations: NonZeroU8::new(1).unwrap()
-			},
-			use_heuristics: false,
-			timeout: None
-		}
-	});
+///
+/// While doing so, it also validates that neither image dimension exceeds the passed
+/// threshold.
+fn strip_unnecessary_chunks(
+	input_png: BytesMut,
+	maximum_dimension: u16
+) -> Result<Vec<u8>, OptimizationError> {
+	let mut stripped_png = Vec::with_capacity(input_png.len());
 
-	oxipng::optimize_from_memory(&input_png, &ONLY_STRIP_CHUNKS_OPTIONS)
+	// Helper macro to avoid non-panicking bounds checking verbosity
+	static TOO_SMALL_ERROR_MESSAGE: &str =
+		"The file is smaller than expected. Is it invalid or corrupt?";
+	macro_rules! get_or_err {
+		($range:expr) => {
+			input_png
+				.get($range)
+				.ok_or(OptimizationError::StripValidateError(
+					TOO_SMALL_ERROR_MESSAGE
+				))?
+		};
+	}
+
+	// The format of PNG files is dead simple: just a signature in the beginning
+	// followed by as many chunks as desired. OxiPNG supports stripping chunks,
+	// but it's amazing that implementing this ourselves takes barely the same
+	// LOC than calling OxiPNG with the suitable options, and that there is no
+	// nice library at crates.io to do this simple optimization. OxiPNG is also
+	// pretty slow because it insists on decoding the image anyway. So do it
+	// ourselves and strip every chunk that we know won't be of any use.
+	// Normative reference: https://www.w3.org/TR/PNG/
+
+	// Check and copy the signature
+	let signature = get_or_err!(..8);
+	if signature != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A] {
+		return Err(OptimizationError::StripValidateError(
+			"PNG signature not found. Is it really a PNG file?"
+		));
+	}
+	stripped_png.extend_from_slice(signature);
+
+	// Now copy the known-necessary chunks only. We barely do any validation on them
+	// apart from checking whether the image is too big and what's necessary to do
+	// the copy. spng and OxiPNG will take care of further validation
+	let mut i = 8;
+	while i < input_png.len() {
+		let data_length_and_chunk_type = get_or_err!(i..i + 8);
+		let data_length =
+			u32::from_be_bytes(data_length_and_chunk_type[..4].try_into().unwrap()) as usize;
+		let chunk_type = &data_length_and_chunk_type[4..];
+
+		if matches!(
+			chunk_type,
+			// gAMA may be used by spng later on. PLTE is necessary for palette color images,
+			// which may have its transparency stored in a tRNS chunk. IHDR, IDAT and IEND
+			// are critical and must appear
+			b"IHDR" | b"IDAT" | b"IEND" | b"PLTE" | b"tRNS" | b"gAMA"
+		) {
+			let chunk_data = get_or_err!(i + 8..i + 8 + data_length);
+			let chunk_crc = get_or_err!(i + 8 + data_length..i + 8 + data_length + 4);
+
+			if chunk_type == b"IHDR" {
+				if data_length != 13 {
+					return Err(OptimizationError::StripValidateError(
+						"Unexpected size for IHDR chunk"
+					));
+				}
+
+				let width = u32::from_be_bytes(chunk_data[..4].try_into().unwrap());
+				let height = u32::from_be_bytes(chunk_data[4..8].try_into().unwrap());
+
+				if width > maximum_dimension as u32 || height > maximum_dimension as u32 {
+					return Err(OptimizationError::StripValidateError(
+						"The texture width or height exceeds the configured maximum size. \
+						More information: <https://packsquash.page.link/Too-big-PNG-help>"
+					));
+				}
+			}
+
+			stripped_png.extend_from_slice(data_length_and_chunk_type);
+			stripped_png.extend_from_slice(chunk_data);
+			stripped_png.extend_from_slice(chunk_crc);
+		}
+
+		i += 8 + data_length + 4;
+	}
+
+	Ok(stripped_png)
 }
 
 /// Performs color quantization on the image yielded by the provided PNG reader,
@@ -367,10 +420,10 @@ fn color_quantize<R>(
 		8
 	);
 	let mut png_encoder = png::Encoder::new(&mut quantized_png_buf, png_info.width, png_info.height);
-	png_encoder.set_color(ColorType::Indexed);
-	png_encoder.set_depth(BitDepth::Eight);
-	png_encoder.set_compression(Compression::Fast);
-	png_encoder.set_filter(FilterType::NoFilter);
+	png_encoder.set_color(png::ColorType::Indexed);
+	png_encoder.set_depth(png::BitDepth::Eight);
+	png_encoder.set_compression(png::Compression::Fast);
+	png_encoder.set_filter(png::FilterType::NoFilter);
 
 	// Now we need to generate the PLTE and tRNS headers. According to
 	// http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html:
