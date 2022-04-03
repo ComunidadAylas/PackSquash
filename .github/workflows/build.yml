@@ -128,7 +128,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --release
+          args: --release -- -Z unstable-options --report-time
 
       - name: Build with optimized standard library
         uses: actions-rs/cargo@v1
@@ -222,7 +222,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --release
+          args: --release -- -Z unstable-options --report-time
 
       - name: Build with optimized standard library
         uses: actions-rs/cargo@v1
@@ -285,7 +285,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --release
+          args: --release -- -Z unstable-options --report-time
 
       - name: Build with optimized standard library
         uses: actions-rs/cargo@v1
@@ -353,7 +353,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --release
+          args: --release -- -Z unstable-options --report-time
 
       - name: Build with optimized standard library
         uses: actions-rs/cargo@v1
