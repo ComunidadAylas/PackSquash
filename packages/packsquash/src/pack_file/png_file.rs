@@ -423,8 +423,7 @@ fn visually_lossless_optimize(
 	can_change_transparent_pixel_colors: bool,
 	can_convert_to_grayscale: bool
 ) -> Result<Vec<u8>, PngError> {
-	let zopfli_iterations_model =
-		ZopfliIterationsTimeModel::new(zopfli_compression_iterations, 7.0 / 8.0);
+	let zopfli_iterations_model = ZopfliIterationsTimeModel::new(zopfli_compression_iterations, 2.0);
 
 	let optimization_options = Options {
 		alphas: if !can_change_transparent_pixel_colors {
@@ -446,18 +445,15 @@ fn visually_lossless_optimize(
 		// Compute an appropriate number of Zopfli compression iterations using our
 		// model. If the number of iterations drops to zero, switch to the much faster,
 		// but not so space-efficient, cloudflare-zlib deflater
-		deflate: match zopfli_iterations_model
-			.iterations_for_data_size(
-				// OxiPNG does one Zopfli compression attempt per PNG filter configured below,
-				// and returns the combination that yields the best result, so it's desired to
-				// consider that the data size was multiplied by the number of filters to bound
-				// execution time properly
-				pixel_data_size.saturating_mul(3),
-				0,
-				23
-			)
-			.saturating_sub(8)
-		{
+		deflate: match zopfli_iterations_model.iterations_for_data_size(
+			// OxiPNG does one Zopfli compression attempt per PNG filter configured below,
+			// and returns the combination that yields the best result, so it's desired to
+			// consider that the data size was multiplied by the number of filters to bound
+			// execution time properly
+			pixel_data_size.saturating_mul(3),
+			0,
+			15
+		) {
 			0 => Deflaters::Zlib {
 				compression: {
 					// Use the maximum compression level for the best compression.
