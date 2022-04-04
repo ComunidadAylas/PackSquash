@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649022599980,
+  "lastUpdate": 1649036854509,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "b6cb3a87e84e8e6122f3e9881185c67207354630",
-          "message": "chore(deps): bump gstreamer from 0.18.2 to 0.18.3 (#55)\n\nBumps gstreamer from 0.18.2 to 0.18.3.\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: gstreamer\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-02-09T11:07:59+01:00",
-          "tree_id": "b7a12f8e604079a34434a8b11ede5bf3ad76440c",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b6cb3a87e84e8e6122f3e9881185c67207354630"
-        },
-        "date": 1644403581805,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14008475,
-            "range": "± 193188",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 946959542,
-            "range": "± 12266038",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10938299024,
-            "range": "± 46431346",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1357091905,
-            "range": "± 6817672",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2391,6 +2343,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2573884741,
             "range": "± 15185425",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "id": "61913c39861d2f66f587c2e436ab16f028659f3f",
+          "message": "perf(png_file): optimize PNG chunk stripping pass code\n\nBy implementing this pass ourselves we no longer have to deal with\nOxiPNG's decoding of the image under the hood, which takes some precious\nmilliseconds to do, essentially turning it as quick of a pass as\npossible.",
+          "timestamp": "2022-04-03T21:21:18Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/61913c39861d2f66f587c2e436ab16f028659f3f"
+        },
+        "date": 1649036853934,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12249200,
+            "range": "± 1131560",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 695470120,
+            "range": "± 34940024",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 9419176895,
+            "range": "± 137133286",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2402083331,
+            "range": "± 76128751",
             "unit": "ns/iter"
           }
         ]
