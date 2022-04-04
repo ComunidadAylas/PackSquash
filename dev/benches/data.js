@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649036854509,
+  "lastUpdate": 1649086470656,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "7ff4604c6fe48cc3b2489ea49a866d3da2ba79ed",
-          "message": "chore(deps): bump core-foundation from 0.9.2 to 0.9.3 (#53)\n\nBumps [core-foundation](https://github.com/servo/core-foundation-rs) from 0.9.2 to 0.9.3.\r\n- [Release notes](https://github.com/servo/core-foundation-rs/releases)\r\n- [Commits](https://github.com/servo/core-foundation-rs/compare/core-foundation-v0.9.2...core-foundation-v0.9.3)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: core-foundation\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-02-09T11:07:34+01:00",
-          "tree_id": "bbdc8ae13998d59db972724863de5ce314bc1682",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7ff4604c6fe48cc3b2489ea49a866d3da2ba79ed"
-        },
-        "date": 1644403804140,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12700532,
-            "range": "± 166010",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 906952593,
-            "range": "± 7703009",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10754693641,
-            "range": "± 117556184",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1342711767,
-            "range": "± 4718526",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2402083331,
             "range": "± 76128751",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "999ec024fe39071ae8240f96922877a10a9e1cf6",
+          "message": "tweak(json_file/debloater): add selectors for keys used as comments\n\nThese are ignored by the programs who parse the asset types that get\ndebloated, but I have seen some authors including them. With the custom\nfiles feature they now have less reasons to do that.",
+          "timestamp": "2022-04-04T17:05:19+02:00",
+          "tree_id": "9808d4370300c14cf40ec65a539e3ae5d1e38b5e",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/999ec024fe39071ae8240f96922877a10a9e1cf6"
+        },
+        "date": 1649086469980,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 16891564,
+            "range": "± 1678364",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 939293930,
+            "range": "± 11518875",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12481623985,
+            "range": "± 193261931",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 3257449361,
+            "range": "± 69573535",
             "unit": "ns/iter"
           }
         ]
