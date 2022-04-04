@@ -1,8 +1,10 @@
 {
     "credit": "Example made with love by the Minecraft Wiki editors",
+    "__comment": "I like writing comments",
     "groups": [
         0,
         {
+            "_comment": "This is a nice group",
             "name": "group",
             "origin": [8, 0.5, 8],
             "color": 0,

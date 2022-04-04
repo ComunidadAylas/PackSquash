@@ -16,6 +16,27 @@ macro_rules! jsonpath_selectormut {
 	}};
 }
 
+/// Convenience macro that appends three selectors for keys commonly used
+/// as comments to an array or vector initializer.
+macro_rules! jsonpath_selectormuts_with_common_json_comment_keys {
+	[$($selectormut:expr),*] => {
+		[
+			jsonpath_selectormut!("$..__comment"),
+			jsonpath_selectormut!("$..__comment__"),
+			jsonpath_selectormut!("$.._comment"),
+			$(jsonpath_selectormut!($selectormut)),*
+		]
+	};
+	[vec $($selectormut:expr),+] => {
+		vec![
+			jsonpath_selectormut!("$..__comment"),
+			jsonpath_selectormut!("$..__comment__"),
+			jsonpath_selectormut!("$.._comment"),
+			$(jsonpath_selectormut!($selectormut)),+
+		]
+	};
+}
+
 /// Allows debloating Minecraft JSON files. Debloating deletes values that
 /// may be fairly common to find in JSON objects but are ignored by the game,
 /// reducing the size of the file.
@@ -23,7 +44,7 @@ macro_rules! jsonpath_selectormut {
 /// Instantiating this struct involves compiling JSONPath expressions, so users
 /// are encouraged to reuse instances across JSON files.
 pub(super) struct Debloater {
-	minecraft_model_bloat_selectors: OnceCell<Cell<[SelectorMut; 2]>>,
+	minecraft_model_bloat_selectors: OnceCell<Cell<[SelectorMut; 5]>>,
 	#[cfg(feature = "mtr3-support")]
 	mtr3_train_model_bloat_selectors: OnceCell<Cell<Vec<SelectorMut>>>
 }
@@ -102,12 +123,10 @@ fn debloat_value<T: AsMut<[SelectorMut]> + Default, F: FnOnce() -> Cell<T>>(
 }
 
 /// Compiles JSONPath selectors to remove bloat from Minecraft model assets.
-fn compile_minecraft_model_bloat_selectors() -> Cell<[SelectorMut; 2]> {
-	Cell::new([
-		// Blockbench credits (can be disabled in its options)
-		jsonpath_selectormut!("$.credit"),
-		// Blockbench groups (their export can be disabled in its options)
-		jsonpath_selectormut!("$.groups")
+fn compile_minecraft_model_bloat_selectors() -> Cell<[SelectorMut; 5]> {
+	Cell::new(jsonpath_selectormuts_with_common_json_comment_keys![
+		"$.credit", // Blockbench credits (can be disabled in its options)
+		"$.groups"  // Blockbench groups (their export can be disabled in its options)
 	])
 }
 
@@ -117,47 +136,49 @@ fn compile_minecraft_model_bloat_selectors() -> Cell<[SelectorMut; 2]> {
 #[doc(cfg(feature = "mtr3-support"))]
 fn compile_mtr3_train_model_bloat_selectors() -> Cell<Vec<SelectorMut>> {
 	// An array of these many selectors would be 5168 bytes big (152 bytes
-	// per selector). We don't want to put an array that big in the stack
-	Cell::new(vec![
+	// per selector), excluding comment keys. We don't want to put an array
+	// that big in the stack
+	Cell::new(jsonpath_selectormuts_with_common_json_comment_keys![
 		// This list of expressions was deduced from the following source code files:
 		// https://github.com/JannisX11/blockbench/blob/f687d97b77d748d5a07cc8ef3e594033a21dd305/js/io/formats/bbmodel.js#L93
 		// https://github.com/JannisX11/blockbench/blob/f687d97b77d748d5a07cc8ef3e594033a21dd305/js/io/project.js#L294
 		// https://github.com/JannisX11/blockbench/blob/f687d97b77d748d5a07cc8ef3e594033a21dd305/js/outliner/cube.js#L225
 		// https://github.com/JannisX11/blockbench/blob/f687d97b77d748d5a07cc8ef3e594033a21dd305/js/outliner/group.js#L357
 		// https://github.com/jonafanho/Minecraft-Transit-Railway/blob/f11faa38a0df5a7cff9907c1d64f9c58f1f1f83c/src/main/java/mtr/config/DynamicTrainModel.java#L23
-		jsonpath_selectormut!("$.meta"),
-		jsonpath_selectormut!("$.name"),
-		jsonpath_selectormut!("$.geometry_name"),
-		jsonpath_selectormut!("$.modded_entity_version"),
-		jsonpath_selectormut!("$.ambientocclusion"),
-		jsonpath_selectormut!("$.front_gui_light"),
-		jsonpath_selectormut!("$.visible_box"),
-		jsonpath_selectormut!("$.variable_placeholders"),
-		jsonpath_selectormut!("$.overrides"),
-		jsonpath_selectormut!("$.flag"),
-		jsonpath_selectormut!("$.textures"),
-		jsonpath_selectormut!("$.animations"),
-		jsonpath_selectormut!("$['animation_variable_placeholders']"),
-		jsonpath_selectormut!("$.display"),
-		jsonpath_selectormut!("$.backgrounds"),
-		jsonpath_selectormut!("$.history"),
-		jsonpath_selectormut!("$.history_index"),
-		jsonpath_selectormut!("$.fabricOptions"),
-		jsonpath_selectormut!("$.elements[*].autouv"),
-		jsonpath_selectormut!("$.elements[*].color"),
-		jsonpath_selectormut!("$.elements[*].visibility"),
-		jsonpath_selectormut!("$.elements[*].export"),
-		jsonpath_selectormut!("$.elements[*].faces"),
-		jsonpath_selectormut!("$.outliner[*]..origin"),
-		jsonpath_selectormut!("$.outliner[*]..color"),
-		jsonpath_selectormut!("$.outliner[*]..uuid"),
-		jsonpath_selectormut!("$.outliner[*]..export"),
-		jsonpath_selectormut!("$.outliner[*]..isOpen"),
-		jsonpath_selectormut!("$.outliner[*]..locked"),
-		jsonpath_selectormut!("$.outliner[*]..visibility"),
-		jsonpath_selectormut!("$.outliner[*]..autouv"),
-		jsonpath_selectormut!("$.outliner[*]..shade"),
-		jsonpath_selectormut!("$.outliner[*]..rotation"),
-		jsonpath_selectormut!("$.outliner[*]..reset"),
+		vec
+		"$.meta",
+		"$.name",
+		"$.geometry_name",
+		"$.modded_entity_version",
+		"$.ambientocclusion",
+		"$.front_gui_light",
+		"$.visible_box",
+		"$.variable_placeholders",
+		"$.overrides",
+		"$.flag",
+		"$.textures",
+		"$.animations",
+		"$['animation_variable_placeholders']",
+		"$.display",
+		"$.backgrounds",
+		"$.history",
+		"$.history_index",
+		"$.fabricOptions",
+		"$.elements[*].autouv",
+		"$.elements[*].color",
+		"$.elements[*].visibility",
+		"$.elements[*].export",
+		"$.elements[*].faces",
+		"$.outliner[*]..origin",
+		"$.outliner[*]..color",
+		"$.outliner[*]..uuid",
+		"$.outliner[*]..export",
+		"$.outliner[*]..isOpen",
+		"$.outliner[*]..locked",
+		"$.outliner[*]..visibility",
+		"$.outliner[*]..autouv",
+		"$.outliner[*]..shade",
+		"$.outliner[*]..rotation",
+		"$.outliner[*]..reset"
 	])
 }
