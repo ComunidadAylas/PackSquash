@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649155571950,
+  "lastUpdate": 1649158915807,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "332a783dbc9dec5e5efd5019075f111c55914906",
-          "message": "chore(deps): bump sysinfo from 0.23.1 to 0.23.2 (#63)\n\nBumps [sysinfo](https://github.com/GuillaumeGomez/sysinfo) from 0.23.1 to 0.23.2.\r\n- [Release notes](https://github.com/GuillaumeGomez/sysinfo/releases)\r\n- [Changelog](https://github.com/GuillaumeGomez/sysinfo/blob/master/CHANGELOG.md)\r\n- [Commits](https://github.com/GuillaumeGomez/sysinfo/commits)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: sysinfo\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-02-14T17:38:58+01:00",
-          "tree_id": "f8f43592e600b199bc832195a6dbc757ec949c0c",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/332a783dbc9dec5e5efd5019075f111c55914906"
-        },
-        "date": 1644858833532,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 17493544,
-            "range": "± 788068",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1117860367,
-            "range": "± 15252740",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12711924531,
-            "range": "± 296876834",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1630371439,
-            "range": "± 30071851",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2391,6 +2343,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2607070929,
             "range": "± 26631074",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "08c4c5977f9865e8108f00cafd141ad8ed4dd264",
+          "message": "fix(optifine/cit): do not skip CIT tex. metadata. Debloat item models\n\nSome OptiFine features, namely \"custom items\" (CIT) and \"connected\ntextures\" (CTM), support the vanilla way of putting a .mcmeta file\nalongside a texture to make it animated. v0.3.0 processed these files,\nbut when moving to using asset masks we stopped doing so incorrectly,\ndue to an oversight.\n\nThe custom items feature can also read vanilla item models from\nOptiFine-specific directories in a resource pack. These were processed\nby PackSquash anyway, but by falling back to the generic JSON asset\ntype, which disabled any debloating done to vanilla models.\n\nDoing integration tests with real packs in preparation for the v0.3.1\nrelease showed these problems, so let's fix them.",
+          "timestamp": "2022-04-05T13:16:17+02:00",
+          "tree_id": "1b7f0f3572fa7fdf356fc5f0b74c4c31ebb6d667",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/08c4c5977f9865e8108f00cafd141ad8ed4dd264"
+        },
+        "date": 1649158915237,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 16453096,
+            "range": "± 805748",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 832358635,
+            "range": "± 12400689",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13394875220,
+            "range": "± 155266412",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 3072548704,
+            "range": "± 55594810",
             "unit": "ns/iter"
           }
         ]
