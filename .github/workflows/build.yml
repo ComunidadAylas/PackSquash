@@ -2,6 +2,24 @@ name: Build
 
 on:
   push:
+    paths:
+      # Source code and assets, build and test scripts
+      - packages/**
+      - appimage/**
+      - common/**
+      - scripts/build_*
+      - scripts/test-packs/**
+      # Rust toolchain configuration file
+      - rust-toolchain
+      - rustfmt.toml
+      - deny.toml
+      - Cargo.toml
+      - Cargo.lock
+      - '**/.cargo/config.toml'
+      # Git files that may affect how test files are checked in
+      - .gitattributes
+      # GitHub Actions workflows
+      - .github/workflows/*.yml
   pull_request:
     types:
       - opened
