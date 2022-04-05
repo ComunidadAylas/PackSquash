@@ -39,7 +39,7 @@ imagequant = { version = "4.0.0", default-features = false }
 oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
 
 gstreamer = { version = "0.18.7", default-features = false, optional = true }
-gstreamer-app = { version = "0.18.0", default-features = false, features = ["v1_10"], optional = true }
+gstreamer-app = { version = "0.18.7", default-features = false, features = ["v1_10"], optional = true }
 gstreamer-audio = { version = "0.18.7", default-features = false, optional = true }
 
 glsl = "6.0.1"
