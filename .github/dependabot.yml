@@ -1,12 +1,23 @@
 version: 2
 updates:
-- package-ecosystem: cargo
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "04:00"
-  open-pull-requests-limit: 3
-  reviewers:
-  - ComunidadAylas/packsquash-developers
-  labels:
-  - dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+    reviewers:
+      - ComunidadAylas/packsquash-developers
+    labels:
+      - dependencies
+      
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      # Weekly frequency to avoid developer burnout and
+      # releases yanked slightly after release. It's not
+      # uncommon to get several PRs a day
+      interval: weekly
+    open-pull-requests-limit: 5
+    reviewers:
+      - ComunidadAylas/packsquash-developers
+    labels:
+      - dependencies
