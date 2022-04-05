@@ -30,7 +30,8 @@ use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor, PackFileProcess
 /// represent assets of several types. An asset type adds constraints on the data format
 /// of a [`PackFile`], or otherwise has characteristics that are relevant for optimization.
 // When adding or removing variants from this enumeration, make sure to update the PackFileAssetTypeMatches
-// and tweak_asset_types_mask_from_global_options implementations too
+// and tweak_asset_types_mask_from_global_options implementations too. Also check out file-type
+// specific code that may do different things depending on the asset type
 #[derive(Debug, EnumSetType)]
 #[repr(usize)]
 pub enum PackFileAssetType {
@@ -60,6 +61,25 @@ pub enum PackFileAssetType {
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
 	OptifineCustomEntityModelPartWithComments,
+	/// A vanilla item model file used by the OptiFine custom items feature, with `.json`
+	/// extension.
+	#[cfg(feature = "optifine-support")]
+	#[doc(cfg(feature = "optifine-support"))]
+	OptifineVanillaItemModel,
+	/// A vanilla item model file used by the OptiFine custom items feature, maybe with
+	/// comments and `.jsonc` extension.
+	#[cfg(feature = "optifine-support")]
+	#[doc(cfg(feature = "optifine-support"))]
+	OptifineVanillaItemModelWithComments,
+	/// An OptiFine texture metadata asset, in the same format as vanilla texture metadata
+	/// files, with `.mcmeta` extension.
+	#[cfg(feature = "optifine-support")]
+	#[doc(cfg(feature = "optifine-support"))]
+	OptifineVanillaTextureMetadata,
+	/// An OptiFine texture metadata asset, maybe with comments and the `.mcmetac` extension.
+	#[cfg(feature = "optifine-support")]
+	#[doc(cfg(feature = "optifine-support"))]
+	OptifineVanillaTextureMetadataWithComments,
 	/// A Blockbench modded entity model project which contains custom train models for the
 	/// Minecraft Transit Railway 3 mod, with `.bbmodel` extension.
 	#[cfg(feature = "mtr3-support")]
@@ -195,6 +215,32 @@ impl PackFileAssetType {
 			#[cfg(feature = "optifine-support")]
 			Self::OptifineCustomEntityModelPartWithComments => compile_hardcoded_pack_file_glob_pattern(
 				"assets/minecraft/{mcpatcher,optifine}/cem/?*.jpmc"
+			),
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineVanillaItemModel => {
+				// These models may be put in vanilla paths, or within the cit subdirectory
+				// of the OptiFine folder: the documentation states that relative paths from
+				// the corresponding properties file are accepted
+				compile_hardcoded_pack_file_glob_pattern(
+					"assets/*/{mcpatcher,optifine}/cit/**/?*.json"
+				)
+			}
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineVanillaItemModelWithComments => compile_hardcoded_pack_file_glob_pattern(
+				"assets/*/{mcpatcher,optifine}/cit/**/?*.jsonc"
+			),
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineVanillaTextureMetadata => {
+				// Textures matched by the OptifineTexture asset type may have animation data
+				// alongside them in vanilla format (the custom item and connected textures
+				// features expressly document support for this)
+				compile_hardcoded_pack_file_glob_pattern(
+					"assets/*/{mcpatcher,optifine}/**/?*.png.mcmeta"
+				)
+			}
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineVanillaTextureMetadataWithComments => compile_hardcoded_pack_file_glob_pattern(
+				"assets/*/{mcpatcher,optifine}/**/?*.png.mcmetac"
 			),
 			#[cfg(feature = "mtr3-support")]
 			Self::Mtr3CustomTrainModel => {
@@ -394,6 +440,14 @@ impl PackFileAssetType {
 			Self::OptifineCustomEntityModelPart => None,
 			#[cfg(feature = "optifine-support")]
 			Self::OptifineCustomEntityModelPartWithComments => Some("jpm"),
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineVanillaItemModel => None,
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineVanillaItemModelWithComments => Some("json"),
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineVanillaTextureMetadata => None,
+			#[cfg(feature = "optifine-support")]
+			Self::OptifineVanillaTextureMetadataWithComments => Some("mcmeta"),
 			#[cfg(feature = "mtr3-support")]
 			Self::Mtr3CustomTrainModel => None,
 			#[cfg(feature = "mtr3-support")]
@@ -485,7 +539,7 @@ impl PackFileAssetTypeMatches {
 		}
 	}
 
-	/// Checks whether there are no matches in this set, so that the `process_data` would always
+	/// Checks whether there are no matches in this set, so that `process_data` would always
 	/// return `None`.
 	pub fn is_empty(&self) -> bool {
 		self.matches.is_empty()
@@ -540,6 +594,18 @@ impl PackFileAssetTypeMatches {
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				#[cfg(feature = "optifine-support")]
 				PackFileAssetType::OptifineCustomEntityModelPartWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				#[cfg(feature = "optifine-support")]
+				PackFileAssetType::OptifineVanillaItemModel if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				#[cfg(feature = "optifine-support")]
+				PackFileAssetType::OptifineVanillaItemModelWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				#[cfg(feature = "optifine-support")]
+				PackFileAssetType::OptifineVanillaTextureMetadata if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				#[cfg(feature = "optifine-support")]
+				PackFileAssetType::OptifineVanillaTextureMetadataWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				#[cfg(feature = "mtr3-support")]
 				PackFileAssetType::Mtr3CustomTrainModel if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
@@ -628,6 +694,10 @@ pub fn tweak_asset_types_mask_from_global_options(
 			| PackFileAssetType::OptifineCustomEntityModelWithComments
 			| PackFileAssetType::OptifineCustomEntityModelPart
 			| PackFileAssetType::OptifineCustomEntityModelPartWithComments
+			| PackFileAssetType::OptifineVanillaItemModel
+			| PackFileAssetType::OptifineVanillaItemModelWithComments
+			| PackFileAssetType::OptifineVanillaTextureMetadata
+			| PackFileAssetType::OptifineVanillaTextureMetadataWithComments
 			| PackFileAssetType::OptifineTexture
 			| PackFileAssetType::GenericProperties;
 	}

@@ -188,7 +188,9 @@ const fn asset_type_has_comments_extension(asset_type: PackFileAssetType) -> boo
 		| PackFileAssetType::GenericJsonWithComments => true,
 		#[cfg(feature = "optifine-support")]
 		PackFileAssetType::OptifineCustomEntityModelWithComments
-		| PackFileAssetType::OptifineCustomEntityModelPartWithComments => true,
+		| PackFileAssetType::OptifineCustomEntityModelPartWithComments
+		| PackFileAssetType::OptifineVanillaItemModelWithComments
+		| PackFileAssetType::OptifineVanillaTextureMetadataWithComments => true,
 		#[cfg(feature = "mtr3-support")]
 		PackFileAssetType::Mtr3CustomTrainModelWithComments => true,
 		_ => false

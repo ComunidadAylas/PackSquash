@@ -74,6 +74,13 @@ impl Debloater {
 					compile_minecraft_model_bloat_selectors
 				)
 			}
+			#[cfg(feature = "optifine-support")]
+			PackFileAssetType::OptifineVanillaItemModel
+			| PackFileAssetType::OptifineVanillaItemModelWithComments => debloat_value(
+				parsed_json,
+				&self.minecraft_model_bloat_selectors,
+				compile_minecraft_model_bloat_selectors
+			),
 			#[cfg(feature = "mtr3-support")]
 			PackFileAssetType::Mtr3CustomTrainModel
 			| PackFileAssetType::Mtr3CustomTrainModelWithComments => debloat_value(
