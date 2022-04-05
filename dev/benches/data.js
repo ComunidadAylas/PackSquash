@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649149097457,
+  "lastUpdate": 1649149126229,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "02ae4afb5366449a1a85db6a18f1fec1a46815d0",
-          "message": "chore(deps): bump crc32fast from 1.3.1 to 1.3.2 (#58)\n\nBumps [crc32fast](https://github.com/srijs/rust-crc32fast) from 1.3.1 to 1.3.2.\r\n- [Release notes](https://github.com/srijs/rust-crc32fast/releases)\r\n- [Commits](https://github.com/srijs/rust-crc32fast/compare/v1.3.1...v1.3.2)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: crc32fast\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-02-09T11:27:57+01:00",
-          "tree_id": "6dca40753a1e1ea1712d6fb2959a2ab8ee2a684f",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/02ae4afb5366449a1a85db6a18f1fec1a46815d0"
-        },
-        "date": 1644404600811,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 18278130,
-            "range": "± 700771",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1199260991,
-            "range": "± 17097962",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13790976869,
-            "range": "± 224541500",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1724868957,
-            "range": "± 26218028",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2646075086,
             "range": "± 152045767",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "05cc7fa87ef7e027e608cc2b2c0922263c5cec1b",
+          "message": "chore(deps): bump gstreamer-audio from 0.18.5 to 0.18.7 (#87)\n\nBumps gstreamer-audio from 0.18.5 to 0.18.7.\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: gstreamer-audio\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-04-05T10:24:08+02:00",
+          "tree_id": "25538a64da1ea801ce1793e1d453d24de24d1099",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/05cc7fa87ef7e027e608cc2b2c0922263c5cec1b"
+        },
+        "date": 1649149125640,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14735281,
+            "range": "± 257279",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 756672008,
+            "range": "± 2781411",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11733975928,
+            "range": "± 66970484",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2801626410,
+            "range": "± 13278618",
             "unit": "ns/iter"
           }
         ]
