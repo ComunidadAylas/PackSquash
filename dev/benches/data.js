@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649283935089,
+  "lastUpdate": 1649283989369,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "1cce7d4bc8f06d5f9c1fa79442ea621c799a1b03",
-          "message": "chore(deps): bump gstreamer-audio from 0.18.0 to 0.18.5 (#65)\n\nBumps gstreamer-audio from 0.18.0 to 0.18.5.\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: gstreamer-audio\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-02-21T10:21:06+01:00",
-          "tree_id": "fbc2f2939c21e74b078eabd891464fec1ff64a2b",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/1cce7d4bc8f06d5f9c1fa79442ea621c799a1b03"
-        },
-        "date": 1645437380825,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 16444873,
-            "range": "± 816973",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1096745222,
-            "range": "± 16555300",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12498049359,
-            "range": "± 123525113",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1629469986,
-            "range": "± 20659193",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2393,6 +2345,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 3232188309,
             "range": "± 106471955",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "id": "128ab820890c5bfd27574be2b9496c2713561113",
+          "message": "chore(deps): update for the last time before v0.3.1 🎉",
+          "timestamp": "2022-04-06T21:24:05Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/128ab820890c5bfd27574be2b9496c2713561113"
+        },
+        "date": 1649283988783,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 15555003,
+            "range": "± 865073",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 893438622,
+            "range": "± 9840584",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14296120281,
+            "range": "± 112919205",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 3291863808,
+            "range": "± 131277729",
             "unit": "ns/iter"
           }
         ]
