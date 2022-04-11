@@ -169,25 +169,25 @@ jobs:
           recipe: appimage/recipe.yml
 
       - name: Upload CLI binary
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash executable (Linux, x64, glibc)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
       - name: Upload CLI Debian package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash CLI Debian package (amd64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
       - name: Upload CLI AppImage
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash CLI AppImage (x64)'
           path: PackSquash-*-x86_64.AppImage
 
       - name: Upload CLI AppImage update diff
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash CLI AppImage zsync (x64)'
           path: PackSquash-*-x86_64.AppImage.zsync
@@ -252,7 +252,7 @@ jobs:
         run: target/set_executable_resource_data.ps1
 
       - name: Upload binary
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash CLI executable (Windows, x64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe
@@ -312,7 +312,7 @@ jobs:
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: Upload CLI binary
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash CLI executable (macOS, x64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
@@ -394,25 +394,25 @@ jobs:
           recipe: appimage/recipe.yml
 
       - name: Upload CLI binary
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash executable (Linux, AArch64-ARM64, glibc)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
 
       - name: Upload CLI Debian package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash CLI Debian package (arm64)'
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
       - name: Upload CLI AppImage
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash CLI AppImage (arm64)'
           path: PackSquash-*-aarch64.AppImage
 
       - name: Upload CLI AppImage update diff
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: 'PackSquash CLI AppImage zsync (arm64)'
           path: PackSquash-*-aarch64.AppImage.zsync
