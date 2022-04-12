@@ -533,18 +533,18 @@ fn visually_lossless_optimize(
 			}
 		},
 		filter: {
-			const OPTIMIZATION_FILTERS: [u8; 3] = [
+			const PIXEL_DATA_FILTERS: [u8; 3] = [
 				0, // No filter (surprisingly good)
 				4, // Paeth
 				5  // Per-scanline filter chosen with MAD heuristic
 			];
 
-			let mut optimization_filters = IndexSet::with_capacity(OPTIMIZATION_FILTERS.len());
-			for filter in OPTIMIZATION_FILTERS {
-				optimization_filters.insert(filter);
+			let mut pixel_data_filters = IndexSet::with_capacity(PIXEL_DATA_FILTERS.len());
+			for filter in PIXEL_DATA_FILTERS {
+				pixel_data_filters.insert(filter);
 			}
 
-			optimization_filters
+			pixel_data_filters
 		},
 		fix_errors: true, // Ignore CRC for speed. We assume a reliable data source
 		force: false,     // Give up with the second pass result if we can't reduce size further
