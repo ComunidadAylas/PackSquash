@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649666352183,
+  "lastUpdate": 1649796823421,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "e1487d545322b5d10b44027eb604d38299991520",
-          "message": "chore: update dependencies. Remove duplicate miniz_oxide versions\n\nThese changes should improve executable size and build time, as\nminiz_oxide is one of the slowest crates to compile, and compiling two\nseparate versions of it does not help.",
-          "timestamp": "2022-02-26T14:20:56+01:00",
-          "tree_id": "857911c383c44c71e5e537959b2d213bf60d3d02",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e1487d545322b5d10b44027eb604d38299991520"
-        },
-        "date": 1645883876594,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13685624,
-            "range": "± 1044317",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 919454868,
-            "range": "± 16238789",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 9984597370,
-            "range": "± 88447784",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1337482888,
-            "range": "± 9217972",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2683923517,
             "range": "± 40949778",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "bafe0a9c3e1eb4706fb82a98aedd650c4eacd792",
+          "message": "tweak(png_file): improve error message for PNG files with trailing bytes\n\nThe PNG validation and chunk stripping code we introduced for v0.3.1 had\nthe technically nice side effect of being stricter with trailing bytes\nat the end of files, as previously the decoders we used just ignored\nthem, even if the PNG standard explicitly says that such PNG files are\nnon-conforming. I expected such an error condition to be very rare, so I\ndidn't add a specific error message for it.\n\nHowever, @sya-ri stumbled upon a PNG file that had trailing bytes, and\nwas puzzled about it, with reason, as the error message pointed out that\nthe PNG file is \"too small\". To address that situation, update the wiki\nand tweak the error message for future releases.",
+          "timestamp": "2022-04-12T22:13:52+02:00",
+          "tree_id": "ab388b26bc4d3d3f75cfc7a7684ce390278290f8",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/bafe0a9c3e1eb4706fb82a98aedd650c4eacd792"
+        },
+        "date": 1649796822592,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14491745,
+            "range": "± 984818",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 760119122,
+            "range": "± 21361903",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12946192574,
+            "range": "± 214389182",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2646146379,
+            "range": "± 64109448",
             "unit": "ns/iter"
           }
         ]
