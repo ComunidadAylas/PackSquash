@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649956724997,
+  "lastUpdate": 1649968726695,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "9257c123b2d5390fb49a12681385edd58c398e3c",
-          "message": "chore: replace repeated BOM constant with reference to static variable",
-          "timestamp": "2022-02-27T18:11:16+01:00",
-          "tree_id": "023e87c87965a0f06f947b4278ceaf6ef2068064",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9257c123b2d5390fb49a12681385edd58c398e3c"
-        },
-        "date": 1645983814274,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 15835897,
-            "range": "± 947320",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1089618777,
-            "range": "± 20123064",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11633735583,
-            "range": "± 121427809",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1546873835,
-            "range": "± 19456343",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2468342873,
             "range": "± 135362701",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "349eaf031897ad327060eb840f308f16d801bcb5",
+          "message": "ci(linux): ditch build-appimage action, use appimage-builder directly\n\nThe action was terribly obsolete, to begin with. We updated it to a more\nrecent version, and it worked, but then we wanted to get rid of some\nbenign GStreamer warnings, and for this the latest appimage-builder\nversion needs to run gst-launch-1.0 during build time. So we tried to\nput the package that contains that command in the Docker image too, but\nthen no plugins could be loaded in that environment for some reason.\nUsing appimage-builder locally, with gst-launch-1.0, worked fine, at\nleast in a non cross-compilation situation.\n\nWe maybe could spend 3 days debugging this and waiting for the Docker\nimages to upload at a terribly slow speed that reminds me of the dial-up\ndays, but by the looks of it, not much people cares about the Docker\ncontainer anyway, so it's fate is to become obsolete again. Let's\nsidestep all of that by not using the action.",
+          "timestamp": "2022-04-14T21:55:24+02:00",
+          "tree_id": "deaca031e4c84965051b9b88e8237b1d3a2afed7",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/349eaf031897ad327060eb840f308f16d801bcb5"
+        },
+        "date": 1649968726154,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 17250590,
+            "range": "± 691395",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 821778515,
+            "range": "± 18371560",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 15129503870,
+            "range": "± 284792458",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2893544360,
+            "range": "± 76262096",
             "unit": "ns/iter"
           }
         ]
