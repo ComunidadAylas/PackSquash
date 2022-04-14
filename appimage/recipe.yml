@@ -87,10 +87,10 @@ AppDir:
   test:
     # Test on distros representative of the most common families.
     # TODO use a more thorough test command that exercises GStreamer
-    bullseye:
+    debian-stretch:
       image: debian:stretch-slim
       command: ./AppRun --version
-    focal:
+    ubuntu-bionic:
       image: ubuntu:bionic
       command: ./AppRun --version
     fedora:
