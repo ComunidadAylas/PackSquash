@@ -36,6 +36,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   CARGO_DEB_VERSION: 1.34.0
+  APPIMAGE_BUILDER_VERSION: 1.0.0a3
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
   APPDIR: AppDir
   REPO_DIR: /pkgs
@@ -116,11 +117,17 @@ jobs:
       - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
         run: |
           apt-get update
-          # curl is required by rustup
+          # curl is required by rustup.
+          # markdown and html2text are required to generate the Debian package only.
+          # The last two lines contains packages necessary for appimage-builder only.
+          # gstreamer1.0-plugins-base-apps is used by appimage-builder to embed a GStreamer registry in
+          # the AppImage, speeding up its execution and avoiding some unactionable, ugly plugin warnings
           apt-get install -yq build-essential git curl \
                               gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
                               libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
-                              markdown html2text
+                              markdown html2text \
+                              python3-pip patchelf file zsync desktop-file-utils fakeroot gtk-update-icon-cache \
+                              gstreamer1.0-plugins-base-apps
 
       - name: Checkout source
         uses: actions/checkout@v3
@@ -142,6 +149,19 @@ jobs:
           crate: cargo-deb
           version: ${{ env.CARGO_DEB_VERSION }}
 
+      - name: Install appimage-builder
+        run: |
+          pip install appimage-builder==${{ env.APPIMAGE_BUILDER_VERSION }}
+          curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
+          chmod ugo+x /opt/appimagetool
+          # Workaround from https://github.com/AppImageCrafters/appimage-builder/blob/v1.0.0-alpha.3/Dockerfile#L11-L15
+          # to extract the appimagetool AppImage within a container
+          cd /opt
+          sed -i 's|AI\x02|\x00\x00\x00|' appimagetool
+          /opt/appimagetool --appimage-extract > /dev/null
+          mv /opt/squashfs-root /opt/appimagetool.AppDir
+          ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
+
       - name: Run tests
         uses: actions-rs/cargo@v1
         with:
@@ -157,16 +177,12 @@ jobs:
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
-      - name: Set VERSION environment variable for AppImage
-        run: echo "VERSION=$(git describe --tags --dirty=-custom)" >> $GITHUB_ENV
-
       - name: Generate CLI AppImage
-        uses: ComunidadAylas/build-appimage@packsquash
         env:
           TARGET_APPIMAGE_ARCH: x86_64
           TARGET_APPIMAGE_APT_ARCH: amd64
-        with:
-          recipe: appimage/recipe.yml
+        run: VERSION="$(git describe --tags --dirty=-custom)"
+          appimage-builder --recipe appimage/recipe.yml --skip-test
 
       - name: Upload CLI binary
         uses: actions/upload-artifact@v3
@@ -294,9 +310,9 @@ jobs:
 
       - name: Install GStreamer libraries and GStreamer development packages
         run: |
-          curl -o /tmp/gstreamer.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-1.20.1-universal.pkg
+          curl https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-1.20.1-universal.pkg -o /tmp/gstreamer.pkg
           sudo installer -pkg /tmp/gstreamer.pkg -target /
-          curl -o /tmp/gstreamer-devel.pkg https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg
+          curl https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg -o /tmp/gstreamer-devel.pkg
           sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
 
       - name: Run tests
@@ -338,11 +354,17 @@ jobs:
         run: |
           dpkg --add-architecture arm64
           apt-get update
-          # lizlzma-dev is required by cargo-deb. curl is required by rustup
-          apt-get install -yq build-essential git liblzma-dev curl \
+          # curl is required by rustup.
+          # markdown and html2text are required to generate the Debian package only.
+          # The last two lines contains packages necessary for appimage-builder only.
+          # gstreamer1.0-plugins-base-apps is used by appimage-builder to embed a GStreamer registry in
+          # the AppImage, speeding up its execution and avoiding some unactionable, ugly plugin warnings
+          apt-get install -yq build-essential git curl \
                               gcc-aarch64-linux-gnu libgstreamer-plugins-base1.0-dev:arm64 \
                               qemu-user gstreamer1.0-plugins-good:arm64 gstreamer1.0-plugins-bad:arm64 \
-                              markdown html2text
+                              markdown html2text \
+                              python3-pip patchelf file zsync desktop-file-utils fakeroot gtk-update-icon-cache \
+                              gstreamer1.0-plugins-base-apps:arm64
 
       - name: Checkout source
         uses: actions/checkout@v3
@@ -367,6 +389,19 @@ jobs:
           crate: cargo-deb
           version: ${{ env.CARGO_DEB_VERSION }}
 
+      - name: Install appimage-builder
+        run: |
+          pip install appimage-builder==${{ env.APPIMAGE_BUILDER_VERSION }}
+          curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
+          chmod ugo+x /opt/appimagetool
+          # Workaround from https://github.com/AppImageCrafters/appimage-builder/blob/v1.0.0-alpha.3/Dockerfile#L11-L15
+          # to extract the appimagetool AppImage within a container
+          cd /opt
+          sed -i 's|AI\x02|\x00\x00\x00|' appimagetool
+          /opt/appimagetool --appimage-extract > /dev/null
+          mv /opt/squashfs-root /opt/appimagetool.AppDir
+          ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
+
       - name: Run tests
         uses: actions-rs/cargo@v1
         with:
@@ -382,16 +417,27 @@ jobs:
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
 
-      - name: Set VERSION environment variable for AppImage
-        run: echo "VERSION=$(git describe --tags --dirty=-custom)" >> $GITHUB_ENV
+      # This is necessary because we're cross-compiling and appimage-builder isn't
+      # smart enough to run binaries for the target platform with QEMU
+      - name: Create appimage-builder QEMU wrapper scripts
+        run: |
+          mkdir -p /run/appimage-builder-qemu-wrappers
+          cat <<-'GST_LAUNCH_WRAPPER' > /run/appimage-builder-qemu-wrappers/gst-launch-1.0
+          #!/bin/sh
+          echo '> Using custom gst-launch-1.0 QEMU wrapper script'
+          qemu-aarch64 /usr/bin/gst-launch-1.0 "$@"
+          GST_LAUNCH_WRAPPER
+          chmod +x /run/appimage-builder-qemu-wrappers/gst-launch-1.0
 
+      # Setting PATH is a hack to make our gst-launch-1.0 wrapper script be used. See:
+      # https://github.com/AppImageCrafters/appimage-builder/blob/v1.0.0-alpha.3/appimagebuilder/modules/setup/helpers/gstreamer.py#L56
       - name: Generate CLI AppImage
-        uses: ComunidadAylas/build-appimage@packsquash
         env:
           TARGET_APPIMAGE_ARCH: aarch64
           TARGET_APPIMAGE_APT_ARCH: arm64
-        with:
-          recipe: appimage/recipe.yml
+        run: PATH="/run/appimage-builder-qemu-wrappers:$PATH"
+          VERSION="$(git describe --tags --dirty=-custom)"
+          appimage-builder --recipe appimage/recipe.yml --skip-test
 
       - name: Upload CLI binary
         uses: actions/upload-artifact@v3
