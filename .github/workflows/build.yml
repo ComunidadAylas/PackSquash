@@ -161,7 +161,7 @@ jobs:
         run: echo "VERSION=$(git describe --tags --dirty=-custom)" >> $GITHUB_ENV
 
       - name: Generate CLI AppImage
-        uses: ComunidadAylas/build-appimage@master
+        uses: ComunidadAylas/build-appimage@packsquash
         env:
           TARGET_APPIMAGE_ARCH: x86_64
           TARGET_APPIMAGE_APT_ARCH: amd64
@@ -386,7 +386,7 @@ jobs:
         run: echo "VERSION=$(git describe --tags --dirty=-custom)" >> $GITHUB_ENV
 
       - name: Generate CLI AppImage
-        uses: ComunidadAylas/build-appimage@master
+        uses: ComunidadAylas/build-appimage@packsquash
         env:
           TARGET_APPIMAGE_ARCH: aarch64
           TARGET_APPIMAGE_APT_ARCH: arm64

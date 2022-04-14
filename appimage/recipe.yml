@@ -102,12 +102,24 @@ AppDir:
     suse:
       image: opensuse/leap:15
       command: ./AppRun --version
-    alpine:
-      # The upstream alpine:3 would work if it had the shadow package,
-      # because the test preparation commands run useradd. Therefore,
-      # use a custom image that's like alpine:3 but with that package
-      image: comunidadaylas/alpine-appimage-test:latest
-      command: ./AppRun --version
+    # This test is commented out because we need a R/W Docker volume to copy some
+    # glibc files around, but it is R/O. Upstream issue:
+    # https://github.com/AppImageCrafters/appimage-builder/issues/214
+    #alpine:
+    #  # The upstream alpine:3 would work if it had the shadow package,
+    #  # because the test preparation commands run useradd. Therefore,
+    #  # use a custom image that's like alpine:3 but with that package
+    #  image: comunidadaylas/alpine-appimage-test:latest
+    #  # Recent appimage-builder versions, from v1.0.0-alpha.1 onwards,
+    #  # put the glibc interpreter and its files on runtime/compat. This
+    #  # is selected at runtime if the system glibc version is too old
+    #  # by the AppRun executable. However, we can't execute the AppRun
+    #  # at all on Alpine, so just copy the contents of runtime/compat
+    #  # of the AppImage to the root, so embedded AppRun can run as
+    #  # usual. More information:
+    #  # https://github.com/AppImageCrafters/appimage-builder/commit/a44066ce4783dfb8093727c48b0a3a6b74fcc6d8
+    #  # https://github.com/AppImageCrafters/AppRun/blob/master/docs/USAGE.md#runtimes-and-libc-deployment
+    #  command: sh -c 'cp -R runtime/compat/* . && ./AppRun --version'
 
 AppImage:
   arch: !ENV ${TARGET_APPIMAGE_ARCH}

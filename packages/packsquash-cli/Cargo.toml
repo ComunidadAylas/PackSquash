@@ -3,7 +3,7 @@ cargo-features = ["different-binary-name"]
 [package]
 name = "packsquash-cli"
 description = "Minecraft resource and data pack optimizer (CLI)"
-version = "0.4.0"
+version = "0.3.1"
 authors = ["Alejandro \"AlexTMjugador\" González"]
 repository = "https://github.com/ComunidadAylas/PackSquash"
 license = "AGPL-3.0-or-later"
@@ -12,7 +12,7 @@ publish = false
 edition = "2021"
 
 [dependencies]
-packsquash = { path = "../packsquash", version = "0.4.0" }
+packsquash = { path = "../packsquash", version = "0.3.1" }
 
 getopts = "0.2.21"
 toml = "0.5.8"
@@ -56,7 +56,7 @@ assets = [
 section = "utils"
 # For each release with the same version number (shouldn't be too many),
 # increment this, and change APT repo action
-revision = "0"
+revision = "1"
 depends = """
 $auto, \
 gstreamer1.0-plugins-bad (>= 1.16.2), gstreamer1.0-plugins-base (>= 1.16.2), gstreamer1.0-plugins-good (>= 1.16.2)"""

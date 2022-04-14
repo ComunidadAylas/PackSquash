@@ -32,7 +32,7 @@ python3 -m venv "$APPIMAGE_WORKDIR/.venv"
 
 echo '> Install appimage-build in temporary Python virtual environment'
 pip3 install -r /proc/self/fd/0 <<'REQUIREMENTS'
-appimage-builder==0.9.2
+appimage-builder==1.0.0a3
 certifi==2021.10.8
 charset-normalizer==2.0.12
 contextlib2==21.6.0
