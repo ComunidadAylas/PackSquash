@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649936569733,
+  "lastUpdate": 1649951604352,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "ee5ec79281dcc70c57d979fe39bbbd71706fc512",
-          "message": "feat(mtr3): support textures in mtr/custom_directory again\n\nWith the introduction of asset types and proper path matching instead of\njust blindly optimizing files by broad type, we started skipping PNG\nfiles that are outside of the vanilla-like assets/<namespace>/textures\nfolder. However, the example MTR3 resource pack, on which widely\ndeployed MTR3 resource packs are based on, decided to put custom\ntextures on a directory that does not conform to the more common\nhierarchy: assets/mtr/custom_directory.\n\nThe mod can deal with textures being placed in either directory, and\nit's my personal opinion that putting them following the vanilla-like\nhierarchy looks more tidy. However, them being in a different hierarchy\nalso allows PackSquash to do more effective filtering of undesired mod\nfiles when the MTR3 mod is not allowed in the options. To avoid breaking\nmost MTR3 packs and take advantage of this likely unintended design\nchoice, let's support MTR3 custom textures inside the custom_directory\nfolder again, but only if the MTR3 mod is allowed in the options.",
-          "timestamp": "2022-02-26T22:26:52+01:00",
-          "tree_id": "07566e7cda715be1ce542141a973f63aaa82285f",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ee5ec79281dcc70c57d979fe39bbbd71706fc512"
-        },
-        "date": 1645912897080,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13031429,
-            "range": "± 1095465",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 912657014,
-            "range": "± 60497579",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 9553760476,
-            "range": "± 543591113",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1367100061,
-            "range": "± 56710933",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2794591778,
             "range": "± 20535365",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "a4e086761288dfdcf8b9cc3ea192441026c98487",
+          "message": "dist: bump back to v0.3.1 for re-release with fixed appimage-builder\n\nAfter releasing v0.3.1 two unexpected and somewhat critical errors were\nreported by users:\n\n- The checks we introduced for trailing PNG bytes were more frequent\n  than anticipated, but the error message shown for them was bad and\n  confusing for users. This warranted improving the error messages at\n  least.\n- The new Linux AppImages were effectively broken due to the usage of a\n  very old appimage-builder version in CI, v0.8.2, while a newer\n  appimage-builder version of v0.9.2 was used for testing by developers\n  in their computers. That older appimage-builder version, pulled by its\n  corresponding workflow action, did not handle GStreamer plugins\n  properly, but support has improved a lot ever since, especially since\n  v1.0.0-alpha.1. The alpha version even contain some nice changes that\n  generate the GStreamer plugin registry at build time, which speeds up\n  execution and avoids some ugly, non-hideable warnings about loading\n  plugins that are not bundled in the AppImage and not necessary.\n\nAs we've addressed these two issues, prepare the repository so that the\nnext workflow run will generate artifacts suitable for re-releasing\nv0.3.1. These release artifacts will silently replace the current v0.3.1\nrelease artifacts. For traceability, PackSquash will show a slightly\ndifferent version when run.",
+          "timestamp": "2022-04-14T15:32:07+02:00",
+          "tree_id": "ec1b474e5ef59fa63ef5c7d8b55162f1cdca9c91",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a4e086761288dfdcf8b9cc3ea192441026c98487"
+        },
+        "date": 1649951603715,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14430411,
+            "range": "± 1073194",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 799067299,
+            "range": "± 20518533",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13410498205,
+            "range": "± 393865335",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2700485986,
+            "range": "± 110030820",
             "unit": "ns/iter"
           }
         ]
