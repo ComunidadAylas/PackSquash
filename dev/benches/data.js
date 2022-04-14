@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649796823421,
+  "lastUpdate": 1649936569733,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "f59497b0d619c02a32e1db45130e94d4f656748d",
-          "message": "chore(deps): update zopfli and OxiPNG forks\n\nUpdating zopfli to v0.5.0 was a bit more involved than desired, but\nI finally had enough motivation to finally do it. This should help\nstreamlining transitive dependencies too.",
-          "timestamp": "2022-02-26T18:45:03+01:00",
-          "tree_id": "1eaf826c208395e0f5742253335eb6d842763f64",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f59497b0d619c02a32e1db45130e94d4f656748d"
-        },
-        "date": 1645899476540,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10993467,
-            "range": "± 682052",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 849915033,
-            "range": "± 5548776",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 9488829658,
-            "range": "± 81868735",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1270733344,
-            "range": "± 15971807",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2646146379,
             "range": "± 64109448",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "5381ceffabd1642e93bb911f21f4d5f80636a114",
+          "message": "ci(appimage): bump appimage-builder version used by the action in fork\n\nThe appimage-builder action was using an ancient appimage-builder\nversion, 0.8.2, which is lacking some important fixes for us. Let's\nupdate it to something much more modern ourselves.",
+          "timestamp": "2022-04-14T13:01:42+02:00",
+          "tree_id": "067d86075a70758ffec6caf7a760d752a8ae8f97",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5381ceffabd1642e93bb911f21f4d5f80636a114"
+        },
+        "date": 1649936568385,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 15422109,
+            "range": "± 800412",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 823070658,
+            "range": "± 9358165",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13880916604,
+            "range": "± 82000403",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2794591778,
+            "range": "± 20535365",
             "unit": "ns/iter"
           }
         ]
