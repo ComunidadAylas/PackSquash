@@ -354,7 +354,7 @@ jobs:
         run: |
           dpkg --add-architecture arm64
           apt-get update
-          # liblzma-dev is required by cergo-deb. curl is required by rustup.
+          # liblzma-dev is required by cargo-deb. curl is required by rustup.
           # markdown and html2text are required to generate the Debian package only.
           # The last two lines contains packages necessary for appimage-builder only.
           # gstreamer1.0-plugins-base-apps is used by appimage-builder to embed a GStreamer registry in
