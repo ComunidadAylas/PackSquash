@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1650825632304,
+  "lastUpdate": 1650850440272,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "2dbe3269b49cc2a1d8f8999119c84ee2afe4afe1",
-          "message": "chore(deps): bump png from 0.17.4 to 0.17.5 (#74)\n\nBumps [png](https://github.com/image-rs/image-png) from 0.17.4 to 0.17.5.\r\n- [Release notes](https://github.com/image-rs/image-png/releases)\r\n- [Changelog](https://github.com/image-rs/image-png/blob/master/CHANGES.md)\r\n- [Commits](https://github.com/image-rs/image-png/compare/v0.17.4...v0.17.5)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: png\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-03-02T10:31:53+01:00",
-          "tree_id": "c8115101e9bb7943fa17b82a5c54c3b9f67ce67f",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2dbe3269b49cc2a1d8f8999119c84ee2afe4afe1"
-        },
-        "date": 1646215486846,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13770162,
-            "range": "± 1184944",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 913019902,
-            "range": "± 40855144",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 9950980292,
-            "range": "± 626074505",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1478396357,
-            "range": "± 16745050",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2391,6 +2343,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2490247733,
             "range": "± 1955195960",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "id": "d2da6012783b270609882060e051e7abb5324e3d",
+          "message": "chore(Cargo.toml): remove Cargo option stabilized in 1.59",
+          "timestamp": "2022-04-24T18:05:39Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d2da6012783b270609882060e051e7abb5324e3d"
+        },
+        "date": 1650850439749,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14499971,
+            "range": "± 206132",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 702454231,
+            "range": "± 5861142",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14014202238,
+            "range": "± 85166632",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2509806831,
+            "range": "± 14860362",
             "unit": "ns/iter"
           }
         ]
