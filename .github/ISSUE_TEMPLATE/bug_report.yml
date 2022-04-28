@@ -1,8 +1,6 @@
 name: Bug report
 description: Create a report to help us improve
-title: ''
 labels: ['bug']
-assignees: []
 body:
   - type: markdown
     attributes:
@@ -26,9 +24,9 @@ body:
         - Linux x64 executable (**deprecated**, please use the AppImage instead)
         - Linux x64 AppImage
         - Linux x64 APT package
-        - Linux ARM64/Aarch64 executable (**deprecated**, please use the AppImage instead)
-        - Linux ARM64/Aarch64 AppImage
-        - Linux ARM64/Aarch64 APT package
+        - Linux ARM64/AArch64 executable (**deprecated**, please use the AppImage instead)
+        - Linux ARM64/AArch64 AppImage
+        - Linux ARM64/AArch64 APT package
         - macOS x64 executable
         - GitHub action
     validations:
@@ -72,4 +70,4 @@ body:
     id: additional-context
     attributes:
       label: Additional context
-      description: Add any other context or information that might be relevant to resolving the problem here.
+      description: Add any other information that might be relevant to resolving the problem here.
