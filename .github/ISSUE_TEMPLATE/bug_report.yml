@@ -9,8 +9,8 @@ body:
 
         Before submitting, please make sure that:
           - The problem is not related to PackSquash not being installed as described in the [installation guide](https://github.com/ComunidadAylas/PackSquash/wiki/Installation-guide).
-          - You can answer any issue-related questions that may be asked in the comments in a reasonable timeframe. Issues with missing information for developers tend to be unactionable, eventually closed, and a waste of time for everyone involved!
           - If you are trying to use a pack in a Minecraft server, the pack works fine in singleplayer. If it works in singleplayer, a network or server misconfiguration may be the cause of the problem.
+          - You can answer any issue-related questions that may be asked in the comments in a reasonable timeframe. Issues with missing information for developers tend to be unactionable, eventually closed, and a waste of time for everyone involved!
 
         After your report is submitted, a repository maintainer will try to resolve it or get back to you as soon as possible.
 
@@ -21,10 +21,10 @@ body:
       description: What flavor of PackSquash are you using?
       options:
         - Windows executable
-        - Linux x64 executable (**deprecated**, please use the AppImage instead)
+        - Linux x64 executable (deprecated, please use the AppImage instead)
         - Linux x64 AppImage
         - Linux x64 APT package
-        - Linux ARM64/AArch64 executable (**deprecated**, please use the AppImage instead)
+        - Linux ARM64/AArch64 executable (deprecated, please use the AppImage instead)
         - Linux ARM64/AArch64 AppImage
         - Linux ARM64/AArch64 APT package
         - macOS x64 executable
