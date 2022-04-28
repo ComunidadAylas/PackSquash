@@ -1,0 +1,75 @@
+name: Bug report
+description: Create a report to help us improve
+title: ''
+labels: ['bug']
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thanks for taking the time to fill out this bug report!
+
+        Before submitting, please make sure that:
+          - The problem is not related to PackSquash not being installed as described in the [installation guide](https://github.com/ComunidadAylas/PackSquash/wiki/Installation-guide).
+          - You can answer any issue-related questions that may be asked in the comments in a reasonable timeframe. Issues with missing information for developers tend to be unactionable, eventually closed, and a waste of time for everyone involved!
+          - If you are trying to use a pack in a Minecraft server, the pack works fine in singleplayer. If it works in singleplayer, a network or server misconfiguration may be the cause of the problem.
+
+        After your report is submitted, a repository maintainer will try to resolve it or get back to you as soon as possible.
+
+  - type: dropdown
+    id: distribution
+    attributes:
+      label: Distribution
+      description: What flavor of PackSquash are you using?
+      options:
+        - Windows executable
+        - Linux x64 executable (**deprecated**, please use the AppImage instead)
+        - Linux x64 AppImage
+        - Linux x64 APT package
+        - Linux ARM64/Aarch64 executable (**deprecated**, please use the AppImage instead)
+        - Linux ARM64/Aarch64 AppImage
+        - Linux ARM64/Aarch64 APT package
+        - macOS x64 executable
+        - GitHub action
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Reproduction steps
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '...'
+        2. Type '....'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: attached-files
+    attributes:
+      label: Attached files
+      description: If applicable, add pack files that help reproduce your problem.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context or information that might be relevant to resolving the problem here.
