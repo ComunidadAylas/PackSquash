@@ -30,6 +30,8 @@ body:
         - Linux ARM64/AArch64 APT package
         - macOS x64 executable
         - GitHub action
+        - Unstable or custom build (please describe in the "Additional context" section)
+        - Other (please describe in the "Additional context" section)
     validations:
       required: true
 
