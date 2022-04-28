@@ -1,0 +1,43 @@
+name: Feature request
+description: Suggest an idea for this project
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thanks for taking the time to fill out this feature request!
+
+        Before submitting, please make sure that the report follows the guidelines for issues described in the [Contributing Guidelines](https://github.com/ComunidadAylas/PackSquash/blob/master/CONTRIBUTING.md#-issues).
+
+        After your report is submitted, a repository maintainer will try to resolve it or get back to you as soon as possible.
+
+  - type: textarea
+    id: related-problem
+    attributes:
+      label: Related problem
+      description: Is your feature request related to a problem? Please describe.
+      placeholder: A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution
+      description: A clear and concise description of what you want to happen to address your problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternative-solutions
+    attributes:
+      label: Alternative solutions
+      description: A clear and concise description of any alternative solutions, workarounds or features you've considered.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other information that might be relevant to making the feature happen here.
