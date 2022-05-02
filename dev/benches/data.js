@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1650878159693,
+  "lastUpdate": 1651455791226,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "040b0fd8433706a9dc6ce9e1b5303cabee127853",
-          "message": "ci(linux/aarch64): attempt building AppImages",
-          "timestamp": "2022-03-07T22:56:27+01:00",
-          "tree_id": "c4bc9881bde625d91e61469e6819a88536818264",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/040b0fd8433706a9dc6ce9e1b5303cabee127853"
-        },
-        "date": 1646691896235,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 16181901,
-            "range": "± 458226",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1098501737,
-            "range": "± 11245163",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12758278490,
-            "range": "± 86071217",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1644062617,
-            "range": "± 82085461",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2724956311,
             "range": "± 71623062",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Alejandro González",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "da0230ff84cf1bfad79bf91c067a66ab6eca5b5d",
+          "message": "ci(issue templates): add link to the Discord server in the template chooser\n\nAlso disable creating empty issues.",
+          "timestamp": "2022-04-28T13:11:45Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/da0230ff84cf1bfad79bf91c067a66ab6eca5b5d"
+        },
+        "date": 1651455790659,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 16353934,
+            "range": "± 1088856",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 911527425,
+            "range": "± 24069030",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 15032638259,
+            "range": "± 387908368",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 3498013631,
+            "range": "± 184932198",
             "unit": "ns/iter"
           }
         ]
