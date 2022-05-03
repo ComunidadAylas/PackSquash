@@ -26,7 +26,7 @@ tokio-util = { version = "0.7.1", default-features = false, features = ["codec",
 tokio-stream = { version = "0.1.8", default-features = false }
 futures = { version = "0.3.21", default-features = false }
 
-serde = { version = "1.0.136", features = ["derive"] }
+serde = { version = "1.0.137", features = ["derive"] }
 
 serde_json = "1.0.80"
 json_comments = "0.2.1"
