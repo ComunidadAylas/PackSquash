@@ -14,7 +14,7 @@ bytes = "1.1.0"
 globset = "0.4.8"
 enumset = { version = "1.0.11", features = ["serde"] }
 indexmap = { version = "1.8.1", default-features = false, features = ["serde-1"] }
-thiserror = "1.0.30"
+thiserror = "1.0.31"
 ahash = "0.7.6"
 
 num_cpus = "1.13.1"
