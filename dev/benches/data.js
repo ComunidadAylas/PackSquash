@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1651622076308,
+  "lastUpdate": 1651696365348,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "946320d6af81a0fa730e862c0c2fe60afb63fb4a",
-          "message": "fix(appimage/recipe): run tests and change Alpine image used\n\nAs expected, all the defined tests passed, with the only exception of\nthe Alpine test, because appimage-builder runs useradd before the actual\ntest command, and the base Alpine images do not have that command\ninstalled.\n\nTherefore, to fix the Alpine test it was enough to use a custom image\nbased on alpine:3 with a single layer to install the package, by running\n`apk add --no-cache shadow`.",
-          "timestamp": "2022-03-11T22:02:46+01:00",
-          "tree_id": "6f63e3dcfbfa34fa9062f315511ecd3a9970f8a7",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/946320d6af81a0fa730e862c0c2fe60afb63fb4a"
-        },
-        "date": 1647034691894,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 18326619,
-            "range": "± 1276548",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1191588372,
-            "range": "± 22566748",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13285806029,
-            "range": "± 360349639",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1691339439,
-            "range": "± 13208145",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2387,6 +2339,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 3261666196,
             "range": "± 141530411",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "72daa7e88a6a5f5abf47c4ec378b0c0919797353",
+          "message": "chore(deps): bump serde from 1.0.136 to 1.0.137 (#104)\n\nBumps [serde](https://github.com/serde-rs/serde) from 1.0.136 to 1.0.137.\r\n- [Release notes](https://github.com/serde-rs/serde/releases)\r\n- [Commits](https://github.com/serde-rs/serde/compare/v1.0.136...v1.0.137)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: serde\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-05-04T21:53:00+02:00",
+          "tree_id": "5b51e1551c4b7c326cfa76f5f61b1b992f1bce0b",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/72daa7e88a6a5f5abf47c4ec378b0c0919797353"
+        },
+        "date": 1651696364796,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10893255,
+            "range": "± 156525",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 703832471,
+            "range": "± 15989881",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10216061266,
+            "range": "± 44078259",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2640011619,
+            "range": "± 6239947",
             "unit": "ns/iter"
           }
         ]
