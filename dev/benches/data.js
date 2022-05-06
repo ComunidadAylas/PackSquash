@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1651696365348,
+  "lastUpdate": 1651864047410,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "e33605a9d7f04c6de2d79a345dd932813c4266ce",
-          "message": "tweak: exclude include shaders from asset mask when targeting MC < 1.17\n\nAlthough the Minecraft wiki is not clear at all about this, support for\ninclude shaders and their associated #moj_import directive was added on\n1.17. Therefore, it does not make sense to optimize those files when\ntargeting older versions.",
-          "timestamp": "2022-03-12T15:06:38+01:00",
-          "tree_id": "a925d1e578d4b9936e866611e1867c6b710c780d",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e33605a9d7f04c6de2d79a345dd932813c4266ce"
-        },
-        "date": 1647096261178,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14615971,
-            "range": "± 208935",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 934324326,
-            "range": "± 11102466",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10641607697,
-            "range": "± 75375715",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1372117772,
-            "range": "± 3746643",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2387,6 +2339,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2640011619,
             "range": "± 6239947",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "51b017809d4460f480bad6aa52d3b40f0bd8ae7f",
+          "message": "chore(deps): bump sysinfo from 0.23.10 to 0.23.11 (#105)\n\nBumps [sysinfo](https://github.com/GuillaumeGomez/sysinfo) from 0.23.10 to 0.23.11.\r\n- [Release notes](https://github.com/GuillaumeGomez/sysinfo/releases)\r\n- [Changelog](https://github.com/GuillaumeGomez/sysinfo/blob/master/CHANGELOG.md)\r\n- [Commits](https://github.com/GuillaumeGomez/sysinfo/commits)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: sysinfo\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-05-06T20:32:33+02:00",
+          "tree_id": "6aa96d3dfb17c8e79ce29cfddab53c6a9a071520",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/51b017809d4460f480bad6aa52d3b40f0bd8ae7f"
+        },
+        "date": 1651864046821,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 11062349,
+            "range": "± 98405",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 706380622,
+            "range": "± 6545324",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10058582593,
+            "range": "± 55775396",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2639423421,
+            "range": "± 7146123",
             "unit": "ns/iter"
           }
         ]
