@@ -1580,7 +1580,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "packsquash-cli"
+name = "packsquash_cli"
 version = "0.3.1"
 dependencies = [
  "atty",

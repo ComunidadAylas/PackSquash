@@ -1,7 +1,5 @@
-cargo-features = ["different-binary-name"]
-
 [package]
-name = "packsquash-cli"
+name = "packsquash_cli"
 description = "Minecraft resource and data pack optimizer (CLI)"
 version = "0.3.1"
 authors = ["Alejandro \"AlexTMjugador\" González"]
@@ -39,8 +37,7 @@ time = { version = "0.3.9", default-features = false, features = ["std"] }
 default = ["color-backtrace"]
 
 [[bin]]
-name = "packsquash-cli"
-filename = "packsquash"
+name = "packsquash"
 bench = false
 
 [package.metadata.deb]

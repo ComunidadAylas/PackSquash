@@ -175,7 +175,7 @@ jobs:
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: Generate CLI Debian package
-        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
+        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
 
       - name: Generate CLI AppImage
         env:
@@ -415,7 +415,7 @@ jobs:
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: Generate CLI Debian package
-        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash-cli -- -Z build-std
+        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
 
       # This is necessary because we're cross-compiling and appimage-builder isn't
       # smart enough to run binaries for the target platform with QEMU
