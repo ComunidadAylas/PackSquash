@@ -17,14 +17,6 @@ macro_rules! custom_criterion_group {
                 $target(&mut benchmark_group, pack_dataset);
             )+
         }
-    };
-    ($name:ident, $( $target:path ),+ $(,)*) => {
-        $crate::criterion_group! {
-            name = $name;
-            config = ::criterion::Criterion::default();
-            sampling_mode = ::criterion::SamplingMode::Auto;
-            targets = $( $target ),+
-        }
     }
 }
 
