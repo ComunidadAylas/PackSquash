@@ -467,6 +467,12 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      # Use docker.io for Docker Hub if empty
+      REGISTRY: ghcr.io
+      # github.repository as <account>/<repo>
+      IMAGE_NAME: ${{ github.repository }}
+
     needs: [ linux-x64-gnu ]
 
     steps:
@@ -477,8 +483,7 @@ jobs:
         id: dockermeta
         uses: docker/metadata-action@v4
         with:
-          images: |
-            ghcr.io/realkarmakun/packsquash
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # generate Docker tags: edge for every commit on master, semver for every semantic tag
           tags: |
             type=edge,branch=master
