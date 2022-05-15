@@ -473,7 +473,7 @@ jobs:
       # github.repository as <account>/<repo>
       IMAGE_NAME: ${{ github.repository }}
 
-    needs: [ linux-x64-gnu ]
+    needs: [ linux-x64-gnu, linux-aarch64-gnu ]
 
     steps:
       - name: Checkout
@@ -489,10 +489,15 @@ jobs:
             type=edge,branch=master
             type=semver,pattern={{version}}
         
-      - name: Download PackSquash AppImage
+      - name: Download PackSquash X86-64 AppImage
         uses: actions/download-artifact@v3.0.0
         with:
           name: 'PackSquash CLI AppImage (x64)'
+
+      - name: Download PackSquash AArch64-ARM64 AppImage
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: 'PackSquash CLI AppImage (arm64)'
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -511,13 +516,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.REGISTRY_TOKEN }}
           
-      - name: Build and push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
           context: .
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.dockermeta.outputs.tags }}
           labels: ${{ steps.dockermeta.outputs.labels }}
 
