@@ -477,7 +477,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build Docker image metadata
         id: dockermeta
@@ -490,12 +490,12 @@ jobs:
             type=semver,pattern={{version}}
         
       - name: Download PackSquash X86-64 AppImage
-        uses: actions/download-artifact@v3.0.0
+        uses: actions/download-artifact@v3
         with:
           name: 'PackSquash CLI AppImage (x64)'
 
       - name: Download PackSquash AArch64-ARM64 AppImage
-        uses: actions/download-artifact@v3.0.0
+        uses: actions/download-artifact@v3
         with:
           name: 'PackSquash CLI AppImage (arm64)'
 
@@ -510,14 +510,15 @@ jobs:
 
       # We need a github token with write:package permission in reposiotry secret for this to work
       - name: Login to ghcr.io
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
+        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.REGISTRY_TOKEN }}
           
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: Dockerfile
