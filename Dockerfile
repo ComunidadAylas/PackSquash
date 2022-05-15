@@ -2,11 +2,11 @@ FROM debian:bullseye-slim as build
 
 ARG TARGETPLATFORM
 FROM --platform=${TARGETPLATFORM} debian:bullseye-slim as copy_arm64
-ONBUILD COPY --from=build --chmod=755 PackSquash-*-aarch64.AppImage /app/packsquash
+ONBUILD COPY --chmod=755 PackSquash-*-aarch64.AppImage /app/packsquash
 
 ARG TARGETPLATFORM
-FROM --platform=${TARGETPLATFORM} build as copy_amd64
-ONBUILD COPY --from=build --chmod=755 PackSquash-*-x86_64.AppImage /app/packsquash
+FROM --platform=${TARGETPLATFORM} debian:bullseye-slim as copy_amd64
+ONBUILD COPY --chmod=755 PackSquash-*-x86_64.AppImage /app/packsquash
 
 ARG TARGETPLATFORM
 ARG TARGETARCH
