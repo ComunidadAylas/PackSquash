@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1652665670863,
+  "lastUpdate": 1652713794172,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "11eb1a02be6372360bec1510d8de5b39ab633b78",
-          "message": "ci(experimental/x32): target Debian testing\n\nThe unofficial x32 port of Debian does not follow the usual release\ncadence and it usually breaks. Let's see if moving to this other version\nworks.",
-          "timestamp": "2022-04-02T15:07:05+02:00",
-          "tree_id": "0ee5f528d86a999e39ca2f77e762ba0fa2967d5c",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/11eb1a02be6372360bec1510d8de5b39ab633b78"
-        },
-        "date": 1648906676475,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13129511,
-            "range": "± 236815",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 938895395,
-            "range": "± 2258387",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10540436476,
-            "range": "± 196023102",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1377559804,
-            "range": "± 10674290",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2385,6 +2337,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2548526691,
             "range": "± 57945344",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "36238d2413971f9b69bab11898674c1c3a683c30",
+          "message": "chore(deps): bump sysinfo from 0.23.11 to 0.23.12 (#112)\n\nBumps [sysinfo](https://github.com/GuillaumeGomez/sysinfo) from 0.23.11 to 0.23.12.\r\n- [Release notes](https://github.com/GuillaumeGomez/sysinfo/releases)\r\n- [Changelog](https://github.com/GuillaumeGomez/sysinfo/blob/master/CHANGELOG.md)\r\n- [Commits](https://github.com/GuillaumeGomez/sysinfo/commits)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: sysinfo\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-05-16T16:41:19+02:00",
+          "tree_id": "eb80dbaa79b5fe5756ba62339dd063a25c8175ef",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/36238d2413971f9b69bab11898674c1c3a683c30"
+        },
+        "date": 1652713793311,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 17611213,
+            "range": "± 1152409",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1004444381,
+            "range": "± 6554269",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 17288521114,
+            "range": "± 68248175",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2603072640,
+            "range": "± 98308862",
             "unit": "ns/iter"
           }
         ]
