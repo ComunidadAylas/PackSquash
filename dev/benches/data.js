@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1652713794172,
+  "lastUpdate": 1652714714790,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "c9c77d012e924d9258ed8af4c3eef26d5987ead5",
-          "message": "ci(experimental/x32): try out x64 x32 ABI builds\n\nThe ILP32 data model used by this target has the nice property in theory\nof reducing code size, as pointers are still 32-bit, like in 32-bit\narchitectures. However, it support is very lacking. Let's see how things\nbreak.",
-          "timestamp": "2022-04-02T15:01:09+02:00",
-          "tree_id": "5668fc07e8e28cc55f5be2c1c909c61cce2df61c",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c9c77d012e924d9258ed8af4c3eef26d5987ead5"
-        },
-        "date": 1648906712903,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13213413,
-            "range": "± 748279",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 961459928,
-            "range": "± 33920695",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 9784234489,
-            "range": "± 244408533",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1374037829,
-            "range": "± 32741383",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2385,6 +2337,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2603072640,
             "range": "± 98308862",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cf69f68da1176e46f556134f74d5d7885b380cab",
+          "message": "chore(deps): bump tokio-util from 0.7.1 to 0.7.2 (#113)\n\nBumps [tokio-util](https://github.com/tokio-rs/tokio) from 0.7.1 to 0.7.2.\r\n- [Release notes](https://github.com/tokio-rs/tokio/releases)\r\n- [Commits](https://github.com/tokio-rs/tokio/compare/tokio-util-0.7.1...tokio-util-0.7.2)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: tokio-util\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-05-16T16:40:59+02:00",
+          "tree_id": "0def437895572fdc3a87d10e506bf5b6974d6ab3",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/cf69f68da1176e46f556134f74d5d7885b380cab"
+        },
+        "date": 1652714714218,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12481439,
+            "range": "± 717241",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 827033288,
+            "range": "± 8599020",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 15048915207,
+            "range": "± 49419269",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2170130816,
+            "range": "± 31029527",
             "unit": "ns/iter"
           }
         ]
