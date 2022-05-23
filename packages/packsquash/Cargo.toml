@@ -57,7 +57,7 @@ fpe = "0.5.1"
 uuid = "1.0.0"
 entropy = "0.4.1"
 rand_xoshiro = "0.6.0"
-regex = "1.5.5"
+regex = "1.5.6"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.10.1"
