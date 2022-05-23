@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1652714714790,
+  "lastUpdate": 1653269869322,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "fe475c9fe21ce87894bf09fb5454d7867247f2ad",
-          "message": "ci(experimental/x32): revert\n\nDebian x32 port, the only sane distro that supports the x32 ABI, has\nbroken packages when used in a multiarch configuration with the usual\nx64 ABI, because some versions of transitive dependencies are different\nbetween the x32 port and amd64 repositories, and some packages have\nrestrictive conflictive requirements that do not allow two slightly\ndifferent versions to coexist on the same system.\n\nThe proper solution would be to ditch the amd64 repositories and just\nuse the x32 ones, but the x32 ABI is disabled by default on most\nDebian-based kernels, and I bet that GH Actions runners do not have the\nnecessary kernel boot parameter to enable it back. QEMU does not seem to\nhave support for the x32 ABI, and we don't want to do heavy hackery on\ngetting conflicting packages working fine, so let's give up.",
-          "timestamp": "2022-04-02T18:49:47+02:00",
-          "tree_id": "a824f1c57cd2d1fc2be50376d615a23368102dbf",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/fe475c9fe21ce87894bf09fb5454d7867247f2ad"
-        },
-        "date": 1648920038767,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 16870596,
-            "range": "± 828861",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1141054466,
-            "range": "± 23554228",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13135770705,
-            "range": "± 385001726",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1700839200,
-            "range": "± 81823574",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2385,6 +2337,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2170130816,
             "range": "± 31029527",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]",
+            "email": "49699333+dependabot[bot]@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "36238d2413971f9b69bab11898674c1c3a683c30",
+          "message": "chore(deps): bump sysinfo from 0.23.11 to 0.23.12 (#112)\n\nBumps [sysinfo](https://github.com/GuillaumeGomez/sysinfo) from 0.23.11 to 0.23.12.\r\n- [Release notes](https://github.com/GuillaumeGomez/sysinfo/releases)\r\n- [Changelog](https://github.com/GuillaumeGomez/sysinfo/blob/master/CHANGELOG.md)\r\n- [Commits](https://github.com/GuillaumeGomez/sysinfo/commits)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: sysinfo\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-05-16T14:41:19Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/36238d2413971f9b69bab11898674c1c3a683c30"
+        },
+        "date": 1653269868832,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14471446,
+            "range": "± 328183",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 844772431,
+            "range": "± 4804601",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11881421318,
+            "range": "± 40636371",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2301563746,
+            "range": "± 50083010",
             "unit": "ns/iter"
           }
         ]
