@@ -13,7 +13,7 @@ edition = "2021"
 bytes = "1.1.0"
 globset = "0.4.8"
 enumset = { version = "1.0.11", features = ["serde"] }
-indexmap = { version = "1.8.1", default-features = false, features = ["serde-1"] }
+indexmap = { version = "1.8.2", default-features = false, features = ["serde-1"] }
 thiserror = "1.0.31"
 ahash = "0.7.6"
 
