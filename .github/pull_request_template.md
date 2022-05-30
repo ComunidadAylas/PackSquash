@@ -31,7 +31,7 @@ Please state how your changes were tested, including both manual and automated t
 
 ## Usage
 
-Please state how the project stakeholders exploit your changes, if applicable. Take into account that changes may lead to updates to the end-user documentation.
+Please state how the project stakeholders may use your changes, if applicable. Take into account that changes may lead to updates to the end-user documentation.
 
 ## Notes
 
