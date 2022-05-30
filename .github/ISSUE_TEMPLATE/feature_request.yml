@@ -14,9 +14,10 @@ body:
   - type: textarea
     id: related-problem
     attributes:
-      label: Related problem
-      description: Is your feature request related to a problem? Please describe.
-      placeholder: A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+      label: Related problem or need
+      description: Please describe the problem or need that led you to create this feature request.
+        You can include any background information you deem relevant here.
+      placeholder: A concise description of what the problem. Ex. my pack has files that [...] and could be optimized better if [...]
     validations:
       required: true
 
