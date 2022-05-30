@@ -17,7 +17,7 @@ body:
       label: Related problem or need
       description: Please describe the problem or need that led you to create this feature request.
         You can include any background information you deem relevant here.
-      placeholder: A concise description of what the problem. Ex. my pack has files that [...] and could be optimized better if [...]
+      placeholder: A concise description of the problem or need. Ex. my pack has files that [...] and could be optimized better if [...]
     validations:
       required: true
 
