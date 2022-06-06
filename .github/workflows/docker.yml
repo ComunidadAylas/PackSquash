@@ -11,7 +11,7 @@ on:
 
 jobs:
   docker-image:
-    runs-on: ubuntu-latestgi
+    runs-on: ubuntu-latest
     env:
       # Registry to use
       REGISTRY: ghcr.io
