@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654479912684,
+  "lastUpdate": 1654512552411,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "0424cee91618da961a7fd17a180957a52381d206",
-          "message": "chore(deps): bump enumset from 1.0.8 to 1.0.9 (#88)\n\nBumps [enumset](https://github.com/Lymia/enumset) from 1.0.8 to 1.0.9.\r\n- [Release notes](https://github.com/Lymia/enumset/releases)\r\n- [Changelog](https://github.com/Lymia/enumset/blob/master/RELEASES.md)\r\n- [Commits](https://github.com/Lymia/enumset/commits)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: enumset\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-04-05T10:21:20+02:00",
-          "tree_id": "63f0c46fb48edd514d529152a1b508fcc4fc3903",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/0424cee91618da961a7fd17a180957a52381d206"
-        },
-        "date": 1649149096853,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14585476,
-            "range": "± 417886",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 742830747,
-            "range": "± 30176011",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11622064865,
-            "range": "± 545486492",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2646075086,
-            "range": "± 152045767",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2381,6 +2333,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2588930372,
             "range": "± 34624492",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c0bd5e0b4fb01399b8ba7bfc7a506d2af1a3463d",
+          "message": "chore(deps): bump uuid from 1.1.0 to 1.1.1 (#124)\n\nBumps [uuid](https://github.com/uuid-rs/uuid) from 1.1.0 to 1.1.1.\r\n- [Release notes](https://github.com/uuid-rs/uuid/releases)\r\n- [Commits](https://github.com/uuid-rs/uuid/compare/1.1.0...1.1.1)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: uuid\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-06-06T12:21:25+02:00",
+          "tree_id": "a61be1b1399ec40d06f7f124c25ecec7cf26dd20",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c0bd5e0b4fb01399b8ba7bfc7a506d2af1a3463d"
+        },
+        "date": 1654512551480,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13328465,
+            "range": "± 812251",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 806033084,
+            "range": "± 40168877",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13805909009,
+            "range": "± 770683126",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2205190681,
+            "range": "± 116060629",
             "unit": "ns/iter"
           }
         ]
