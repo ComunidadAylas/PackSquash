@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1653902419494,
+  "lastUpdate": 1654479912684,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "999ec024fe39071ae8240f96922877a10a9e1cf6",
-          "message": "tweak(json_file/debloater): add selectors for keys used as comments\n\nThese are ignored by the programs who parse the asset types that get\ndebloated, but I have seen some authors including them. With the custom\nfiles feature they now have less reasons to do that.",
-          "timestamp": "2022-04-04T17:05:19+02:00",
-          "tree_id": "9808d4370300c14cf40ec65a539e3ae5d1e38b5e",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/999ec024fe39071ae8240f96922877a10a9e1cf6"
-        },
-        "date": 1649086469980,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 16891564,
-            "range": "± 1678364",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 939293930,
-            "range": "± 11518875",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12481623985,
-            "range": "± 193261931",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 3257449361,
-            "range": "± 69573535",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2383,6 +2335,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2057313084,
             "range": "± 137271511",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Alejandro González",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "25ae2b83d93e64feb2f32880daf10a9e263da724",
+          "message": "chore(ISSUE_TEMPLATE/feature_request): fix typo",
+          "timestamp": "2022-05-30T14:36:45Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/25ae2b83d93e64feb2f32880daf10a9e263da724"
+        },
+        "date": 1654479911531,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 15163860,
+            "range": "± 372715",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 981670515,
+            "range": "± 11747361",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 16876762899,
+            "range": "± 129012265",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2588930372,
+            "range": "± 34624492",
             "unit": "ns/iter"
           }
         ]
