@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654710578144,
+  "lastUpdate": 1654710798970,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "3471e5223543a195171ba93511f9f63ff992ea79",
-          "message": "chore(deps): bump gstreamer-app from 0.18.0 to 0.18.7 (#89)\n\nBumps gstreamer-app from 0.18.0 to 0.18.7.\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: gstreamer-app\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-04-05T11:38:45+02:00",
-          "tree_id": "cbbec63652ca60a7fd46f3c7fa7bead979268c47",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3471e5223543a195171ba93511f9f63ff992ea79"
-        },
-        "date": 1649154113411,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12680978,
-            "range": "± 448098",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 735886872,
-            "range": "± 4130673",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11100692779,
-            "range": "± 65952945",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2614214030,
-            "range": "± 32862523",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2381,6 +2333,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2450483515,
             "range": "± 78103758",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "46e7f522f37dd2cedf11a7811520cf7b06bf20a3",
+          "message": "chore(ci): add Dockerfile to included push path for build workflow",
+          "timestamp": "2022-06-08T19:18:25+02:00",
+          "tree_id": "2f400a6431014f4fc19191213edd25f86f8d69c4",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/46e7f522f37dd2cedf11a7811520cf7b06bf20a3"
+        },
+        "date": 1654710798458,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 11253379,
+            "range": "± 259338",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 793473722,
+            "range": "± 5499109",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12799262187,
+            "range": "± 59280554",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2267196023,
+            "range": "± 51756552",
             "unit": "ns/iter"
           }
         ]
