@@ -465,7 +465,7 @@ jobs:
           name: 'PackSquash CLI AppImage zsync (arm64)'
           path: PackSquash-*-aarch64.AppImage.zsync
 
-  docker-image:
+  docker:
 
     runs-on: ubuntu-latest
 
@@ -537,7 +537,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: ${{ !steps.check_write_permission.outputs.has-permission }}
+          push: ${{ steps.check_write_permission.outputs.has-permission }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
