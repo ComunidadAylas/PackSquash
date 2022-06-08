@@ -266,9 +266,6 @@ jobs:
           command: build
           args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
-      - name: Set binary resource data
-        run: target/set_executable_resource_data.ps1
-
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:

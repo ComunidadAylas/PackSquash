@@ -32,6 +32,9 @@ winapi-util = "0.1.5"
 vergen = { version = "7.0.0", default-features = false, features = ["cargo", "git"] }
 time = { version = "0.3.9", default-features = false, features = ["std"] }
 
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1.12"
+
 [features]
 # Support pretty panic messages by default
 default = ["color-backtrace"]
@@ -57,3 +60,9 @@ revision = "1"
 depends = """
 $auto, \
 gstreamer1.0-plugins-bad (>= 1.16.2), gstreamer1.0-plugins-base (>= 1.16.2), gstreamer1.0-plugins-good (>= 1.16.2)"""
+
+[package.metadata.winres]
+ProductName = "PackSquash"
+CompanyName = "Comunidad Aylas"
+OriginalFilename = "packsquash.exe"
+InternalName = "packsquash.exe"
