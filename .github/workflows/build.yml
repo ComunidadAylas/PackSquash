@@ -20,6 +20,8 @@ on:
       - .gitattributes
       # GitHub Actions workflows
       - .github/workflows/*.yml
+      # Docker image
+      - Dockerfile
   pull_request:
     types:
       - opened
