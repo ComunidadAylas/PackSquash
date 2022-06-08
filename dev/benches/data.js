@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654710798970,
+  "lastUpdate": 1654712850325,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "2255bb0dd8c5deae5845a85b883e1bd8edaed7b8",
-          "message": "ci: do not run build workflow when no source file changes\n\nThis is meant to save precious time and resources for commits that just\ntweak something in the documentation and cannot possibly affect the\nbuild output. PRs still run the workflow anyway because they might want\nto refactor the entire project structure or something.",
-          "timestamp": "2022-04-05T12:06:23+02:00",
-          "tree_id": "36c36c686723be209eec10d8f13eba77322abb2b",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2255bb0dd8c5deae5845a85b883e1bd8edaed7b8"
-        },
-        "date": 1649155571375,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12499353,
-            "range": "± 400009",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 731364769,
-            "range": "± 4551985",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11151296776,
-            "range": "± 63130122",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2607070929,
-            "range": "± 26631074",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2381,6 +2333,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2267196023,
             "range": "± 51756552",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "a0f0c195d132a1d60f0c23c0f7bde8abb6117a9e",
+          "message": "chore(ci/docker): rename job and fix typo",
+          "timestamp": "2022-06-08T19:59:33+02:00",
+          "tree_id": "773c465e930e100e1e48f5a91bf1a88c9404ce38",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a0f0c195d132a1d60f0c23c0f7bde8abb6117a9e"
+        },
+        "date": 1654712849749,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12570106,
+            "range": "± 3453177",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 754849043,
+            "range": "± 2697922",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13264407805,
+            "range": "± 65151037",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2053127914,
+            "range": "± 47030235",
             "unit": "ns/iter"
           }
         ]
