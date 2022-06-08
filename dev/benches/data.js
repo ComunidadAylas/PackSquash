@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654723932741,
+  "lastUpdate": 1654725718371,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "8d1eb2a276bcc615449d9f8bb3e47b479bf78a4c",
-          "message": "chore: bump PackSquash packages to the next release version",
-          "timestamp": "2022-04-07T12:37:34+02:00",
-          "tree_id": "e020e0c98eedc8d7c85630a71b1a067e835b0629",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/8d1eb2a276bcc615449d9f8bb3e47b479bf78a4c"
-        },
-        "date": 1649330195721,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14112854,
-            "range": "± 166079",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 699304734,
-            "range": "± 7289239",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13821882405,
-            "range": "± 75601058",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2508120721,
-            "range": "± 12606953",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2383,6 +2335,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2636259248,
             "range": "± 81254762",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "46f5772d58963dcfd69ddab3de8213bd3295a942",
+          "message": "fix(pack_file/asset_type): legacy font .bin files can be anywhere\n\nThe Minecraft wiki incorrectly pointed out that .bin files belong to\nassets/<namespace>/font, but the game interprets the resource location\nin an absolute context, so valid resource locations for those files can\npoint anywhere in the pack. Indeed, a PackSquash user reported dealing\nwith a pack that had a .bin file outside of the usual folder, which\nPackSquash broke due to me coding a too restrictive glob pattern based\non the wiki misinformation.\n\nMake the .bin glob pattern more permissive to fix the situation.",
+          "timestamp": "2022-06-08T23:13:20+02:00",
+          "tree_id": "14a5b1d3fc161ec5ea77fa354ad8f65e5c1934e9",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/46f5772d58963dcfd69ddab3de8213bd3295a942"
+        },
+        "date": 1654725717322,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13000168,
+            "range": "± 604687",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 826767095,
+            "range": "± 1712070",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13995786116,
+            "range": "± 49827923",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2214103027,
+            "range": "± 60926880",
             "unit": "ns/iter"
           }
         ]
