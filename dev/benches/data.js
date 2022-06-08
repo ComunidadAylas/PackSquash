@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654712850325,
+  "lastUpdate": 1654714954031,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "08c4c5977f9865e8108f00cafd141ad8ed4dd264",
-          "message": "fix(optifine/cit): do not skip CIT tex. metadata. Debloat item models\n\nSome OptiFine features, namely \"custom items\" (CIT) and \"connected\ntextures\" (CTM), support the vanilla way of putting a .mcmeta file\nalongside a texture to make it animated. v0.3.0 processed these files,\nbut when moving to using asset masks we stopped doing so incorrectly,\ndue to an oversight.\n\nThe custom items feature can also read vanilla item models from\nOptiFine-specific directories in a resource pack. These were processed\nby PackSquash anyway, but by falling back to the generic JSON asset\ntype, which disabled any debloating done to vanilla models.\n\nDoing integration tests with real packs in preparation for the v0.3.1\nrelease showed these problems, so let's fix them.",
-          "timestamp": "2022-04-05T13:16:17+02:00",
-          "tree_id": "1b7f0f3572fa7fdf356fc5f0b74c4c31ebb6d667",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/08c4c5977f9865e8108f00cafd141ad8ed4dd264"
-        },
-        "date": 1649158915237,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 16453096,
-            "range": "± 805748",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 832358635,
-            "range": "± 12400689",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13394875220,
-            "range": "± 155266412",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 3072548704,
-            "range": "± 55594810",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2381,6 +2333,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2053127914,
             "range": "± 47030235",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "21dd13854b6df0699dc078c59ce78fa247536303",
+          "message": "chore(ci/docker): fix GitHub expression not being evaluated to YAML bool",
+          "timestamp": "2022-06-08T20:31:31+02:00",
+          "tree_id": "8615690f17b4ed371bf8e9bab456a1fb86ba7f97",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/21dd13854b6df0699dc078c59ce78fa247536303"
+        },
+        "date": 1654714953333,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 17557390,
+            "range": "± 1026165",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1024867577,
+            "range": "± 13249931",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 18053649048,
+            "range": "± 103167904",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2838314884,
+            "range": "± 119759978",
             "unit": "ns/iter"
           }
         ]
