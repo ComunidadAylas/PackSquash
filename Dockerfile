@@ -1,21 +1,15 @@
-FROM debian:bullseye-slim as build
+FROM debian:bullseye-slim AS libs
 
-ARG TARGETPLATFORM
-FROM --platform=${TARGETPLATFORM} debian:bullseye-slim as copy_arm64
-ONBUILD COPY --chmod=755 PackSquash-*-aarch64.AppImage /app/packsquash
+# Use the base variant because we need glibc components
+FROM gcr.io/distroless/base-debian11
 
-ARG TARGETPLATFORM
-FROM --platform=${TARGETPLATFORM} debian:bullseye-slim as copy_amd64
-ONBUILD COPY --chmod=755 PackSquash-*-x86_64.AppImage /app/packsquash
-
-ARG TARGETPLATFORM
 ARG TARGETARCH
-FROM --platform=${TARGETPLATFORM} copy_${TARGETARCH}
+COPY --chmod=755 PackSquash-*-${TARGETARCH}.AppImage /usr/bin/packsquash
 
-LABEL org.opencontainers.image.source="https://github.com/ComunidadAylas/PackSquash"
-LABEL org.opencontainers.image.licenses=AGPL-3.0
+# Copy runtime dependency from the base Debian zlib1g package.
+# The AppImage runtime assumes that it is present
+COPY --from=libs /lib/*-linux-gnu/libz.so.1 /lib/libz.so.1
 
-WORKDIR /app
-ENV PATH /app:$PATH
+WORKDIR /
 
-CMD ["packsquash", "--appimage-extract-and-run"]
+ENTRYPOINT ["packsquash", "--appimage-extract-and-run"]
