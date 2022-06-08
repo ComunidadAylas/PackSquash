@@ -511,9 +511,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-        with:
-          version: v0.8.2
-          buildkitd-flags: --debug
 
       - name: Check workflow package write permission
         id: check_write_permission
