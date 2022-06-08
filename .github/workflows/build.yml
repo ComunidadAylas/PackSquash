@@ -483,11 +483,14 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          # generate Docker tags: edge for every commit on master, semver for every semantic tag
+          # Tag the image as "edge" for every commit on master.
+          # Maintain the "latest", full and major and minor semver tags for each semver tag push
           tags: |
             type=edge,branch=master
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+          labels: |
+            org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
       - name: Download PackSquash x64 AppImage
         uses: actions/download-artifact@v3
