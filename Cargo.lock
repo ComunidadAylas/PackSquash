@@ -1298,9 +1298,9 @@ dependencies = [
 
 [[package]]
 name = "lzma-sys"
-version = "0.1.17"
+version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdb4b7c3eddad11d3af9e86c487607d2d2442d185d848575365c4856ba96d619"
+checksum = "e06754c4acf47d49c727d5665ca9fb828851cda315ed3bd51edd148ef78a8772"
 dependencies = [
  "cc",
  "libc",
@@ -2104,9 +2104,9 @@ dependencies = [
 
 [[package]]
 name = "sysinfo"
-version = "0.24.1"
+version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6a8e71535da31837213ac114531d31def75d7aebd133264e420a3451fa7f703"
+checksum = "9a2809487b962344ca55d9aea565f9ffbcb6929780802217acc82561f6746770"
 dependencies = [
  "cfg-if",
  "core-foundation-sys",
@@ -2254,9 +2254,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.19.1"
+version = "1.19.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95eec79ea28c00a365f539f1961e9278fbcaf81c0ff6aaf0e93c181352446948"
+checksum = "c51a52ed6686dd62c320f9b89299e9dfb46f730c7a48e635c19f21d116cb1439"
 dependencies = [
  "bytes",
  "memchr",
@@ -2410,9 +2410,9 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "vergen"
-version = "7.0.0"
+version = "7.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4db743914c971db162f35bf46601c5a63ec4452e61461937b4c1ab817a60c12e"
+checksum = "b1f44ef1afcf5979e34748c12595f9589f3dc4e34abf156fb6d95f9b835568dc"
 dependencies = [
  "anyhow",
  "cfg-if",
@@ -2658,9 +2658,9 @@ dependencies = [
 
 [[package]]
 name = "xz2"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c179869f34fc7c01830d3ce7ea2086bc3a07e0d35289b667d0a8bf910258926c"
+checksum = "388c44dc09d76f1536602ead6d325eb532f5c122f17782bd57fb47baeeb767e2"
 dependencies = [
  "lzma-sys",
 ]
