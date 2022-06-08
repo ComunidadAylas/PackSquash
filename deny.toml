@@ -14,10 +14,6 @@ unmaintained = "warn"
 yanked = "deny"
 notice = "warn"
 ignore = [
-	# chrono depends on a version of time with another security advisory.
-	# chrono is a direct transitive dependency we use for building. In
-	# Windows builds it also is used at runtime by the wmi crate
-	"RUSTSEC-2020-0159",
 	# This old version of time pulled by chrono might dereference a null
 	# pointer in Unix platforms. But this is not a concern at build time,
 	# and Windows builds (which actually use this library at runtime) are
