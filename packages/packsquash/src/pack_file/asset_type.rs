@@ -395,7 +395,7 @@ impl PackFileAssetType {
 
 			Self::TrueTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.ttf"),
 			Self::FontCharacterSizes => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.bin")
+				compile_hardcoded_pack_file_glob_pattern("assets/*/**/?*.bin")
 			}
 			Self::Text => {
 				// Be restrictive in the text files pattern as plain text files are somewhat
