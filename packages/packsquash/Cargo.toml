@@ -11,14 +11,14 @@ edition = "2021"
 
 [dependencies]
 bytes = "1.1.0"
-globset = "0.4.8"
+globset = { version = "0.4.9", default-features = false }
 enumset = { version = "1.0.11", features = ["serde"] }
 indexmap = { version = "1.8.2", default-features = false, features = ["serde-1"] }
 thiserror = "1.0.31"
 ahash = "0.7.6"
 
 num_cpus = "1.13.1"
-sysinfo = { version = "0.24.2", default-features = false }
+sysinfo = { version = "0.24.3", default-features = false }
 walkdir = "2.3.2"
 
 tokio = { version = "1.19.2", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
@@ -54,7 +54,7 @@ smaz = "0.1.0"
 const-random = "0.1.13"
 aes = "0.7.5"
 fpe = "0.5.1"
-uuid = "1.1.1"
+uuid = "1.1.2"
 entropy = "0.4.1"
 rand_xoshiro = "0.6.0"
 regex = "1.5.6"
