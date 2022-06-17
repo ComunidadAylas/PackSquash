@@ -101,7 +101,7 @@ wildcards = "warn"
 highlight = "all"
 skip = [
 	# chrono depends on this old version of the time crate
-	{ name = "time", version = "=0.1.43" }
+	{ name = "time", version = "=0.1.44" }
 ]
 skip-tree = [
 	# An ancient nom is pulled by the development dependency for
