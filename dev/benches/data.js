@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655473950072,
+  "lastUpdate": 1655474503130,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "bafe0a9c3e1eb4706fb82a98aedd650c4eacd792",
-          "message": "tweak(png_file): improve error message for PNG files with trailing bytes\n\nThe PNG validation and chunk stripping code we introduced for v0.3.1 had\nthe technically nice side effect of being stricter with trailing bytes\nat the end of files, as previously the decoders we used just ignored\nthem, even if the PNG standard explicitly says that such PNG files are\nnon-conforming. I expected such an error condition to be very rare, so I\ndidn't add a specific error message for it.\n\nHowever, @sya-ri stumbled upon a PNG file that had trailing bytes, and\nwas puzzled about it, with reason, as the error message pointed out that\nthe PNG file is \"too small\". To address that situation, update the wiki\nand tweak the error message for future releases.",
-          "timestamp": "2022-04-12T22:13:52+02:00",
-          "tree_id": "ab388b26bc4d3d3f75cfc7a7684ce390278290f8",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/bafe0a9c3e1eb4706fb82a98aedd650c4eacd792"
-        },
-        "date": 1649796822592,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14491745,
-            "range": "± 984818",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 760119122,
-            "range": "± 21361903",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12946192574,
-            "range": "± 214389182",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2646146379,
-            "range": "± 64109448",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2383,6 +2335,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2284793740,
             "range": "± 59136438",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "25e5153ae89082c9aa4c41f094fae39506f09bfe",
+          "message": "chore(deps): remove transitive dependency on chrono\n\nchrono is a worrying crate to depend on, because it depends on old\nversions of the time crate with known security problems. PackSquash is\nnot affected by these, and overall upstream does not consider the issue\nvery important, but as GitHub advisories are rolled out for it, silecing\nall the security warnings in this convoluted transitive dependency mess\ngets cumbersome quickly.\n\nLuckily, chrono is only used by wmi-rs on Windows platforms. The rest of\nthe ecosystem has been moving away from it, and wmi-rs now has a feature\nflag to directly use the time crate instead. Let's enable it to pull\nless transitive dependencies and properly fix all these warnings.",
+          "timestamp": "2022-06-17T15:02:47+02:00",
+          "tree_id": "1f1fc528e7501405ee7334f4b078784d666c5661",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/25e5153ae89082c9aa4c41f094fae39506f09bfe"
+        },
+        "date": 1655474502528,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 11062780,
+            "range": "± 614810",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 718878236,
+            "range": "± 8208731",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13454882747,
+            "range": "± 32847793",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2206662268,
+            "range": "± 28992872",
             "unit": "ns/iter"
           }
         ]
