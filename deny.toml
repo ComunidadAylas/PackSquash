@@ -14,11 +14,6 @@ unmaintained = "warn"
 yanked = "deny"
 notice = "warn"
 ignore = [
-	# This old version of time pulled by chrono might dereference a null
-	# pointer in Unix platforms. But this is not a concern at build time,
-	# and Windows builds (which actually use this library at runtime) are
-	# not affected
-	"RUSTSEC-2020-0071",
 	# Criterion depends on serde_cbor, which is unmaintained and has some quirks, but works:
 	# https://github.com/pyfisch/cbor/issues/179
 	"RUSTSEC-2021-0127"
@@ -99,10 +94,6 @@ multiple-versions = "warn"
 # dependencies. It's best to have a warning than skipping crates here
 wildcards = "warn"
 highlight = "all"
-skip = [
-	# chrono depends on this old version of the time crate
-	{ name = "time", version = "=0.1.44" }
-]
 skip-tree = [
 	# An ancient nom is pulled by the development dependency for
 	# benchmarking perfcnt. Let's ignore that for now. It doesn't
