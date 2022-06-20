@@ -15,7 +15,7 @@
 // https://docs.rs/crate/machine-uid/0.2.0
 // https://github.com/tilda/rust-hwid
 
-use std::{cmp::Ordering, env, lazy::SyncOnceCell};
+use std::{cmp::Ordering, env, sync::OnceLock};
 
 use tokio::task;
 use uuid::Uuid;
@@ -104,7 +104,7 @@ impl Eq for SystemId {}
 
 /// The cell that will be used to memoize the result of computing the system ID, so
 /// it's done only once in the lifetime of the process.
-static SYSTEM_ID: SyncOnceCell<SystemId> = SyncOnceCell::new();
+static SYSTEM_ID: OnceLock<SystemId> = OnceLock::new();
 
 /// Returns the system ID, calculating it if that was not done yet.
 ///

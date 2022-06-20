@@ -18,7 +18,7 @@ thiserror = "1.0.31"
 ahash = "0.7.6"
 
 num_cpus = "1.13.1"
-sysinfo = { version = "0.24.4", default-features = false }
+sysinfo = { version = "0.24.5", default-features = false }
 walkdir = "2.3.2"
 
 tokio = { version = "1.19.2", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
@@ -34,7 +34,7 @@ jsonpath_lib = "0.3.0"
 
 spng = { version = "0.2.0-alpha.2", default-features = false }
 png = "0.17.5"
-rgb = "0.8.32"
+rgb = "0.8.33"
 imagequant = { version = "4.0.0", default-features = false }
 oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
 

@@ -1,4 +1,4 @@
-use std::lazy::SyncLazy;
+use std::sync::LazyLock;
 
 use ahash::AHashSet;
 use futures::{future, StreamExt};
@@ -19,7 +19,7 @@ use super::{OptimizedBytesChunk, PackFile, PackFileConstructor};
 mod tests;
 
 /// A regular expression that matches plausible Java format specifiers, used in format strings.
-static FORMAT_SPECIFIER_REGEX: SyncLazy<Regex> = SyncLazy::new(|| {
+static FORMAT_SPECIFIER_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 	// The format specifier follows this syntax
 	// (from https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Formatter.html#summary):
 	// %[argument_index$][flags][width][.precision]conversion

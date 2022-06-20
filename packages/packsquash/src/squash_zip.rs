@@ -4,10 +4,10 @@ use std::{
 	borrow::Cow,
 	collections::hash_map::Entry,
 	io::{self, ErrorKind, Read, SeekFrom},
-	lazy::SyncLazy,
 	num::TryFromIntError,
 	path::Path,
 	string::FromUtf8Error,
+	sync::LazyLock,
 	time::SystemTime
 };
 
@@ -191,8 +191,8 @@ struct MutableSquashZipState<F: AsyncRead + AsyncSeek + Unpin> {
 
 /// The system time sanitizer that SquashZip will use for sanitizing and
 /// desanitizing dates to and from ZIP files, respectively.
-static SYSTEM_TIME_SANITIZER: SyncLazy<SystemTimeSanitizer<Aes128>> =
-	SyncLazy::new(SystemTimeSanitizer::new);
+static SYSTEM_TIME_SANITIZER: LazyLock<SystemTimeSanitizer<Aes128>> =
+	LazyLock::new(SystemTimeSanitizer::new);
 
 impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// Creates a new instance of this struct, that may leverage the
