@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655474503130,
+  "lastUpdate": 1655747255773,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "5381ceffabd1642e93bb911f21f4d5f80636a114",
-          "message": "ci(appimage): bump appimage-builder version used by the action in fork\n\nThe appimage-builder action was using an ancient appimage-builder\nversion, 0.8.2, which is lacking some important fixes for us. Let's\nupdate it to something much more modern ourselves.",
-          "timestamp": "2022-04-14T13:01:42+02:00",
-          "tree_id": "067d86075a70758ffec6caf7a760d752a8ae8f97",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5381ceffabd1642e93bb911f21f4d5f80636a114"
-        },
-        "date": 1649936568385,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 15422109,
-            "range": "± 800412",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 823070658,
-            "range": "± 9358165",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13880916604,
-            "range": "± 82000403",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2794591778,
-            "range": "± 20535365",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2383,6 +2335,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2206662268,
             "range": "± 28992872",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "b9246d55910c4ed1c4d85b5e270ffa35f73d76be",
+          "message": "chore: update dependencies and apply recent once_cell feature renamings\n\nhttps://github.com/rust-lang/rust/pull/98165 landed in the latest Rust\nnightly version, which made Dependabot CI runs to fail. Try to get\nbuilds working again by updating the references to the old names\naccordingly.\n\nWhile at it, let's also do some minor dependency version bumps.",
+          "timestamp": "2022-06-20T18:43:43+02:00",
+          "tree_id": "6776a382c80ef7309319d6474a4314baa9b0eca0",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b9246d55910c4ed1c4d85b5e270ffa35f73d76be"
+        },
+        "date": 1655747253760,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 15633822,
+            "range": "± 1281737",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 886748961,
+            "range": "± 7001939",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 15938590979,
+            "range": "± 70397125",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2446273787,
+            "range": "± 23345565",
             "unit": "ns/iter"
           }
         ]
