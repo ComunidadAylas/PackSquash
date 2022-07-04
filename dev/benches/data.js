@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1656932301196,
+  "lastUpdate": 1656932467119,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "349eaf031897ad327060eb840f308f16d801bcb5",
-          "message": "ci(linux): ditch build-appimage action, use appimage-builder directly\n\nThe action was terribly obsolete, to begin with. We updated it to a more\nrecent version, and it worked, but then we wanted to get rid of some\nbenign GStreamer warnings, and for this the latest appimage-builder\nversion needs to run gst-launch-1.0 during build time. So we tried to\nput the package that contains that command in the Docker image too, but\nthen no plugins could be loaded in that environment for some reason.\nUsing appimage-builder locally, with gst-launch-1.0, worked fine, at\nleast in a non cross-compilation situation.\n\nWe maybe could spend 3 days debugging this and waiting for the Docker\nimages to upload at a terribly slow speed that reminds me of the dial-up\ndays, but by the looks of it, not much people cares about the Docker\ncontainer anyway, so it's fate is to become obsolete again. Let's\nsidestep all of that by not using the action.",
-          "timestamp": "2022-04-14T21:55:24+02:00",
-          "tree_id": "deaca031e4c84965051b9b88e8237b1d3a2afed7",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/349eaf031897ad327060eb840f308f16d801bcb5"
-        },
-        "date": 1649968726154,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 17250590,
-            "range": "± 691395",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 821778515,
-            "range": "± 18371560",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 15129503870,
-            "range": "± 284792458",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2893544360,
-            "range": "± 76262096",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2383,6 +2335,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2460315406,
             "range": "± 30604162",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7d103b3543ec551ed94d052aa392654072838cab",
+          "message": "chore(deps): bump serde_json from 1.0.81 to 1.0.82 (#134)\n\nBumps [serde_json](https://github.com/serde-rs/json) from 1.0.81 to 1.0.82.\r\n- [Release notes](https://github.com/serde-rs/json/releases)\r\n- [Commits](https://github.com/serde-rs/json/compare/v1.0.81...v1.0.82)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: serde_json\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-07-04T12:29:52+02:00",
+          "tree_id": "150a3bc7e5003617cbfcc10556c31e045a5f45c9",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7d103b3543ec551ed94d052aa392654072838cab"
+        },
+        "date": 1656932466536,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10612651,
+            "range": "± 238520",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 705941933,
+            "range": "± 8594249",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 13234024783,
+            "range": "± 52228858",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2198511841,
+            "range": "± 5821158",
             "unit": "ns/iter"
           }
         ]
