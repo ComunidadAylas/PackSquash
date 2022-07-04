@@ -67,7 +67,7 @@ impl PackMeta {
 		// We do this parsing manually, instead of using auxiliary structs that derive
 		// deserialization traits, because it is faster, provides more relevant error
 		// information, and we only need to parse a few things that are unlikely to change
-		match serde_json::from_reader(StripComments::new(strip_utf8_bom(&*pack_meta_value)))? {
+		match serde_json::from_reader(StripComments::new(strip_utf8_bom(&pack_meta_value)))? {
 			Value::Object(root_object) => {
 				match root_object.get("pack").ok_or(PackMetaError::MalformedMeta(
 					"Missing \"pack\" key in root object"

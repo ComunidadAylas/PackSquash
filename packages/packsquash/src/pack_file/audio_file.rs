@@ -350,7 +350,7 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 					return;
 				}
 
-				let audio_info = AudioInfo::from_caps(&*src_pad.current_caps().unwrap()).unwrap();
+				let audio_info = AudioInfo::from_caps(&src_pad.current_caps().unwrap()).unwrap();
 				let source_sampling_frequency = audio_info.rate().try_into().unwrap();
 
 				// Resample to the requested sampling frequency in the options only if it is lower than the
