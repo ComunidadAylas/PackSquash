@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1656323336614,
+  "lastUpdate": 1656932301196,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "a4e086761288dfdcf8b9cc3ea192441026c98487",
-          "message": "dist: bump back to v0.3.1 for re-release with fixed appimage-builder\n\nAfter releasing v0.3.1 two unexpected and somewhat critical errors were\nreported by users:\n\n- The checks we introduced for trailing PNG bytes were more frequent\n  than anticipated, but the error message shown for them was bad and\n  confusing for users. This warranted improving the error messages at\n  least.\n- The new Linux AppImages were effectively broken due to the usage of a\n  very old appimage-builder version in CI, v0.8.2, while a newer\n  appimage-builder version of v0.9.2 was used for testing by developers\n  in their computers. That older appimage-builder version, pulled by its\n  corresponding workflow action, did not handle GStreamer plugins\n  properly, but support has improved a lot ever since, especially since\n  v1.0.0-alpha.1. The alpha version even contain some nice changes that\n  generate the GStreamer plugin registry at build time, which speeds up\n  execution and avoids some ugly, non-hideable warnings about loading\n  plugins that are not bundled in the AppImage and not necessary.\n\nAs we've addressed these two issues, prepare the repository so that the\nnext workflow run will generate artifacts suitable for re-releasing\nv0.3.1. These release artifacts will silently replace the current v0.3.1\nrelease artifacts. For traceability, PackSquash will show a slightly\ndifferent version when run.",
-          "timestamp": "2022-04-14T15:32:07+02:00",
-          "tree_id": "ec1b474e5ef59fa63ef5c7d8b55162f1cdca9c91",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a4e086761288dfdcf8b9cc3ea192441026c98487"
-        },
-        "date": 1649956724443,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13273902,
-            "range": "± 806734",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 651588201,
-            "range": "± 18838347",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11579921713,
-            "range": "± 626931260",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2468342873,
-            "range": "± 135362701",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2383,6 +2335,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2140290088,
             "range": "± 46817803",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "c86bd6f326cc36e3a9b2f50a7291858e3fc931e0",
+          "message": "chore(clippy): fix new lints",
+          "timestamp": "2022-07-04T12:27:22+02:00",
+          "tree_id": "816d3633d6803e14b060aa836a1a8cbf5e01b2fd",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c86bd6f326cc36e3a9b2f50a7291858e3fc931e0"
+        },
+        "date": 1656932299298,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13888373,
+            "range": "± 903638",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 838926684,
+            "range": "± 8162782",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14838717862,
+            "range": "± 245461288",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2460315406,
+            "range": "± 30604162",
             "unit": "ns/iter"
           }
         ]
