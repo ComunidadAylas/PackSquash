@@ -1542,7 +1542,6 @@ dependencies = [
  "json_comments",
  "jsonpath_lib",
  "mach",
- "num_cpus",
  "oxipng",
  "perfcnt",
  "png",

@@ -1,5 +1,6 @@
 //! Contains the configuration options needed to create a `PackSquasher` run.
 
+use std::thread::available_parallelism;
 use std::{num::NonZeroUsize, path::PathBuf};
 
 use enumset::{EnumSet, EnumSetType};
@@ -268,7 +269,7 @@ impl Default for GlobalOptions {
 		let available_memory_kb =
 			System::new_with_specifics(RefreshKind::new().with_memory()).available_memory();
 
-		let hardware_threads = num_cpus::get();
+		let hardware_threads = available_parallelism().unwrap_or(NonZeroUsize::new(1).unwrap());
 
 		Self {
 			skip_pack_icon: false,
@@ -285,11 +286,11 @@ impl Default for GlobalOptions {
 			ignore_system_and_hidden_files: true,
 			#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 			allow_mods: EnumSet::empty(),
-			threads: hardware_threads.try_into().unwrap(),
+			threads: hardware_threads,
 			output_file_path: PathBuf::from("pack.zip"),
 			// In MiB. By default, half of available memory / (hardware threads + 1 for the output ZIP)
 			spooling_buffers_size: (available_memory_kb * 125
-				/ 262144 / (hardware_threads as u64 + 1))
+				/ 262144 / (hardware_threads.get() as u64 + 1))
 				.try_into()
 				.unwrap_or(usize::MAX),
 			open_files_limit: 512.try_into().unwrap()

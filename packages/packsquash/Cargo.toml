@@ -17,7 +17,6 @@ indexmap = { version = "1.9.1", default-features = false, features = ["serde-1"]
 thiserror = "1.0.31"
 ahash = "0.7.6"
 
-num_cpus = "1.13.1"
 sysinfo = { version = "0.24.5", default-features = false }
 walkdir = "2.3.2"
 
