@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1656934641427,
+  "lastUpdate": 1657105820715,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "5fe7054cd1687719560804f2164a9a545e105c96",
-          "message": "ci(linux/aarch64): install missing package dependency",
-          "timestamp": "2022-04-18T10:54:25+02:00",
-          "tree_id": "14aa64e56c445d6e68612c0224462aa0ff81ea3a",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5fe7054cd1687719560804f2164a9a545e105c96"
-        },
-        "date": 1650275214815,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12462296,
-            "range": "± 307585",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 690250069,
-            "range": "± 5376980",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12885206326,
-            "range": "± 223230235",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2456364485,
-            "range": "± 81177265",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2383,6 +2335,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2217209235,
             "range": "± 51420320",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "d24646b000be731a71cbf72906369d01592cd7b4",
+          "message": "chore(refactor): drop `num_cpus` dep in favor of stdlib function\n\nThis function was recently stabilized and is improving in recent Rust\nversions. At this point, it is equivalent to num_cpus for most purposes,\nbut without the added burden of another dependency.",
+          "timestamp": "2022-07-06T12:35:50+02:00",
+          "tree_id": "9d242497a02564dc660d18cb57f9b94a77209bcc",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d24646b000be731a71cbf72906369d01592cd7b4"
+        },
+        "date": 1657105820145,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 11143328,
+            "range": "± 170506",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 740189533,
+            "range": "± 37542103",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14225243718,
+            "range": "± 873327613",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1957409775,
+            "range": "± 14041179",
             "unit": "ns/iter"
           }
         ]
