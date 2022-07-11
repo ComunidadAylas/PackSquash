@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1657105820715,
+  "lastUpdate": 1657504168754,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "b44439f4f6bde979dbe5c7be731cd1d65253d4a7",
-          "message": "ci(linux/aarch64): fix typo",
-          "timestamp": "2022-04-18T12:28:32+02:00",
-          "tree_id": "0f05d8d308fb2b4bab569b5f3b748d5fe8a1b00a",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b44439f4f6bde979dbe5c7be731cd1d65253d4a7"
-        },
-        "date": 1650279172036,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12539107,
-            "range": "± 199971",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 690414979,
-            "range": "± 4940540",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12748473254,
-            "range": "± 80237151",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2460240148,
-            "range": "± 50501284",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2383,6 +2335,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 1957409775,
             "range": "± 14041179",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador",
+            "email": "AlexTMjugador@users.noreply.github.com"
+          },
+          "id": "d24646b000be731a71cbf72906369d01592cd7b4",
+          "message": "chore(refactor): drop `num_cpus` dep in favor of stdlib function\n\nThis function was recently stabilized and is improving in recent Rust\nversions. At this point, it is equivalent to num_cpus for most purposes,\nbut without the added burden of another dependency.",
+          "timestamp": "2022-07-06T10:34:26Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d24646b000be731a71cbf72906369d01592cd7b4"
+        },
+        "date": 1657504167847,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13873436,
+            "range": "± 456145",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 762046505,
+            "range": "± 7147797",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14974865304,
+            "range": "± 51927188",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2213895518,
+            "range": "± 15930971",
             "unit": "ns/iter"
           }
         ]
