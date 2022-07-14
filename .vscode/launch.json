@@ -1,42 +1,121 @@
 {
-	"version": "0.2.0",
-	"configurations": [
-		{
-			"type": "lldb",
-			"request": "launch",
-			"name": "Debug executable",
-			"cargo": {
-				"args": [
-					"build",
-					"--bin=packsquash",
-					"--package=packsquash"
-				],
-				"filter": {
-					"name": "packsquash",
-					"kind": "bin"
-				}
-			},
-			"args": [],
-			"cwd": "${workspaceFolder}"
-		},
-		{
-			"type": "lldb",
-			"request": "launch",
-			"name": "Debug unit tests",
-			"cargo": {
-				"args": [
-					"test",
-					"--no-run",
-					"--lib=packsquash",
-					"--package=packsquash"
-				],
-				"filter": {
-					"name": "packsquash",
-					"kind": "lib"
-				}
-			},
-			"args": [],
-			"cwd": "${workspaceFolder}"
-		}
-	]
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'packsquash'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=packsquash"
+                ],
+                "filter": {
+                    "name": "packsquash",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug benchmark 'benches'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bench=benches",
+                    "--package=packsquash"
+                ],
+                "filter": {
+                    "name": "benches",
+                    "kind": "bench"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug benchmark 'pack_dataset'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bench=pack_dataset",
+                    "--package=packsquash"
+                ],
+                "filter": {
+                    "name": "pack_dataset",
+                    "kind": "bench"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug benchmark 'macros'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bench=macros",
+                    "--package=packsquash"
+                ],
+                "filter": {
+                    "name": "macros",
+                    "kind": "bench"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'packsquash'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=packsquash",
+                    "--package=packsquash_cli"
+                ],
+                "filter": {
+                    "name": "packsquash",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'packsquash'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=packsquash",
+                    "--package=packsquash_cli"
+                ],
+                "filter": {
+                    "name": "packsquash",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
 }
