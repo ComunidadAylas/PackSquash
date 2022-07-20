@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658344173212,
+  "lastUpdate": 1658344192666,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "9f81e31d190c4adf764701a9929842f035f1124e",
-          "message": "chore: rename `packsquash-cli` package. Stop using unstable Cargo feature\n\nBy defining a custom binary with the desired name instead of modifying\nthe filename of the default binary, which is the same as the name of the\npackage, we can achieve the same result as before, but in a more\nstraightforward way with less configuration.\n\nWhile at it, I've discovered that some Rust RFC recommends for words in\ncrate names to be separated by underscores instead of dashes. This\nconvention is far from being universally observed, and some prominent\ncrates use dashes, but we want to do things right, so let's use\nunderscores.",
-          "timestamp": "2022-05-09T22:27:12+02:00",
-          "tree_id": "265fc5bae7e09f2eeb5433c2fd1c16ee31346faf",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9f81e31d190c4adf764701a9929842f035f1124e"
-        },
-        "date": 1652131134972,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 17840692,
-            "range": "± 849822",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 902262656,
-            "range": "± 15259720",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 14295614009,
-            "range": "± 50070541",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 3237618131,
-            "range": "± 21946390",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2385,6 +2337,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2731752294,
             "range": "± 114976605",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1d7adebe131cb1f8b623c79ae348afc986aea131",
+          "message": "fix(deps): update rust crate serde to 1.0.140",
+          "timestamp": "2022-07-20T18:27:03Z",
+          "tree_id": "6a12e0a74f75d8285e456229b5a25463c5a0bfe8",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/1d7adebe131cb1f8b623c79ae348afc986aea131"
+        },
+        "date": 1658344191568,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 15157126,
+            "range": "± 658586",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 983285808,
+            "range": "± 6914590",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11919445521,
+            "range": "± 45096393",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2490459564,
+            "range": "± 45825012",
             "unit": "ns/iter"
           }
         ]
