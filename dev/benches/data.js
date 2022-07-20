@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658331989904,
+  "lastUpdate": 1658332506223,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "63c01bf3d310dcbb73fba086b22b2ba96cf44cac",
-          "message": "chore(deps): bump gstreamer from 0.18.7 to 0.18.8 (#103)\n\nBumps gstreamer from 0.18.7 to 0.18.8.\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: gstreamer\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-05-04T01:17:06+02:00",
-          "tree_id": "b77513d42f515a199409dedf1aba116e11576299",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/63c01bf3d310dcbb73fba086b22b2ba96cf44cac"
-        },
-        "date": 1651621998909,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14207567,
-            "range": "± 989821",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 742333428,
-            "range": "± 16353670",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10528425967,
-            "range": "± 679654353",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2594400619,
-            "range": "± 101883685",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2383,6 +2335,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2227973457,
             "range": "± 18993268",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c24c6fbc653fa3f20e850da696f353864e7e55be",
+          "message": "fix(deps): update rust crate imagequant to 4.0.1",
+          "timestamp": "2022-07-20T15:11:47Z",
+          "tree_id": "860f4493360ca3f6f0eebff086f1792a9e612bff",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c24c6fbc653fa3f20e850da696f353864e7e55be"
+        },
+        "date": 1658332505573,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14424512,
+            "range": "± 510503",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 860471003,
+            "range": "± 6366556",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12515068617,
+            "range": "± 29647509",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2277420932,
+            "range": "± 28583440",
             "unit": "ns/iter"
           }
         ]
