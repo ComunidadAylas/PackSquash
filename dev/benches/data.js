@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658344639747,
+  "lastUpdate": 1658344850097,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "cf69f68da1176e46f556134f74d5d7885b380cab",
-          "message": "chore(deps): bump tokio-util from 0.7.1 to 0.7.2 (#113)\n\nBumps [tokio-util](https://github.com/tokio-rs/tokio) from 0.7.1 to 0.7.2.\r\n- [Release notes](https://github.com/tokio-rs/tokio/releases)\r\n- [Commits](https://github.com/tokio-rs/tokio/compare/tokio-util-0.7.1...tokio-util-0.7.2)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: tokio-util\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-05-16T16:40:59+02:00",
-          "tree_id": "0def437895572fdc3a87d10e506bf5b6974d6ab3",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/cf69f68da1176e46f556134f74d5d7885b380cab"
-        },
-        "date": 1652714714218,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12481439,
-            "range": "± 717241",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 827033288,
-            "range": "± 8599020",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 15048915207,
-            "range": "± 49419269",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2170130816,
-            "range": "± 31029527",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2387,6 +2339,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2336995553,
             "range": "± 77261847",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2b64c769f090feef214ce0cad525be00ae6b541e",
+          "message": "chore(deps): update dependency beautifulsoup4 to v4.11.1",
+          "timestamp": "2022-07-20T18:32:00Z",
+          "tree_id": "ecca22a5f00a2c3b63e7e351f295906330367d3c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2b64c769f090feef214ce0cad525be00ae6b541e"
+        },
+        "date": 1658344849441,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 15652506,
+            "range": "± 745166",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1015965419,
+            "range": "± 20026296",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14623905729,
+            "range": "± 295732242",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2885143714,
+            "range": "± 64364703",
             "unit": "ns/iter"
           }
         ]
