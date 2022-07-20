@@ -902,7 +902,7 @@ impl TryFrom<f32> for UnitIntervalFloat {
 	fn try_from(value: f32) -> Result<Self, Self::Error> {
 		(0.0..=1.0)
 			.contains(&value)
-			.then(|| UnitIntervalFloat(value))
+			.then_some(UnitIntervalFloat(value))
 			.ok_or("The specified value is not a decimal number between 0 and 1, inclusive")
 	}
 }

@@ -83,6 +83,8 @@ impl Decoder for OptimizerDecoder {
 		}
 		self.reached_eof = true;
 
+		// Using a match expression is easier to understand and expand in the future
+		#[allow(clippy::match_like_matches_macro)]
 		let can_change_color_type = match self.asset_type {
 			PackFileAssetType::BannerLayer
 				if self
