@@ -28,11 +28,11 @@ fn main() {
 	println!("cargo:rustc-env=BUILD_YEAR={}", build_year);
 
 	// Add platform-specific metadata to the executable
-	add_executable_metadata(build_year);
+	add_executable_metadata();
 }
 
 #[cfg(windows)]
-fn add_executable_metadata(build_year: i32) {
+fn add_executable_metadata() {
 	let mut windows_resource = winres::WindowsResource::new();
 	windows_resource.set("LegalCopyright", env!("CARGO_PKG_AUTHORS"));
 	windows_resource.set(
@@ -53,4 +53,4 @@ fn add_executable_metadata(build_year: i32) {
 }
 
 #[cfg(not(windows))]
-fn add_executable_metadata(_: i32) {}
+fn add_executable_metadata() {}
