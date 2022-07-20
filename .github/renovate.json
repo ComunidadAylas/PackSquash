@@ -4,6 +4,7 @@
 		"config:base"
 	],
 	"addLabels": ["dependencies"],
+	"reviewers": ["team:packsquash-developers"],
 	"automergeType": "branch",
 	"packageRules": [
 		{
