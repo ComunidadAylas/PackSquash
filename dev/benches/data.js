@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658344988150,
+  "lastUpdate": 1658354307580,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "986f98346b8b5e13065aa962e17a3f55d6cec8e8",
-          "message": "chore(deps): bump sysinfo from 0.23.12 to 0.23.13 (#115)\n\nBumps [sysinfo](https://github.com/GuillaumeGomez/sysinfo) from 0.23.12 to 0.23.13.\r\n- [Release notes](https://github.com/GuillaumeGomez/sysinfo/releases)\r\n- [Changelog](https://github.com/GuillaumeGomez/sysinfo/blob/master/CHANGELOG.md)\r\n- [Commits](https://github.com/GuillaumeGomez/sysinfo/commits)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: sysinfo\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-05-23T10:55:57+02:00",
-          "tree_id": "8b3ae80acebdbcb5b3ffd441aef8ff18c66212c7",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/986f98346b8b5e13065aa962e17a3f55d6cec8e8"
-        },
-        "date": 1653297759469,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10940065,
-            "range": "± 388703",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 798749393,
-            "range": "± 3041573",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10286961629,
-            "range": "± 232733808",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2263753173,
-            "range": "± 37512297",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2389,6 +2341,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2659548080,
             "range": "± 80585441",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9d24aa29721a7cc15f3e5e04dbbe19c64e0624e7",
+          "message": "chore(deps): update dependency filelock to v3.7.1",
+          "timestamp": "2022-07-20T21:16:23Z",
+          "tree_id": "8705b77073d0a219636894286fb19a347b8e4c89",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9d24aa29721a7cc15f3e5e04dbbe19c64e0624e7"
+        },
+        "date": 1658354306831,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13585426,
+            "range": "± 967213",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 817630239,
+            "range": "± 22691653",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10572299889,
+            "range": "± 414217553",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2294169136,
+            "range": "± 48390867",
             "unit": "ns/iter"
           }
         ]
