@@ -11,6 +11,6 @@
 			"automerge": true
 		}
 	],
-	"__comment": "TODO The dependencies ignored below are pending upstream coordination to be applied effectively",
+	"description": "TODO The dependencies ignored below are pending upstream coordination to be applied effectively",
 	"ignoreDeps": ["aes", "zopfli"]
 }
