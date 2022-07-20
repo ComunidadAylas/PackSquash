@@ -1,0 +1,16 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"config:base"
+	],
+	"addLabels": ["dependencies"],
+	"automergeType": "branch",
+	"packageRules": [
+		{
+			"matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+			"automerge": true
+		}
+	],
+	"description": "TODO The dependencies ignored below are pending upstream coordination to be applied effectively",
+	"ignoreDeps": ["aes", "zopfli"]
+}
