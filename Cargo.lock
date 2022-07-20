@@ -711,15 +711,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fallible_collections"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c195cf4b2285d3c993eb887b4dc56b0d5728bbe1d0f9a99c0ac6bec2da3e4d85"
-dependencies = [
- "hashbrown",
-]
-
-[[package]]
 name = "fastrand"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1137,9 +1128,6 @@ name = "hashbrown"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "607c8a29735385251a339424dd462993c0fed8fa09d378f259377df08c126022"
-dependencies = [
- "ahash",
-]
 
 [[package]]
 name = "heck"
@@ -1175,12 +1163,11 @@ dependencies = [
 
 [[package]]
 name = "imagequant"
-version = "4.0.0"
+version = "4.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49f533cecb7eb061d19dee3c938d0e302c02193270497483e1b662a0a1a5e343"
+checksum = "fd9c246b5e902559d1f619b08a08f872cb88b03afe21ca9ec0df146f2fb1d34d"
 dependencies = [
  "arrayvec",
- "fallible_collections",
  "noisy_float",
  "once_cell",
  "rgb",
