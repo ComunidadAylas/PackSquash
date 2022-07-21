@@ -1,54 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658396452025,
+  "lastUpdate": 1658396457798,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador",
-            "email": "AlexTMjugador@users.noreply.github.com"
-          },
-          "committer": {
-            "name": "GitHub",
-            "username": "web-flow",
-            "email": "noreply@github.com"
-          },
-          "id": "9920791d61400a538c542c16e3db10d2eac5d2d6",
-          "message": "chore: add GitHub Codespaces dev container configuration\n\nGitHub Codespaces is very useful for those that have access to it, as it\noffers a web VS Code IDE backed by a powerful Linux VM with terminal\naccess, where development can be done in a breeze, without any local\nconfiguration.\n\nThis makes it easier for new contributors to get started, and serves as\na backup development machine for maintainers.",
-          "timestamp": "2022-07-14T12:08:07Z",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9920791d61400a538c542c16e3db10d2eac5d2d6"
-        },
-        "date": 1658108806481,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 16399772,
-            "range": "± 940146",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 870058745,
-            "range": "± 18532867",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13966640158,
-            "range": "± 176758141",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 3077913858,
-            "range": "± 52571645",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2862180238,
             "range": "± 72869933",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2e3ec3e0465a8666d09a839a672a05d46a15c230",
+          "message": "chore(deps): update dependency requests to v2.28.1",
+          "timestamp": "2022-07-21T09:15:33Z",
+          "tree_id": "ca36b1d28f603cfc9076cd155b9d7588e1970c42",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2e3ec3e0465a8666d09a839a672a05d46a15c230"
+        },
+        "date": 1658396457216,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12622041,
+            "range": "± 394842",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 840624164,
+            "range": "± 26020166",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11885818986,
+            "range": "± 713683715",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2343100134,
+            "range": "± 65233373",
             "unit": "ns/iter"
           }
         ]
