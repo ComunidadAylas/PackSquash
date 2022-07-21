@@ -607,7 +607,6 @@ jobs:
           benchmark-data-dir-path: dev/benches
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
-          comment-always: true
           comment-on-alert: true
           alert-threshold: 150%
           fail-on-alert: false
