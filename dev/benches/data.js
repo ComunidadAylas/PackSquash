@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658374860616,
+  "lastUpdate": 1658374957472,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "b9246d55910c4ed1c4d85b5e270ffa35f73d76be",
-          "message": "chore: update dependencies and apply recent once_cell feature renamings\n\nhttps://github.com/rust-lang/rust/pull/98165 landed in the latest Rust\nnightly version, which made Dependabot CI runs to fail. Try to get\nbuilds working again by updating the references to the old names\naccordingly.\n\nWhile at it, let's also do some minor dependency version bumps.",
-          "timestamp": "2022-06-20T18:43:43+02:00",
-          "tree_id": "6776a382c80ef7309319d6474a4314baa9b0eca0",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b9246d55910c4ed1c4d85b5e270ffa35f73d76be"
-        },
-        "date": 1655747253760,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 15633822,
-            "range": "± 1281737",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 886748961,
-            "range": "± 7001939",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 15938590979,
-            "range": "± 70397125",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2446273787,
-            "range": "± 23345565",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2672572399,
             "range": "± 188675234",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6c6f286e98191259a70cc3ea50c3370afcc0fb76",
+          "message": "chore(deps): update dependency certifi to v2022",
+          "timestamp": "2022-07-21T02:53:13Z",
+          "tree_id": "6e54cf2efe1a7eb2d8ff0dfeffa97b383646ffb7",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6c6f286e98191259a70cc3ea50c3370afcc0fb76"
+        },
+        "date": 1658374956861,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 17780362,
+            "range": "± 1280766",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1018520974,
+            "range": "± 23705907",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14150432286,
+            "range": "± 206817515",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2814126142,
+            "range": "± 54983060",
             "unit": "ns/iter"
           }
         ]
