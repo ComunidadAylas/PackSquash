@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658379046330,
+  "lastUpdate": 1658379601447,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "6f40332118196bbc68074f199121526dd8a013b7",
-          "message": "chore(deps): bump serde from 1.0.137 to 1.0.138 (#133)\n\nBumps [serde](https://github.com/serde-rs/serde) from 1.0.137 to 1.0.138.\r\n- [Release notes](https://github.com/serde-rs/serde/releases)\r\n- [Commits](https://github.com/serde-rs/serde/compare/v1.0.137...v1.0.138)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: serde\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-patch\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2022-07-04T13:07:20+02:00",
-          "tree_id": "f2d4a477070632a76cd832edb149de71bf6889f0",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6f40332118196bbc68074f199121526dd8a013b7"
-        },
-        "date": 1656934640506,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10827526,
-            "range": "± 93325",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 710518177,
-            "range": "± 4099866",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13427591937,
-            "range": "± 42376720",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2217209235,
-            "range": "± 51420320",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2248266269,
             "range": "± 102034820",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "51070f46b42c51182242e83ba0909a7e46f37abf",
+          "message": "fix(deps): update rust crate bytes to 1.2.0",
+          "timestamp": "2022-07-21T04:26:16Z",
+          "tree_id": "ec0392ccc002deb7ee9ed836d18bd4f152e9ee6b",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/51070f46b42c51182242e83ba0909a7e46f37abf"
+        },
+        "date": 1658379600704,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13068728,
+            "range": "± 865138",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 799012173,
+            "range": "± 33316028",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11844724608,
+            "range": "± 578788946",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2282550285,
+            "range": "± 85496805",
             "unit": "ns/iter"
           }
         ]
