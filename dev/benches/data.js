@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658366584613,
+  "lastUpdate": 1658367311318,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "b4ac04d1b1d7667bfa4a8618d7652d9c2414d4c9",
-          "message": "chore(deps): update dependencies",
-          "timestamp": "2022-06-08T22:36:06+02:00",
-          "tree_id": "a723a3937cd2826c2cace6c61952b68895c1c9e5",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b4ac04d1b1d7667bfa4a8618d7652d9c2414d4c9"
-        },
-        "date": 1654722371946,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 15688201,
-            "range": "± 1141729",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 991494167,
-            "range": "± 22183057",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 16740331682,
-            "range": "± 178893339",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2648813890,
-            "range": "± 63952792",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2393,6 +2345,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2349148318,
             "range": "± 47450823",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1669b73eb508bd6d76a57a1af257ebe5e3f3b568",
+          "message": "chore(deps): update dependency requests to v2.28.1",
+          "timestamp": "2022-07-21T00:33:43Z",
+          "tree_id": "c616f2fb1c9d73a7f776dc158df40e8b5d04cfdc",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/1669b73eb508bd6d76a57a1af257ebe5e3f3b568"
+        },
+        "date": 1658367310269,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10999211,
+            "range": "± 358931",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 791602125,
+            "range": "± 8452215",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10457817620,
+            "range": "± 385195348",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2166371982,
+            "range": "± 33366655",
             "unit": "ns/iter"
           }
         ]
