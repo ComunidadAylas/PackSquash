@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658367601030,
+  "lastUpdate": 1658374035871,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "46f5772d58963dcfd69ddab3de8213bd3295a942",
-          "message": "fix(pack_file/asset_type): legacy font .bin files can be anywhere\n\nThe Minecraft wiki incorrectly pointed out that .bin files belong to\nassets/<namespace>/font, but the game interprets the resource location\nin an absolute context, so valid resource locations for those files can\npoint anywhere in the pack. Indeed, a PackSquash user reported dealing\nwith a pack that had a .bin file outside of the usual folder, which\nPackSquash broke due to me coding a too restrictive glob pattern based\non the wiki misinformation.\n\nMake the .bin glob pattern more permissive to fix the situation.",
-          "timestamp": "2022-06-08T23:13:20+02:00",
-          "tree_id": "14a5b1d3fc161ec5ea77fa354ad8f65e5c1934e9",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/46f5772d58963dcfd69ddab3de8213bd3295a942"
-        },
-        "date": 1654725717322,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13000168,
-            "range": "± 604687",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 826767095,
-            "range": "± 1712070",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13995786116,
-            "range": "± 49827923",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2214103027,
-            "range": "± 60926880",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2393,6 +2345,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2174015129,
             "range": "± 56306483",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3ef9dcd7cea20d391ff0c1eca4781f80162b3570",
+          "message": "chore(deps): update dependency filelock to v3.7.1",
+          "timestamp": "2022-07-21T02:51:58Z",
+          "tree_id": "5a2b6770ca320a72312423ceeeb4a1f1b1625737",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3ef9dcd7cea20d391ff0c1eca4781f80162b3570"
+        },
+        "date": 1658374034799,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 15359143,
+            "range": "± 645600",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 977448567,
+            "range": "± 15555223",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11869712226,
+            "range": "± 377595408",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2471264451,
+            "range": "± 72484452",
             "unit": "ns/iter"
           }
         ]
