@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658379911941,
+  "lastUpdate": 1658396452025,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "9920791d61400a538c542c16e3db10d2eac5d2d6",
-          "message": "chore: add GitHub Codespaces dev container configuration\n\nGitHub Codespaces is very useful for those that have access to it, as it\noffers a web VS Code IDE backed by a powerful Linux VM with terminal\naccess, where development can be done in a breeze, without any local\nconfiguration.\n\nThis makes it easier for new contributors to get started, and serves as\na backup development machine for maintainers.",
-          "timestamp": "2022-07-14T12:08:07Z",
-          "tree_id": "9fa8aa2e954d9e172253d83f9d0c6cd4333d0185",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9920791d61400a538c542c16e3db10d2eac5d2d6"
-        },
-        "date": 1657803759901,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14464639,
-            "range": "± 413665",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 752962250,
-            "range": "± 4667830",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12064678280,
-            "range": "± 45026519",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2671662147,
-            "range": "± 8434989",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2158165729,
             "range": "± 23921158",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9f3410d5384f662b56acbe58bf0d5e5ba87d1dbe",
+          "message": "chore(deps): update dependency certifi to v2022 (#147)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2022-07-21T11:15:04+02:00",
+          "tree_id": "9462ae9ffb8d201a946fb11859cecf709c0b432f",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9f3410d5384f662b56acbe58bf0d5e5ba87d1dbe"
+        },
+        "date": 1658396451404,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 18209632,
+            "range": "± 1243964",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1012271386,
+            "range": "± 15304325",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14331004682,
+            "range": "± 290921242",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2862180238,
+            "range": "± 72869933",
             "unit": "ns/iter"
           }
         ]
