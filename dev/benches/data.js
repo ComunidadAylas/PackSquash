@@ -1,54 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658379672417,
+  "lastUpdate": 1658379911941,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador",
-            "email": "AlexTMjugador@users.noreply.github.com"
-          },
-          "committer": {
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador",
-            "email": "AlexTMjugador@users.noreply.github.com"
-          },
-          "id": "d24646b000be731a71cbf72906369d01592cd7b4",
-          "message": "chore(refactor): drop `num_cpus` dep in favor of stdlib function\n\nThis function was recently stabilized and is improving in recent Rust\nversions. At this point, it is equivalent to num_cpus for most purposes,\nbut without the added burden of another dependency.",
-          "timestamp": "2022-07-06T10:34:26Z",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d24646b000be731a71cbf72906369d01592cd7b4"
-        },
-        "date": 1657504167847,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13873436,
-            "range": "± 456145",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 762046505,
-            "range": "± 7147797",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 14974865304,
-            "range": "± 51927188",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2213895518,
-            "range": "± 15930971",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2694916846,
             "range": "± 104459105",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "171f399cd0d696ba41260e4bdee210374e0ccc1b",
+          "message": "chore(deps): update dependency requests to v2.28.1",
+          "timestamp": "2022-07-21T04:25:12Z",
+          "tree_id": "e034e02ba6b5e2ae6f9679c7eeee35eb8a409a4b",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/171f399cd0d696ba41260e4bdee210374e0ccc1b"
+        },
+        "date": 1658379910644,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10898392,
+            "range": "± 2696533",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 778813051,
+            "range": "± 3190259",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10438580148,
+            "range": "± 334879858",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2158165729,
+            "range": "± 23921158",
             "unit": "ns/iter"
           }
         ]
