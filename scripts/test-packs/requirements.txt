@@ -1,5 +1,5 @@
 beautifulsoup4==4.11.1
-certifi==2021.10.8
+certifi==2022.6.15
 charset-normalizer==2.0.10
 filelock==3.7.1
 gdown==4.2.0
