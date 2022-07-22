@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658447842237,
+  "lastUpdate": 1658457715970,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "4420feb345ff15c21d3403761a81aee2bf2f5855",
-          "message": "chore(deps): update dependency soupsieve to v2.3.2.post1 (#143)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
-          "timestamp": "2022-07-20T20:24:46+02:00",
-          "tree_id": "2810bb6dbc647fb30f22565c850403a61943fb42",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/4420feb345ff15c21d3403761a81aee2bf2f5855"
-        },
-        "date": 1658344124947,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14587241,
-            "range": "± 731942",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 914325714,
-            "range": "± 11506162",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11164147914,
-            "range": "± 91383542",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2363003720,
-            "range": "± 94857423",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2077646185,
             "range": "± 53746631",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cdacb0acf91da517db500c365c109fe60dbe9b17",
+          "message": "chore(deps): update rust crate vergen to 7.3.1",
+          "timestamp": "2022-07-22T02:08:23Z",
+          "tree_id": "e5a862955d8e26df9ff24359f26a8eb216102273",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/cdacb0acf91da517db500c365c109fe60dbe9b17"
+        },
+        "date": 1658457715299,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10914595,
+            "range": "± 564449",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 793387148,
+            "range": "± 2262343",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10880222949,
+            "range": "± 393859428",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2174510557,
+            "range": "± 35471141",
             "unit": "ns/iter"
           }
         ]
