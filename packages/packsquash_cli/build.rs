@@ -7,6 +7,9 @@ use time::OffsetDateTime;
 /// Initializes environment variables that will be accessible in the source
 /// code via the env! macro, and takes care of build-time metadata.
 fn main() {
+	// The environment variables read here are documented at:
+	// https://doc.rust-lang.org/cargo/reference/environment-variables.html
+
 	// Set variable for the build version
 	println!(
 		"cargo:rustc-env=BUILD_VERSION={}",
