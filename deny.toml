@@ -75,7 +75,11 @@ allow = [
 	# according to https://opensource.org/licenses/0BSD it is a modification
 	# of the ISC license, which is compatible. Its text is also extremely
 	# simple and allows using the code for any purpose
-	"0BSD"
+	"0BSD",
+	# Permissive license used by the Unicode consortium, similar in spirit
+	# to other permissive licenses:
+	# https://spdx.org/licenses/Unicode-DFS-2016.html
+	"Unicode-DFS-2016"
 ]
 default = "deny"
 copyleft = "allow"
@@ -98,12 +102,7 @@ skip-tree = [
 	# An ancient nom is pulled by the development dependency for
 	# benchmarking perfcnt. Let's ignore that for now. It doesn't
 	# affect the final user executables at all
-	{ name = "perfcnt", version = "=0.8.0" },
-	# criterion-plot depends on an older version of the cast crate
-	# compared to criterion itself. Ignore it, it's a development
-	# dependency that does not affect the final user executables at
-	# all. There are PRs submitted for upstream review to address this
-	{ name = "criterion-plot", version = "=0.4.4" }
+	{ name = "perfcnt", version = "=0.8.0" }
 ]
 
 [sources]
