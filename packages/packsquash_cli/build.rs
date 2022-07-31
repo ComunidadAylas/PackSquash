@@ -1,22 +1,34 @@
+use git2::{DescribeFormatOptions, DescribeOptions, Repository};
+use std::env;
+use std::env::current_dir;
+use std::error::Error;
 use time::OffsetDateTime;
-use vergen::{vergen, SemverKind};
 
 /// Initializes environment variables that will be accessible in the source
 /// code via the env! macro, and takes care of build-time metadata.
 fn main() {
-	let mut vergen_config = vergen::Config::default();
-	*vergen_config.cargo_mut().features_mut() = false;
-	*vergen_config.cargo_mut().profile_mut() = true;
-	*vergen_config.cargo_mut().target_triple_mut() = true;
-	*vergen_config.git_mut().branch_mut() = false;
-	*vergen_config.git_mut().commit_timestamp_mut() = false;
-	*vergen_config.git_mut().semver_mut() = true;
-	*vergen_config.git_mut().semver_kind_mut() = SemverKind::Lightweight;
-	*vergen_config.git_mut().semver_dirty_mut() = Some("-custom");
-	*vergen_config.git_mut().sha_mut() = false;
+	// Set variable for the build version
+	println!(
+		"cargo:rustc-env=BUILD_VERSION={}",
+		git_version().unwrap_or_else(|err| {
+			println!(
+				"cargo:warning=Could not get version via git: {}. \
+				Falling back to Cargo package version",
+				err
+			);
+			String::from(env!("CARGO_PKG_VERSION"))
+		})
+	);
 
-	// Generate the 'cargo:' key output that populate the target triple and version envrionment variables
-	vergen(vergen_config).expect("Vergen failure");
+	// Set variables for the target triple and build profile
+	println!(
+		"cargo:rustc-env=CARGO_TARGET_TRIPLE={}",
+		env::var("TARGET").unwrap_or_else(|_| String::from("unknown"))
+	);
+	println!(
+		"cargo:rustc-env=CARGO_PROFILE={}",
+		env::var("PROFILE").unwrap_or_else(|_| String::from("unknown"))
+	);
 
 	// Set variables with the build dates, for copyright and version strings
 	let build_date = OffsetDateTime::now_utc();
@@ -29,6 +41,27 @@ fn main() {
 
 	// Add platform-specific metadata to the executable
 	add_executable_metadata();
+}
+
+fn git_version() -> Result<String, Box<dyn Error>> {
+	// The current directory is set to the source file directory for this package.
+	// Find the repo directory backtracking on the file tree
+	let repo = Repository::discover(current_dir()?)?;
+
+	// Make sure we're executed if HEAD changes
+	println!("cargo:rerun-if-changed={:?}", repo.path().join("HEAD"));
+
+	// Run the equivalent of git describe --tags --dirty=-custom --always
+	let head_description = repo.describe(
+		DescribeOptions::new()
+			.describe_tags()
+			.show_commit_oid_as_fallback(true)
+	)?;
+
+	let version_string =
+		head_description.format(Some(DescribeFormatOptions::new().dirty_suffix("-custom")))?;
+
+	Ok(version_string)
 }
 
 #[cfg(windows)]

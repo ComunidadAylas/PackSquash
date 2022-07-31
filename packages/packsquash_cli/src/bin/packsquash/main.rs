@@ -391,10 +391,10 @@ fn squash(
 fn print_version_information(verbose: bool) {
 	println!(
 		"PackSquash {} ({}, {}) for {}",
-		env!("VERGEN_GIT_SEMVER_LIGHTWEIGHT"),
-		env!("VERGEN_CARGO_PROFILE"),
+		env!("BUILD_VERSION"),
+		env!("CARGO_PROFILE"),
 		env!("BUILD_DATE"),
-		env!("VERGEN_CARGO_TARGET_TRIPLE")
+		env!("CARGO_TARGET_TRIPLE")
 	);
 	println!("{}", env!("CARGO_PKG_DESCRIPTION"));
 	println!();
