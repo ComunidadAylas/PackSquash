@@ -30,7 +30,7 @@ winapi-util = "0.1.5"
 
 [build-dependencies]
 git2 = { version = "0.15.0", default-features = false }
-time = { version = "0.3.11", default-features = false, features = ["std"] }
+time = { version = "0.3.12", default-features = false, features = ["std"] }
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1.12"
