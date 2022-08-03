@@ -19,8 +19,6 @@ pub mod asset_type;
 
 mod util;
 
-#[cfg(feature = "audio-transcoding")]
-#[doc(cfg(feature = "audio-transcoding"))]
 mod audio_file;
 mod command_function_file;
 mod json_file;
@@ -37,8 +35,6 @@ mod properties_file;
 #[derive(Error, Debug)]
 #[error("{0}")]
 pub enum OptimizationError {
-	#[cfg(feature = "audio-transcoding")]
-	#[doc(cfg(feature = "audio-transcoding"))]
 	AudioFile(#[from] audio_file::OptimizationError),
 	JsonFile(#[from] json_file::OptimizationError),
 	PngFile(#[from] png_file::OptimizationError),

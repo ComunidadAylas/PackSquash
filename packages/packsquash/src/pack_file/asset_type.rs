@@ -9,7 +9,6 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 use tokio::io::AsyncRead;
 
 use crate::config::GlobalOptions;
-#[cfg(feature = "audio-transcoding")]
 use crate::pack_file::audio_file::AudioFile;
 use crate::pack_file::command_function_file::CommandFunctionFile;
 use crate::pack_file::json_file::JsonFile;
@@ -98,12 +97,10 @@ pub enum PackFileAssetType {
 
 	/// Any audio asset in Ogg Vorbis format. Minecraft expects the `.ogg` extension for them.
 	GenericOggVorbisAudio,
-	/// Any audio asset in a format supported by GStreamer, other than Ogg Vorbis. To make
-	/// PackSquash easier to distribute and test, only audio files with the extensions `.mp3`,
-	/// `.opus`, `.flac` and `.wav` are supported. As Minecraft does not support these formats,
-	/// they will be converted to Ogg Vorbis, with `.ogg` extension.
-	#[cfg(feature = "audio-transcoding")]
-	#[doc(cfg(feature = "audio-transcoding"))]
+	/// Any audio asset in a supported format, other than Ogg Vorbis. Currently, the other
+	/// supported audio formats and extensions are `.mp3`, `.flac`, `.wav` and `.m4a`. As
+	/// Minecraft does not support these formats, they will be converted to Ogg Vorbis,
+	/// with `.ogg` extension.
 	GenericAudio,
 
 	/// The `pack.png` pack icon file, located at the root directory of the pack.
@@ -266,9 +263,8 @@ impl PackFileAssetType {
 			Self::GenericOggVorbisAudio => {
 				compile_hardcoded_pack_file_glob_pattern("assets/*/sounds/**/?*.{ogg,oga}")
 			}
-			#[cfg(feature = "audio-transcoding")]
 			Self::GenericAudio => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/sounds/**/?*.{mp3,opus,flac,wav}")
+				compile_hardcoded_pack_file_glob_pattern("assets/*/sounds/**/?*.{mp3,flac,wav,m4a}")
 			}
 
 			Self::PackIcon => compile_hardcoded_pack_file_glob_pattern("pack.png"),
@@ -455,7 +451,6 @@ impl PackFileAssetType {
 			Self::GenericJson => None,
 			Self::GenericJsonWithComments => Some("json"),
 			Self::GenericOggVorbisAudio => Some("ogg"),
-			#[cfg(feature = "audio-transcoding")]
 			Self::GenericAudio => Some("ogg"),
 			Self::PackIcon | Self::BannerLayer | Self::EyeLayer => None,
 			#[cfg(feature = "optifine-support")]
@@ -617,13 +612,8 @@ impl PackFileAssetTypeMatches {
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				PackFileAssetType::GenericJsonWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
-				#[cfg(feature = "audio-transcoding")]
 				PackFileAssetType::GenericOggVorbisAudio if let Some(FileOptions::AudioFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(AudioFile, optimization_settings),
-				#[cfg(not(feature = "audio-transcoding"))]
-				PackFileAssetType::GenericOggVorbisAudio if file_options.is_none() =>
-					return_pack_file_to_process_data!(PassthroughFile, ()),
-				#[cfg(feature = "audio-transcoding")]
 				PackFileAssetType::GenericAudio if let Some(FileOptions::AudioFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(AudioFile, optimization_settings),
 				PackFileAssetType::PackIcon if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>

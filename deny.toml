@@ -111,4 +111,4 @@ unknown-git = "deny"
 allow-git = ["https://github.com/BurntSushi/rust-csv", "https://github.com/rust-lang/backtrace-rs"]
 
 [sources.allow-org]
-github = ["ComunidadAylas"]
+github = ["ComunidadAylas", "OptiVorbis"]

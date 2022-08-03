@@ -1,38 +1,34 @@
 //! Contains code to optimize audio files.
 
-use futures::{
-	future,
-	stream::{poll_fn, select},
-	FutureExt, SinkExt, StreamExt
+use bytes::{Buf, Bytes, BytesMut};
+use optivorbis::remuxer::ogg_to_ogg;
+use optivorbis::{
+	Remuxer, VorbisCommentFieldsAction, VorbisOptimizerSettings, VorbisVendorStringAction
 };
-use gstreamer::{
-	glib::BoolError, prelude::*, Buffer, Caps, Element, ElementFactory, FlowError, MessageView,
-	Pipeline, Sample, State, StateChangeError, TagMergeMode, TagSetter
-};
-
-use std::{
-	borrow::Cow,
-	pin::Pin,
-	task::{Context, Poll}
-};
-
-use bytes::BytesMut;
-use gstreamer::{buffer::Readable, MappedBuffer};
-use gstreamer_app::{AppSink, AppSrc};
-use gstreamer_audio::AudioInfo;
+use rubato::{ResampleError, ResamplerConstructionError};
+use std::borrow::Cow;
+use std::cell::Cell;
+use std::cmp;
+use std::io::{Cursor, Read};
+use std::num::NonZeroU32;
 use thiserror::Error;
-use tokio::{io::AsyncRead, task};
-use tokio_stream::Stream;
-use tokio_util::{codec::FramedRead, io::ReaderStream};
+use tokio::io::AsyncRead;
+use tokio_util::codec::{Decoder, FramedRead};
+use vorbis::{VorbisBitrateManagementStrategy, VorbisEncoder};
 
-use crate::config::{AudioFileOptions, ChannelMixingOption};
+use crate::config::{AudioBitrateControlMode, AudioFileOptions, ChannelMixingOption};
 use crate::pack_file::asset_type::PackFileAssetType;
 use crate::pack_file::AsyncReadAndSizeHint;
+use signal_processor::decode_and_process_sample_blocks;
+use vorbis_stream_mangler::ValidatingAndObfuscatingOggVorbisStreamMangler;
 
-use super::{passthrough_file::PassthroughDecoder, PackFile, PackFileConstructor};
+use super::{PackFile, PackFileConstructor};
 
 #[cfg(test)]
 mod tests;
+
+mod signal_processor;
+mod vorbis_stream_mangler;
 
 /// Represents an audio file, that can be optimized and/or transcoded to Ogg.
 ///
@@ -40,384 +36,373 @@ mod tests;
 /// packs may replace and add new sound events to Minecraft.
 pub struct AudioFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
+	file_length_hint: usize,
 	is_ogg: bool,
 	optimization_settings: AudioFileOptions
 }
 
-/// The size of the temporary audio data buffers that are handed-off and received from
-/// GStreamer, in bytes.
-const AUDIO_DATA_BUFFER_SIZE: usize = 32 * 1024;
-const AUDIO_DATA_BUFFER_SIZE_U32: u32 = AUDIO_DATA_BUFFER_SIZE as u32;
-const AUDIO_DATA_BUFFER_SIZE_U64: u64 = AUDIO_DATA_BUFFER_SIZE_U32 as u64;
-
-/// The maximum duration of the audio data that will be put on a single Ogg page, in nanoseconds.
-const MAX_OGG_PAGE_DURATION: u64 = 15_000_000_000;
+/// Optimizer decoder that transforms audio files to an optimized representation.
+pub struct OptimizerDecoder {
+	optimization_settings: AudioFileOptions,
+	is_ogg: bool,
+	reached_eof: bool
+}
 
 /// Represents an error that may happen while optimizing audio files.
 #[derive(Error, Debug)]
 #[non_exhaustive]
 pub enum OptimizationError {
-	#[error("GStreamer element state change error (more info with GST_DEBUG): {0}")]
-	GstreamerStateChange(#[from] StateChangeError),
-	#[error("GStreamer error (more info with GST_DEBUG): {0}")]
-	GstreamerBool(#[from] BoolError),
-	#[error("GStreamer flow error (more info with GST_DEBUG): {0}")]
-	GstreamerFlow(#[from] FlowError),
-	#[error("GStreamer error message (more info with GST_DEBUG): {0}")]
-	GstreamerMessage(#[from] gstreamer::glib::Error),
+	#[error("Symphonia decoding error: {0}")]
+	Symphonia(#[from] symphonia::core::errors::Error),
+	#[error("Vorbis error: {0}")]
+	Vorbis(#[from] vorbis::VorbisError),
+	#[error("Could not find a decodable audio track. Is this file in a supported format, and its extension correct?")]
+	NoAudioTrack,
+	#[error("Unknown or invalid channel count. Minecraft only supports mono and stereo sounds")]
+	UnsupportedChannelCount,
+	#[error("Unknown sampling frequency. Is this file corrupt?")]
+	UnknownSamplingFrequency,
+	#[error("Could not set up resampling: {0}")]
+	ResamplerConstructionFailure(#[from] ResamplerConstructionError),
+	#[error("Tried to resample from {sampling_frequency} Hz, but that frequency is too high. Please lower it")]
+	InvalidSourceSamplingFrequency { sampling_frequency: NonZeroU32 },
+	#[error("Tried to resample to {sampling_frequency} Hz, but that frequency is too high. Please lower it")]
+	InvalidTargetSamplingFrequency { sampling_frequency: NonZeroU32 },
+	#[error("An invalid target bitrate of zero was specified")]
+	InvalidTargetBitrate,
+	#[error("Resample error: {0}")]
+	ResamplingFailure(#[from] ResampleError),
+	#[error("{0}")]
+	TwoPassOptimization(#[from] ogg_to_ogg::RemuxError),
+	#[error("The Minecraft sample count limit for audio files was exceeded. Please reduce the sampling frequency or duration")]
+	TooLongForMinecraft,
 	#[error("I/O error: {0}")]
 	Io(#[from] std::io::Error)
 }
 
-/// Alias for the opaque stream type that provides the processed (optimized) audio
-/// file data, when it was transcoded.
-pub type ProcessedAudioDataStream<T: AsyncRead + Send + Unpin + 'static> =
-	impl Stream<Item = Result<MappedBuffer<Readable>, OptimizationError>> + Send + Unpin;
-
-/// Creates a new processed audio file data stream, that will use the specified
-/// GStreamer pipeline, which contains the provided appsrc and appsink elements,
-/// to process audio file bytes read from an [AsyncRead] to an optimized form,
-/// via transcoding.
-fn new_processed_audio_data_stream<T: AsyncRead + Send + Unpin + 'static>(
-	read: T,
-	gstreamer_pipeline: Pipeline,
-	appsrc: &AppSrc,
-	appsink: &AppSink
-) -> ProcessedAudioDataStream<T> {
-	let read_stream = ReaderStream::new(read);
-	let input_sample_sink = appsrc.sink().sink_err_into();
-	let bus_message_stream = gstreamer_pipeline.bus().unwrap().stream();
-
-	let mut input_forward_future = read_stream
-		.map(|read_result| {
-			read_result.map_or_else(
-				|error| Err(error.into()),
-				|buffer| {
-					Ok(Sample::builder()
-						.buffer(&Buffer::from_slice(buffer))
-						.build())
-				}
-			)
-		})
-		.forward(input_sample_sink);
-
-	// This stream just polls the input forward future to completion,
-	// returning either end of stream and no items or an error when the
-	// future resolves. While it is in progress, it always returns Pending
-	let input_forward_stream = poll_fn(move |cx| -> Poll<Option<_>> {
-		input_forward_future
-			.poll_unpin(cx)
-			.map(|result| result.err().map(Err))
-	});
-
-	let error_message_stream = bus_message_stream
-		.filter_map(|msg| {
-			future::ready(match msg.view() {
-				// Convert error messages and pass them through
-				MessageView::Error(error) => Some(Some(Err(error.error().into()))),
-				// Let the first EOS message pass, so we can end this stream. This is
-				// needed because after EOS there will be no more messages for our
-				// purposes, and we should end the stream here
-				MessageView::Eos(_) => Some(None),
-				// Do not ley any other messages through
-				_ => None
-			})
-		})
-		// Passthrough any error, but end the stream if we find EOS
-		.scan((), |_, error_or_eos| future::ready(error_or_eos))
-		.take(1);
-
-	select(
-		// Return either errors that happen while forwarding data from the read or another
-		// data, by polling from two streams.
-		// The result stream will only end when both of these end
-		input_forward_stream,
-		select(
-			// Return either actual output data or error conditions signalled in the bus
-			error_message_stream,
-			appsink.stream().map(|sample| {
-				Ok(sample
-					.buffer_owned()
-					.unwrap()
-					.into_mapped_buffer_readable()
-					.unwrap())
-			})
-		)
-	)
-	.chain(poll_fn(move |_| -> Poll<Option<_>> {
-		// After an error or EOS message was received in the bus, the appsink
-		// stream signalled EOS, and we reached EOF on the read, we know that
-		// the file was completely processed.
-		// This is a good moment to tear down the pipeline, and let GStreamer
-		// free memory
-		gstreamer_pipeline.set_state(State::Null).ok();
-
-		Poll::Ready(None)
-	}))
-}
-
-/// Adapts internal stream structs used by [AudioFile] to a single [Stream]
-/// that matches client code expectations.
-pub enum AudioDataStream<T: AsyncRead + Send + Unpin + 'static> {
-	Transcoded(ProcessedAudioDataStream<T>),
-	PassedThrough(FramedRead<T, PassthroughDecoder>),
-	InitError(tokio_stream::Once<<Self as Stream>::Item>)
-}
-
-impl<T: AsyncRead + Send + Unpin + 'static> Stream for AudioDataStream<T> {
-	type Item = Result<(Cow<'static, str>, ByteBuffer), OptimizationError>;
-
-	fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-		// Pass through to the underlying stream, mapping types accordingly
-		match Pin::into_inner(self) {
-			AudioDataStream::Transcoded(stream) => stream.poll_next_unpin(cx).map(|item| {
-				item.map(|result| {
-					result.map(|buf| (Cow::Borrowed("Transcoded"), ByteBuffer::MappedBuffer(buf)))
-				})
-			}),
-			AudioDataStream::PassedThrough(stream) => stream.poll_next_unpin(cx).map(|item| {
-				item.map(|result| {
-					result.map_or_else(
-						|err| Err(err.into()),
-						|(optimization_strategy_message, buf)| {
-							Ok((optimization_strategy_message, ByteBuffer::BytesMut(buf)))
-						}
-					)
-				})
-			}),
-			AudioDataStream::InitError(stream) => stream.poll_next_unpin(cx)
-		}
-	}
-}
-
-/// Helper enum to allow clients of [AudioFile] consume bytes from different
+/// Helper enum to allow clients of [AudioFile] to consume bytes from different
 /// owned representations, which skips costly conversions.
 #[derive(Debug)]
 pub enum ByteBuffer {
-	MappedBuffer(MappedBuffer<Readable>),
-	BytesMut(BytesMut)
+	CowSlice(Cow<'static, [u8]>),
+	Bytes(Bytes)
 }
 
 impl AsRef<[u8]> for ByteBuffer {
 	fn as_ref(&self) -> &[u8] {
 		match self {
-			ByteBuffer::MappedBuffer(buf) => buf,
-			ByteBuffer::BytesMut(buf) => buf
+			ByteBuffer::CowSlice(buf) => buf,
+			ByteBuffer::Bytes(buf) => buf
 		}
 	}
+}
+
+// FIXME: actual framing?
+// (i.e. do not hold the entire file in memory before decoding, so that frame != file)
+impl Decoder for OptimizerDecoder {
+	type Item = (Cow<'static, str>, ByteBuffer);
+	type Error = OptimizationError;
+
+	fn decode(&mut self, _: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+		Ok(None)
+	}
+
+	fn decode_eof(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+		// This method will be called when EOF is reached until it returns None. Because we
+		// will only ever output a single item in the stream, always return None if we have
+		// executed once already
+		if self.reached_eof {
+			return Ok(None);
+		}
+		self.reached_eof = true;
+
+		let input_file = src.split_off(0).freeze();
+
+		let skip_transcoding = self.is_ogg && !self.optimization_settings.transcode_ogg;
+		let do_two_pass_optimization_and_validation = self
+			.optimization_settings
+			.two_pass_vorbis_optimization_and_validation;
+		let can_use_input_as_output = self.is_ogg
+			&& self.optimization_settings.target_pitch == 1.0
+			&& matches!(
+				self.optimization_settings.channels,
+				ChannelMixingOption::Skip
+			);
+
+		// First pass: transcode the input audio file to an efficient Ogg Vorbis representation.
+		// This is necessary if the input audio file is not Ogg Vorbis, or if some modification
+		// to the audio data is done (currently, channel mixing, resampling and pitch shifting)
+		let transcoded_file = if skip_transcoding {
+			ByteBuffer::Bytes(input_file.clone())
+		} else {
+			ByteBuffer::CowSlice(process_and_transcode(
+				input_file.clone().reader(),
+				self.is_ogg,
+				&self.optimization_settings
+			)?)
+		};
+
+		// Second pass: run OptiVorbis on the input file, which may be transcoded by now. This
+		// is a lossless, two-pass lossless optimization step that completes pretty quickly
+		// (think on OxiPNG, but much, much faster and less quirkier)
+		let transcoded_and_optimized_file = if do_two_pass_optimization_and_validation {
+			ByteBuffer::CowSlice(
+				validate_and_optimize(transcoded_file, self.optimization_settings.ogg_obfuscation)?
+					.into()
+			)
+		} else {
+			transcoded_file
+		};
+
+		// Third pass: check whether the transcoded and two-pass optimized file is actually smaller.
+		// If not, quickly run OptiVorbis over the original file, which is practically guaranteed to
+		// never return a file bigger than its input, and return that
+		let optimized_file_is_input_file;
+		let optimized_file = if do_two_pass_optimization_and_validation
+			&& input_file.len() < transcoded_and_optimized_file.as_ref().len()
+			&& can_use_input_as_output
+		{
+			optimized_file_is_input_file = true;
+			ByteBuffer::CowSlice(
+				validate_and_optimize(input_file, self.optimization_settings.ogg_obfuscation)?.into()
+			)
+		} else {
+			optimized_file_is_input_file = false;
+			transcoded_and_optimized_file
+		};
+
+		let optimization_strategy = match (skip_transcoding, do_two_pass_optimization_and_validation, optimized_file_is_input_file) {
+			(false, false, false) => "Transcoded",
+			(false, true, false) => "Transcoded, validated and optimized",
+			(true, false, false) => "Copied",
+			(true, true, false) => "Validated and optimized",
+			(_, _, true) => "Validated and optimized, but transcoding yielded a bigger file. Try tweaking options for extra savings"
+		}.into();
+
+		Ok(Some((optimization_strategy, optimized_file)))
+	}
+}
+
+/// Processes the input audio file and transcodes it to Ogg Vorbis, according to the
+/// provided optimization settings. The audio signal processing done may include resampling,
+/// pitch shifting and channel mixing. Empty sound files (e.g., without audio samples, or only
+/// containing audio samples which are complete silence) may be special-cased for optimization,
+/// yielding a minimal empty Ogg Vorbis file.
+fn process_and_transcode(
+	input_file: impl Read + Send + Sync + 'static,
+	is_ogg: bool,
+	optimization_settings: &AudioFileOptions
+) -> Result<Cow<'static, [u8]>, OptimizationError> {
+	// FIXME write to a SpooledTempFile whose maximum memory buffer size
+	// is controlled by a global budget, once that refactor is complete
+	let mut transcoded_file = vec![];
+	let encoder = Cell::new(None);
+
+	let is_silence = decode_and_process_sample_blocks(
+		input_file,
+		is_ogg,
+		match optimization_settings.channels {
+			ChannelMixingOption::ToChannels(count) => Some(count),
+			ChannelMixingOption::Skip => None
+		},
+		|input_sampling_frequency, output_channel_count| {
+			let is_positional_audio = optimization_settings
+				.is_positional_audio
+				.unwrap_or(output_channel_count.get() == 1);
+
+			// Resampling to a frequency higher than the input one is a bad idea at
+			// this point: it doesn't add meaningful audio information or helps using
+			// different signal processing filters, but it definitely increases space
+			// costs. Let's not do that
+			let output_sampling_frequency = cmp::min(
+				optimization_settings
+					.sampling_frequency_override
+					.unwrap_or(if is_positional_audio {
+						optimization_settings.positional_audio_sampling_frequency
+					} else {
+						optimization_settings.non_positional_audio_sampling_frequency
+					}),
+				input_sampling_frequency
+			);
+
+			encoder.set(Some(VorbisEncoder::new(
+				// Use a fixed serial for better compressibility when not using OptiVorbis,
+				// which is non-zero to avoid some warnings
+				1,
+				// No comments
+				[("", ""); 0],
+				output_sampling_frequency,
+				output_channel_count,
+				match optimization_settings
+					.audio_bitrate_control_mode_override
+					.unwrap_or(optimization_settings.audio_bitrate_control_mode)
+				{
+					AudioBitrateControlMode::Cqf => VorbisBitrateManagementStrategy::QualityVbr {
+						target_quality: target_bitrate_control_metric_to_quality(
+							optimization_settings,
+							is_positional_audio
+						)
+					},
+					AudioBitrateControlMode::Vbr => VorbisBitrateManagementStrategy::Vbr {
+						target_bitrate: target_bitrate_control_metric_to_bitrate(
+							optimization_settings,
+							is_positional_audio
+						)?
+					},
+					AudioBitrateControlMode::Abr => VorbisBitrateManagementStrategy::Abr {
+						average_bitrate: target_bitrate_control_metric_to_bitrate(
+							optimization_settings,
+							is_positional_audio
+						)?
+					},
+					AudioBitrateControlMode::ConstrainedAbr => {
+						VorbisBitrateManagementStrategy::ConstrainedAbr {
+							maximum_bitrate: target_bitrate_control_metric_to_bitrate(
+								optimization_settings,
+								is_positional_audio
+							)?
+						}
+					}
+				},
+				// Use jumbo Ogg pages for the least encapsulation overhead
+				Some(u16::MAX),
+				&mut transcoded_file
+			)?));
+
+			Ok(output_sampling_frequency)
+		},
+		optimization_settings.target_pitch,
+		|block| {
+			if let Some(mut vorbis_encoder) = encoder.take() {
+				vorbis_encoder.encode_audio_block(block)?;
+				encoder.set(Some(vorbis_encoder));
+			}
+
+			Ok(())
+		}
+	)?;
+
+	// Explicitly finish the Ogg Vorbis stream, so we don't ignore any errors there
+	if let Some(vorbis_encoder) = encoder.take() {
+		vorbis_encoder.finish()?;
+	}
+	drop(encoder);
+
+	Ok(
+		if is_silence && optimization_settings.empty_audio_optimization {
+			// Use a specially crafted minimal Ogg Vorbis file to represent
+			// no audio data. This can save 1-2 KiB in Vorbis header information
+			// per file: every known encoder assumes that audio samples will
+			// follow, and thus they always add the complete codec setup
+			// information to the headers, but we can do better and stub all
+			// that out when not needed. Audio files full of silence are a
+			// fairly common idiom among resource pack creators to disable
+			// sounds.
+			//
+			// This file is a bit special in the sense that, even though it
+			// follows the Vorbis format specification, it contains absolutely
+			// no audio data. Minecraft handles this fine, but programs that
+			// insist on decoding at least a sample may treat this as an error
+			// condition (e.g., GStreamer)
+			Cow::Borrowed(include_bytes!("audio_file/empty.ogg"))
+		} else {
+			Cow::Owned(transcoded_file)
+		}
+	)
+}
+
+/// Validates and optimizes the specified Ogg Vorbis file in two passes, using OptiVorbis.
+fn validate_and_optimize<T: AsRef<[u8]>>(
+	input_file: T,
+	obfuscate: bool
+) -> Result<Vec<u8>, OptimizationError> {
+	let mut too_long_for_minecraft = false;
+	// FIXME write to a SpooledTempFile whose maximum memory buffer size
+	// is controlled by a global budget, once that refactor is complete
+	let mut optimized_file = Vec::with_capacity(input_file.as_ref().len().saturating_mul(17) / 20);
+
+	optivorbis::OggToOgg::new(
+		ogg_to_ogg::Settings {
+			randomize_stream_serials: true,
+			first_stream_serial_offset: 0,
+			// Beginning sample truncation is not supported by the Minecraft Vorbis decoder
+			ignore_start_sample_offset: true,
+			error_on_no_vorbis_streams: true,
+			vorbis_stream_mangler: ValidatingAndObfuscatingOggVorbisStreamMangler::new(
+				obfuscate,
+				&mut too_long_for_minecraft
+			)
+		},
+		{
+			let mut optimizer_settings = VorbisOptimizerSettings::default();
+			optimizer_settings.comment_fields_action = VorbisCommentFieldsAction::Delete;
+			optimizer_settings.vendor_string_action = VorbisVendorStringAction::Empty;
+			optimizer_settings
+		}
+	)
+	.remux(Cursor::new(input_file), &mut optimized_file)?;
+
+	if too_long_for_minecraft {
+		return Err(OptimizationError::TooLongForMinecraft);
+	}
+
+	Ok(optimized_file)
+}
+
+/// Converts the applicable target bitrate control metric, as defined in the specified
+/// optimization settings, to a quality factor ready to pass on to a Vorbis encoder.
+fn target_bitrate_control_metric_to_quality(
+	optimization_settings: &AudioFileOptions,
+	is_positional_audio: bool
+) -> f32 {
+	let target_bitrate_control_metric = optimization_settings
+		.target_bitrate_control_metric_override
+		.unwrap_or(if is_positional_audio {
+			optimization_settings.positional_audio_target_bitrate_control_metric
+		} else {
+			optimization_settings.non_positional_audio_target_bitrate_control_metric
+		});
+
+	// Convert the more user-friendly range of [-1, 10] to the
+	// [-0.1, 1] range expected by aoTuV
+	target_bitrate_control_metric / 10.0
+}
+
+/// Converts the applicable target bitrate control metric, as defined in the specified
+/// optimization settings, to a bitrate ready to pass on to a Vorbis encoder.
+fn target_bitrate_control_metric_to_bitrate(
+	optimization_settings: &AudioFileOptions,
+	is_positional_audio: bool
+) -> Result<NonZeroU32, OptimizationError> {
+	let target_bitrate_control_metric = optimization_settings
+		.target_bitrate_control_metric_override
+		.unwrap_or(if is_positional_audio {
+			optimization_settings.positional_audio_target_bitrate_control_metric
+		} else {
+			optimization_settings.non_positional_audio_target_bitrate_control_metric
+		});
+
+	// Convert the more user-friendly unit of kbits/s to bits/s, as
+	// expected by Vorbis
+	((target_bitrate_control_metric * 1000.0) as u32)
+		.try_into()
+		.map_err(|_| OptimizationError::InvalidTargetBitrate)
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 	type ByteChunkType = ByteBuffer;
 	type OptimizationError = OptimizationError;
-	type OptimizedByteChunksStream = AudioDataStream<T>;
+	type OptimizedByteChunksStream = FramedRead<T, OptimizerDecoder>;
 
-	fn process(self) -> AudioDataStream<T> {
-		// Bail with a passthrough stream if we want to do so
-		if self.is_ogg && !self.optimization_settings.transcode_ogg {
-			return AudioDataStream::PassedThrough(FramedRead::new(
-				self.read,
-				PassthroughDecoder {
-					optimization_strategy_message: "Copied due to file settings"
-				}
-			));
-		}
-
-		// Perform GStreamer pipeline initialization operations and stream creation
-		// in a closure that returns a result, to be able to use the more ergonomic ?
-		// operator
-		(|| -> Result<AudioDataStream<T>, OptimizationError> {
-			// With one task per resource file, this is optimal
-			task::block_in_place(|| {
-				// GStreamer always acquires a mutex lock to check if it was already initialized,
-				// and if so returns successfully, so there's no point for PackSquash to introduce
-				// extra synchronization to guarantee that this is only called once. This behavior
-				// is unlikely to change, because it is a reasonable expectation of the docs, which
-				// state that the method returns success "if GStreamer could be initialized" (it
-				// doesn't specify now or before).
-				// See: https://github.com/GStreamer/gstreamer/blob/44bdad58f623e50a07476c0f40f8ff7543396f7c/gst/gst.c#L411
-				gstreamer::init().unwrap()
-			});
-
-			let gstreamer_pipeline = Pipeline::new(None);
-
-			// Create the pipeline elements
-			let appsrc = ElementFactory::make("appsrc", None).unwrap();
-			let decoder = ElementFactory::make("decodebin", None).unwrap(); // Contains a demuxer + decoder
-			let converter = ElementFactory::make("audioconvert", None).unwrap(); // Make sure vorbisenc receives f32le samples
-			let resampler = ElementFactory::make("audioresample", None).unwrap();
-			let resampler_filter = ElementFactory::make("capsfilter", None).unwrap();
-			let encoder = ElementFactory::make("vorbisenc", None).unwrap();
-			let muxer = ElementFactory::make("oggmux", None).unwrap();
-			let appsink = ElementFactory::make("appsink", None).unwrap();
-
-			appsrc.set_property("max-bytes", AUDIO_DATA_BUFFER_SIZE_U64);
-
-			decoder.set_property("expose-all-streams", false);
-			decoder.set_property(
-				"caps",
-				Caps::new_simple("audio/x-raw", &[]) // Only decode audio streams
-			);
-
-			resampler.set_property("quality", 10i32); // Good quality resampling
-
-			encoder.try_set_property(
-				"min-bitrate",
-				i32::from(self.optimization_settings.minimum_bitrate)
-			)?;
-			encoder.try_set_property(
-				"max-bitrate",
-				i32::from(self.optimization_settings.maximum_bitrate)
-			)?;
-
-			// Reduce Ogg page overhead by increasing maximum page duration. This slows down
-			// seeks, but the Minecraft sound engine only plays audio sources through
-			muxer.set_property("max-delay", MAX_OGG_PAGE_DURATION);
-			muxer.set_property("max-page-delay", MAX_OGG_PAGE_DURATION);
-
-			appsink.set_property("sync", false); // Output at max speed, not realtime
-			appsink.set_property("blocksize", AUDIO_DATA_BUFFER_SIZE_U32);
-			appsink.set_property("max-buffers", 8u32);
-
-			// decodebin (demuxer + decoder) needs to be linked later with the next step, because in the
-			// beginning it doesn't have a source pad: it acquires it on the fly after probing the input
-
-			// Add and link the constant parts of the pipeline together
-			gstreamer_pipeline
-				.add_many(&[
-					&appsrc,
-					&decoder,
-					&converter,
-					&resampler,
-					&resampler_filter,
-					&encoder,
-					&muxer,
-					&appsink
-				])
-				.unwrap();
-
-			appsrc.link(&decoder)?;
-			Element::link_many(&[&resampler, &resampler_filter, &encoder, &muxer, &appsink])?;
-
-			// Discard all event-provided tags. As the encoder is not simultaneously a tag reader,
-			// and we not explicitly add any tags, the resulting file will have no tags
-			encoder
-				.downcast_ref::<TagSetter>()
-				.unwrap()
-				.set_tag_merge_mode(TagMergeMode::KeepAll);
-
-			// If we need to change the target pitch, add the needed elements
-			let mut pitch_shifter = None;
-
-			#[allow(clippy::float_cmp)] // Edge case where comparing float equality is okay
-			if self.optimization_settings.target_pitch != 1.0 {
-				let pitch_shifter_element = ElementFactory::make("pitch", None).unwrap();
-
-				// Minecraft lets OpenAL "Frequency Shift by Pitch" implement pitch shifting
-				// (see https://www.openal.org/documentation/openal-1.1-specification.pdf).
-				// OpenAL achieves the pitch shift by resampling the audio, i.e. changing both
-				// tempo and pitch, which introduces the "chipmunk effect". As we want the sound
-				// to be played back at its original speed at target_pitch, we shift the pitch
-				// to the inverse value. For instance, if the target pitch is 0.5 (half less pitch),
-				// we shift the pitch here to 1 / 0.5 = 2 (double the pitch), so the pitch shifts
-				// cancel each other out
-				pitch_shifter_element
-					.try_set_property("pitch", 1.0 / self.optimization_settings.target_pitch)?;
-				pitch_shifter_element
-					.try_set_property("tempo", 1.0 / self.optimization_settings.target_pitch)?;
-
-				gstreamer_pipeline.add(&pitch_shifter_element).unwrap();
-				pitch_shifter_element.link(&resampler)?;
-
-				pitch_shifter = Some(pitch_shifter_element);
-			}
-
-			// Handle the demuxer receiving a source pad
-			let requested_sampling_frequency = self.optimization_settings.sampling_frequency.into();
-			let result_audio_channels = self.optimization_settings.channels;
-			decoder.connect_pad_added(move |decoder, src_pad| {
-				// The decoder has just received a audio source.
-				// Get the target element, and then its sink, to connect the decoder source pad to it
-				let sink_element = if let Some(pitch_shifter) = pitch_shifter.as_ref() {
-					pitch_shifter
-				} else {
-					&resampler
-				};
-				let sink_pad = sink_element.static_pad("sink").unwrap();
-
-				// Ignore event if the link is already set up
-				if sink_pad.is_linked() {
-					return;
-				}
-
-				let audio_info = AudioInfo::from_caps(&src_pad.current_caps().unwrap()).unwrap();
-				let source_sampling_frequency = audio_info.rate().try_into().unwrap();
-
-				// Resample to the requested sampling frequency in the options only if it is lower than the
-				// source sampling frequency, as upsampling would only bloat the file size with no benefits
-				// in this case
-				resampler_filter.set_property(
-					"caps",
-					&Caps::new_simple(
-						"audio/x-raw",
-						&[(
-							"rate",
-							&i32::min(requested_sampling_frequency, source_sampling_frequency)
-						)]
-					)
-				);
-
-				if let ChannelMixingOption::ToChannels(num_channels) = result_audio_channels {
-					// We want to mix to some number of channels, so configure the
-					// necessary caps filter (channel mix filter)
-					let channel_mix_filter = ElementFactory::make("capsfilter", None).unwrap();
-					channel_mix_filter.set_property(
-						"caps",
-						&Caps::new_simple("audio/x-raw", &[("channels", &i32::from(num_channels))])
-					);
-
-					// Get the pipeline, which is the parent of any element in the
-					// pipeline, and add the new caps filter to it
-					sink_element
-						.parent()
-						.unwrap()
-						.downcast_ref::<Pipeline>()
-						.unwrap()
-						.add(&channel_mix_filter)
-						.unwrap();
-
-					// Link the decoder with the converter, the converter to the channel mix filter, and
-					// the channel mix filter to the sink element:
-					// ... -> decoder -> converter -> channel_mix_filter -> sink_element -> ...
-					Element::link_many(&[decoder, &converter, &channel_mix_filter, sink_element])
-						.unwrap();
-
-					// We also need to set the new element to play, or otherwise
-					// the entire pipeline will pause
-					channel_mix_filter.sync_state_with_parent().unwrap();
-				} else {
-					// No channel mixing is desired, so link the decoder with the
-					// converter, and the converter directly with the sink element:
-					// ... -> decoder -> converter -> sink_element -> ...
-					Element::link_many(&[decoder, &converter, sink_element]).unwrap();
-				}
-			});
-
-			// The pipeline is good to go. Let's start!
-			gstreamer_pipeline.set_state(State::Playing)?;
-
-			Ok(AudioDataStream::Transcoded(
-				new_processed_audio_data_stream(
-					self.read,
-					gstreamer_pipeline,
-					appsrc.downcast_ref::<AppSrc>().unwrap(),
-					appsink.downcast_ref::<AppSink>().unwrap()
-				)
-			))
-		})()
-		.map_or_else(
-			|err| AudioDataStream::InitError(tokio_stream::once(Err(err))),
-			|stream| stream
+	fn process(self) -> FramedRead<T, OptimizerDecoder> {
+		FramedRead::with_capacity(
+			self.read,
+			OptimizerDecoder {
+				optimization_settings: self.optimization_settings,
+				is_ogg: self.is_ogg,
+				reached_eof: false
+			},
+			self.file_length_hint
 		)
 	}
 
@@ -434,8 +419,10 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for AudioFile
 		asset_type: PackFileAssetType,
 		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
-		file_read_producer().map(|(read, _)| Self {
+		file_read_producer().map(|(read, file_length_hint)| Self {
 			read,
+			// The file is too big to fit in memory if this conversion fails anyway
+			file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
 			is_ogg: matches!(asset_type, PackFileAssetType::GenericOggVorbisAudio),
 			optimization_settings
 		})

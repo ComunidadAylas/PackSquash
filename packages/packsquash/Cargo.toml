@@ -25,9 +25,9 @@ tokio-util = { version = "0.7.3", default-features = false, features = ["codec",
 tokio-stream = { version = "0.1.9", default-features = false }
 futures = { version = "0.3.21", default-features = false }
 
-serde = { version = "1.0.141", features = ["derive"] }
+serde = { version = "1.0.142", features = ["derive"] }
 
-serde_json = "1.0.82"
+serde_json = "1.0.83"
 json_comments = "0.2.1"
 jsonpath_lib = "0.3.0"
 
@@ -37,9 +37,14 @@ rgb = "0.8.33"
 imagequant = { version = "4.0.1", default-features = false }
 oxipng = { version = "5.0.1", default-features = false, features = ["zopfli"] }
 
-gstreamer = { version = "0.18.8", default-features = false, optional = true }
-gstreamer-app = { version = "0.18.7", default-features = false, features = ["v1_10"], optional = true }
-gstreamer-audio = { version = "0.18.7", default-features = false, optional = true }
+symphonia = { version = "0.5.1", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
+vorbis = { version = "0.0.1", git = "https://github.com/ComunidadAylas/vorbis-rs" }
+dasp_signal = { version = "0.11.0", default-features = false }
+dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
+dasp_ring_buffer = "0.11.0"
+dasp_frame = "0.11.0"
+rubato = "0.12.0"
+optivorbis = "0.1.1"
 
 glsl = "6.0.1"
 
@@ -83,10 +88,9 @@ criterion-perf-events = "0.2.0"
 perfcnt = "0.8.0"
 
 [features]
-# Support audio transcoding and all kinds of files added by modifications by default
-default = ["audio-transcoding", "mod-support"]
+# Support all kinds of files added by modifications by default
+default = ["mod-support"]
 
-audio-transcoding = ["gstreamer", "gstreamer-app", "gstreamer-audio"]
 # This feature will include support for all the mods that PackSquash will ever support
 mod-support = ["optifine-support", "mtr3-support"]
 

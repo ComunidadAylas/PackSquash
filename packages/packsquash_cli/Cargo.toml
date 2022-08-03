@@ -57,9 +57,6 @@ section = "utils"
 # For each release with the same version number (shouldn't be too many),
 # increment this, and change APT repo action
 revision = "1"
-depends = """
-$auto, \
-gstreamer1.0-plugins-bad (>= 1.16.2), gstreamer1.0-plugins-base (>= 1.16.2), gstreamer1.0-plugins-good (>= 1.16.2)"""
 
 [package.metadata.winres]
 ProductName = "PackSquash"

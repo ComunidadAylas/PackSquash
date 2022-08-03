@@ -1,5 +1,6 @@
 //! Contains the configuration options needed to create a `PackSquasher` run.
 
+use std::num::{NonZeroU32, NonZeroU8};
 use std::thread::available_parallelism;
 use std::{num::NonZeroUsize, path::PathBuf};
 
@@ -222,6 +223,64 @@ pub struct GlobalOptions {
 	#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 	#[doc(cfg(any(feature = "optifine-support", feature = "mtr3-support")))]
 	pub allow_mods: EnumSet<MinecraftMod>,
+	/// The bitrate control mode that will be used for transcoding audio files that do not explicitly
+	/// override the bitrate control mode via file-specific options. Different bitrate control modes
+	/// have different trade-offs between audio quality, file size, bandwidth predictability and
+	/// encoding speed.
+	///
+	/// Changing the bitrate control mode usually requires changing its target metrics, too. See the
+	/// `non_positional_audio_target_bitrate_control_metric` and
+	/// `positional_audio_target_bitrate_control_metric` options for details.
+	///
+	/// **Default value**: constant quality factor (CQF)
+	pub audio_bitrate_control_mode: AudioBitrateControlMode,
+	/// The metric that will be used as a target for the specified bitrate control mode. Depending
+	/// on the selected bitrate control mode, this will be interpreted as a quality factor, average
+	/// bitrate, approximate bitrate, or maximum bitrate.
+	///
+	/// This metric will be used for non-positional (i.e., stereo) sounds only. For mono sounds,
+	/// please check out the `positional_audio_target_bitrate_control_metric` option. The
+	/// rationale of using different metrics for each sound type is that positional sounds tend to
+	/// be shorter and combined with others, so players are expected to be less sensitive to them
+	/// being encoded with a slightly lower quality, which helps saving space.
+	///
+	/// **Default value**: `0.25` (interpreted as a quality factor, ≈68 kbit/s for stereo, 44.1 kHz
+	/// audio)
+	pub non_positional_audio_target_bitrate_control_metric: f32,
+	/// The sampling frequency that non-positional (i.e., stereo) audio will be resampled to.
+	/// Downsampling helps saving space, at the cost of potentially introducing aliasing artifacts
+	/// if the input audio contains frequencies higher than half the new sampling rate and narrowing
+	/// margins for filters and further signal processing work. If the specified sampling frequency
+	/// is higher than the sampling frequency of the input audio file, no resampling will be done.
+	///
+	/// This metric is used for non-positional sounds only. For mono sounds, please check out the
+	/// `positional_audio_sampling_frequency` option.
+	///
+	/// **Default value**: `40050` (40.05 kHz)
+	pub non_positional_audio_sampling_frequency: NonZeroU32,
+	/// The metric that will be used as a target for the specified bitrate control mode. Depending
+	/// on the selected bitrate control mode, this will be interpreted as a quality factor, average
+	/// bitrate, approximate bitrate, or maximum bitrate.
+	///
+	/// This metric will be used for positional (i.e., mono) sounds only. For stereo sounds,
+	/// please check out the `non_positional_audio_target_bitrate_control_metric` option. The
+	/// rationale of using different metrics for each sound type is that positional sounds tend to
+	/// be shorter and combined with others, so players are expected to be less sensitive to them
+	/// being encoded with a slightly lower quality, which helps saving space.
+	///
+	/// **Default value**: `0.0` (interpreted as a quality factor)
+	pub positional_audio_target_bitrate_control_metric: f32,
+	/// The sampling frequency that positional (i.e., mono) audio will be resampled to.
+	/// Downsampling helps saving space, at the cost of potentially introducing aliasing artifacts
+	/// if the input audio contains frequencies higher than half the new sampling rate and narrowing
+	/// margins for filters and further signal processing work. If the specified sampling frequency
+	/// is higher than the sampling frequency of the input audio file, no resampling will be done.
+	///
+	/// This metric is used for positional sounds only. For stereo sounds, please check out the
+	/// `non_positional_audio_sampling_frequency` option.
+	///
+	/// **Default value**: `32000` (32 kHz)
+	pub positional_audio_sampling_frequency: NonZeroU32,
 	/// The output file path where the result ZIP will be written to. This path must not point to a
 	/// folder.
 	///
@@ -286,6 +345,11 @@ impl Default for GlobalOptions {
 			ignore_system_and_hidden_files: true,
 			#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 			allow_mods: EnumSet::empty(),
+			audio_bitrate_control_mode: Default::default(),
+			non_positional_audio_target_bitrate_control_metric: 0.25, // ~ 68 kbit/s for stereo, 44.1 kHz signals
+			non_positional_audio_sampling_frequency: NonZeroU32::new(40_050).unwrap(),
+			positional_audio_target_bitrate_control_metric: 0.0,
+			positional_audio_sampling_frequency: NonZeroU32::new(32_000).unwrap(),
 			threads: hardware_threads,
 			output_file_path: PathBuf::from("pack.zip"),
 			// In MiB. By default, half of available memory / (hardware threads + 1 for the output ZIP)
@@ -526,8 +590,6 @@ pub enum MinecraftMod {
 pub enum FileOptions {
 	/// The options for transcoding audio files to a more space-efficient format that is
 	/// accepted by Minecraft.
-	#[cfg(feature = "audio-transcoding")]
-	#[doc(cfg(feature = "audio-transcoding"))]
 	AudioFileOptions(AudioFileOptions),
 	/// The options that control how JSON files are optimized.
 	JsonFileOptions(JsonFileOptions),
@@ -573,6 +635,14 @@ impl FileOptions {
 				.contains(MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending);
 		}
 
+		if let FileOptions::AudioFileOptions(file_options) = &mut self {
+			file_options.audio_bitrate_control_mode = global_options.audio_bitrate_control_mode;
+			file_options.non_positional_audio_target_bitrate_control_metric =
+				global_options.non_positional_audio_target_bitrate_control_metric;
+			file_options.non_positional_audio_sampling_frequency =
+				global_options.non_positional_audio_sampling_frequency;
+		}
+
 		self
 	}
 }
@@ -581,27 +651,78 @@ impl FileOptions {
 #[derive(Deserialize, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
-#[cfg(feature = "audio-transcoding")]
-#[doc(cfg(feature = "audio-transcoding"))]
 pub struct AudioFileOptions {
 	/// If `true`, input audio files that are already Ogg won't be transcoded again. This preserves
 	/// their original quality and improves performance, but may come at a cost in space savings.
 	///
 	/// **Default value**: `true`
 	pub transcode_ogg: bool,
+	/// If `true`, an additional, fast two-pass optimization and validation step will be executed
+	/// on the generated Ogg Vorbis file before adding it to the pack, no matter if it was
+	/// transcoded or not. This enables PackSquash to ensure that the generated file will work fine
+	/// in Minecraft, losslessly reduce its size by 5% on average, and optionally obfuscate it to
+	/// thwart its use outside of Minecraft.
+	///
+	/// Due to how fast and unobtrusive this step is, it's usually best to leave it enabled. Good
+	/// reasons for disabling it include troubleshooting and wanting a slightly faster execution
+	/// at the cost of missing out on the aforementioned features.
+	///
+	/// **Default value**: `true`
+	pub two_pass_vorbis_optimization_and_validation: bool,
+	/// If `true`, empty audio files (i.e., with no audio data, or full of complete silence)
+	/// will be replaced with a specially-crafted, but valid empty audio file that is
+	/// optimized for size and contains no audio data. This kind of files work fine in
+	/// Minecraft and most media players, but some might consider the lack of audio data as
+	/// an error.
+	///
+	/// This option is only honored if the audio file is being transcoded, which is always the
+	/// case when the `transcode_ogg` option is set to `true`.
+	///
+	/// **Default value**: `true`
+	pub empty_audio_optimization: bool,
 	/// Sets a number of channels that the audio file will be mixed to. Downmixing stereo sounds
-	/// to mono may save a bit of space, but may also affect how Minecraft calculates positional
-	/// audio effects. On the other hand, it may be desireable to upmix mono sounds to stereo
-	/// to get the different positional effects.
+	/// to mono may save a bit of space, and also affects how Minecraft calculates positional
+	/// audio effects. On the other hand, it may be desirable to upmix mono sounds to stereo to
+	/// get the different positional effects. If `is_positional_audio` is set to `None`, this
+	/// channel mixing also influences whether the sound is considered positional or not.
 	///
 	/// **Default value**: do not downmix or upmix (keep the channels of the input file)
 	pub channels: ChannelMixingOption,
-	/// Changes the sampling frequency of the resulting audio file. Higher sampling frequencies
-	/// can represent audio signals with higher bandwidth properly, but also take more space
-	/// (because more audio samples are recorded and stored).
+	/// Sets whether this sound should be treated as positional (i.e., mono) or non-positional
+	/// (i.e., stereo) for bitrate control and resampling purposes, without affecting its channel
+	/// count. This is useful to override the channel count based classification heuristic used
+	/// by PackSquash in cases where the different treatment is warranted (e.g., a mono sound
+	/// being used prominently in the foreground, or a stereo sound being a faint background
+	/// detail).
 	///
-	/// **Default value**: `32000` (Hz)
-	pub sampling_frequency: PositiveI32,
+	/// This option only has any effect when the audio file is transcoded.
+	///
+	/// **Default value**: `None` (let PackSquash decide according to the number of channels)
+	pub is_positional_audio: Option<bool>,
+	/// Overrides the sampling frequency to resample this audio file to, ignoring whether it is
+	/// positional or not and the global `positional_audio_sampling_frequency` and
+	/// `non_positional_audio_sampling_frequency` options.
+	///
+	/// This option only has any effect when the audio file is transcoded.
+	///
+	/// **Default value**: `None` (let PackSquash decide based on the value of the global options
+	/// and whether this sound is positional or not)
+	pub sampling_frequency_override: Option<NonZeroU32>,
+	/// Overrides the bitrate control mode used for encoding this audio file, ignoring the global
+	/// `audio_bitrate_control_mode` option.
+	///
+	/// **Default value**: `None` (use the global bitrate control mode)
+	pub audio_bitrate_control_mode_override: Option<AudioBitrateControlMode>,
+	/// Overrides the target bitrate control metric to use for encoding this audio file, ignoring
+	/// whether it is positional or not and the global
+	/// `positional_audio_target_bitrate_control_metric` and
+	/// `non_positional_audio_target_bitrate_control_metric` options.
+	///
+	/// This option only has any effect when the audio file is transcoded.
+	///
+	/// **Default value**: `None` (let PackSquash decide based on the value of the global options
+	/// and whether this sound is positional or not)
+	pub target_bitrate_control_metric_override: Option<f32>,
 	/// Sets the pitch shift coefficient that will have to be used to play back the sound
 	/// at the original pitch. This pitch shift coefficient can be used directly in Minecraft
 	/// commands like `/playsound`.
@@ -613,28 +734,55 @@ pub struct AudioFileOptions {
 	///
 	/// **Default value**: `1.0` (the audio pitch is not shifted)
 	pub target_pitch: f32,
-	/// The minimum bitrate that the Ogg Vorbis encoder will try to use to represent the audio
-	/// signal. Higher values provide higher quality at the expense of file size.
+	/// If `true`, the generated Ogg Vorbis files will be mangled in a way meant to make them
+	/// harder to play outside of Minecraft. The obfuscation technique used is not robust
+	/// against being reversed by an expert and does not affect file sizes.
 	///
-	/// **Default value**: 40000 (bit/s)
-	pub minimum_bitrate: PositiveI32,
-	/// The maximum bitrate that the Ogg Vorbis encoder will try to use to represent the audio
-	/// signal. Higher values provide higher quality at the expense of file size.
+	/// This option only has any effect if the two-pass optimization and validation step is
+	/// enabled, i.e., the `two_pass_vorbis_optimization_and_validation` option is set to `true`.
 	///
-	/// **Default value**: 96000 (bit/s)
-	pub maximum_bitrate: PositiveI32
+	/// **Default value**: `true`
+	pub ogg_obfuscation: bool,
+	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
+	/// the value of the global option of the same name.
+	#[serde(skip)]
+	pub(crate) audio_bitrate_control_mode: AudioBitrateControlMode,
+	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
+	/// the value of the global option of the same name.
+	#[serde(skip)]
+	pub(crate) non_positional_audio_target_bitrate_control_metric: f32,
+	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
+	/// the value of the global option of the same name.
+	#[serde(skip)]
+	pub(crate) non_positional_audio_sampling_frequency: NonZeroU32,
+	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
+	/// the value of the global option of the same name.
+	#[serde(skip)]
+	pub(crate) positional_audio_target_bitrate_control_metric: f32,
+	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
+	/// the value of the global option of the same name.
+	#[serde(skip)]
+	pub(crate) positional_audio_sampling_frequency: NonZeroU32
 }
 
-#[cfg(feature = "audio-transcoding")]
 impl Default for AudioFileOptions {
 	fn default() -> Self {
 		Self {
 			transcode_ogg: true,
+			two_pass_vorbis_optimization_and_validation: true,
 			channels: Default::default(),
-			sampling_frequency: PositiveI32(32_000),
+			is_positional_audio: None,
+			sampling_frequency_override: None,
+			audio_bitrate_control_mode_override: None,
+			target_bitrate_control_metric_override: None,
 			target_pitch: 1.0,
-			minimum_bitrate: PositiveI32(40_000),
-			maximum_bitrate: PositiveI32(96_000)
+			empty_audio_optimization: true,
+			ogg_obfuscation: false,
+			audio_bitrate_control_mode: Default::default(),
+			non_positional_audio_target_bitrate_control_metric: 0.25,
+			non_positional_audio_sampling_frequency: NonZeroU32::new(40_050).unwrap(),
+			positional_audio_target_bitrate_control_metric: 0.0,
+			positional_audio_sampling_frequency: NonZeroU32::new(32_000).unwrap()
 		}
 	}
 }
@@ -642,52 +790,134 @@ impl Default for AudioFileOptions {
 /// A channel mixing strategy for some audio file, contained in [`AudioFileOptions`].
 #[derive(Deserialize, Clone, Copy)]
 #[serde(untagged)]
-#[cfg(feature = "audio-transcoding")]
-#[doc(cfg(feature = "audio-transcoding"))]
 pub enum ChannelMixingOption {
 	/// Downmix or upmix the sound channels in the input file to generate an output
 	/// file with the specified number of channels.
 	///
-	/// At the time this was written, only `1` or `2` channels make sense for a
-	/// resource pack audio file, but other numbers are accepted.
-	ToChannels(PositiveI32),
+	/// Currently, only `1` or `2` channels make sense for a resource pack audio
+	/// file, as other channel counts are rejected by Minecraft.
+	ToChannels(ChannelCount),
 	/// Do not change the number or layout of the sound channels of the input file
 	/// in any way.
 	Skip
 }
 
-#[cfg(feature = "audio-transcoding")]
 impl Default for ChannelMixingOption {
 	fn default() -> Self {
 		ChannelMixingOption::Skip
 	}
 }
 
-/// A helper struct that contains an integer that must be strictly positive (i.e.
-/// greater, and not equal to, zero).
+/// Represents a bitrate control mode that can be used by the PackSquash Vorbis encoder,
+/// a modified version of the reference encoder with the aoTuV and Lancer patches applied.
 #[derive(Deserialize, Clone, Copy)]
-#[serde(try_from = "i32")]
-#[repr(transparent)]
-#[cfg(feature = "audio-transcoding")]
-#[doc(cfg(feature = "audio-transcoding"))]
-pub struct PositiveI32(i32);
+#[serde(rename_all = "UPPERCASE")]
+pub enum AudioBitrateControlMode {
+	/// *Constant Quality Factor*: the encoder will interpret the target metric as a quality
+	/// factor, attempting to keep the perceived subjective quality constant for all the audio
+	/// segments. The encoder will not have hard pressures to limit the bitrate in any way,
+	/// although the quality metric tends to be strongly correlated with an average bitrate for
+	/// typical signals.
+	///
+	/// Some advantages of this bitrate control mode include:
+	/// - It adapts well to different sampling frequencies and channel counts: the encoder knows
+	///   that it requires less bits to encode mono signals than stereo signals at the same quality
+	///   level, for example.
+	/// - Unlike with bitrates, it's not possible to ask for too high or low quality levels.
+	/// - Easy to encode audio segments are stored in minimal space, with consistent quality: there
+	///   is no pressure to meet any average bitrate.
+	/// - Performance is significantly higher than when using ABR or CABR modes, because the Vorbis
+	///   bitrate management engine logic is skipped.
+	///
+	/// Some disadvantages of this bitrate control mode include:
+	/// - The relationship between quality factor and actual average bitrate is harder to predict.
+	/// - There is no hard guarantee against hard to encode segments bumping the average bitrate
+	///   up.
+	///
+	/// The quality factor is expected to be in the [-1, 10] range, where -1 means the worst audio
+	/// quality, and 10 the best.
+	Cqf,
+	/// *Variable BitRate*: the encoder will interpret the target metric as an approximate bitrate,
+	/// internally translating it to a quality factor. Therefore, this mode is equivalent to
+	/// [CQF](AudioBitrateControlMode::Cqf), but with the quality factor selected in another way.
+	///
+	/// Some advantages of this bitrate control mode over CQF include:
+	/// - The relationship between quality factor and actual average bitrate is more predictable.
+	///
+	/// Some disadvantages of this bitrate control mode over CQF include:
+	/// - The same bitrate may yield different quality levels for different audio signals, or be
+	///   too high or too low for the possible quality factors.
+	///
+	/// The bitrate is interpreted in kbit/s.
+	Vbr,
+	/// **Average BitRate**: the encoder will interpret the target metric as an average bitrate,
+	/// and will be pressured to meet that bitrate for the whole audio signal. No specific subjective
+	/// quality level will be targeted.
+	///
+	/// Some advantages of this bitrate control mode include:
+	/// - The actual average stream bitrate is guaranteed to very closely meet the specified average
+	///   bitrate. Therefore, the resulting file sizes are easier to predict.
+	/// - The maximum instantaneous bitrate for an audio segment might be higher than average in a
+	///   small time window, as long as it doesn't affect the average.
+	///
+	/// Some disadvantages of this bitrate control mode include:
+	/// - Setting too low bitrates for the input signal may severely degrade audio quality, and
+	///   setting too high bitrates will waste space on padding the data to meet the average.
+	/// - Easy to encode audio segments may be stored using more bits than necessary for a certain
+	///   quality level in order to meet the average bitrate. Conversely, harder to encode segments
+	///   may sound worse due to the encoder being deprived of bits to dedicate to them, if running
+	///   high on bitrate. The resulting subjective quality will be more inconsistent.
+	/// - Performance is significantly worse than when using CQF or VBR modes, because the Vorbis
+	///   bitrate management engine logic is used.
+	///
+	/// The bitrate is interpreted in kbit/s.
+	Abr,
+	/// **Constrained Average BitRate**: the encoder will interpret the target metric as a hard
+	/// maximum bitrate, internally selecting a slightly lower average bitrate than the maximum
+	/// to meet. This mode is similar to [ABR](AudioBitrateControlMode::Abr), but with the addition
+	/// of a maximum bitrate.
+	///
+	/// Some advantages of this bitrate control mode over ABR include:
+	/// - The actual average bitrate is guaranteed to never exceed the specified maximum bitrate,
+	///   allowing to bound the maximum file size with certainty.
+	///
+	/// Some disadvantages of this bitrate control mode over ABR include:
+	/// - To make sure that the hard maximum bitrate is never exceeded, a lower average bitrate
+	///   will be targeted, which ensures headroom for hard to encode segments, but usually yields
+	///   inferior quality.
+	///
+	/// The bitrate is interpreted in kbit/s.
+	#[serde(rename = "CABR")]
+	ConstrainedAbr
+}
 
-#[cfg(feature = "audio-transcoding")]
-impl TryFrom<i32> for PositiveI32 {
+impl Default for AudioBitrateControlMode {
+	fn default() -> Self {
+		Self::Cqf
+	}
+}
+
+/// A helper struct that contains an integer that must be a valid number of
+/// audio channels accepted by Minecraft.
+#[derive(Deserialize, Clone, Copy)]
+#[serde(try_from = "NonZeroU8")]
+#[repr(transparent)]
+pub struct ChannelCount(NonZeroU8);
+
+impl TryFrom<NonZeroU8> for ChannelCount {
 	type Error = &'static str;
 
-	fn try_from(value: i32) -> Result<Self, Self::Error> {
-		if value > 0 {
-			Ok(PositiveI32(value))
+	fn try_from(value: NonZeroU8) -> Result<Self, Self::Error> {
+		if (1..=2).contains(&value.get()) {
+			Ok(ChannelCount(value))
 		} else {
-			Err("The specified integer should be greater than zero")
+			Err("The specified number of channels is not valid")
 		}
 	}
 }
 
-#[cfg(feature = "audio-transcoding")]
-impl From<PositiveI32> for i32 {
-	fn from(value: PositiveI32) -> Self {
+impl From<ChannelCount> for NonZeroU8 {
+	fn from(value: ChannelCount) -> Self {
 		value.0
 	}
 }

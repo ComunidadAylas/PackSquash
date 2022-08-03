@@ -29,6 +29,10 @@ mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
 # of the crates ecosystem. Related PR: https://github.com/rust-lang/backtrace-rs/pull/463
 backtrace = { git = "https://github.com/rust-lang/backtrace-rs", rev = "38cb2d55" }
 
+# Use the latest upstream commits because they update git2 and we need that
+# to link and build successfully
+optivorbis = { git = "https://github.com/OptiVorbis/OptiVorbis" }
+
 [profile.release]
 opt-level = 3
 lto = "fat"

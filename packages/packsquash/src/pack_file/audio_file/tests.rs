@@ -1,4 +1,5 @@
 use pretty_assertions::assert_eq;
+use std::num::NonZeroU8;
 use std::time::Duration;
 
 use tokio_stream::StreamExt;
@@ -9,19 +10,21 @@ use super::*;
 static FLAC_AUDIO_DATA: &[u8] = include_bytes!("dtmf_tone.flac");
 static FLAC_AUDIO_DATA_8KHZ: &[u8] = include_bytes!("dtmf_tone_8khz.flac");
 static OGG_AUDIO_DATA: &[u8] = include_bytes!("dtmf_tone.ogg");
+static EMPTY_OGG_AUDIO_DATA: &[u8] = include_bytes!("empty.ogg");
 
 /// Processes the given input data as a [AudioFile], using the provided settings,
 /// expecting a successful result.
-async fn successful_process_test<T: Into<i32>>(
+async fn successful_process_test(
 	input_data: &[u8],
 	is_ogg: bool,
 	settings: AudioFileOptions,
 	expect_same_file_size: bool,
 	expected_channels: u8,
-	expected_sample_rate: T
+	expected_sample_rate: NonZeroU32
 ) {
 	let data_stream = AudioFile {
 		read: Builder::new().read(input_data).build(),
+		file_length_hint: input_data.len(),
 		is_ogg,
 		optimization_settings: settings
 	}
@@ -80,9 +83,7 @@ async fn successful_process_test<T: Into<i32>>(
 	);
 
 	assert_eq!(
-		u32::try_from(expected_sample_rate.into())
-			.unwrap()
-			.to_le_bytes(),
+		expected_sample_rate.get().to_le_bytes(),
 		data[40..=43],
 		"The processed audio file has an unexpected sampling frequency: {}",
 		u32::from_le_bytes(data[40..=43].try_into().unwrap())
@@ -98,6 +99,7 @@ async fn error_process_test<T: AsyncRead + Unpin + Send + 'static>(
 ) {
 	let mut data_stream = AudioFile {
 		read,
+		file_length_hint: 0,
 		is_ogg,
 		optimization_settings: settings
 	}
@@ -118,9 +120,9 @@ async fn transcoding_works() {
 		FLAC_AUDIO_DATA,
 		false, // Is not Ogg
 		Default::default(),
-		false,                                          // Smaller file size
-		1,                                              // One channel (mono)
-		AudioFileOptions::default().sampling_frequency  // Default sampling frequency
+		false,                                                           // Smaller file size
+		1,                                                               // One channel (mono)
+		AudioFileOptions::default().positional_audio_sampling_frequency  // Default sampling frequency
 	)
 	.await
 }
@@ -132,11 +134,13 @@ async fn passthrough_works() {
 		true, // Is Ogg
 		AudioFileOptions {
 			transcode_ogg: false,
+			empty_audio_optimization: false,
+			two_pass_vorbis_optimization_and_validation: false,
 			..Default::default()
 		},
-		true,  // Same file size
-		1,     // One channel (mono)
-		44100  // Default sampling frequency
+		true,                             // Same file size
+		1,                                // One channel (mono)
+		NonZeroU32::new(44_100).unwrap()  // Input sampling frequency
 	)
 	.await
 }
@@ -150,9 +154,9 @@ async fn pitch_shifting_works() {
 			target_pitch: 1.25,
 			..Default::default()
 		},
-		false,                                          // Smaller file size
-		1,                                              // One channel (mono)
-		AudioFileOptions::default().sampling_frequency  // Default sampling frequency
+		false,                                                           // Smaller file size
+		1,                                                               // One channel (mono)
+		AudioFileOptions::default().positional_audio_sampling_frequency  // Default sampling frequency
 	)
 	.await
 }
@@ -163,12 +167,12 @@ async fn channel_mixing_works() {
 		OGG_AUDIO_DATA,
 		true, // Is Ogg
 		AudioFileOptions {
-			channels: ChannelMixingOption::ToChannels(2.try_into().unwrap()),
+			channels: ChannelMixingOption::ToChannels(NonZeroU8::new(2).unwrap().try_into().unwrap()),
 			..Default::default()
 		},
-		false,                                          // Bigger file size
-		2,                                              // Two channels (stereo)
-		AudioFileOptions::default().sampling_frequency  // Default sampling frequency
+		false,                                                               // Bigger file size
+		2,                                                                   // Two channels (stereo)
+		AudioFileOptions::default().non_positional_audio_sampling_frequency  // Default sampling frequency
 	)
 	.await
 }
@@ -180,12 +184,12 @@ async fn channel_mixing_and_pitch_shifting_work() {
 		true, // Is Ogg
 		AudioFileOptions {
 			target_pitch: 1.25,
-			channels: ChannelMixingOption::ToChannels(2.try_into().unwrap()),
+			channels: ChannelMixingOption::ToChannels(NonZeroU8::new(2).unwrap().try_into().unwrap()),
 			..Default::default()
 		},
-		false,                                          // Smaller file size
-		2,                                              // Two channels (stereo)
-		AudioFileOptions::default().sampling_frequency  // Default sampling frequency
+		false,                                                               // Smaller file size
+		2,                                                                   // Two channels (stereo)
+		AudioFileOptions::default().non_positional_audio_sampling_frequency  // Default sampling frequency
 	)
 	.await
 }
@@ -194,20 +198,27 @@ async fn channel_mixing_and_pitch_shifting_work() {
 async fn transcoded_audio_is_not_upsampled() {
 	successful_process_test(
 		FLAC_AUDIO_DATA_8KHZ,
+		false, // Is Ogg
+		Default::default(),
+		false,                           // Smaller file size
+		1,                               // One channel (mono)
+		NonZeroU32::new(8_000).unwrap()  // Sampling frequency of the original audio data
+	)
+	.await
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn valid_empty_input_works() {
+	successful_process_test(
+		EMPTY_OGG_AUDIO_DATA,
 		true, // Is Ogg
 		AudioFileOptions {
-			// Mix to stereo because libvorbis' vorbis_encode_setup_managed returns an error code,
-			// which GStreamer reports as a "negotiation problem", for 8 kHz mono source audio data.
-			// The underlying cause of this error is that a internal call to get_setup_template in
-			// libvorbis code fails, as no hardcoded setup data matches that channel and sampling
-			// frequency combination. See:
-			// https://github.com/xiph/vorbis/blob/4e1155cc77a2c672f3dd18f9a32dbf1404693289/lib/vorbisenc.c#L154-L187
-			channels: ChannelMixingOption::ToChannels(2.try_into().unwrap()),
+			empty_audio_optimization: true,
 			..Default::default()
 		},
-		false, // Smaller file size
-		2,     // Two channels (stereo) due to channel mixing
-		8000   // Sampling frequency of the original audio data
+		true,                        // Same size (should recognize the empty sound as such)
+		1,                           // One channel (mono)
+		NonZeroU32::new(1).unwrap()  // Sampling frequency of the crafted empty file
 	)
 	.await
 }

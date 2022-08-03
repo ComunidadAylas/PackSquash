@@ -14,6 +14,7 @@
 #![feature(type_alias_impl_trait)]
 #![feature(const_option)]
 #![feature(const_fn_floating_point_arithmetic)]
+#![feature(inline_const)]
 #![doc(
 	html_logo_url = "https://user-images.githubusercontent.com/31966940/124388201-1f40eb80-dce2-11eb-88e8-3934d7d73c0a.png"
 )]
@@ -46,7 +47,6 @@ use config::ProcessedSquashOptions;
 use pack_meta::{PackMeta, PackMetaError};
 use squash_zip::{SquashZip, SquashZipError};
 
-#[cfg(feature = "audio-transcoding")]
 use crate::config::AudioFileOptions;
 #[cfg(feature = "optifine-support")]
 use crate::config::PropertiesFileOptions;
@@ -436,7 +436,6 @@ impl PackSquasher {
 					if have_default_options {
 						for default_file_options in [
 							Some(FileOptions::JsonFileOptions(JsonFileOptions::default())),
-							#[cfg(feature = "audio-transcoding")]
 							Some(FileOptions::AudioFileOptions(AudioFileOptions::default())),
 							Some(FileOptions::PngFileOptions(PngFileOptions::default())),
 							#[cfg(feature = "optifine-support")]
