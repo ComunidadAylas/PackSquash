@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659502076431,
+  "lastUpdate": 1659522298633,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "1669b73eb508bd6d76a57a1af257ebe5e3f3b568",
-          "message": "chore(deps): update dependency requests to v2.28.1",
-          "timestamp": "2022-07-21T00:33:43Z",
-          "tree_id": "c616f2fb1c9d73a7f776dc158df40e8b5d04cfdc",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/1669b73eb508bd6d76a57a1af257ebe5e3f3b568"
-        },
-        "date": 1658367310269,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10999211,
-            "range": "± 358931",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 791602125,
-            "range": "± 8452215",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10457817620,
-            "range": "± 385195348",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2166371982,
-            "range": "± 33366655",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2373020855,
             "range": "± 41722708",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "3df46090903348e231a9f06920be64ed4e81f4c9",
+          "message": "chore(workflows/build): ignore Renovate branches for benchmarks\n\nAs these will eventually be merged to master anyway, running benchmarks\ntwice is noisy. The workflow does not fail even if a possible\nperformance regression is spotted.",
+          "timestamp": "2022-08-03T11:50:15+02:00",
+          "tree_id": "697485005cff11019bda42080b4c90f059185fe6",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3df46090903348e231a9f06920be64ed4e81f4c9"
+        },
+        "date": 1659522296479,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 16057294,
+            "range": "± 831169",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 1000537616,
+            "range": "± 21422981",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12311392562,
+            "range": "± 260960613",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2643351303,
+            "range": "± 49459337",
             "unit": "ns/iter"
           }
         ]
