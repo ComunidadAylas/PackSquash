@@ -276,6 +276,7 @@ pub fn decode_and_process_sample_blocks(
 	target_channels: Option<ChannelCount>,
 	target_sampling_frequency_producer: impl FnOnce(
 		NonZeroU32,
+		NonZeroU8,
 		NonZeroU8
 	) -> Result<NonZeroU32, OptimizationError>,
 	target_pitch: f32,
@@ -310,8 +311,11 @@ pub fn decode_and_process_sample_blocks(
 	} else {
 		input_channels
 	};
-	let target_sampling_frequency =
-		target_sampling_frequency_producer(input_sampling_frequency, output_channels)?;
+	let target_sampling_frequency = target_sampling_frequency_producer(
+		input_sampling_frequency,
+		input_channels,
+		output_channels
+	)?;
 
 	let resampler_state = if target_sampling_frequency != input_sampling_frequency {
 		let resampler = FftFixedIn::new(

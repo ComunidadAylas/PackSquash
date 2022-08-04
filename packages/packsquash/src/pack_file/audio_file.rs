@@ -122,34 +122,31 @@ impl Decoder for OptimizerDecoder {
 		let do_two_pass_optimization_and_validation = self
 			.optimization_settings
 			.two_pass_vorbis_optimization_and_validation;
-		let can_use_input_as_output = self.is_ogg
-			&& self.optimization_settings.target_pitch == 1.0
-			&& matches!(
-				self.optimization_settings.channels,
-				ChannelMixingOption::Skip
-			);
+		let do_ogg_obfuscation = self
+			.optimization_settings
+			.minecraft_version_supports_ogg_obfuscation
+			&& self.optimization_settings.ogg_obfuscation;
 
 		// First pass: transcode the input audio file to an efficient Ogg Vorbis representation.
 		// This is necessary if the input audio file is not Ogg Vorbis, or if some modification
 		// to the audio data is done (currently, channel mixing, resampling and pitch shifting)
-		let transcoded_file = if skip_transcoding {
-			ByteBuffer::Bytes(input_file.clone())
+		let (transcoded_file, channel_mixing_done) = if skip_transcoding {
+			(ByteBuffer::Bytes(input_file.clone()), false)
 		} else {
-			ByteBuffer::CowSlice(process_and_transcode(
+			let (transcoded_file, channel_mixing_done) = process_and_transcode(
 				input_file.clone().reader(),
 				self.is_ogg,
 				&self.optimization_settings
-			)?)
+			)?;
+
+			(ByteBuffer::CowSlice(transcoded_file), channel_mixing_done)
 		};
 
 		// Second pass: run OptiVorbis on the input file, which may be transcoded by now. This
 		// is a lossless, two-pass lossless optimization step that completes pretty quickly
 		// (think on OxiPNG, but much, much faster and less quirkier)
 		let transcoded_and_optimized_file = if do_two_pass_optimization_and_validation {
-			ByteBuffer::CowSlice(
-				validate_and_optimize(transcoded_file, self.optimization_settings.ogg_obfuscation)?
-					.into()
-			)
+			ByteBuffer::CowSlice(validate_and_optimize(transcoded_file, do_ogg_obfuscation)?.into())
 		} else {
 			transcoded_file
 		};
@@ -158,14 +155,15 @@ impl Decoder for OptimizerDecoder {
 		// If not, quickly run OptiVorbis over the original file, which is practically guaranteed to
 		// never return a file bigger than its input, and return that
 		let optimized_file_is_input_file;
+		let can_use_input_as_output =
+			self.is_ogg && self.optimization_settings.target_pitch == 1.0 && !channel_mixing_done;
+
 		let optimized_file = if do_two_pass_optimization_and_validation
 			&& input_file.len() < transcoded_and_optimized_file.as_ref().len()
 			&& can_use_input_as_output
 		{
 			optimized_file_is_input_file = true;
-			ByteBuffer::CowSlice(
-				validate_and_optimize(input_file, self.optimization_settings.ogg_obfuscation)?.into()
-			)
+			ByteBuffer::CowSlice(validate_and_optimize(input_file, do_ogg_obfuscation)?.into())
 		} else {
 			optimized_file_is_input_file = false;
 			transcoded_and_optimized_file
@@ -192,12 +190,13 @@ fn process_and_transcode(
 	input_file: impl Read + Send + Sync + 'static,
 	is_ogg: bool,
 	optimization_settings: &AudioFileOptions
-) -> Result<Cow<'static, [u8]>, OptimizationError> {
+) -> Result<(Cow<'static, [u8]>, bool), OptimizationError> {
 	// FIXME write to a SpooledTempFile whose maximum memory buffer size
 	// is controlled by a global budget, once that refactor is complete
 	let mut transcoded_file = vec![];
 	let encoder = Cell::new(None);
 
+	let mut channel_mixing_done = false;
 	let is_silence = decode_and_process_sample_blocks(
 		input_file,
 		is_ogg,
@@ -205,10 +204,12 @@ fn process_and_transcode(
 			ChannelMixingOption::ToChannels(count) => Some(count),
 			ChannelMixingOption::Skip => None
 		},
-		|input_sampling_frequency, output_channel_count| {
+		|input_sampling_frequency, input_channel_count, output_channel_count| {
 			let is_positional_audio = optimization_settings
 				.is_positional_audio
 				.unwrap_or(output_channel_count.get() == 1);
+
+			channel_mixing_done = input_channel_count != output_channel_count;
 
 			// Resampling to a frequency higher than the input one is a bad idea at
 			// this point: it doesn't add meaningful audio information or helps using
@@ -304,9 +305,12 @@ fn process_and_transcode(
 			// no audio data. Minecraft handles this fine, but programs that
 			// insist on decoding at least a sample may treat this as an error
 			// condition (e.g., GStreamer)
-			Cow::Borrowed(include_bytes!("audio_file/empty.ogg"))
+			(
+				Cow::Borrowed(include_bytes!("audio_file/empty.ogg")),
+				channel_mixing_done
+			)
 		} else {
-			Cow::Owned(transcoded_file)
+			(Cow::Owned(transcoded_file), channel_mixing_done)
 		}
 	)
 }

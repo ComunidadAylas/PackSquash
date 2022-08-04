@@ -537,7 +537,18 @@ pub enum MinecraftQuirk {
 	/// can be impacted negatively, though. This quirk does not have any effect if an affected
 	/// ZIP specification conformance level is not used, or if the Minecraft client is run
 	/// using newer Java versions.
-	Java8ZipParsing
+	Java8ZipParsing,
+	/// The audio decoding code of the latest Minecraft versions, from 1.14 onwards, was
+	/// refactored in such a way that the PackSquash Ogg Vorbis obfuscation techniques were
+	/// made possible. Older Minecraft versions do not support these obfuscated files, showing
+	/// errors in the console and freezing the game when they are played.
+	///
+	/// This workaround ensures that no obfuscation is done to any Ogg Vorbis file generated
+	/// by PackSquash, so at least the pack will work. Keep in mind that, due to 1.13 and
+	/// 1.14 sharing the same pack format version, the autodetection code for this quirk will
+	/// err on the safe side and only consider Minecraft versions starting from 1.15 to be
+	/// compatible.
+	OggObfuscationIncompatibility
 }
 
 impl MinecraftQuirk {
@@ -550,7 +561,8 @@ impl MinecraftQuirk {
 			Self::BadEntityEyeLayerTextureTransparencyBlending => {
 				"bad_entity_eye_layer_texture_transparency_blending"
 			}
-			Self::Java8ZipParsing => "java8_zip_parsing"
+			Self::Java8ZipParsing => "java8_zip_parsing",
+			Self::OggObfuscationIncompatibility => "ogg_obfuscation_incompatibility"
 		}
 	}
 }
@@ -641,6 +653,9 @@ impl FileOptions {
 				global_options.non_positional_audio_target_bitrate_control_metric;
 			file_options.non_positional_audio_sampling_frequency =
 				global_options.non_positional_audio_sampling_frequency;
+			file_options.minecraft_version_supports_ogg_obfuscation = !global_options
+				.work_around_minecraft_quirks
+				.contains(MinecraftQuirk::OggObfuscationIncompatibility);
 		}
 
 		self
@@ -762,7 +777,13 @@ pub struct AudioFileOptions {
 	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
 	/// the value of the global option of the same name.
 	#[serde(skip)]
-	pub(crate) positional_audio_sampling_frequency: NonZeroU32
+	pub(crate) positional_audio_sampling_frequency: NonZeroU32,
+	/// Crate-private option set by the [MinecraftQuirk::OggObfuscationIncompatibility]
+	/// workaround to not obfuscate Ogg Vorbis files.
+	///
+	/// **Default value**: `true`
+	#[serde(skip)]
+	pub(crate) minecraft_version_supports_ogg_obfuscation: bool
 }
 
 impl Default for AudioFileOptions {
@@ -782,7 +803,8 @@ impl Default for AudioFileOptions {
 			non_positional_audio_target_bitrate_control_metric: 0.25,
 			non_positional_audio_sampling_frequency: NonZeroU32::new(40_050).unwrap(),
 			positional_audio_target_bitrate_control_metric: 0.0,
-			positional_audio_sampling_frequency: NonZeroU32::new(32_000).unwrap()
+			positional_audio_sampling_frequency: NonZeroU32::new(32_000).unwrap(),
+			minecraft_version_supports_ogg_obfuscation: true
 		}
 	}
 }

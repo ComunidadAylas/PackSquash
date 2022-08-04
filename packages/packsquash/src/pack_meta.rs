@@ -19,6 +19,8 @@ mod tests;
 
 /// The pack format version used in Minecraft versions from 1.13 to 1.14.4.
 pub const PACK_FORMAT_VERSION_1_13: i32 = 4;
+/// The pack format version used in Minecraft versions from 1.15 to 1.16.1.
+pub const PACK_FORMAT_VERSION_1_15: i32 = 5;
 /// The pack format version used in Minecraft versions from 1.17 to 1.17.1.
 pub const PACK_FORMAT_VERSION_1_17: i32 = 7;
 
@@ -154,6 +156,13 @@ impl PackMeta {
 		if self.pack_format_version < PACK_FORMAT_VERSION_1_13 {
 			quirks |= MinecraftQuirk::GrayscaleImagesGammaMiscorrection;
 			quirks |= MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck;
+		}
+
+		if self.pack_format_version < PACK_FORMAT_VERSION_1_15 {
+			// Minecraft 1.14 is compatible with this feature, but we can't tell
+			// it apart from 1.13 due to it sharing the same version number, so
+			// err on the safe side
+			quirks |= MinecraftQuirk::OggObfuscationIncompatibility;
 		}
 
 		if self.pack_format_version < PACK_FORMAT_VERSION_1_17 {
