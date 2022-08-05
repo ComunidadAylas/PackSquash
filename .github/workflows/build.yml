@@ -153,6 +153,12 @@ jobs:
           mv /opt/squashfs-root /opt/appimagetool.AppDir
           ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
 
+      # Our build container minimal and it doesn't contain any systemd package.
+      # systemd is responsible for setting up the machine ID files we use for
+      # testing the system ID retrieval code, so copy a dummy one
+      - name: Set up a dummy D-Bus machine ID for tests
+        run: cp /proc/sys/kernel/random/boot_id /run/machine-id
+
       - name: Run tests
         uses: actions-rs/cargo@v1
         with:
@@ -350,6 +356,12 @@ jobs:
           /opt/appimagetool --appimage-extract > /dev/null
           mv /opt/squashfs-root /opt/appimagetool.AppDir
           ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
+
+      # Our build container minimal and it doesn't contain any systemd package.
+      # systemd is responsible for setting up the machine ID files we use for
+      # testing the system ID retrieval code, so copy a dummy one
+      - name: Set up a dummy D-Bus machine ID for tests
+        run: cp /proc/sys/kernel/random/boot_id /run/machine-id
 
       - name: Run tests
         uses: actions-rs/cargo@v1
