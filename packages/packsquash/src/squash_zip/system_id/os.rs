@@ -21,12 +21,10 @@ use std::{fs, io, path::Path};
 pub(super) fn get_dbus_machine_id() -> Option<SystemId> {
 	u128::from_str_radix(
 		read_uuid_file("/etc/machine-id")
-			.map_err(|_| {
-				read_uuid_file("/var/lib/dbus/machine-id")
-					.map_err(|_| read_uuid_file("/var/db/dbus/machine-id"))
-					.map_err(|_| read_uuid_file("/usr/local/etc/machine-id"))
-					.map_err(|_| read_uuid_file("/run/machine-id"))
-			})
+			.or_else(|_| read_uuid_file("/var/lib/dbus/machine-id"))
+			.or_else(|_| read_uuid_file("/var/db/dbus/machine-id"))
+			.or_else(|_| read_uuid_file("/usr/local/etc/machine-id"))
+			.or_else(|_| read_uuid_file("/run/machine-id"))
 			.ok()?
 			.trim(),
 		16
