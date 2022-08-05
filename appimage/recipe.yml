@@ -50,22 +50,6 @@ AppDir:
     include:
       - packsquash
 
-    exclude:
-      - systemd-timesyncd
-      - libpam-systemd
-      - libpam-modules
-      - dbus-user-session
-      - dbus-system-bus-common
-      - dbus
-      - dbus-session-bus-common
-      - dbus-bin
-      - dbus-daemon
-      - login
-      - dmsetup
-      - sensible-utils
-      - libcryptsetup12
-      - libdevmapper1.02.1
-
   files:
     exclude:
       # Development and documentation files
@@ -76,17 +60,11 @@ AppDir:
       - usr/share/doc-base
       - usr/share/lintian
       - usr/share/sounds
-      # systemd units
-      - usr/lib/systemd
-      - lib/systemd
-      # udev rules
-      - lib/udev
       # root utility programs
       - usr/sbin
 
   test:
-    # Test on distros representative of the most common families.
-    # TODO use a more thorough test command that exercises GStreamer
+    # Test on distros representative of the most common families
     debian-stretch:
       image: debian:stretch-slim
       command: ./AppRun --version

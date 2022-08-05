@@ -314,9 +314,8 @@ impl PackSquasher {
 			let pack_file_optimization_failed = Arc::new(AtomicBool::new(false));
 
 			// To shield ourselves against pack file tasks that may panic, even if they shouldn't
-			// do so (GStreamer, I'm looking at you, because initializing your libraries can fail),
-			// install a temporary panic hook that will register the pack file optimization as
-			// failed and then invoke the already registered hook. This will "leak" two Arc's
+			// do so, install a temporary panic hook that will register the pack file optimization
+			// as failed and then invoke the already registered hook. This will "leak" two Arc's
 			// in case we don't get to restore the previous panic hook, but if that's the case
 			// then we will propagate the panic to the caller, which will probably not care about
 			// this anyway. This "leak" lasts until the hook is set again, because the reference

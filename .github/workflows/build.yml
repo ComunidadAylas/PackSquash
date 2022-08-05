@@ -57,11 +57,10 @@ jobs:
           profile: minimal
           components: rustfmt, clippy
 
-      - name: Install GStreamer libraries and development packages
+      - name: Install development packages
         run: |
           sudo apt-get update
-          sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
-                               desktop-file-utils
+          sudo apt-get install desktop-file-utils
 
       - name: Check workflow write permission
         id: check_write_permission
@@ -111,20 +110,15 @@ jobs:
       github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
-      - name: Install development packages, GStreamer libraries, GStreamer development packages and documentation generation packages
+      - name: Install development packages
         run: |
           apt-get update
           # curl is required by rustup.
           # markdown and html2text are required to generate the Debian package only.
-          # The last two lines contains packages necessary for appimage-builder only.
-          # gstreamer1.0-plugins-base-apps is used by appimage-builder to embed a GStreamer registry in
-          # the AppImage, speeding up its execution and avoiding some unactionable, ugly plugin warnings
+          # The last line contains packages necessary for appimage-builder only
           apt-get install -yq build-essential git curl \
-                              gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-                              libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
                               markdown html2text \
-                              python3-pip patchelf file zsync desktop-file-utils fakeroot gtk-update-icon-cache \
-                              gstreamer1.0-plugins-base-apps
+                              python3-pip patchelf file zsync desktop-file-utils fakeroot gtk-update-icon-cache
 
       - name: Checkout source
         uses: actions/checkout@v3
@@ -211,7 +205,6 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: x86_64-pc-windows-gnu
-      PKG_CONFIG_ALLOW_CROSS: 1
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
@@ -232,22 +225,6 @@ jobs:
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v1
-
-      - name: Install GStreamer libraries and GStreamer development packages
-        run: |
-          Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.20.1/mingw/gstreamer-1.0-devel-mingw-x86_64-1.20.1.msi' -OutFile 'gstreamer-1.0-devel-mingw-x86_64.msi'
-          Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-devel-mingw-x86_64.msi /qn' -Wait
-          "PKG_CONFIG_PATH=C:\gstreamer\1.0\mingw_x86_64\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-          $tmp_file = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '.tmp', '.zip' } -PassThru
-          Invoke-WebRequest -Uri 'https://ftp.rrze.uni-erlangen.de/xbmc/build-deps/win32/mingw-msys/pkg-config-lite-0.28-1_bin-win32.zip' -OutFile $tmp_file
-          $tmp_file | Expand-Archive -DestinationPath "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1" -Force
-          $tmp_file | Remove-Item
-          "$env:GITHUB_WORKSPACE\pkg-config-lite-0.28-1\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-          Invoke-WebRequest -Uri 'https://gstreamer.freedesktop.org/data/pkg/windows/1.20.1/mingw/gstreamer-1.0-mingw-x86_64-1.20.1.msi' -OutFile 'gstreamer-1.0-mingw-x86_64.msi'
-          Start-Process msiexec.exe -ArgumentList '/i gstreamer-1.0-mingw-x86_64.msi /qn' -Wait
-          "C:\gstreamer\1.0\mingw_x86_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Run tests
         uses: actions-rs/cargo@v1
@@ -273,15 +250,6 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: x86_64-apple-darwin
-      PKG_CONFIG: /Library/Frameworks/GStreamer.framework/Versions/Current/bin/pkg-config
-      PKG_CONFIG_PATH: /Library/Frameworks/GStreamer.framework/Versions/Current/lib/pkgconfig
-      # Setting rpath manually is needed because GStreamer libraries became relocatable on macOS
-      # for 1.20.1 and Rust GStreamer build systems do not set it properly yet.
-      # Related reads:
-      # https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/807
-      # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/338
-      RUSTFLAGS: >
-        -C link-args=-Wl,-rpath,/Library/Frameworks/GStreamer.framework/Versions/1.0/lib
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
@@ -301,13 +269,6 @@ jobs:
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v1
-
-      - name: Install GStreamer libraries and GStreamer development packages
-        run: |
-          curl https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-1.20.1-universal.pkg -o /tmp/gstreamer.pkg
-          sudo installer -pkg /tmp/gstreamer.pkg -target /
-          curl https://gstreamer.freedesktop.org/data/pkg/osx/1.20.1/gstreamer-1.0-devel-1.20.1-universal.pkg -o /tmp/gstreamer-devel.pkg
-          sudo installer -pkg /tmp/gstreamer-devel.pkg -target /
 
       - name: Run tests
         uses: actions-rs/cargo@v1
@@ -335,8 +296,6 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
-      PKG_CONFIG_ALLOW_CROSS: 1
-      PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
       DEBIAN_FRONTEND: noninteractive
 
     # Only run if this is not a pull request, or for pull requests on forks
@@ -344,21 +303,17 @@ jobs:
       github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
-      - name: Install development packages, cross-compilation GCC toolchain, GStreamer libraries, GStreamer development packages and documentation generation packages
+      - name: Install development packages and cross-compilation GCC toolchain
         run: |
           dpkg --add-architecture arm64
           apt-get update
           # liblzma-dev is required by cargo-deb. curl is required by rustup.
           # markdown and html2text are required to generate the Debian package only.
-          # The last two lines contains packages necessary for appimage-builder only.
-          # gstreamer1.0-plugins-base-apps is used by appimage-builder to embed a GStreamer registry in
-          # the AppImage, speeding up its execution and avoiding some unactionable, ugly plugin warnings
+          # The last line contains packages necessary for appimage-builder only
           apt-get install -yq build-essential git liblzma-dev curl \
-                              gcc-aarch64-linux-gnu libgstreamer-plugins-base1.0-dev:arm64 \
-                              qemu-user gstreamer1.0-plugins-good:arm64 gstreamer1.0-plugins-bad:arm64 \
+                              gcc-aarch64-linux-gnu qemu-user libc6:arm64 \
                               markdown html2text \
-                              python3-pip patchelf file zsync desktop-file-utils fakeroot gtk-update-icon-cache \
-                              gstreamer1.0-plugins-base-apps:arm64
+                              python3-pip patchelf file zsync desktop-file-utils fakeroot gtk-update-icon-cache
 
       - name: Checkout source
         uses: actions/checkout@v3
@@ -411,26 +366,11 @@ jobs:
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
 
-      # This is necessary because we're cross-compiling and appimage-builder isn't
-      # smart enough to run binaries for the target platform with QEMU
-      - name: Create appimage-builder QEMU wrapper scripts
-        run: |
-          mkdir -p /run/appimage-builder-qemu-wrappers
-          cat <<-'GST_LAUNCH_WRAPPER' > /run/appimage-builder-qemu-wrappers/gst-launch-1.0
-          #!/bin/sh
-          echo '> Using custom gst-launch-1.0 QEMU wrapper script'
-          qemu-aarch64 /usr/bin/gst-launch-1.0 "$@"
-          GST_LAUNCH_WRAPPER
-          chmod +x /run/appimage-builder-qemu-wrappers/gst-launch-1.0
-
-      # Setting PATH is a hack to make our gst-launch-1.0 wrapper script be used. See:
-      # https://github.com/AppImageCrafters/appimage-builder/blob/v1.0.0-alpha.3/appimagebuilder/modules/setup/helpers/gstreamer.py#L56
       - name: Generate CLI AppImage
         env:
           TARGET_APPIMAGE_ARCH: aarch64
           TARGET_APPIMAGE_APT_ARCH: arm64
-        run: PATH="/run/appimage-builder-qemu-wrappers:$PATH"
-          VERSION="$(git describe --tags --dirty=-custom)"
+        run: VERSION="$(git describe --tags --dirty=-custom)"
           appimage-builder --recipe appimage/recipe.yml --skip-test
 
       - name: Upload CLI binary
@@ -560,13 +500,11 @@ jobs:
     if: success() && github.event_name != 'pull_request' && !startsWith(github.ref_name, 'renovate/')
 
     steps:
-      - name: Install development packages, GStreamer libraries, GStreamer development packages and benchmark script packages
+      - name: Install development packages and benchmark script packages
         run: |
           apt-get update
           # curl is required by rustup
           apt-get install -yq build-essential git curl \
-                              gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-                              libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
                               python3-venv gpg
 
       - name: Checkout source
