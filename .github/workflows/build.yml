@@ -157,7 +157,7 @@ jobs:
       # systemd is responsible for setting up the machine ID files we use for
       # testing the system ID retrieval code, so copy a dummy one
       - name: Set up a dummy D-Bus machine ID for tests
-        run: cp /proc/sys/kernel/random/boot_id /run/machine-id
+        run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
 
       - name: Run tests
         uses: actions-rs/cargo@v1
@@ -361,7 +361,7 @@ jobs:
       # systemd is responsible for setting up the machine ID files we use for
       # testing the system ID retrieval code, so copy a dummy one
       - name: Set up a dummy D-Bus machine ID for tests
-        run: cp /proc/sys/kernel/random/boot_id /run/machine-id
+        run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
 
       - name: Run tests
         uses: actions-rs/cargo@v1
