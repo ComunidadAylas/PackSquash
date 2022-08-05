@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659625545560,
+  "lastUpdate": 1659704284676,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "b6fa6e76bf6da620b1b7b57cd68c8f77baa0d161",
-          "message": "chore(deps): update dependency gdown to v4.5.1",
-          "timestamp": "2022-07-21T02:52:03Z",
-          "tree_id": "705208de177d89c8e490adde98cc34df0a0050e6",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b6fa6e76bf6da620b1b7b57cd68c8f77baa0d161"
-        },
-        "date": 1658374037196,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 16649470,
-            "range": "± 617095",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 997103032,
-            "range": "± 15413606",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13916813280,
-            "range": "± 445473073",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2770888886,
-            "range": "± 53296471",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2264119810,
             "range": "± 108184936",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "5081d8c578a61d316d32b36fc077fdc1c9be11e4",
+          "message": "fix(system_id/linux): fix D-Bus machine ID fallback lookups not working\n\nUsing map_err is incorrect here. We should use the or_else combinator.",
+          "timestamp": "2022-08-05T14:20:24+02:00",
+          "tree_id": "e059f5030372ed102385e5df1d8213e116fcd013",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5081d8c578a61d316d32b36fc077fdc1c9be11e4"
+        },
+        "date": 1659704284001,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10635023,
+            "range": "± 237264",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 340025363,
+            "range": "± 11275584",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10342708289,
+            "range": "± 165077857",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2200105613,
+            "range": "± 24824864",
             "unit": "ns/iter"
           }
         ]
