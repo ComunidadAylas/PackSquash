@@ -130,8 +130,8 @@ impl Decoder for OptimizerDecoder {
 		// First pass: transcode the input audio file to an efficient Ogg Vorbis representation.
 		// This is necessary if the input audio file is not Ogg Vorbis, or if some modification
 		// to the audio data is done (currently, channel mixing, resampling and pitch shifting)
-		let (transcoded_file, channel_mixing_done) = if skip_transcoding {
-			(ByteBuffer::Bytes(input_file.clone()), false)
+		let (transcoded_file, channel_mixing_done, pitch_shifting_done) = if skip_transcoding {
+			(ByteBuffer::Bytes(input_file.clone()), false, false)
 		} else {
 			let (transcoded_file, channel_mixing_done) = process_and_transcode(
 				input_file.clone().reader(),
@@ -139,7 +139,11 @@ impl Decoder for OptimizerDecoder {
 				&self.optimization_settings
 			)?;
 
-			(ByteBuffer::CowSlice(transcoded_file), channel_mixing_done)
+			(
+				ByteBuffer::CowSlice(transcoded_file),
+				channel_mixing_done,
+				self.optimization_settings.target_pitch != 1.0
+			)
 		};
 
 		// Second pass: run OptiVorbis on the input file, which may be transcoded by now. This
@@ -155,8 +159,7 @@ impl Decoder for OptimizerDecoder {
 		// If not, quickly run OptiVorbis over the original file, which is practically guaranteed to
 		// never return a file bigger than its input, and return that
 		let optimized_file_is_input_file;
-		let can_use_input_as_output =
-			self.is_ogg && self.optimization_settings.target_pitch == 1.0 && !channel_mixing_done;
+		let can_use_input_as_output = self.is_ogg && !pitch_shifting_done && !channel_mixing_done;
 
 		let optimized_file = if do_two_pass_optimization_and_validation
 			&& input_file.len() < transcoded_and_optimized_file.as_ref().len()
