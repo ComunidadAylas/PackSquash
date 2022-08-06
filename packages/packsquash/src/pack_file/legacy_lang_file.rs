@@ -1,6 +1,5 @@
 use std::sync::LazyLock;
 
-use ahash::AHashSet;
 use futures::{future, StreamExt};
 use patricia_tree::PatriciaSet;
 use regex::Regex;

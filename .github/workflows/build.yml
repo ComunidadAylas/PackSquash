@@ -160,16 +160,10 @@ jobs:
         run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
 
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release -- -Z unstable-options --report-time
+        run: cargo test --release -- -Z unstable-options --report-time
 
       - name: Build with optimized standard library
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
@@ -233,16 +227,10 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release -- -Z unstable-options --report-time
+        run: cargo test --release -- -Z unstable-options --report-time
 
       - name: Build with optimized standard library
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
@@ -277,16 +265,10 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release -- -Z unstable-options --report-time
+        run: cargo test --release -- -Z unstable-options --report-time
 
       - name: Build with optimized standard library
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: Upload CLI binary
         uses: actions/upload-artifact@v3
@@ -364,16 +346,10 @@ jobs:
         run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
 
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release -- -Z unstable-options --report-time
+        run: cargo test --release -- -Z unstable-options --report-time
 
       - name: Build with optimized standard library
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: Generate CLI Debian package
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
