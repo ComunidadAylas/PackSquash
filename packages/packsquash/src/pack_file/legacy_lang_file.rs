@@ -2,6 +2,7 @@ use std::sync::LazyLock;
 
 use ahash::AHashSet;
 use futures::{future, StreamExt};
+use patricia_tree::PatriciaSet;
 use regex::Regex;
 use thiserror::Error;
 use tokio::io::AsyncRead;
@@ -82,7 +83,7 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for LegacyLanguageFile<T> {
 
 	fn process(self) -> Self::OptimizedByteChunksStream {
 		let mut line_number = LineNumber::new();
-		let mut processed_keys = AHashSet::new();
+		let mut processed_keys = PatriciaSet::new();
 
 		let minify = self.optimization_settings.minify;
 		let strip_bom = self.optimization_settings.strip_bom;
@@ -143,7 +144,7 @@ fn process_line<L: Into<String>>(
 	line_number: LineNumber,
 	minify: bool,
 	strip_bom: bool,
-	processed_keys: &mut AHashSet<Box<[u8]>>
+	processed_keys: &mut PatriciaSet
 ) -> Option<OptimizedBytesChunk<Vec<u8>, OptimizationError>> {
 	const MINIFIED: &str = "Minified";
 	const NOT_MINIFIED: &str = "Validated and copied";
@@ -173,13 +174,10 @@ fn process_line<L: Into<String>>(
 			// Check whether this key already has a value. Minecraft overwrites the
 			// previous value of a key when a new one is found, but to guarantee that
 			// our output is minimal and that pack authors are not surprised when a
-			// line overrides another, consider duplicate keys as an error. We use the
-			// fast smaz short string compression algorithm to save on memory for
-			// language files with lots of entries with English-like keys.
-			// FIXME when the spooled temporary files refactor to use a global byte
-			// budget is complete, consider replacing this with a CDB insert and lookup,
-			// using the galvanize crate on one of those
-			if !processed_keys.insert(smaz::compress(key.as_bytes()).into_boxed_slice()) {
+			// line overrides another, consider duplicate keys as an error. We use a
+			// Patricia tree to substantially save on memory for big files in common
+			// cases
+			if !processed_keys.insert(key) {
 				return Some(Err(OptimizationError::DuplicateKey(
 					String::from(key),
 					line_number

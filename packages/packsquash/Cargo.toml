@@ -16,6 +16,7 @@ enumset = { version = "1.0.11", features = ["serde"] }
 indexmap = { version = "1.9.1", default-features = false, features = ["serde-1"] }
 thiserror = "1.0.32"
 ahash = "0.7.6"
+patricia_tree = "0.3.1"
 
 sysinfo = { version = "0.25.1", default-features = false }
 walkdir = "2.3.2"
@@ -53,7 +54,6 @@ java-properties = { version = "1.4.1", optional = true }
 tempfile = "3.3.0"
 crc32fast = "1.3.2"
 zopfli = "0.5.0"
-smaz = "0.1.0"
 
 const-random = "0.1.13"
 aes = "0.7.5"
