@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659805097090,
+  "lastUpdate": 1659808450890,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "e69d3b042747dd18fc254d7717ebe7f5808ea3ac",
-          "message": "chore(deps): update dependency tqdm to v4.64.0",
-          "timestamp": "2022-07-21T02:52:13Z",
-          "tree_id": "3ba6b33f75142207c305ab905583e51cba6f05bd",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e69d3b042747dd18fc254d7717ebe7f5808ea3ac"
-        },
-        "date": 1658374718918,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10964167,
-            "range": "± 426772",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 793716293,
-            "range": "± 4799193",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10416388606,
-            "range": "± 339534873",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2171444680,
-            "range": "± 11438445",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2184030600,
             "range": "± 28007045",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "8830dd1cda3b47214295baf03250502cf8c57dc0",
+          "message": "fix(packsquash_cli/build): disable dir owner validation in CI\n\nThis probably was causing git commands to fail when trying to retrieve\nthe semantic version for a commit on CI.",
+          "timestamp": "2022-08-06T19:12:56+02:00",
+          "tree_id": "8dc86010b5eef2fcf0d3ca14bf2f8e22005d9086",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/8830dd1cda3b47214295baf03250502cf8c57dc0"
+        },
+        "date": 1659808449897,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14160936,
+            "range": "± 320953",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 397147089,
+            "range": "± 3847669",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12458762928,
+            "range": "± 14014582",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2230905498,
+            "range": "± 78614594",
             "unit": "ns/iter"
           }
         ]
