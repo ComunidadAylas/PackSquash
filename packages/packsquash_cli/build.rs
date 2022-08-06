@@ -1,3 +1,4 @@
+use git2::opts::set_verify_owner_validation;
 use git2::{DescribeFormatOptions, DescribeOptions, Repository};
 use std::env;
 use std::env::current_dir;
@@ -47,6 +48,15 @@ fn main() {
 }
 
 fn git_version() -> Result<String, Box<dyn Error>> {
+	// CI workflows run on Debian Bullseye, which ships with git 2.30. This older
+	// version of Git is vulnerable to CVE-2022-24765 and doesn't implement the
+	// configuration option that libgit2 polls for, so it causes a failure. However,
+	// this security vulnerability is not applicable to CI runners, so if we're on
+	// CI, disable the troublesome checks
+	if env::var_os("CI").is_some() {
+		unsafe { set_verify_owner_validation(false) }.unwrap();
+	}
+
 	// The current directory is set to the source file directory for this package.
 	// Find the repo directory backtracking on the file tree
 	let repo = Repository::discover(current_dir()?)?;
