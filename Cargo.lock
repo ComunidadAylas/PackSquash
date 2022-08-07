@@ -2717,11 +2717,11 @@ dependencies = [
 
 [[package]]
 name = "winres"
-version = "0.1.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b68db261ef59e9e52806f688020631e987592bd83619edccda9c47d42cde4f6c"
+version = "0.1.11"
+source = "git+https://github.com/Nilstrieb/winres?rev=c839134b#c839134b5f78d7dd0f5c8211ec6c7b675b0026fc"
 dependencies = [
  "toml",
+ "version_check 0.9.4",
 ]
 
 [[package]]
@@ -2781,8 +2781,3 @@ dependencies = [
  "iter-read",
  "typed-arena",
 ]
-
-[[patch.unused]]
-name = "winres"
-version = "0.1.11"
-source = "git+https://github.com/Nilstrieb/winres?rev=c839134b#c839134b5f78d7dd0f5c8211ec6c7b675b0026fc"
