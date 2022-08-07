@@ -83,11 +83,7 @@ fn add_executable_metadata() {
 	windows_resource.set("LegalCopyright", env!("CARGO_PKG_AUTHORS"));
 	windows_resource.set(
 		"FileDescription",
-		&format!(
-			"{} - {}",
-			env!("CARGO_PKG_NAME"),
-			env!("CARGO_PKG_DESCRIPTION")
-		)
+		&format!("PackSquash - {}", env!("CARGO_PKG_DESCRIPTION"))
 	);
 
 	windows_resource.set_language(0x0409); // English (US)
