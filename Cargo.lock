@@ -2781,3 +2781,8 @@ dependencies = [
  "iter-read",
  "typed-arena",
 ]
+
+[[patch.unused]]
+name = "winres"
+version = "0.1.11"
+source = "git+https://github.com/Nilstrieb/winres?rev=c839134b#c839134b5f78d7dd0f5c8211ec6c7b675b0026fc"
