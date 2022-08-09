@@ -10,6 +10,7 @@ oxipng = { git = "https://github.com/ComunidadAylas/oxipng", branch = "packsquas
 # Related PRs:
 # https://github.com/phaazon/glsl/pull/138
 # https://github.com/ComunidadAylas/glsl/pull/1
+# https://github.com/ComunidadAylas/glsl/pull/2
 glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
 # Use our fork of Zopfli that includes streaming support and the ability to change
 # the number of compression iterations

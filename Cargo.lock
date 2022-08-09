@@ -967,7 +967,7 @@ dependencies = [
 [[package]]
 name = "glsl"
 version = "6.0.1"
-source = "git+https://github.com/ComunidadAylas/glsl?branch=packsquash#c74039dd6df4f7848dcc6c7fb2789ee462c27de5"
+source = "git+https://github.com/ComunidadAylas/glsl?branch=packsquash#0fb5eb4b4d870fc89b2d5e99cb5b310dd05be50c"
 dependencies = [
  "nom 6.1.2",
 ]
@@ -1123,9 +1123,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.126"
+version = "0.2.127"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
+checksum = "505e71a4706fa491e9b1b55f51b95d4037d0821ee40131190475f692b35b009b"
 
 [[package]]
 name = "libgit2-sys"
@@ -1380,7 +1380,7 @@ checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 [[package]]
 name = "optivorbis"
 version = "0.1.1"
-source = "git+https://github.com/OptiVorbis/OptiVorbis#6a321d735871a209d47cf9b26bb66f167c1bb2e4"
+source = "git+https://github.com/OptiVorbis/OptiVorbis#7013256f4bfae16af7f62c29fa45782d628a5b51"
 dependencies = [
  "bumpalo",
  "getrandom",
@@ -1400,9 +1400,9 @@ dependencies = [
 
 [[package]]
 name = "ouroboros"
-version = "0.15.1"
+version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0020e5088e4600e6b82e7c192de0d04c1f37d5b3cfd8dfec193cec1f81f15fa0"
+checksum = "7425ea87a1e31df63a27b6d31e21a35a9003268032a876465e8d43c2364b0de2"
 dependencies = [
  "aliasable",
  "ouroboros_macro",
@@ -1410,9 +1410,9 @@ dependencies = [
 
 [[package]]
 name = "ouroboros_macro"
-version = "0.15.1"
+version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df194bd9cdca62dad63764c2185d1a23b38a11582db74275847c45f99d440725"
+checksum = "734aa7a4a6390b162112523cac2923a18e4f23b917880a68c826bf6e8bf48f06"
 dependencies = [
  "Inflector",
  "proc-macro-error",
@@ -1829,9 +1829,9 @@ dependencies = [
 
 [[package]]
 name = "realfft"
-version = "3.0.0"
+version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a83b876fe55da7e1bf5deeacb93d6411edf81eba0e1a497e79c067734729053a"
+checksum = "8028eb3fabd68ddf331f744ba9c25a939804e276d820f9b218ab25a4bd7b91b8"
 dependencies = [
  "rustfft",
 ]
@@ -2059,9 +2059,9 @@ checksum = "a3ff2f71c82567c565ba4b3009a9350a96a7269eaa4001ebedae926230bc2254"
 
 [[package]]
 name = "strum_macros"
-version = "0.24.2"
+version = "0.24.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4faebde00e8ff94316c01800f9054fd2ba77d30d9e922541913051d1d978918b"
+checksum = "1e385be0d24f186b4ce2f9982191e7101bb737312ad61c1f2f984f34bcf85d59"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -2287,12 +2287,11 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.12"
+version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74b7cc93fc23ba97fde84f7eea56c55d1ba183f495c6715defdfc7b9cb8c870f"
+checksum = "db76ff9fa4b1458b3c7f077f3ff9887394058460d21e634355b273aaf11eea45"
 dependencies = [
  "itoa",
- "js-sys",
  "libc",
  "num_threads",
  "serde",
@@ -2533,7 +2532,7 @@ dependencies = [
 [[package]]
 name = "vorbis_bitpack"
 version = "0.1.1"
-source = "git+https://github.com/OptiVorbis/OptiVorbis#6a321d735871a209d47cf9b26bb66f167c1bb2e4"
+source = "git+https://github.com/OptiVorbis/OptiVorbis#7013256f4bfae16af7f62c29fa45782d628a5b51"
 
 [[package]]
 name = "vorbis_sys"
