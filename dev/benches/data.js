@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1660025531800,
+  "lastUpdate": 1660050823373,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": false,
-          "id": "3ef9dcd7cea20d391ff0c1eca4781f80162b3570",
-          "message": "chore(deps): update dependency filelock to v3.7.1",
-          "timestamp": "2022-07-21T02:51:58Z",
-          "tree_id": "5a2b6770ca320a72312423ceeeb4a1f1b1625737",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3ef9dcd7cea20d391ff0c1eca4781f80162b3570"
-        },
-        "date": 1658378937310,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14459307,
-            "range": "± 434729",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 850359035,
-            "range": "± 3386354",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11957273430,
-            "range": "± 262898730",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2364156912,
-            "range": "± 66307192",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2778333347,
             "range": "± 64662635",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "5e5d6fc8557621467136410ecfb0595d4713b1ff",
+          "message": "fix(pack_file/shader_file): workaround M1 Mac GLSL compiler quirk\n\nIt was discovered by @pau101 that the GLSL compiler distributed with M1\nMacs may consider some if-else construct as ambiguous and fail shader\ncompilation, even though every other known GLSL compiler accepts them\nfine.\n\nThis problem was fixed in the glsl crate fork PackSquash uses, via a PR\nthat's now merged. Update the glsl crate commit used by PackSquash to\nlet it use this fix.",
+          "timestamp": "2022-08-09T14:40:53+02:00",
+          "tree_id": "3d87f692bfdec03dfd8171049d89a87ff317c03a",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5e5d6fc8557621467136410ecfb0595d4713b1ff"
+        },
+        "date": 1660050822276,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14206573,
+            "range": "± 716209",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 411994217,
+            "range": "± 8593093",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10508684284,
+            "range": "± 393235939",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2227543994,
+            "range": "± 42890431",
             "unit": "ns/iter"
           }
         ]
