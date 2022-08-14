@@ -1380,8 +1380,9 @@ checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 
 [[package]]
 name = "optivorbis"
-version = "0.1.1"
-source = "git+https://github.com/OptiVorbis/OptiVorbis#7013256f4bfae16af7f62c29fa45782d628a5b51"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "30ff42bc545d15e0ecc6ca7b7b645f770c2c1fd20d1bce0baf663b80b0198520"
 dependencies = [
  "bumpalo",
  "getrandom",
@@ -2533,7 +2534,8 @@ dependencies = [
 [[package]]
 name = "vorbis_bitpack"
 version = "0.1.1"
-source = "git+https://github.com/OptiVorbis/OptiVorbis#7013256f4bfae16af7f62c29fa45782d628a5b51"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "91304fb1fb7f14c888496d859d627db36efdb63cdd6755e286e3dd637cc28997"
 
 [[package]]
 name = "vorbis_sys"
@@ -2781,3 +2783,8 @@ dependencies = [
  "iter-read",
  "typed-arena",
 ]
+
+[[patch.unused]]
+name = "optivorbis"
+version = "0.1.1"
+source = "git+https://github.com/OptiVorbis/OptiVorbis#7013256f4bfae16af7f62c29fa45782d628a5b51"
