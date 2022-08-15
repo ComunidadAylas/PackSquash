@@ -2783,8 +2783,3 @@ dependencies = [
  "iter-read",
  "typed-arena",
 ]
-
-[[patch.unused]]
-name = "optivorbis"
-version = "0.1.1"
-source = "git+https://github.com/OptiVorbis/OptiVorbis#7013256f4bfae16af7f62c29fa45782d628a5b51"

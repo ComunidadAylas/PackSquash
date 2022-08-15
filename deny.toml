@@ -115,4 +115,4 @@ allow-git = [
 ]
 
 [sources.allow-org]
-github = ["ComunidadAylas", "OptiVorbis"]
+github = ["ComunidadAylas"]
