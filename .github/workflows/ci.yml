@@ -182,6 +182,7 @@ jobs:
         run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
 
       - name: ✔️ Run tests
+        if: matrix.target != 'aarch64-apple-darwin'
         run: cargo test --release -- -Z unstable-options --report-time
 
       - name: 🔨 Build with optimized standard library
