@@ -249,7 +249,7 @@ jobs:
       - name: 📁 Rename PackSquash CLI ARM64 MacOS executable
         run: mv packsquash packsquash-aarch64
 
-      - name: 🔨 Generate universal binary
+      - name: 🔨 Generate universal CLI binary
         run: lipo -create -output packsquash packsquash-x64 packsquash-aarch64
 
       - name: 📤 Upload universal CLI binary
