@@ -69,6 +69,7 @@ jobs:
   build:
 
     strategy:
+      fail-fast: false
       matrix:
         target:
           - x86_64-unknown-linux-gnu
@@ -237,7 +238,7 @@ jobs:
       - name: 📥 Download PackSquash CLI x64 MacOS executable
         uses: actions/download-artifact@v3
         with:
-          name: PackSquash CLI AppImage (x86_64-apple-darwin)
+          name: PackSquash CLI executable (x86_64-apple-darwin)
 
       - name: 📁 Rename PackSquash CLI x64 MacOS executable
         run: mv packsquash packsquash-x64
@@ -245,7 +246,7 @@ jobs:
       - name: 📥 Download PackSquash CLI ARM64 MacOS executable
         uses: actions/download-artifact@v3
         with:
-          name: PackSquash CLI AppImage (aarch64-apple-darwin)
+          name: PackSquash CLI executable (aarch64-apple-darwin)
 
       - name: 📁 Rename PackSquash CLI ARM64 MacOS executable
         run: mv packsquash packsquash-aarch64
