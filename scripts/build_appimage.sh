@@ -22,7 +22,7 @@ fi
 # Create a temporary working directory for this AppImage script
 APPIMAGE_WORKDIR=$(mktemp -d -t packsquash-appimagebuild.XXX)
 readonly APPIMAGE_WORKDIR
-trap '{ rm -rf "$APPIMAGE_WORKDIR" || true; } && { rm -rf appimage-builder-cache || true; }' EXIT INT TERM
+trap '{ rm -rf "$APPIMAGE_WORKDIR" || true; } && { rm -rf appimage-build AppDir || true; }' EXIT INT TERM
 
 # Set up a virtual environment so that we do not pollute the global Python
 # packages list with the packages we need to install
@@ -32,31 +32,33 @@ python3 -m venv "$APPIMAGE_WORKDIR/.venv"
 
 echo '> Install appimage-build in temporary Python virtual environment'
 pip3 install -r /proc/self/fd/0 <<'REQUIREMENTS'
-appimage-builder==1.0.0a3
-certifi==2021.10.8
-charset-normalizer==2.0.12
+appimage-builder==1.1.0
+certifi==2022.6.15
+charset-normalizer==2.1.0
 contextlib2==21.6.0
 decorator==5.1.1
 docker==5.0.3
 emrichen==0.2.3
 idna==3.3
 jsonpath-rw==1.4.0
+lief==0.12.1
 packaging==21.3
 ply==3.11
-prompt-toolkit==3.0.28
+prompt-toolkit==3.0.30
 pyaml==21.10.1
-pyparsing==3.0.7
+pyparsing==3.0.9
+python-gnupg==0.4.9
 PyYAML==6.0
 questionary==1.10.0
-requests==2.27.1
+requests==2.28.1
 roam==0.3.1
 ruamel.yaml==0.17.21
 ruamel.yaml.clib==0.2.6
 schema==0.7.5
 six==1.16.0
-urllib3==1.26.8
+urllib3==1.26.11
 wcwidth==0.2.5
-websocket-client==1.3.1
+websocket-client==1.3.3
 REQUIREMENTS
 
 echo '> Downloading appimagetool'
@@ -67,8 +69,8 @@ export PATH="$PATH:$APPIMAGE_WORKDIR"
 
 echo '> Running appimage-builder'
 
-APPDIR="$APPIMAGE_WORKDIR/AppDir" REPO_DIR="$APPIMAGE_WORKDIR/pkgs" \
-VERSION="$(git describe --tags --dirty=-custom)" \
+APPDIR=AppDir REPO_DIR="$APPIMAGE_WORKDIR/pkgs" \
+VERSION="$(git describe --tags --dirty=-custom --always)" \
 TARGET_APPIMAGE_ARCH=$(uname -m) \
 TARGET_APPIMAGE_APT_ARCH=$(dpkg-architecture -q DEB_HOST_ARCH) \
 appimage-builder --recipe appimage/recipe.yml

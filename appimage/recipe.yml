@@ -15,8 +15,8 @@ script:
   - CWD="$PWD" && cd "$REPO_DIR" && apt-ftparchive packages . > Packages && cd "$CWD"
   # The following two commands are a workaround for the local APT package not
   # being saved to the archives directory, as expected by appimage-builder
-  - mkdir -p appimage-builder-cache/apt/archives
-  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_${TARGET_APPIMAGE_APT_ARCH}.deb appimage-builder-cache/apt/archives
+  - mkdir -p appimage-build/apt/archives
+  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_${TARGET_APPIMAGE_APT_ARCH}.deb appimage-build/apt/archives
   # Copy PackSquash icon asset, like linuxdeploy would do
   - mkdir -p "$APPDIR"/usr/share/icons/hicolor/256x256/apps
   - cp -f common/assets/app_icon.png "$APPDIR"/usr/share/icons/hicolor/256x256/apps/packsquash.png
@@ -27,8 +27,6 @@ script:
   - cp -f common/assets/com.github.comunidadaylas.packsquash.desktop "$APPDIR"/usr/share/applications
 
 AppDir:
-  path: !ENV ${APPDIR}
-
   app_info:
     id: com.github.comunidadaylas.packsquash
     name: PackSquash

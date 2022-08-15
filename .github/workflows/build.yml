@@ -2,26 +2,6 @@ name: Build
 
 on:
   push:
-    paths:
-      # Source code and assets, build and test scripts
-      - packages/**
-      - appimage/**
-      - common/**
-      - scripts/build_*
-      - scripts/test-packs/**
-      # Rust toolchain configuration file
-      - rust-toolchain
-      - rustfmt.toml
-      - deny.toml
-      - Cargo.toml
-      - Cargo.lock
-      - '**/.cargo/config.toml'
-      # Git files that may affect how test files are checked in
-      - .gitattributes
-      # GitHub Actions workflows
-      - .github/workflows/*.yml
-      # Docker image
-      - Dockerfile
   pull_request:
     types:
       - opened
@@ -32,11 +12,9 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CARGO_DEB_VERSION: 1.34.0
-  APPIMAGE_BUILDER_VERSION: 1.0.0a3
+  DEBIAN_FRONTEND: noninteractive
+
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
-  APPDIR: AppDir
-  REPO_DIR: /pkgs
 
 jobs:
   static-analysis:
@@ -48,69 +26,99 @@ jobs:
       github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
-      - name: Checkout source
+      - name: 📥 Checkout source
         uses: actions/checkout@v3
 
-      - name: Install Rust toolchain
+      - name: 🧰 Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           components: rustfmt, clippy
 
-      - name: Install development packages
+      - name: 🧰 Install development packages
         run: |
           sudo apt-get update
           sudo apt-get install desktop-file-utils
 
-      - name: Check workflow write permission
+      - name: 🔍 Check workflow write permission
         id: check_write_permission
         uses: scherermichael-oss/action-has-permission@1.0.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Clippy check (with annotations)
+      - name: 🔍 Clippy check (with annotations)
         uses: actions-rs/clippy-check@v1
         if: steps.check_write_permission.outputs.has-permission
         with:
           args: --all-targets -- -D warnings
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Clippy check (without annotations)
+      - name: 🔍 Clippy check (without annotations)
         if: ${{ !steps.check_write_permission.outputs.has-permission }}
         run: cargo clippy --all-targets -- -D warnings
 
-      - name: Cargo deny check
+      - name: 🔍 Cargo deny check
         uses: EmbarkStudios/cargo-deny-action@v1
 
-      - name: Check PackSquash Linux desktop entries correctness
+      - name: 🔍 Check PackSquash Linux desktop entries correctness
         run: desktop-file-validate common/assets/*.desktop
 
-      - name: Format Rust source code
-        run: cargo fmt
+      - name: 🔍 Check Rust source code format
+        run: cargo fmt --all --check
 
-      - name: Commit and push Rust source code format changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: 'Format Rust source code using rustfmt'
-          author_name: github-actions[bot]
-          author_email: 41898282+github-actions[bot]@users.noreply.github.com
+  build:
 
-  linux-x64-gnu:
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-pc-windows-gnu
+          - aarch64-unknown-linux-gnu
+          - x86_64-apple-darwin
+        include:
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            container: debian:bullseye-slim
+            apt-arch: amd64
+            appimage-arch: x86_64
+            cli-executable: packsquash
 
-    runs-on: ubuntu-latest
+          - target: x86_64-pc-windows-gnu
+            runner: windows-latest
+            cli-executable: packsquash.exe
 
-    container: debian:bullseye-slim
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-latest
+            container: debian:bullseye-slim
+            apt-arch: arm64
+            appimage-arch: aarch64
+            cli-executable: packsquash
+
+          - target: x86_64-apple-darwin
+            runner: macos-latest
+            cli-executable: packsquash
+
+    runs-on: ${{ matrix.runner }}
+
+    container: ${{ matrix.container }}
 
     env:
-      CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
-      DEBIAN_FRONTEND: noninteractive
+      CARGO_BUILD_TARGET: ${{ matrix.target }}
+      TARGET_APPIMAGE_ARCH: ${{ matrix.appimage-arch }}
+      TARGET_APPIMAGE_APT_ARCH: ${{ matrix.apt-arch }}
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
       github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
-      - name: Install development packages
+      - name: 📥 Checkout source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Keep the commit history for proper version information
+
+      - name: 🧰 Install toolchain
+        if: matrix.runner == 'ubuntu-latest'
         run: |
           apt-get update
           # curl is required by rustup.
@@ -118,217 +126,39 @@ jobs:
           # The last line contains packages necessary for appimage-builder only
           apt-get install -yq build-essential git curl \
                               markdown html2text \
-                              python3-pip patchelf file zsync desktop-file-utils fakeroot gtk-update-icon-cache
+                              python3-pip file zsync desktop-file-utils fakeroot squashfs-tools
 
-      - name: Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          components: rust-src
-
-      - name: Cache Rust artifacts
-        uses: Swatinem/rust-cache@v1
-
-      - name: Install cargo-deb
-        uses: actions-rs/install@v0.1
-        with:
-          crate: cargo-deb
-          version: ${{ env.CARGO_DEB_VERSION }}
-
-      - name: Install appimage-builder
-        run: |
-          pip install appimage-builder==${{ env.APPIMAGE_BUILDER_VERSION }}
-          curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
-          chmod ugo+x /opt/appimagetool
-          # Workaround from https://github.com/AppImageCrafters/appimage-builder/blob/v1.0.0-alpha.3/Dockerfile#L11-L15
-          # to extract the appimagetool AppImage within a container
-          cd /opt
-          sed -i 's|AI\x02|\x00\x00\x00|' appimagetool
-          /opt/appimagetool --appimage-extract > /dev/null
-          mv /opt/squashfs-root /opt/appimagetool.AppDir
-          ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
-
-      # Our build container minimal and it doesn't contain any systemd package.
-      # systemd is responsible for setting up the machine ID files we use for
-      # testing the system ID retrieval code, so copy a dummy one
-      - name: Set up a dummy D-Bus machine ID for tests
-        run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
-
-      - name: Run tests
-        run: cargo test --release -- -Z unstable-options --report-time
-
-      - name: Build with optimized standard library
-        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
-
-      - name: Generate CLI Debian package
-        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
-
-      - name: Generate CLI AppImage
-        env:
-          TARGET_APPIMAGE_ARCH: x86_64
-          TARGET_APPIMAGE_APT_ARCH: amd64
-        run: VERSION="$(git describe --tags --dirty=-custom)"
-          appimage-builder --recipe appimage/recipe.yml --skip-test
-
-      - name: Upload CLI binary
-        uses: actions/upload-artifact@v3
-        with:
-          name: 'PackSquash executable (Linux, x64, glibc)'
-          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
-
-      - name: Upload CLI Debian package
-        uses: actions/upload-artifact@v3
-        with:
-          name: 'PackSquash CLI Debian package (amd64)'
-          path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
-
-      - name: Upload CLI AppImage
-        uses: actions/upload-artifact@v3
-        with:
-          name: 'PackSquash CLI AppImage (x64)'
-          path: PackSquash-*-x86_64.AppImage
-
-      - name: Upload CLI AppImage update diff
-        uses: actions/upload-artifact@v3
-        with:
-          name: 'PackSquash CLI AppImage zsync (x64)'
-          path: PackSquash-*-x86_64.AppImage.zsync
-
-  windows-x64-gnu:
-
-    runs-on: windows-latest
-
-    env:
-      CARGO_BUILD_TARGET: x86_64-pc-windows-gnu
-
-    # Only run if this is not a pull request, or for pull requests on forks
-    if: github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          target: ${{ env.CARGO_BUILD_TARGET }}
-          profile: minimal
-          components: rust-src
-
-      - name: Cache Rust artifacts
-        uses: Swatinem/rust-cache@v1
-
-      - name: Run tests
-        run: cargo test --release -- -Z unstable-options --report-time
-
-      - name: Build with optimized standard library
-        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
-
-      - name: Upload binary
-        uses: actions/upload-artifact@v3
-        with:
-          name: 'PackSquash CLI executable (Windows, x64)'
-          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe
-
-  macos-x64-darwin:
-
-    runs-on: macos-11
-
-    env:
-      CARGO_BUILD_TARGET: x86_64-apple-darwin
-
-    # Only run if this is not a pull request, or for pull requests on forks
-    if: github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          components: rust-src
-
-      - name: Cache Rust artifacts
-        uses: Swatinem/rust-cache@v1
-
-      - name: Run tests
-        run: cargo test --release -- -Z unstable-options --report-time
-
-      - name: Build with optimized standard library
-        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
-
-      - name: Upload CLI binary
-        uses: actions/upload-artifact@v3
-        with:
-          name: 'PackSquash CLI executable (macOS, x64)'
-          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
-
-  linux-aarch64-gnu:
-
-    runs-on: ubuntu-latest
-
-    container: debian:bullseye-slim
-
-    env:
-      CARGO_BUILD_TARGET: aarch64-unknown-linux-gnu
-      DEBIAN_FRONTEND: noninteractive
-
-    # Only run if this is not a pull request, or for pull requests on forks
-    if: github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
-
-    steps:
-      - name: Install development packages and cross-compilation GCC toolchain
+      - name: 🧰 Install Linux ARM64 cross-compilation toolchain
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
         run: |
           dpkg --add-architecture arm64
           apt-get update
-          # liblzma-dev is required by cargo-deb. curl is required by rustup.
-          # markdown and html2text are required to generate the Debian package only.
-          # The last line contains packages necessary for appimage-builder only
-          apt-get install -yq build-essential git liblzma-dev curl \
-                              gcc-aarch64-linux-gnu qemu-user libc6:arm64 \
-                              markdown html2text \
-                              python3-pip patchelf file zsync desktop-file-utils fakeroot gtk-update-icon-cache
+          apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
 
-      - name: Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Install Rust toolchain
+      - name: 🧰 Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          target: ${{ env.CARGO_BUILD_TARGET }}
           profile: minimal
+          target: ${{ env.CARGO_BUILD_TARGET }}
           components: rust-src
 
-      - name: Cache Rust artifacts
-        uses: Swatinem/rust-cache@v1
-
-      - name: Install cargo-deb
+      - name: 🧰 Install cargo-deb
+        if: matrix.runner == 'ubuntu-latest'
         uses: actions-rs/install@v0.1
         env:
+          # Guarantee that cargo-deb is built for the host when cross-compiling
           CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
         with:
           crate: cargo-deb
-          version: ${{ env.CARGO_DEB_VERSION }}
+          version: 1.38.2
 
-      - name: Install appimage-builder
+      - name: 💨 Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
+
+      - name: 🧰 Install appimage-builder
+        if: matrix.runner == 'ubuntu-latest'
         run: |
-          pip install appimage-builder==${{ env.APPIMAGE_BUILDER_VERSION }}
+          pip install appimage-builder==1.1.0
           curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
           chmod ugo+x /opt/appimagetool
           # Workaround from https://github.com/AppImageCrafters/appimage-builder/blob/v1.0.0-alpha.3/Dockerfile#L11-L15
@@ -339,53 +169,59 @@ jobs:
           mv /opt/squashfs-root /opt/appimagetool.AppDir
           ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
 
-      # Our build container minimal and it doesn't contain any systemd package.
+      # Our build container is minimal, and it doesn't contain any systemd package.
       # systemd is responsible for setting up the machine ID files we use for
       # testing the system ID retrieval code, so copy a dummy one
-      - name: Set up a dummy D-Bus machine ID for tests
+      - name: 📏 Set up a dummy D-Bus machine ID for tests
+        if: matrix.runner == 'ubuntu-latest'
         run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
 
-      - name: Run tests
+      - name: ✔️ Run tests
         run: cargo test --release -- -Z unstable-options --report-time
 
-      - name: Build with optimized standard library
+      - name: 🔨 Build with optimized standard library
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
-      - name: Generate CLI Debian package
+      - name: 🔨 Generate CLI Debian package
+        if: matrix.runner == 'ubuntu-latest'
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
 
-      - name: Generate CLI AppImage
+      - name: 🔨 Generate CLI AppImage
+        if: matrix.runner == 'ubuntu-latest'
         env:
-          TARGET_APPIMAGE_ARCH: aarch64
-          TARGET_APPIMAGE_APT_ARCH: arm64
-        run: VERSION="$(git describe --tags --dirty=-custom)"
+          APPDIR: AppDir
+          REPO_DIR: /pkgs
+        run: VERSION="$(git describe --tags --dirty=-custom --always)"
           appimage-builder --recipe appimage/recipe.yml --skip-test
 
-      - name: Upload CLI binary
+      - name: 📤 Upload CLI binary
         uses: actions/upload-artifact@v3
         with:
-          name: 'PackSquash executable (Linux, AArch64-ARM64, glibc)'
-          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+          name: PackSquash CLI executable (${{ matrix.target }})
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/${{ matrix.cli-executable }}
 
-      - name: Upload CLI Debian package
+      - name: 📤 Upload CLI Debian package
+        if: matrix.runner == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: 'PackSquash CLI Debian package (arm64)'
+          name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
-      - name: Upload CLI AppImage
+      - name: 📤 Upload CLI AppImage
+        if: matrix.runner == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: 'PackSquash CLI AppImage (arm64)'
-          path: PackSquash-*-aarch64.AppImage
+          name: PackSquash CLI AppImage (${{ matrix.appimage-arch }})
+          path: PackSquash-*-${{ matrix.appimage-arch }}.AppImage
 
-      - name: Upload CLI AppImage update diff
+      - name: 📤 Upload CLI AppImage update diff
+        if: matrix.runner == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: 'PackSquash CLI AppImage zsync (arm64)'
-          path: PackSquash-*-aarch64.AppImage.zsync
+          name: PackSquash CLI AppImage zsync (${{ matrix.appimage-arch }})
+          path: PackSquash-*-${{ matrix.appimage-arch }}.AppImage.zsync
 
-  docker:
+  build-docker-images:
 
     runs-on: ubuntu-latest
 
@@ -395,13 +231,16 @@ jobs:
       # github.repository as <account>/<repo>
       IMAGE_NAME: ${{ github.repository }}
 
-    needs: [ linux-x64-gnu, linux-aarch64-gnu ]
+    needs: build
 
     steps:
-      - name: Checkout source
+      - name: 📥 Checkout source
         uses: actions/checkout@v3
 
-      - name: Generate Docker image metadata
+      - name: 🧰 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: ⚙️ Generate Docker image metadata
         id: meta
         uses: docker/metadata-action@v4
         with:
@@ -415,27 +254,24 @@ jobs:
           labels: |
             org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
-      - name: Download PackSquash x64 AppImage
+      - name: 📥 Download PackSquash x64 AppImage
         uses: actions/download-artifact@v3
         with:
-          name: 'PackSquash CLI AppImage (x64)'
+          name: PackSquash CLI AppImage (x86_64-unknown-linux-gnu)
 
       # Docker uses different architecture names
-      - name: Rename PackSquash x64 AppImage
+      - name: 📁 Rename PackSquash x64 AppImage
         run: mv PackSquash-*-x86_64.AppImage PackSquash-*-amd64.AppImage
 
-      - name: Download PackSquash ARM64 AppImage
+      - name: 📥 Download PackSquash ARM64 AppImage
         uses: actions/download-artifact@v3
         with:
-          name: 'PackSquash CLI AppImage (arm64)'
+          name: PackSquash CLI AppImage (aarch64-unknown-linux-gnu)
 
-      - name: Rename PackSquash ARM64 AppImage
+      - name: 📁 Rename PackSquash ARM64 AppImage
         run: mv PackSquash-*-aarch64.AppImage PackSquash-*-arm64.AppImage
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Check workflow package write permission
+      - name: 🔍 Check workflow package write permission
         id: check_write_permission
         uses: scherermichael-oss/action-has-permission@1.0.6
         env:
@@ -444,7 +280,7 @@ jobs:
       # The GitHub token needs the package:write permission for the push to work.
       # This permission is not given to PRs from forked repositories.
       # See: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-      - name: Login to ${{ env.REGISTRY }}
+      - name: ⚙️ Login to ${{ env.REGISTRY }}
         uses: docker/login-action@v2
         if: steps.check_write_permission.outputs.has-permission
         with:
@@ -452,7 +288,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: 🔨 Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -475,10 +311,7 @@ jobs:
     timeout-minutes: 30
 
     # Only benchmark code that passes all the checks
-    needs: [ static-analysis, linux-x64-gnu, windows-x64-gnu, macos-x64-darwin, linux-aarch64-gnu ]
-
-    env:
-      DEBIAN_FRONTEND: noninteractive
+    needs: [ static-analysis, build ]
 
     # Ignore runs that don't have the secret needed to decrypt packs (this happens for PRs outside
     # the repository). First-time would-be contributors need to have their workflows approved
@@ -488,28 +321,28 @@ jobs:
     if: success() && github.event_name != 'pull_request' && !startsWith(github.ref_name, 'renovate/')
 
     steps:
-      - name: Install development packages and benchmark script packages
+      - name: 📥 Checkout source
+        uses: actions/checkout@v3
+
+      - name: 🧰 Install development packages and benchmark script packages
         run: |
           apt-get update
           # curl is required by rustup
           apt-get install -yq build-essential git curl \
                               python3-venv gpg
 
-      - name: Checkout source
-        uses: actions/checkout@v3
-
-      - name: Install Rust toolchain
+      - name: 🧰 Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
 
-      - name: Cache Rust artifacts
+      - name: 💨 Cache Rust artifacts
         uses: Swatinem/rust-cache@v1
 
-      - name: Download test packs dataset
+      - name: 📥 Download test packs dataset
         run: scripts/test-packs/download.sh
 
-      - name: Decrypt private test packs in dataset
+      - name: 🔑 Decrypt private test packs in dataset
         env:
           PRIVATE_TEST_PACKS_PASSWORD: ${{ secrets.PRIVATE_TEST_PACKS_PASSWORD }}
         run: scripts/test-packs/decrypt.sh
@@ -517,10 +350,10 @@ jobs:
       # GitHub-hosted runners restrict access to the perf_event_open syscall for some event types we
       # are interested in, so we can't run benchmarks that measure the troublesome performance counters.
       # See: https://github.com/actions/virtual-environments/issues/4974
-      - name: Run quick benchmarks
+      - name: 🔍 Run quick benchmarks
         run: cargo bench -- --output-format=bencher 'wall_time' | tee /run/bench_results.txt
 
-      - name: Publish quick benchmarks results
+      - name: 📤 Publish quick benchmarks results
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: 'PackSquash library quick benchmarks'
