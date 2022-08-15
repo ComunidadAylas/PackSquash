@@ -296,7 +296,7 @@ jobs:
       - name: 📥 Download PackSquash x64 AppImage
         uses: actions/download-artifact@v3
         with:
-          name: PackSquash CLI AppImage (x86_64-unknown-linux-gnu)
+          name: PackSquash CLI AppImage (x86_64)
 
       # Docker uses different architecture names
       - name: 📁 Rename PackSquash x64 AppImage
@@ -305,7 +305,7 @@ jobs:
       - name: 📥 Download PackSquash ARM64 AppImage
         uses: actions/download-artifact@v3
         with:
-          name: PackSquash CLI AppImage (aarch64-unknown-linux-gnu)
+          name: PackSquash CLI AppImage (aarch64)
 
       - name: 📁 Rename PackSquash ARM64 AppImage
         run: mv PackSquash-*-aarch64.AppImage PackSquash-*-arm64.AppImage
