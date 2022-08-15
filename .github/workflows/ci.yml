@@ -1,4 +1,4 @@
-name: Build
+name: CI
 
 on:
   push:
@@ -75,6 +75,7 @@ jobs:
           - x86_64-pc-windows-gnu
           - aarch64-unknown-linux-gnu
           - x86_64-apple-darwin
+          - aarch64-apple-darwin
         include:
           - target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
@@ -98,6 +99,10 @@ jobs:
             runner: macos-latest
             cli-executable: packsquash
 
+          - target: aarch64-apple-darwin
+            runner: macos-latest
+            cli-executable: packsquash
+
     runs-on: ${{ matrix.runner }}
 
     container: ${{ matrix.container }}
@@ -117,6 +122,9 @@ jobs:
         with:
           fetch-depth: 0  # Keep the commit history for proper version information
 
+      - name: 💨 Cache Rust artifacts
+        uses: Swatinem/rust-cache@v1
+
       - name: 🧰 Install toolchain
         if: matrix.runner == 'ubuntu-latest'
         run: |
@@ -126,7 +134,7 @@ jobs:
           # The last line contains packages necessary for appimage-builder only
           apt-get install -yq build-essential git curl \
                               markdown html2text \
-                              python3-pip file zsync desktop-file-utils fakeroot squashfs-tools
+                              python3-pip file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: matrix.target == 'aarch64-unknown-linux-gnu'
@@ -151,9 +159,6 @@ jobs:
         with:
           crate: cargo-deb
           version: 1.38.2
-
-      - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@v1
 
       - name: 🧰 Install appimage-builder
         if: matrix.runner == 'ubuntu-latest'
@@ -220,6 +225,38 @@ jobs:
         with:
           name: PackSquash CLI AppImage zsync (${{ matrix.appimage-arch }})
           path: PackSquash-*-${{ matrix.appimage-arch }}.AppImage.zsync
+
+  build-universal-macos-binaries:
+
+    runs-on: macos-latest
+
+    needs: build
+
+    steps:
+      - name: 📥 Download PackSquash CLI x64 MacOS executable
+        uses: actions/download-artifact@v3
+        with:
+          name: PackSquash CLI AppImage (x86_64-apple-darwin)
+
+      - name: 📁 Rename PackSquash CLI x64 MacOS executable
+        run: mv packsquash packsquash-x64
+
+      - name: 📥 Download PackSquash CLI ARM64 MacOS executable
+        uses: actions/download-artifact@v3
+        with:
+          name: PackSquash CLI AppImage (aarch64-apple-darwin)
+
+      - name: 📁 Rename PackSquash CLI ARM64 MacOS executable
+        run: mv packsquash packsquash-aarch64
+
+      - name: 🔨 Generate universal binary
+        run: lipo -create -output packsquash packsquash-x64 packsquash-aarch64
+
+      - name: 📤 Upload universal CLI binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash CLI executable (universal-apple-darwin)
+          path: packsquash
 
   build-docker-images:
 
