@@ -239,20 +239,16 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: PackSquash CLI executable (x86_64-apple-darwin)
-
-      - name: 📁 Rename PackSquash CLI x64 MacOS executable
-        run: mv packsquash packsquash-x64
+          path: packsquash-x64
 
       - name: 📥 Download PackSquash CLI ARM64 MacOS executable
         uses: actions/download-artifact@v3
         with:
           name: PackSquash CLI executable (aarch64-apple-darwin)
-
-      - name: 📁 Rename PackSquash CLI ARM64 MacOS executable
-        run: mv packsquash packsquash-aarch64
+          path: packsquash-aarch64
 
       - name: 🔨 Generate universal CLI binary
-        run: lipo -create -output packsquash packsquash-x64 packsquash-aarch64
+        run: lipo -create -output packsquash packsquash-x64/packsquash packsquash-aarch64/packsquash
 
       - name: 📤 Upload universal CLI binary
         uses: actions/upload-artifact@v3
@@ -360,15 +356,15 @@ jobs:
     if: success() && github.event_name != 'pull_request' && !startsWith(github.ref_name, 'renovate/')
 
     steps:
-      - name: 📥 Checkout source
-        uses: actions/checkout@v3
-
       - name: 🧰 Install development packages and benchmark script packages
         run: |
           apt-get update
           # curl is required by rustup
           apt-get install -yq build-essential git curl \
                               python3-venv gpg
+
+      - name: 📥 Checkout source
+        uses: actions/checkout@v3
 
       - name: 🧰 Install Rust toolchain
         uses: actions-rs/toolchain@v1
