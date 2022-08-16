@@ -118,11 +118,6 @@ jobs:
       github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
-      - name: 📥 Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Keep the commit history for proper version information
-
       - name: 💨 Cache Rust artifacts
         uses: Swatinem/rust-cache@v1
 
@@ -136,6 +131,11 @@ jobs:
           apt-get install -yq build-essential git curl \
                               markdown html2text \
                               python3-pip file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools
+
+      - name: 📥 Checkout source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Keep the commit history for proper version information
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: matrix.target == 'aarch64-unknown-linux-gnu'
