@@ -97,7 +97,7 @@ struct HashAndSize {
 pub enum SquashZipError {
 	#[error("Could not read the previous ZIP: {0}")]
 	PreviousZipParseError(#[from] PreviousZipParseError),
-	#[error("Tried to handle a value that is off limits: {0}. Are you dealing with a too big file?")]
+	#[error("Tried to handle a value that is off limits: {0}. Is a file too big?")]
 	Overflow(#[from] TryFromIntError),
 	#[error("A file size exceeds the 4 GiB limit")]
 	FileTooBig,
