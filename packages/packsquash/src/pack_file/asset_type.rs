@@ -113,6 +113,9 @@ pub enum PackFileAssetType {
 	/// with alpha blending that are exacerbated with the optimizations PackSquash does. As of
 	/// 15th November, 2021, all released Minecraft versions are affected by these problems.
 	EyeLayer,
+	/// A texture that may be used as an input render target in a shader program via a sampler
+	/// uniform.
+	AuxiliaryShaderTargetTexture,
 	/// An OptiFine-specific texture, with `.png` extension.
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
@@ -283,6 +286,9 @@ impl PackFileAssetType {
 					spider_eyes.png,\
 					phantom_eyes.png}"
 			),
+			Self::AuxiliaryShaderTargetTexture => {
+				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/textures/effect/**/?*.png")
+			}
 			#[cfg(feature = "optifine-support")]
 			Self::OptifineTexture => {
 				// OptiFine looks for PNGs in specific locations within its folder, but users can
@@ -452,7 +458,10 @@ impl PackFileAssetType {
 			Self::GenericJsonWithComments => Some("json"),
 			Self::GenericOggVorbisAudio => Some("ogg"),
 			Self::GenericAudio => Some("ogg"),
-			Self::PackIcon | Self::BannerLayer | Self::EyeLayer => None,
+			Self::PackIcon
+			| Self::BannerLayer
+			| Self::EyeLayer
+			| Self::AuxiliaryShaderTargetTexture => None,
 			#[cfg(feature = "optifine-support")]
 			Self::OptifineTexture => None,
 			#[cfg(feature = "mtr3-support")]
@@ -621,6 +630,8 @@ impl PackFileAssetTypeMatches {
 				PackFileAssetType::BannerLayer if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(PngFile, optimization_settings),
 				PackFileAssetType::EyeLayer if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(PngFile, optimization_settings),
+				PackFileAssetType::AuxiliaryShaderTargetTexture if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(PngFile, optimization_settings),
 				#[cfg(feature = "optifine-support")]
 				PackFileAssetType::OptifineTexture if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>

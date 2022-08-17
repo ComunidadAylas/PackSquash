@@ -1475,6 +1475,7 @@ dependencies = [
  "glsl",
  "imagequant",
  "indexmap",
+ "itertools",
  "java-properties",
  "json_comments",
  "jsonpath_lib",

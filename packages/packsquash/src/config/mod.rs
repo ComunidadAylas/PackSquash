@@ -1049,6 +1049,14 @@ pub struct PngFileOptions {
 	///
 	/// **Default value**: `false`
 	pub skip_alpha_optimizations: bool,
+	/// If `true`, single-color textures that are estimated to be safe to resize will be downsized
+	/// to the minimum resolution that maintains the current maximum mipmap level. This can provide
+	/// significant space savings for this kind of textures, but in some edge cases (using
+	/// modifications, dealing with animated textures or fonts) breakage may occur. If you are
+	/// setting this to `false` to work around such problems, please let us know.
+	///
+	/// **Default value**: `true`
+	pub downsize_if_single_color: bool,
 	/// Crate-private option set by the [MinecraftQuirk::GrayscaleImagesGammaMiscorrection]
 	/// workaround to not reduce color images to grayscale.
 	///
@@ -1077,6 +1085,7 @@ impl Default for PngFileOptions {
 			color_quantization_dithering_level: UnitIntervalFloat(0.85),
 			maximum_width_and_height: 8192,
 			skip_alpha_optimizations: false,
+			downsize_if_single_color: true,
 			working_around_grayscale_reduction_quirk: false,
 			working_around_color_type_change_quirk: false,
 			working_around_transparent_pixel_colors_change_quirk: false

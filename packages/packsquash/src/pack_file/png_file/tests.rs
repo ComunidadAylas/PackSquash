@@ -1,6 +1,5 @@
 use std::{env, fs};
 
-use pretty_assertions::assert_eq;
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
 
@@ -13,6 +12,7 @@ static ENDERMAN_EYES_DATA: &[u8] = include_bytes!("enderman_eyes.png");
 /// Somewhat extreme but realistic example of a texture whose size increases
 /// 7x when color quantized and dithered with the default options.
 static DITHERBOMB_DATA: &[u8] = include_bytes!("ditherbomb.png");
+static SINGLE_BLUE_COLOR: &[u8] = include_bytes!("blue.png");
 
 /// Processes the given input data as a [PngFile], using the provided settings,
 /// expecting a successful result.
@@ -22,6 +22,7 @@ async fn successful_process_test(
 	expect_same_pixels: bool,
 	expect_smaller_file_size: bool,
 	expect_same_color_type: bool,
+	expected_resolution: Option<(u32, u32)>,
 	asset_type: PackFileAssetType,
 	test_name: &str
 ) {
@@ -48,6 +49,7 @@ async fn successful_process_test(
 	let mut decoded_pixels;
 	let processed_data_size;
 	let processed_color_type;
+	let processed_resolution;
 	{
 		let mut data = Vec::with_capacity(input_data_len);
 		for (_, partial_data) in process_result {
@@ -70,6 +72,7 @@ async fn successful_process_test(
 			.expect("No error should happen while decoding processed PNG");
 
 		processed_color_type = image_info.color_type;
+		processed_resolution = (image_info.width, image_info.height);
 
 		decoded_pixels = vec![0; image_info.buffer_size];
 		png_reader
@@ -96,10 +99,11 @@ async fn successful_process_test(
 	}
 	let original_pixels = original_pixels.as_rgba();
 
-	assert_eq!(
-		original_pixels.len(),
-		decoded_pixels.len(),
-		"The processed PNG should have the same resolution as the original PNG"
+	assert!(
+		expected_resolution.is_none() || expected_resolution == Some(processed_resolution),
+		"The processed PNG does not have the expected resolution: {:?} actual, {:?} expected",
+		processed_resolution,
+		expected_resolution.unwrap()
 	);
 
 	assert!(
@@ -135,9 +139,10 @@ async fn lossless_optimization_works() {
 			skip_alpha_optimizations: true,
 			..Default::default()
 		},
-		true,  // Same pixels
-		true,  // Smaller size
-		false, // Not necessarily the same color type
+		true,           // Same pixels
+		true,           // Smaller size
+		false,          // Not necessarily the same color type
+		Some((16, 16)), // Same resolution
 		PackFileAssetType::GenericTexture,
 		"lossless_optimization_works"
 	)
@@ -152,9 +157,10 @@ async fn lossy_optimization_works() {
 			color_quantization_target: ColorQuantizationTarget::FourBitDepth,
 			..Default::default()
 		},
-		false, // Not necessarily the same pixels
-		true,  // Smaller size
-		false, // Not necessarily the same color type
+		false,          // Not necessarily the same pixels
+		true,           // Smaller size
+		false,          // Not necessarily the same color type
+		Some((16, 16)), // Same resolution
 		PackFileAssetType::GenericTexture,
 		"lossy_optimization_works"
 	)
@@ -170,9 +176,10 @@ async fn entity_eye_blending_workaround_works() {
 			working_around_transparent_pixel_colors_change_quirk: true,
 			..Default::default()
 		},
-		true,  // Same pixels
-		false, // Not necessarily smaller
-		false, // Not necessarily the same color type
+		true,           // Same pixels
+		false,          // Not necessarily smaller
+		false,          // Not necessarily the same color type
+		Some((64, 32)), // Same resolution
 		PackFileAssetType::EyeLayer,
 		"entity_eye_blending_workaround_works"
 	)
@@ -188,9 +195,10 @@ async fn banner_layer_check_workaround_works() {
 			working_around_color_type_change_quirk: true,
 			..Default::default()
 		},
-		false, // Not necessarily the same pixels
-		false, // Not necessarily smaller
-		true,  // Same color type
+		false,          // Not necessarily the same pixels
+		false,          // Not necessarily smaller
+		true,           // Same color type
+		Some((16, 16)), // Same resolution
 		PackFileAssetType::BannerLayer,
 		"banner_layer_check_workaround_works"
 	)
@@ -206,9 +214,10 @@ async fn ditherbomb_does_not_get_bigger() {
 			color_quantization_dithering_level: 1.0.try_into().unwrap(),
 			..Default::default()
 		},
-		true, // Should fall back to the first pass result
-		true, // The first pass strips some non-critical chunks
-		true, // Should fall back to the first pass result
+		true,               // Should fall back to the first pass result
+		true,               // The first pass strips some non-critical chunks
+		true,               // Should fall back to the first pass result
+		Some((4395, 6598)), // Same resolution
 		PackFileAssetType::GenericTexture,
 		"ditherbomb_does_not_get_bigger"
 	)
@@ -224,11 +233,30 @@ async fn ditherbomb_can_be_defused() {
 			color_quantization_dithering_level: 0.0.try_into().unwrap(),
 			..Default::default()
 		},
-		false, // Not necessarily the same pixels
-		true,  // No dithering is enough to make the optimizations work as expected
-		false, // Not necessarily the same color type
+		false,              // Not necessarily the same pixels
+		true,               // No dithering is enough to make the optimizations work as expected
+		false,              // Not necessarily the same color type
+		Some((4395, 6598)), // Same resolution
 		PackFileAssetType::GenericTexture,
 		"ditherbomb_can_be_defused"
+	)
+	.await
+}
+
+#[tokio::test]
+async fn single_color_image_is_downsized() {
+	successful_process_test(
+		SINGLE_BLUE_COLOR,
+		PngFileOptions {
+			downsize_if_single_color: true,
+			..Default::default()
+		},
+		false,        // Not the same pixels
+		true,         // Smaller file size
+		false,        // Maybe different color type
+		Some((1, 1)), // Not a power of two, so vanilla Minecraft doesn't do mipmaps
+		PackFileAssetType::GenericTexture,
+		"single_color_image_is_downsized"
 	)
 	.await
 }
