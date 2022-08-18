@@ -16,6 +16,7 @@ static SINGLE_BLUE_COLOR: &[u8] = include_bytes!("blue.png");
 
 /// Processes the given input data as a [PngFile], using the provided settings,
 /// expecting a successful result.
+#[allow(clippy::too_many_arguments)]
 async fn successful_process_test(
 	input_data: &[u8],
 	settings: PngFileOptions,
