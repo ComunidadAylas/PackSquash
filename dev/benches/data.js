@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1661210157877,
+  "lastUpdate": 1661426519240,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "cd0e57f72c3564e1daa786559c094cecb4695293",
-          "message": "chore(ci/benchmark): disable benchmark comment on each commit\n\nExperience has shown that this causes more noise and harm than good.\nGitHub-hosted runners have different hardware that can't be chosen,\nwhich significantly contributes to varying execution times, even for\ncommits that build the same code with the same toolchain.",
-          "timestamp": "2022-07-22T01:29:06+02:00",
-          "tree_id": "dbfa81b6eabf1e1349d47ed1a8e07c68107aa50f",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/cd0e57f72c3564e1daa786559c094cecb4695293"
-        },
-        "date": 1658447841211,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14011838,
-            "range": "± 7697914",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 855166869,
-            "range": "± 22356657",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10521315098,
-            "range": "± 338333175",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2077646185,
-            "range": "± 53746631",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2585918842,
             "range": "± 689194519",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "cd8a7e5cbf4588e9361bfc5f2459225852c1ae4e",
+          "message": "chore(deps): update rust crate time to 0.3.14",
+          "timestamp": "2022-08-25T04:18:15Z",
+          "tree_id": "3a7676b5d006bafe125843483db3fd7c9941c126",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/cd8a7e5cbf4588e9361bfc5f2459225852c1ae4e"
+        },
+        "date": 1661426518575,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 15110342,
+            "range": "± 413733",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 498172762,
+            "range": "± 22128684",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14955926885,
+            "range": "± 77344185",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 3369705447,
+            "range": "± 27234388",
             "unit": "ns/iter"
           }
         ]
