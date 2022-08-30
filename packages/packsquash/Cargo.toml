@@ -74,7 +74,7 @@ mach = "0.3.2"
 
 [dev-dependencies]
 tokio-test = "0.4.2"
-pretty_assertions = "1.2.1"
+pretty_assertions = "1.3.0"
 
 criterion = { version = "0.3.6", features = ["html_reports"] }
 tar = { version = "0.4.38", default-features = false }
