@@ -1,7 +1,7 @@
 <p align="center"><img src="https://user-images.githubusercontent.com/31966940/124388201-1f40eb80-dce2-11eb-88e8-3934d7d73c0a.png" alt="PackSquash logo" width="300" height="300"></p>
 <p align="center"><i>Create more. Worry less about distribution and storage intricacies.</i></p>
 
-# PackSquash [![Build](https://github.com/ComunidadAylas/PackSquash/workflows/Build/badge.svg)](https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3ABuild) [![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Total downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/total?label=Downloads)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Discord server online count](https://img.shields.io/discord/85364538328768512?label=Discord&logo=discord)](https://discord.gg/bGUSamzJYp)
+# PackSquash [![Build](https://github.com/ComunidadAylas/PackSquash/workflows/CI/badge.svg)](https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3ACI) [![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Total downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/total?label=Downloads)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Discord server online count](https://img.shields.io/discord/85364538328768512?label=Discord&logo=discord)](https://discord.gg/bGUSamzJYp)
 
 A Minecraft: Java Edition resource and data pack optimizer which aims to achieve
 the best possible compression, performance, and protection, improving pack
