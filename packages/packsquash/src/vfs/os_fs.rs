@@ -30,7 +30,7 @@ impl VirtualFileSystem for OsFilesystem {
 		root_path: &Path,
 		iterator_traversal_options: IteratorTraversalOptions
 	) -> Self::FileIter {
-		let entry_iter = WalkDir::new(&root_path)
+		let entry_iter = WalkDir::new(root_path)
 			.min_depth(1) // Do not yield the root path itself, but all of its children
 			.follow_links(true)
 			.max_open(10)
