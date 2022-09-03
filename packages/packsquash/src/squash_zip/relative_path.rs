@@ -16,8 +16,8 @@ use thiserror::Error;
 ///
 /// This relative path can be referenced as a string slice that contains its
 /// representation, normalized to always use the forward slash as a component
-/// separator. Therefore, any instance of this struct is appropriate for
-/// direct consumption by ZIP file data structures.
+/// separator. Therefore, any instance of this struct is appropriate for pack
+/// file paths and direct consumption by ZIP file data structures.
 ///
 /// The struct is efficient, because it tries to use smart pointers to avoid
 /// allocating new buffers to represent the relative path, borrowing data when
