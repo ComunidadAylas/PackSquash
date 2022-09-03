@@ -9,7 +9,7 @@ use rubato::{ResampleError, ResamplerConstructionError};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::cmp;
-use std::io::{Cursor, Read};
+use std::io::{Cursor, Read, Seek};
 use std::num::NonZeroU32;
 use thiserror::Error;
 use tokio::io::AsyncRead;
@@ -150,7 +150,10 @@ impl Decoder for OptimizerDecoder {
 		// is a lossless, two-pass lossless optimization step that completes pretty quickly
 		// (think on OxiPNG, but much, much faster and less quirkier)
 		let transcoded_and_optimized_file = if do_two_pass_optimization_and_validation {
-			ByteBuffer::CowSlice(validate_and_optimize(transcoded_file, do_ogg_obfuscation)?.into())
+			ByteBuffer::CowSlice(
+				validate_and_optimize(Cursor::new(transcoded_file.as_ref()), do_ogg_obfuscation)?
+					.into()
+			)
 		} else {
 			transcoded_file
 		};
@@ -166,7 +169,9 @@ impl Decoder for OptimizerDecoder {
 			&& can_use_input_as_output
 		{
 			optimized_file_is_input_file = true;
-			ByteBuffer::CowSlice(validate_and_optimize(input_file, do_ogg_obfuscation)?.into())
+			ByteBuffer::CowSlice(
+				validate_and_optimize(Cursor::new(input_file.as_ref()), do_ogg_obfuscation)?.into()
+			)
 		} else {
 			optimized_file_is_input_file = false;
 			transcoded_and_optimized_file
@@ -319,14 +324,14 @@ fn process_and_transcode(
 }
 
 /// Validates and optimizes the specified Ogg Vorbis file in two passes, using OptiVorbis.
-fn validate_and_optimize<T: AsRef<[u8]>>(
+fn validate_and_optimize<T: Read + Seek>(
 	input_file: T,
 	obfuscate: bool
 ) -> Result<Vec<u8>, OptimizationError> {
 	let mut too_long_for_minecraft = false;
 	// FIXME write to a SpooledTempFile whose maximum memory buffer size
 	// is controlled by a global budget, once that refactor is complete
-	let mut optimized_file = Vec::with_capacity(input_file.as_ref().len().saturating_mul(17) / 20);
+	let mut optimized_file = vec![];
 
 	optivorbis::OggToOgg::new(
 		ogg_to_ogg::Settings {
@@ -347,7 +352,7 @@ fn validate_and_optimize<T: AsRef<[u8]>>(
 			optimizer_settings
 		}
 	)
-	.remux(Cursor::new(input_file), &mut optimized_file)?;
+	.remux(input_file, &mut optimized_file)?;
 
 	if too_long_for_minecraft {
 		return Err(OptimizationError::TooLongForMinecraft);
