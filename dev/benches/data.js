@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1662215804193,
+  "lastUpdate": 1662225541330,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "a3728e6c1c26fa5d9d61d334cf78393a2a86cbbb",
-          "message": "fix(deps): update rust crate sysinfo to 0.25.0",
-          "timestamp": "2022-07-29T22:05:09Z",
-          "tree_id": "012f15d7c96a9fdcce7c4623d790bdd50bb89dd8",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a3728e6c1c26fa5d9d61d334cf78393a2a86cbbb"
-        },
-        "date": 1659134979275,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14135837,
-            "range": "± 486439",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 841570033,
-            "range": "± 6236746",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12434091911,
-            "range": "± 22957792",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2285140472,
-            "range": "± 52517243",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2626908550,
             "range": "± 68679236",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "12679d2ad7369b79dfc147ef9f9cba5fa7dfcc0e",
+          "message": "chore(deps): update oxipng and zopfli dependencies\n\nThe bureaucracy of submitting the needed upstream changes was just done.\nMinimize software entropy by updating Zopfli to its latest version,\nwhich has everything we need, and using the OxiPNG changes that were\nsubmitted for upstreaming.",
+          "timestamp": "2022-09-03T16:33:52Z",
+          "tree_id": "b4337c2c9039ed0bff95aeef053bda8b8fe12413",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/12679d2ad7369b79dfc147ef9f9cba5fa7dfcc0e"
+        },
+        "date": 1662225540683,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9208328,
+            "range": "± 132424",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 356746091,
+            "range": "± 6449091",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10331494674,
+            "range": "± 32535822",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2583122031,
+            "range": "± 60226015",
             "unit": "ns/iter"
           }
         ]
