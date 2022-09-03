@@ -349,27 +349,27 @@ checksum = "5827cebf4670468b8772dd191856768aedcb1b0278a04f989f7766351917b9dc"
 
 [[package]]
 name = "cpufeatures"
-version = "0.2.3"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1079fb8528d9f9c888b1e8aa651e6e079ade467323d58f75faf1d30b1808f540"
+checksum = "dc948ebb96241bb40ab73effeb80d9f93afaad49359d159a5e61be51619fe813"
 dependencies = [
  "libc",
 ]
 
 [[package]]
 name = "crc"
-version = "2.1.0"
+version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49fc9a695bca7f35f5f4c15cddc84415f66a74ea78eef08e90c5024f2b540e23"
+checksum = "53757d12b596c16c78b83458d732a5d1a17ab3f53f2f7412f6fb57cc8a140ab3"
 dependencies = [
  "crc-catalog",
 ]
 
 [[package]]
 name = "crc-catalog"
-version = "1.1.1"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ccaeedb56da03b09f598226e25e80088cb4cd25f316e6e4df7d695f0feeb1403"
+checksum = "2d0165d2900ae6778e36e80bbc4da3b5eefccee9ba939761f9c2882a5d9af3ff"
 
 [[package]]
 name = "crc32fast"
@@ -1151,9 +1151,9 @@ dependencies = [
 
 [[package]]
 name = "lock_api"
-version = "0.4.7"
+version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "327fa5b6a6940e4699ec49a9beae1ea4845c6bab9314e4f84ac68742139d8c53"
+checksum = "9f80bf5aacaf25cbfc8210d1cfb718f2bf3b11c4c54e5afe36c236853a8ec390"
 dependencies = [
  "autocfg",
  "scopeguard",
@@ -1345,7 +1345,7 @@ dependencies = [
 [[package]]
 name = "ogg_sys"
 version = "0.0.1"
-source = "git+https://github.com/ComunidadAylas/vorbis-rs#0ae3dea9989db8edff18cd5bc09244a222564b51"
+source = "git+https://github.com/ComunidadAylas/vorbis-rs#875b98128b2df7bb2d88658cf1ebaf4cac93306d"
 dependencies = [
  "cc",
  "git2",
@@ -1353,9 +1353,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.13.1"
+version = "1.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "074864da206b4973b84eb91683020dbefd6a8c3f0f38e054d93954e891935e4e"
+checksum = "2f7254b99e31cad77da24b08ebf628882739a608578bb1bcdfc1f9c21260d7c0"
 
 [[package]]
 name = "oorandom"
@@ -1393,9 +1393,9 @@ dependencies = [
 
 [[package]]
 name = "ouroboros"
-version = "0.15.2"
+version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7425ea87a1e31df63a27b6d31e21a35a9003268032a876465e8d43c2364b0de2"
+checksum = "7f56a2b0aa5fc88687aaf63e85a7974422790ce3419a2e1a15870f8a55227822"
 dependencies = [
  "aliasable",
  "ouroboros_macro",
@@ -1403,9 +1403,9 @@ dependencies = [
 
 [[package]]
 name = "ouroboros_macro"
-version = "0.15.2"
+version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "734aa7a4a6390b162112523cac2923a18e4f23b917880a68c826bf6e8bf48f06"
+checksum = "6c40641e27d0eb38cae3dee081d920104d2db47a8e853c1a592ef68d33f5ebf4"
 dependencies = [
  "Inflector",
  "proc-macro-error",
@@ -1426,10 +1426,9 @@ dependencies = [
 [[package]]
 name = "oxipng"
 version = "5.0.1"
-source = "git+https://github.com/ComunidadAylas/oxipng?branch=packsquash#12144fe2906e63c10c982eaeb74909655aa99cc0"
+source = "git+https://github.com/ComunidadAylas/oxipng?branch=packsquash#19899d177c0ac1691509a7591de8ec91bf693add"
 dependencies = [
  "bit-vec",
- "byteorder",
  "cloudflare-zlib",
  "crc",
  "crossbeam-channel",
@@ -2525,7 +2524,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 [[package]]
 name = "vorbis"
 version = "0.0.1"
-source = "git+https://github.com/ComunidadAylas/vorbis-rs#0ae3dea9989db8edff18cd5bc09244a222564b51"
+source = "git+https://github.com/ComunidadAylas/vorbis-rs#875b98128b2df7bb2d88658cf1ebaf4cac93306d"
 dependencies = [
  "errno",
  "ogg_sys",
@@ -2543,7 +2542,7 @@ checksum = "91304fb1fb7f14c888496d859d627db36efdb63cdd6755e286e3dd637cc28997"
 [[package]]
 name = "vorbis_sys"
 version = "0.0.1"
-source = "git+https://github.com/ComunidadAylas/vorbis-rs#0ae3dea9989db8edff18cd5bc09244a222564b51"
+source = "git+https://github.com/ComunidadAylas/vorbis-rs#875b98128b2df7bb2d88658cf1ebaf4cac93306d"
 dependencies = [
  "cc",
  "git2",
@@ -2731,9 +2730,9 @@ dependencies = [
 
 [[package]]
 name = "wmi"
-version = "0.11.1"
+version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37f41bede50491c30ec19a4f4b9872815d7a0ddb82b17886352fe938379dc9a4"
+checksum = "31186a1833786ed5f5f61d4c9b7a16df6a5f3883258622d5424c43cbd431b62c"
 dependencies = [
  "com",
  "futures",
@@ -2783,12 +2782,14 @@ checksum = "09041cd90cf85f7f8b2df60c646f853b7f535ce68f85244eb6731cf89fa498ec"
 
 [[package]]
 name = "zopfli"
-version = "0.5.0"
-source = "git+https://github.com/ComunidadAylas/zopfli?branch=packsquash#840078826b13a5f68d33c276adbaf05939884e24"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4f3cae89ab7952cf7f091fffda70f373ba3ee110ac6221b3b6c3c285b04f82e"
 dependencies = [
  "adler32",
  "byteorder",
  "crc",
  "iter-read",
+ "log",
  "typed-arena",
 ]

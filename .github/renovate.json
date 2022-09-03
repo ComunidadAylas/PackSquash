@@ -17,5 +17,5 @@
 		}
 	],
 	"description": "TODO The dependencies ignored below are pending upstream coordination to be applied effectively",
-	"ignoreDeps": ["aes", "zopfli"]
+	"ignoreDeps": ["aes"]
 }

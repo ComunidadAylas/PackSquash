@@ -12,9 +12,6 @@ oxipng = { git = "https://github.com/ComunidadAylas/oxipng", branch = "packsquas
 # https://github.com/ComunidadAylas/glsl/pull/1
 # https://github.com/ComunidadAylas/glsl/pull/2
 glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
-# Use our fork of Zopfli that includes streaming support and the ability to change
-# the number of compression iterations
-zopfli = { git = "https://github.com/ComunidadAylas/zopfli", branch = "packsquash" }
 
 # Use a newer commit of the csv crate, that's pulled in by development dependencies
 # for benchmarking, that depends on a itoa version consistent with the rest of the

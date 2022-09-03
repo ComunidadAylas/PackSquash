@@ -656,7 +656,8 @@ fn visually_lossless_optimize(
 		pretend: false,
 		strip: Headers::All,
 		timeout: Some(Duration::from_secs(600)), // Bail out if the optimization takes too long
-		use_heuristics: false
+		use_heuristics: false,
+		check: false
 	};
 
 	oxipng::optimize_from_memory(&input_png, &optimization_options)
