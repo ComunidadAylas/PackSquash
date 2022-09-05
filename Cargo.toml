@@ -3,7 +3,7 @@ members = ["packages/*"]
 
 [patch.crates-io]
 # Use our fork of oxipng that removes a dependency and an unneeded sanity check
-oxipng = { git = "https://github.com/ComunidadAylas/oxipng", branch = "packsquash" }
+oxipng = { git = "https://github.com/ComunidadAylas/oxipng" }
 # Use our fork of glsl that allows it to parse files that use DOS-style CRLF line
 # endings, prevalent on Windows environments, fixes the #elif preprocessor directive
 # not being parsed, improves minification and fixes some incorrect transpiling
