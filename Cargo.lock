@@ -121,7 +121,7 @@ dependencies = [
  "cc",
  "cfg-if",
  "libc",
- "miniz_oxide",
+ "miniz_oxide 0.5.4",
  "object",
  "rustc-demangle",
 ]
@@ -277,6 +277,12 @@ dependencies = [
  "backtrace",
  "termcolor",
 ]
+
+[[package]]
+name = "color_quant"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
 name = "com"
@@ -768,7 +774,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f82b0f4c27ad9f8bfd1f3208d882da2b09c301bc1c828fd3a00d0216d2fbbff6"
 dependencies = [
  "crc32fast",
- "miniz_oxide",
+ "miniz_oxide 0.5.4",
 ]
 
 [[package]]
@@ -1010,6 +1016,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "image"
+version = "0.24.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e30ca2ecf7666107ff827a8e481de6a132a9b687ed3bb20bb1c144a36c00964"
+dependencies = [
+ "bytemuck",
+ "byteorder",
+ "color_quant",
+ "num-rational",
+ "num-traits",
+ "png",
+]
+
+[[package]]
 name = "imagequant"
 version = "4.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1220,6 +1240,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "miniz_oxide"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b275950c28b37e794e8c55d88aeb5e139d0ce23fdbbeda68f8d7174abdf9e8fa"
+dependencies = [
+ "adler",
+]
+
+[[package]]
 name = "mmap"
 version = "0.1.1"
 source = "git+https://github.com/ComunidadAylas/rust-mmap#c7619e302cbde9cfa50d1779ae769cdb2cc02230"
@@ -1294,6 +1323,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "225d3389fb3509a24c93f5c29eb6bde2586b98d9f016636dff58d7c6f7569cd9"
 dependencies = [
  "autocfg",
+ "num-traits",
+]
+
+[[package]]
+name = "num-rational"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0638a1c9d0a3c0914158145bc76cff373a75a627e6ecbfb71cbe6f453a5a19b0"
+dependencies = [
+ "autocfg",
+ "num-integer",
  "num-traits",
 ]
 
@@ -1426,17 +1466,19 @@ dependencies = [
 
 [[package]]
 name = "oxipng"
-version = "6.0.0"
-source = "git+https://github.com/ComunidadAylas/oxipng#320426521f5ec003e08dfa43536f0f62fb004138"
+version = "6.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a40d437cd5308cba163907008d4c91a0280fc3b1ec1265dd20820e739002f4d9"
 dependencies = [
  "bit-vec",
  "cloudflare-zlib",
  "crc",
  "crossbeam-channel",
+ "image",
  "indexmap",
  "itertools",
  "log",
- "miniz_oxide",
+ "miniz_oxide 0.6.2",
  "rgb",
  "rustc_version",
  "zopfli",
@@ -1665,7 +1707,7 @@ dependencies = [
  "bitflags",
  "crc32fast",
  "flate2",
- "miniz_oxide",
+ "miniz_oxide 0.5.4",
 ]
 
 [[package]]
@@ -2794,3 +2836,8 @@ dependencies = [
  "log",
  "typed-arena",
 ]
+
+[[patch.unused]]
+name = "oxipng"
+version = "6.0.0"
+source = "git+https://github.com/ComunidadAylas/oxipng#320426521f5ec003e08dfa43536f0f62fb004138"
