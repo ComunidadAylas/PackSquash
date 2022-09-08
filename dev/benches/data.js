@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1662593127380,
+  "lastUpdate": 1662638927264,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": false,
-          "id": "44d1bb0564def7a41880fc8c32b12c615944fd79",
-          "message": "chore(deps): update rust crate time to 0.3.12",
-          "timestamp": "2022-08-01T17:48:52Z",
-          "tree_id": "e490b9ee906e8eaf69dddb04eb65e7851462bdbb",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/44d1bb0564def7a41880fc8c32b12c615944fd79"
-        },
-        "date": 1659395420990,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14163666,
-            "range": "± 316295",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 846614820,
-            "range": "± 3336719",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12022667333,
-            "range": "± 18919159",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2342296622,
-            "range": "± 52228586",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2581913280,
             "range": "± 79881654",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "3b98e35c210baf22eacf5ad30bd9f359a68b79e2",
+          "message": "chore(deps): update OxiPNG to 6.0.1\n\nThis version contains a critical bugfix that affects DEFLATE stream\ncorrectness when using Zopfli.",
+          "timestamp": "2022-09-08T11:18:34Z",
+          "tree_id": "3e806dfcf721f993635d1880214b3b11871f16c7",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3b98e35c210baf22eacf5ad30bd9f359a68b79e2"
+        },
+        "date": 1662638926559,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9587000,
+            "range": "± 213094",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 362866396,
+            "range": "± 4083156",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10534371513,
+            "range": "± 34832259",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2596194583,
+            "range": "± 45283718",
             "unit": "ns/iter"
           }
         ]
