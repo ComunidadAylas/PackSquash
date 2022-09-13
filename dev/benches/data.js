@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663086854735,
+  "lastUpdate": 1663099683238,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "3df46090903348e231a9f06920be64ed4e81f4c9",
-          "message": "chore(workflows/build): ignore Renovate branches for benchmarks\n\nAs these will eventually be merged to master anyway, running benchmarks\ntwice is noisy. The workflow does not fail even if a possible\nperformance regression is spotted.",
-          "timestamp": "2022-08-03T11:50:15+02:00",
-          "tree_id": "697485005cff11019bda42080b4c90f059185fe6",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3df46090903348e231a9f06920be64ed4e81f4c9"
-        },
-        "date": 1659522296479,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 16057294,
-            "range": "± 831169",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 1000537616,
-            "range": "± 21422981",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12311392562,
-            "range": "± 260960613",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2643351303,
-            "range": "± 49459337",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2280409025,
             "range": "± 42868486",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "78a02e6608e68507970702b0dfe3d2ba7f058221",
+          "message": "fix(deps): update rust crate itertools to 0.10.4",
+          "timestamp": "2022-09-13T15:48:05Z",
+          "tree_id": "c2e64af69fc77d4b03e913ff5c18c3853661bf23",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/78a02e6608e68507970702b0dfe3d2ba7f058221"
+        },
+        "date": 1663099681635,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8497475,
+            "range": "± 2249995",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 462470285,
+            "range": "± 17183508",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 14418989339,
+            "range": "± 14473058",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2876496703,
+            "range": "± 8130709",
             "unit": "ns/iter"
           }
         ]
