@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663112135952,
+  "lastUpdate": 1663197014803,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "61de25ed50b011a6732ae4e0edfd704943bb2005",
-          "message": "feat(audio): rework audio processing code, replace GStreamer\n\nThe audio processing code was redone from scratch to be better in most\nmetrics, including space efficiency and performance. Some preliminary\nperformance tests with a pack with a significant amount of audio files\nyielded a 2x runtime decrease for the same audio processing operations.\n\nGStreamer, a long-standing pain point for distribution and PackSquash\nease of use and installation, has been replaced by several smaller\nlibraries working together, which has only become a feasible replacement\nrelatively recently. As some important side benefits, the compiler is\nnow able to perform more advanced optimizations (there's no dynamic link\nlibrary barrier now), we gained the control we needed to select a\ncertain Vorbis encoder and signal processing algorithm implementation,\nand there's no runtime pipeline discovery, management and communication\noverhead.\n\nGaining this control over the Vorbis encoder in use was instrumental to\nbe able to use the reference Vorbis encoder patched with the aoTuV and\nLancer patchsets, which are considered to offer substantial improvements\nin encoding quality, flexibility and performance by the community. These\nconsiderations were further validated by us, and are significant for\nPackSquash.\n\nIn addition, the knowledge gained by @AlexTMjugador during the\ndevelopment of OptiVorbis was used to design a better audio optimization\ntechnique, which better takes into account the inner workings of Vorbis\nand perceptual context differences to yield smaller files, faster. Of\ncourse, PackSquash now uses OptiVorbis.\n\nEmpty sound files (with no audio, or full of silence) are now\nspecial-cased and replaced with a specially crafted, minimal valid file,\nwhich may yield significant savings for the common pattern of using such\nfiles to disable Minecraft sounds.\n\nFinally, an optional, per-file configurable Ogg obfuscation feature was\nadded, which makes the selected files not playable by most players\noutside of Minecraft.\n\nThe options were tweaked as necessary in a breaking way.",
-          "timestamp": "2022-08-03T21:07:27+02:00",
-          "tree_id": "8b2854afadc140e98eea93db37287e3319eb16a3",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/61de25ed50b011a6732ae4e0edfd704943bb2005"
-        },
-        "date": 1659555696095,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14314032,
-            "range": "± 226857",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 402142359,
-            "range": "± 1946906",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11889303009,
-            "range": "± 35834791",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2399882938,
-            "range": "± 52898777",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2349932988,
             "range": "± 51680972",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "7f7b9642bd6d0f6fa2869fe35a36e6427c0651dd",
+          "message": "chore(deps): update helper python scripts",
+          "timestamp": "2022-09-14T02:07:53Z",
+          "tree_id": "dc44f21178dddf2072531f3d6cbbd2601930dbfe",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7f7b9642bd6d0f6fa2869fe35a36e6427c0651dd"
+        },
+        "date": 1663197014121,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9218871,
+            "range": "± 128086",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 352422623,
+            "range": "± 10620798",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10476783595,
+            "range": "± 30215371",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2577607899,
+            "range": "± 31483343",
             "unit": "ns/iter"
           }
         ]
