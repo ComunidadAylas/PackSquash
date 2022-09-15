@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663197014803,
+  "lastUpdate": 1663207482833,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "7cb9cf3cdc4eb064a6cc0b98384bc28ca2cb8039",
-          "message": "fix(audio_code): quirk for Ogg obf. in older versions. Make third pass smarter\n\nAfter some testing, it was discovered that older Minecraft versions do\nnot support decoding obfuscated Ogg files. It didn't look feasible to\nobfuscate them in another way that's compatible with them, so add a\nquirk for them to disable obfuscation, at least for now.\n\nMoreover, the third optimization pass could reject outputting the same\nfile as the input one even when no channel mixing actually took place,\ndue to the channel mixing setting having the same value as the actual\nchannels of the input file. That edge case, which could negatively\naffect pack file sizes, was corrected.",
-          "timestamp": "2022-08-04T16:18:57+02:00",
-          "tree_id": "3d32237b894939c3958573ae29253b42545e6382",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7cb9cf3cdc4eb064a6cc0b98384bc28ca2cb8039"
-        },
-        "date": 1659625544667,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 7799019,
-            "range": "± 1588727",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 391031258,
-            "range": "± 739777",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11915268541,
-            "range": "± 22865639",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2264119810,
-            "range": "± 108184936",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2577607899,
             "range": "± 31483343",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e9b9f485650e56f06331934d64fdd2ca20203b2c",
+          "message": "chore(deps): update dependency certifi to v2022.9.14",
+          "timestamp": "2022-09-14T22:13:09Z",
+          "tree_id": "9a857892bbda7a798a8222ce8b6050f2930b259c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e9b9f485650e56f06331934d64fdd2ca20203b2c"
+        },
+        "date": 1663207480627,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12482490,
+            "range": "± 729016",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 425108891,
+            "range": "± 13047741",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11575051079,
+            "range": "± 131747639",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2875833798,
+            "range": "± 47886320",
             "unit": "ns/iter"
           }
         ]
