@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663454996138,
+  "lastUpdate": 1663540893536,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "8830dd1cda3b47214295baf03250502cf8c57dc0",
-          "message": "fix(packsquash_cli/build): disable dir owner validation in CI\n\nThis probably was causing git commands to fail when trying to retrieve\nthe semantic version for a commit on CI.",
-          "timestamp": "2022-08-06T19:12:56+02:00",
-          "tree_id": "8dc86010b5eef2fcf0d3ca14bf2f8e22005d9086",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/8830dd1cda3b47214295baf03250502cf8c57dc0"
-        },
-        "date": 1659808449897,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14160936,
-            "range": "± 320953",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 397147089,
-            "range": "± 3847669",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12458762928,
-            "range": "± 14014582",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2230905498,
-            "range": "± 78614594",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2912112838,
             "range": "± 58849710",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "bc82260411075aa1ab623d0432080e2ca28fba71",
+          "message": "fix(deps): update rust crate tokio-stream to 0.1.10",
+          "timestamp": "2022-09-18T19:33:10Z",
+          "tree_id": "69eef67c99ee5eb683d3bd6b7f831753cfd34230",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/bc82260411075aa1ab623d0432080e2ca28fba71"
+        },
+        "date": 1663540892982,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10448600,
+            "range": "± 219017",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 382742040,
+            "range": "± 12133543",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11326941299,
+            "range": "± 41271732",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2635322069,
+            "range": "± 10243187",
             "unit": "ns/iter"
           }
         ]
