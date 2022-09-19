@@ -112,7 +112,8 @@ unknown-git = "deny"
 allow-git = [
 	"https://github.com/BurntSushi/rust-csv",
 	"https://github.com/rust-lang/backtrace-rs",
-	"https://github.com/Nilstrieb/winres"
+	"https://github.com/Nilstrieb/winres",
+	"https://github.com/kurtbuilds/serde"
 ]
 
 [sources.allow-org]

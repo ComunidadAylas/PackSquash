@@ -26,6 +26,10 @@ mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
 # for color-backtrace, that depends on a miniz_oxide version consistent with the rest
 # of the crates ecosystem. Related PR: https://github.com/rust-lang/backtrace-rs/pull/463
 backtrace = { git = "https://github.com/rust-lang/backtrace-rs", rev = "38cb2d55" }
+# Use a patch of the serde_derive crate with PR #1544 merged, which greatly improves error
+# messages when deserializing data, including options files.
+# See: https://github.com/serde-rs/serde/pull/1544
+serde_derive = { git = "https://github.com/kurtbuilds/serde", rev = "6a7ed68f" }
 
 [profile.release]
 opt-level = 3

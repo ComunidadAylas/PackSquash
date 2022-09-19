@@ -180,12 +180,22 @@ fn read_options_file_and_squash(
 	};
 
 	// Deserialize the options struct contained in the string
-	let squash_options = match toml::from_str::<SquashOptions>(&options_string) {
+	let squash_options = match serde_path_to_error::deserialize::<_, SquashOptions>(
+		&mut toml::de::Deserializer::new(&options_string)
+	) {
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
+			let error_path = deserialize_error.path();
+
 			error!(
-				"An error occurred while parsing the options file from {}: {}",
-				user_friendly_options_path, deserialize_error
+				"An error occurred while parsing the options file from {}: {}{}",
+				user_friendly_options_path,
+				if error_path.iter().next().is_some() {
+					Cow::Owned(format!("{}: ", error_path))
+				} else {
+					Cow::Borrowed("")
+				},
+				deserialize_error.inner()
 			);
 
 			return 3;

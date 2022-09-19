@@ -1505,6 +1505,7 @@ dependencies = [
  "git2",
  "log",
  "packsquash",
+ "serde_path_to_error",
  "time",
  "tokio",
  "toml",
@@ -1968,8 +1969,7 @@ dependencies = [
 [[package]]
 name = "serde_derive"
 version = "1.0.144"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94ed3a816fb1d101812f83e789f888322c34e291f894f19590dc310963e87a00"
+source = "git+https://github.com/kurtbuilds/serde?rev=6a7ed68f#6a7ed68f7e5a0866b542c8bda95d9bf6f453c90a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1985,6 +1985,15 @@ dependencies = [
  "indexmap",
  "itoa",
  "ryu",
+ "serde",
+]
+
+[[package]]
+name = "serde_path_to_error"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "184c643044780f7ceb59104cef98a5a6f12cb2288a7bc701ab93a362b49fd47d"
+dependencies = [
  "serde",
 ]
 
