@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663540893536,
+  "lastUpdate": 1663561438164,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "2c4a11ea8be81201caf4a8e6e9437fd031ea8b6f",
-          "message": "fix(ci/windows): use winres patch to try to fix exe metadata\n\nwinres is known to not work on recent Rust toolchains due to some linker\nchanges, but there is a PR submitted upstream to fix that. Let's see if\nit fixes our issue of executable metadata not working.",
-          "timestamp": "2022-08-07T20:08:28Z",
-          "tree_id": "857822ad0d0670519a83e94d87a2c18c220ded4a",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2c4a11ea8be81201caf4a8e6e9437fd031ea8b6f"
-        },
-        "date": 1659905320939,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14040635,
-            "range": "± 167132",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 397791929,
-            "range": "± 5041999",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12025306352,
-            "range": "± 247973816",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2381306120,
-            "range": "± 70101000",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2635322069,
             "range": "± 10243187",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "5a34542c5308f7ca6d6fe9d62a74684b876f77f9",
+          "message": "fix(deps): update rust crate rgb to 0.8.34",
+          "timestamp": "2022-09-19T00:16:55Z",
+          "tree_id": "6d3e674b36357e37b97274575a3a82296c1ae203",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5a34542c5308f7ca6d6fe9d62a74684b876f77f9"
+        },
+        "date": 1663561437533,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9389807,
+            "range": "± 189014",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 370786463,
+            "range": "± 15008450",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10523175246,
+            "range": "± 40512863",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2603228001,
+            "range": "± 63183866",
             "unit": "ns/iter"
           }
         ]
