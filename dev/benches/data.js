@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663561438164,
+  "lastUpdate": 1663624593326,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "06cd9f25ad9dd27ea6b2a14efbc9a67d021eb8c9",
-          "message": "chore(ci/windows): fix cargo deny check and executable description",
-          "timestamp": "2022-08-07T20:58:28Z",
-          "tree_id": "e90d9c695f3666eb6da74419cd9a391395407eb1",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/06cd9f25ad9dd27ea6b2a14efbc9a67d021eb8c9"
-        },
-        "date": 1659907780748,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 15985099,
-            "range": "± 663530",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 454031767,
-            "range": "± 8295713",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13757700014,
-            "range": "± 70490854",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2684163219,
-            "range": "± 24663490",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2603228001,
             "range": "± 63183866",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "6ba00607ea037cd7eb2b6464e7ba06ce24206d8f",
+          "message": "feat: improve error messages for invalid options files\n\nThe error messages shown when parsing options files could be pretty\nunhelpful for end users when file-specific options are invalid, because\nthey just pointed to the fact that file-specific options could not be\nparsed without any further context or information.\n\nLuckily, I'm not alone this time. Someone made a great PR for upstream\ncode that has been unmerged for years and makes the messages more\nverbose in these cases, so at least it's possible to know what exactly\nwent wrong. Let's use their great work in PackSquash.\n\nIn addition, the path in which the error occurred is now shown, if\navailable.",
+          "timestamp": "2022-09-19T21:10:11Z",
+          "tree_id": "930139f31b56fe210f4e86c0981f1c1ef7c16c17",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6ba00607ea037cd7eb2b6464e7ba06ce24206d8f"
+        },
+        "date": 1663624590637,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9578949,
+            "range": "± 326114",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 361457630,
+            "range": "± 10916858",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 12543595936,
+            "range": "± 726452457",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2325575223,
+            "range": "± 110012918",
             "unit": "ns/iter"
           }
         ]
