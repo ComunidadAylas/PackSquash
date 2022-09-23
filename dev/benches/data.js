@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663731507001,
+  "lastUpdate": 1663892298344,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "5e5d6fc8557621467136410ecfb0595d4713b1ff",
-          "message": "fix(pack_file/shader_file): workaround M1 Mac GLSL compiler quirk\n\nIt was discovered by @pau101 that the GLSL compiler distributed with M1\nMacs may consider some if-else construct as ambiguous and fail shader\ncompilation, even though every other known GLSL compiler accepts them\nfine.\n\nThis problem was fixed in the glsl crate fork PackSquash uses, via a PR\nthat's now merged. Update the glsl crate commit used by PackSquash to\nlet it use this fix.",
-          "timestamp": "2022-08-09T14:40:53+02:00",
-          "tree_id": "3d87f692bfdec03dfd8171049d89a87ff317c03a",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5e5d6fc8557621467136410ecfb0595d4713b1ff"
-        },
-        "date": 1660050822276,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14206573,
-            "range": "± 716209",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 411994217,
-            "range": "± 8593093",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10508684284,
-            "range": "± 393235939",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2227543994,
-            "range": "± 42890431",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2908399207,
             "range": "± 74710757",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "b6f31f6b51fe770ab1b078fb76bff6f7236e661c",
+          "message": "fix(deps): update rust crate serde to 1.0.145",
+          "timestamp": "2022-09-22T20:29:14Z",
+          "tree_id": "e0b6d398b0f4b808af237e881a2c54f30050a511",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b6f31f6b51fe770ab1b078fb76bff6f7236e661c"
+        },
+        "date": 1663892297693,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10197125,
+            "range": "± 93625",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 390661947,
+            "range": "± 9130108",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11315414800,
+            "range": "± 31653691",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2636490828,
+            "range": "± 155451127",
             "unit": "ns/iter"
           }
         ]
