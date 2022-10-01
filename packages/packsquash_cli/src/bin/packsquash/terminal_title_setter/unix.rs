@@ -42,7 +42,7 @@ impl<'title> TerminalTitleSetterTrait<'title> for UnixTerminalTitleSetter {
 					escape_codes_stream: AnsiEscapeCodesStream::Stderr
 				})
 			} else {
-				ctermid()
+				controlling_terminal()
 					.and_then(|ctty_path| OpenOptions::new().write(true).open(ctty_path).ok())
 					.map(|ctty| Self {
 						escape_codes_stream: AnsiEscapeCodesStream::ControllingTty(ctty)
@@ -78,8 +78,8 @@ impl<'title> From<&'title str> for UnixTerminalTitleString<'title> {
 
 /// Returns a file path to the controlling terminal of this process. If this
 /// process has no controlling terminal, `None` will be returned.
-fn ctermid() -> Option<String> {
-	use std::ffi::CString;
+fn controlling_terminal() -> Option<String> {
+	use std::ffi::CStr;
 	use std::os::raw::c_char;
 
 	extern "C" {
@@ -89,30 +89,22 @@ fn ctermid() -> Option<String> {
 		fn ctermid(s: *mut c_char) -> *mut c_char;
 	}
 
+	let mut path_buf = [0; 256];
+
 	// SAFETY: system calls are unsafe. ctermid is required by the standard to populate the passed
 	// pointer with a valid string, always. If some error happens, then the string is empty, but the
-	// pointer is valid. Because we bring our own buffer, safe Rust is in full control of the data
-	// lifetime. L_ctermid is 9 on Linux, but allocating space for 256 characters should guarantee
-	// that the buffer size is always greater than L_ctermid. c_uchar has the same memory layout
-	// than c_char and are interchangeable
+	// pointer contents are valid. Because we bring our own buffer, safe Rust is in full control of
+	// the data lifetime. L_ctermid is 9 on Linux, but allocating space for 256 characters should
+	// guarantee that the buffer size is always greater than L_ctermid. c_uchar has the same memory
+	// layout than c_char and are interchangeable
 	#[allow(unsafe_code)]
-	let path = unsafe {
-		let mut path_buf = vec![0; 256];
-
-		ctermid(path_buf.as_mut_ptr() as *mut c_char);
-
-		// CString requires that the Vec exactly contains a C string, with no NUL bytes
-		let mut found_nul = false;
-		path_buf.retain(|byte| {
-			let is_not_first_nul = *byte != 0 && !found_nul;
-			found_nul = found_nul || *byte == 0;
-			is_not_first_nul
-		});
-
-		CString::new(path_buf)
+	unsafe {
+		ctermid(path_buf.as_mut_ptr() as *mut c_char)
 	};
 
+	let path = CStr::from_bytes_until_nul(&path_buf[..]);
+
 	path.ok()
-		.and_then(|path_cstring| path_cstring.into_string().ok())
+		.and_then(|path_cstr| path_cstr.to_str().ok().map(|path_str| path_str.to_string()))
 		.filter(|path| !path.is_empty())
 }
