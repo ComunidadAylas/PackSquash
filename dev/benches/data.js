@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1664650456712,
+  "lastUpdate": 1664658043832,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": false,
-          "id": "9938f9af736afb275e18c8e1c4257fb241f94ac9",
-          "message": "fix(deps): update rust crate serde_json to 1.0.85",
-          "timestamp": "2022-08-21T23:05:28Z",
-          "tree_id": "0a1bd19be93b1021714ac7412af049a030b2f2fc",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9938f9af736afb275e18c8e1c4257fb241f94ac9"
-        },
-        "date": 1661134897878,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12468697,
-            "range": "± 334841",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 384307248,
-            "range": "± 13486889",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10538973841,
-            "range": "± 47197266",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2720184504,
-            "range": "± 16186544",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2516765913,
             "range": "± 56028675",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "648cd6015e15d5577e0dfcdaa25f9e1b9bb95aa0",
+          "message": "perf(main): save memory allocs for prettifying config error messages\n\nInstead of format!'ing stuff, we can be smarter and reuse the logic\nmore easily by using a newtype wrapper that efficiently implements\nDisplay without additional allocations.",
+          "timestamp": "2022-10-01T19:23:52Z",
+          "tree_id": "c80a79e58af3a30d573cdb18118dc5b87d32a656",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/648cd6015e15d5577e0dfcdaa25f9e1b9bb95aa0"
+        },
+        "date": 1664658043266,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10463163,
+            "range": "± 432475",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 408597604,
+            "range": "± 9835859",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11809926136,
+            "range": "± 25945908",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2489188326,
+            "range": "± 22927063",
             "unit": "ns/iter"
           }
         ]
