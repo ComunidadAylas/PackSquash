@@ -12,7 +12,7 @@ edition = "2021"
 [dependencies]
 bytes = "1.2.1"
 globset = { version = "0.4.9", default-features = false }
-enumset = { version = "1.0.11", features = ["serde"] }
+enumset = { version = "1.0.12", features = ["serde"] }
 indexmap = { version = "1.9.1", default-features = false, features = ["serde-1"] }
 itertools = "0.10.5"
 thiserror = "1.0.37"
