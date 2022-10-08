@@ -30,7 +30,7 @@ pub trait TerminalTitleSetterTrait<'title> {
 
 	/// Sets the current terminal title to the specified string. Any errors that might happen
 	/// doing so are silently ignored.
-	fn set_title(&self, title: &'title Self::TerminalTitleString);
+	fn set_title(&self, title: &Self::TerminalTitleString);
 }
 
 /// Writes the ANSI escape sequence that sets the terminal title to the provided string to
