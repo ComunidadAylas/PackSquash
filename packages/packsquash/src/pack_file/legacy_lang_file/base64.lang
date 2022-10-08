@@ -1,6 +1,0 @@
-# This is a nice comment
-entity.ZombieVillager.name=J0knbSBhIGhlbGljb3B0ZXInIC0gU29tZSB2aWxsYWdlciwgbWFueSB5ZWFycyBhZ28=
-entity.Villager.name=SSB3YW50IG1vcmUgVmlsbGFnZXIgTmV3cyBlcGlzb2Rlcw==
-
-# Validating format specifiers without knowing the exact String.format call = trouble
-item.color=Color: %1$s

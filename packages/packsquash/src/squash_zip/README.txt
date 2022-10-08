@@ -2,7 +2,7 @@
 
 ## File addition
 To add files, SquashZip implements the algorithm described in the following steps,
-but in a multithreaded way, by using a spooled temporary file per thread instead:
+but in a multithreaded way, by using per thread scratch files instead:
 
 0. Store the current file offset and Squash Time timestamp.
 1. Create a local file header.

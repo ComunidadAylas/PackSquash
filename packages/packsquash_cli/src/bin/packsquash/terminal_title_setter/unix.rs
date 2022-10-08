@@ -52,7 +52,7 @@ impl<'title> TerminalTitleSetterTrait<'title> for UnixTerminalTitleSetter {
 		}
 	}
 
-	fn set_title(&self, title: &'title UnixTerminalTitleString) {
+	fn set_title(&self, title: &UnixTerminalTitleString) {
 		match &self.escape_codes_stream {
 			AnsiEscapeCodesStream::Stdout => {
 				write_ansi_set_window_title_escape_sequence(io::stdout(), title.0)

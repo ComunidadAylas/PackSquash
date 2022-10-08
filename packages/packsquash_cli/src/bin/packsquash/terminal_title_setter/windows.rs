@@ -29,7 +29,7 @@ enum WindowsTitleStrategy {
 }
 
 impl<'title> TerminalTitleSetterTrait<'title> for WindowsTerminalTitleSetter {
-	type TerminalTitleString = WindowsTerminalTitleString<'title>;
+	type TerminalTitleString = WindowsTerminalTitleString;
 
 	fn init() -> Option<Self> {
 		// Unix-style environment variable set by Unix-like terminal emulators on Windows (e.g. mintty)
@@ -121,7 +121,7 @@ impl<'title> TerminalTitleSetterTrait<'title> for WindowsTerminalTitleSetter {
 		)
 	}
 
-	fn set_title(&self, title: &'title WindowsTerminalTitleString) {
+	fn set_title(&self, title: &WindowsTerminalTitleString) {
 		match &self.title_strategy {
 			WindowsTitleStrategy::AnsiEscapeCodes(TerminalStream::Stdout) => {
 				write_ansi_set_window_title_escape_sequence(io::stdout(), title.0)
@@ -130,32 +130,24 @@ impl<'title> TerminalTitleSetterTrait<'title> for WindowsTerminalTitleSetter {
 				write_ansi_set_window_title_escape_sequence(io::stderr(), title.0)
 			}
 			WindowsTitleStrategy::WindowsConsoleApi => {
-				let mut wide_title = title.1.take();
-
 				// SAFETY: system calls are unsafe. We borrow a Vec whose lifetime
 				// is at least as long as this function execution, so the pointer
 				// passed to SetConsoleTitleW stays valid
 				#[allow(unsafe_code)]
 				unsafe {
-					SetConsoleTitleW(
-						wide_title
-							.get_or_insert_with(|| OsStr::new(title.0).encode_wide().collect())
-							.as_ptr()
-					);
+					SetConsoleTitleW(title.0.as_ptr());
 				}
-
-				title.1.set(wide_title);
 			}
 		}
 	}
 }
 
 /// A string that can be used to change a terminal title.
-pub struct WindowsTerminalTitleString<'title>(&'title str, Cell<Option<Vec<u16>>>);
+pub struct WindowsTerminalTitleString(Vec<u16>);
 
-impl<'title> From<&'title str> for WindowsTerminalTitleString<'title> {
-	fn from(title: &'title str) -> Self {
-		Self(title, Cell::new(None))
+impl From<&str> for WindowsTerminalTitleString {
+	fn from(title: &str) -> Self {
+		Self(OsStr::new(title).encode_wide().collect())
 	}
 }
 

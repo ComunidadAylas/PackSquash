@@ -12,7 +12,7 @@ use std::{
 	borrow::Cow,
 	cell::Cell,
 	char::{ToLowercase, ToUppercase},
-	io,
+	io::{self, Write},
 	iter::{self, Once}
 };
 
@@ -21,7 +21,6 @@ use rand_xoshiro::{
 	rand_core::{RngCore, SeedableRng},
 	Xoshiro128Plus
 };
-use tokio::io::{AsyncWrite, AsyncWriteExt};
 
 use crate::{config::PercentageInteger, RelativePath};
 
@@ -69,23 +68,17 @@ impl ObfuscationEngine {
 		}
 	}
 
-	pub async fn obfuscating_header<T: AsyncWrite + Unpin>(
-		&self,
-		mut output_zip: T,
-		seed: u64
-	) -> io::Result<()> {
+	pub fn obfuscating_header<T: Write>(&self, mut output_zip: T, seed: u64) -> io::Result<()> {
 		if let ObfuscationEngine::Obfuscation {
 			size_increasing_obfuscation: true,
 			..
 		} = self
 		{
-			output_zip
-				.write_all(&if random_u32(seed) % 5 == 0 {
-					[0x50, 0x4B, 0x03, 0x04]
-				} else {
-					[0x50, 0x4B, 0x05, 0x06]
-				})
-				.await?;
+			output_zip.write_all(&if random_u32(seed) % 5 == 0 {
+				[0x50, 0x4B, 0x03, 0x04]
+			} else {
+				[0x50, 0x4B, 0x05, 0x06]
+			})?;
 		}
 
 		Ok(())

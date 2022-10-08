@@ -22,6 +22,9 @@ mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
 # messages when deserializing data, including options files.
 # See: https://github.com/serde-rs/serde/pull/1544
 serde_derive = { git = "https://github.com/ComunidadAylas/serde", branch = "master" }
+# Use a patch of the indenter crate with a fix for line number computation for formatters.
+# See: https://github.com/yaahc/indenter/pull/18
+indenter = { git = "https://github.com/ComunidadAylas/indenter" }
 
 [profile.release]
 opt-level = 3

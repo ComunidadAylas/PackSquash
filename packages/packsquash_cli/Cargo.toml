@@ -15,12 +15,13 @@ packsquash = { path = "../packsquash", version = "0.4.0" }
 getopts = "0.2.21"
 toml = { version = "0.7.6", default-features = false, features = ["parse"] }
 
-tokio = { version = "1.29.1", default-features = false, features = ["time"] }
+strum = { version = "0.24.1", features = ["derive"] }
 
-serde_path_to_error = "0.1.13"
+serde_path_to_error = "0.1.8"
 
-log = "0.4.19"
-env_logger = { version = "0.10.0", default-features = false, features = ["color"] }
+log = "0.4.17"
+env_logger = { version = "0.9.0", default-features = false, features = ["termcolor"] }
+indenter = { version = "0.3.3", features = ["std"] }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", default-features = false, features = ["consoleapi"] }
