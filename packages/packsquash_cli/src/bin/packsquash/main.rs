@@ -397,16 +397,26 @@ fn init_logging(
 					Ok(())
 				}
 				Some(PackSquashStatus::DetectedPackType { pack_type }) => {
-					let game_version = record.key_values().get("game_version".into()).unwrap();
+					let game_version_range = record
+						.key_values()
+						.get("game_version_range".into())
+						.unwrap();
 
 					write_message(&format_args!(
 						"Pack metadata read. Minecraft {} {} detected",
-						game_version, pack_type
+						game_version_range, pack_type
 					))
 				}
-				Some(PackSquashStatus::QuirksToWorkAround { quirk_list }) => write_message(
-					&format_args!("Working around Minecraft quirks: {}", quirk_list)
-				),
+				Some(PackSquashStatus::QuirksToWorkAround { quirk_list }) => {
+					if quirk_list.is_empty() {
+						write_message(&"No Minecraft quirks to work around")
+					} else {
+						write_message(&format_args!(
+							"Working around Minecraft quirks: {}",
+							quirk_list
+						))
+					}
+				}
 				Some(PackSquashStatus::UnusablePreviousZip {
 					previous_zip_parse_error,
 					io_error

@@ -12,7 +12,7 @@ pub struct ResourceLocation<'location> {
 	pack_type: PackType,
 	namespace: &'location str,
 	asset_type_directory: Option<Cow<'location, str>>,
-	asset_path: &'location str,
+	relative_asset_path: &'location str,
 	asset_type_extension: Option<Cow<'location, str>>
 }
 
@@ -60,43 +60,66 @@ impl<'location> ResourceLocation<'location> {
 		let asset_type_extension =
 			asset_type_extension.map(|asset_type_extension| asset_type_extension.into());
 
-		let (namespace, asset_path) = resource_location_string
+		let (namespace, relative_asset_path) = resource_location_string
 			.split_once(':')
 			.unwrap_or((DEFAULT_NAMESPACE, resource_location_string));
 
 		verify_namespace(namespace)?;
-		verify_path(asset_path)?;
+		verify_path(relative_asset_path)?;
 
 		Ok(Self {
 			pack_type,
 			namespace,
 			asset_type_directory,
-			asset_path,
+			relative_asset_path,
 			asset_type_extension
 		})
+	}
+
+	pub fn namespace(&self) -> &str {
+		self.namespace
+	}
+
+	pub fn resolved_asset_path(&self) -> Cow<'location, str> {
+		if self.asset_type_directory.is_none() && self.asset_type_extension.is_none() {
+			// If there is nothing to prepend (an asset type root directory) or append
+			// (an asset type extension), the relative asset path matches the resolved
+			// asset path, and we can borrow it
+			Cow::Borrowed(self.relative_asset_path)
+		} else {
+			let mut resolved_asset_path = String::new();
+
+			self.push_resolved_asset_path_to(&mut resolved_asset_path);
+
+			Cow::Owned(resolved_asset_path)
+		}
 	}
 
 	pub fn as_relative_path(&self) -> Result<RelativePath<'static>, InvalidPathError<'static>> {
 		let root_directory = self.pack_type.root_directory();
 		let root_directory = root_directory.as_str();
 		let namespace = self.namespace;
+
 		let asset_type_directory = self
 			.asset_type_directory
 			.as_ref()
 			.unwrap_or(&Cow::Borrowed(""));
-		let asset_path = self.asset_path;
+
+		let relative_asset_path = self.relative_asset_path;
+
 		let asset_type_extension = self
 			.asset_type_extension
 			.as_ref()
 			.unwrap_or(&Cow::Borrowed(""));
 
-		let mut path =
-			String::with_capacity(
-				root_directory.len()
-					+ namespace.len() + asset_type_directory.len()
-					+ asset_path.len() + asset_type_extension.len()
-					+ 4
-			);
+		let mut path = String::with_capacity(
+			root_directory.len()
+				+ namespace.len()
+				+ asset_type_directory.len()
+				+ relative_asset_path.len()
+				+ asset_type_extension.len()
+				+ 4
+		);
 
 		// A resource location is a relative path with the following format:
 		// {root_directory}/{namespace}/({asset_type_directory}/)?{asset_path}(.{asset_type_extension})?
@@ -104,15 +127,7 @@ impl<'location> ResourceLocation<'location> {
 		path.push('/');
 		path.push_str(namespace);
 		path.push('/');
-		if asset_type_extension.len() > 0 {
-			path.push_str(asset_type_directory);
-			path.push('/');
-		}
-		path.push_str(asset_path);
-		if asset_type_extension.len() > 0 {
-			path.push('.');
-			path.push_str(asset_type_extension);
-		}
+		self.push_resolved_asset_path_to(&mut path);
 
 		if path.len() > u16::MAX as usize {
 			return Err(InvalidPathError::TooBig);
@@ -122,6 +137,24 @@ impl<'location> ResourceLocation<'location> {
 		// relative path with no weird metacharacters, and we have just checked that the length
 		// is not too big
 		Ok(RelativePath::from_inner(path))
+	}
+
+	fn push_resolved_asset_path_to(&self, resolved_asset_path: &mut String) {
+		if let Some(asset_type_directory) = &self.asset_type_directory {
+			if asset_type_directory.len() > 0 {
+				resolved_asset_path.push_str(asset_type_directory);
+				resolved_asset_path.push('/');
+			}
+		}
+
+		resolved_asset_path.push_str(self.relative_asset_path);
+
+		if let Some(asset_type_extension) = &self.asset_type_extension {
+			if asset_type_extension.len() > 0 {
+				resolved_asset_path.push('.');
+				resolved_asset_path.push_str(asset_type_extension);
+			}
+		}
 	}
 }
 
@@ -133,9 +166,9 @@ impl<'location> TryFrom<&'location RelativePath<'_>> for ResourceLocation<'locat
 		// paths. Validate that the path to be converted has:
 		// - A valid pack type root directory
 		// - A valid namespace
-		// - A valid asset path
-		// If that validation parses, then it is a valid resource path, barring any
-		// asset type directory or extension requirements
+		// - A valid relative asset path
+		// If that validation parses, then it is a valid resource path, relative to the
+		// pack type root directory (asset_type_directory is assumed to be None)
 
 		let (path_without_root_dir, pack_type) = PackType::iter()
 			.filter_map(|pack_type| {
@@ -156,19 +189,19 @@ impl<'location> TryFrom<&'location RelativePath<'_>> for ResourceLocation<'locat
 
 		verify_namespace(namespace)?;
 
-		let asset_path = namespace_and_asset_path_components
+		let relative_asset_path = namespace_and_asset_path_components
 			.as_path()
 			.as_os_str()
 			.to_str()
 			.unwrap();
 
-		verify_path(asset_path)?;
+		verify_path(relative_asset_path)?;
 
 		Ok(Self {
 			pack_type,
 			namespace,
 			asset_type_directory: None,
-			asset_path,
+			relative_asset_path,
 			asset_type_extension: None
 		})
 	}
