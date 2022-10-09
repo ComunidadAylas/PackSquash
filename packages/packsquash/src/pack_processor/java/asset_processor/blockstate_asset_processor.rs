@@ -14,8 +14,10 @@ use crate::relative_path::InvalidPathError;
 use crate::scratch_file::ScratchFile;
 use crate::squash_zip::SquashZipError;
 use crate::squashed_pack_state::SquashedPackState;
-use crate::util::patricia_set_relative_path_iter::PatriciaSetRelativePathIterExt;
-use crate::util::{range_bounds_intersect::RangeBoundsIntersectExt, strip_utf8_bom::StripUtf8BomExt};
+use crate::util::{
+	lazy_or_eager::LazyOrEager, patricia_set_relative_path_iter::PatriciaSetRelativePathIterExt,
+	range_bounds_intersect::RangeBoundsIntersectExt, strip_utf8_bom::StripUtf8BomExt
+};
 use crate::vfs::VirtualFileSystem;
 use crate::{PackSquashAssetProcessingStrategy, RelativePath};
 use ahash::{AHashMap, AHashSet};
@@ -23,7 +25,6 @@ use itertools::Itertools;
 use json_comments::StripComments;
 use once_cell::sync::Lazy;
 use once_cell::unsync::Lazy as UnsyncLazy;
-use parking_lot::Mutex;
 use patricia_tree::PatriciaSet;
 use rayon::prelude::*;
 use std::borrow::Cow;
@@ -143,57 +144,11 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 			vanilla_blockstate_property_list::matching_for_version_range(game_version_range)
 		});
 
-		let referenced_models = Mutex::new(PatriciaSet::new());
-
 		let vanilla_blockstates =
 			vanilla_blockstate_list::matching_for_version_range(game_version_range);
-		let vanilla_blockstates_are_unknown = vanilla_blockstates.is_none();
 
-		let vanilla_blockstates_iter = vanilla_blockstates.map(|vanilla_blockstates| {
-			// The Rust compiler needs some help to figure out that we want to unwrap the owned HashMap
-			// from the AHashMap deref facade, which is necessary to be able to move it to the
-			// into_par_iter() call
-			<AHashSet<RelativePath<'_>> as Into<HashSet<_, _>>>::into(vanilla_blockstates)
-				.into_par_iter()
-		});
-
-		// Vanilla-format blockstates can be found on other namespaces in modded environments
-		// (Forge and Fabric), but under the same path those namespaces. The unwritten agreement
-		// is to use folders within namespaces to distinguish between asset types, while the
-		// namespaces themselves are used to avoid asset clashes. In practice, it does not happen
-		// that a mod-specific namespace reads non-blockstate assets from the blockstates path
-		let any_blockstate_path_matcher =
-			compile_hardcoded_pack_file_glob_pattern("assets/?*/blockstates/**/?*.jso{n,nc}")
-				.compile_matcher();
-
-		let non_vanilla_blockstates_iter = (self
-			.global_options
-			.allow_non_vanilla_assets_of_vanilla_types
-			|| vanilla_blockstates_are_unknown)
-			.then(|| {
-				self.pack_files
-					.relative_path_iter()
-					.par_bridge()
-					.filter_map(|relative_path| {
-						any_blockstate_path_matcher
-							.is_match(&relative_path)
-							.then_some(relative_path)
-							.filter(|relative_path| {
-								// Minecraft expects blockstate files to be located at a valid resource
-								// location (see net.minecraft.client.resources.model.ModelBakery and
-								// net.minecraft.client.resources.model.ModelResourceLocation). Every
-								// known mod for the Minecraft versions that support blockstates expands
-								// on this vanilla logic, so filtering by that should be fine
-								ResourceLocation::try_from(relative_path).is_ok()
-							})
-					})
-			});
-
-		vanilla_blockstates_iter
-			.into_par_iter()
-			.flatten()
-			.chain(non_vanilla_blockstates_iter.into_par_iter().flatten())
-			.try_for_each(|candidate_asset_path| {
+		let process_blockstate =
+			|(candidate_asset_path, is_vanilla)| -> Result<(), BlockStateAssetError> {
 				let file_options: UnsyncLazy<&JsonFileOptions, _> = UnsyncLazy::new(|| {
 					self.file_options
 						.get(&candidate_asset_path)
@@ -212,15 +167,79 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 					&file_options,
 					is_game_version_before_the_flattening,
 					game_version_has_multipart_model_strategy,
-					&referenced_models,
-					// TODO take into account non-vanilla blockstate files, which may not use vanilla properties!
-					&valid_vanilla_block_properties
+					// For now, we only want to validate block properties of vanilla blockstates.
+					// Make sure that non-vanilla blockstates do not get any properties, to avoid
+					// potential clashes with modded blockstates
+					if is_vanilla {
+						LazyOrEager::Lazy(&valid_vanilla_block_properties)
+					} else {
+						LazyOrEager::Eager(None)
+					}
 				)
 				.map_err(|err| BlockStateAssetError {
 					inner: err,
 					file_path: candidate_asset_path.into_owned()
 				})
-			})
+			};
+
+		match (
+			self.global_options
+				.allow_non_vanilla_assets_of_vanilla_types,
+			vanilla_blockstates.is_some()
+		) {
+			(true, _) | (_, false) => {
+				// Exhaustive asset enumeration strategy: we either want to include non-vanilla assets
+				// or we don't know what vanilla assets there are, so iterate over all the plausible
+				// assets
+
+				// Vanilla-format blockstates can be found in other namespaces in modded environments
+				// (Forge and Fabric), but under the same paths on those namespaces. The unwritten agreement
+				// is to rely on folders within namespaces to distinguish between asset types, while the
+				// namespaces themselves are only used as mod IDs. Therefore, in practice it does not happen
+				// that a mod-specific namespace reads non-blockstate assets from the blockstates path
+				let any_blockstate_path_matcher =
+					compile_hardcoded_pack_file_glob_pattern("assets/?*/blockstates/**/?*.jso{n,nc}")
+						.compile_matcher();
+
+				self.pack_files
+					.relative_path_iter()
+					.par_bridge()
+					.filter_map(|relative_path| {
+						// Minecraft expects blockstate files to be located at a valid resource
+						// location (see net.minecraft.client.resources.model.ModelBakery and
+						// net.minecraft.client.resources.model.ModelResourceLocation). Every
+						// known mod for the Minecraft versions that support blockstates expands
+						// on this vanilla logic, so filtering by that should be fine
+						if any_blockstate_path_matcher.is_match(&relative_path)
+							&& ResourceLocation::try_from(&relative_path).is_ok()
+						{
+							let is_vanilla = vanilla_blockstates.as_ref().map_or_else(
+								|| false,
+								|vanilla_blockstates| vanilla_blockstates.contains(&relative_path)
+							);
+
+							Some((relative_path, is_vanilla))
+						} else {
+							None
+						}
+					})
+					.try_for_each(process_blockstate)
+			}
+			(false, true) => {
+				// Focused asset enumeration strategy: we only want vanilla assets and we know what vanilla
+				// assets there are, so process them, and only them, right away
+
+				// The Rust compiler needs some help to figure out that we want to unwrap the owned HashMap
+				// from the AHashMap deref facade, which is necessary to be able to move it to the
+				// into_par_iter() call
+				<AHashSet<RelativePath<'_>> as Into<HashSet<_, _>>>::into(
+					vanilla_blockstates.unwrap()
+				)
+				.into_par_iter()
+				.map(|relative_path| (relative_path, true))
+				.try_for_each(process_blockstate)
+			}
+		}
 	}
 
 	fn process_blockstate_file<'options>(
@@ -229,8 +248,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 		file_options: &impl Deref<Target = &'options JsonFileOptions>,
 		is_game_version_before_the_flattening: bool,
 		game_version_has_multipart_model_strategy: bool,
-		referenced_models: &Mutex<PatriciaSet>,
-		valid_block_properties: &impl Deref<
+		valid_block_properties: impl Deref<
 			Target = Option<
 				AHashMap<&'static str, AHashMap<&'static str, TinyVec<[BlockStatePropertyType; 1]>>>
 			>
@@ -251,20 +269,18 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 		let allow_json_comments = asset_path.extension() == Some(OsStr::new("jsonc"))
 			|| self.global_options.always_allow_json_comments;
 
-		let check_missing_models = matches!(
-			self.global_options.missing_reference_action,
-			MissingReferenceAction::ErrorOut | MissingReferenceAction::Warn
-		);
+		let mut models_to_be_checked_for_presence = AHashSet::new();
 
 		// Deserialize the block state data to process it, and gather file metadata
 		let asset_mmap;
 		let (blockstate, file_size_hint) = if allow_json_comments {
 			let asset_file = open_or_mmap!(open);
 
-			// Mark as processed. If it was processed or is being processed by another thread
-			// (non_vanilla_blockstates_iter and vanilla_blockstates_iter may overlap), do nothing
-			// if there are no other paths to try. If we error out, it doesn't matter that the file
-			// was not actually processed
+			// Mark as processed and return early it was processed or is being processed by
+			// another thread (the same asset may be available at several non-canonical paths).
+			// If we error out, it doesn't matter that the file was not actually processed.
+			// We have to mark it after trying to open the file to ignore non-existing alternative
+			// candidate paths
 			if !self
 				.squashed_pack_state
 				.mark_file_as_processed(&canonical_asset_path)
@@ -293,10 +309,11 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 		} else {
 			asset_mmap = open_or_mmap!(mmap);
 
-			// Mark as processed. If it was processed or is being processed by another thread
-			// (non_vanilla_blockstates_iter and vanilla_blockstates_iter may overlap), do nothing
-			// if there are no other paths to try. If we error out, it doesn't matter that the file
-			// was not actually processed
+			// Mark as processed and return early it was processed or is being processed by
+			// another thread (the same asset may be available at several non-canonical paths).
+			// If we error out, it doesn't matter that the file was not actually processed.
+			// We have to mark it after trying to open the file to ignore non-existing alternative
+			// candidate paths
 			if !self
 				.squashed_pack_state
 				.mark_file_as_processed(&canonical_asset_path)
@@ -340,7 +357,11 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 				valid_block_properties,
 				is_game_version_before_the_flattening,
 				game_version_has_multipart_model_strategy,
-				check_missing_models.then_some(referenced_models),
+				matches!(
+					self.global_options.missing_reference_action,
+					MissingReferenceAction::ErrorOut | MissingReferenceAction::Warn
+				)
+				.then_some(&mut models_to_be_checked_for_presence),
 				file_size_hint
 			)?;
 
@@ -351,50 +372,46 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 				.add_previous_zip_file(&canonical_asset_path)?;
 		}
 
-		// Gather all the missing model warnings, if necessary
+		// If some reference model is to be checked for presence, do it
 		let mut missing_model_warnings = tiny_vec!();
-		if check_missing_models {
-			// Iterate over the raw Patricia set contents to avoid string conversions in the
-			// common case that the references are valid
-			for referenced_model_path in referenced_models.lock().iter() {
-				// TODO ignore if it is a known vanilla model?
-				if !self.pack_files.contains(&referenced_model_path) {
-					let referenced_model_path =
-						RelativePath::from_inner(String::from_utf8(referenced_model_path).unwrap());
+		let missing_model_warnings_are_errors = matches!(
+			self.global_options.missing_reference_action,
+			MissingReferenceAction::ErrorOut
+		);
 
-					let missing_model_warnings_are_errors = matches!(
-						self.global_options.missing_reference_action,
-						MissingReferenceAction::ErrorOut
-					);
+		for referenced_model_path in models_to_be_checked_for_presence {
+			// TODO ignore if it is a known, non-filtered vanilla model
+			if self.pack_files.contains(referenced_model_path.as_str()) {
+				// The dependency is satisfied
+				continue;
+			}
 
-					// Short-circuit evaluation if any warning is an error anyway: consider that it
-					// was not filtered out
-					let is_model_filtered_out = !missing_model_warnings_are_errors
-						&& self.pack_meta.is_resource_location_filtered_out(
-							&ResourceLocation::try_from(&referenced_model_path).unwrap()
-						);
+			// Short-circuit evaluation if any warning is an error anyway: consider that it
+			// was not filtered out
+			let is_model_filtered_out = !missing_model_warnings_are_errors
+				&& self.pack_meta.is_resource_location_filtered_out(
+					&ResourceLocation::try_from(&referenced_model_path).unwrap()
+				);
 
-					if missing_model_warnings_are_errors || is_model_filtered_out {
-						return Err(InnerBlockStateAssetError::MissingModel {
-							path: referenced_model_path,
-							// Let whoever sees this error displayed know whether we elevated a
-							// warning to an error due to resource filters
-							__filtered_out_text: if is_model_filtered_out {
-								" and it was filtered out by the pack.mcmeta filter section"
-							} else {
-								""
-							}
-						});
+			if missing_model_warnings_are_errors || is_model_filtered_out {
+				return Err(InnerBlockStateAssetError::MissingModel {
+					path: referenced_model_path,
+					// Let whoever sees this error displayed know whether we elevated a
+					// warning to an error due to resource filters
+					__filtered_out_text: if is_model_filtered_out {
+						" and it was filtered out by the pack.mcmeta filter section"
 					} else {
-						missing_model_warnings.push(
-							format!(
-								"A variant referenced a model at {}, but it was not found in the pack",
-								referenced_model_path.as_str()
-							)
-							.into()
-						);
+						""
 					}
-				}
+				});
+			} else {
+				missing_model_warnings.push(
+					format!(
+						"A variant referenced a model at {}, but it was not found in the pack",
+						referenced_model_path.as_str()
+					)
+					.into()
+				);
 			}
 		}
 
@@ -422,14 +439,14 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 		mut blockstate: BlockState,
 		block_name: &str,
 		file_options: &impl Deref<Target = &'options JsonFileOptions>,
-		valid_block_properties: &impl Deref<
+		valid_block_properties: impl Deref<
 			Target = Option<
 				AHashMap<&'static str, AHashMap<&'static str, TinyVec<[BlockStatePropertyType; 1]>>>
 			>
 		>,
 		is_game_version_before_the_flattening: bool,
 		game_version_has_multipart_model_strategy: bool,
-		referenced_models: Option<&Mutex<PatriciaSet>>,
+		mut models_to_be_checked_for_presence: Option<&mut AHashSet<RelativePath<'static>>>,
 		file_size_hint: usize
 	) -> Result<ScratchFile, InnerBlockStateAssetError> {
 		// First, run more through validation and optimization
@@ -452,7 +469,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 
 					// Validate property-value pairs used for selecting lists of variants.
 					// Do not error out if we find no property data for this block: it may
-					// be non-vanilla, or maybe we just don't want to validate properties
+					// be non-vanilla, or we may lack data about a specific vanilla version
 					if let Some(valid_block_properties) = valid_block_properties
 						.as_ref()
 						.and_then(|valid_block_properties| valid_block_properties.get(block_name))
@@ -480,7 +497,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 						variant_list,
 						file_options,
 						is_game_version_before_the_flattening,
-						referenced_models
+						models_to_be_checked_for_presence.as_mut()
 					)?;
 				}
 			}
@@ -492,15 +509,18 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 					));
 				}
 
-				let block_properties = valid_block_properties
+				let valid_block_properties = valid_block_properties
 					.as_ref()
-					.and_then(|block_properties| block_properties.get(block_name));
+					.and_then(|valid_block_properties| valid_block_properties.get(block_name));
 
 				for multipart_variant_selector in multipart_variants {
 					// Validate and optimize the selector condition, if any
 					if let Some(condition) = &mut multipart_variant_selector.condition {
-						if let Some(block_properties) = block_properties {
-							validate_blockstate_multipart_condition(condition, block_properties)?;
+						if let Some(valid_block_properties) = valid_block_properties {
+							validate_blockstate_multipart_condition(
+								condition,
+								valid_block_properties
+							)?;
 						}
 
 						// This optimization can be done even if we don't know the properties
@@ -513,7 +533,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 						&mut multipart_variant_selector.variants,
 						file_options,
 						is_game_version_before_the_flattening,
-						referenced_models
+						models_to_be_checked_for_presence.as_mut()
 					)?;
 
 					// Delete unknown keys that the game won't read
@@ -553,12 +573,12 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 		Ok(scratch_file)
 	}
 
-	fn optimize_variant_list<'options>(
+	fn optimize_variant_list<'options, 'data>(
 		&self,
 		variant_list: &mut VariantList,
 		file_options: &impl Deref<Target = &'options JsonFileOptions>,
 		is_game_version_before_the_flattening: bool,
-		referenced_models: Option<&Mutex<PatriciaSet>>
+		mut referenced_models: Option<&mut &mut AHashSet<RelativePath<'static>>>
 	) -> Result<(), InnerBlockStateAssetError> {
 		// Optimize list of variants to a single variant if it contains a single element
 		if variant_list.len() == 1 && matches!(variant_list, VariantList::SeveralVariants(_)) {
@@ -578,10 +598,8 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 				Some("json")
 			)?;
 
-			if let Some(referenced_models) = referenced_models {
-				referenced_models
-					.lock()
-					.insert(model_location.as_relative_path()?.as_str());
+			if let Some(referenced_models) = &mut referenced_models {
+				referenced_models.insert(model_location.as_relative_path()?);
 			}
 
 			if file_options.delete_bloat {
@@ -595,16 +613,19 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 
 fn validate_blockstate_multipart_condition(
 	condition: &Condition,
-	block_properties: &AHashMap<&'static str, TinyVec<[BlockStatePropertyType; 1]>>
+	valid_block_properties: &AHashMap<&'static str, TinyVec<[BlockStatePropertyType; 1]>>
 ) -> Result<(), InnerBlockStateAssetError> {
 	match condition {
 		Condition::PropertyPredicates(property_predicates) => {
 			// A non-composite condition is valid if every property-predicate pair references
 			// valid properties and values for those properties
 			for (property, property_predicate) in property_predicates {
-				let allowed_value_types = block_properties.get(&*property.0).ok_or_else(|| {
-					InnerBlockStateAssetError::UnrecognizedPropertyName(property.0.to_string().into())
-				})?;
+				let allowed_value_types =
+					valid_block_properties.get(&*property.0).ok_or_else(|| {
+						InnerBlockStateAssetError::UnrecognizedPropertyName(
+							property.0.to_string().into()
+						)
+					})?;
 
 				for value in &property_predicate.values {
 					validate_property_value_for_types(&property.0, value, allowed_value_types)?;
@@ -619,7 +640,7 @@ fn validate_blockstate_multipart_condition(
 			};
 
 			for condition in conditions {
-				validate_blockstate_multipart_condition(condition, block_properties)?;
+				validate_blockstate_multipart_condition(condition, valid_block_properties)?;
 			}
 		}
 	}
