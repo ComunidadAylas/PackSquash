@@ -64,8 +64,12 @@ pub enum InnerBlockStateAssetError {
 		value: String,
 		expected_types: String
 	},
-	#[error("A variant referenced a model at {path}, but it was not found in the pack")]
-	MissingModel { path: RelativePath<'static> },
+	#[error("A variant referenced a model at {path}, but it was not found in the pack{__filtered_out_text}")]
+	MissingModel {
+		path: RelativePath<'static>,
+		#[doc(hidden)]
+		__filtered_out_text: &'static str
+	},
 	#[error("JSON error at {0}")]
 	JsonSerdeWithPath(#[from] serde_path_to_error::Error<serde_json::Error>),
 	#[error("JSON error: {0}")]
@@ -122,25 +126,27 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 	}
 
 	pub fn process(&self) -> Result<(), BlockStateAssetError> {
-		let game_version = self.pack_meta.game_version();
+		let game_version_range = self.pack_meta.game_version_range();
 
 		// Block states were introduced in Minecraft 1.8
-		if !(minecraft_version!(1, 8)..).intersects(game_version) {
+		if !(minecraft_version!(1, 8)..).intersects(game_version_range) {
 			return Ok(());
 		}
 
 		let is_game_version_before_the_flattening =
-			(..minecraft_version!(1, 13)).intersects(game_version);
+			(..minecraft_version!(1, 13)).intersects(game_version_range);
 
 		let game_version_has_multipart_model_strategy =
-			(minecraft_version!(1, 9)..).intersects(game_version);
+			(minecraft_version!(1, 9)..).intersects(game_version_range);
 
-		let valid_vanilla_block_properties =
-			Lazy::new(|| vanilla_blockstate_property_list::matching_for_version_range(game_version));
+		let valid_vanilla_block_properties = Lazy::new(|| {
+			vanilla_blockstate_property_list::matching_for_version_range(game_version_range)
+		});
 
 		let referenced_models = Mutex::new(PatriciaSet::new());
 
-		let vanilla_blockstates = vanilla_blockstate_list::matching_for_version_range(game_version);
+		let vanilla_blockstates =
+			vanilla_blockstate_list::matching_for_version_range(game_version_range);
 		let vanilla_blockstates_are_unknown = vanilla_blockstates.is_none();
 
 		let vanilla_blockstates_iter = vanilla_blockstates.map(|vanilla_blockstates| {
@@ -207,6 +213,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 					is_game_version_before_the_flattening,
 					game_version_has_multipart_model_strategy,
 					&referenced_models,
+					// TODO take into account non-vanilla blockstate files, which may not use vanilla properties!
 					&valid_vanilla_block_properties
 				)
 				.map_err(|err| BlockStateAssetError {
@@ -355,8 +362,30 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 					let referenced_model_path =
 						RelativePath::from_inner(String::from_utf8(referenced_model_path).unwrap());
 
-					if let MissingReferenceAction::Warn = self.global_options.missing_reference_action
-					{
+					let missing_model_warnings_are_errors = matches!(
+						self.global_options.missing_reference_action,
+						MissingReferenceAction::ErrorOut
+					);
+
+					// Short-circuit evaluation if any warning is an error anyway: consider that it
+					// was not filtered out
+					let is_model_filtered_out = !missing_model_warnings_are_errors
+						&& self.pack_meta.is_resource_location_filtered_out(
+							&ResourceLocation::try_from(&referenced_model_path).unwrap()
+						);
+
+					if missing_model_warnings_are_errors || is_model_filtered_out {
+						return Err(InnerBlockStateAssetError::MissingModel {
+							path: referenced_model_path,
+							// Let whoever sees this error displayed know whether we elevated a
+							// warning to an error due to resource filters
+							__filtered_out_text: if is_model_filtered_out {
+								" and it was filtered out by the pack.mcmeta filter section"
+							} else {
+								""
+							}
+						});
+					} else {
 						missing_model_warnings.push(
 							format!(
 								"A variant referenced a model at {}, but it was not found in the pack",
@@ -364,10 +393,6 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 							)
 							.into()
 						);
-					} else {
-						return Err(InnerBlockStateAssetError::MissingModel {
-							path: referenced_model_path
-						});
 					}
 				}
 			}
@@ -633,7 +658,7 @@ fn validate_property_value_for_types(
 		Err(InnerBlockStateAssetError::InvalidPropertyValue {
 			name: name.into(),
 			value: value.into(),
-			expected_types: valid_property_types.iter().join(", ")
+			expected_types: valid_property_types.iter().join("; ")
 		})
 	}
 }

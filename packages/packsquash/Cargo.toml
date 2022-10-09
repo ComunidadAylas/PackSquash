@@ -71,7 +71,7 @@ fpe = "0.5.1"
 uuid = "1.2.1"
 entropy = "0.4.1"
 rand_xoshiro = "0.6.0"
-regex = "1.6.0"
+onig = { version = "6.4.0", default-features = false }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.10.1"

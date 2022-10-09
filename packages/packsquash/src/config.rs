@@ -241,6 +241,7 @@ pub struct GlobalOptions<'data> {
 	/// **Default value**: `20`
 	pub zip_compression_iterations: u8,
 	pub treat_asset_warnings_as_errors: bool,
+	// TODO file-specific option
 	pub missing_reference_action: MissingReferenceAction,
 	pub always_allow_json_comments: bool,
 	/// Some Minecraft versions have some quirks that affect how pack files can be optimized. If these

@@ -12,6 +12,8 @@ use strum::IntoEnumIterator;
 use thiserror::Error;
 
 use crate::config::MinecraftQuirk;
+use crate::java::pack_meta::filter_section::ResourceFilterSection;
+use crate::java::resource_location::ResourceLocation;
 use crate::java::PackType;
 use crate::minecraft_version::{MinecraftVersion, MinecraftVersionRange};
 use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
@@ -22,6 +24,8 @@ use crate::RelativePath;
 #[cfg(test)]
 mod tests;
 
+mod filter_section;
+
 /// Metadata for a Java Edition resource or data pack, contained in the `pack.mcmeta` file in the
 /// root folder of a pack.
 ///
@@ -29,11 +33,13 @@ mod tests;
 /// - <https://minecraft.fandom.com/wiki/Resource_Pack#Contents>
 /// - <https://minecraft.fandom.com/wiki/Data_Pack#pack.mcmeta>
 /// - Minecraft class `net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer`
+/// - Minecraft class `net.minecraft.server.packs.resources.ResourceFilterSection`
 pub struct PackMeta {
 	meta: Value,
 	pack_type: PackType,
-	game_version: MinecraftVersionRange,
-	game_version_quirks: EnumSet<MinecraftQuirk>
+	game_version_range: MinecraftVersionRange,
+	game_version_quirks: EnumSet<MinecraftQuirk>,
+	resource_filter_section: Option<ResourceFilterSection<'static>>
 }
 
 /// Represents an error that may happen while getting pack metadata.
@@ -50,6 +56,8 @@ pub enum PackMetaError {
 		actual_game_version: MinecraftVersion,
 		expected_game_version_range: MinecraftVersionRange
 	},
+	#[error("JSON error at {0}")]
+	JsonSerdeWithPath(#[from] serde_path_to_error::Error<serde_json::Error>),
 	#[error("I/O error: {0}")]
 	Io(#[from] io::Error)
 }
@@ -58,7 +66,7 @@ impl PackMeta {
 	/// Gathers the metadata from the pack contained in a virtual filesystem.
 	pub fn new(
 		vfs: &(impl VirtualFileSystem + ?Sized),
-		game_version: Option<MinecraftVersion>,
+		target_game_version: Option<MinecraftVersion>,
 		allow_json_comments: bool
 	) -> Result<Self, PackMetaError> {
 		const PACK_FORMAT_VERSION_IS_NOT_VALID_INTEGER: &str =
@@ -85,6 +93,10 @@ impl PackMeta {
 		} else {
 			serde_json::from_reader(meta_file)
 		}?;
+
+		let expected_game_version_range;
+		let game_version_range;
+		let resource_filter_section;
 
 		match &meta {
 			Value::Object(root_object) => {
@@ -113,7 +125,7 @@ impl PackMeta {
 									})?;
 
 								// The least valid pack format version for resource packs
-								// is 1, and for data packs 4. Lesser values are effectively
+								// is 1, and for data packs 4. Smaller values are effectively
 								// reserved and should not be used
 								let initial_pack_format_version = match pack_type {
 									PackType::ResourcePack => 1,
@@ -158,7 +170,39 @@ impl PackMeta {
 							"The pack key value is not a JSON object"
 						))
 					}
-				}
+				};
+
+				// Get the appropriate game version range according to the metadata we've just read
+				expected_game_version_range =
+					possible_game_version_range(pack_type, pack_format_version);
+				game_version_range = match target_game_version {
+					Some(target_game_version) => {
+						if expected_game_version_range.contains(&target_game_version) {
+							// The specified game version is plausible, so narrow the range
+							Ok((target_game_version..=target_game_version).into())
+						} else {
+							Err(PackMetaError::InvalidGameVersion {
+								actual_game_version: target_game_version,
+								expected_game_version_range
+							})
+						}
+					}
+					None => Ok(expected_game_version_range)
+				}?;
+
+				// Newer Minecraft versions support filtering (e.g., ignoring) files provided
+				// by packs loaded before this pack, including default packs
+				resource_filter_section = (minecraft_version!(1, 19, 0)..)
+					.intersects(&game_version_range)
+					.then(|| {
+						root_object
+							.get("filter")
+							// TODO avoid this clone. Maybe refactor deserialization to use Serde traits?
+							.cloned()
+							.map(serde_path_to_error::deserialize)
+					})
+					.flatten()
+					.transpose()?;
 			}
 			_ => {
 				return Err(PackMetaError::MalformedMeta(
@@ -167,32 +211,17 @@ impl PackMeta {
 			}
 		};
 
-		let expected_game_version_range = get_game_version_range(pack_type, pack_format_version);
-		let game_version = match game_version {
-			Some(game_version) => {
-				if expected_game_version_range.contains(&game_version) {
-					// The specified game version is plausible, so narrow the range
-					Ok((game_version..=game_version).into())
-				} else {
-					Err(PackMetaError::InvalidGameVersion {
-						actual_game_version: game_version,
-						expected_game_version_range
-					})
-				}
-			}
-			None => Ok(expected_game_version_range)
-		}?;
-
 		Ok(Self {
 			meta,
 			pack_type,
-			game_version_quirks: get_game_version_quirks(pack_type, &game_version),
-			game_version
+			game_version_quirks: get_game_version_quirks(pack_type, &game_version_range),
+			game_version_range,
+			resource_filter_section
 		})
 	}
 
-	pub fn game_version(&self) -> &(impl RangeBounds<MinecraftVersion> + Display) {
-		&self.game_version
+	pub fn game_version_range(&self) -> &(impl RangeBounds<MinecraftVersion> + Display) {
+		&self.game_version_range
 	}
 
 	// TODO update these docs
@@ -213,9 +242,27 @@ impl PackMeta {
 	pub fn pack_type(&self) -> PackType {
 		self.pack_type
 	}
+
+	pub fn is_resource_location_filtered_out(
+		&self,
+		resource_location: &ResourceLocation<'_>
+	) -> bool {
+		self.resource_filter_section.as_ref().map_or_else(
+			|| false,
+			|resource_filter_section| {
+				resource_filter_section
+					.block_filters
+					.iter()
+					.any(|filter| filter.matches_resource_location(resource_location))
+			}
+		)
+	}
 }
 
-fn get_game_version_range(pack_type: PackType, pack_format_version: i32) -> MinecraftVersionRange {
+fn possible_game_version_range(
+	pack_type: PackType,
+	pack_format_version: i32
+) -> MinecraftVersionRange {
 	match (pack_type, pack_format_version) {
 		(PackType::ResourcePack, 1) => {
 			MinecraftVersionRange::from(minecraft_version!(1, 6, 1)..minecraft_version!(1, 9))
