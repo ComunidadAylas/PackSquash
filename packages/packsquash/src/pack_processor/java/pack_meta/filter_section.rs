@@ -28,7 +28,7 @@ impl<'data> Deref for ResourceFilterBlockList<'data> {
 }
 
 #[derive(Deserialize, Debug, Default)]
-#[serde(try_from = "RawResourceBlockFilter<'data>")]
+#[serde(try_from = "ResourceBlockFilterObject<'data>")]
 pub struct ResourceBlockFilter<'data> {
 	namespace_regex: Option<Regex>,
 	path_regex: Option<Regex>,
@@ -38,6 +38,9 @@ pub struct ResourceBlockFilter<'data> {
 
 impl ResourceBlockFilter<'_> {
 	pub fn matches_resource_location(&self, resource_location: &ResourceLocation<'_>) -> bool {
+		// The Minecraft code builds a predicate whose truth result is the regex match result,
+		// then AND's them together. Missing regexes fall back to a tautology.
+		// See net.minecraft.server.packs.resources.ResourceFilterSection#ResourceLocationPattern
 		self.namespace_regex.as_ref().map_or_else(
 			|| true,
 			|namespace_regex| namespace_regex.is_match(resource_location.namespace())
@@ -49,17 +52,21 @@ impl ResourceBlockFilter<'_> {
 }
 
 #[derive(Deserialize, Debug)]
-struct RawResourceBlockFilter<'data> {
+struct ResourceBlockFilterObject<'data> {
 	#[serde(borrow)]
 	namespace: Option<Cow<'data, str>>,
 	#[serde(borrow)]
 	path: Option<Cow<'data, str>>
 }
 
-impl<'data> TryFrom<RawResourceBlockFilter<'data>> for ResourceBlockFilter<'data> {
+impl<'data> TryFrom<ResourceBlockFilterObject<'data>> for ResourceBlockFilter<'data> {
 	type Error = onig::Error;
 
-	fn try_from(value: RawResourceBlockFilter<'data>) -> Result<Self, Self::Error> {
+	fn try_from(value: ResourceBlockFilterObject<'data>) -> Result<Self, Self::Error> {
+		// The Minecraft code calls Pattern.compile on the regexes without any options to build
+		// the matcher predicates. See net.minecraft.util.ExtraCodecs#PATTERN and its usage by
+		// net.minecraft.server.packs.resources.ResourceFilterSection#ResourceLocationPattern
+
 		let namespace_regex = value
 			.namespace
 			.map(|namespace| {
