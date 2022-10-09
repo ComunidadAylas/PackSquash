@@ -90,7 +90,7 @@ impl PackProcessor {
 
 		status_info!(
 			DetectedPackType { pack_type },
-			game_version = log::kv::Value::capture_display(pack_meta.game_version())
+			game_version_range = log::kv::Value::capture_display(pack_meta.game_version_range())
 		);
 
 		status_info!(QuirksToWorkAround {

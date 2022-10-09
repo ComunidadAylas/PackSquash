@@ -29,9 +29,9 @@ impl Display for BlockStatePropertyType {
 		match self {
 			Self::Enum { values } => {
 				if values.is_empty() {
-					f.write_str("enum with no values")?;
+					f.write_str("enum of no values")?;
 				} else {
-					f.write_str("enum and possible values: ")?;
+					f.write_str("enum of: ")?;
 					values.iter().try_fold(true, |is_first, value| {
 						if !is_first {
 							f.write_str(", ")?;
