@@ -29,9 +29,6 @@ jobs:
       - name: 📥 Checkout source
         uses: actions/checkout@v3
 
-      - name: 🧰 Setup mold as the default linker
-        uses: rui314/setup-mold@v1
-
       - name: 🧰 Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -129,16 +126,11 @@ jobs:
         run: |
           apt-get update
           # curl is required by rustup.
-          # sudo, wget and jq are required by the setup-mold action.
           # markdown and html2text are required to generate the Debian package only.
           # The last line contains packages necessary for appimage-builder only
           apt-get install -yq build-essential git curl \
-                              sudo wget jq \
                               markdown html2text \
                               python3-pip file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools
-
-      - name: 🧰 Setup mold as the default linker
-        uses: rui314/setup-mold@v1
 
       - name: 📥 Checkout source
         uses: actions/checkout@v3
