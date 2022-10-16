@@ -119,7 +119,7 @@ jobs:
 
     steps:
       - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@v1
+        uses: Swatinem/rust-cache@v2
 
       - name: 🧰 Install toolchain
         if: matrix.runner == 'ubuntu-latest'
@@ -372,7 +372,7 @@ jobs:
           profile: minimal
 
       - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@v1
+        uses: Swatinem/rust-cache@v2
 
       - name: 📥 Download test packs dataset
         run: scripts/test-packs/download.sh
