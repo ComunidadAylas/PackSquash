@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1666257869564,
+  "lastUpdate": 1666287256225,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "7ebffc62294d21b1b37d02db8aac1494d1216459",
-          "message": "chore(audio_file): minor refactors",
-          "timestamp": "2022-09-03T16:06:29+02:00",
-          "tree_id": "3af78ebace1a8bde9bcc91cc821dae5c24e66673",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7ebffc62294d21b1b37d02db8aac1494d1216459"
-        },
-        "date": 1662215803569,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11914469,
-            "range": "± 133055",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 389891088,
-            "range": "± 12980917",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12173435430,
-            "range": "± 51025112",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2626908550,
-            "range": "± 68679236",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2183893747,
             "range": "± 51535942",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "aa28ea236925faef4ee44b5484c8e6119d17061d",
+          "message": "Revert \"chore(deps): update dependency charset-normalizer to v3 (#161)\"\n\nThis reverts commit 904cbb8f3336daef8cd8ab9825d8971f7571da2d.\n\nrequests 2.28.1 depends on charset-normalizer<3 and >=2, so we can't\nupdate charset-normalizer just yet.",
+          "timestamp": "2022-10-20T17:03:33Z",
+          "tree_id": "8dfa39b4f1fc6208b5dff511c87dfd6055cd191d",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/aa28ea236925faef4ee44b5484c8e6119d17061d"
+        },
+        "date": 1666287255425,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12151325,
+            "range": "± 243704",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 382789304,
+            "range": "± 3760309",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 15437620488,
+            "range": "± 55534870",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2173753107,
+            "range": "± 90919830",
             "unit": "ns/iter"
           }
         ]
