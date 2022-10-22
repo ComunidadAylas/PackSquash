@@ -16,7 +16,7 @@ use symphonia::core::io::{MediaSourceStream, MediaSourceStreamOptions, ReadOnlyS
 use symphonia::core::meta::{Limit, MetadataOptions};
 use symphonia::core::probe::Hint;
 use symphonia::core::units::Duration;
-use vorbis::{VorbisDecoder, VorbisError, OV_HOLE};
+use vorbis_rs::{VorbisDecoder, VorbisError, OV_HOLE};
 
 /// The count of frames (i.e. an audio sample for each channel) that will be accumulated
 /// in a block before being handed off to resamplers and consumers. This controls the

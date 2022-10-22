@@ -14,7 +14,7 @@ use std::num::NonZeroU32;
 use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
-use vorbis::{VorbisBitrateManagementStrategy, VorbisEncoder};
+use vorbis_rs::{VorbisBitrateManagementStrategy, VorbisEncoder};
 
 use crate::config::{AudioBitrateControlMode, AudioFileOptions, ChannelMixingOption};
 use crate::pack_file::asset_type::PackFileAssetType;
@@ -55,7 +55,7 @@ pub enum OptimizationError {
 	#[error("Symphonia decoding error: {0}")]
 	Symphonia(#[from] symphonia::core::errors::Error),
 	#[error("Vorbis error: {0}")]
-	Vorbis(#[from] vorbis::VorbisError),
+	Vorbis(#[from] vorbis_rs::VorbisError),
 	#[error("Could not find a decodable audio track. Is this file in a supported format, and its extension correct?")]
 	NoAudioTrack,
 	#[error("Unknown or invalid channel count. Minecraft only supports mono and stereo sounds")]

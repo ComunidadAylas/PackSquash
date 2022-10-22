@@ -69,6 +69,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "250f629c0161ad8107cf89319e990051fae62832fd343083bea452d93e2205fd"
 
 [[package]]
+name = "aotuv_lancer_vorbis_sys"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0b2ad0335c812628eb2bf621088cd079935bd3e03abfb8afb2ee64a6c947438"
+dependencies = [
+ "cc",
+ "ogg_next_sys",
+]
+
+[[package]]
 name = "arrayvec"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1334,12 +1344,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "ogg_sys"
-version = "0.0.1"
-source = "git+https://github.com/ComunidadAylas/vorbis-rs#c0d80f6ffe7448e63e9660f172b66180592986cc"
+name = "ogg_next_sys"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb6254669d40c0ea1ca8ca05d2b320f535e968b9a91a3ef238f7529057b4f155"
 dependencies = [
  "cc",
- "git2",
 ]
 
 [[package]]
@@ -1484,7 +1494,7 @@ dependencies = [
  "tokio-test",
  "tokio-util",
  "uuid",
- "vorbis",
+ "vorbis_rs",
  "walkdir",
  "winreg",
  "wmi",
@@ -2510,31 +2520,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
-name = "vorbis"
-version = "0.0.1"
-source = "git+https://github.com/ComunidadAylas/vorbis-rs#c0d80f6ffe7448e63e9660f172b66180592986cc"
-dependencies = [
- "errno",
- "ogg_sys",
- "thiserror",
- "tinyvec",
- "vorbis_sys",
-]
-
-[[package]]
 name = "vorbis_bitpack"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "91304fb1fb7f14c888496d859d627db36efdb63cdd6755e286e3dd637cc28997"
 
 [[package]]
-name = "vorbis_sys"
-version = "0.0.1"
-source = "git+https://github.com/ComunidadAylas/vorbis-rs#c0d80f6ffe7448e63e9660f172b66180592986cc"
+name = "vorbis_rs"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f8abe117a90371415d7a26f5831b3f7f679fef83f2670a073017951e49f90a5"
 dependencies = [
- "cc",
- "git2",
- "ogg_sys",
+ "aotuv_lancer_vorbis_sys",
+ "errno",
+ "ogg_next_sys",
+ "thiserror",
+ "tinyvec",
 ]
 
 [[package]]
