@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1666355308797,
+  "lastUpdate": 1666440821666,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "795621fe5c663992e3cf28efc1beb547b8f8ee18",
-          "message": "fix(deps): update rust crate wmi to 0.11.2 (#152)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
-          "timestamp": "2022-09-03T18:58:01+02:00",
-          "tree_id": "82353cfdefda089d106d3032cf19b050df3878e4",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/795621fe5c663992e3cf28efc1beb547b8f8ee18"
-        },
-        "date": 1662226194882,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13862688,
-            "range": "± 936642",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 457320462,
-            "range": "± 18945295",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12118397733,
-            "range": "± 164540358",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2942486858,
-            "range": "± 75452749",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2310403661,
             "range": "± 72821778",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "1345806f02cc539bc90935ec17c8f59e3bab5ff9",
+          "message": "chore: use our recently published vorbis_rs crate\n\nOur custom FFI bindings for the patched Vorbis encoder were polished and\npublished to crates.io, so we don't need to declare them as a git\ndependency any longer.",
+          "timestamp": "2022-10-22T11:32:28Z",
+          "tree_id": "9f3389fd05136277786c90c3ffb9b813c9e27f0e",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/1345806f02cc539bc90935ec17c8f59e3bab5ff9"
+        },
+        "date": 1666440820443,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 14612282,
+            "range": "± 919100",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 467098938,
+            "range": "± 4684661",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 18273741866,
+            "range": "± 178208076",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2708793088,
+            "range": "± 28649716",
             "unit": "ns/iter"
           }
         ]
