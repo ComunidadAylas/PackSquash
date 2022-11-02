@@ -13,12 +13,12 @@ use thiserror::Error;
 use aes::Aes128;
 use ahash::AHashMap;
 use once_cell::sync::Lazy;
+use packsquash_options::PercentageInteger;
 use parking_lot::Mutex;
 use tinyvec::{tiny_vec, TinyVec};
 use zopfli::Format;
 
 use crate::{
-	config::PercentageInteger,
 	scratch_file::{ScratchFile, ScratchFilesBudget},
 	util::crc32_hashing_read::Crc32HashingRead,
 	RelativePath

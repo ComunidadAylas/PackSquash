@@ -1,13 +1,13 @@
 use super::pack_meta::PackMeta;
 use super::resource_pack_processor::ResourcePackProcessor;
 use super::{PackError, PackType};
-use crate::config::{MinecraftQuirk, SquashOptions, ZipSpecConformanceLevel};
 use crate::scratch_file::ScratchFilesBudget;
 use crate::squash_zip;
 use crate::squash_zip::SquashZipSettings;
 use crate::squashed_pack_state::SquashedPackState;
 use crate::vfs::{os_fs::OsFilesystem, VirtualFileSystem, VirtualFileSystemType};
 use itertools::Itertools;
+use packsquash_options::{MinecraftQuirk, SquashOptions, ZipSpecConformanceLevel};
 use rayon::ThreadPoolBuilder;
 use std::fs::File;
 use std::io::{Read, Seek};

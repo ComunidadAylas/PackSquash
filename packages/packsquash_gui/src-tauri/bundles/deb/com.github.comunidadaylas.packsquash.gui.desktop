@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=PackSquash (GUI)
+Icon=packsquash
+Comment=The Minecraft: Java Edition resource and data pack optimizer.
+Comment[es]=El optimizador de paquetes de datos y recursos de Minecraft: Java Edition.
+TryExec=packsquash-gui
+Exec=packsquash-gui
+Terminal=false
+Keywords=minecraft;resource;data;pack;
+Categories=Utility;Archiving;Compression;

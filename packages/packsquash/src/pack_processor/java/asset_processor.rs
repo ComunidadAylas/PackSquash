@@ -1,10 +1,10 @@
 use self::blockstate_asset_processor::BlockStateAssetProcessor;
-use crate::config::{self, FileOptionsMap, GlobalOptions};
 use crate::pack_processor::java::pack_meta::PackMeta;
 use crate::squashed_pack_state::SquashedPackState;
 use crate::vfs::VirtualFileSystem;
 use enum_map::{enum_map, Enum, EnumMap};
 use globset::Glob;
+use packsquash_options::{FileOptionsMap, GlobalOptions};
 use patricia_tree::PatriciaSet;
 use std::io::{Read, Seek};
 use strum::Display;
@@ -71,5 +71,5 @@ macro_rules! get_asset_processor {
 /// accidental misuse, it is possible to get string slices that live indefinitely by leaking a heap
 /// allocation.
 fn compile_hardcoded_pack_file_glob_pattern(glob_pattern: &'static str) -> Glob {
-	config::compile_pack_file_glob_pattern(glob_pattern).unwrap()
+	packsquash_options::compile_pack_file_glob_pattern(glob_pattern).unwrap()
 }

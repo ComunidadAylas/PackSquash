@@ -221,3 +221,6 @@ $RECYCLE.BIN/
 # Manual one-off tests (see scripts/manual_packsquash_test.sh)
 pack.zip
 /test_pack/
+
+# Automatically generated on packsquash_gui build
+/packages/packsquash_gui/src/data/optionsSchema.json

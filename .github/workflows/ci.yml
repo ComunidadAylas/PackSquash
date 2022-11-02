@@ -43,6 +43,9 @@ jobs:
       - name: 🔍 Cargo deny check
         uses: EmbarkStudios/cargo-deny-action@v1
 
+      - name: 🔍 Check PackSquash Linux desktop entries correctness
+        run: desktop-file-validate **/*.desktop
+
       - name: 🔍 Check Rust source code format
         run: cargo fmt --all --check
 
@@ -174,7 +177,7 @@ jobs:
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}

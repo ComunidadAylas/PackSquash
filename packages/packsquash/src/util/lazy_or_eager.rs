@@ -6,7 +6,7 @@ pub enum LazyOrEager<'lazy, T, F: FnOnce() -> T> {
 	Eager(T)
 }
 
-pub impl<T, F: FnOnce() -> T> Deref for LazyOrEager<'_, T, F> {
+impl<T, F: FnOnce() -> T> Deref for LazyOrEager<'_, T, F> {
 	type Target = T;
 
 	fn deref(&self) -> &Self::Target {

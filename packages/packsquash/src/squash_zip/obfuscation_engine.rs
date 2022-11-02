@@ -17,12 +17,13 @@ use std::{
 };
 
 use const_random::const_random;
+use packsquash_options::PercentageInteger;
 use rand_xoshiro::{
 	rand_core::{RngCore, SeedableRng},
 	Xoshiro128Plus
 };
 
-use crate::{config::PercentageInteger, RelativePath};
+use crate::RelativePath;
 
 use super::{
 	zip_file_record::{

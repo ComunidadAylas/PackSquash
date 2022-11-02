@@ -1,0 +1,34 @@
+[package]
+name = "packsquash_options"
+description = "Options files and configuration data structures for PackSquash"
+version = "0.3.1"
+authors = ["Alejandro \"AlexTMjugador\" González"]
+repository = "https://github.com/ComunidadAylas/PackSquash"
+license = "AGPL-3.0-or-later"
+readme = "../../README.md"
+publish = false
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0.145", features = ["derive"] }
+serde_with = "2.0.1"
+schemars = { version = "0.8.11", default-features = false, features = ["derive", "enumset"] }
+
+sysinfo = { version = "0.26.4", default-features = false }
+
+const-default = { version = "1.0.0", features = ["derive"] }
+
+ahash = { version = "0.8.0", features = ["serde"] }
+enumset = { version = "1.0.11", features = ["serde"] }
+globset = { version = "0.4.9", default-features = false }
+strum = { version = "0.24.1", features = ["derive"] }
+
+[features]
+# Support all kinds of files added by modifications by default
+default = ["mod-support"]
+
+# This feature will include support for all the mods that PackSquash will ever support
+mod-support = ["optifine-support", "mtr3-support"]
+
+optifine-support = []
+mtr3-support = []

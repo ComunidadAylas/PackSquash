@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization Culture="es-ES" xmlns="http://schemas.microsoft.com/wix/2006/localization">
+  <String Id="LaunchApp">Abrir PackSquash</String>
+  <String Id="AppShortcutDescription">Abrir PackSquash</String>
+  <String Id="InstallAppFeatureTitle">PackSquash</String>
+  <String Id="InstallAppFeatureDescription">Instala PackSquash</String>
+  <String Id="InstallShortcutsFeatureTitle">Accesos directos</String>
+  <String Id="InstallShortcutsFeatureDescription">Crea accesos directos a PackSquash</String>
+  <String Id="UninstallShortcutName">Desinstalar PackSquash</String>
+  <String Id="UninstallShortcutDescription">Desinstala PackSquash</String>
+</WixLocalization>

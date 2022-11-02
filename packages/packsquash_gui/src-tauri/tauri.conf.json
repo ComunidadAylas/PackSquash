@@ -1,0 +1,137 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/tauri-v1.1.1/tooling/cli/schema.json",
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev",
+    "devPath": "http://localhost:3000"
+  },
+  "package": {
+    "productName": "PackSquash",
+    "version": "../package.json"
+  },
+  "tauri": {
+    "allowlist": {
+      "os": {
+        "all": true
+      },
+      "shell": {
+        "open": "^https://packsquash.page.link/.*|^/.+|^[A-Za-z]:.+|^\\.+",
+        "execute": true,
+        "scope": [
+          {
+            "name": "dbus-send",
+            "cmd": "dbus-send",
+            "args": [
+              "--dest=org.freedesktop.FileManager1",
+              "--type=method_call",
+              "/org/freedesktop/FileManager1",
+              "org.freedesktop.FileManager1.ShowItems",
+              {
+                "validator": "array:string:[^,]+"
+              },
+              {
+                "validator": "string:.*"
+              }
+            ]
+          },
+          {
+            "name": "explorer",
+            "cmd": "explorer",
+            "args": [
+              {
+                "validator": "/select,\".*\""
+              }
+            ]
+          },
+          {
+            "name": "open",
+            "cmd": "open",
+            "args": [
+              "-R",
+              {
+                "validator": ".*"
+              }
+            ]
+          }
+        ]
+      },
+      "fs": {
+        "readFile": true
+      },
+      "clipboard": {
+        "writeText": true
+      },
+      "window": {
+        "setTitle": true,
+        "requestUserAttention": true
+      },
+      "dialog": {
+        "open": true,
+        "save": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": [
+        "updater",
+        "msi",
+        "dmg"
+      ],
+      "identifier": "com.github.comunidadaylas.packsquash.gui",
+      "shortDescription": "The Minecraft: Java Edition resource and data pack optimizer",
+      "category": "Utility",
+      "copyright": "PackSquash developers",
+      "icon": [
+        "bundles/icons/256x256.png",
+        "bundles/icons/icon.icns",
+        "bundles/icons/icon.ico"
+      ],
+      "macOS": {
+        "license": "../../../LICENSE"
+      },
+      "windows": {
+        "wix": {
+          "license": "../../../LICENSE",
+          "template": "bundles/wix/main.wxs",
+          "language": {
+            "en-US": {
+              "localePath": "bundles/wix/locales/en-US.xml"
+            },
+            "es-ES": {
+              "localePath": "bundles/wix/locales/es-ES.xml"
+            }
+          }
+        },
+        "webviewInstallMode": {
+          "type": "embedBootstrapper"
+        }
+      }
+    },
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval'"
+    },
+    "updater": {
+      "active": true,
+      "dialog": false,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ4NTFGMzlEQzE3NjJGQjMKUldTekwzYkJuZk5SU002VWpENjVoSHI0Q3RzMEVzT0xzbjluTXlMYTl2MVRaTG5ubnZNSGx6TloK",
+      "endpoints": [
+        "https://packsquash.page.link/Latest-GUI-app-update-manifest"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    },
+    "windows": [
+      {
+        "title": "PackSquash",
+        "label": "main",
+        "width": 640,
+        "height": 480,
+        "minWidth": 240,
+        "minHeight": 320,
+        "resizable": true,
+        "decorations": true
+      }
+    ]
+  }
+}

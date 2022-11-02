@@ -1,0 +1,50 @@
+[package]
+name = "packsquash_gui"
+description = "Minecraft resource and data pack optimizer (GUI)"
+version = "0.4.0"
+authors = ["Alejandro \"AlexTMjugador\" González"]
+repository = "https://github.com/ComunidadAylas/PackSquash"
+license = "AGPL-3.0-or-later"
+readme = "../../../README.md"
+publish = false
+edition = "2021"
+
+[dependencies]
+packsquash = { path = "../../packsquash", version = "0.3.1" }
+packsquash_options = { path = "../../packsquash_options", version = "0.3.1" }
+
+tauri = { version = "1.1.1", features = ["clipboard-write-text", "dialog-open", "dialog-save", "fs-read-file", "os-all", "shell-execute", "shell-open", "updater", "window-request-user-attention", "window-set-title"] }
+tauri-plugin-store = { git = "https://github.com/tauri-apps/tauri-plugin-store", rev = "4326f754" }
+
+log = "0.4.17"
+path-absolutize = "3.0.14"
+
+[build-dependencies]
+tauri-build = { version = "1.1.1", features = [] }
+
+[features]
+# Enable Tauri production mode by default.
+# This feature is managed by the Tauri CLI. On development mode,
+# the crate is run with default features disabled
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+# Use cargo deb instead of the Tauri deb bundler because it is much more flexible.
+# Tauri deb bundler source: https://github.com/tauri-apps/tauri/blob/62ce02f6b5e95b1bb9682cdce7e678350ad666d1/tooling/bundler/src/bundle/linux/debian.rs
+[package.metadata.deb]
+name = "packsquash-gui"
+maintainer = "Alejandro González <AlexTMjugador@users.noreply.github.com>"
+copyright = "PackSquash developers"
+license-file = ["../../../LICENSE", "0"]
+extended-description-file = "target/debian/extended_package_description.txt"
+suggests = "packsquash"
+assets = [
+    ["target/release/packsquash_gui", "usr/bin/packsquash-gui", "755"],
+    ["../../../README.md", "usr/share/doc/packsquash-gui/README.md", "644"],
+    ["bundles/icons/256x256.png", "usr/share/icons/hicolor/256x256/apps/packsquash.png", "644"],
+    ["bundles/deb/com.github.comunidadaylas.packsquash.gui.desktop", "usr/share/applications/", "644"]
+]
+section = "utils"
+# For each release with the same version number (shouldn't be too many),
+# increment this, and change APT repo action
+revision = "0"

@@ -1,6 +1,5 @@
 [workspace]
-members = ["packages/*"]
-resolver = "2"
+members = ["packages/packsquash", "packages/packsquash_cli", "packages/packsquash_gui/src-tauri", "packages/packsquash_options"]
 
 [patch.crates-io]
 # Use a newer commit of oxipng that has a PR that adds a more performant raw image API merged.

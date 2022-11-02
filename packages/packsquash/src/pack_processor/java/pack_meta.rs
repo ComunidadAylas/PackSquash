@@ -7,15 +7,16 @@ use std::ops::RangeBounds;
 
 use enumset::EnumSet;
 use json_comments::StripComments;
+use packsquash_options::{
+	minecraft_version, MinecraftQuirk, MinecraftVersion, MinecraftVersionRange
+};
 use serde_json::Value;
 use strum::IntoEnumIterator;
 use thiserror::Error;
 
-use crate::config::MinecraftQuirk;
 use crate::java::pack_meta::filter_section::ResourceFilterSection;
 use crate::java::resource_location::ResourceLocation;
 use crate::java::PackType;
-use crate::minecraft_version::{MinecraftVersion, MinecraftVersionRange};
 use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
 use crate::util::strip_utf8_bom::StripUtf8BomExt;
 use crate::vfs::VirtualFileSystem;
