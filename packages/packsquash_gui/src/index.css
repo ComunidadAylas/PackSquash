@@ -1,0 +1,160 @@
+@import "tippy.js/dist/tippy.css";
+@import "tippy.js/animations/scale-subtle.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-squashbrown-900: 242 176 53;
+  }
+
+  /*
+   * Hide the shadow user agent summary marker element, and convert it to an explicit
+   * pseudo-element. This works around some browsers (e.g., Firefox) deciding to remove
+   * the marker depending if its calculated display value is not list-item. See:
+   * https://bugzilla.mozilla.org/show_bug.cgi?id=1270163
+   * https://bugzilla.mozilla.org/show_bug.cgi?id=1258657
+   */
+  summary::marker,
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::before {
+    content: "";
+    display: list-item;
+    list-style: disclosure-closed inside;
+  }
+  details[open] summary::before {
+    list-style-type: disclosure-open;
+  }
+
+  /* Make <input> look more consistent across browsers and platforms */
+  input {
+    appearance: none;
+    @apply bg-form-control-background drop-shadow-md invalid:outline-dashed invalid:outline-2 invalid:outline-[red];
+  }
+  input::placeholder {
+    @apply text-form-control-placeholder-color;
+  }
+
+  /* Custom checkbox */
+  input[type="checkbox"] {
+    width: 1.15em;
+    height: 1.15em;
+    border: 0.15em solid currentColor;
+    @apply flex items-center justify-center bg-transparent text-packblue-900;
+  }
+  input[type="checkbox"]::before {
+    width: 0.65em;
+    height: 0.65em;
+    @apply bg-packblue-900;
+  }
+  input[type="checkbox"]:checked::before {
+    content: "";
+  }
+
+  /* Make textual input height consistent with our custom selection input height */
+  input[type="text"],
+  input[type="number"] {
+    height: calc(1em + 2 * 0.25rem);
+    @apply box-content p-1;
+  }
+
+  /* Make progress bar filled part color consistent */
+  ::-webkit-progress-value {
+    @apply bg-packteal-900;
+  }
+  ::-moz-progress-bar {
+    @apply bg-packteal-900;
+  }
+
+  /* Make progress bar unfilled part color consistent */
+  ::-webkit-progress-bar {
+    @apply bg-packteal-100;
+  }
+  progress {
+    @apply bg-packteal-100;
+  }
+}
+
+@layer components {
+  ol.progress-breadcrumb {
+    counter-reset: step;
+  }
+
+  ol.progress-breadcrumb li::before {
+    display: flex;
+    content: counter(step);
+    counter-increment: step;
+    width: 4ch;
+    height: 4ch;
+    border-radius: 2ch;
+    margin: 0 auto 0 auto;
+    flex-direction: column;
+    justify-content: center;
+    @apply bg-packteal-100 text-zinc-50;
+  }
+
+  ol.progress-breadcrumb li.active::before {
+    display: flex;
+    content: counter(step);
+    counter-increment: step;
+    width: 4ch;
+    height: 4ch;
+    border-radius: 2ch;
+    margin: 0 auto 0 auto;
+    flex-direction: column;
+    justify-content: center;
+    @apply bg-packteal-900;
+  }
+
+  ol.progress-breadcrumb li.active.last-active {
+    @apply font-bold;
+  }
+
+  ol.progress-breadcrumb li:first-child::after {
+    content: none;
+  }
+
+  ol.progress-breadcrumb li::after {
+    content: "";
+    width: 100%;
+    height: 0.33ch;
+    position: absolute;
+    top: calc(2ch - 0.33ch / 2);
+    left: -50%;
+    z-index: -1;
+    @apply bg-packteal-100;
+  }
+
+  ol.progress-breadcrumb li.active::after {
+    @apply bg-packteal-600;
+  }
+
+  .retro-color-scheme {
+    animation: 10s linear infinite retro-color-scheme-animation;
+  }
+}
+
+@keyframes credits-roll {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes retro-color-scheme-animation {
+  0% {
+    filter: sepia(100%) hue-rotate(40deg);
+  }
+  50% {
+    filter: sepia(100%) hue-rotate(50deg);
+  }
+  100% {
+    filter: sepia(100%) hue-rotate(40deg);
+  }
+}

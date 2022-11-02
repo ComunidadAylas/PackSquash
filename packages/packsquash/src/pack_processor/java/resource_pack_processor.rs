@@ -1,9 +1,9 @@
 use super::{pack_meta::PackMeta, PackError};
-use crate::config::{FileOptionsMap, GlobalOptions};
 use crate::pack_processor::java::asset_processor::create_asset_processors;
 use crate::squashed_pack_state::SquashedPackState;
 use crate::vfs::VirtualFileSystem;
 use itertools::Itertools;
+use packsquash_options::{FileOptionsMap, GlobalOptions};
 use patricia_tree::PatriciaSet;
 use std::io::{Read, Seek};
 

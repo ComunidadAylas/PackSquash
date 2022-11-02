@@ -3,9 +3,6 @@ use self::blockstate::{
 };
 use self::vanilla_blockstate_property_list::BlockStatePropertyType;
 use super::compile_hardcoded_pack_file_glob_pattern;
-use crate::config::{
-	FileOptions, FileOptionsMap, GlobalOptions, JsonFileOptions, MissingReferenceAction
-};
 use crate::pack_processor::java::{
 	pack_meta::PackMeta, resource_location::ResourceLocation,
 	resource_location::ResourceLocationError
@@ -25,6 +22,10 @@ use itertools::Itertools;
 use json_comments::StripComments;
 use once_cell::sync::Lazy;
 use once_cell::unsync::Lazy as UnsyncLazy;
+use packsquash_options::{
+	minecraft_version, FileOptions, FileOptionsMap, GlobalOptions, JsonFileOptions,
+	MissingReferenceAction
+};
 use patricia_tree::PatriciaSet;
 use rayon::prelude::*;
 use std::borrow::Cow;

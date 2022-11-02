@@ -56,22 +56,25 @@ status_log_macro!(warn, status_warn);
 status_log_macro!(info, status_info);
 status_log_macro!(trace, status_trace);
 
-pub mod config;
 mod util;
 mod vfs;
 
-#[macro_use]
-mod minecraft_version;
 mod pack_processor;
 mod relative_path;
 mod scratch_file;
 mod squash_zip;
 mod squashed_pack_state;
 
-use crate::config::SquashOptions;
+pub static BUILD_VERSION: &str = env!("BUILD_VERSION");
+pub static BUILD_DATE: &str = env!("BUILD_DATE");
+pub static BUILD_YEAR: &str = env!("BUILD_YEAR");
+pub static CARGO_TARGET_TRIPLE: &str = env!("CARGO_TARGET_TRIPLE");
+pub static CARGO_PROFILE: &str = env!("CARGO_PROFILE");
+
 use crate::pack_processor::java;
 use crate::squash_zip::PreviousZipParseError;
 pub use crate::vfs::VirtualFileSystemType;
+use packsquash_options::SquashOptions;
 use relative_path::RelativePath;
 use std::borrow::Cow;
 use std::fmt::{Display, Formatter};
