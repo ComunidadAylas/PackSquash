@@ -1,8 +1,8 @@
 //! This automatically generated file contains the list of block state properties for several vanilla Minecraft versions.
 
-use crate::minecraft_version::MinecraftVersion;
 use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
 use ahash::AHashMap;
+use packsquash_options::{minecraft_version, MinecraftVersion};
 use phf::phf_map;
 use std::fmt;
 use std::fmt::{Display, Formatter};

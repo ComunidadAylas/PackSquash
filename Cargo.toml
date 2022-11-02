@@ -1,5 +1,5 @@
 [workspace]
-members = ["packages/*"]
+members = ["packages/packsquash", "packages/packsquash_cli", "packages/packsquash_gui/src-tauri", "packages/packsquash_options"]
 
 [patch.crates-io]
 # Use our fork of oxipng that removes a dependency and an unneeded sanity check

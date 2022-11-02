@@ -1,0 +1,103 @@
+# Reference:
+# https://appimage-builder.readthedocs.io/en/latest/reference/version_1.html
+
+version: 1
+
+script:
+  # Clean up directories created by the recipe
+  - rm "$TARGET_APPDIR" -rf || true
+  - rm "$REPO_DIR" -rf || true
+  # Create a temporary Debian repository folder to put the generated Debian
+  # packages on, so we can install it like any other packages
+  - mkdir -p "$REPO_DIR"
+  - stat target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_${TARGET_APPIMAGE_APT_ARCH}.deb >/dev/null 2>&1 || packages/packsquash_cli/bundles/deb/build.sh
+  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_${TARGET_APPIMAGE_APT_ARCH}.deb "$REPO_DIR"
+  - command -v apt-ftparchive >/dev/null 2>&1 || { apt-get update && apt-get install -yq apt-utils; }
+  - CWD="$PWD" && cd "$REPO_DIR" && apt-ftparchive packages . > Packages && cd "$CWD"
+  # The following two commands are a workaround for the local APT package not
+  # being saved to the archives directory, as expected by appimage-builder
+  - mkdir -p appimage-build/apt/archives
+  - cp -f target/"${CARGO_BUILD_TARGET:-.}"/debian/packsquash_*_${TARGET_APPIMAGE_APT_ARCH}.deb appimage-build/apt/archives
+  # Copy PackSquash icon asset, like linuxdeploy would do
+  - mkdir -p "$TARGET_APPDIR"/usr/share/icons/hicolor/256x256/apps
+  - cp -f icons/packsquash_icon_256x256.png "$TARGET_APPDIR"/usr/share/icons/hicolor/256x256/apps/packsquash.png
+  # Copy PackSquash desktop definition file. app_info below is used to
+  # autogenerate a desktop file if needed, but if there is one present
+  # appimage-builder uses it
+  - mkdir -p "$TARGET_APPDIR"/usr/share/applications
+  - cp -f packages/packsquash_cli/bundles/appimage/com.github.comunidadaylas.packsquash.desktop "$TARGET_APPDIR"/usr/share/applications
+
+AppDir:
+  app_info:
+    id: com.github.comunidadaylas.packsquash
+    name: PackSquash
+    icon: packsquash
+    version: !ENV ${VERSION}
+    exec: usr/bin/packsquash
+
+  apt:
+    arch: !ENV ${TARGET_APPIMAGE_APT_ARCH}
+    sources:
+      # The key_url was hacked together from the recipe documentation examples
+      # and the errors that showed up when it was absent. Maybe there is a
+      # better way to get it?
+      - sourceline: !ENV 'deb [arch=${TARGET_APPIMAGE_APT_ARCH}] https://deb.debian.org/debian/ bullseye main'
+        key_url: http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x648ACFD622F3D138
+      - sourceline: !ENV 'deb [trusted=yes] file:${REPO_DIR}/ ./'
+
+    # Including our whole package is pretty elegant, isn't it? :)
+    include:
+      - packsquash
+
+  files:
+    exclude:
+      # Development and documentation files
+      - usr/include
+      - usr/share/bug
+      - usr/share/man
+      - usr/share/doc
+      - usr/share/doc-base
+      - usr/share/lintian
+      - usr/share/sounds
+      # root utility programs
+      - usr/sbin
+
+  test:
+    # Test on distros representative of the most common families
+    debian-stretch:
+      image: debian:stretch-slim
+      command: ./AppRun --version
+    ubuntu-bionic:
+      image: ubuntu:bionic
+      command: ./AppRun --version
+    fedora:
+      image: fedora:34
+      command: ./AppRun --version
+    arch:
+      image: archlinux:base
+      command: ./AppRun --version
+    suse:
+      image: opensuse/leap:15
+      command: ./AppRun --version
+    # This test is commented out because we need a R/W Docker volume to copy some
+    # glibc files around, but it is R/O. Upstream issue:
+    # https://github.com/AppImageCrafters/appimage-builder/issues/214
+    #alpine:
+    #  # The upstream alpine:3 would work if it had the shadow package,
+    #  # because the test preparation commands run useradd. Therefore,
+    #  # use a custom image that's like alpine:3 but with that package
+    #  image: comunidadaylas/alpine-appimage-test:latest
+    #  # Recent appimage-builder versions, from v1.0.0-alpha.1 onwards,
+    #  # put the glibc interpreter and its files on runtime/compat. This
+    #  # is selected at runtime if the system glibc version is too old
+    #  # by the AppRun executable. However, we can't execute the AppRun
+    #  # at all on Alpine, so just copy the contents of runtime/compat
+    #  # of the AppImage to the root, so embedded AppRun can run as
+    #  # usual. More information:
+    #  # https://github.com/AppImageCrafters/appimage-builder/commit/a44066ce4783dfb8093727c48b0a3a6b74fcc6d8
+    #  # https://github.com/AppImageCrafters/AppRun/blob/master/docs/USAGE.md#runtimes-and-libc-deployment
+    #  command: sh -c 'cp -R runtime/compat/* . && ./AppRun --version'
+
+AppImage:
+  arch: !ENV ${TARGET_APPIMAGE_ARCH}
+  update-information: !ENV 'gh-releases-zsync|ComunidadAylas|PackSquash|latest|PackSquash-*${TARGET_APPIMAGE_ARCH}.AppImage.zsync'

@@ -1,9 +1,9 @@
 //! This automatically generated file contains the list of block states for several vanilla Minecraft versions.
 
-use crate::minecraft_version::MinecraftVersion;
 use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
 use crate::RelativePath;
 use ahash::AHashSet;
+use packsquash_options::{minecraft_version, MinecraftVersion};
 use std::ops::RangeBounds;
 
 static BLOCKSTATES_1_8_TO_1_9_EXCLUSIVE: [RelativePath<'static>; 340] = [

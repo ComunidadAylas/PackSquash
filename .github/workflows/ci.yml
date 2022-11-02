@@ -61,7 +61,7 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v1
 
       - name: 🔍 Check PackSquash Linux desktop entries correctness
-        run: desktop-file-validate common/assets/*.desktop
+        run: desktop-file-validate **/*.desktop
 
       - name: 🔍 Check Rust source code format
         run: cargo fmt --all --check
@@ -161,20 +161,6 @@ jobs:
           crate: cargo-deb
           version: 1.39.3
 
-      - name: 🧰 Install appimage-builder
-        if: matrix.runner == 'ubuntu-latest'
-        run: |
-          pip install appimage-builder==1.1.0
-          curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
-          chmod ugo+x /opt/appimagetool
-          # Workaround from https://github.com/AppImageCrafters/appimage-builder/blob/v1.0.0-alpha.3/Dockerfile#L11-L15
-          # to extract the appimagetool AppImage within a container
-          cd /opt
-          sed -i 's|AI\x02|\x00\x00\x00|' appimagetool
-          /opt/appimagetool --appimage-extract > /dev/null
-          mv /opt/squashfs-root /opt/appimagetool.AppDir
-          ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
-
       # Our build container is minimal, and it doesn't contain any systemd package.
       # systemd is responsible for setting up the machine ID files we use for
       # testing the system ID retrieval code, so copy a dummy one
@@ -191,15 +177,11 @@ jobs:
 
       - name: 🔨 Generate CLI Debian package
         if: matrix.runner == 'ubuntu-latest'
-        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
       - name: 🔨 Generate CLI AppImage
         if: matrix.runner == 'ubuntu-latest'
-        env:
-          APPDIR: AppDir
-          REPO_DIR: /pkgs
-        run: VERSION="$(git describe --tags --dirty=-custom --always)"
-          appimage-builder --recipe appimage/recipe.yml --skip-test
+        run: packages/packsquash_cli/bundles/appimage/build.sh
 
       - name: 📤 Upload CLI binary
         uses: actions/upload-artifact@v3
@@ -219,14 +201,14 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI AppImage (${{ matrix.appimage-arch }})
-          path: PackSquash-*-${{ matrix.appimage-arch }}.AppImage
+          path: target/appimage/PackSquash-*-${{ matrix.appimage-arch }}.AppImage
 
       - name: 📤 Upload CLI AppImage update diff
         if: matrix.runner == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI AppImage zsync (${{ matrix.appimage-arch }})
-          path: PackSquash-*-${{ matrix.appimage-arch }}.AppImage.zsync
+          path: target/appimage/PackSquash-*-${{ matrix.appimage-arch }}.AppImage.zsync
 
   build-universal-macos-binaries:
 
