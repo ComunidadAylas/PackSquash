@@ -11,7 +11,6 @@ import PackSquashLogo from "../components/PackSquashLogo";
 import PrimaryActionNavigateButton from "../components/PrimaryActionNavigateButton";
 import FluidTitleHeader from "../components/FluidTitleHeader";
 import FluidSubtitleHeader from "../components/FluidSubtitleHeader";
-import UpdateDialog from "../components/UpdateDialog";
 
 export default () => {
   const [l10n] = useI18n();
