@@ -1,0 +1,3 @@
+files:
+  - source: /packages/packsquash_gui/src/assets/i18n/en/*.ftl
+    translation: /packages/packsquash_gui/src/assets/i18n/%two_letters_code%/%original_file_name%
