@@ -16,7 +16,6 @@ export default () => {
     <button
       class="h-12 w-12 rounded-full drop-shadow-md hover:scale-110"
       onClick={() => open("https://packsquash.page.link/Ko-fi")}
-      title={openKofiTooltipText()}
       use:tippy={{
         hidden: true,
         props: {

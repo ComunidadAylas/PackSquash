@@ -18,7 +18,6 @@ export default () => {
       onClick={() =>
         open("https://packsquash.page.link/Main-project-repository")
       }
-      title={openGitHubRepoTooltipText()}
       use:tippy={{
         hidden: true,
         props: {
