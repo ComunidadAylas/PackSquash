@@ -37,7 +37,7 @@ crash-screen-error-details-text = A interface de usuario encontrou un problema i
 crash-screen-continue-action = Continuar
 
 pack-selection-screen-title = Escolla de paquete
-pack-selection-screen-caption = ¡Comecemos!
+pack-selection-screen-caption = Comecemos!
 pack-selection-screen-caption-text = { -app-name } precisa saber qué paquete optimizar.
 
     Escólleo arrastrando o seu directorio aquí, ou facendo clic no botón de abaixo.
@@ -98,7 +98,7 @@ optimization-success-screen-copy-warnings-action = Copiar avisos no portapapeis
 optimization-success-screen-warnings-copied = Avisos copiados no portapapeis
 optimization-success-screen-open-generated-zip-action = Abrir ZIP xerado no explorador de ficheiros
 optimization-success-screen-start-over-action = Volver a comezar
-optimization-success-screen-start-over-toast-text = ¡Grazas por empregar { -app-name }! Se che gustou, podes considerar participar na súa comunidade ou apoiar o proxecto.
+optimization-success-screen-start-over-toast-text = Grazas por empregar { -app-name }! Se che gustou, podes considerar participar na súa comunidade ou apoiar o proxecto.
 
 optimization-failure-screen-title = Erro de optimización
 optimization-failure-screen-header = Ups, algo está mal co paquete!
