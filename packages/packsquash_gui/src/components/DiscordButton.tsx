@@ -18,7 +18,6 @@ export default () => {
       onClick={() =>
         open("https://packsquash.page.link/Discord-server-invite-link")
       }
-      title={openDiscordTooltipText()}
       use:tippy={{
         hidden: true,
         props: {
