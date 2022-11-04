@@ -33,7 +33,7 @@ crash-screen-error-details-text = A interface de usuario encontrou un problema i
 
     Esto non debería pasar. Reporta esta incidencia e reinicia { -app-name } se segues tendo problemas.
 
-    Deseguido móstrase unha descripción técnica do erro:
+    Deseguido móstrase unha descrición técnica do erro:
 crash-screen-continue-action = Continuar
 
 pack-selection-screen-title = Escolla de paquete
@@ -51,13 +51,13 @@ configuration-screen-default-options-action = Usar opcións predeterminadas
 configuration-screen-default-options-action-description = O punto de partida recomendado para paquetes vanilla se non tes necesidades específicas. { -app-name } funcionará ben na maioría de casos.
 configuration-screen-custom-options-action = Definir e usar opcións personalizadas
 configuration-screen-custom-options-action-description = Escolle isto se precisas cambiar como funciona { -app-name }, ou se queres usar características coma o soporte de mods e protección ZIP.
-configuration-screen-invalid-custom-option-error = O valor introducido para esta opción é inválido. Para máis información acerca dos valores aceptables, revisa a súa descripción
+configuration-screen-invalid-custom-option-error = O valor introducido para esta opción é inválido. Para máis información acerca dos valores aceptables, revisa a súa descrición
 configuration-screen-invalid-custom-options-error = Polo menos unha opción ten un valor inválido. Por favor, revísaas antes de continuar
 configuration-screen-custom-options-file-action = Usar ficheiro de opcións
 configuration-screen-custom-options-file-action-description = A escolla apropiada se xa tes un ficheiro de opcións, xa sexa escrito manualmente ou xerado nunha execución anterior.
 configuration-screen-custom-options-file-parse-error = Ocorreu un erro ao ler o ficheiro de opcións. É válido?
 
-    Descripción técnica: { $errorDescription }
+    Descrición técnica: { $errorDescription }
 configuration-screen-optimize-action = Optimizar
 configuration-screen-copy-options-action = Copiar ficheiro de opcións no portapapeis
 configuration-screen-options-copied = Ficheiro de opcións copiado no portapapeis
@@ -102,13 +102,13 @@ optimization-success-screen-start-over-toast-text = Grazas por empregar { -app-n
 
 optimization-failure-screen-title = Erro de optimización
 optimization-failure-screen-header = Ups, algo está mal co paquete!
-optimization-failure-screen-caption = Deseguido móstrase unha descripción técnica do erro. Con sorte, axudarache a corrixilo:
+optimization-failure-screen-caption = Deseguido móstrase unha descrición técnica do erro. Con sorte, axudarache a corrixilo:
 optimization-failure-screen-start-over-action = { optimization-success-screen-start-over-action }
 optimization-failure-screen-try-again-action = Intentalo de novo
 optimization-failure-screen-open-online-help-action = Consultar axuda en línea
 
 update-dialog-title = Actualización dispoñible
-update-dialog-caption = É o teu día de sorte: saliu unha nova versión de { -app-name }! Queres actualizar agora?
+update-dialog-caption = É o teu día de sorte: saíu unha nova versión de { -app-name }! Queres actualizar agora?
 update-dialog-update-version = Versión: { $version }
 update-dialog-update-publication-date = Data de publicación: { DATETIME($date, dateStyle: "medium", timeStyle: "short") }
 update-dialog-update-version-notes = Notas da versión:
