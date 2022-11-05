@@ -40,7 +40,8 @@ export default () => {
     onCleanup(async () => {
       runWithOwner(componentOwner, () => {
         toast(l10n("optimization-success-screen-start-over-toast-text"), {
-          icon: <HeartStraight color="red" class="animate-pulse" />
+          icon: <HeartStraight color="red" class="animate-pulse" />,
+          position: "top-right"
         });
       });
 
