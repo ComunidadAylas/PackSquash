@@ -12,7 +12,7 @@ import { FluentBundle, FluentResource } from "@fluent/bundle";
 import { Localization } from "@fluent/dom";
 import { setSelectedLocale as persistSelectedLocale } from "../util/localeSettings";
 
-const LOCALES = ["en", "es", "gl"] as const;
+const LOCALES = ["en", "es", "ja", "gl"] as const;
 
 export type Locale = typeof LOCALES[number];
 
@@ -22,6 +22,9 @@ export const AvailableLocales: Record<Locale, LocaleInfo> = {
   },
   es: {
     friendlyName: "Español"
+  },
+  ja: {
+    friendlyName: "日本語"
   },
   gl: {
     friendlyName: "Galego"
