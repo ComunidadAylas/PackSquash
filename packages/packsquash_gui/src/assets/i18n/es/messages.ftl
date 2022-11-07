@@ -19,7 +19,7 @@ about-screen-app-user-agent = Agente de usuario:
 about-screen-app-license-text =
     Este programa es software libre: puedes redistribuirlo y/o modificarlo bajo los términos de la GNU Affero General Public License publicada por la Free Software Foundation, ya sea la versión 3 de la Licencia o, a tu elección, cualquier versión posterior.
     
-    Este programa se distribuye con la esperanza de que sea útil, pero SIN NINGUNA GARANTÍA; ni siquiera la garantía implícita de COMERCIALIZACIÓN o ADEDUCACIÓN A UN PROPÓSITO PARTICULAR. Consulta la GNU Affero General Public License para más detalles.
+    Este programa se distribuye con la esperanza de que sea útil, pero SIN NINGUNA GARANTÍA; ni siquiera la garantía implícita de COMERCIALIZACIÓN o ADECUACIÓN A UN PROPÓSITO PARTICULAR. Consulta la GNU Affero General Public License para más detalles.
 about-screen-thanks = Gracias a...
 crash-screen-title = Error inesperado
 crash-screen-header = Disculpa, ¡algo fue mal!
