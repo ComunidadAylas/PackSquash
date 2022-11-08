@@ -3792,8 +3792,7 @@ dependencies = [
 [[package]]
 name = "serde_derive"
 version = "1.0.147"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f1d362ca8fc9c3e3a7484440752472d68a6caa98f1ab81d99b5dfe517cec852"
+source = "git+https://github.com/ComunidadAylas/serde?branch=master#c000ffb8385d0906dbf95083e36462a29d91cf61"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5598,8 +5597,3 @@ dependencies = [
  "log",
  "typed-arena",
 ]
-
-[[patch.unused]]
-name = "serde_derive"
-version = "1.0.145"
-source = "git+https://github.com/ComunidadAylas/serde?branch=master#553519b9f110e0fc56229ad8444053ec032a2511"
