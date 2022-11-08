@@ -117,10 +117,24 @@ jobs:
         if: matrix.runner == 'ubuntu-latest'
         run: |
           apt-get update
-          # curl is required by rustup.
-          # markdown and html2text are required to generate the Debian package only
-          apt-get install -yq build-essential musl-tools git curl \
-                              markdown html2text
+          # curl is required by rustup and Tauri.
+          # markdown and html2text are required to generate the Debian package only.
+          # The third line contains packages necessary for appimage-builder only.
+          # The fourth line contains packages neccessary for Tauri.
+          # The fifth line contains packages necessary for build-time JSON Schema generation
+          apt-get install -yq build-essential git curl \
+                              markdown html2text \
+                              python3-pip file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools \
+                              libwebkit2gtk-4.0-dev \
+                              jq
+
+      - name: 🧰 Install toolchain
+        if: matrix.runner == 'windows-latest'
+        run: chocolatey install jq
+
+      - name: 🧰 Install toolchain
+        if: matrix.runner == 'macos-latest'
+        run: brew install jq
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: startsWith(matrix.target, 'aarch64-unknown-linux')
@@ -179,6 +193,14 @@ jobs:
         if: endsWith(matrix.target, '-linux-gnu')
         run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
+      - name: 🔨 Generate GUI Debian package
+        if: matrix.runner == 'ubuntu-latest'
+        run: packages/packsquash_gui/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+
+      - name: 🔨 Generate GUI AppImage
+        if: matrix.runner == 'ubuntu-latest'
+        run: packages/packsquash_gui/bundles/appimage/build.sh
+
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
         uses: actions/upload-artifact@v3
@@ -213,13 +235,13 @@ jobs:
           path: packsquash-aarch64
 
       - name: 🔨 Generate universal CLI binary
-        run: lipo -create -output packsquash packsquash-x64/packsquash packsquash-aarch64/packsquash
+        run: lipo -create -output packsquash_cli packsquash-x64/packsquash_cli packsquash-aarch64/packsquash_cli
 
       - name: 📤 Upload universal CLI binary
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI executable (universal-apple-darwin)
-          path: packsquash
+          path: packsquash_cli
 
   build-docker-images:
 
