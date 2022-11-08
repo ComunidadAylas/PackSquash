@@ -10,16 +10,16 @@ publish = false
 edition = "2021"
 
 [dependencies]
-serde = { version = "1.0.145", features = ["derive"] }
+serde = { version = "1.0.147", features = ["derive"] }
 serde_with = "2.0.1"
 schemars = { version = "0.8.11", default-features = false, features = ["derive", "enumset"] }
 
-sysinfo = { version = "0.26.4", default-features = false }
+sysinfo = { version = "0.26.7", default-features = false }
 
 const-default = { version = "1.0.0", features = ["derive"] }
 
-ahash = { version = "0.8.0", features = ["serde"] }
-enumset = { version = "1.0.11", features = ["serde"] }
+ahash = { version = "0.8.1", features = ["serde"] }
+enumset = { version = "1.0.12", features = ["serde"] }
 globset = { version = "0.4.9", default-features = false }
 strum = { version = "0.24.1", features = ["derive"] }
 
