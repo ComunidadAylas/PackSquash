@@ -38,7 +38,7 @@ jobs:
       - name: 🧰 Install development packages
         run: |
           sudo apt-get update
-          sudo apt-get install desktop-file-utils
+          sudo apt-get install desktop-file-utils libwebkit2gtk-4.0-dev
 
       - name: 🔍 Check workflow write permission
         id: check_write_permission
@@ -83,26 +83,26 @@ jobs:
             container: debian:bullseye-slim
             apt-arch: amd64
             appimage-arch: x86_64
-            cli-executable: packsquash
+            cli-executable: packsquash_cli
 
           - target: x86_64-pc-windows-gnu
             runner: windows-latest
-            cli-executable: packsquash.exe
+            cli-executable: packsquash_cli.exe
 
           - target: aarch64-unknown-linux-gnu
             runner: ubuntu-latest
             container: debian:bullseye-slim
             apt-arch: arm64
             appimage-arch: aarch64
-            cli-executable: packsquash
+            cli-executable: packsquash_cli
 
           - target: x86_64-apple-darwin
             runner: macos-latest
-            cli-executable: packsquash
+            cli-executable: packsquash_cli
 
           - target: aarch64-apple-darwin
             runner: macos-latest
-            cli-executable: packsquash
+            cli-executable: packsquash_cli
 
     runs-on: ${{ matrix.runner }}
 
@@ -125,12 +125,24 @@ jobs:
         if: matrix.runner == 'ubuntu-latest'
         run: |
           apt-get update
-          # curl is required by rustup.
+          # curl is required by rustup and Tauri.
           # markdown and html2text are required to generate the Debian package only.
-          # The last line contains packages necessary for appimage-builder only
+          # The third line contains packages necessary for appimage-builder only.
+          # The fourth line contains packages neccessary for Tauri.
+          # The fifth line contains packages necessary for build-time JSON Schema generation
           apt-get install -yq build-essential git curl \
                               markdown html2text \
-                              python3-pip file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools
+                              python3-pip file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools \
+                              libwebkit2gtk-4.0-dev \
+                              jq
+
+      - name: 🧰 Install toolchain
+        if: matrix.runner == 'windows-latest'
+        run: chocolatey install jq
+
+      - name: 🧰 Install toolchain
+        if: matrix.runner == 'macos-latest'
+        run: brew install jq
 
       - name: 📥 Checkout source
         uses: actions/checkout@v3
@@ -159,7 +171,7 @@ jobs:
           CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
         with:
           crate: cargo-deb
-          version: 1.39.3
+          version: 1.41.0
 
       # Our build container is minimal, and it doesn't contain any systemd package.
       # systemd is responsible for setting up the machine ID files we use for
@@ -183,7 +195,16 @@ jobs:
         if: matrix.runner == 'ubuntu-latest'
         run: packages/packsquash_cli/bundles/appimage/build.sh
 
+      - name: 🔨 Generate GUI Debian package
+        if: matrix.runner == 'ubuntu-latest'
+        run: packages/packsquash_gui/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+
+      - name: 🔨 Generate GUI AppImage
+        if: matrix.runner == 'ubuntu-latest'
+        run: packages/packsquash_gui/bundles/appimage/build.sh
+
       - name: 📤 Upload CLI binary
+        if: matrix.runner != 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
@@ -230,13 +251,13 @@ jobs:
           path: packsquash-aarch64
 
       - name: 🔨 Generate universal CLI binary
-        run: lipo -create -output packsquash packsquash-x64/packsquash packsquash-aarch64/packsquash
+        run: lipo -create -output packsquash_cli packsquash-x64/packsquash_cli packsquash-aarch64/packsquash_cli
 
       - name: 📤 Upload universal CLI binary
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI executable (universal-apple-darwin)
-          path: packsquash
+          path: packsquash_cli
 
   build-docker-images:
 
