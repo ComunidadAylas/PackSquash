@@ -31,7 +31,7 @@ tinyvec = { version = "1.6.0", features = ["alloc", "rustc_1_55", "serde"] }
 
 rayon = "1.5.3"
 parking_lot = { version = "0.12.1", features = ["hardware-lock-elision"] }
-once_cell = { version = "1.15.0", features = ["parking_lot"] }
+once_cell = { version = "1.16.0", features = ["parking_lot"] }
 
 log = { version = "0.4.17", features = ["kv_unstable"] }
 
@@ -90,7 +90,7 @@ mach2 = "0.4.1"
 
 [build-dependencies]
 git2 = { version = "0.15.0", default-features = false }
-time = { version = "0.3.15", default-features = false, features = ["std"] }
+time = { version = "0.3.17", default-features = false, features = ["std"] }
 schemars = { version = "0.8.11", default-features = false }
 serde_json = "1.0.87"
 packsquash_options = { version = "0.3.1", path = "../packsquash_options" }
