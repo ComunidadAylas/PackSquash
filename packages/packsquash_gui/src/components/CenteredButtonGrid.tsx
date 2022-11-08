@@ -5,7 +5,7 @@ export default (props: ParentProps<{ columns: number }>) => {
     <div
       class={`grid justify-center gap-3`}
       style={{
-        "grid-template-columns": `repeat(${props.columns},max-content)`
+        "grid-template-columns": `repeat(${props.columns},auto)`
       }}
     >
       {props.children}
