@@ -11,9 +11,9 @@ on:
       - published
 
 env:
-  DEBIAN_FRONTEND: noninteractive
-
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
+
+  DEBIAN_FRONTEND: noninteractive
 
 jobs:
   static-analysis:
@@ -69,8 +69,10 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: debian:bullseye-slim
+            container: node:16-bullseye-slim
+            pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: amd64
+            appimage-arch: x86_64
 
           - target: x86_64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
@@ -81,8 +83,10 @@ jobs:
           - target: aarch64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: debian:bullseye-slim
+            container: node:16-bullseye-slim
+            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
             apt-arch: arm64
+            appimage-arch: aarch64
 
           - target: aarch64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
@@ -118,6 +122,12 @@ jobs:
       # https://doc.rust-lang.org/cargo/reference/unstable.html#build-std-features
       # https://github.com/rust-lang/rust/blob/4c8bb79d9f565115637cc6da739f8389e79f3a29/library/std/Cargo.toml#L54-L79
       OPTIMIZED_RELEASE_BUILD_FLAGS: -Z build-std -Z build-std-features=panic-unwind
+
+      TARGET_APPIMAGE_ARCH: ${{ matrix.appimage-arch }}
+      TARGET_APPIMAGE_APT_ARCH: ${{ matrix.apt-arch }}
+
+      PKG_CONFIG_ALLOW_CROSS: 1
+      PKG_CONFIG_PATH: ${{ matrix.pkg-config-path }}
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
