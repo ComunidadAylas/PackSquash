@@ -50,7 +50,7 @@ jobs:
         uses: actions-rs/clippy-check@v1
         if: steps.check_write_permission.outputs.has-permission
         with:
-          args: --all-targets
+          args: --all-targets -vv
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔍 Clippy check (without annotations)
@@ -190,7 +190,7 @@ jobs:
 
       - name: ✔️ Run tests
         if: matrix.target != 'aarch64-apple-darwin'
-        run: cargo test --release -- -Z unstable-options --report-time
+        run: cargo test -vv --release -- -Z unstable-options --report-time
 
       - name: 🔨 Build with optimized standard library
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release

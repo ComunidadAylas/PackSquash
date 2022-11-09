@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::{env, fs};
 
@@ -30,8 +31,18 @@ fn generate_debloated_options_file_json_schema() {
 	)
 	.expect("jq output was not UTF-8 encoded");
 
+	let package_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+	println!(
+		"CARGO_MANIFEST_DIR: {}, {}",
+		package_dir,
+		env::current_dir()
+			.unwrap()
+			.into_os_string()
+			.into_string()
+			.unwrap()
+	);
 	fs::write(
-		"../src/data/optionsSchema.json",
+		PathBuf::from(package_dir).join("../src/data/optionsSchema.json"),
 		&debloated_options_file_json_schema
 	)
 	.expect("Could not write the PackSquash options file JSON schema");
