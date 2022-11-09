@@ -67,7 +67,9 @@ jobs:
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
             container: node:16-bullseye-slim
+            pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: amd64
+            appimage-arch: x86_64
 
           - target: x86_64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
@@ -79,7 +81,9 @@ jobs:
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
             container: node:16-bullseye-slim
+            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
             apt-arch: arm64
+            appimage-arch: aarch64
 
           - target: aarch64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
@@ -108,6 +112,10 @@ jobs:
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
       RUSTUP_TOOLCHAIN: nightly-${{ matrix.host-target }}
+      TARGET_APPIMAGE_ARCH: ${{ matrix.appimage-arch }}
+      TARGET_APPIMAGE_APT_ARCH: ${{ matrix.apt-arch }}
+      PKG_CONFIG_ALLOW_CROSS: 1
+      PKG_CONFIG_PATH: ${{ matrix.pkg-config-path }}
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
@@ -125,7 +133,7 @@ jobs:
           apt-get install -yq build-essential git curl \
                               markdown html2text \
                               python3-pip file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools \
-                              libwebkit2gtk-4.0-dev \
+                              libssl-dev:${{ matrix.apt-arch }} libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
                               jq
 
       - name: 🧰 Install toolchain
