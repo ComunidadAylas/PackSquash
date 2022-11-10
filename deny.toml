@@ -15,9 +15,6 @@ unmaintained = "warn"
 yanked = "deny"
 notice = "warn"
 ignore = [
-	# Criterion depends on serde_cbor, which is unmaintained and has some quirks, but works:
-	# https://github.com/pyfisch/cbor/issues/179
-	"RUSTSEC-2021-0127",
 	# Tauri depends on xml-rs, and it is aware of this advisory. See:
 	# https://github.com/tauri-apps/tauri/issues/4951
 	"RUSTSEC-2022-0048"
@@ -103,10 +100,6 @@ multiple-versions = "warn"
 wildcards = "warn"
 highlight = "all"
 skip-tree = [
-	# An ancient nom is pulled by the development dependency for
-	# benchmarking perfcnt. Let's ignore that for now. It doesn't
-	# affect the final user executables at all
-	{ name = "perfcnt", version = "=0.8.0" },
 	# Tauri is such a complex beast with so many dependencies that
 	# matching every transitive dependency version is an incommensurate
 	# effort from our part, so let's pretend nothing's wrong there.
