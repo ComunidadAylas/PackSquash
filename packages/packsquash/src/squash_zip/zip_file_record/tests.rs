@@ -231,7 +231,7 @@ fn central_directory_works_test(use_zip64_extensions: bool) {
 
 /// Tests that the end of central directory is written as expected, no matter if ZIP64
 /// extensions are used or not.
-async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
+fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 	let central_directory_start_offset = if use_zip64_extensions {
 		(u32::MAX as u64) + 1 // This can only be represented using ZIP64 extensions
 	} else {
@@ -431,8 +431,6 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 
 #[test]
 fn local_file_header_works() {
-	// The memory buffer does not fit the entire local file header in order to
-	// test correct behavior on roll
 	let buf = Vec::with_capacity(LOCAL_FILE_HEADER_SIZE);
 
 	let mut loc = LocalFileHeader::new(Cow::Owned(RelativePath::from_inner(FILE_NAME)));

@@ -185,8 +185,12 @@ mod tests {
 
 	use std::fs::File;
 
+	use crate::util::patricia_set_relative_path_iter::PatriciaSetRelativePathIterExt;
 	use pretty_assertions::assert_eq;
 	use tempfile::Builder;
+
+	static VIRTUALLY_UNLIMITED_MEMORY_BUDGET: ScratchFilesBudget =
+		ScratchFilesBudget::new(usize::MAX);
 
 	#[test]
 	fn os_filesystem_vfs_works() {
@@ -194,6 +198,14 @@ mod tests {
 			.prefix("ps-osfs-test")
 			.tempdir()
 			.expect("I/O operations are assumed not to fail during tests");
+
+		// The following lines create this file tree:
+		// ├── bye
+		// │   ├── bye
+		// │   │   └── now.txt
+		// │   └── .dont_come_back.txt
+		// └── hello
+		//     └── world.txt
 
 		let mut file1_path = root_dir.path().join("hello");
 		file1_path.push("world.txt");
@@ -220,23 +232,19 @@ mod tests {
 			File::create(file3_path).expect("I/O operations are assumed not to fail during tests");
 		}
 
-		let file_iter = OsFilesystem.file_iterator(
-			root_dir.path(),
-			IteratorTraversalOptions {
-				ignore_system_and_hidden_files: true
-			}
-		);
+		let file_set = OsFilesystem::new(root_dir.path(), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
+			.file_set()
+			.expect("I/O operations are assumed not to fail during tests");
 
-		const RELATIVE_PATHS: &[&str] = &["hello/world.txt", "bye/bye/now.txt"];
+		const RELATIVE_PATHS: &[&str] = &[
+			"hello/world.txt",
+			"bye/bye/now.txt",
+			"bye/.dont_come_back.txt"
+		];
 
 		let mut file_count = 0;
-		for file in file_iter {
-			assert!(RELATIVE_PATHS.contains(
-				&file
-					.expect("I/O operations are assumed not to fail during tests")
-					.relative_path
-					.as_str()
-			));
+		for file in file_set.relative_path_iter() {
+			assert!(RELATIVE_PATHS.contains(&file.as_str()));
 
 			file_count += 1;
 		}
@@ -250,30 +258,24 @@ mod tests {
 
 	#[test]
 	fn single_component_dot_relative_path_works() {
-		let mut file_iter = OsFilesystem.file_iterator(
-			Path::new("."),
-			IteratorTraversalOptions {
-				ignore_system_and_hidden_files: true
-			}
-		);
+		let file_set = OsFilesystem::new(Path::new("."), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
+			.file_set()
+			.expect("I/O operations are assumed not to fail during tests");
 
 		assert!(
-			file_iter.next().is_some(),
+			file_set.into_iter().next().is_some(),
 			"The current working directory, where the source files are located, is expected to have files"
 		);
 	}
 
 	#[test]
 	fn single_component_double_dot_relative_path_works() {
-		let mut file_iter = OsFilesystem.file_iterator(
-			Path::new(".."),
-			IteratorTraversalOptions {
-				ignore_system_and_hidden_files: true
-			}
-		);
+		let file_set = OsFilesystem::new(Path::new(".."), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
+			.file_set()
+			.expect("I/O operations are assumed not to fail during tests");
 
 		assert!(
-			file_iter.next().is_some(),
+			file_set.into_iter().next().is_some(),
 			"The parent of the current working directory, where the source files are located, is expected to have files"
 		);
 	}
@@ -288,15 +290,12 @@ mod tests {
 		let file_path = root_dir.path().join("file.bin");
 		File::create(file_path).expect("I/O operations are assumed not to fail during tests");
 
-		let file_iter = OsFilesystem.file_iterator(
-			root_dir.path(),
-			IteratorTraversalOptions {
-				ignore_system_and_hidden_files: true
-			}
-		);
+		let file_set = OsFilesystem::new(root_dir.path(), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
+			.file_set()
+			.expect("I/O operations are assumed not to fail during tests");
 
 		assert_eq!(
-			file_iter.count(),
+			file_set.into_iter().count(),
 			1,
 			"An initial hidden directory should be descended into and yield exactly one file in this test"
 		);
