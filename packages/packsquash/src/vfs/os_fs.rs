@@ -287,8 +287,8 @@ mod tests {
 			.tempdir()
 			.expect("I/O operations are assumed not to fail during tests");
 
-		let file_path = root_dir.path().join("file.bin");
-		File::create(file_path).expect("I/O operations are assumed not to fail during tests");
+		File::create(root_dir.path().join("file.bin"))
+			.expect("I/O operations are assumed not to fail during tests");
 
 		let file_set = OsFilesystem::new(root_dir.path(), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
 			.file_set()
