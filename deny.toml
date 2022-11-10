@@ -14,6 +14,11 @@ vulnerability = "deny"
 unmaintained = "warn"
 yanked = "deny"
 notice = "warn"
+ignore = [
+	# Tauri depends on xml-rs, and it is aware of this advisory. See:
+	# https://github.com/tauri-apps/tauri/issues/4951
+	"RUSTSEC-2022-0048"
+]
 
 [licenses]
 unlicensed = "deny"
@@ -102,12 +107,12 @@ skip = [
 	{ name = "darling_core", version = "=0.14.4" }
 ]
 skip-tree = [
-	# An ancient nom is pulled by the development dependency for
-	# benchmarking perfcnt. Let's ignore that for now. It doesn't
-	# affect the final user executables at all
-	{ name = "perfcnt" },
-	# Criterion itself also pulls some older dependencies
-	{ name = "criterion" }
+	# Tauri is such a complex beast with so many dependencies that
+	# matching every transitive dependency version is an incommensurate
+	# effort from our part, so let's pretend nothing's wrong there.
+	# Most of the warnings are for build-time dependencies anyway, and
+	# GUI users likely won't care that much about a few KiB here and there
+	{ name = "tauri" }
 ]
 
 [sources]
