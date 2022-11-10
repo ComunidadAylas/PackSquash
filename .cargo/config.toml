@@ -10,7 +10,24 @@
 [target.x86_64-unknown-linux-gnu]
 rustflags = ["-C", "target-cpu=x86-64-v2"]
 
-[target.x86_64-pc-windows-gnu]
+# TODO On Windows, rustc may link to MSVC runtime libraries that should
+#      be distributed with the executable. Building with the GNU toolchain
+#      links to a system component DLL instead, but that is not well
+#      supported by Tauri, and it's desirable for both the CLI and the GUI
+#      to use the same CRT: https://github.com/tauri-apps/tauri/issues/4319
+#      Tauri takes care of statically linking to the CRT properly for the GUI
+#      on Windows, but with the CLI we must do things manually. The best idea
+#      seems to be linking to the UCRT instead. Interesting links about the
+#      subject:
+#      https://github.com/tauri-apps/tauri/issues/4565
+#      https://users.rust-lang.org/t/static-vcruntime-distribute-windows-msvc-binaries-without-needing-to-deploy-vcruntime-dll/57599
+#      https://stackoverflow.com/questions/10166412/how-to-link-against-msvcrt-dll-instead-of-msvcr100-dll-in-vc-10-0
+#      https://rust-lang.github.io/rustup/installation/windows.html
+#      https://learn.microsoft.com/en-us/cpp/porting/upgrade-your-code-to-the-universal-crt?view=msvc-170
+#      https://users.rust-lang.org/t/rust-target-for-windows-universal/13249
+#      https://github.com/rust-lang/rfcs/issues/2355
+#      https://www.reddit.com/r/rust/comments/7mif9i/how_to_compile_binaries_without_dependencies_on/
+[target.x86_64-pc-windows-msvc]
 rustflags = ["-C", "target-cpu=x86-64-v2"]
 
 [target.aarch64-unknown-linux-gnu]
