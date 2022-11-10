@@ -17,7 +17,10 @@ notice = "warn"
 ignore = [
 	# Criterion depends on serde_cbor, which is unmaintained and has some quirks, but works:
 	# https://github.com/pyfisch/cbor/issues/179
-	"RUSTSEC-2021-0127"
+	"RUSTSEC-2021-0127",
+	# Tauri depends on xml-rs, and it is aware of this advisory. See:
+	# https://github.com/tauri-apps/tauri/issues/4951
+	"RUSTSEC-2022-0048"
 ]
 
 [licenses]
@@ -103,15 +106,21 @@ skip-tree = [
 	# An ancient nom is pulled by the development dependency for
 	# benchmarking perfcnt. Let's ignore that for now. It doesn't
 	# affect the final user executables at all
-	{ name = "perfcnt", version = "=0.8.0" }
+	{ name = "perfcnt", version = "=0.8.0" },
+	# Tauri is such a complex beast with so many dependencies that
+	# matching every transitive dependency version is an incommensurate
+	# effort from our part, so let's pretend nothing's wrong there.
+	# Most of the warnings are for build-time dependencies anyway, and
+	# GUI users likely won't care that much about a few KiB here and there
+	{ name = "tauri" }
 ]
 
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
-	"https://github.com/BurntSushi/rust-csv",
-	"https://github.com/Nilstrieb/winres"
+	"https://github.com/Nilstrieb/winres",
+	"https://github.com/tauri-apps/tauri-plugin-store"
 ]
 
 [sources.allow-org]
