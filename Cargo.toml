@@ -12,11 +12,6 @@ glsl-lang-lexer = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-pp = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 
-# Use our fork of mmap, pulled by development dependencies for benchmarking, to fix its
-# dependency on unmaintained crates and reduce duplicate dependency versions. Some of
-# the changes were authored by jbreitbart.
-# Related PR: https://github.com/rbranson/rust-mmap/pull/13
-mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
 # Use a patch of the serde_derive crate with PR #1544 merged, which greatly improves error
 # messages when deserializing data, including options files.
 # See: https://github.com/serde-rs/serde/pull/1544
