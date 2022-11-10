@@ -29,6 +29,10 @@ jobs:
       - name: 📥 Checkout source
         uses: actions/checkout@v3
 
+      # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
+      - name: ➕ Create GUI package frontend dist directory
+        run: mkdir packages/packsquash_gui/dist
+
       - name: 🧰 Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -158,6 +162,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Keep the commit history for proper version information
+
+      # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
+      - name: ➕ Create GUI package frontend dist directory
+        run: mkdir packages/packsquash_gui/dist
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: matrix.target == 'aarch64-unknown-linux-gnu'
