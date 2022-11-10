@@ -22,9 +22,6 @@ use crate::util::strip_utf8_bom::StripUtf8BomExt;
 use crate::vfs::VirtualFileSystem;
 use crate::RelativePath;
 
-#[cfg(test)]
-mod tests;
-
 mod filter_section;
 
 /// Metadata for a Java Edition resource or data pack, contained in the `pack.mcmeta` file in the

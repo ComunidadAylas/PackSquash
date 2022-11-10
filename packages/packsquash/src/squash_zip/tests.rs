@@ -1,9 +1,11 @@
 use std::{
 	env,
+	fs::File,
+	io::Cursor,
 	path::{Path, PathBuf}
 };
 
-use tempfile::Builder;
+use tempfile::{Builder, TempPath};
 
 use pretty_assertions::assert_eq;
 
@@ -14,45 +16,78 @@ static RELATIVE_PATH_INSTANTIATION_FAILURE: &str = "Relative path creation was n
 static UNEXPECTED_OPERATION_FAILURE: &str = "This SquashZip operation should not fail";
 static UNEXPECTED_IO_FAILURE: &str = "I/O operations are assumed not to fail";
 
-/// The size of the spooled temporary file that SquashZip will use internally.
-const SPOOL_BUFFER_SIZE: usize = 64 * 1024 * 1024;
+/// The budget for scratch files that SquashZip will use internally.
+static SCRATCH_FILES_BUDGET: ScratchFilesBudget = ScratchFilesBudget::new(64 * 1024 * 1024);
 
 /// The uncompressed size of the files that will be added to ZIP files during tests.
 const FILE_SIZE: usize = 2048;
 
+/// Helper struct that wraps either a `PathBuf` or `TempPath`, providing an `AsRef<Path>`
+/// implementation.
+enum NamedTempFilePath {
+	PathBuf(PathBuf),
+	TempPath(TempPath)
+}
+
+impl AsRef<Path> for NamedTempFilePath {
+	fn as_ref(&self) -> &Path {
+		match self {
+			Self::PathBuf(path) => path,
+			Self::TempPath(path) => path
+		}
+	}
+}
+
+/// Returns a [`SquashZipSettings`] struct suitable for tests. Deduplication is enabled or not
+/// according to the value of the `enable_deduplication` parameter.
+fn squash_zip_settings(enable_deduplication: bool) -> SquashZipSettings {
+	SquashZipSettings {
+		zopfli_iterations: 20,
+		store_squash_time: true,
+		enable_obfuscation: false,
+		enable_deduplication,
+		enable_size_increasing_obfuscation: false,
+		percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
+		workaround_old_java_obfuscation_quirks: false
+	}
+}
+
 /// Creates a temporary output file for testing, and returns its path. Depending on the value of
 /// the `WRITE_SQUASHZIP_TEST_RESULTS` environment variable, the named of the created file may
 /// be printed out.
-///
-/// Note that, due to API limitations in the tempfile crate, all files created for tests are not
-/// deleted automatically when the tests end.
-fn create_temporary_output_file(test_name: &'static str) -> PathBuf {
-	let file_and_path = Builder::new()
+fn create_temporary_output_file(test_name: &'static str) -> (File, NamedTempFilePath) {
+	let keep = env::var("WRITE_SQUASHZIP_TEST_RESULTS").unwrap_or_else(|_| String::from("0")) == "1";
+
+	let temp_file = Builder::new()
 		.prefix("squashzip-test")
 		.suffix(".zip")
 		.tempfile()
-		.expect("Temporary file creation is assumed not to fail for tests")
-		.keep()
-		.expect("Keeping the temporary file is assumed not to fail for tests");
+		.expect("Temporary file creation is assumed not to fail for tests");
 
-	let file_path = file_and_path.1;
+	if keep {
+		let (file, path) = temp_file
+			.keep()
+			.expect("Keeping the temporary file is assumed not to fail for tests");
 
-	if env::var("WRITE_SQUASHZIP_TEST_RESULTS").unwrap_or_else(|_| String::from("0")) == "1" {
 		eprintln!(
 			"Creating temporary output file {:?} for test {}",
-			file_path, test_name
+			path, test_name
 		);
-	}
 
-	file_path
+		(file, NamedTempFilePath::PathBuf(path))
+	} else {
+		let (file, path) = temp_file.into_parts();
+
+		(file, NamedTempFilePath::TempPath(path))
+	}
 }
 
 /// Generic helper function that adds the specified number of files to a new temporary
 /// output ZIP file, finishes the ZIP file, and then reads it back, asserting that
 /// PackSquash is able to read back relevant data from the files it generates.
-#[allow(clippy::too_many_arguments)] // Alternatives are not really more readable
-async fn add_files_finish_and_read_back_test(
-	squash_zip: Option<SquashZip<File>>,
+#[allow(clippy::too_many_arguments)] // Alternatives are not really much more readable
+fn add_files_finish_and_read_back_test(
+	squash_zip: Option<SquashZip<'_, '_, File>>,
 	file_count: u8,
 	enable_deduplication: bool,
 	file_name_number: impl Fn(u8) -> u8,
@@ -61,27 +96,14 @@ async fn add_files_finish_and_read_back_test(
 	skip_compression: impl Fn(u8) -> bool,
 	test_name: &'static str,
 	files_reused_from_previous_run: usize
-) -> PathBuf {
-	let squash_zip = squash_zip.unwrap_or(
-		SquashZip::new(
-			None,
-			SquashZipSettings {
-				zopfli_iterations: 20,
-				store_squash_time: true,
-				enable_obfuscation: false,
-				enable_deduplication,
-				enable_size_increasing_obfuscation: false,
-				percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
-				workaround_old_java_obfuscation_quirks: false,
-				spool_buffer_size: SPOOL_BUFFER_SIZE
-			}
-		)
-		.await
-		.map_err(|(err, _)| err)
-		.expect(INSTANTIATION_FAILURE)
-	);
+) -> NamedTempFilePath {
+	let squash_zip_settings = squash_zip_settings(enable_deduplication);
+	let squash_zip = squash_zip.unwrap_or_else(|| {
+		SquashZip::new(None, &squash_zip_settings, &SCRATCH_FILES_BUDGET)
+			.expect(INSTANTIATION_FAILURE)
+	});
 
-	let file_path = create_temporary_output_file(test_name);
+	let (file, file_path) = create_temporary_output_file(test_name);
 
 	for i in 0..file_count {
 		squash_zip
@@ -94,38 +116,25 @@ async fn add_files_finish_and_read_back_test(
 					))
 				)
 				.expect(RELATIVE_PATH_INSTANTIATION_FAILURE),
-				&mut tokio_stream::iter(std::iter::repeat(&[file_byte(i)][..]).take(file_size)),
-				skip_compression(i),
-				file_size
+				Cursor::new(vec![file_byte(i); file_size]),
+				skip_compression(i)
 			)
-			.await
 			.expect(UNEXPECTED_OPERATION_FAILURE);
 	}
 
 	squash_zip
-		.finish(&file_path)
-		.await
+		.finish(|| Ok(file))
 		.expect(UNEXPECTED_OPERATION_FAILURE);
 
 	let squash_zip = SquashZip::new(
-		Some(File::open(&file_path).await.expect(UNEXPECTED_IO_FAILURE)),
-		SquashZipSettings {
-			zopfli_iterations: 20,
-			store_squash_time: true,
-			enable_obfuscation: false,
-			enable_deduplication,
-			enable_size_increasing_obfuscation: false,
-			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
-			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: SPOOL_BUFFER_SIZE
-		}
+		Some(File::open(&file_path).expect(UNEXPECTED_IO_FAILURE)),
+		&squash_zip_settings,
+		&SCRATCH_FILES_BUDGET
 	)
-	.await
-	.map_err(|(err, _)| err)
 	.expect(INSTANTIATION_FAILURE);
 
 	assert_eq!(
-		squash_zip.previous_file_count(),
+		squash_zip.previous_zip_contents.len(),
 		file_count as usize + files_reused_from_previous_run,
 		"Unexpected number of ZIP files read back"
 	);
@@ -133,8 +142,8 @@ async fn add_files_finish_and_read_back_test(
 	file_path
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn add_single_finish_and_read_back_works() {
+#[test]
+fn add_single_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		1,
@@ -145,12 +154,11 @@ async fn add_single_finish_and_read_back_works() {
 		|_| false,
 		"add_single_finish_and_read_back_works",
 		0
-	)
-	.await;
+	);
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn add_empty_finish_and_read_back_works() {
+#[test]
+fn add_empty_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		1,
@@ -161,12 +169,11 @@ async fn add_empty_finish_and_read_back_works() {
 		|_| false,
 		"add_empty_finish_and_read_back_works",
 		0
-	)
-	.await;
+	);
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn add_tiny_finish_and_read_back_works() {
+#[test]
+fn add_tiny_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		1,
@@ -177,12 +184,11 @@ async fn add_tiny_finish_and_read_back_works() {
 		|_| false,
 		"add_tiny_finish_and_read_back_works",
 		0
-	)
-	.await;
+	);
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn add_several_finish_and_read_back_works() {
+#[test]
+fn add_several_finish_and_read_back_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		3,
@@ -193,12 +199,11 @@ async fn add_several_finish_and_read_back_works() {
 		|_| false,
 		"add_several_finish_and_read_back_works",
 		0
-	)
-	.await;
+	);
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn add_several_finish_and_read_back_with_deduplication_works() {
+#[test]
+fn add_several_finish_and_read_back_with_deduplication_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		3,
@@ -209,12 +214,11 @@ async fn add_several_finish_and_read_back_with_deduplication_works() {
 		|_| true,
 		"add_several_finish_and_read_back_with_deduplication_works",
 		0
-	)
-	.await;
+	);
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn add_several_compressed_finish_and_read_back_with_deduplication_works() {
+#[test]
+fn add_several_compressed_finish_and_read_back_with_deduplication_works() {
 	let bigger_file = add_files_finish_and_read_back_test(
 		None,
 		3,
@@ -225,8 +229,7 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 		|i| i < 2,
 		"add_several_compressed_finish_and_read_back_with_deduplication_works (bigger file)",
 		0
-	)
-	.await;
+	);
 
 	let smaller_file = add_files_finish_and_read_back_test(
 		None,
@@ -238,22 +241,17 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 		|_| false,
 		"add_several_compressed_finish_and_read_back_with_deduplication_works (smaller file)",
 		0
-	)
-	.await;
+	);
 
 	let bigger_file_size = File::open(bigger_file)
-		.await
 		.expect(UNEXPECTED_IO_FAILURE)
 		.metadata()
-		.await
 		.expect(UNEXPECTED_IO_FAILURE)
 		.len();
 
 	let smaller_file_size = File::open(smaller_file)
-		.await
 		.expect(UNEXPECTED_IO_FAILURE)
 		.metadata()
-		.await
 		.expect(UNEXPECTED_IO_FAILURE)
 		.len();
 
@@ -263,8 +261,8 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 	);
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn add_several_and_read_back_some_duplicates_works() {
+#[test]
+fn add_several_and_read_back_some_duplicates_works() {
 	add_files_finish_and_read_back_test(
 		None,
 		3,
@@ -275,12 +273,11 @@ async fn add_several_and_read_back_some_duplicates_works() {
 		|_| true,
 		"add_several_and_read_back_some_duplicates_works",
 		0
-	)
-	.await;
+	);
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn add_several_finish_then_reuse_and_add_works() {
+#[test]
+fn add_several_finish_then_reuse_and_add_works() {
 	// Two different files, visions0.bin and visions1.bin, with bytes 'a' and 'b' repeated
 	let zip_path = add_files_finish_and_read_back_test(
 		None,
@@ -292,30 +289,19 @@ async fn add_several_finish_then_reuse_and_add_works() {
 		|_| true,
 		"add_several_finish_then_reuse_and_add_works (first part)",
 		0
-	)
-	.await;
+	);
 
+	let squash_zip_settings = squash_zip_settings(true);
 	let squash_zip = SquashZip::new(
-		Some(File::open(&zip_path).await.expect(UNEXPECTED_IO_FAILURE)),
-		SquashZipSettings {
-			zopfli_iterations: 20,
-			store_squash_time: true,
-			enable_obfuscation: false,
-			enable_deduplication: true,
-			enable_size_increasing_obfuscation: false,
-			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
-			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: SPOOL_BUFFER_SIZE
-		}
+		Some(File::open(&zip_path).expect(UNEXPECTED_IO_FAILURE)),
+		&squash_zip_settings,
+		&SCRATCH_FILES_BUDGET
 	)
-	.await
-	.map_err(|(err, _)| err)
 	.expect(INSTANTIATION_FAILURE);
 
 	// Add the previous visions0.bin file
 	squash_zip
 		.add_previous_file(&RelativePath::from_inner("virtual/visions0.bin"))
-		.await
 		.expect(UNEXPECTED_OPERATION_FAILURE);
 
 	// Add visions2.bin and visions3.bin. The resulting ZIP file should contain
@@ -333,24 +319,13 @@ async fn add_several_finish_then_reuse_and_add_works() {
 		|_| true,
 		"add_several_finish_then_reuse_and_add_works (second part)",
 		1
-	)
-	.await;
+	);
 
 	let squash_zip = SquashZip::new(
-		Some(File::open(&zip_path).await.expect(UNEXPECTED_IO_FAILURE)),
-		SquashZipSettings {
-			zopfli_iterations: 20,
-			store_squash_time: true,
-			enable_obfuscation: false,
-			enable_deduplication: true,
-			enable_size_increasing_obfuscation: false,
-			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
-			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: SPOOL_BUFFER_SIZE
-		}
+		Some(File::open(&zip_path).expect(UNEXPECTED_IO_FAILURE)),
+		&squash_zip_settings,
+		&SCRATCH_FILES_BUDGET
 	)
-	.await
-	.map_err(|(err, _)| err)
 	.expect(INSTANTIATION_FAILURE);
 
 	for file in [
@@ -364,28 +339,15 @@ async fn add_several_finish_then_reuse_and_add_works() {
 	}
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-async fn several_files_with_same_path_are_handled_properly() {
-	let squash_zip = SquashZip::new(
-		None::<File>,
-		SquashZipSettings {
-			zopfli_iterations: 0,
-			store_squash_time: false,
-			enable_obfuscation: false,
-			enable_deduplication: false,
-			enable_size_increasing_obfuscation: false,
-			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
-			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: SPOOL_BUFFER_SIZE
-		}
-	)
-	.await
-	.map_err(|(err, _)| err)
-	.expect(INSTANTIATION_FAILURE);
+#[test]
+fn several_files_with_same_path_are_handled_properly() {
+	let squash_zip_settings = squash_zip_settings(false);
+	let squash_zip = SquashZip::new(None::<File>, &squash_zip_settings, &SCRATCH_FILES_BUDGET)
+		.expect(INSTANTIATION_FAILURE);
 
 	let file_path = &RelativePath::from_inner("virtual/visions0.bin");
-	let add_file = || squash_zip.add_file(file_path, tokio_stream::once([0]), true, 1);
+	let add_file = || squash_zip.add_file(file_path, Cursor::new([0]), true);
 
-	add_file().await.expect(UNEXPECTED_OPERATION_FAILURE);
-	add_file().await.expect_err(UNEXPECTED_OPERATION_FAILURE);
+	add_file().expect(UNEXPECTED_OPERATION_FAILURE);
+	add_file().expect_err(UNEXPECTED_OPERATION_FAILURE);
 }

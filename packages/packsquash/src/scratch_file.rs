@@ -11,7 +11,7 @@ pub struct ScratchFilesBudget {
 }
 
 impl ScratchFilesBudget {
-	pub fn new(memory_budget: usize) -> Self {
+	pub const fn new(memory_budget: usize) -> Self {
 		Self {
 			remaining_memory_budget: AtomicUsize::new(memory_budget)
 		}
