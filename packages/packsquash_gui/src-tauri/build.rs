@@ -32,7 +32,7 @@ fn generate_debloated_options_file_json_schema() {
 
 	fs::write(
 		"../src/data/optionsSchema.json",
-		&debloated_options_file_json_schema
+		debloated_options_file_json_schema
 	)
 	.expect("Could not write the PackSquash options file JSON schema");
 }
