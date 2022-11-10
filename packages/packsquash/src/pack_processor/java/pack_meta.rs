@@ -287,7 +287,7 @@ fn possible_game_version_range(
 			MinecraftVersionRange::from(minecraft_version!(1, 18)..minecraft_version!(1, 19))
 		}
 		(PackType::ResourcePack, 9) => {
-			MinecraftVersionRange::from(minecraft_version!(1, 19)..minecraft_version!(1, 20))
+			MinecraftVersionRange::from(minecraft_version!(1, 19)..minecraft_version!(1, 19, 3))
 		}
 		(PackType::DataPack, 8) => {
 			MinecraftVersionRange::from(minecraft_version!(1, 18)..minecraft_version!(1, 18, 2))
