@@ -212,11 +212,11 @@ jobs:
 
       - name: 🔨 Generate GUI Debian package
         if: matrix.runner == 'ubuntu-latest'
-        run: packages/packsquash_gui/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+        run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
 
       - name: 🔨 Generate GUI AppImage
         if: matrix.runner == 'ubuntu-latest'
-        run: packages/packsquash_gui/bundles/appimage/build.sh
+        run: packages/packsquash_gui/src-tauri/bundles/appimage/build.sh
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
