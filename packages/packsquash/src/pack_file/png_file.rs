@@ -584,9 +584,7 @@ fn visually_lossless_optimize(
 		} else {
 			let mut alpha_optimizations = IndexSet::with_capacity(6);
 			alpha_optimizations.insert(AlphaOptim::Black);
-			alpha_optimizations.insert(AlphaOptim::Down);
 			alpha_optimizations.insert(AlphaOptim::Left);
-			alpha_optimizations.insert(AlphaOptim::Right);
 			alpha_optimizations.insert(AlphaOptim::Up);
 			alpha_optimizations.insert(AlphaOptim::White);
 
