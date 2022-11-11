@@ -1,4 +1,3 @@
-use std::cell::Cell;
 use std::ffi::OsStr;
 use std::io::IsTerminal;
 use std::os::windows::ffi::OsStrExt;
@@ -28,7 +27,7 @@ enum WindowsTitleStrategy {
 	WindowsConsoleApi
 }
 
-impl<'title> TerminalTitleSetterTrait<'title> for WindowsTerminalTitleSetter {
+impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 	type TerminalTitleString = WindowsTerminalTitleString;
 
 	fn init() -> Option<Self> {
@@ -143,6 +142,7 @@ impl<'title> TerminalTitleSetterTrait<'title> for WindowsTerminalTitleSetter {
 }
 
 /// A string that can be used to change a terminal title.
+#[repr(transparent)]
 pub struct WindowsTerminalTitleString(Vec<u16>);
 
 impl From<&str> for WindowsTerminalTitleString {
