@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<WixLocalization Culture="es-ES" xmlns="http://schemas.microsoft.com/wix/2006/localization">
+<WixLocalization Culture="en-US" xmlns="http://schemas.microsoft.com/wix/2006/localization">
   <String Id="LaunchApp">Launch PackSquash</String>
   <String Id="AppShortcutDescription">Launch PackSquash</String>
   <String Id="InstallAppFeatureTitle">PackSquash</String>
