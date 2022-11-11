@@ -48,6 +48,7 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v1
 
       - name: 🔍 Check PackSquash Linux desktop entries correctness
+        shell: bash -e 'shopt -s globstar; {0}'
         run: desktop-file-validate **/*.desktop
 
       - name: 🔍 Check Rust source code format
@@ -136,7 +137,7 @@ jobs:
           # The fifth line contains packages necessary for build-time JSON Schema generation
           apt-get install -yq build-essential git curl \
                               markdown html2text \
-                              python3-pip file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools \
+                              python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools \
                               libssl-dev:${{ matrix.apt-arch }} libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
                               jq
 
