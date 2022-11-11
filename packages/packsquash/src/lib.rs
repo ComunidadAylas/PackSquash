@@ -27,10 +27,10 @@ use std::borrow::Cow;
 use std::convert::Infallible;
 use std::hint::unreachable_unchecked;
 use std::io::ErrorKind;
+use std::panic;
 use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::panic;
 use std::{io, time::SystemTime};
 
 use enumset::EnumSet;
