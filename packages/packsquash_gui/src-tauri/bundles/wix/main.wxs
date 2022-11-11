@@ -19,7 +19,7 @@
 
         <Package Id="*"
                  InstallerVersion="450"
-                 Languages="1033,3082"
+                 Languages="!(loc.TauriLanguage)"
                  Compressed="yes"
                  InstallScope="perMachine"
                  SummaryCodepage="!(loc.TauriCodepage)"/>
