@@ -1,3 +1,4 @@
+use std::cell::Cell;
 use std::ffi::OsStr;
 use std::io::IsTerminal;
 use std::os::windows::ffi::OsStrExt;
@@ -122,32 +123,45 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 
 	fn set_title(&self, title: &WindowsTerminalTitleString) {
 		match &self.title_strategy {
-			WindowsTitleStrategy::AnsiEscapeCodes(TerminalStream::Stdout) => {
-				write_ansi_set_window_title_escape_sequence(io::stdout(), title.0)
+			WindowsTitleStrategy::AnsiEscapeCodes(Stream::Stdout) => {
+				write_ansi_set_window_title_escape_sequence(io::stdout(), title.string)
 			}
-			WindowsTitleStrategy::AnsiEscapeCodes(TerminalStream::Stderr) => {
-				write_ansi_set_window_title_escape_sequence(io::stderr(), title.0)
+			WindowsTitleStrategy::AnsiEscapeCodes(Stream::Stderr) => {
+				write_ansi_set_window_title_escape_sequence(io::stderr(), title.string)
 			}
 			WindowsTitleStrategy::WindowsConsoleApi => {
+				let mut utf16_string = title.utf16_string.take();
+
 				// SAFETY: system calls are unsafe. We borrow a Vec whose lifetime
 				// is at least as long as this function execution, so the pointer
 				// passed to SetConsoleTitleW stays valid
 				#[allow(unsafe_code)]
 				unsafe {
-					SetConsoleTitleW(title.0.as_ptr());
+					SetConsoleTitleW(
+						utf16_string
+							.get_or_insert_with(|| OsStr::new(title).encode_wide().collect())
+							.as_ptr()
+					);
 				}
+
+				title.utf16_string.set(utf16_string);
 			}
 		}
 	}
 }
 
 /// A string that can be used to change a terminal title.
-#[repr(transparent)]
-pub struct WindowsTerminalTitleString(Vec<u16>);
+pub struct WindowsTerminalTitleString {
+	string: &'static str,
+	utf16_string: Cell<Option<Vec<u16>>>
+}
 
-impl From<&str> for WindowsTerminalTitleString {
-	fn from(title: &str) -> Self {
-		Self(OsStr::new(title).encode_wide().collect())
+impl From<&'static str> for WindowsTerminalTitleString {
+	fn from(title: &'static str) -> Self {
+		Self {
+			string: title,
+			utf16_string: Cell::new(None)
+		}
 	}
 }
 
