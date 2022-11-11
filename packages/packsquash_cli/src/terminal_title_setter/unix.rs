@@ -19,8 +19,8 @@ enum AnsiEscapeCodesStream {
 	ControllingTty(File)
 }
 
-impl<'title> TerminalTitleSetterTrait<'title> for UnixTerminalTitleSetter {
-	type TerminalTitleString = UnixTerminalTitleString<'title>;
+impl TerminalTitleSetterTrait for UnixTerminalTitleSetter {
+	type TerminalTitleString = UnixTerminalTitleString;
 
 	fn init() -> Option<Self> {
 		if matches!(
@@ -69,10 +69,10 @@ impl<'title> TerminalTitleSetterTrait<'title> for UnixTerminalTitleSetter {
 
 /// A string that can be used to change a terminal title.
 #[repr(transparent)]
-pub struct UnixTerminalTitleString<'title>(&'title str);
+pub struct UnixTerminalTitleString(&'static str);
 
-impl<'title> From<&'title str> for UnixTerminalTitleString<'title> {
-	fn from(title: &'title str) -> Self {
+impl From<&'static str> for UnixTerminalTitleString {
+	fn from(title: &'static str) -> Self {
 		Self(title)
 	}
 }
