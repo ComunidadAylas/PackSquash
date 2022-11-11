@@ -10,7 +10,7 @@ use strum::FromRepr;
 pub struct TerminalTitleController {
 	title_setter: TerminalTitleSetter,
 	current_title_index: AtomicUsize,
-	title_strings: [TerminalTitleString<'static>; 7]
+	title_strings: [TerminalTitleString; 7]
 }
 
 /// Represents the terminal titles that can be shown.

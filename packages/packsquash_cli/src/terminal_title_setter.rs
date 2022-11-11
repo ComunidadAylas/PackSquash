@@ -17,8 +17,8 @@ mod windows;
 
 /// Defines the contract that any struct capable of setting the title of the process
 /// controlling terminal must follow.
-pub trait TerminalTitleSetterTrait<'title> {
-	type TerminalTitleString: From<&'title str>;
+pub trait TerminalTitleSetterTrait {
+	type TerminalTitleString: From<&'static str>;
 
 	/// Initializes a new terminal title setter, possibly checking whether a terminal title
 	/// can be set and setting things up for doing so. `None` will be returned if the setup
