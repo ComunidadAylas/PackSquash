@@ -30,7 +30,7 @@ use std::io::ErrorKind;
 use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::{cmp, panic};
+use std::panic;
 use std::{io, time::SystemTime};
 
 use enumset::EnumSet;
@@ -293,23 +293,20 @@ impl PackSquasher {
 			// This is needed because if we spawn those tasks faster than we finish them we
 			// may end up opening a lot of files, needlessly consuming memory and exhausting
 			// open file limits
-			let in_flight_tasks_semaphore = Arc::new(Semaphore::new(cmp::min(
-				options_holder.options.global_options.threads.get() * 2,
+			let in_flight_tasks_semaphore = Arc::new(Semaphore::new(
 				// - 2 because we open the output file and the previous file
 				// - 10 because the OsFilesystem VFS may keep some files open
 				// / 3 because each task may consume 3 descriptors: the pack file itself,
 				// and two temporary files
-				cmp::max(
-					(options_holder
-						.options
-						.global_options
-						.open_files_limit
-						.get()
-						.saturating_sub(2)
-						.saturating_sub(10)) / 3,
-					1
-				)
-			)));
+				(options_holder
+					.options
+					.global_options
+					.open_files_limit
+					.get()
+					.saturating_sub(2)
+					.saturating_sub(10) / 3)
+					.clamp(1, options_holder.options.global_options.threads.get() * 2)
+			));
 
 			let pack_file_optimization_failed = Arc::new(AtomicBool::new(false));
 

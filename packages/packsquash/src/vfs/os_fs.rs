@@ -136,7 +136,7 @@ mod tests {
 			fs::create_dir_all(file1_path.parent().unwrap())
 				.expect("I/O operations are assumed not to fail during tests");
 
-			File::create(&file1_path).expect("I/O operations are assumed not to fail during tests");
+			File::create(file1_path).expect("I/O operations are assumed not to fail during tests");
 		}
 
 		let mut file2_path = root_dir.path().join("bye");
@@ -146,13 +146,13 @@ mod tests {
 			fs::create_dir_all(file2_path.parent().unwrap())
 				.expect("I/O operations are assumed not to fail during tests");
 
-			File::create(&file2_path).expect("I/O operations are assumed not to fail during tests");
+			File::create(file2_path).expect("I/O operations are assumed not to fail during tests");
 		}
 
 		let mut file3_path = root_dir.path().join("bye");
 		file3_path.push(".dont_come_back.txt");
 		{
-			File::create(&file3_path).expect("I/O operations are assumed not to fail during tests");
+			File::create(file3_path).expect("I/O operations are assumed not to fail during tests");
 		}
 
 		let file_iter = OsFilesystem.file_iterator(
@@ -221,7 +221,7 @@ mod tests {
 			.expect("I/O operations are assumed not to fail during tests");
 
 		let file_path = root_dir.path().join("file.bin");
-		File::create(&file_path).expect("I/O operations are assumed not to fail during tests");
+		File::create(file_path).expect("I/O operations are assumed not to fail during tests");
 
 		let file_iter = OsFilesystem.file_iterator(
 			root_dir.path(),
