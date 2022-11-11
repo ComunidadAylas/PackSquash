@@ -605,7 +605,7 @@ fn visually_lossless_optimize(
 			0,
 			15
 		) {
-			0 => Deflaters::Zlib {
+			0 => Deflaters::Libdeflater {
 				compression: {
 					// Use the maximum compression level for the best compression.
 					// This is still acceptably fast for bigger images of realistic
@@ -614,17 +614,7 @@ fn visually_lossless_optimize(
 					levels.insert(9);
 
 					levels
-				},
-				strategies: {
-					// Try every Zlib strategy to get the best compression possible
-					let mut strategies = IndexSet::with_capacity(4);
-					for i in 0..=3 {
-						strategies.insert(i);
-					}
-
-					strategies
-				},
-				window: 15
+				}
 			},
 			zopfli_iterations => Deflaters::Zopfli {
 				iterations: NonZeroU8::new(zopfli_iterations).unwrap()
