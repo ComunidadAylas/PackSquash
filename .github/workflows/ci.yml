@@ -61,6 +61,12 @@ jobs:
         if: ${{ !steps.check_write_permission.outputs.has-permission }}
         run: cargo clippy --all-targets
 
+      - name: 🔍 ESLint check
+        working-directory: packages/packsquash_gui
+        run: |
+          npm install
+          npm run lint
+
       - name: 🔍 Cargo deny check
         uses: EmbarkStudios/cargo-deny-action@v1
 
@@ -69,6 +75,10 @@ jobs:
 
       - name: 🔍 Check Rust source code format
         run: cargo fmt --all --check
+
+      - name: 🔍 Check TypeScript source code format
+        working-directory: packages/packsquash_gui
+        run: npm run format
 
   build:
 
@@ -162,6 +172,13 @@ jobs:
         if: matrix.runner == 'macos-latest'
         run: brew install jq
 
+      # Debian Bullseye distributes a too old Node.js version, so set up a more modern one externally
+      - name: 🧰 Install Node.js
+        if: matrix.runner == 'ubuntu-latest'
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
       - name: 📥 Checkout source
         uses: actions/checkout@v3
         with:
@@ -173,8 +190,7 @@ jobs:
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: |
-          apt-get install -yq gcc-aarch64-linux-gnu qemu-user
+        run: apt-get install -yq gcc-aarch64-linux-gnu qemu-user
 
       - name: 🧰 Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -213,6 +229,12 @@ jobs:
 
       - name: 🔨 Build with optimized standard library
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+
+      - name: 🔨 Build GUI frontend
+        working-directory: packages/packsquash_gui
+        run: |
+          npm install
+          npm run build
 
       - name: 🔨 Generate CLI Debian package
         if: matrix.runner == 'ubuntu-latest'
