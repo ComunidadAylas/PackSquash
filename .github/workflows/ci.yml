@@ -50,12 +50,12 @@ jobs:
         uses: actions-rs/clippy-check@v1
         if: steps.check_write_permission.outputs.has-permission
         with:
-          args: --all-targets
+          args: --all-targets -- -D warnings
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔍 Clippy check (without annotations)
         if: ${{ !steps.check_write_permission.outputs.has-permission }}
-        run: cargo clippy --all-targets
+        run: cargo clippy --all-targets -- -D warnings
 
       - name: 🔍 Cargo deny check
         uses: EmbarkStudios/cargo-deny-action@v1
