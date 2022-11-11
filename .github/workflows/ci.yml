@@ -49,6 +49,7 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v1
 
       - name: 🔍 Check PackSquash Linux desktop entries correctness
+        shell: bash -e 'shopt -s globstar; {0}'
         run: desktop-file-validate **/*.desktop
 
       - name: 🔍 Check Rust source code format
