@@ -147,7 +147,7 @@ jobs:
           # The fifth line contains packages necessary for build-time JSON Schema generation
           apt-get install -yq build-essential git curl \
                               markdown html2text \
-                              python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools \
+                              python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
                               libssl-dev:${{ matrix.apt-arch }} libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
                               jq
 
@@ -185,10 +185,19 @@ jobs:
         uses: actions-rs/install@v0.1
         env:
           # Guarantee that cargo-deb is built for the host when cross-compiling
-          CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
+          CARGO_BUILD_TARGET:
         with:
           crate: cargo-deb
           version: 1.41.0
+
+      - name: 🧰 Install tauri-cli
+        if: matrix.runner != 'ubuntu-latest'
+        uses: actions-rs/install@v0.1
+        env:
+          # Guarantee that tauri-cli is built for the host when cross-compiling
+          CARGO_BUILD_TARGET:
+        with:
+          crate: tauri-cli
 
       # Our build container is minimal, and it doesn't contain any systemd package.
       # systemd is responsible for setting up the machine ID files we use for
@@ -220,6 +229,10 @@ jobs:
         if: matrix.runner == 'ubuntu-latest'
         run: packages/packsquash_gui/src-tauri/bundles/appimage/build.sh
 
+      - name: 🔨 Generate GUI bundles
+        if: matrix.runner != 'ubuntu-latest'
+        run: cargo tauri build
+
       - name: 📤 Upload CLI binary
         if: matrix.runner != 'ubuntu-latest'
         uses: actions/upload-artifact@v3
@@ -247,6 +260,27 @@ jobs:
         with:
           name: PackSquash CLI AppImage zsync (${{ matrix.appimage-arch }})
           path: target/appimage/PackSquash-*-${{ matrix.appimage-arch }}.AppImage.zsync
+
+      - name: 📤 Upload GUI Debian package
+        if: matrix.runner == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI Debian package (${{ matrix.apt-arch }})
+          path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash-gui_*.deb
+
+      - name: 📤 Upload GUI AppImage
+        if: matrix.runner == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI AppImage (${{ matrix.appimage-arch }})
+          path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage
+
+      - name: 📤 Upload GUI AppImage update diff
+        if: matrix.runner == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI AppImage zsync (${{ matrix.appimage-arch }})
+          path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage.zsync
 
   build-universal-macos-binaries:
 
