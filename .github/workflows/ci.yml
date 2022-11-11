@@ -137,7 +137,7 @@ jobs:
           # The fifth line contains packages necessary for build-time JSON Schema generation
           apt-get install -yq build-essential git curl \
                               markdown html2text \
-                              python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools \
+                              python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
                               libssl-dev:${{ matrix.apt-arch }} libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
                               jq
 
@@ -218,6 +218,10 @@ jobs:
         if: matrix.runner == 'ubuntu-latest'
         run: packages/packsquash_gui/src-tauri/bundles/appimage/build.sh
 
+      - name: 🔨 Generate GUI bundles
+        if: matrix.runner != 'ubuntu-latest'
+        run: cargo tauri build
+
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
         uses: actions/upload-artifact@v3
@@ -231,6 +235,27 @@ jobs:
         with:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
+
+      - name: 📤 Upload GUI Debian package
+        if: matrix.runner == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI Debian package (${{ matrix.apt-arch }})
+          path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash-gui_*.deb
+
+      - name: 📤 Upload GUI AppImage
+        if: matrix.runner == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI AppImage (${{ matrix.appimage-arch }})
+          path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage
+
+      - name: 📤 Upload GUI AppImage update diff
+        if: matrix.runner == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI AppImage zsync (${{ matrix.appimage-arch }})
+          path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage.zsync
 
   build-universal-macos-binaries:
 
