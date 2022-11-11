@@ -12,6 +12,7 @@ on:
 
 env:
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
+  TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
 
   DEBIAN_FRONTEND: noninteractive
 
@@ -256,7 +257,7 @@ jobs:
 
       - name: 🔨 Generate GUI bundles
         if: matrix.runner != 'ubuntu-latest'
-        run: cargo tauri build
+        run: cargo tauri build --target ${{ matrix.target }}
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
