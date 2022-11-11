@@ -35,7 +35,7 @@ AppDir:
       # better way to get it?
       - sourceline: !ENV 'deb [arch=${TARGET_APPIMAGE_APT_ARCH}] https://deb.debian.org/debian/ bullseye main'
         key_url: http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x648ACFD622F3D138
-      - sourceline: !ENV 'deb [arch=${TARGET_APPIMAGE_APT_ARCH}] https://deb.debian.org/debian/ bullseye-security main'
+      - sourceline: !ENV 'deb [arch=${TARGET_APPIMAGE_APT_ARCH}] https://deb.debian.org/debian-security/ bullseye-security main'
         key_url: http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x648ACFD622F3D138
       - sourceline: !ENV 'deb [arch=${TARGET_APPIMAGE_APT_ARCH}] https://deb.debian.org/debian/ bullseye-updates main'
         key_url: http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x648ACFD622F3D138
