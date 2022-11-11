@@ -34,9 +34,9 @@ dependencies = [
 
 [[package]]
 name = "ahash"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "464b3811b747f8f7ebc8849c9c728c39f6ac98a055edad93baf9eb330e3f8f9d"
+checksum = "bf6ccdb167abbf410dcb915cabd428929d7f6a04980b54a11f26a39f1c7f7107"
 dependencies = [
  "cfg-if",
  "getrandom 0.2.8",
@@ -381,24 +381,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ee52072ec15386f770805afd189a01c8841be8696bed250fa2f13c4c0d6dfb7"
 dependencies = [
  "generic-array",
-]
-
-[[package]]
-name = "cloudflare-zlib"
-version = "0.2.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2cfcefb5df07f146eb15756342a135eb7d76b8bb609eff9c111f7539d060f94d"
-dependencies = [
- "cloudflare-zlib-sys",
-]
-
-[[package]]
-name = "cloudflare-zlib-sys"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2040b6d1edfee6d75f172d81e2d2a7807534f3f294ce18184c70e7bb0105cd6f"
-dependencies = [
- "cc",
 ]
 
 [[package]]
@@ -1461,10 +1443,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c05aeb6a22b8f62540c194aac980f2115af067bfe15a0734d7277a768d396b31"
 dependencies = [
  "cfg-if",
- "js-sys",
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -1994,6 +1974,24 @@ name = "libc"
 version = "0.2.137"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc7fcc620a3bff7cdd7a365be3376c97191aeaccc2a603e600951e452615bf89"
+
+[[package]]
+name = "libdeflate-sys"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb6784b6b84b67d71b4307963d456a9c7c29f9b47c658f533e598de369e34277"
+dependencies = [
+ "cc",
+]
+
+[[package]]
+name = "libdeflater"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d8e285aa6a046fd338b2592c16bee148b2b00789138ed6b7bb56bb13d585050d"
+dependencies = [
+ "libdeflate-sys",
+]
 
 [[package]]
 name = "libgit2-sys"
@@ -2602,16 +2600,14 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 [[package]]
 name = "oxipng"
 version = "6.0.1"
-source = "git+https://github.com/ComunidadAylas/oxipng?branch=master#66d50bde70ca2651e87a06ae879a839665302203"
+source = "git+https://github.com/ComunidadAylas/oxipng?branch=master#761af4629cae3898ed63e384c093d95da4fa2b32"
 dependencies = [
  "bit-vec",
- "cloudflare-zlib",
- "crc",
  "crossbeam-channel",
  "indexmap",
  "itertools",
+ "libdeflater",
  "log",
- "miniz_oxide 0.5.4",
  "rayon",
  "rgb",
  "rustc_version 0.4.0",
