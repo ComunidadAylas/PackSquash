@@ -1,13 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  For,
-  getOwner,
-  JSXElement,
-  Owner,
-  runWithOwner,
-  Show
-} from "solid-js";
+import { getOwner, JSXElement, Owner, runWithOwner } from "solid-js";
 import { JSONSchema7, JSONSchema7TypeName } from "json-schema";
 import optionsSchemaJson from "../data/optionsSchema.json";
 import { LocalizationProvider, useI18n } from "../contexts/i18n";
@@ -15,14 +6,6 @@ import { save } from "@tauri-apps/api/dialog";
 import ConfigurationControlContainer from "../components/OptionControlContainer";
 import { selectedPackPath } from "../views/PackSelection";
 import { invoke } from "@tauri-apps/api";
-import {
-  HeadlessDisclosureChild,
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions
-} from "solid-headless";
-import { CaretDown, CaretUp } from "phosphor-solid";
 import { toast } from "solid-toast";
 import ListboxControl from "../components/ListboxControl";
 
