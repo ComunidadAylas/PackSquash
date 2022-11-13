@@ -39,7 +39,7 @@
             "cmd": "explorer",
             "args": [
               {
-                "validator": "/select,\".*\""
+                "validator": "/select,.*"
               }
             ]
           },
