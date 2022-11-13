@@ -245,7 +245,7 @@ jobs:
 
       - name: 🔨 Generate GUI bundles
         if: matrix.runner != 'ubuntu-latest'
-        run: cargo tauri build --target ${{ matrix.target }}
+        run: cargo tauri build -v --target ${{ matrix.target }}
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
