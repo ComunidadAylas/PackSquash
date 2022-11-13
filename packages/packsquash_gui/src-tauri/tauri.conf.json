@@ -93,6 +93,8 @@
         "wix": {
           "license": "../../../LICENSE",
           "template": "bundles/wix/main.wxs",
+          "bannerPath": "bundles/wix/img/banner.bmp",
+          "dialogImagePath": "bundles/wix/img/dialogSidebar.bmp",
           "language": {
             "en-US": {
               "localePath": "bundles/wix/locales/en-US.xml"
