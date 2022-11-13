@@ -155,11 +155,6 @@ async function openZipInFileBrowser() {
       ]);
     }
   } else if (osFamily == "Windows_NT") {
-    // Paths with double quotes are not meant to be
-    // (see https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions), but
-    // different filesystem implementations (e.g., ntfs-3g) and applications using the Win32 path namespace may
-    // be able to get around that because NTFS technically supports it. In such cases, however, even Windows
-    // Explorer is prone to failure, so we're kind of hopeless: let's not over-engineer things here.
     // The documentation is not clear about this, but given that explorer likely uses the SHParseDisplayName
     // Windows API function to parse the path, using absolute paths only seems like a good idea that will save
     // problems. See:
