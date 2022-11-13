@@ -13,6 +13,7 @@ on:
 env:
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
   TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+  TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
   DEBIAN_FRONTEND: noninteractive
 
