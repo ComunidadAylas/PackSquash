@@ -115,7 +115,7 @@
     "updater": {
       "active": true,
       "dialog": false,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ4NTFGMzlEQzE3NjJGQjMKUldTekwzYkJuZk5SU002VWpENjVoSHI0Q3RzMEVzT0xzbjluTXlMYTl2MVRaTG5ubnZNSGx6TloK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDRDQTdFQkI4NDlCRjU2MEIKUldRTFZyOUp1T3VuVEkzemZrellYWFRxT1o5cjQ1OWt5dmMwc1dwMUdIL1pFODhwRjBRNmVjNDAK",
       "endpoints": [
         "https://packsquash.page.link/Latest-GUI-app-update-manifest"
       ],
