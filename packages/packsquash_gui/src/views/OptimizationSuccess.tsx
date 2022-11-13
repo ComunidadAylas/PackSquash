@@ -165,7 +165,7 @@ async function openZipInFileBrowser() {
     // problems. See:
     // https://stackoverflow.com/a/54524363/9366153
     // https://stackoverflow.com/questions/62584777/how-to-use-ifileoperation-with-relative-and-absolute-paths
-    showCommand = new Command("explorer", [`/select,"${packZipPath}"`]);
+    showCommand = new Command("explorer", [`/select,${packZipPath}`]);
   } else if (osFamily == "Darwin") {
     // Against all odds, macOS could be the least quirky OS here, if this was tested ;)
     showCommand = new Command("open", ["-R", packZipPath]);
