@@ -201,6 +201,10 @@ jobs:
       - name: 💨 Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
 
+      - name: Clear root-owned npm cache
+        if: matrix.runner == 'ubuntu-latest'
+        run: rm -rf /github/home/.npm
+
       - name: 🧰 Install cargo-deb
         if: matrix.runner == 'ubuntu-latest'
         uses: actions-rs/install@v0.1
