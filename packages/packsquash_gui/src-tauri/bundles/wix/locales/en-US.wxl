@@ -3,8 +3,8 @@
   <String Id="LaunchApp">Launch PackSquash</String>
   <String Id="AppShortcutDescription">Launch PackSquash</String>
   <String Id="InstallAppFeatureTitle">PackSquash</String>
-  <String Id="InstallAppFeatureDescription">Instala PackSquash</String>
-  <String Id="InstallShortcutsFeatureTitle">Accesos directos</String>
+  <String Id="InstallAppFeatureDescription">Installs PackSquash</String>
+  <String Id="InstallShortcutsFeatureTitle">Shortcuts</String>
   <String Id="InstallShortcutsFeatureDescription">Creates shortcuts for PackSquash</String>
   <String Id="UninstallShortcutName">Uninstall PackSquash</String>
   <String Id="UninstallShortcutDescription">Uninstalls PackSquash</String>

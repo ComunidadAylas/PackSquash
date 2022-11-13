@@ -97,10 +97,10 @@
           "dialogImagePath": "bundles/wix/img/dialogSidebar.bmp",
           "language": {
             "en-US": {
-              "localePath": "bundles/wix/locales/en-US.xml"
+              "localePath": "bundles/wix/locales/en-US.wxl"
             },
             "es-ES": {
-              "localePath": "bundles/wix/locales/es-ES.xml"
+              "localePath": "bundles/wix/locales/es-ES.wxl"
             }
           }
         },
