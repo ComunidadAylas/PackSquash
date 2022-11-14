@@ -233,7 +233,10 @@ jobs:
         if: ${{ !contains(matrix.target, '-windows-') && matrix.target != 'x86_64-apple-darwin' }}
         working-directory: packages/packsquash_gui
         run: |
-          npm ci
+          # --unsafe-perm avoids dropping root privileges, which may be needed to access the npm cache at
+          # the container HOME directory, which runs as root. See:
+          # https://docs.npmjs.com/cli/v6/using-npm/config#unsafe-perm
+          npm ci --unsafe-perm
           npm run build
 
       - name: 🔨 Generate CLI Debian package
