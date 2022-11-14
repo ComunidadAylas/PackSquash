@@ -125,7 +125,9 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
 
-    container: ${{ matrix.container }}
+    container:
+      image: ${{ matrix.container }}
+      options: --user 1001:1001 # Run as the unprivileged GitHub runner user. npm requires this
 
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
