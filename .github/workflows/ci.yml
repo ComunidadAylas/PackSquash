@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v3
 
       # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
-      - name: ➕ Create GUI package frontend dist directory
+      - name: 📁 Create GUI package frontend dist directory
         run: mkdir packages/packsquash_gui/dist
 
       - name: 🧰 Install Rust toolchain
@@ -220,7 +220,7 @@ jobs:
           fetch-depth: 0 # Keep the commit history for proper version information
 
       # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
-      - name: ➕ Create GUI package frontend dist directory
+      - name: 📁 Create GUI package frontend dist directory
         run: mkdir packages/packsquash_gui/dist
 
       # Our build container is minimal, and it doesn't contain any systemd package.
@@ -257,7 +257,7 @@ jobs:
         if: matrix.runner == 'ubuntu-latest'
         run: packages/packsquash_gui/src-tauri/bundles/appimage/build.sh
 
-      - name: 🔨 Generate GUI bundles
+      - name: 🔨 Generate GUI MSI, dmg and update artifacts
         if: matrix.runner != 'ubuntu-latest'
         run: cargo tauri build -v --target ${{ matrix.target }}
 
