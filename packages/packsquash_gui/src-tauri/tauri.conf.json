@@ -90,6 +90,7 @@
         "license": "../../../LICENSE"
       },
       "windows": {
+        "allowDowngrades": true,
         "wix": {
           "license": "../../../LICENSE",
           "template": "bundles/wix/main.wxs",

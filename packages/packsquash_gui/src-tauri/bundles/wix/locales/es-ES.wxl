@@ -4,8 +4,6 @@
   <String Id="AppShortcutDescription">Abrir PackSquash</String>
   <String Id="InstallAppFeatureTitle">PackSquash</String>
   <String Id="InstallAppFeatureDescription">Instala PackSquash</String>
-  <String Id="InstallShortcutsFeatureTitle">Accesos directos</String>
-  <String Id="InstallShortcutsFeatureDescription">Crea accesos directos a PackSquash</String>
   <String Id="UninstallShortcutName">Desinstalar PackSquash</String>
   <String Id="UninstallShortcutDescription">Desinstala PackSquash</String>
 </WixLocalization>
