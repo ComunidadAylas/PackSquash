@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WixLocalization Culture="en-US" xmlns="http://schemas.microsoft.com/wix/2006/localization">
-  <String Id="LaunchApp">Launch PackSquash</String>
+  <String Id="LaunchAppCheckboxCaption">Launch PackSquash</String>
   <String Id="AppShortcutDescription">Launch PackSquash</String>
   <String Id="InstallAppFeatureTitle">PackSquash</String>
   <String Id="InstallAppFeatureDescription">Installs PackSquash</String>
-  <String Id="InstallShortcutsFeatureTitle">Shortcuts</String>
-  <String Id="InstallShortcutsFeatureDescription">Creates shortcuts for PackSquash</String>
   <String Id="UninstallShortcutName">Uninstall PackSquash</String>
   <String Id="UninstallShortcutDescription">Uninstalls PackSquash</String>
 </WixLocalization>

@@ -63,7 +63,7 @@
         </Property>
 
         <!-- launch app checkbox -->
-        <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="!(loc.LaunchApp)" />
+        <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="!(loc.LaunchAppCheckboxCaption)" />
         <Property Id="WixShellExecTarget" Value="[!Path]" />
         <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
 
@@ -95,6 +95,11 @@
                 <Component Id="ApplicationShortcutDesktop" Guid="*">
                     <Shortcut Id="ApplicationDesktopShortcut" Name="{{{product_name}}}" Description="!(loc.AppShortcutDescription)" Target="[!Path]" />
                     <RemoveFolder Id="DesktopFolder" On="uninstall" />
+                    <!--
+                        We won't use these RegistryValues we create for shortcuts, but it's good practice to bloat
+                        the registry with an entry for each shortcut because Windows Installer.
+                        Ref: Nick Ramirez, WiX 3.6: A Developer's Guide to Windows Installer XML, 2nd Edition (2012), page 35
+                    -->
                     <RegistryValue Root="HKCU" Key="Software\\{{{manufacturer}}}\\{{{product_name}}}" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
                 </Component>
             </Directory>
@@ -114,6 +119,7 @@
             </Component>
             <Component Id="Path" Guid="{{{path_component_guid}}}" Win64="$(var.Win64)">
                 <File Id="Path" Source="{{{app_exe_source}}}" KeyPath="yes" Checksum="yes"/>
+                <RemoveFolder Id="INSTALLDIR" On="uninstall" />
             </Component>
             {{#each binaries as |bin| ~}}
             <Component Id="{{ bin.id }}" Guid="{{bin.guid}}" Win64="$(var.Win64)">
@@ -132,28 +138,10 @@
             </Component>
             {{/if}}
             {{{resources}}}
-            <Component Id="CMP_UninstallShortcut" Guid="*">
-
-                <Shortcut Id="UninstallShortcut"
-						  Name="!(loc.UninstallShortcutName)"
-						  Description="!(loc.UninstallShortcutDescription)"
-						  Target="[System64Folder]msiexec.exe"
-						  Arguments="/x [ProductCode]" />
-
-				<RemoveFolder Id="INSTALLDIR"
-							  On="uninstall" />
-
-				<RegistryValue Root="HKCU"
-							   Key="Software\\{{{manufacturer}}}\\{{{product_name}}}"
-							   Name="UninstallerShortcut"
-							   Type="integer"
-							   Value="1"
-							   KeyPath="yes" />
-            </Component>
         </DirectoryRef>
 
         <DirectoryRef Id="ApplicationProgramsFolder">
-            <Component Id="ApplicationShortcut" Guid="*">
+            <Component Id="CMP_ApplicationStartMenuShortcuts" Guid="*">
                 <Shortcut Id="ApplicationStartMenuShortcut"
                     Name="{{{product_name}}}"
                     Description="!(loc.AppShortcutDescription)"
@@ -161,9 +149,18 @@
                     Icon="ProductIcon">
                     <ShortcutProperty Key="System.AppUserModel.ID" Value="{{{bundle_id}}}"/>
                 </Shortcut>
+
+                <Shortcut Id="UninstallShortcut"
+                          Name="!(loc.UninstallShortcutName)"
+                          Description="!(loc.UninstallShortcutDescription)"
+                          Target="[System64Folder]msiexec.exe"
+                          Arguments="/x [ProductCode]" />
+
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-                <RegistryValue Root="HKCU" Key="Software\\{{{manufacturer}}}\\{{{product_name}}}" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes"/>
-           </Component>
+
+                <RegistryValue Root="HKCU" Key="Software\\{{{manufacturer}}}\\{{{product_name}}}"
+                               Name="StartMenuShortcuts" Type="integer" Value="1" KeyPath="yes"/>
+            </Component>
         </DirectoryRef>
 
         {{#each merge_modules as |msm| ~}}
@@ -186,6 +183,8 @@
                 Display="expand"
                 Absent="disallow">
 
+            <ComponentRef Id="Path"/>
+
             <ComponentRef Id="RegistryEntries"/>
 
             {{#each resource_file_ids as |resource_file_id| ~}}
@@ -198,15 +197,8 @@
                 <ComponentRef Id="UpdateTaskUninstaller" />
             {{/if}}
 
-            <Feature Id="ShortcutsFeature"
-                Title="!(loc.InstallShortcutsFeatureTitle)"
-                Description="!(loc.InstallShortcutsFeatureDescription)"
-                Level="1">
-				<ComponentRef Id="Path"/>
-                <ComponentRef Id="CMP_UninstallShortcut" />
-                <ComponentRef Id="ApplicationShortcut" />
-                <ComponentRef Id="ApplicationShortcutDesktop" />
-            </Feature>
+            <ComponentRef Id="CMP_ApplicationStartMenuShortcuts" />
+            <ComponentRef Id="ApplicationShortcutDesktop" />
         </Feature>
 
         <Feature Id="External" AllowAdvertise="no" Absent="disallow">
