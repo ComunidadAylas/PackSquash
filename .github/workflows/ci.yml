@@ -250,7 +250,10 @@ jobs:
 
       - name: 🔨 Build GUI frontend, installers and updater artifacts
         if: matrix.tauri-target != ''
-        run: cargo tauri build -v --target ${{ matrix.tauri-target }} -- -Z build-std
+        working-directory: packages/packsquash_gui
+        run: |
+          npm ci
+          cargo tauri build -v --target ${{ matrix.tauri-target }} -- -Z build-std
 
       - name: 🔨 Generate GUI Debian package
         if: startsWith(matrix.runner, 'ubuntu')
