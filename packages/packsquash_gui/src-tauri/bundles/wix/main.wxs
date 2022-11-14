@@ -24,6 +24,8 @@
                  Languages="!(loc.TauriLanguage)"
                  Compressed="yes"
                  InstallScope="perMachine"
+                 Description="{{{product_name}}}"
+                 Manufacturer="{{{manufacturer}}}"
                  SummaryCodepage="!(loc.TauriCodepage)"/>
 
         <!-- https://docs.microsoft.com/en-us/windows/win32/msi/reinstallmode -->
