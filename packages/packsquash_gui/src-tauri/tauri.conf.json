@@ -79,6 +79,7 @@
       ],
       "identifier": "com.github.comunidadaylas.packsquash.gui",
       "shortDescription": "The Minecraft: Java Edition resource and data pack optimizer",
+      "publisher": "Comunidad Aylas",
       "category": "Utility",
       "copyright": "PackSquash developers",
       "icon": [
