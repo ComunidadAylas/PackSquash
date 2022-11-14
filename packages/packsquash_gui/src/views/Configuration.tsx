@@ -40,7 +40,7 @@ export default () => {
     <>
       <Title>PackSquash · {l10n("configuration-screen-title")}</Title>
 
-      <ViewContainer fitContentHeight={true}>
+      <ViewContainer>
         <aside class="fixed z-[9998] sm:static sm:z-auto sm:flex sm:items-center">
           <Show
             when={showOptionsEditor()}
