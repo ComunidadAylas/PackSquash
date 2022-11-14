@@ -11,7 +11,6 @@ on:
       - published
 
 env:
-  CARGO_TERM_COLOR: always
   DEBIAN_FRONTEND: noninteractive
 
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
@@ -36,9 +35,8 @@ jobs:
         run: mkdir packages/packsquash_gui/dist
 
       - name: 🧰 Install Rust toolchain
-        uses: dtolnay/rust-toolchain@v1
+        uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
           components: rustfmt, clippy
 
       - name: 🧰 Install development packages
@@ -186,9 +184,8 @@ jobs:
         run: apt-get install -yq gcc-aarch64-linux-gnu qemu-user
 
       - name: 🧰 Install Rust toolchain
-        uses: dtolnay/rust-toolchain@v1
+        uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
           targets: ${{ matrix.rust-toolchain-targets }}
           components: rust-src
 
