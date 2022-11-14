@@ -199,12 +199,6 @@ jobs:
       - name: 💨 Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
 
-      - name: Temporary fix to get Linux builds working
-        if: startsWith(matrix.runner, 'ubuntu')
-        run: |
-          npm cache clean --force
-          rm -rf "$HOME/.npm"
-
       - name: 🧰 Install cargo-deb
         if: startsWith(matrix.runner, 'ubuntu')
         uses: taiki-e/install-action@v1
@@ -239,7 +233,10 @@ jobs:
         if: ${{ !startsWith(matrix.runner, 'macos') && matrix.tauri-target == '' }}
         working-directory: packages/packsquash_gui
         run: |
-          npm ci
+          # --unsafe-perm avoids dropping root privileges, which may be needed to access the npm cache at
+          # the container HOME directory, which runs as root. See:
+          # https://docs.npmjs.com/cli/v6/using-npm/config#unsafe-perm
+          npm ci --unsafe-perm
           npm run build
 
       - name: 🔨 Generate CLI Debian package
@@ -254,7 +251,7 @@ jobs:
         if: matrix.tauri-target != ''
         working-directory: packages/packsquash_gui
         run: |
-          npm ci
+          npm ci --unsafe-perm
           cargo tauri build -v --target ${{ matrix.tauri-target }} -- -Z build-std
 
       - name: 🔨 Generate GUI Debian package
