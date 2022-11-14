@@ -227,7 +227,7 @@ jobs:
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: 🔨 Build GUI frontend
-        if: !startsWith(matrix.runner, 'macos') && matrix.tauri-target == ''
+        if: ${{ !startsWith(matrix.runner, 'macos') && matrix.tauri-target == '' }}
         working-directory: packages/packsquash_gui
         run: |
           npm ci
@@ -258,7 +258,7 @@ jobs:
         run: packages/packsquash_gui/src-tauri/bundles/wix/build_multilingual_installer.ps1
 
       - name: 📤 Upload CLI binary
-        if: !startsWith(matrix.runner, 'ubuntu')
+        if: ${{ !startsWith(matrix.runner, 'ubuntu') }}
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
