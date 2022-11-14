@@ -17,7 +17,7 @@ $ErrorActionPreference = "Stop"
 
 # The languages the installer will be in, barring en-US, followed by their LANGID. Source:
 # https://learn.microsoft.com/en-us/windows/win32/msi/localizing-the-error-and-actiontext-tables
-$AdditionalLanguages = ("es-ES",3082),("fr-FR",1036),("ja-JP",1041)
+$AdditionalLanguages = ("es-ES",3082)#,("fr-FR",1036),("ja-JP",1041)
 $EN_US_LOCID = 1033
 # The Tauri WiX bundler puts the WiX executables at the following directory. Source:
 # https://github.com/tauri-apps/tauri/blob/2901145c497299f033ba7120af5f2e7ead16c75a/tooling/bundler/src/bundle/windows/msi.rs#L31-L32
