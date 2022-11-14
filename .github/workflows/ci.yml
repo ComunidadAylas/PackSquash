@@ -202,7 +202,7 @@ jobs:
           tool: cargo-deb@1.41.0
 
       - name: 🧰 Install tauri-cli
-        if: !startsWith(matrix.runner, 'ubuntu')
+        if: ${{ !startsWith(matrix.runner, 'ubuntu') }}
         uses: taiki-e/install-action@v1
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
