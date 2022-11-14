@@ -147,9 +147,11 @@ jobs:
       github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
-      - name: Temporary fix to get AArch64 Linux builds working
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: rm -rf "$HOME/.npm"
+      - name: Temporary fix to get Linux builds working
+        if: startsWith(matrix.runner, 'ubuntu')
+        run: |
+          npm cache clean --force
+          rm -rf "$HOME/.npm"
 
       - name: 📦 Add Linux ARM64 architecture APT packages
         if: matrix.target == 'aarch64-unknown-linux-gnu'
