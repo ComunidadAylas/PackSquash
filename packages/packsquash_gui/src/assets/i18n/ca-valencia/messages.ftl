@@ -63,7 +63,7 @@ optimization-screen-pack-type-placeholder = Determinant tipus de paquet...
 optimization-screen-pack-type-description =
     Tipus de paquet: { $packType ->
        *[resource_pack] paquet de recursos
-         [data_pack] paquet de dades
+        [data_pack] paquet de dades
     } per a Minecraft { $gameVersionRange }
 optimization-screen-processed-file-count =
     { $processedFileCount } de { $packFileCount } { $packFileCount ->
