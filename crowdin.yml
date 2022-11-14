@@ -8,3 +8,8 @@ files:
     export_only_approved: true
     skip_untranslated_files: true
     skip_untranslated_strings: true
+  - source: /packages/packsquash_gui/src-tauri/bundles/wix/locales/en-US.wxl
+    translation: /packages/packsquash_gui/src-tauri/bundles/wix/locales/%locale%.wxl
+    export_only_approved: true
+    skip_untranslated_files: true
+    skip_untranslated_strings: true
