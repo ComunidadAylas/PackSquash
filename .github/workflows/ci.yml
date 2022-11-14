@@ -240,13 +240,6 @@ jobs:
       - name: 🔨 Build GUI frontend
         working-directory: packages/packsquash_gui
         run: |
-          # chown to work around npm insisting on running as non-root in a container, where running as root
-          # doesn't really matter because it's a fake root user.
-          # We could also run the container as non-root, but then we wouldn't be able to install APT packages,
-          # because the base Debian image lacks sudo, su requires authentication, and using a heavier Ubuntu
-          # image is overkill for this.
-          # TL;DR: work around typical, not that well thought out Node shenanigans
-          chown -R 1001:1001 /github/home/.npm
           npm ci
           npm run build
 
