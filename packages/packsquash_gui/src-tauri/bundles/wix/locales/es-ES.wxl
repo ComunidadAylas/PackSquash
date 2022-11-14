@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<WixLocalization Culture="es-ES" xmlns="http://schemas.microsoft.com/wix/2006/localization">
-  <String Id="LaunchApp">Abrir PackSquash</String>
+<?xml version="1.0" encoding="UTF-8"?>
+<WixLocalization xmlns="http://schemas.microsoft.com/wix/2006/localization" Codepage="1252" Language="3082" Culture="es-es">
+  <String Id="LaunchAppCheckboxCaption">Abrir PackSquash</String>
   <String Id="AppShortcutDescription">Abrir PackSquash</String>
   <String Id="InstallAppFeatureTitle">PackSquash</String>
   <String Id="InstallAppFeatureDescription">Instala PackSquash</String>
