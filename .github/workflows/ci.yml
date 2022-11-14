@@ -237,7 +237,7 @@ jobs:
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Build GUI frontend
-        if: !startsWith(matrix.runner, 'macos') && matrix.tauri-target == ''
+        if: ${{ !startsWith(matrix.runner, 'macos') && matrix.tauri-target == '' }}
         working-directory: packages/packsquash_gui
         run: |
           npm ci
