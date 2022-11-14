@@ -12,10 +12,6 @@ on:
 
 env:
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
-  TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-  TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-
-  DEBIAN_FRONTEND: noninteractive
 
 jobs:
   static-analysis:
@@ -84,7 +80,6 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
-            rust-toolchain-targets: x86_64-pc-windows-msvc
             runner: ubuntu-latest
             container: node:16-bullseye-slim
             pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
@@ -99,7 +94,6 @@ jobs:
 
           - target: aarch64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
-            rust-toolchain-targets: aarch64-unknown-linux-gnu
             runner: ubuntu-latest
             container: node:16-bullseye-slim
             pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
@@ -118,13 +112,11 @@ jobs:
 
           - target: x86_64-apple-darwin
             host-target: x86_64-apple-darwin
-            rust-toolchain-targets: aarch64-apple-darwin
             tauri-target: universal-apple-darwin
             runner: macos-latest
 
           - target: aarch64-apple-darwin
             host-target: x86_64-apple-darwin
-            rust-toolchain-targets: aarch64-apple-darwin
             runner: macos-latest
 
     runs-on: ${{ matrix.runner }}
@@ -187,8 +179,8 @@ jobs:
       - name: 🧰 Install Rust toolchain
         uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly-${{ matrix.host-target }}
-          targets: ${{ env.CARGO_BUILD_TARGET }}
+          toolchain: ${{ env.RUSTUP_TOOLCHAIN }}
+          targets: ${{ matrix.target }}
           components: rust-src
 
       - name: 💨 Cache Rust artifacts
@@ -207,7 +199,7 @@ jobs:
           tool: cargo-deb
 
       - name: 🧰 Install tauri-cli
-        if: endsWith(matrix.target, '-linux-gnu')
+        if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'
         uses: taiki-e/install-action@v2
         with:
           tool: tauri-cli
@@ -238,7 +230,7 @@ jobs:
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Build GUI frontend
-        if: ${{ !startsWith(matrix.runner, 'macos') && matrix.tauri-target == '' }}
+        if: ${{ !contains(matrix.target, '-windows-') && matrix.target != 'x86_64-apple-darwin' }}
         working-directory: packages/packsquash_gui
         run: |
           npm ci
@@ -249,22 +241,29 @@ jobs:
         run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Build GUI frontend, installers and updater artifacts
-        if: matrix.tauri-target != ''
+        if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'
         working-directory: packages/packsquash_gui
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         run: |
-          npm ci
-          cargo tauri build -v --target ${{ matrix.tauri-target }} -- -Z build-std
+          (
+            # Do not trust Node package installation scripts with sensitive keys
+            unset -v TAURI_PRIVATE_KEY TAURI_KEY_PASSWORD
+            npm ci
+          )
+          cargo tauri build -v --target ${{ matrix.tauri-target || matrix.target }} -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI Debian package
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu')
         run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI AppImage
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu')
         run: packages/packsquash_gui/src-tauri/bundles/appimage/build.sh
 
       - name: 🔨 Generate multilingual GUI MSI installer
-        if: startsWith(matrix.runner, 'windows')
+        if: contains(matrix.target, '-windows-')
         run: packages/packsquash_gui/src-tauri/bundles/wix/build_multilingual_installer.ps1
 
       - name: 📤 Upload CLI binary
@@ -284,14 +283,14 @@ jobs:
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
       - name: 📤 Upload GUI Debian package
-        if: startsWith(matrix.runner, 'ubuntu')
+        if:  endsWith(matrix.target, '-linux-gnu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash-gui_*.deb
 
       - name: 📤 Upload GUI AppImage
-        if: startsWith(matrix.runner, 'ubuntu')
+        if:  endsWith(matrix.target, '-linux-gnu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI AppImage (${{ matrix.appimage-arch }})
@@ -305,18 +304,18 @@ jobs:
           path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage.zsync
 
       - name: 📤 Upload GUI MSI installer
-        if: startsWith(matrix.runner, 'windows')
+        if: contains(matrix.target, '-windows-')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI MSI installer (${{ matrix.target }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/bundle/msi/PackSquash_*_x64.msi
 
       - name: 📤 Upload GUI Apple Disk Image
-        if: startsWith(matrix.runner, 'macos') && matrix.tauri-target != ''
+        if: matrix.target == 'x86_64-apple-darwin'
         uses: actions/upload-artifact@v3
         with:
-          name: PackSquash GUI Apple Disk Image (${{ matrix.tauri-target }})
-          path: target/${{ matrix.tauri-target }}/release/bundle/dmg/PackSquash_*.dmg
+          name: PackSquash GUI Apple Disk Image (${{ matrix.tauri-target || matrix.target }})
+          path: target/${{ matrix.tauri-target || matrix.target }}/release/bundle/dmg/PackSquash_*.dmg
 
   build-universal-macos-binaries:
 
