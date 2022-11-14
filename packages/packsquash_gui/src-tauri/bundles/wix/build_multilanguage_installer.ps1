@@ -23,7 +23,14 @@ $EN_US_LOCID = 1033
 # https://github.com/tauri-apps/tauri/blob/2901145c497299f033ba7120af5f2e7ead16c75a/tooling/bundler/src/bundle/windows/msi.rs#L31-L32
 $WixToolsPath = "$env:LOCALAPPDATA\tauri\WixTools"
 
-Push-Location target\release\wix\x64
+if ($env:CARGO_BUILD_TARGET -eq $null)
+{
+  Push-Location target\release\wix\x64
+}
+else
+{
+  Push-Location "target\$env:CARGO_BUILD_TARGET\release\wix\x64"
+}
 
 $SourceInstaller = (Get-Item ..\..\bundle\msi\*_en-US.msi).FullName
 $InstallerPrefix = $SourceInstaller.TrimEnd("_en-US.msi")
