@@ -147,12 +147,6 @@ jobs:
       github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
 
     steps:
-      - name: Temporary fix to get Linux builds working
-        if: startsWith(matrix.runner, 'ubuntu')
-        run: |
-          npm cache clean --force
-          rm -rf "$HOME/.npm"
-
       - name: 📦 Add Linux ARM64 architecture APT packages
         if: matrix.target == 'aarch64-unknown-linux-gnu'
         run: |
@@ -208,7 +202,7 @@ jobs:
           tool: cargo-deb@1.41.0
 
       - name: 🧰 Install tauri-cli
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: !startsWith(matrix.runner, 'ubuntu')
         uses: taiki-e/install-action@v1
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
