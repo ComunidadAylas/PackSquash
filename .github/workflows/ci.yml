@@ -143,8 +143,8 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
-      - name: 🧰 Install toolchain
-        if: matrix.runner == 'ubuntu-latest'
+      - name: 🧰 Install Linux toolchain packages
+        if: startsWith(matrix.runner, 'ubuntu')
         run: |
           apt-get update
           # curl is required by rustup and Tauri.
