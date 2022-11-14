@@ -233,10 +233,10 @@ jobs:
         if: ${{ !startsWith(matrix.runner, 'macos') && matrix.tauri-target == '' }}
         working-directory: packages/packsquash_gui
         run: |
-          # --unsafe-perm avoids dropping root privileges, which may be needed to access the npm cache at
-          # the container HOME directory, which runs as root. See:
-          # https://docs.npmjs.com/cli/v6/using-npm/config#unsafe-perm
-          npm ci --unsafe-perm
+          # The default npm cache directory resides at the home directory. That directory is
+          # bind-mounted from the host runner, which is owned by an unprivileged user. To
+          # avoid permission issues, change the cache directory to be within the container
+          npm ci --cache=/tmp/.npm
           npm run build
 
       - name: 🔨 Generate CLI Debian package
@@ -251,7 +251,7 @@ jobs:
         if: matrix.tauri-target != ''
         working-directory: packages/packsquash_gui
         run: |
-          npm ci --unsafe-perm
+          npm ci
           cargo tauri build -v --target ${{ matrix.tauri-target }} -- -Z build-std
 
       - name: 🔨 Generate GUI Debian package
