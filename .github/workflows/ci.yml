@@ -136,7 +136,6 @@ jobs:
       TARGET_APPIMAGE_APT_ARCH: ${{ matrix.apt-arch }}
       PKG_CONFIG_ALLOW_CROSS: 1
       PKG_CONFIG_PATH: ${{ matrix.pkg-config-path }}
-      NODE_ENV: production
 
     # Only run if this is not a pull request, or for pull requests on forks
     if: github.event_name != 'pull_request' ||
