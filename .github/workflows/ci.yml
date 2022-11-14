@@ -50,7 +50,7 @@ jobs:
       - name: 🔍 ESLint check
         working-directory: packages/packsquash_gui
         run: |
-          npm install
+          npm ci
           npm run lint
 
       - name: 🔍 Cargo deny check
@@ -144,6 +144,7 @@ jobs:
 
       PKG_CONFIG_ALLOW_CROSS: 1
       PKG_CONFIG_PATH: ${{ matrix.pkg-config-path }}
+      NODE_ENV: production
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
@@ -211,7 +212,8 @@ jobs:
         if: endsWith(matrix.target, '-linux-gnu')
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: latest
+          cache: npm
 
       - name: 📥 Checkout source
         uses: actions/checkout@v3
@@ -241,7 +243,7 @@ jobs:
       - name: 🔨 Build GUI frontend
         working-directory: packages/packsquash_gui
         run: |
-          npm install
+          npm ci
           npm run build
 
       - name: 🔨 Generate CLI Debian package
