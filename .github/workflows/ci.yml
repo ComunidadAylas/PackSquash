@@ -376,11 +376,13 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # Tag the image as "edge" for every commit on master.
+          # Tag the image by its ref for every commit on non-master branches.
           # Maintain the "latest", full and major and minor semver tags for each semver tag push
           tags: |
             type=edge,branch=master
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
           labels: |
             org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
