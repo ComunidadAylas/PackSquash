@@ -79,11 +79,11 @@ jobs:
           - aarch64-unknown-linux-gnu
           - aarch64-unknown-linux-musl
           - x86_64-apple-darwin
-          - aarch64-apple-darwin
 
         include:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
+            rust-toolchain-targets: x86_64-pc-windows-msvc
             runner: ubuntu-latest
             container: node:16-bullseye-slim
             pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
@@ -98,6 +98,7 @@ jobs:
 
           - target: aarch64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
+            rust-toolchain-targets: aarch64-unknown-linux-gnu
             runner: ubuntu-latest
             container: node:16-bullseye-slim
             pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
@@ -116,10 +117,13 @@ jobs:
 
           - target: x86_64-apple-darwin
             host-target: x86_64-apple-darwin
+            rust-toolchain-targets: aarch64-apple-darwin
+            tauri-target: universal-apple-darwin
             runner: macos-latest
 
           - target: aarch64-apple-darwin
             host-target: x86_64-apple-darwin
+            rust-toolchain-targets: aarch64-apple-darwin
             runner: macos-latest
 
     runs-on: ${{ matrix.runner }}
@@ -172,13 +176,8 @@ jobs:
                               python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
                               markdown html2text
 
-      - name: 🧰 Install toolchain
-        if: matrix.runner == 'windows-latest'
-        run: chocolatey install jq
-
-      - name: 🧰 Install toolchain
-        if: matrix.runner == 'macos-latest'
-        run: brew install jq
+      # The GitHub Windows and macOS images already have jq, git and the build-essential equivalents installed,
+      # so we don't need to install them explicitly. However, that may not be the case in different environments
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: startsWith(matrix.target, 'aarch64-unknown-linux')
@@ -238,6 +237,7 @@ jobs:
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Build GUI frontend
+        if: !startsWith(matrix.runner, 'macos') && matrix.tauri-target == ''
         working-directory: packages/packsquash_gui
         run: |
           npm ci
@@ -247,20 +247,20 @@ jobs:
         if: endsWith(matrix.target, '-linux-gnu')
         run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
+      - name: 🔨 Build GUI frontend, installers and updater artifacts
+        if: matrix.tauri-target != ''
+        run: cargo tauri build -v --target ${{ matrix.tauri-target }} -- -Z build-std
+
       - name: 🔨 Generate GUI Debian package
-        if: matrix.runner == 'ubuntu-latest'
+        if: startsWith(matrix.runner, 'ubuntu')
         run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI AppImage
-        if: matrix.runner == 'ubuntu-latest'
+        if: startsWith(matrix.runner, 'ubuntu')
         run: packages/packsquash_gui/src-tauri/bundles/appimage/build.sh
 
-      - name: 🔨 Generate GUI MSIs, dmg and update artifacts
-        if: matrix.runner != 'ubuntu-latest'
-        run: cargo tauri build -v --target ${{ matrix.target }}
-
-      - name: 🔨 Generate GUI multilingual MSI installer
-        if: matrix.runner == 'windows-latest'
+      - name: 🔨 Generate multilingual GUI MSI installer
+        if: startsWith(matrix.runner, 'windows')
         run: packages/packsquash_gui/src-tauri/bundles/wix/build_multilingual_installer.ps1
 
       - name: 📤 Upload CLI binary
@@ -280,25 +280,39 @@ jobs:
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
       - name: 📤 Upload GUI Debian package
-        if: matrix.runner == 'ubuntu-latest'
+        if: startsWith(matrix.runner, 'ubuntu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash-gui_*.deb
 
       - name: 📤 Upload GUI AppImage
-        if: matrix.runner == 'ubuntu-latest'
+        if: startsWith(matrix.runner, 'ubuntu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI AppImage (${{ matrix.appimage-arch }})
           path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage
 
       - name: 📤 Upload GUI AppImage update diff
-        if: matrix.runner == 'ubuntu-latest'
+        if: startsWith(matrix.runner, 'ubuntu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI AppImage zsync (${{ matrix.appimage-arch }})
           path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage.zsync
+
+      - name: 📤 Upload GUI MSI installer
+        if: startsWith(matrix.runner, 'windows')
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI MSI installer (${{ matrix.target }})
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/bundle/msi/PackSquash_*_x64.msi
+
+      - name: 📤 Upload GUI Apple Disk Image
+        if: startsWith(matrix.runner, 'macos') && matrix.tauri-target != ''
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI Apple Disk Image (${{ matrix.tauri-target }})
+          path: target/${{ matrix.tauri-target }}/release/bundle/dmg/PackSquash_*.dmg
 
   build-universal-macos-binaries:
 
