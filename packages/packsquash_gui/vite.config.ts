@@ -16,7 +16,14 @@ export default defineConfig({
     port: 3000
   },
   build: {
-    target: "esnext"
+    target: "esnext",
+    rollupOptions: {
+      output: {
+        // Shorten file names to save some space on the final executable
+        chunkFileNames: "[name].js",
+        assetFileNames: "[name].[hash].[ext]"
+      }
+    }
   },
   define: {
     // Workaround for @iarna/toml requiring global
