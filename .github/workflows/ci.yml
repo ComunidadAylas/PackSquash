@@ -128,7 +128,9 @@ jobs:
 
     runs-on: ${{ matrix.runner }}
 
-    container: ${{ matrix.container }}
+    container:
+      image: ${{ matrix.container }}
+      options: --user 1001:1001 # Run as the unprivileged GitHub runner user. npm requires this
 
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
@@ -145,23 +147,23 @@ jobs:
       - name: 📦 Add Linux ARM64 architecture APT packages
         if: matrix.target == 'aarch64-unknown-linux-gnu'
         run: |
-          dpkg --add-architecture arm64
-          apt-get update
+          su -c 'dpkg --add-architecture arm64'
+          su -c 'apt-get update'
 
       - name: 🧰 Install toolchain
         if: matrix.runner == 'ubuntu-latest'
         run: |
-          apt-get update
+          su -c 'apt-get update'
           # curl is required by rustup and Tauri.
           # markdown and html2text are required to generate the Debian package only.
           # The third line contains packages necessary for appimage-builder only.
           # The fourth line contains packages necessary for Tauri.
           # The fifth line contains packages necessary for build-time JSON Schema generation
-          apt-get install -yq build-essential git curl \
-                              markdown html2text \
-                              python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
-                              libssl-dev:${{ matrix.apt-arch }} libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
-                              jq
+          su -c 'apt-get install -yq build-essential git curl \
+                                     markdown html2text \
+                                     python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
+                                     libssl-dev:${{ matrix.apt-arch }} libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
+                                     jq'
 
       - name: 🧰 Install toolchain
         if: matrix.runner == 'windows-latest'
@@ -189,7 +191,7 @@ jobs:
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: apt-get install -yq gcc-aarch64-linux-gnu qemu-user
+        run: su -c 'apt-get install -yq gcc-aarch64-linux-gnu qemu-user'
 
       - name: 🧰 Install Rust toolchain
         uses: actions-rs/toolchain@v1
