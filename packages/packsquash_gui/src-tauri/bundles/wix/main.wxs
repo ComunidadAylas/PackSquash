@@ -25,7 +25,7 @@
                  Compressed="yes"
                  InstallScope="perMachine"
                  Description="{{{product_name}}}"
-                 Comments=""
+                 Comments="(c) {{{manufacturer}}}"
                  Manufacturer="{{{manufacturer}}}"
                  SummaryCodepage="!(loc.TauriCodepage)"/>
 
