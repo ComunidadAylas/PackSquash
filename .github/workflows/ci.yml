@@ -148,10 +148,12 @@ jobs:
 
     steps:
       - name: 📦 Add Linux ARM64 architecture APT packages
+        if: startsWith(matrix.runner, 'ubuntu')
+        run: sed -i '/bullseye-.* main$/d' /etc/apt/sources.list
+
+      - name: 📦 Add Linux ARM64 architecture APT packages
         if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: |
-          dpkg --add-architecture arm64
-          apt-get update
+        run: dpkg --add-architecture arm64
 
       - name: 🧰 Install Linux toolchain packages
         if: startsWith(matrix.runner, 'ubuntu')
