@@ -106,6 +106,10 @@ AppDir:
       - sbin
       - bin
 
+  # Incorporate Tauri patch to relocate hardcoded system WebKitGTK binary paths to the AppDir:
+  # https://github.com/tauri-apps/linuxdeploy-plugin-gtk/blob/c017fa2962008635d201889a721373077dd299e4/linuxdeploy-plugin-gtk.sh#L325-L326
+  after_bundle: find "$TARGET_APPDIR"/usr/lib -name 'libwebkit*' -exec sed -i -e "s|/usr|././|g" '{}' \;
+
   # Tests don't work due to Tauri security checks we can't work around:
   # https://github.com/tauri-apps/tauri/blob/35264b4c1801b381e0b867c1c35540f0fbb43365/core/tauri-utils/src/lib.rs#L202
   #test:
