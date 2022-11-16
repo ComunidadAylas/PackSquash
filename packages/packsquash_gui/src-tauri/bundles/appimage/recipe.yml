@@ -46,8 +46,6 @@ AppDir:
       - packsquash-gui
       # This package is necessary to avoid this: https://github.com/AppImageCrafters/appimage-builder/pull/191
       - shared-mime-info
-      # Avoid a backwards compatibility warning from appimage-builder
-      - libc6
 
     exclude:
       - systemd
@@ -89,7 +87,6 @@ AppDir:
       - var
       # systemd, lsb, modprobe.d, udev and misc daemon files
       - lib/systemd
-      - lib/x86_64-linux-gnu
       - usr/lib/systemd
       - usr/lib/x86_64-linux-gnu/systemd
       - lib/udev
