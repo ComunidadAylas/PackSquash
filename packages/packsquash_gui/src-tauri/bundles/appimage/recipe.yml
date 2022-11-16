@@ -85,12 +85,14 @@ AppDir:
       - usr/lib/pkgconfig
       - etc
       - var
-      # systemd, lsb, modprobe.d, udev and misc daemon files
+      # systemd, pam, lsb, modprobe.d, udev and misc daemon files
       - lib/systemd
+      - lib/*-linux-gnu/security
       - usr/lib/systemd
-      - usr/lib/x86_64-linux-gnu/systemd
+      - usr/lib/*-linux-gnu/systemd
       - lib/udev
       - usr/lib/udev
+      - usr/lib/*.d
       - lib/lsb
       - lib/modprobe.d
       - usr/lib/kernel
@@ -100,7 +102,7 @@ AppDir:
       # Unneeded utility programs and libraries
       - usr/sbin
       # The only missing alphabet letter here is p, to not delete the PackSquash executable
-      - usr/bin/{a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,q,r,s,t,u,v,w,x,y,z}*
+      - usr/bin/[abcdefghijklmnoqrstuvwxyz]*
       - sbin
       - bin
 
