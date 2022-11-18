@@ -47,6 +47,10 @@ language.
     It should be noted that Windows Installer only supports a fixed set of
     languages, so some languages may not be able to have a localized installer.
 
+- [ ] Add the new language to the `LOCALES` array defined in
+  `src/contexts/i18n.tsx` and modify `AvailableLocales` accordingly. Languages
+  are roughly ordered by their number of speakers.
+
 - [ ] Add the new language to the `AdditionalLanguages` array defined in the
   `src-tauri/bundles/wix/build_multilingual_installer.ps1` script to register
   the new Windows Installer MSI language, if applicable. Also add it to tauri >
