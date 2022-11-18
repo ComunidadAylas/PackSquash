@@ -30,7 +30,6 @@ jobs:
         with:
           workflow: ${{ env.CI_WORKFLOW }}
           workflow_conclusion: success
-          branch: workspace/v0.4.0 # TODO remove branch filter
           event: push # TODO change to release
           name: PackSquash GUI MSI update bundle (${{ env.WINDOWS_TARGET }})
 
@@ -39,7 +38,6 @@ jobs:
         with:
           workflow: ${{ env.CI_WORKFLOW }}
           workflow_conclusion: success
-          branch: workspace/v0.4.0 # TODO remove branch filter
           event: push # TODO change to release
           name: PackSquash GUI MSI update bundle signature (${{ env.WINDOWS_TARGET }})
 
@@ -48,7 +46,6 @@ jobs:
         with:
           workflow: ${{ env.CI_WORKFLOW }}
           workflow_conclusion: success
-          branch: workspace/v0.4.0 # TODO remove branch filter
           event: push # TODO change to release
           name: PackSquash GUI macOS update bundle (${{ env.MACOS_TARGET }})
 
@@ -57,7 +54,6 @@ jobs:
         with:
           workflow: ${{ env.CI_WORKFLOW }}
           workflow_conclusion: success
-          branch: workspace/v0.4.0 # TODO remove branch filter
           event: push # TODO change to release
           name: PackSquash GUI macOS update bundle signature (${{ env.MACOS_TARGET }})
 
@@ -106,7 +102,7 @@ jobs:
                 signature: $macos_update_bundle_signature
               }
             }
-          }' > version-manifest.json
+          }' | tee version-manifest.json
 
       - name: 📤 Upload updater artifacts to object store
         uses: jakejarvis/s3-sync-action@v0.5.1
