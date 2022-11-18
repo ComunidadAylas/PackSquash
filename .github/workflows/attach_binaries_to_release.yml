@@ -4,7 +4,6 @@ on:
   workflow_run:
     workflows: [CI]
     types: [completed]
-    branches: ['workspace/v0.4.0'] # TODO remove branch filter
 
 jobs:
   attach-binaries-to-release:
