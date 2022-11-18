@@ -11,23 +11,17 @@ use packsquash_options::SquashOptions;
 use path_absolutize::Absolutize;
 use std::borrow::Cow;
 use std::path::Path;
-use std::time::Duration;
 use std::{env, fs};
 use tauri::{Runtime, Window};
 use tauri_plugin_store::StoreBuilder;
 
 fn main() {
-	tauri::Builder::default()
+	let mut tauri_builder = tauri::Builder::default()
 		.plugin(
 			tauri_plugin_store::PluginBuilder::default()
 				.store(StoreBuilder::new("settings.json".into()).build())
 				.build()
 		)
-		.setup(|app| {
-			tauri::updater::builder(app.handle()).timeout(Duration::from_secs(30));
-
-			Ok(())
-		})
 		.invoke_handler(tauri::generate_handler![
 			app_build_version,
 			app_build_date,
@@ -39,7 +33,19 @@ fn main() {
 			absolutize_path,
 			get_parent_path,
 			set_working_directory
-		])
+		]);
+
+	// Override the updater target to ignore architecture differences on macOS platforms.
+	// The documentation is not crystal clear about this, but after reading it in detail
+	// and inspecting the source code it stands out that setting the updater target also
+	// changes the platform key Tauri will look up for in the JSON response. Refs:
+	// https://docs.rs/tauri/1.2.0/tauri/updater/struct.UpdateBuilder.html#method.target
+	// https://github.com/tauri-apps/tauri/blob/ed43ff324330d1bd9c042a53a6636dfc7d97b410/core/tauri/src/updater/core.rs#L333-L340
+	if cfg!(target_os = "macos") {
+		tauri_builder = tauri_builder.updater_target("darwin-universal");
+	}
+
+	tauri_builder
 		.run(tauri::generate_context!())
 		.expect("Could not launch application")
 }
