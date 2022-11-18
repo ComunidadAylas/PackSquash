@@ -32,3 +32,26 @@ Your app is ready to be deployed!
 ## Deployment
 
 You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
+
+## Localization
+
+The following tasks must be carried out in order to localize the app for a new
+language.
+
+- [ ] Add the new target language on
+  [Crowdin](https://crowdin.com/project/packsquash), allowing translators to
+  localize:
+  - In-app text strings, which use the [Fluent localization framework](https://projectfluent.org/).
+  - Windows Installer MSI strings, which use the [WiX toolset localization
+    extension](https://wixtoolset.org/docs/v3/howtos/ui_and_localization/make_installer_localizable/).
+    It should be noted that Windows Installer only supports a fixed set of
+    languages, so some languages may not be able to have a localized installer.
+
+- [ ] Add the new language to the `AdditionalLanguages` array defined in the
+  `src-tauri/bundles/wix/build_multilingual_installer.ps1` script to register
+  the new Windows Installer MSI language, if applicable. Also add it to tauri >
+  bundle > windows > wix > language at `src-tauri/tauri.conf.json`.
+
+- [ ] Manually localize the Linux desktop entry comment string at
+  `src-tauri/bundles/deb/com.github.comunidadaylas.packsquash.gui.desktop` for
+  the new language.
