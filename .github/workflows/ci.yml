@@ -313,12 +313,40 @@ jobs:
           name: PackSquash GUI MSI installer (${{ matrix.target }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/bundle/msi/PackSquash_*_x64.msi
 
+      - name: 📤 Upload GUI MSI update bundle
+        if: startsWith(matrix.runner, 'windows')
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI MSI update bundle (${{ matrix.target }})
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/bundle/msi/PackSquash_*_x64_en-US.msi.zip
+
+      - name: 📤 Upload GUI MSI update bundle signature
+        if: startsWith(matrix.runner, 'windows')
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI MSI update bundle signature (${{ matrix.target }})
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/bundle/msi/PackSquash_*_x64_en-US.msi.zip.sig
+
       - name: 📤 Upload GUI Apple Disk Image
         if: matrix.target == 'x86_64-apple-darwin'
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI Apple Disk Image (${{ matrix.tauri-target || matrix.target }})
           path: target/${{ matrix.tauri-target || matrix.target }}/release/bundle/dmg/PackSquash_*.dmg
+
+      - name: 📤 Upload GUI macOS update bundle
+        if: startsWith(matrix.runner, 'macos') && matrix.tauri-target != ''
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI macOS update bundle (${{ matrix.tauri-target }})
+          path: target/${{ matrix.tauri-target }}/release/bundle/macos/PackSquash.app.tar.gz
+
+      - name: 📤 Upload GUI macOS update bundle signature
+        if: startsWith(matrix.runner, 'macos') && matrix.tauri-target != ''
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackSquash GUI macOS update bundle signature (${{ matrix.tauri-target }})
+          path: target/${{ matrix.tauri-target }}/release/bundle/macos/PackSquash.app.tar.gz.sig
 
   build-universal-macos-binaries:
 
