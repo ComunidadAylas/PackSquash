@@ -3,13 +3,6 @@ import { checkUpdate } from "@tauri-apps/api/updater";
 import UpdateDialog from "./UpdateDialog";
 import osFamily from "../util/osFamily";
 
-// TODO Serve and maintain a JSON file like this somewhere, under packsquash.page.link, with fallback to direct URL:
-// https://tauri.app/v1/guides/distribution/updater/#update-file-json-format
-// Support windows-x86_64, darwin-x86_64 and darwin-aarch64 (Linux is handled better by ourselves)
-// To generate bundles, run cargo tauri build with TAURI_PRIVATE_KEY set to the private key (look at ~/.tauri/packsquash.key)
-// To disable the useless updater bundle for Linux targets, run this on CI:
-// jq 'del(.tauri.bundle.targets[] | select(. == "updater"))' src-tauri/tauri.conf.json > src-tauri/tauri.conf.json
-
 export default () => {
   const [updateResult] = createResource(checkUpdate);
 
