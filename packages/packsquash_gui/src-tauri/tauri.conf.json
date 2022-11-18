@@ -119,7 +119,7 @@
       "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDRDQTdFQkI4NDlCRjU2MEIKUldRTFZyOUp1T3VuVEkzemZrellYWFRxT1o5cjQ1OWt5dmMwc1dwMUdIL1pFODhwRjBRNmVjNDAK",
       "endpoints": [
-        "https://packsquash.page.link/Latest-GUI-app-update-manifest"
+        "https://pub-4ca517e65b6d470cb00725f41baed143.r2.dev/version-manifest.json"
       ],
       "windows": {
         "installMode": "passive"

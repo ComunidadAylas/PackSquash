@@ -1,0 +1,52 @@
+name: Attach binaries to release
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: ['workspace/v0.4.0'] # TODO remove branch filter
+
+jobs:
+  attach-binaries-to-release:
+    name: Attach binaries to release
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' # TODO change event to release
+
+    strategy:
+      matrix:
+        artifact:
+          #- PackSquash CLI AppImage (x86_64)
+          #- PackSquash CLI AppImage zsync (x86_64)
+          #- PackSquash CLI AppImage (aarch64)
+          #- PackSquash CLI AppImage zsync (aarch64)
+          - PackSquash CLI executable (x86_64-pc-windows-msvc)
+          #- PackSquash CLI executable (universal-apple-darwin)
+
+          #- PackSquash GUI AppImage (x86_64)
+          #- PackSquash GUI AppImage zsync (x86_64)
+          #- PackSquash GUI AppImage (aarch64)
+          #- PackSquash GUI AppImage zsync (aarch64)
+          #- PackSquash GUI MSI installer (x86_64-pc-windows-msvc)
+          - PackSquash GUI Apple Disk Image (universal-apple-darwin)
+        include:
+          - artifact: PackSquash CLI executable (x86_64-pc-windows-msvc)
+            binary-is-zipped-artifact: true
+        #  - artifact: PackSquash CLI executable (universal-apple-darwin)
+        #    binary-is-zipped-artifact: true
+
+    steps:
+      - name: 📥 Download ${{ matrix.artifact }}
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: ${{ matrix.artifact }}
+          run_id: ${{ github.event.workflow_run.id }}
+          skip_unpack: ${{ !!matrix.binary-is-zipped-artifact }}
+
+      - name: 📤 Upload artifact as release binary
+        uses: xresloader/upload-to-github-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: *
+          overwrite: true
+          update_latest_release: true
