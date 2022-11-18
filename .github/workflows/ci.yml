@@ -349,6 +349,7 @@ jobs:
           path: target/${{ matrix.tauri-target }}/release/bundle/macos/PackSquash.app.tar.gz.sig
 
   build-universal-macos-binaries:
+    name: Build universal macOS binaries
 
     name: Build universal macOS binaries
 
@@ -379,6 +380,7 @@ jobs:
           path: packsquash_cli
 
   build-docker-images:
+    name: Build Docker images
 
     name: Build Docker images
 
