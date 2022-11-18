@@ -19,6 +19,7 @@ env:
 
 jobs:
   static-analysis:
+    name: Static analysis
 
     runs-on: ubuntu-latest
 
@@ -81,6 +82,7 @@ jobs:
         run: npm run format
 
   build:
+    name: Build
 
     strategy:
       fail-fast: false
@@ -350,6 +352,7 @@ jobs:
           path: target/${{ matrix.tauri-target }}/release/bundle/macos/PackSquash.app.tar.gz.sig
 
   build-universal-macos-binaries:
+    name: Build universal macOS binaries
 
     runs-on: macos-latest
 
@@ -378,6 +381,7 @@ jobs:
           path: packsquash_cli
 
   build-docker-images:
+    name: Build Docker images
 
     runs-on: ubuntu-latest
 
