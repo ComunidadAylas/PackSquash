@@ -19,7 +19,7 @@ env:
   CI_WORKFLOW: ci.yml
 
 jobs:
-  generate-gui-updter-objects:
+  generate-gui-updater-objects:
     name: Generate GUI updater objects
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -70,7 +70,7 @@ jobs:
         run: |
           # Get the update bundle names
           for windows_bundle in PackSquash_*.msi.zip; do
-            WINDOWS_BUNDLE_NAME="$windows_bundle"
+            readonly WINDOWS_BUNDLE_NAME="$windows_bundle"
             break
           done
 
@@ -78,10 +78,10 @@ jobs:
 
           # Get the update bundles signatures
           WINDOWS_UPDATE_BUNDLE_SIGNATURE=$(cat "$WINDOWS_BUNDLE_NAME.sig")
-          readonly "$WINDOWS_UPDATE_BUNDLE_SIGNATURE"
+          readonly WINDOWS_UPDATE_BUNDLE_SIGNATURE
 
           MACOS_UPDATE_BUNDLE_SIGNATURE=$(cat "$MACOS_BUNDLE_NAME.sig")
-          readonly "$MACOS_UPDATE_BUNDLE_SIGNATURE"
+          readonly MACOS_UPDATE_BUNDLE_SIGNATURE
 
           # Generate the manifest
           jq -nc \
