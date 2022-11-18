@@ -1,0 +1,119 @@
+name: Generate GUI updater objects
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-tag:
+        description: The tag of the latest release version.
+        required: true
+        type: string
+
+      release-notes:
+        description: The version notes text that the update dialog will show for the latest release version, in English.
+        required: true
+        type: string
+
+env:
+  WINDOWS_TARGET: x86_64-pc-windows-msvc
+  MACOS_TARGET: universal-apple-darwin
+  CI_WORKFLOW: ci.yml
+
+jobs:
+  generate-gui-updter-objects:
+    name: Generate GUI updater objects
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Download GUI MSI update bundle
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ${{ env.CI_WORKFLOW }}
+          workflow_conclusion: success
+          branch: workspace/v0.4.0 # TODO remove branch filter
+          event: push # TODO change to release
+          name: PackSquash GUI MSI update bundle (${{ env.WINDOWS_TARGET }})
+
+      - name: 📥 Download GUI MSI update bundle signature
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ${{ env.CI_WORKFLOW }}
+          workflow_conclusion: success
+          branch: workspace/v0.4.0 # TODO remove branch filter
+          event: push # TODO change to release
+          name: PackSquash GUI MSI update bundle signature (${{ env.WINDOWS_TARGET }})
+
+      - name: 📥 Download GUI macOS update bundle
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ${{ env.CI_WORKFLOW }}
+          workflow_conclusion: success
+          branch: workspace/v0.4.0 # TODO remove branch filter
+          event: push # TODO change to release
+          name: PackSquash GUI macOS update bundle (${{ env.MACOS_TARGET }})
+
+      - name: 📥 Download GUI macOS update bundle signature
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ${{ env.CI_WORKFLOW }}
+          workflow_conclusion: success
+          branch: workspace/v0.4.0 # TODO remove branch filter
+          event: push # TODO change to release
+          name: PackSquash GUI macOS update bundle signature (${{ env.MACOS_TARGET }})
+
+      - name: ✏️ Generate updater JSON manifest
+        env:
+          VERSION_TAG: ${{ inputs.version-tag }}
+          RELEASE_NOTES: ${{ inputs.release-notes }}
+          # This should be kept in sync with the updater endpoint URL defined in tauri.conf.json
+          BASE_BUNDLE_URL: https://pub-4ca517e65b6d470cb00725f41baed143.r2.dev
+        run: |
+          # Get the update bundle names
+          for windows_bundle in PackSquash_*.msi.zip; do
+            WINDOWS_BUNDLE_NAME="$windows_bundle"
+            break
+          done
+
+          readonly MACOS_BUNDLE_NAME='PackSquash.app.tar.gz'
+
+          # Get the update bundles signatures
+          WINDOWS_UPDATE_BUNDLE_SIGNATURE=$(cat "$WINDOWS_BUNDLE_NAME.sig")
+          readonly "$WINDOWS_UPDATE_BUNDLE_SIGNATURE"
+
+          MACOS_UPDATE_BUNDLE_SIGNATURE=$(cat "$MACOS_BUNDLE_NAME.sig")
+          readonly "$MACOS_UPDATE_BUNDLE_SIGNATURE"
+
+          # Generate the manifest
+          jq -nc \
+          --arg version_tag "$VERSION_TAG" \
+          --arg release_notes "$RELEASE_NOTES" \
+          --arg release_date "$(date -u '+%FT%TZ')" \
+          --arg windows_update_bundle_url "$BASE_BUNDLE_URL/$WINDOWS_BUNDLE_NAME" \
+          --arg windows_update_bundle_signature "$WINDOWS_UPDATE_BUNDLE_SIGNATURE" \
+          --arg macos_update_bundle_url "$BASE_BUNDLE_URL/$MACOS_BUNDLE_NAME" \
+          --arg macos_update_bundle_signature "$MACOS_UPDATE_BUNDLE_SIGNATURE" \
+          '{
+            version: $version_tag,
+            notes: $release_notes,
+            pub_date: $release_date,
+            platforms: {
+              "windows-x86_64": {
+                url: $windows_update_bundle_url,
+                signature: $windows_update_bundle_signature
+              },
+              "darwin-universal": {
+                url: $macos_update_bundle_url,
+                signature: $macos_update_bundle_signature
+              }
+            }
+          }' > version-manifest.json
+
+      - name: 📤 Upload updater artifacts to object store
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        env:
+          AWS_S3_ENDPOINT: ${{ secrets.GUI_UPDATER_S3_ENDPOINT }}
+          AWS_S3_BUCKET: ${{ secrets.GUI_UPDATER_S3_BUCKET }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.GUI_UPDATER_S3_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.GUI_UPDATER_S3_ACCESS_KEY_ID }}
+        with:
+          args: --delete
