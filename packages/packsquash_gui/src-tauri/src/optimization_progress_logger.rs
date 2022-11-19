@@ -2,11 +2,15 @@ use log::{LevelFilter, Log, Metadata, Record, SetLoggerError};
 use packsquash::PackSquashStatus;
 use tauri::{Runtime, Window};
 
+/// Logger implementation that emits a Tauri window event for each PackSquash log record.
+/// Records from other sources are ignored.
 pub struct OptimizationProgressLogger<R: Runtime> {
 	window: Window<R>
 }
 
 impl<R: Runtime> OptimizationProgressLogger<R> {
+	/// Configures `log` to use this logger implementation, logging PackSquash log
+	/// records as Tauri events for the specified window.
 	pub fn init(window: Window<R>) -> Result<(), SetLoggerError> {
 		log::set_boxed_logger(Box::new(OptimizationProgressLogger { window }))
 			.map(|_| log::set_max_level(LevelFilter::Trace))

@@ -1,3 +1,6 @@
+//! Rust entrypoint for the PackSquash GUI, responsible for initializing Tauri and providing
+//! several commands to the frontend.
+
 #![cfg_attr(
 	all(not(debug_assertions), target_os = "windows"),
 	windows_subsystem = "windows"
