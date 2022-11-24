@@ -287,13 +287,12 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 		for (matching_header_offset, matching_header_size) in &*matching_local_headers {
 			let matching_data_start_offset = matching_header_offset + *matching_header_size as u64;
 
-			// Make sure we read data from the start
-			compressed_data_scratch_file.seek(SeekFrom::Start(0))?;
+			compressed_data_scratch_file.rewind()?;
 
 			// Move the output ZIP file cursor to where the matching data starts. If this is our
 			// first seek, make sure to note where it was, so we can go back there
 			if initial_output_zip_stream_offset.is_none() {
-				initial_output_zip_stream_offset = Some(output_zip.seek(SeekFrom::Current(0))?);
+				initial_output_zip_stream_offset = Some(output_zip.stream_position()?);
 			}
 			output_zip.seek(SeekFrom::Start(matching_data_start_offset))?;
 
@@ -333,7 +332,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 				output_zip.seek(SeekFrom::Start(offset))
 			} else {
 				// No matches found. There's no seeking around in the output ZIP to undo
-				output_zip.seek(SeekFrom::Current(0))
+				output_zip.stream_position()
 			}?;
 
 			add_partial_central_directory_header(
@@ -355,7 +354,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 			local_file_header.write(&mut output_zip)?;
 
 			// Write the compressed data
-			compressed_data_scratch_file.seek(SeekFrom::Start(0))?;
+			compressed_data_scratch_file.rewind()?;
 
 			match compressed_data_scratch_file {
 				MaybeScratchFile::ScratchFile(mut scratch_file) => {
@@ -457,7 +456,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 			// Move the output ZIP file cursor to where the matching data starts. If this is our
 			// first seek, make sure to note where it was, so we can go back there
 			if initial_output_zip_stream_offset.is_none() {
-				initial_output_zip_stream_offset = Some(output_zip.seek(SeekFrom::Current(0))?);
+				initial_output_zip_stream_offset = Some(output_zip.stream_position()?);
 			}
 			output_zip.seek(SeekFrom::Start(matching_data_start_offset))?;
 
@@ -497,7 +496,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 				output_zip.seek(SeekFrom::Start(offset))
 			} else {
 				// No matches found. There's no seeking around in the output ZIP to undo
-				output_zip.seek(SeekFrom::Current(0))
+				output_zip.stream_position()
 			}?;
 
 			add_partial_central_directory_header(
@@ -545,7 +544,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 		let mut output_zip = state.output_zip;
 
 		let central_directory_entry_count = u64::try_from(central_directory_data.len())?;
-		let central_directory_start_offset = output_zip.seek(SeekFrom::Current(0))?;
+		let central_directory_start_offset = output_zip.stream_position()?;
 
 		// First, write the central directory file headers
 		for (file_name, header_data) in central_directory_data {
@@ -567,7 +566,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 			central_directory_header.write(&mut output_zip)?;
 		}
 
-		let central_directory_end_offset = output_zip.seek(SeekFrom::Current(0))?;
+		let central_directory_end_offset = output_zip.stream_position()?;
 
 		// Now write the end of central directory
 		let mut end_of_central_directory = EndOfCentralDirectory {
@@ -591,7 +590,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 
 		// Finally, write the generated ZIP file to its place!
 		// This also implicitly flushes any buffer, so any error during flushing will be returned
-		output_zip.seek(SeekFrom::Start(0))?;
+		output_zip.rewind()?;
 		output_zip.copy_to(writer_provider()?)?;
 
 		Ok(())
@@ -617,7 +616,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 		// Get the processed data size
 		let processed_data_size = u32::try_from(processed_data.seek(SeekFrom::End(0))?)
 			.map_err(|_| SquashZipError::FileTooBig)?;
-		processed_data.seek(SeekFrom::Start(0))?;
+		processed_data.rewind()?;
 
 		// Set up our scratch compressed data file
 		let mut compressed_data_scratch_file = ScratchFile::with_capacity(
@@ -657,7 +656,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 				&mut compressed_data_scratch_file
 			)?;
 
-			compressed_data_size = compressed_data_scratch_file.seek(SeekFrom::Current(0))?;
+			compressed_data_size = compressed_data_scratch_file.stream_position()?;
 		}
 
 		let processed_data_crc = crc32_hasher.finalize();
@@ -867,7 +866,7 @@ fn read_previous_zip_contents<F: Read + Seek>(
 		// when looking for the next central directory header, because the seek position
 		// will point to those fields. This is intentional, as that signals a non-SquashZip
 		// ZIP file, and we should error out with such a file
-		let next_central_directory_header_offset = previous_zip.seek(SeekFrom::Current(0))?;
+		let next_central_directory_header_offset = previous_zip.stream_position()?;
 
 		// Now go to the local file header. We need to parse it a bit to compute the
 		// compressed data offset, as the compressed data is after the file name, which
