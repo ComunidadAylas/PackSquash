@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1669115650955,
+  "lastUpdate": 1669285876537,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "6ba00607ea037cd7eb2b6464e7ba06ce24206d8f",
-          "message": "feat: improve error messages for invalid options files\n\nThe error messages shown when parsing options files could be pretty\nunhelpful for end users when file-specific options are invalid, because\nthey just pointed to the fact that file-specific options could not be\nparsed without any further context or information.\n\nLuckily, I'm not alone this time. Someone made a great PR for upstream\ncode that has been unmerged for years and makes the messages more\nverbose in these cases, so at least it's possible to know what exactly\nwent wrong. Let's use their great work in PackSquash.\n\nIn addition, the path in which the error occurred is now shown, if\navailable.",
-          "timestamp": "2022-09-19T21:10:11Z",
-          "tree_id": "930139f31b56fe210f4e86c0981f1c1ef7c16c17",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6ba00607ea037cd7eb2b6464e7ba06ce24206d8f"
-        },
-        "date": 1663624590637,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9578949,
-            "range": "± 326114",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 361457630,
-            "range": "± 10916858",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12543595936,
-            "range": "± 726452457",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2325575223,
-            "range": "± 110012918",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2483038658,
             "range": "± 104274319",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "9d1bd79a608c6e4f987111b3ee03ce476fd2328a",
+          "message": "chore: fix new Clippy lints",
+          "timestamp": "2022-11-24T09:55:00Z",
+          "tree_id": "57400ef368275e60582fc6f0fd97926bdb26ebe4",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9d1bd79a608c6e4f987111b3ee03ce476fd2328a"
+        },
+        "date": 1669285875893,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9700947,
+            "range": "± 3465385",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 356612265,
+            "range": "± 2487198",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 10779775089,
+            "range": "± 64300568",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2279110366,
+            "range": "± 24823116",
             "unit": "ns/iter"
           }
         ]
