@@ -24,7 +24,7 @@ serde_path_to_error = "0.1.8"
 atty = "0.2.14"
 
 log = "0.4.17"
-env_logger = { version = "0.9.3", default-features = false, features = ["termcolor"] }
+env_logger = { version = "0.10.0", default-features = false, features = ["termcolor"] }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", default-features = false, features = ["consoleapi"] }
