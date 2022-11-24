@@ -617,7 +617,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 		// Get the processed data size
 		let processed_data_size = u32::try_from(processed_data.seek(SeekFrom::End(0))?)
 			.map_err(|_| SquashZipError::FileTooBig)?;
-		processed_data.seek(SeekFrom::Start(0))?;
+		processed_data.rewind()?;
 
 		// Set up our scratch compressed data file
 		let mut compressed_data_scratch_file = ScratchFile::with_capacity(
