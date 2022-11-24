@@ -15,10 +15,10 @@ fn works() {
 
 	assert_eq!(
 		scratch_file
-			.seek(SeekFrom::Current(0))
+			.stream_position()
 			.expect("No error should occur during this I/O operation"),
 		0,
-		"Unexpected initial seek position"
+		"Unexpected initial stream position"
 	);
 
 	scratch_file
@@ -60,7 +60,7 @@ fn works() {
 	);
 
 	scratch_file
-		.seek(SeekFrom::Start(0))
+		.rewind()
 		.expect("No I/O errors are assumed during tests");
 
 	let mut buf = [0; 11];
