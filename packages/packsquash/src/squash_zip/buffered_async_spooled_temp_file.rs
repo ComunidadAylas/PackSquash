@@ -209,9 +209,7 @@ impl AsyncSeek for BufferedAsyncSpooledTempFile {
 		let this = Pin::into_inner(self);
 		match this {
 			Self::InMemory(_, cursor) => Poll::Ready(Ok(cursor.position())),
-			Self::OnDisk(_, _) => {
-				Poll::Ready(task::block_in_place(|| this.seek(SeekFrom::Current(0))))
-			}
+			Self::OnDisk(_, _) => Poll::Ready(task::block_in_place(|| this.stream_position()))
 		}
 	}
 }

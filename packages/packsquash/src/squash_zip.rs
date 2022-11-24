@@ -312,14 +312,12 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			let matching_data_start_offset = matching_header_offset + *matching_header_size as u64;
 
 			// Make sure we read data from the start
-			compressed_data_scratch_file
-				.seek(SeekFrom::Start(0))
-				.await?;
+			compressed_data_scratch_file.rewind().await?;
 
 			// Move the output ZIP file cursor to where the matching data starts. If this is our
 			// first seek, make sure to note where it was, so we can go back there
 			if initial_output_zip_stream_offset.is_none() {
-				initial_output_zip_stream_offset = Some(output_zip.seek(SeekFrom::Current(0)).await?);
+				initial_output_zip_stream_offset = Some(output_zip.stream_position().await?);
 			}
 			output_zip
 				.seek(SeekFrom::Start(matching_data_start_offset))
@@ -379,7 +377,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				offset
 			} else {
 				// No matches occurred. Get the offset now for the first time
-				output_zip.seek(SeekFrom::Current(0)).await?
+				output_zip.stream_position().await?
 			};
 
 			add_partial_central_directory_header(
@@ -401,9 +399,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			local_file_header.write(output_zip).await?;
 
 			// Write the compressed data
-			compressed_data_scratch_file
-				.seek(SeekFrom::Start(0))
-				.await?;
+			compressed_data_scratch_file.rewind().await?;
 
 			tokio::io::copy(&mut compressed_data_scratch_file, output_zip).await?;
 		}
@@ -511,7 +507,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			// Move the output ZIP file cursor to where the matching data starts. If this is our
 			// first seek, make sure to note where it was, so we can go back there
 			if initial_output_zip_stream_offset.is_none() {
-				initial_output_zip_stream_offset = Some(output_zip.seek(SeekFrom::Current(0)).await?);
+				initial_output_zip_stream_offset = Some(output_zip.stream_position().await?);
 			}
 			output_zip
 				.seek(SeekFrom::Start(matching_data_start_offset))
@@ -585,7 +581,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				offset
 			} else {
 				// No matches occurred. Get the offset now for the first time
-				output_zip.seek(SeekFrom::Current(0)).await?
+				output_zip.stream_position().await?
 			};
 
 			add_partial_central_directory_header(
@@ -632,7 +628,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		let mut output_zip = state.output_zip;
 
 		let central_directory_entry_count = u64::try_from(central_directory_data.len())?;
-		let central_directory_start_offset = output_zip.seek(SeekFrom::Current(0)).await?;
+		let central_directory_start_offset = output_zip.stream_position().await?;
 
 		// First, write the central directory file headers
 		for (file_name, header_data) in central_directory_data {
@@ -654,7 +650,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			central_directory_header.write(&mut output_zip).await?;
 		}
 
-		let central_directory_end_offset = output_zip.seek(SeekFrom::Current(0)).await?;
+		let central_directory_end_offset = output_zip.stream_position().await?;
 
 		// Now write the end of central directory
 		let mut end_of_central_directory = EndOfCentralDirectory {
@@ -678,7 +674,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 
 		// Finally, write the generated ZIP file to its place!
 		// This also implicitly flushes any buffer, so any error during flushing will be returned
-		output_zip.seek(SeekFrom::Start(0)).await?;
+		output_zip.rewind().await?;
 
 		tokio::io::copy(&mut output_zip, &mut File::create(path).await?).await?;
 
@@ -737,7 +733,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			compressed_data_size = processed_data_size as u64;
 		} else {
 			// Rewind scratch file to read it back for compression
-			processed_data_scratch_file.seek(SeekFrom::Start(0)).await?;
+			processed_data_scratch_file.rewind().await?;
 
 			zopfli::compress(
 				&zopfli::Options {
@@ -756,9 +752,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				&mut compressed_data_scratch_file
 			)?;
 
-			compressed_data_size = compressed_data_scratch_file
-				.seek(SeekFrom::Current(0))
-				.await?;
+			compressed_data_size = compressed_data_scratch_file.stream_position().await?;
 		}
 
 		let compression_method;
@@ -968,7 +962,7 @@ async fn read_previous_zip_contents<F: AsyncRead + AsyncSeek + Unpin>(
 		// when looking for the next central directory header, because the seek position
 		// will point to those fields. This is intentional, as that signals a non-SquashZip
 		// ZIP file, and we should error out with such a file
-		let next_central_directory_header_offset = previous_zip.seek(SeekFrom::Current(0)).await?;
+		let next_central_directory_header_offset = previous_zip.stream_position().await?;
 
 		// Now go to the local file header. We need to parse it a bit to compute the
 		// compressed data offset, as the compressed data is after the file name, which
