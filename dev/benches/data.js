@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1669312871895,
+  "lastUpdate": 1669381775546,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "distinct": true,
-          "id": "ddae00963a4e012eba34e613ae3db6530d0e80bb",
-          "message": "chore(deps): update dependency certifi to v2022.9.24",
-          "timestamp": "2022-09-25T00:48:30Z",
-          "tree_id": "f16eb5a41869cabd73bb94ed54b49ade8e84ced0",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ddae00963a4e012eba34e613ae3db6530d0e80bb"
-        },
-        "date": 1664070000956,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14331744,
-            "range": "± 591486",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 465989260,
-            "range": "± 12196130",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 12171114399,
-            "range": "± 229521358",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 3040406758,
-            "range": "± 216608812",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2250565912,
             "range": "± 61245781",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "6f3782e4c55475e81d8b19146ed6445f64d022ec",
+          "message": "chore: bump dependencies\n\nMost notably, this commit updates env_logger to 0.10.0, which includes\na breaking feature name change.",
+          "timestamp": "2022-11-25T12:34:00Z",
+          "tree_id": "bb8c114d8dd8d18800e8c5cc6d9468c435b99bfd",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6f3782e4c55475e81d8b19146ed6445f64d022ec"
+        },
+        "date": 1669381774925,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10511015,
+            "range": "± 270924",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 359438124,
+            "range": "± 9017100",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 11009704768,
+            "range": "± 66436068",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 2167243163,
+            "range": "± 98174316",
             "unit": "ns/iter"
           }
         ]
