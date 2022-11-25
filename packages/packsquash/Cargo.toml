@@ -24,25 +24,25 @@ thiserror = "1.0.37"
 
 globset = { version = "0.4.9", default-features = false }
 patricia_tree = "0.4.0"
-ahash = "0.8.1"
+ahash = "0.8.2"
 # TODO delete this if the blockstate property list stops using maps
 phf = { version = "0.11.1", features = ["macros"] }
 tinyvec = { version = "1.6.0", features = ["alloc", "rustc_1_55", "serde"] }
 
-rayon = "1.5.3"
+rayon = "1.6.0"
 parking_lot = { version = "0.12.1", features = ["hardware-lock-elision"] }
 once_cell = { version = "1.16.0", features = ["parking_lot"] }
 
 log = { version = "0.4.17", features = ["kv_unstable"] }
 
 walkdir = "2.3.2"
-memmap2 = "0.5.7"
+memmap2 = "0.5.8"
 path-clean = "0.1.0"
 
 serde = { version = "1.0.147", features = ["derive"] }
 serde_path_to_error = "0.1.8"
 
-serde_json = "1.0.100"
+serde_json = "1.0.89"
 json_comments = "0.2.1"
 
 spng = { version = "0.2.0-alpha.2", default-features = false }
@@ -72,10 +72,9 @@ crc32fast = "1.3.2"
 zopfli = { version = "0.7.4", default-features = false, features = ["std"] }
 
 const-random = "0.1.15"
-const_format = "0.2.31"
-aes = "0.8.3"
-fpe = "0.6.1"
-uuid = "1.4.0"
+aes = "0.7.5"
+fpe = "0.5.1"
+uuid = "1.2.2"
 entropy = "0.4.1"
 rand_xoshiro = "0.6.0"
 onig = { version = "6.4.0", default-features = false }
@@ -92,7 +91,7 @@ mach2 = "0.4.1"
 git2 = { version = "0.15.0", default-features = false }
 time = { version = "0.3.17", default-features = false, features = ["std"] }
 schemars = { version = "0.8.11", default-features = false }
-serde_json = "1.0.87"
+serde_json = "1.0.89"
 packsquash_options = { version = "0.3.1", path = "../packsquash_options" }
 
 [dev-dependencies]
