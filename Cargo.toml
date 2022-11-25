@@ -6,7 +6,8 @@ members = ["packages/packsquash", "packages/packsquash_cli", "packages/packsquas
 oxipng = { git = "https://github.com/ComunidadAylas/oxipng", branch = "master" }
 # Use our fork of glsl that allows it to parse files that use DOS-style CRLF line
 # endings, prevalent on Windows environments, fixes the #elif preprocessor directive
-# not being parsed, improves minification and fixes some incorrect transpiling
+# not being parsed, improves minification, fixes some incorrect transpiling, and
+# supports Minecraft-specific preprocessor directives.
 # Related PRs:
 # https://github.com/phaazon/glsl/pull/138
 # https://github.com/ComunidadAylas/glsl/pull/1
