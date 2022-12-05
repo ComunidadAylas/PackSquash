@@ -38,10 +38,7 @@ fn create_temporary_output_file(test_name: &'static str) -> PathBuf {
 	let file_path = file_and_path.1;
 
 	if env::var("WRITE_SQUASHZIP_TEST_RESULTS").unwrap_or_else(|_| String::from("0")) == "1" {
-		eprintln!(
-			"Creating temporary output file {:?} for test {}",
-			file_path, test_name
-		);
+		eprintln!("Creating temporary output file {file_path:?} for test {test_name}");
 	}
 
 	file_path
@@ -360,7 +357,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 	] {
 		squash_zip
 			.file_process_time(&RelativePath::from_inner(file))
-			.unwrap_or_else(|| panic!("Expected file not read back from output ZIP: {}", file));
+			.unwrap_or_else(|| panic!("Expected file not read back from output ZIP: {file}"));
 	}
 }
 

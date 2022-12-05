@@ -60,7 +60,7 @@ async fn successful_process_test(
 
 		if env::var("WRITE_PNG_TEST_RESULTS").unwrap_or_else(|_| String::from("0")) == "1" {
 			fs::write(
-				format!("../../target/png_test_result_{}.png", test_name),
+				format!("../../target/png_test_result_{test_name}.png"),
 				&data
 			)
 			.expect("No error should happen while writing a test result to disk")
@@ -112,13 +112,9 @@ async fn successful_process_test(
 		"The processed PNG should have the same pixels as the original PNG"
 	);
 
+	eprintln!("Original PNG size: {input_data_len} bytes, color type: {original_color_type:?}");
 	eprintln!(
-		"Original PNG size: {} bytes, color type: {:?}",
-		input_data_len, original_color_type
-	);
-	eprintln!(
-		"Processed PNG size: {} bytes, color type: {:?}",
-		processed_data_size, processed_color_type
+		"Processed PNG size: {processed_data_size} bytes, color type: {processed_color_type:?}"
 	);
 	assert!(
 		!expect_smaller_file_size || processed_data_size < input_data_len,

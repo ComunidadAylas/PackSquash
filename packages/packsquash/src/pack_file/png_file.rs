@@ -284,8 +284,7 @@ impl Decoder for OptimizerDecoder {
 					third_pass_png,
 					if let Some(Some(quantization_pass_quality)) = second_pass_quality {
 						Cow::Owned(format!(
-							"Optimized with {}% quality color quantization",
-							quantization_pass_quality
+							"Optimized with {quantization_pass_quality}% quality color quantization"
 						))
 					} else if let Some(None) = second_pass_quality {
 						Cow::Borrowed("Downsized and optimized")

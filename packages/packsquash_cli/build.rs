@@ -16,9 +16,8 @@ fn main() {
 		"cargo:rustc-env=BUILD_VERSION={}",
 		git_version().unwrap_or_else(|err| {
 			println!(
-				"cargo:warning=Could not get version via git: {}. \
-				Falling back to Cargo package version",
-				err
+				"cargo:warning=Could not get version via git: {err}. \
+				Falling back to Cargo package version"
 			);
 			String::from(env!("CARGO_PKG_VERSION"))
 		})
@@ -41,7 +40,7 @@ fn main() {
 		"cargo:rustc-env=BUILD_DATE={}-{:02}-{:02}",
 		build_year, build_month as u8, build_day
 	);
-	println!("cargo:rustc-env=BUILD_YEAR={}", build_year);
+	println!("cargo:rustc-env=BUILD_YEAR={build_year}");
 
 	// Add platform-specific metadata to the executable
 	add_executable_metadata();

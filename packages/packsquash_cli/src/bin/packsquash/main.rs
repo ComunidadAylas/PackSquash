@@ -239,11 +239,11 @@ fn read_options_file_and_squash(
 				),
 				file_counts.map_or_else(
 					|| Cow::Borrowed("unknown"),
-					|(total_file_count, _)| Cow::Owned(format!("{}", total_file_count))
+					|(total_file_count, _)| Cow::Owned(format!("{total_file_count}"))
 				),
 				file_counts.map_or_else(
 					|| Cow::Borrowed("unknown"),
-					|(_, processed_file_count)| Cow::Owned(format!("{}", processed_file_count))
+					|(_, processed_file_count)| Cow::Owned(format!("{processed_file_count}"))
 				),
 				process_time.as_secs(),
 				process_time.subsec_millis()
@@ -468,7 +468,7 @@ fn init_logger(enable_emoji: bool, enable_colors: bool) {
 					.replace('\n', if enable_emoji { "\n   " } else { "\n  " })
 			);
 
-			writeln!(f, "{}", message)
+			writeln!(f, "{message}")
 		});
 
 	if let Ok(log_filters) = env::var("PACKSQUASH_LOG").or_else(|_| env::var("RUST_LOG")) {
@@ -492,7 +492,7 @@ impl<E: Display> Display for PrettyPathDeserializeErrorDisplay<E> {
 		// which looks ugly and is somewhat confusing. Show the inner error
 		// directly instead
 		if path.iter().next().is_some() {
-			write!(f, "{}: {}", path, inner)
+			write!(f, "{path}: {inner}")
 		} else {
 			inner.fmt(f)
 		}

@@ -8,7 +8,7 @@ use super::*;
 fn works() {
 	let system_id = get_or_compute_system_id();
 
-	eprintln!("System ID: {:?}", system_id);
+	eprintln!("System ID: {system_id:?}");
 
 	// The platform serial number in macOS may have a bit low entropy
 	#[cfg(not(target_os = "macos"))]
