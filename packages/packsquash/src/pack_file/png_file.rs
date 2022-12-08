@@ -12,7 +12,7 @@ use bytes::BytesMut;
 use imagequant::{liq_error, Attributes};
 use indexmap::IndexSet;
 use itertools::Itertools;
-use oxipng::{AlphaOptim, Deflaters, Headers, Options, PngError};
+use oxipng::{AlphaOptim, Deflaters, Headers, Options, PngError, RowFilter};
 use png::EncodingError;
 use rgb::{ComponentBytes, FromSlice, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
@@ -581,13 +581,14 @@ fn visually_lossless_optimize(
 		alphas: if !can_change_transparent_pixel_colors {
 			IndexSet::new()
 		} else {
-			let mut alpha_optimizations = IndexSet::with_capacity(6);
-			alpha_optimizations.insert(AlphaOptim::Black);
-			alpha_optimizations.insert(AlphaOptim::Left);
-			alpha_optimizations.insert(AlphaOptim::Up);
-			alpha_optimizations.insert(AlphaOptim::White);
-
-			alpha_optimizations
+			[
+				AlphaOptim::Black,
+				AlphaOptim::Left,
+				AlphaOptim::Up,
+				AlphaOptim::White
+			]
+			.into_iter()
+			.collect()
 		},
 		backup: false,
 		bit_depth_reduction: can_change_color_type,
@@ -605,33 +606,24 @@ fn visually_lossless_optimize(
 			15
 		) {
 			0 => Deflaters::Libdeflater {
-				compression: {
-					// Use the maximum compression level for the best compression.
-					// This is still acceptably fast for bigger images of realistic
-					// sizes
-					let mut levels = IndexSet::with_capacity(1);
-					levels.insert(9);
-
-					levels
-				}
+				// Use the maximum compression level for the best compression.
+				// This is still acceptably fast for bigger images of realistic
+				// sizes
+				compression: 12
 			},
 			zopfli_iterations => Deflaters::Zopfli {
 				iterations: NonZeroU8::new(zopfli_iterations).unwrap()
 			}
 		},
 		filter: {
-			const PIXEL_DATA_FILTERS: [u8; 3] = [
-				0, // No filter (surprisingly good)
-				4, // Paeth
-				5  // Per-scanline filter chosen with MAD heuristic
-			];
-
-			let mut pixel_data_filters = IndexSet::with_capacity(PIXEL_DATA_FILTERS.len());
-			for filter in PIXEL_DATA_FILTERS {
-				pixel_data_filters.insert(filter);
-			}
-
-			pixel_data_filters
+			[
+				RowFilter::None,
+				RowFilter::Sub,
+				RowFilter::Entropy,
+				RowFilter::Bigrams
+			]
+			.into_iter()
+			.collect()
 		},
 		fix_errors: true, // Ignore CRC for speed. We assume a reliable data source
 		force: false,     // Give up with the second pass result if we can't reduce size further
@@ -643,7 +635,7 @@ fn visually_lossless_optimize(
 		pretend: false,
 		strip: Headers::All,
 		timeout: Some(Duration::from_secs(600)), // Bail out if the optimization takes too long
-		use_heuristics: false,
+		fast_evaluation: true,
 		check: false
 	};
 
