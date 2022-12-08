@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1670472579077,
+  "lastUpdate": 1670503480742,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "c9d602dcab189dbf394cb05ca308c2400c363bb1",
-          "message": "fix(terminal_title_setter/unix): delay memory allocation, fix spurious CLion lint\n\nThis provides for shorter code, and should be slightly more or equally\nperformant.",
-          "timestamp": "2022-10-01T18:01:10Z",
-          "tree_id": "1049a380a6524f8d5cd7d38c7b564fc1930be054",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c9d602dcab189dbf394cb05ca308c2400c363bb1"
-        },
-        "date": 1664650455609,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10745281,
-            "range": "± 154984",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 410830194,
-            "range": "± 8277873",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11851182386,
-            "range": "± 669764618",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2516765913,
-            "range": "± 56028675",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 2111599992,
             "range": "± 68005336",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "e10712f4bed68ca18614a18b64880ed297802255",
+          "message": "deps: update oxipng to v7.0.0\n\nThis version contains nice changes that may speed up optimization and\ndecrease texture file sizes.",
+          "timestamp": "2022-12-08T12:13:20Z",
+          "tree_id": "bf34540716968988c69c88c2d6c825b44d8928d8",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e10712f4bed68ca18614a18b64880ed297802255"
+        },
+        "date": 1670503480086,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10236011,
+            "range": "± 490968",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 144231464,
+            "range": "± 2019821",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 979322577,
+            "range": "± 4175599",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 204745537,
+            "range": "± 6215170",
             "unit": "ns/iter"
           }
         ]
