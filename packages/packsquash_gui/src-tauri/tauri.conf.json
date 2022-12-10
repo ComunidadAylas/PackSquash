@@ -101,6 +101,9 @@
             "en-US": {
               "localePath": "bundles/wix/locales/en-US.wxl"
             },
+            "zh-TW": {
+              "localePath": "bundles/wix/locales/zh-TW.wxl"
+            },
             "es-ES": {
               "localePath": "bundles/wix/locales/es-ES.wxl"
             }
