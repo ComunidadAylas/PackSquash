@@ -62,7 +62,7 @@ jobs:
           VERSION_TAG: ${{ inputs.version-tag }}
           RELEASE_NOTES: ${{ inputs.release-notes }}
           # This should be kept in sync with the updater endpoint URL defined in tauri.conf.json
-          BASE_BUNDLE_URL: https://pub-4ca517e65b6d470cb00725f41baed143.r2.dev
+          BASE_BUNDLE_URL: https://cauldron.v1.packsquash.aylas.org
         run: |
           # Get the update bundle names
           for windows_bundle in PackSquash_*.msi.zip; do

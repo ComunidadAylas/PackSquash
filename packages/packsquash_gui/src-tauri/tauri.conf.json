@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/tauri-v1.2.0/tooling/cli/schema.json",
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/tauri-v1.2.2/tooling/cli/schema.json",
   "build": {
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
@@ -122,7 +122,7 @@
       "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDRDQTdFQkI4NDlCRjU2MEIKUldRTFZyOUp1T3VuVEkzemZrellYWFRxT1o5cjQ1OWt5dmMwc1dwMUdIL1pFODhwRjBRNmVjNDAK",
       "endpoints": [
-        "https://pub-4ca517e65b6d470cb00725f41baed143.r2.dev/version-manifest.json"
+        "https://cauldron.v1.packsquash.aylas.org/version-manifest.json"
       ],
       "windows": {
         "installMode": "passive"
