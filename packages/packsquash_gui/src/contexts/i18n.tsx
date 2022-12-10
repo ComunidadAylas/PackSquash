@@ -12,13 +12,30 @@ import { FluentBundle, FluentResource } from "@fluent/bundle";
 import { Localization } from "@fluent/dom";
 import { setSelectedLocale as persistSelectedLocale } from "../util/localeSettings";
 
-const LOCALES = ["en", "es", "fr", "ja", "ca-valencia", "gl"] as const;
+// The locales are ordered by the estimated total number of speakers of their language
+// according to https://en.wikipedia.org/wiki/List_of_languages_by_total_number_of_speakers
+//
+// The language tags here should be valid according to BCP47 and used by user agents, to make
+// automatic language negotiation possible.
+//
+// For example, this second requirement rules out the more precise cmn-tw tag for Mandarin
+// Chinese as spoken in Taiwan, because browsers universally identify it with the older zh-tw
+// tag.
+//
+// Useful links:
+// https://r12a.github.io/app-subtags/
+// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/language
+// https://stackoverflow.com/questions/5580876/navigator-language-list-of-all-languages
+const LOCALES = ["en", "zh-tw", "es", "fr", "ja", "ca-valencia", "gl"] as const;
 
 export type Locale = typeof LOCALES[number];
 
 export const AvailableLocales: Record<Locale, LocaleInfo> = {
   en: {
     friendlyName: "English"
+  },
+  "zh-tw": {
+    friendlyName: "國語",
   },
   es: {
     friendlyName: "Español"
