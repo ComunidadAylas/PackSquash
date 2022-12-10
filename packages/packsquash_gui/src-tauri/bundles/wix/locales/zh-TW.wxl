@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WixLocalization xmlns="http://schemas.microsoft.com/wix/2006/localization" Codepage="950" Language="1028" Culture="zh-tw">
+  <String Id="LaunchAppCheckboxCaption">啟動 PackSquash</String>
+  <String Id="AppShortcutDescription">啟動 PackSquash</String>
+  <String Id="InstallAppFeatureTitle">PackSquash</String>
+  <String Id="InstallAppFeatureDescription">安裝 PackSquash</String>
+  <String Id="UninstallShortcutName">解除安裝 PackSquash</String>
+  <String Id="UninstallShortcutDescription">解除安裝 PackSquash</String>
+</WixLocalization>
