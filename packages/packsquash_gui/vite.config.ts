@@ -20,8 +20,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Shorten file names to save some space on the final executable
-        chunkFileNames: "[name].js",
-        assetFileNames: "[name].[hash].[ext]"
+        chunkFileNames: "[hash].js",
+        assetFileNames: "[hash].[ext]"
       }
     }
   },
