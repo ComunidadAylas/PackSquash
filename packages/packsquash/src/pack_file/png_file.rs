@@ -10,9 +10,8 @@ use std::{
 
 use bytes::BytesMut;
 use imagequant::{liq_error, Attributes};
-use indexmap::IndexSet;
 use itertools::Itertools;
-use oxipng::{AlphaOptim, Deflaters, Headers, Options, PngError, RowFilter};
+use oxipng::{Deflaters, Headers, Options, PngError, RowFilter};
 use png::EncodingError;
 use rgb::{ComponentBytes, FromSlice, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
@@ -578,18 +577,7 @@ fn visually_lossless_optimize(
 	let zopfli_iterations_model = ZopfliIterationsTimeModel::new(zopfli_compression_iterations, 2.0);
 
 	let optimization_options = Options {
-		alphas: if !can_change_transparent_pixel_colors {
-			IndexSet::new()
-		} else {
-			[
-				AlphaOptim::Black,
-				AlphaOptim::Left,
-				AlphaOptim::Up,
-				AlphaOptim::White
-			]
-			.into_iter()
-			.collect()
-		},
+		optimize_alpha: can_change_transparent_pixel_colors,
 		backup: false,
 		bit_depth_reduction: can_change_color_type,
 		color_type_reduction: can_change_color_type,
