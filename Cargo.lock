@@ -1439,7 +1439,7 @@ dependencies = [
 [[package]]
 name = "oxipng"
 version = "7.0.0"
-source = "git+https://github.com/ComunidadAylas/oxipng?branch=master#5a27cd0f509c22a5abd81184e62cf773fbe0f9ac"
+source = "git+https://github.com/ComunidadAylas/oxipng?branch=master#24858432a233260c5fe1bb3bac9b921298045288"
 dependencies = [
  "bitvec 1.0.1",
  "crossbeam-channel",
@@ -1817,11 +1817,10 @@ dependencies = [
 
 [[package]]
 name = "rayon"
-version = "1.6.0"
+version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e060280438193c554f654141c9ea9417886713b7acd75974c85b18a69a88e0b"
+checksum = "6db3a213adf02b3bcfd2d3846bb41cb22857d131789e01df434fb7e7bc0759b7"
 dependencies = [
- "crossbeam-deque",
  "either",
  "rayon-core",
 ]
@@ -1840,9 +1839,9 @@ dependencies = [
 
 [[package]]
 name = "realfft"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3052e66d6ebeff8049607775c41d39a58d1dfa91a2733e89f2b7816bce2ea4cc"
+checksum = "93d6b8e8f0c6d2234aa58048d7290c60bf92cd36fd2888cd8331c66ad4f2e1d2"
 dependencies = [
  "rustfft",
 ]
@@ -1980,9 +1979,9 @@ checksum = "e25dfac463d778e353db5be2449d1cce89bd6fd23c9f1ea21310ce6e5a1b29c4"
 
 [[package]]
 name = "serde"
-version = "1.0.149"
+version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "256b9932320c590e707b94576e3cc1f7c9024d0ee6612dfbcf1cb106cbe8e055"
+checksum = "e326c9ec8042f1b5da33252c8a37e9ffbd2c9bef0155215b6e6c80c790e05f91"
 dependencies = [
  "serde_derive",
 ]
@@ -1999,8 +1998,8 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.149"
-source = "git+https://github.com/ComunidadAylas/serde?branch=master#7da9d078b21e9ff8670a12f693e849b54407d916"
+version = "1.0.150"
+source = "git+https://github.com/ComunidadAylas/serde?branch=master#bb3c8a3f295e930f5bc1accaba39edd838ba412f"
 dependencies = [
  "proc-macro2",
  "quote",
