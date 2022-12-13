@@ -14,6 +14,7 @@ import { installUpdate, UpdateManifest } from "@tauri-apps/api/updater";
 import { toast } from "solid-toast";
 import { SpinnerGap } from "phosphor-solid";
 import { relaunch } from "@tauri-apps/api/process";
+import parseRustOffsetDateTimeDebugFormatToDate from "../util/parseRustOffsetDateTimeDebugFormatToDate";
 
 export default (props: { updateManifest?: UpdateManifest }) => {
   const [l10n] = useI18n();
@@ -26,7 +27,7 @@ export default (props: { updateManifest?: UpdateManifest }) => {
     throw new Error("No component owner for OptimizationProgress");
   }
 
-  const updatePublicationDate = new Date(props.updateManifest?.date ?? NaN);
+  const updatePublicationDate = getUpdatePublicationDate(props.updateManifest);
 
   return (
     <Dialog
@@ -54,10 +55,7 @@ export default (props: { updateManifest?: UpdateManifest }) => {
                   version: props.updateManifest?.version ?? "-"
                 })}
               </FluidParagraph>
-              <Show
-                when={!isNaN(updatePublicationDate.getTime())}
-                keyed={false}
-              >
+              <Show when={isValidDate(updatePublicationDate)} keyed={false}>
                 <FluidParagraph>
                   {l10n("update-dialog-update-publication-date", {
                     date: updatePublicationDate
@@ -121,3 +119,23 @@ export default (props: { updateManifest?: UpdateManifest }) => {
     </Dialog>
   );
 };
+
+function getUpdatePublicationDate(updateManifest?: UpdateManifest) {
+  const date = updateManifest?.date;
+
+  let publicationDate = new Date(date ?? NaN);
+  if (!isValidDate(publicationDate) && date) {
+    // Even though this is not documented, the Tauri updater emits manifests
+    // to the frontend whose dates are formatted by running .to_string() on
+    // a time's crate OffsetDateTime. That format is not natively supported by
+    // browsers, so fall back to a custom parser for it if the native browser
+    // logic failed to yield a usable result
+    publicationDate = parseRustOffsetDateTimeDebugFormatToDate(date);
+  }
+
+  return publicationDate;
+}
+
+function isValidDate(date: Date) {
+  return !isNaN(date.getTime());
+}
