@@ -219,7 +219,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 
 		obfuscation_engine.obfuscating_header(
 			&mut output_zip,
-			(previous_zip_contents.len() ^ scratch_files_budget.remaining_memory_budget()) as u64
+			(previous_zip_contents.len() ^ scratch_files_budget.remaining()) as u64
 		)?;
 
 		Ok(Self {

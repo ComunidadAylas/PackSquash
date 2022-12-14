@@ -1,4 +1,4 @@
-use std::fmt::{Arguments, Display, Write as FmtWrite};
+use std::fmt::{Arguments, Write as FmtWrite};
 use std::io::{IoSlice, Write as IoWrite};
 
 /// Newtype adapter struct to bridge `io::Write` implementations
@@ -31,32 +31,5 @@ impl<T: IoWrite> FmtWrite for IoWriteToFmtWriteAdapter<T> {
 
 	fn write_fmt(&mut self, args: Arguments<'_>) -> std::fmt::Result {
 		self.0.write_fmt(args).map_err(|_| std::fmt::Error)
-	}
-}
-
-/// Newtype wrapper struct to prettify how serde errors with path information
-/// are displayed.
-#[repr(transparent)]
-pub struct PrettyPathDeserializeErrorDisplay<E>(serde_path_to_error::Error<E>);
-
-impl<E: Display> Display for PrettyPathDeserializeErrorDisplay<E> {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let path = self.0.path();
-		let inner = self.0.inner();
-
-		// When the path is empty, its Display implementation writes a dot ("."),
-		// which looks ugly and is somewhat confusing. Show the inner error
-		// directly instead
-		if path.iter().next().is_some() {
-			write!(f, "{}: {}", path, inner)
-		} else {
-			inner.fmt(f)
-		}
-	}
-}
-
-impl<E> From<serde_path_to_error::Error<E>> for PrettyPathDeserializeErrorDisplay<E> {
-	fn from(value: serde_path_to_error::Error<E>) -> Self {
-		Self(value)
 	}
 }

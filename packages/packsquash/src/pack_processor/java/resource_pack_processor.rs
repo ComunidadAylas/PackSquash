@@ -38,8 +38,31 @@ impl ResourcePackProcessor {
 			asset_processors_list: asset_processors.values().join(", ")
 		});
 
-		// TODO run asset processors without dependencies in parallel (Rayon join(), scope())
-		get_asset_processor!(asset_processors, BlockstateAssetProcessor).process()?;
+		macro_rules! try_join_several {
+			( $closure_a:expr, $closure_b:expr ) => {
+				match rayon::join($closure_a, $closure_b) {
+					(Err(err), _) => return Err(PackError::from(err)),
+					(_, Err(err)) => return Err(PackError::from(err)),
+					(Ok(a), Ok(b)) => (a, b)
+				}
+			};
+			( $closure_a:expr, $closure_b:expr, $( $remaining_closures:expr ),+ ) => {
+				try_join_several!(|| Ok(try_join_several!($closure_a, $closure_b)), $( $remaining_closures ),+)
+			}
+		}
+
+		// TODO this doesn't fail-fast when an error happens: rayon waits for each asset processor
+		//      to complete, which is undesirable. Refactoring with spawn() and using channels
+		//      could avoid this, at the (likely significant) performance cost of needing to wrap
+		//      asset processor references in Arc's. scope() would be great if it didn't block,
+		//      but that could be worked around with another thread. Are there better ways to deal
+		//      with it?
+		try_join_several!(
+			|| get_asset_processor!(asset_processors, BlockStateAssetProcessor).process(
+				get_asset_processor!(asset_processors, ItemAndBlockModelAssetProcessor)
+			),
+			|| get_asset_processor!(asset_processors, ItemAndBlockModelAssetProcessor).process()
+		);
 
 		Ok(())
 	}

@@ -28,7 +28,7 @@ impl<'data> Deref for ResourceFilterBlockList<'data> {
 }
 
 #[derive(Deserialize, Debug, Default)]
-#[serde(try_from = "ResourceBlockFilterObject<'data>")]
+#[serde(try_from = "ResourceBlockFilterObject<'_>")]
 pub struct ResourceBlockFilter<'data> {
 	namespace_regex: Option<Regex>,
 	path_regex: Option<Regex>,

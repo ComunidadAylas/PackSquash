@@ -35,7 +35,7 @@ export const AvailableLocales: Record<Locale, LocaleInfo> = {
     friendlyName: "English"
   },
   "zh-tw": {
-    friendlyName: "繁體中文",
+    friendlyName: "繁體中文"
   },
   es: {
     friendlyName: "Español"
