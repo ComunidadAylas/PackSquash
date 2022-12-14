@@ -52,7 +52,7 @@ pub enum PackError {
 	#[error("Asset error: {0}")]
 	BlockStateAssetError(#[from] BlockStateAssetError),
 	#[error("Asset error: {0}")]
-	BlockModelAssetError(#[from] ItemOrBlockModelAssetError),
+	ItemOrBlockModelAssetError(#[from] ItemOrBlockModelAssetError),
 	/// Thrown when some error occurs in a ZIP file operation.
 	#[error("Error while performing a ZIP file operation: {0}")]
 	SquashZip(#[from] SquashZipError),
