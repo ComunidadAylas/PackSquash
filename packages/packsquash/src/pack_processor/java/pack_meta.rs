@@ -54,8 +54,8 @@ pub enum PackMetaError {
 		actual_game_version: MinecraftVersion,
 		expected_game_version_range: MinecraftVersionRange
 	},
-	#[error("JSON error at {0}")]
-	JsonSerdeWithPath(#[from] serde_path_to_error::Error<serde_json::Error>),
+	#[error("JSON error: {0}")]
+	JsonSerdeWithPath(#[from] packsquash_util::PrettySerdePathErrorWrapper<serde_json::Error>),
 	#[error("I/O error: {0}")]
 	Io(#[from] io::Error)
 }
@@ -197,7 +197,7 @@ impl PackMeta {
 							.get("filter")
 							// TODO avoid this clone. Maybe refactor deserialization to use Serde traits?
 							.cloned()
-							.map(serde_path_to_error::deserialize)
+							.map(packsquash_util::deserialize_with_pretty_path_on_error)
 					})
 					.flatten()
 					.transpose()?;

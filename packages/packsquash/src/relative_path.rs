@@ -120,7 +120,7 @@ impl<'path> RelativePath<'path> {
 		}
 
 		RelativePath(Cow::Owned(
-			self.with_extension(format!("{}c", current_extension))
+			self.with_extension(format!("{current_extension}c"))
 				.into_os_string()
 				.into_string()
 				.unwrap()

@@ -131,7 +131,8 @@ pub enum PackSquashAssetProcessingStrategy {
 	ValidatedAndPrettified,
 	ValidatedDebloatedAndPrettified,
 	// For better style, keep these generic strategies last
-	Optimized
+	Optimized,
+	CopiedFromPreviousZip // TODO translate
 }
 
 pub fn run(options: &SquashOptions, vfs_type: VirtualFileSystemType) -> Result<(), PackSquashError> {

@@ -1,3 +1,4 @@
+use crate::util::zero_copy_deserialize_traits::ZeroCopyDeserializable;
 use ahash::AHashMap;
 use serde::{Deserialize, Serialize, Serializer};
 use std::borrow::Cow;
@@ -8,6 +9,9 @@ use std::slice;
 use thiserror::Error;
 use tinyvec::{tiny_vec, TinyVec};
 
+/// References:
+/// - Vanilla deserializer: `net.minecraft.client.renderer.block.model.BlockModelDefinition`
+/// - https://minecraft.fandom.com/wiki/Tutorials/Models#Block_states
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) struct BlockState<'data> {
 	// TODO docs: must be present if not multipart. The game falls back silently if some variant is
@@ -23,9 +27,19 @@ pub(super) struct BlockState<'data> {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[serde(borrow)]
 	pub(super) multipart_variants: Option<Vec<MultipartVariantSelector<'data>>>,
+	// FIXME In principle, the bloat fields could be deserialized more efficiently by using RawValue
+	//       as map values, but that doesn't work due to this upstream issue:
+	//       https://github.com/serde-rs/json/issues/599
 	#[serde(flatten)]
 	#[serde(borrow)]
 	pub(super) bloat_fields: AHashMap<Cow<'data, str>, serde_json::Value>
+}
+
+/// A dummy struct with no generic parameters that represents [`BlockState`] on
+/// deserialization helper code.
+pub(super) struct BlockStateRepresentative;
+impl<'data> ZeroCopyDeserializable<'data> for BlockStateRepresentative {
+	type Type = BlockState<'data>;
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Hash)]
@@ -64,7 +78,6 @@ impl TryFrom<Cow<'_, str>> for VariantPredicate {
 					return Err(VariantPredicateError::InvalidPropertyValue(property.into()));
 				}
 
-				// TODO maybe optimize this to avoid clone (can be done when Cow::Borrowed, but not owned)
 				property_value_pairs.push((property.into(), value.into()));
 			}
 
@@ -140,6 +153,11 @@ impl<'data> DerefMut for VariantList<'data> {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) struct Variant<'data> {
+	/// To be interpreted as a [`ResourceLocation`] string.
+	///
+	/// The asset type directory of that location depends on the game version that parses this
+	/// blockstate, so a raw string is deserialized here to let higher-level code choose the
+	/// appropriate directory.
 	#[serde(borrow)]
 	pub(super) model: Cow<'data, str>,
 	#[serde(default)]
@@ -235,7 +253,7 @@ pub(super) enum CompositeBooleanCondition<'data> {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
-#[serde(try_from = "Cow<'data, str>")]
+#[serde(try_from = "Cow<'_, str>")]
 #[repr(transparent)]
 pub(super) struct Property<'data>(#[serde(borrow)] pub(super) Cow<'data, str>);
 
@@ -277,7 +295,6 @@ impl TryFrom<Cow<'_, str>> for PropertyPredicate {
 				return Err(PropertyPredicateError::InvalidValue(value.into()));
 			}
 
-			// TODO maybe optimize this to avoid clone (can be done when Cow::Borrowed, but not owned)
 			values.push(value.into());
 
 			is_first_value = false;

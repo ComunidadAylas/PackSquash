@@ -99,7 +99,7 @@ impl PackProcessor {
 
 		ThreadPoolBuilder::new()
 			.num_threads(global_options.threads.get())
-			.thread_name(|i| format!("packsquash-worker-{}", i))
+			.thread_name(|i| format!("packsquash-worker-{i}"))
 			.build()?
 			.install(|| match pack_type {
 				PackType::ResourcePack => ResourcePackProcessor::new().process(

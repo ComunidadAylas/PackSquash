@@ -61,7 +61,7 @@ impl<R: Runtime> Log for OptimizationProgressLogger<R> {
 				self.window
 					.emit(
 						"processed_asset",
-						(asset_path, format!("{:?}", strategy), warnings)
+						(asset_path, format!("{strategy:?}"), warnings)
 					)
 					.ok();
 			}

@@ -7,22 +7,22 @@ use tempfile::tempfile;
 mod tests;
 
 pub struct ScratchFilesBudget {
-	remaining_memory_budget: AtomicUsize
+	remaining_budget: AtomicUsize
 }
 
 impl ScratchFilesBudget {
-	pub const fn new(memory_budget: usize) -> Self {
+	pub const fn new(budget: usize) -> Self {
 		Self {
-			remaining_memory_budget: AtomicUsize::new(memory_budget)
+			remaining_budget: AtomicUsize::new(budget)
 		}
 	}
 
-	pub fn remaining_memory_budget(&self) -> usize {
-		self.remaining_memory_budget.load(Ordering::Acquire)
+	pub fn remaining(&self) -> usize {
+		self.remaining_budget.load(Ordering::Acquire)
 	}
 
 	pub fn spend(&self, bytes: usize) -> bool {
-		self.remaining_memory_budget
+		self.remaining_budget
 			.fetch_update(Ordering::AcqRel, Ordering::Acquire, |budget| {
 				budget.checked_sub(bytes)
 			})
@@ -31,7 +31,7 @@ impl ScratchFilesBudget {
 }
 
 pub struct ScratchFile<'budget> {
-	remaining_memory_budget: &'budget AtomicUsize,
+	remaining_budget: &'budget AtomicUsize,
 	inner: ScratchFileInner
 }
 
@@ -41,14 +41,14 @@ impl<'budget> ScratchFile<'budget> {
 	}
 
 	pub fn with_capacity(budget: &'budget ScratchFilesBudget, capacity: usize) -> io::Result<Self> {
-		let remaining_memory_budget = &budget.remaining_memory_budget;
+		let remaining_budget = &budget.remaining_budget;
 
 		let mut buf = vec![];
 		let have_enough_budget_for_buf = if capacity == 0 {
 			// Fast path to avoid atomic operations
 			true
 		} else {
-			remaining_memory_budget
+			remaining_budget
 				.fetch_update(Ordering::AcqRel, Ordering::Acquire, |budget| {
 					// Avoid allocating memory if it's known to be too much beforehand
 					if budget < capacity {
@@ -62,7 +62,7 @@ impl<'budget> ScratchFile<'budget> {
 		};
 
 		Ok(Self {
-			remaining_memory_budget,
+			remaining_budget,
 			inner: if have_enough_budget_for_buf {
 				ScratchFileInner::InMemory(Cursor::new(buf))
 			} else {
@@ -113,7 +113,7 @@ impl Write for ScratchFile<'_> {
 				let new_buffer_capacity = cursor.get_ref().capacity();
 
 				let remaining_byte_budget = self
-					.remaining_memory_budget
+					.remaining_budget
 					.fetch_update(Ordering::AcqRel, Ordering::Acquire, |budget| {
 						Some(budget.saturating_sub(new_buffer_capacity - buffer_capacity))
 					})
@@ -150,7 +150,7 @@ impl Write for ScratchFile<'_> {
 					// We manually freed the bulk of the memory consumed by the
 					// in-memory buffer, so it's OK for other scratch files to
 					// use its capacity
-					self.remaining_memory_budget
+					self.remaining_budget
 						.fetch_add(new_buffer_capacity, Ordering::AcqRel);
 				}
 
@@ -210,7 +210,7 @@ impl Drop for ScratchFile<'_> {
 			// There's no particular reason to believe that there is high memory pressure,
 			// so err on the performance side and increment the budget slightly before the
 			// actual buffer heap allocation is freed
-			self.remaining_memory_budget
+			self.remaining_budget
 				.fetch_add(cursor.get_ref().capacity(), Ordering::AcqRel);
 		}
 	}

@@ -1,0 +1,14 @@
+[package]
+name = "packsquash_util"
+description = "Miscellaneous, small utilities used by other parts of PackSquash"
+version = "0.4.0"
+authors = ["Alejandro \"AlexTMjugador\" González"]
+repository = "https://github.com/ComunidadAylas/PackSquash"
+license = "AGPL-3.0-or-later"
+readme = "../../README.md"
+publish = false
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0.150", features = ["derive"] }
+serde_path_to_error = "0.1.8"

@@ -7,6 +7,7 @@ mod resource_pack_processor;
 
 use self::asset_processor::blockstate_asset_processor::BlockStateAssetError;
 use self::pack_meta::PackMetaError;
+use crate::pack_processor::java::asset_processor::item_and_block_model_asset_processor::ItemOrBlockModelAssetError;
 use crate::squash_zip::SquashZipError;
 use crate::RelativePath;
 use rayon::ThreadPoolBuildError;
@@ -50,6 +51,8 @@ pub enum PackError {
 	PackMetaError(#[from] PackMetaError),
 	#[error("Asset error: {0}")]
 	BlockStateAssetError(#[from] BlockStateAssetError),
+	#[error("Asset error: {0}")]
+	BlockModelAssetError(#[from] ItemOrBlockModelAssetError),
 	/// Thrown when some error occurs in a ZIP file operation.
 	#[error("Error while performing a ZIP file operation: {0}")]
 	SquashZip(#[from] SquashZipError),

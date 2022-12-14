@@ -81,7 +81,7 @@ pub struct SquashOptions<'data> {
 }
 
 #[derive(Clone, Deserialize, JsonSchema)]
-#[serde(try_from = "Cow<'data, Path>")]
+#[serde(try_from = "Cow<'_, Path>")]
 #[repr(transparent)]
 pub struct ExistingDirectoryPath<'data>(
 	#[schemars(schema_with = "with_directory_path_format")]
@@ -264,6 +264,7 @@ pub struct GlobalOptions<'data> {
 	pub treat_asset_warnings_as_errors: bool,
 	// TODO file-specific option
 	pub missing_reference_action: MissingReferenceAction,
+	pub accept_references_to_unknown_packs_and_mods: bool,
 	pub always_allow_json_comments: bool,
 	/// Some Minecraft versions have some quirks that affect how pack files can be optimized. If these
 	/// quirks are ignored, it may happen that those files are no longer correctly interpreted by the
@@ -283,7 +284,7 @@ pub struct GlobalOptions<'data> {
 	#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 	#[doc(cfg(any(feature = "optifine-support", feature = "mtr3-support")))]
 	pub allow_mods: EnumSet<MinecraftMod>,
-	pub allow_non_vanilla_assets_of_vanilla_types: bool,
+	pub process_not_self_referenced_and_non_vanilla_assets: bool,
 	/// The bitrate control mode that will be used for transcoding audio files that do not explicitly
 	/// override the bitrate control mode via file-specific options. Different bitrate control modes
 	/// have different trade-offs between audio quality, file size, bandwidth predictability and
@@ -386,11 +387,12 @@ impl Default for GlobalOptions<'_> {
 			zip_compression_iterations: 20,
 			treat_asset_warnings_as_errors: false,
 			missing_reference_action: MissingReferenceAction::DEFAULT,
+			accept_references_to_unknown_packs_and_mods: false,
 			always_allow_json_comments: true,
 			work_around_minecraft_quirks: None,
 			#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 			allow_mods: EnumSet::empty(),
-			allow_non_vanilla_assets_of_vanilla_types: true,
+			process_not_self_referenced_and_non_vanilla_assets: false,
 			audio_bitrate_control_mode: Default::default(),
 			non_positional_audio_target_bitrate_control_metric: 0.25, // ~ 68 kbit/s for stereo, 44.1 kHz signals
 			non_positional_audio_sampling_frequency: NonZeroU32::new(40_050).unwrap(),
@@ -413,7 +415,7 @@ impl Default for GlobalOptions<'_> {
 
 // Derive Serialize to work around schemars quirk: https://github.com/GREsau/schemars/issues/140
 #[derive(Clone, Deserialize, JsonSchema, Serialize)]
-#[serde(try_from = "Cow<'data, Path>")]
+#[serde(try_from = "Cow<'_, Path>")]
 #[repr(transparent)]
 pub struct MaybeNonexistentFilePath<'data>(
 	#[schemars(schema_with = "with_maybe_nonexistent_file_path_format")]

@@ -66,7 +66,7 @@ impl<'settings, 'budget, F: Read + Seek + Send> SquashedPackState<'settings, 'bu
 		self.squash_zip.add_previous_file(path)
 	}
 
-	pub fn is_previous_zip_file_current(
+	pub fn is_previous_zip_file_fresh(
 		&self,
 		file_path: &RelativePath,
 		modification_time: Option<SystemTime>
