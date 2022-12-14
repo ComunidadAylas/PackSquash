@@ -16,9 +16,10 @@ use env_logger::{fmt::Color, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
 use log::{debug, error, info, Level, LevelFilter};
 
-use crate::util::{IoWriteToFmtWriteAdapter, PrettyPathDeserializeErrorDisplay};
+use crate::util::IoWriteToFmtWriteAdapter;
 use packsquash::{PackSquashAssetProcessingStrategy, PackSquashStatus, VirtualFileSystemType};
 use packsquash_options::SquashOptions;
+use packsquash_util::PrettySerdePathErrorWrapper;
 use terminal_style::{environment_allows_color, environment_allows_emoji};
 use terminal_title_controller::TerminalTitleController;
 
@@ -187,7 +188,7 @@ fn read_options_file_and_squash(
 		Err(deserialize_error) => {
 			error!(
 				"An error occurred while parsing the options file: {}",
-				PrettyPathDeserializeErrorDisplay::from(deserialize_error)
+				PrettySerdePathErrorWrapper::from(deserialize_error)
 			);
 
 			return 3.into();
@@ -381,7 +382,7 @@ fn init_logging(
 						}
 					}),
 					"{}",
-					level_style.value(format_args!("{} {}", level_icon, message))
+					level_style.value(format_args!("{level_icon} {message}"))
 				)
 				.map_err(|err| io::Error::new(ErrorKind::Other, err))
 			};
@@ -402,8 +403,7 @@ fn init_logging(
 						.unwrap();
 
 					write_message(&format_args!(
-						"Pack metadata read. Minecraft {} {} detected",
-						game_version_range, pack_type
+						"Pack metadata read. Minecraft {game_version_range} {pack_type} detected"
 					))
 				}
 				Some(PackSquashStatus::QuirksToWorkAround { quirk_list }) => {
@@ -411,8 +411,7 @@ fn init_logging(
 						write_message(&"No Minecraft quirks to work around")
 					} else {
 						write_message(&format_args!(
-							"Working around Minecraft quirks: {}",
-							quirk_list
+							"Working around Minecraft quirks: {quirk_list}"
 						))
 					}
 				}
@@ -424,15 +423,13 @@ fn init_logging(
 						write_message(&format_args!(
 							"The previous ZIP file could not be read. \
 							It will not be used to speed up processing. \
-							Was the file last modified by PackSquash? Cause: {}",
-							parse_error
+							Was the file last modified by PackSquash? Cause: {parse_error}"
 						))
 					} else if let Some(io_error) = io_error {
 						write_message(&format_args!(
 							"The previous ZIP file could not be read. \
 							It will not be used to speed up processing. \
-							Cause: {}",
-							io_error
+							Cause: {io_error}"
 						))
 					} else {
 						Ok(())
@@ -441,8 +438,7 @@ fn init_logging(
 				Some(PackSquashStatus::AssetProcessorsToRun {
 					asset_processors_list
 				}) => write_message(&format_args!(
-					"Using asset processors: {}",
-					asset_processors_list
+					"Using asset processors: {asset_processors_list}"
 				)),
 				Some(PackSquashStatus::ProcessedAsset { strategy, warnings }) => {
 					let asset_path = record.key_values().get("asset_path".into()).unwrap();
@@ -472,7 +468,10 @@ fn init_logging(
 						PackSquashAssetProcessingStrategy::ValidatedDebloatedAndPrettified => {
 							"validated, debloated and prettified"
 						}
-						PackSquashAssetProcessingStrategy::Optimized => "optimized"
+						PackSquashAssetProcessingStrategy::Optimized => "optimized",
+						PackSquashAssetProcessingStrategy::CopiedFromPreviousZip => {
+							"Copied from previous run"
+						}
 					};
 
 					struct WarningDisplayWrapper<T: AsRef<[Cow<'static, str>]>> {

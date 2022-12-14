@@ -1,4 +1,5 @@
 //! This automatically generated file contains the list of block states for several vanilla Minecraft versions.
+#![allow(clippy::type_complexity)]
 
 use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
 use crate::RelativePath;
@@ -7422,7 +7423,7 @@ static BLOCKSTATES: [(
 /// Gets the set of relative paths of block states that match the specified version range,
 /// i.e., are read by at least a single game version in the range. `None` is returned if
 /// the version range did not match any known Minecraft version.
-pub(super) fn matching_for_version_range(
+pub fn matching_for_version_range(
 	range: &impl RangeBounds<MinecraftVersion>
 ) -> Option<AHashSet<RelativePath<'static>>> {
 	let mut matching_assets = None;

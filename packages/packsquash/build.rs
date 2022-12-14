@@ -21,9 +21,8 @@ fn set_build_metadata_environment_variables() {
 		"cargo:rustc-env=BUILD_VERSION={}",
 		git_version().unwrap_or_else(|err| {
 			println!(
-				"cargo:warning=Could not get version via git: {}. \
-				Falling back to Cargo package version",
-				err
+				"cargo:warning=Could not get version via git: {err}. \
+				Falling back to Cargo package version"
 			);
 			format!("v{}", env!("CARGO_PKG_VERSION"))
 		})
@@ -44,7 +43,7 @@ fn set_build_metadata_environment_variables() {
 		"cargo:rustc-env=BUILD_DATE={}-{:02}-{:02}",
 		build_year, build_month as u8, build_day
 	);
-	println!("cargo:rustc-env=BUILD_YEAR={}", build_year);
+	println!("cargo:rustc-env=BUILD_YEAR={build_year}");
 }
 
 fn generate_options_file_json_schema() {

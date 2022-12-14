@@ -1,7 +1,10 @@
 use self::blockstate_asset_processor::BlockStateAssetProcessor;
+use self::item_and_block_model_asset_processor::ItemAndBlockModelAssetProcessor;
 use crate::pack_processor::java::pack_meta::PackMeta;
+use crate::relative_path::RelativePath;
 use crate::squashed_pack_state::SquashedPackState;
 use crate::vfs::VirtualFileSystem;
+use ahash::AHashSet;
 use enum_map::{enum_map, Enum, EnumMap};
 use globset::Glob;
 use packsquash_options::{FileOptionsMap, GlobalOptions};
@@ -9,11 +12,16 @@ use patricia_tree::PatriciaSet;
 use std::io::{Read, Seek};
 use strum::Display;
 
+#[macro_use]
+mod helper;
 pub(super) mod blockstate_asset_processor;
+mod data;
+pub(super) mod item_and_block_model_asset_processor;
 
 #[derive(Enum)]
 pub(super) enum AssetProcessorType {
-	BlockstateAssetProcessor
+	BlockStateAssetProcessor,
+	ItemAndBlockModelAssetProcessor
 }
 
 #[derive(Display)]
@@ -22,9 +30,13 @@ pub(super) enum AssetProcessorWrapper<
 	'settings,
 	'budget,
 	V: VirtualFileSystem + ?Sized,
-	F: Read + Seek + Send
+	F: Read + Seek + Send,
+	C: FnOnce() -> Option<AHashSet<RelativePath<'static>>> + Send
 > {
-	BlockstateAssetProcessor(BlockStateAssetProcessor<'state, 'settings, 'budget, V, F>)
+	BlockStateAssetProcessor(BlockStateAssetProcessor<'state, 'settings, 'budget, V, F>),
+	ItemAndBlockModelAssetProcessor(
+		ItemAndBlockModelAssetProcessor<'state, 'settings, 'budget, V, F, C>
+	)
 }
 
 pub(super) fn create_asset_processors<
@@ -40,10 +52,23 @@ pub(super) fn create_asset_processors<
 	global_options: &'state GlobalOptions,
 	file_options: &'state FileOptionsMap,
 	squashed_pack_state: &'state SquashedPackState<'settings, 'budget, F>
-) -> EnumMap<AssetProcessorType, AssetProcessorWrapper<'state, 'settings, 'budget, V, F>> {
+) -> EnumMap<
+	AssetProcessorType,
+	AssetProcessorWrapper<
+		'state,
+		'settings,
+		'budget,
+		V,
+		F,
+		impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + 'state + Send
+	>
+> {
 	enum_map! {
-		AssetProcessorType::BlockstateAssetProcessor => AssetProcessorWrapper::BlockstateAssetProcessor(
+		AssetProcessorType::BlockStateAssetProcessor => AssetProcessorWrapper::BlockStateAssetProcessor(
 			BlockStateAssetProcessor::new(vfs, pack_meta, pack_files, global_options, file_options, squashed_pack_state)
+		),
+		AssetProcessorType::ItemAndBlockModelAssetProcessor => AssetProcessorWrapper::ItemAndBlockModelAssetProcessor(
+			item_and_block_model_asset_processor::new(vfs, pack_meta, pack_files, global_options, file_options, squashed_pack_state)
 		)
 	}
 }

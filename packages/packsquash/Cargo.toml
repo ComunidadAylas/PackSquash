@@ -14,7 +14,8 @@ edition = "2021"
 links = "packsquash"
 
 [dependencies]
-packsquash_options = { version = "0.3.1", path = "../packsquash_options" }
+packsquash_options = { path = "../packsquash_options", version = "0.3.1" }
+packsquash_util = { path = "../packsquash_util", version = "0.4.0" }
 
 enumset = "1.0.12"
 enum-map = "2.4.1"
@@ -25,11 +26,9 @@ thiserror = "1.0.37"
 globset = { version = "0.4.9", default-features = false }
 patricia_tree = "0.4.0"
 ahash = "0.8.2"
-# TODO delete this if the blockstate property list stops using maps
-phf = { version = "0.11.1", features = ["macros"] }
 tinyvec = { version = "1.6.0", features = ["alloc", "rustc_1_55", "serde"] }
 
-rayon = "1.6.0"
+rayon = "1.6.1"
 parking_lot = { version = "0.12.1", features = ["hardware-lock-elision"] }
 once_cell = { version = "1.16.0", features = ["parking_lot"] }
 
@@ -39,7 +38,7 @@ walkdir = "2.3.2"
 memmap2 = "0.5.8"
 path-clean = "0.1.0"
 
-serde = { version = "1.0.147", features = ["derive"] }
+serde = { version = "1.0.150", features = ["derive"] }
 serde_path_to_error = "0.1.8"
 
 serde_json = "1.0.104"
@@ -49,7 +48,7 @@ spng = { version = "0.2.0-alpha.2", default-features = false }
 png = "0.17.7"
 rgb = "0.8.34"
 imagequant = { version = "4.0.4", default-features = false, features = ["threads"] }
-oxipng = { version = "6.0.1", default-features = false, features = ["zopfli", "parallel"] }
+oxipng = { version = "7.0.0", default-features = false, features = ["zopfli", "parallel"] }
 
 symphonia = { version = "0.5.3", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
 vorbis_rs = { version = "0.4.0", default-features = false }

@@ -1,18 +1,23 @@
 use super::PackType;
 use crate::relative_path::InvalidPathError;
+use crate::util::cow_str_util::SplitOnceByColonWithDefaultPrefixExt;
 use crate::RelativePath;
+use serde::{Serialize, Serializer};
 use std::borrow::Cow;
 use strum::IntoEnumIterator;
 use thiserror::Error;
 
 static DEFAULT_NAMESPACE: &str = "minecraft";
 
-#[derive(Debug)]
+// TODO document that these are deserialized from and serialized to resource location strings
+//      (namespace + relative asset path)
+// TODO document that Eq and Hash do stupid field-based equality comparison
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct ResourceLocation<'location> {
 	pack_type: PackType,
-	namespace: &'location str,
+	namespace: Cow<'location, str>,
 	asset_type_directory: Option<Cow<'location, str>>,
-	relative_asset_path: &'location str,
+	relative_asset_path: Cow<'location, str>,
 	asset_type_extension: Option<Cow<'location, str>>
 }
 
@@ -51,7 +56,7 @@ impl<'location> ResourceLocation<'location> {
 	/// does not alter its validity status
 	pub fn new(
 		pack_type: PackType,
-		resource_location_string: &'location str,
+		resource_location_string: impl Into<Cow<'location, str>>,
 		asset_type_directory: Option<impl Into<Cow<'location, str>>>,
 		asset_type_extension: Option<impl Into<Cow<'location, str>>>
 	) -> Result<Self, ResourceLocationError> {
@@ -61,11 +66,11 @@ impl<'location> ResourceLocation<'location> {
 			asset_type_extension.map(|asset_type_extension| asset_type_extension.into());
 
 		let (namespace, relative_asset_path) = resource_location_string
-			.split_once(':')
-			.unwrap_or((DEFAULT_NAMESPACE, resource_location_string));
+			.into()
+			.split_once_with_default_prefix(":", DEFAULT_NAMESPACE);
 
-		verify_namespace(namespace)?;
-		verify_path(relative_asset_path)?;
+		verify_namespace(&namespace)?;
+		verify_path(&relative_asset_path)?;
 
 		Ok(Self {
 			pack_type,
@@ -77,15 +82,15 @@ impl<'location> ResourceLocation<'location> {
 	}
 
 	pub fn namespace(&self) -> &str {
-		self.namespace
+		&self.namespace
 	}
 
-	pub fn resolved_asset_path(&self) -> Cow<'location, str> {
+	pub fn resolved_asset_path(&self) -> Cow<str> {
 		if self.asset_type_directory.is_none() && self.asset_type_extension.is_none() {
 			// If there is nothing to prepend (an asset type root directory) or append
 			// (an asset type extension), the relative asset path matches the resolved
 			// asset path, and we can borrow it
-			Cow::Borrowed(self.relative_asset_path)
+			Cow::Borrowed(&self.relative_asset_path)
 		} else {
 			let mut resolved_asset_path = String::new();
 
@@ -98,14 +103,14 @@ impl<'location> ResourceLocation<'location> {
 	pub fn as_relative_path(&self) -> Result<RelativePath<'static>, InvalidPathError<'static>> {
 		let root_directory = self.pack_type.root_directory();
 		let root_directory = root_directory.as_str();
-		let namespace = self.namespace;
+		let namespace = &self.namespace;
 
 		let asset_type_directory = self
 			.asset_type_directory
 			.as_ref()
 			.unwrap_or(&Cow::Borrowed(""));
 
-		let relative_asset_path = self.relative_asset_path;
+		let relative_asset_path = &self.relative_asset_path;
 
 		let asset_type_extension = self
 			.asset_type_extension
@@ -147,7 +152,7 @@ impl<'location> ResourceLocation<'location> {
 			}
 		}
 
-		resolved_asset_path.push_str(self.relative_asset_path);
+		resolved_asset_path.push_str(&self.relative_asset_path);
 
 		if let Some(asset_type_extension) = &self.asset_type_extension {
 			if asset_type_extension.len() > 0 {
@@ -185,17 +190,19 @@ impl<'location> TryFrom<&'location RelativePath<'_>> for ResourceLocation<'locat
 			.ok_or(ResourceLocationError::MissingNamespaceComponent)?
 			.as_os_str()
 			.to_str()
-			.unwrap();
+			.unwrap()
+			.into();
 
-		verify_namespace(namespace)?;
+		verify_namespace(&namespace)?;
 
 		let relative_asset_path = namespace_and_asset_path_components
 			.as_path()
 			.as_os_str()
 			.to_str()
-			.unwrap();
+			.unwrap()
+			.into();
 
-		verify_path(relative_asset_path)?;
+		verify_path(&relative_asset_path)?;
 
 		Ok(Self {
 			pack_type,
@@ -204,6 +211,19 @@ impl<'location> TryFrom<&'location RelativePath<'_>> for ResourceLocation<'locat
 			relative_asset_path,
 			asset_type_extension: None
 		})
+	}
+}
+
+impl Serialize for ResourceLocation<'_> {
+	fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+		if self.namespace == DEFAULT_NAMESPACE {
+			serializer.serialize_str(&self.relative_asset_path)
+		} else {
+			serializer.collect_str(&format_args!(
+				"{}:{}",
+				self.namespace, self.relative_asset_path
+			))
+		}
 	}
 }
 
