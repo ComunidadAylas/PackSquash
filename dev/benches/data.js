@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1671250284149,
+  "lastUpdate": 1671324440420,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "7822554+AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "7e0bf911c7e01a9534addef43e5f2a15823501e5",
-          "message": "chore(ci): temporarily allow Clippy warnings\n\nThe latest Clippy nightlies introduced some regressions that are blocking\r\nour builds. Ref:\r\nhttps://github.com/rust-lang/rust-clippy/issues/9608",
-          "timestamp": "2022-10-13T11:18:33+02:00",
-          "tree_id": "ad0dcaa9874f4a21b2e27fb112bd5832b107a914",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7e0bf911c7e01a9534addef43e5f2a15823501e5"
-        },
-        "date": 1665656446583,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9362495,
-            "range": "± 161428",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 380800881,
-            "range": "± 9717707",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10553214774,
-            "range": "± 47118265",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2415079852,
-            "range": "± 7891964",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 667493886,
             "range": "± 8379003",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "d18e7cb015226470091d2abfb310e00c076f2b08",
+          "message": "fix(deps): update rust crate serde_json to 1.0.90",
+          "timestamp": "2022-12-17T22:15:28Z",
+          "tree_id": "0d5200b1584cc7d60881dea51a85944099098a31",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d18e7cb015226470091d2abfb310e00c076f2b08"
+        },
+        "date": 1671324439295,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10511645,
+            "range": "± 8896339",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 194099706,
+            "range": "± 911208",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3383093537,
+            "range": "± 54814261",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 671133978,
+            "range": "± 6450715",
             "unit": "ns/iter"
           }
         ]
