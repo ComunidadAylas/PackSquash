@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1671334259525,
+  "lastUpdate": 1671341346863,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "be39bf6baf802537d4bec1ab3c9a011767b266f8",
-          "message": "Revert \"perf(ci): use mold instead of the default system GNU gold linker\"\n\nThis is the most likely cause for a strange stack smashing error that\nhappens when running the latest PackSquash AppImage on GitHub Actions\nrunners. I can't reproduce it on my Linux box.",
-          "timestamp": "2022-10-13T18:24:41Z",
-          "tree_id": "a546f12d96f23cfb1cd116c088e570dfe0796851",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/be39bf6baf802537d4bec1ab3c9a011767b266f8"
-        },
-        "date": 1665687459392,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11896659,
-            "range": "± 637245",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 426217381,
-            "range": "± 22811540",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 13730150807,
-            "range": "± 351174796",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2792073073,
-            "range": "± 69118490",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 671008084,
             "range": "± 8419037",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "b3523ec7c8891b52ad82e3c3480d0242848092c0",
+          "message": "fix(deps): update rust crate thiserror to 1.0.38",
+          "timestamp": "2022-12-18T03:03:54Z",
+          "tree_id": "579351313aa19790799e006c55b1e4551d27c498",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b3523ec7c8891b52ad82e3c3480d0242848092c0"
+        },
+        "date": 1671341346191,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13161104,
+            "range": "± 774545",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 233273239,
+            "range": "± 3802847",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3595482418,
+            "range": "± 90444189",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 755875120,
+            "range": "± 15710730",
             "unit": "ns/iter"
           }
         ]
