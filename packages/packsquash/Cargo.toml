@@ -18,10 +18,10 @@ packsquash_options = { path = "../packsquash_options", version = "0.3.1" }
 packsquash_util = { path = "../packsquash_util", version = "0.4.0" }
 
 enumset = "1.0.12"
-enum-map = "2.4.1"
+enum-map = "2.4.2"
 strum = "0.24.1"
 itertools = "0.10.5"
-thiserror = "1.0.37"
+thiserror = "1.0.38"
 
 globset = { version = "0.4.9", default-features = false }
 patricia_tree = "0.4.0"
@@ -38,10 +38,10 @@ walkdir = "2.3.2"
 memmap2 = "0.5.8"
 path-clean = "0.1.0"
 
-serde = { version = "1.0.150", features = ["derive"] }
-serde_path_to_error = "0.1.8"
+serde = { version = "1.0.151", features = ["derive"] }
+serde_path_to_error = "0.1.9"
 
-serde_json = "1.0.89"
+serde_json = "1.0.91"
 json_comments = "0.2.1"
 
 spng = { version = "0.2.0-alpha.2", default-features = false }
@@ -87,7 +87,7 @@ mach = "0.3.2"
 git2 = { version = "0.15.0", default-features = false }
 time = { version = "0.3.17", default-features = false, features = ["std"] }
 schemars = { version = "0.8.11", default-features = false }
-serde_json = "1.0.89"
+serde_json = "1.0.91"
 packsquash_options = { version = "0.3.1", path = "../packsquash_options" }
 
 [dev-dependencies]
