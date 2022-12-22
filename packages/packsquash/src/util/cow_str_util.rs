@@ -48,9 +48,11 @@ impl<'this> StripPrefixExt<'this> for Cow<'this, str> {
 			Cow::Owned(mut string) => {
 				if string.starts_with(prefix) {
 					string.replace_range(..prefix.len(), "");
-				}
 
-				Err(Cow::Owned(string))
+					Ok(Cow::Owned(string))
+				} else {
+					Err(Cow::Owned(string))
+				}
 			}
 		}
 	}
