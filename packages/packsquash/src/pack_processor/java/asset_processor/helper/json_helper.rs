@@ -10,7 +10,6 @@ use json_comments::StripComments;
 use serde::de::Visitor;
 use serde::{Deserializer, Serialize};
 use serde_json::ser::{CharEscape, CompactFormatter, Formatter, PrettyFormatter};
-use std::ffi::OsStr;
 use std::io::{self, BufRead, Read, Seek, Write};
 use std::time::SystemTime;
 use thiserror::Error;
@@ -50,7 +49,6 @@ pub fn deserialize<
 	deserialize_if_fresh_in_previous_zip: bool,
 	always_allow_json_comments: bool,
 	canonical_extension: &str,
-	with_comments_extension: &str,
 	outcome_callback: impl OutcomeCallback<'path, T, R>
 ) -> Result<R, JsonDeserializationError> {
 	macro_rules! vfs_operation {
@@ -68,7 +66,7 @@ pub fn deserialize<
 	}
 
 	let allow_json_comments =
-		always_allow_json_comments || path.extension() == Some(OsStr::new(with_comments_extension));
+		always_allow_json_comments || *path == path.with_comment_extension_suffix();
 
 	let mut asset_file = if allow_json_comments {
 		// We need to strip comments in this case with a Read adapter, so there is no

@@ -2,7 +2,7 @@ pub mod cow_str_util;
 pub mod crc32_hashing_read;
 pub mod enum_map_serializers;
 pub mod lazy_or_eager;
-pub mod patricia_set_relative_path_iter;
+pub mod patricia_set_util;
 pub mod range_bounds_intersect;
 pub mod range_bounds_only;
 pub mod strip_utf8_bom;

@@ -185,7 +185,7 @@ mod tests {
 
 	use std::fs::File;
 
-	use crate::util::patricia_set_relative_path_iter::PatriciaSetRelativePathIterExt;
+	use crate::util::patricia_set_util::PatriciaSetRelativePathIterExt;
 	use pretty_assertions::assert_eq;
 	use tempfile::Builder;
 
