@@ -262,7 +262,7 @@ pub struct GlobalOptions<'data> {
 	// This option is handled in a special way by packsquash_gui.
 	// Check out the packSquashOptions.tsx component for more details
 	pub treat_asset_warnings_as_errors: bool,
-	// TODO file-specific option
+	// TODO turn to file-specific option
 	pub missing_reference_action: MissingReferenceAction,
 	pub accept_references_to_unknown_packs_and_mods: bool,
 	pub always_allow_json_comments: bool,
@@ -387,11 +387,13 @@ impl Default for GlobalOptions<'_> {
 			zip_compression_iterations: 20,
 			treat_asset_warnings_as_errors: false,
 			missing_reference_action: MissingReferenceAction::DEFAULT,
+			// TODO default to true
 			accept_references_to_unknown_packs_and_mods: false,
 			always_allow_json_comments: true,
 			work_around_minecraft_quirks: None,
 			#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 			allow_mods: EnumSet::empty(),
+			// TODO default to true
 			process_not_self_referenced_and_non_vanilla_assets: false,
 			audio_bitrate_control_mode: Default::default(),
 			non_positional_audio_target_bitrate_control_metric: 0.25, // ~ 68 kbit/s for stereo, 44.1 kHz signals
