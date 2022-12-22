@@ -42,7 +42,6 @@ pub(super) struct ItemOrBlockModel<'data> {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[serde(borrow)]
 	#[serde(default)]
-	// TODO validating this could use a vanilla model list
 	pub(super) parent: Option<ResourceLocation<'data>>,
 	/// A map of texture variables to texture references, to be used by elements in this or
 	/// child models. Texture references are either texture variable names prefixed by `#` or
@@ -59,7 +58,6 @@ pub(super) struct ItemOrBlockModel<'data> {
 	/// model. Defaults to `true`.
 	///
 	/// In-game ambient occlusion effect preview: https://imgur.com/a/HrZKpdN
-	// TODO optimization: if parent is Some, force this to true
 	#[serde(rename = "ambientocclusion")]
 	#[serde(skip_serializing_if = "is_true")]
 	#[serde(default = "bool_true")]
@@ -246,7 +244,6 @@ pub(super) struct ItemTransforms<'data> {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) struct ItemOverride<'data> {
-	// TODO validating this could benefit from a vanilla item list
 	#[serde(deserialize_with = "item_override_model_resource_location_deserializer")]
 	pub(super) model: ResourceLocation<'data>,
 	// TODO keys are properties, parsed as `ResourceLocation`s (see `net.minecraft.client.renderer.block.model.ItemOverride`).
@@ -313,7 +310,6 @@ fn item_override_predicates_deserializer<'de, D: Deserializer<'de>>(
 #[serde(untagged)]
 #[serde(try_from = "Cow<'_, str>")]
 pub(super) enum TextureLocationOrReference<'data> {
-	// TODO validating this could use a vanilla texture list
 	Location(ResourceLocation<'data>),
 	Reference(Cow<'data, str>)
 }
@@ -553,8 +549,6 @@ pub(super) struct ElementFace<'data> {
 	/// UV coordinates in [x1, y1, x2, y2] format. When missing, the game calculates them as if
 	/// [`Element::default_face_uv`] was run for this face direction, using the `from` and `to`
 	/// points of the element. On < 1.9, this is a required attribute.
-	// TODO optimization: set to None if the coordinates match the ones computed by the game and the target
-	//      MC version is >= 1.9
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub(super) uv: Option<(f32, f32, f32, f32)>,
 	#[serde(default)]

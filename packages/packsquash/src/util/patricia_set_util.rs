@@ -18,3 +18,13 @@ impl<'this> PatriciaSetRelativePathIterExt<'this> for PatriciaSet {
 		})
 	}
 }
+
+pub trait PatriciaSetContainsRelativePathExt {
+	fn has_relative_path(&self, relative_path: &RelativePath) -> bool;
+}
+
+impl PatriciaSetContainsRelativePathExt for PatriciaSet {
+	fn has_relative_path(&self, relative_path: &RelativePath) -> bool {
+		self.contains(relative_path.as_str())
+	}
+}

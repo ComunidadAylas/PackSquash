@@ -7,10 +7,13 @@ use crate::pack_processor::java::asset_processor::data::vanilla_blockstate_prope
 use crate::pack_processor::java::asset_processor::data::{
 	vanilla_blockstate_list, vanilla_blockstate_property_list
 };
+use crate::pack_processor::java::asset_processor::helper;
 use crate::pack_processor::java::asset_processor::helper::json_helper::{
 	self, JsonAssetDeserializeOutcome
 };
-use crate::pack_processor::java::asset_processor::item_and_block_model_asset_processor::ItemAndBlockModelAssetProcessor;
+use crate::pack_processor::java::asset_processor::item_and_block_model_asset_processor::{
+	ItemAndBlockModelAssetProcessor, ItemOrBlockModelAssetError
+};
 use crate::pack_processor::java::{
 	pack_meta::PackMeta, resource_location::ResourceLocation,
 	resource_location::ResourceLocationError
@@ -18,8 +21,9 @@ use crate::pack_processor::java::{
 use crate::relative_path::InvalidPathError;
 use crate::squash_zip::SquashZipError;
 use crate::squashed_pack_state::SquashedPackState;
+use crate::util::patricia_set_util::PatriciaSetContainsRelativePathExt;
 use crate::util::{
-	lazy_or_eager::LazyOrEager, patricia_set_relative_path_iter::PatriciaSetRelativePathIterExt,
+	lazy_or_eager::LazyOrEager, patricia_set_util::PatriciaSetRelativePathIterExt,
 	range_bounds_intersect::RangeBoundsIntersectExt
 };
 use crate::vfs::VirtualFileSystem;
@@ -74,6 +78,8 @@ pub enum InnerBlockStateAssetError {
 		__filtered_out_text: &'static str
 	},
 	#[error("{0}")]
+	InvalidModel(#[from] ItemOrBlockModelAssetError),
+	#[error("{0}")]
 	JsonDeserializationError(#[from] json_helper::JsonDeserializationError),
 	/// Thrown when some error occurs in a ZIP file operation.
 	#[error("Error while performing a ZIP file operation: {0}")]
@@ -103,6 +109,7 @@ pub struct BlockStateAssetProcessor<
 	global_options: &'state GlobalOptions<'state>,
 	file_options: &'state FileOptionsMap,
 	squashed_pack_state: &'state SquashedPackState<'settings, 'budget, F>,
+	game_version_supports_blockstates: bool,
 	is_game_version_before_the_flattening: bool,
 	game_version_has_multipart_model_strategy: bool
 }
@@ -120,6 +127,8 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 	) -> Self {
 		let game_version_range = pack_meta.game_version_range();
 
+		let game_version_supports_blockstates =
+			(minecraft_version!(1, 8)..).intersects(game_version_range);
 		let is_game_version_before_the_flattening =
 			(..minecraft_version!(1, 13)).intersects(game_version_range);
 
@@ -133,6 +142,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 			global_options,
 			file_options,
 			squashed_pack_state,
+			game_version_supports_blockstates,
 			is_game_version_before_the_flattening,
 			game_version_has_multipart_model_strategy
 		}
@@ -146,12 +156,11 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 			impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + 'state + Send
 		>
 	) -> Result<(), BlockStateAssetError> {
-		let game_version_range = self.pack_meta.game_version_range();
-
-		// Block states were introduced in Minecraft 1.8
-		if !(minecraft_version!(1, 8)..).intersects(game_version_range) {
+		if !self.game_version_supports_blockstates {
 			return Ok(());
 		}
+
+		let game_version_range = self.pack_meta.game_version_range();
 
 		let valid_vanilla_block_properties = Lazy::new(|| {
 			vanilla_blockstate_property_list::matching_for_version_range(game_version_range)
@@ -172,7 +181,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 				} else {
 					LazyOrEager::Eager(None)
 				},
-				&model_asset_processor.vanilla_models
+				model_asset_processor
 			)
 			.map_err(|err| BlockStateAssetError {
 				inner: err,
@@ -249,8 +258,23 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 				AHashMap<&'static str, AHashMap<&'static str, TinyVec<[BlockStatePropertyType; 1]>>>
 			>
 		>,
-		vanilla_models: &impl Deref<Target = Option<AHashSet<RelativePath<'static>>>>
+		model_asset_processor: &ItemAndBlockModelAssetProcessor<
+			V,
+			F,
+			impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + 'state + Send
+		>
 	) -> Result<(), InnerBlockStateAssetError> {
+		let check_missing_references = !matches!(
+			self.global_options.missing_reference_action,
+			MissingReferenceAction::Ignore
+		);
+		let missing_references_are_warnings = matches!(
+			self.global_options.missing_reference_action,
+			MissingReferenceAction::Warn
+		);
+
+		let mut asset_warnings = tiny_vec!();
+
 		json_helper::deserialize::<BlockStateRepresentative, _, _, _>(
 			asset_path,
 			self.vfs,
@@ -258,7 +282,6 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 			false,
 			self.global_options.always_allow_json_comments,
 			"json",
-			"jsonc",
 			|outcome: JsonAssetDeserializeOutcome<'_, BlockState<'_>>| match outcome {
 				JsonAssetDeserializeOutcome::Value {
 					value: mut blockstate,
@@ -266,7 +289,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 					size_hint,
 					..
 				} => {
-					// The file name, without extension, matches the block name
+					// The file name without the extension matches the block name
 					let block_name = asset_path
 						.file_name()
 						.unwrap()
@@ -276,19 +299,67 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 						.unwrap()
 						.0;
 
-					let mut models_to_be_checked_for_presence = AHashSet::new();
-
 					// Validate and optimize the deserialized block state data
 					self.process_blockstate(
 						&mut blockstate,
 						block_name,
 						&file_options,
 						valid_block_properties,
-						matches!(
-							self.global_options.missing_reference_action,
-							MissingReferenceAction::ErrorOut | MissingReferenceAction::Warn
-						)
-						.then_some(&mut models_to_be_checked_for_presence)
+						|model_location| {
+							helper::validate_asset_dependency(
+								model_location,
+								self.pack_meta,
+								self.global_options,
+								(missing_references_are_warnings && check_missing_references)
+									.then_some(&mut asset_warnings),
+								|model_path| {
+									let model_exists = |candidate_model_path| {
+										let exists =
+											self.pack_files.has_relative_path(candidate_model_path);
+
+										// If the model exists, it should be able to be processed
+										if exists {
+											model_asset_processor.process_model_asset(
+												candidate_model_path,
+												get_file_specific_options!(
+													self.file_options,
+													candidate_model_path,
+													JsonFileOptions
+												)
+											)?;
+										}
+
+										Ok::<_, InnerBlockStateAssetError>(exists)
+									};
+
+									// Always do the check, even if we're not interested in erroring
+									// or warning, to get the side effect of calling process_model_asset
+									// on existing models. Due to the logic OR operator short-circuiting
+									// property, we'll avoid checking the second path if the first candidate
+									// exists, which is desirable and saves operations
+									let exists = model_exists(model_path)?
+										|| model_exists(&model_path.with_comment_extension_suffix())?;
+
+									Ok(!check_missing_references || exists)
+								},
+								|model_path| {
+									if let Some(vanilla_models) =
+										&*model_asset_processor.vanilla_models
+									{
+										Ok(vanilla_models.contains(model_path))
+									} else {
+										// We don't know the vanilla model set. Err on the side of caution
+										Ok(false)
+									}
+								},
+								|model_path, filtered_out_text| {
+									InnerBlockStateAssetError::MissingModel {
+										path: model_path,
+										__filtered_out_text: filtered_out_text
+									}
+								}
+							)
+						}
 					)?;
 
 					// Serialize it back to a scratch file
@@ -298,80 +369,6 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 						size_hint,
 						file_options.minify
 					)?;
-
-					// If some reference model is to be checked for presence, do so
-					let mut missing_model_warnings = tiny_vec!();
-					let missing_model_warnings_are_errors = matches!(
-						self.global_options.missing_reference_action,
-						MissingReferenceAction::ErrorOut
-					);
-
-					for referenced_model_path in models_to_be_checked_for_presence {
-						if self.pack_files.contains(referenced_model_path.as_str())
-							|| self.pack_files.contains(
-								referenced_model_path
-									.with_comment_extension_suffix()
-									.as_str()
-							) {
-							// The pack satisfies its own dependency
-
-							// TODO invoke item_and_block_model_asset_processor on this asset,
-							//      always populate this set
-
-							continue;
-						}
-
-						// We can't be sure that the model dependency is not satisfied yet: another
-						// resource pack applied on the client may provide the required model.
-						// We also know that vanilla models are always available.
-						//
-						// However, if the model is explicitly filtered out from being loaded from
-						// other packs, then we know for sure that the dependency can't be satisfied.
-						//
-						// Therefore, consider the dependency as fulfilled when:
-						// - The model is not filtered out, and
-						// - It is a vanilla model, or references to unknown packs and/or mods are
-						//   accepted.
-						let is_model_filtered_out = self.pack_meta.is_resource_location_filtered_out(
-							&ResourceLocation::try_from(&referenced_model_path).unwrap()
-						);
-
-						let accept_references_to_unknown_packs_and_mods = self
-							.global_options
-							.accept_references_to_unknown_packs_and_mods;
-
-						let dependency_satisfied = !is_model_filtered_out
-							&& (accept_references_to_unknown_packs_and_mods
-								|| if let Some(vanilla_models) = &**vanilla_models {
-									vanilla_models.contains(&referenced_model_path)
-								} else {
-									// We don't know the vanilla model set. Err on the side of caution
-									false
-								});
-
-						if !dependency_satisfied {
-							let filtered_out_text = if is_model_filtered_out {
-								". It was filtered out by the pack.mcmeta filter section"
-							} else {
-								""
-							};
-
-							if missing_model_warnings_are_errors {
-								return Err(InnerBlockStateAssetError::MissingModel {
-									path: referenced_model_path,
-									__filtered_out_text: filtered_out_text
-								});
-							} else {
-								missing_model_warnings.push(
-									format!(
-										"A variant referenced a model at {}, but it is not a known model and it was not found in the pack{}",
-										referenced_model_path.as_str(), filtered_out_text
-									)
-									.into()
-								);
-							}
-						}
-					}
 
 					self.squashed_pack_state.add_file_to_zip(
 						&canonical_asset_path,
@@ -392,7 +389,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 								(true, true) =>
 									PackSquashAssetProcessingStrategy::ValidatedDebloatedAndMinified,
 							},
-							warnings: missing_model_warnings
+							warnings: asset_warnings
 						},
 						asset_path = asset_path.as_str()
 					);
@@ -409,7 +406,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 					status_trace!(
 						ProcessedAsset {
 							strategy: PackSquashAssetProcessingStrategy::CopiedFromPreviousZip,
-							warnings: tiny_vec!()
+							warnings: asset_warnings
 						},
 						asset_path = asset_path.as_str()
 					);
@@ -438,7 +435,9 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 				AHashMap<&'static str, AHashMap<&'static str, TinyVec<[BlockStatePropertyType; 1]>>>
 			>
 		>,
-		mut models_to_be_checked_for_presence: Option<&mut AHashSet<RelativePath<'static>>>
+		mut model_dependency_handler: impl FnMut(
+			&ResourceLocation
+		) -> Result<(), InnerBlockStateAssetError>
 	) -> Result<(), InnerBlockStateAssetError> {
 		// First, run more through validation and optimization
 		match (&mut blockstate.variants, &mut blockstate.multipart_variants) {
@@ -488,7 +487,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 					self.optimize_variant_list(
 						variant_list,
 						file_options,
-						models_to_be_checked_for_presence.as_mut()
+						&mut model_dependency_handler
 					)?;
 				}
 			}
@@ -523,7 +522,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 					self.optimize_variant_list(
 						&mut multipart_variant_selector.variants,
 						file_options,
-						models_to_be_checked_for_presence.as_mut()
+						&mut model_dependency_handler
 					)?;
 
 					// Delete unknown keys that the game won't read
@@ -554,7 +553,9 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 		&self,
 		variant_list: &mut VariantList,
 		file_options: &impl Deref<Target = &'options JsonFileOptions>,
-		mut referenced_models: Option<&mut &mut AHashSet<RelativePath<'static>>>
+		mut model_dependency_handler: impl FnMut(
+			&ResourceLocation
+		) -> Result<(), InnerBlockStateAssetError>
 	) -> Result<(), InnerBlockStateAssetError> {
 		// Optimize list of variants to a single variant if it contains a single element
 		if variant_list.len() == 1 && matches!(variant_list, VariantList::SeveralVariants(_)) {
@@ -574,9 +575,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 				Some("json")
 			)?;
 
-			if let Some(referenced_models) = &mut referenced_models {
-				referenced_models.insert(model_location.as_relative_path()?);
-			}
+			model_dependency_handler(&model_location)?;
 
 			if file_options.delete_bloat {
 				variant.bloat_fields.clear();
