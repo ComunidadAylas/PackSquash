@@ -277,6 +277,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "color_quant"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
+
+[[package]]
 name = "com"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1010,6 +1016,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "image"
+version = "0.24.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69b7ea949b537b0fd0af141fff8c77690f2ce96f4f41f042ccb6c69c6c965945"
+dependencies = [
+ "bytemuck",
+ "byteorder",
+ "color_quant",
+ "num-rational",
+ "num-traits",
+ "png",
+]
+
+[[package]]
 name = "imagequant"
 version = "4.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1319,6 +1339,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-rational"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0638a1c9d0a3c0914158145bc76cff373a75a627e6ecbfb71cbe6f453a5a19b0"
+dependencies = [
+ "autocfg",
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
 name = "num-traits"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1438,11 +1469,13 @@ dependencies = [
 
 [[package]]
 name = "oxipng"
-version = "7.0.0"
-source = "git+https://github.com/ComunidadAylas/oxipng?branch=master#24858432a233260c5fe1bb3bac9b921298045288"
+version = "8.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "630638e107fb436644c300e781d3f17e1b04656138ba0d40564be4be3b06db32"
 dependencies = [
  "bitvec 1.0.1",
  "crossbeam-channel",
+ "image",
  "indexmap",
  "itertools",
  "libdeflater",
@@ -2836,6 +2869,11 @@ dependencies = [
  "log",
  "typed-arena",
 ]
+
+[[patch.unused]]
+name = "oxipng"
+version = "7.0.0"
+source = "git+https://github.com/ComunidadAylas/oxipng?branch=master#24858432a233260c5fe1bb3bac9b921298045288"
 
 [[patch.unused]]
 name = "serde_derive"
