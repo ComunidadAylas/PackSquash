@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1671409984990,
+  "lastUpdate": 1671974274747,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": false,
-          "id": "3e0b9b74c849f2e809f58c82ddf0861c157168ba",
-          "message": "fix(deps): update rust crate sysinfo to 0.26.5",
-          "timestamp": "2022-10-17T22:46:34Z",
-          "tree_id": "f07a7aebaef31eca3d9ed57949ed3bedbfc872c2",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3e0b9b74c849f2e809f58c82ddf0861c157168ba"
-        },
-        "date": 1666060672872,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12702315,
-            "range": "± 713438",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 451706567,
-            "range": "± 14345791",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 11638390747,
-            "range": "± 169062703",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2548457032,
-            "range": "± 60641398",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 676906945,
             "range": "± 9848935",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "d9e049a486f88b1c9977748618b1b4cbcae51f65",
+          "message": "chore(deps): breaking OxiPNG and criterion-perf-events updates\n\nIt's finally possible to phase out our OxiPNG fork, and\ncriterion-perf-events has finally been updated on Christmas to support\nthe latest Criterion.rs releases, which reduces quite a bit of dependency\ntechnical debt.\n\nIs this a Christmas gift?",
+          "timestamp": "2022-12-25T12:45:50Z",
+          "tree_id": "0ec7841059005f020da20d9cc9fde50636e26732",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d9e049a486f88b1c9977748618b1b4cbcae51f65"
+        },
+        "date": 1671974273268,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9675948,
+            "range": "± 416595",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 183162057,
+            "range": "± 2266402",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3570017818,
+            "range": "± 80720619",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 626181617,
+            "range": "± 10169367",
             "unit": "ns/iter"
           }
         ]
