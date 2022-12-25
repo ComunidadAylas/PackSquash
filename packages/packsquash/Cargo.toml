@@ -48,7 +48,7 @@ spng = { version = "0.2.0-alpha.2", default-features = false }
 png = "0.17.7"
 rgb = "0.8.34"
 imagequant = { version = "4.0.4", default-features = false, features = ["threads"] }
-oxipng = { version = "7.0.0", default-features = false, features = ["zopfli", "parallel"] }
+oxipng = { version = "8.0.0", default-features = false, features = ["zopfli", "parallel"] }
 
 symphonia = { version = "0.5.3", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
 vorbis_rs = { version = "0.4.0", default-features = false }

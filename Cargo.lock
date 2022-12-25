@@ -1785,6 +1785,7 @@ dependencies = [
  "color_quant",
  "num-rational",
  "num-traits",
+ "png",
 ]
 
 [[package]]
@@ -2590,11 +2591,13 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
 name = "oxipng"
-version = "7.0.0"
-source = "git+https://github.com/ComunidadAylas/oxipng?branch=master#24858432a233260c5fe1bb3bac9b921298045288"
+version = "8.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "630638e107fb436644c300e781d3f17e1b04656138ba0d40564be4be3b06db32"
 dependencies = [
  "bitvec 1.0.1",
  "crossbeam-channel",
+ "image",
  "indexmap",
  "itertools",
  "libdeflater",
@@ -2824,9 +2827,9 @@ checksum = "478c572c3d73181ff3c2539045f6eb99e5491218eae919370993b890cdbdd98e"
 
 [[package]]
 name = "pest"
-version = "2.5.1"
+version = "2.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc8bed3549e0f9b0a2a78bf7c0018237a2cdf085eecbbc048e52612438e4e9d0"
+checksum = "0f6e86fb9e7026527a0d46bc308b841d73170ef8f443e1807f6ef88526a816d4"
 dependencies = [
  "thiserror",
  "ucd-trie",
