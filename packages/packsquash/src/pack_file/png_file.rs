@@ -11,7 +11,7 @@ use std::{
 use bytes::BytesMut;
 use imagequant::{liq_error, Attributes};
 use itertools::Itertools;
-use oxipng::{Deflaters, Headers, Options, PngError, RowFilter};
+use oxipng::{Deflaters, Headers, Interlacing, Options, PngError, RowFilter};
 use png::EncodingError;
 use rgb::{ComponentBytes, FromSlice, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
@@ -616,7 +616,7 @@ fn visually_lossless_optimize(
 		fix_errors: true, // Ignore CRC for speed. We assume a reliable data source
 		force: false,     // Give up with the second pass result if we can't reduce size further
 		idat_recoding: true,
-		interlace: Some(0), // No interlacing (smaller file size)
+		interlace: Some(Interlacing::None),
 		palette_reduction: true,
 		grayscale_reduction: can_convert_to_grayscale && can_change_color_type,
 		preserve_attrs: false,
