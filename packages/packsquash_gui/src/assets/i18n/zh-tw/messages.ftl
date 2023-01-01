@@ -33,7 +33,7 @@ crash-screen-continue-action = 繼續
 pack-selection-screen-title = 選擇資料夾
 pack-selection-screen-caption = 讓我們開始！
 pack-selection-screen-caption-text =
-    { -app-name } 需要知道最佳化的資料夾位置。
+    { -app-name } 需讀取欲最佳化資料夾位置。
     
     請拖曳資料夾到這裡，或是點擊底下的按鈕。
 pack-selector-dialog-button = 選擇資料夾
