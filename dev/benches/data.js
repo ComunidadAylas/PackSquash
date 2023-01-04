@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1672486537288,
+  "lastUpdate": 1672874153626,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "aa28ea236925faef4ee44b5484c8e6119d17061d",
-          "message": "Revert \"chore(deps): update dependency charset-normalizer to v3 (#161)\"\n\nThis reverts commit 904cbb8f3336daef8cd8ab9825d8971f7571da2d.\n\nrequests 2.28.1 depends on charset-normalizer<3 and >=2, so we can't\nupdate charset-normalizer just yet.",
-          "timestamp": "2022-10-20T17:03:33Z",
-          "tree_id": "8dfa39b4f1fc6208b5dff511c87dfd6055cd191d",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/aa28ea236925faef4ee44b5484c8e6119d17061d"
-        },
-        "date": 1666287255425,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12151325,
-            "range": "± 243704",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 382789304,
-            "range": "± 3760309",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 15437620488,
-            "range": "± 55534870",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2173753107,
-            "range": "± 90919830",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 683458363,
             "range": "± 6426385",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8c1feec007fa1bb5affc5eae01ddb6323a449de9",
+          "message": "fix(deps): update rust crate tokio to 1.23.1",
+          "timestamp": "2023-01-04T19:39:36Z",
+          "tree_id": "3b1875870fdf158bab2ef60b38acf14144decf06",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/8c1feec007fa1bb5affc5eae01ddb6323a449de9"
+        },
+        "date": 1672874152560,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10003074,
+            "range": "± 161800",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 192387083,
+            "range": "± 953255",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3390465569,
+            "range": "± 33217972",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 669152299,
+            "range": "± 12253614",
             "unit": "ns/iter"
           }
         ]
