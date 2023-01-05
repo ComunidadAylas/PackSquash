@@ -22,7 +22,7 @@ patricia_tree = "0.4.0"
 sysinfo = { version = "0.27.2", default-features = false }
 walkdir = "2.3.2"
 
-tokio = { version = "1.23.1", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
+tokio = { version = "1.24.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
 tokio-util = { version = "0.7.4", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.11", default-features = false }
 futures = { version = "0.3.25", default-features = false }
