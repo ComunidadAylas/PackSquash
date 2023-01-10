@@ -19,7 +19,7 @@ thiserror = "1.0.38"
 ahash = "0.8.2"
 patricia_tree = "0.5.0"
 
-sysinfo = { version = "0.27.3", default-features = false }
+sysinfo = { version = "0.27.4", default-features = false }
 walkdir = "2.3.2"
 
 tokio = { version = "1.24.1", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
