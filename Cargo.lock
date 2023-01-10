@@ -1006,6 +1006,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "git2"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be36bc9e0546df253c0cc41fd0af34f5e92845ad8509462ec76672fac6997f5b"
+dependencies = [
+ "bitflags",
+ "libc",
+ "libgit2-sys",
+ "log",
+ "url",
+]
+
+[[package]]
 name = "globset"
 version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1222,9 +1235,9 @@ dependencies = [
 
 [[package]]
 name = "libgit2-sys"
-version = "0.14.0+1.5.0"
+version = "0.14.1+1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47a00859c70c8a4f7218e6d1cc32875c4b55f6799445b842b0d8ed5e4c3d959b"
+checksum = "4a07fb2692bc3593bda59de45a502bb3071659f2c515e28c71e728306b038e17"
 dependencies = [
  "cc",
  "libc",
@@ -1483,7 +1496,7 @@ checksum = "30ff42bc545d15e0ecc6ca7b7b645f770c2c1fd20d1bce0baf663b80b0198520"
 dependencies = [
  "bumpalo",
  "getrandom",
- "git2",
+ "git2 0.15.0",
  "indexmap",
  "log",
  "ogg",
@@ -1622,7 +1635,7 @@ dependencies = [
  "color-backtrace",
  "env_logger",
  "getopts",
- "git2",
+ "git2 0.16.0",
  "log",
  "packsquash",
  "serde_path_to_error",

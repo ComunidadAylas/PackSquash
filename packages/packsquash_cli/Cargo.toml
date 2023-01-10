@@ -31,7 +31,7 @@ winapi = { version = "0.3.9", default-features = false, features = ["consoleapi"
 winapi-util = "0.1.5"
 
 [build-dependencies]
-git2 = { version = "0.15.0", default-features = false }
+git2 = { version = "0.16.0", default-features = false }
 time = { version = "0.3.17", default-features = false, features = ["std"] }
 
 [target.'cfg(windows)'.build-dependencies]
