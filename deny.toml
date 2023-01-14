@@ -14,11 +14,6 @@ vulnerability = "deny"
 unmaintained = "warn"
 yanked = "deny"
 notice = "warn"
-ignore = [
-	# Criterion depends on serde_cbor, which is unmaintained and has some quirks, but works:
-	# https://github.com/pyfisch/cbor/issues/179
-	"RUSTSEC-2021-0127"
-]
 
 [licenses]
 unlicensed = "deny"
