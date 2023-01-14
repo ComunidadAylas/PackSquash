@@ -5,7 +5,7 @@ use std::{
 	env,
 	fmt::Display,
 	fs,
-	io::{self, Read},
+	io::{self, Read, Stderr},
 	process,
 	time::{Duration, Instant}
 };
@@ -13,6 +13,7 @@ use std::{
 use env_logger::fmt::Color;
 use env_logger::{Builder, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
+use is_terminal::IsTerminal;
 use log::{debug, error, info, trace, warn, Level, LevelFilter};
 use tokio::{runtime, select, sync::mpsc::channel, time::sleep};
 
@@ -29,8 +30,8 @@ mod terminal_title_setter;
 
 /// The log target where status messages will be sent to.
 const LOG_TARGET: Target = Target::Stderr;
-/// The [`atty`] stream that matches the [`LOG_TARGET`] constant.
-const LOG_TARGET_STREAM: atty::Stream = atty::Stream::Stderr;
+/// A producer of the [`IsTerminal`] implementation that matches the [`LOG_TARGET`] constant.
+const LOG_TARGET_STREAM: fn() -> Stderr = io::stderr;
 
 fn main() {
 	#[cfg(feature = "color-backtrace")]
@@ -47,7 +48,7 @@ fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 		title_controller.show();
 	}
 
-	let log_target_is_tty = atty::is(LOG_TARGET_STREAM);
+	let log_target_is_tty = LOG_TARGET_STREAM().is_terminal();
 	let enable_emoji_default = environment_allows_emoji(log_target_is_tty);
 	let enable_color_default = environment_allows_color(log_target_is_tty);
 

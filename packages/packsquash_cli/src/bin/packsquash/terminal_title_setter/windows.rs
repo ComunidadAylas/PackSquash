@@ -3,7 +3,8 @@ use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
 use std::{env, io};
 
-use atty::Stream;
+use is_terminal::IsTerminal;
+
 use winapi::um::wincon::SetConsoleTitleW;
 use winapi_util::console::Console;
 
@@ -48,11 +49,11 @@ impl<'title> TerminalTitleSetterTrait<'title> for WindowsTerminalTitleSetter {
 		let ansi_escape_codes_stream = if terminal_emulator_might_support_ansi_escape_codes {
 			if terminal_emulator_supports_ansi_escape_codes {
 				// This is the easy case: just check if any stream is attached to an interactive
-				// terminal. Use the atty crate to handle both standard Windows consoles, including
-				// Windows Terminal, and some Unix-like terminals
-				if atty::is(Stream::Stdout) {
+				// terminal. Use the is-terminal crate to handle both standard Windows consoles,
+				// including Windows Terminal, and some Unix-like terminals
+				if io::stdout().is_terminal() {
 					Some(Stream::Stdout)
-				} else if atty::is(Stream::Stderr) {
+				} else if io::stderr().is_terminal() {
 					Some(Stream::Stderr)
 				} else {
 					None
