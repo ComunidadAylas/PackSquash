@@ -10,5 +10,5 @@ publish = false
 edition = "2021"
 
 [dependencies]
-serde = { version = "1.0.151", features = ["derive"] }
+serde = { version = "1.0.152", features = ["derive"] }
 serde_path_to_error = "0.1.9"

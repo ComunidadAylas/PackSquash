@@ -1,3 +1,4 @@
+use is_terminal::IsTerminal;
 use std::ffi::OsStr;
 use std::io::IsTerminal;
 use std::os::windows::ffi::OsStrExt;
@@ -122,10 +123,10 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 
 	fn set_title(&self, title: &WindowsTerminalTitleString) {
 		match &self.title_strategy {
-			WindowsTitleStrategy::AnsiEscapeCodes(Stream::Stdout) => {
+			WindowsTitleStrategy::AnsiEscapeCodes(TerminalStream::Stdout) => {
 				write_ansi_set_window_title_escape_sequence(io::stdout(), title.string)
 			}
-			WindowsTitleStrategy::AnsiEscapeCodes(Stream::Stderr) => {
+			WindowsTitleStrategy::AnsiEscapeCodes(TerminalStream::Stderr) => {
 				write_ansi_set_window_title_escape_sequence(io::stderr(), title.string)
 			}
 			WindowsTitleStrategy::WindowsConsoleApi => {
