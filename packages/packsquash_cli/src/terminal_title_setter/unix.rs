@@ -1,3 +1,4 @@
+use is_terminal::IsTerminal;
 use std::fs::{File, OpenOptions};
 use std::{env, io};
 
@@ -33,11 +34,11 @@ impl TerminalTitleSetterTrait for UnixTerminalTitleSetter {
 			// Check if any output stream is connected to a terminal. Even if no stream is connected
 			// to a terminal, the controlling terminal of the process may exist and be writable, so
 			// try that too
-			if atty::is(Stream::Stdout) {
+			if io::stdout().is_terminal() {
 				Some(Self {
 					escape_codes_stream: AnsiEscapeCodesStream::Stdout
 				})
-			} else if atty::is(Stream::Stderr) {
+			} else if io::stderr().is_terminal() {
 				Some(Self {
 					escape_codes_stream: AnsiEscapeCodesStream::Stderr
 				})

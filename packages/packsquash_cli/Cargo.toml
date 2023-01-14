@@ -21,7 +21,7 @@ strum = { version = "0.24.1", features = ["derive"] }
 
 serde_path_to_error = "0.1.9"
 
-atty = "0.2.14"
+is-terminal = "0.4.2"
 log = "0.4.17"
 env_logger = { version = "0.10.0", default-features = false, features = ["color"] }
 indenter = { version = "0.3.3", features = ["std"] }

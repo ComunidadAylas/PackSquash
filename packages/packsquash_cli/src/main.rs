@@ -6,7 +6,7 @@ use std::{
 	env,
 	fmt::Display,
 	fs,
-	io::{self, ErrorKind, Read},
+	io::{self, ErrorKind, Read, Stderr},
 	process::ExitCode,
 	sync::atomic::{AtomicU64, AtomicUsize, Ordering},
 	time::Instant
@@ -14,6 +14,7 @@ use std::{
 
 use env_logger::{fmt::Color, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
+use is_terminal::IsTerminal;
 use log::{debug, error, info, Level, LevelFilter};
 
 use crate::util::IoWriteToFmtWriteAdapter;
@@ -30,8 +31,8 @@ mod util;
 
 /// The log target where status messages will be sent to.
 const LOG_TARGET: Target = Target::Stderr;
-/// The [`atty`] stream that matches the [`LOG_TARGET`] constant.
-const LOG_TARGET_STREAM: atty::Stream = atty::Stream::Stderr;
+/// A producer of the [`IsTerminal`] implementation that matches the [`LOG_TARGET`] constant.
+const LOG_TARGET_STREAM: fn() -> Stderr = io::stderr;
 
 static PROCESSED_FILE_COUNT: AtomicU64 = AtomicU64::new(0);
 static TOTAL_FILE_COUNT: AtomicUsize = AtomicUsize::new(0);
@@ -43,7 +44,7 @@ fn main() -> ExitCode {
 	let title_controller = TerminalTitleController::new()
 		.map(|title_controller| Box::leak(Box::new(title_controller)) as &TerminalTitleController);
 
-	let log_target_is_tty = atty::is(LOG_TARGET_STREAM);
+	let log_target_is_tty = LOG_TARGET_STREAM().is_terminal();
 	let enable_emoji_default = environment_allows_emoji(log_target_is_tty);
 	let enable_color_default = environment_allows_color(log_target_is_tty);
 

@@ -1,3 +1,4 @@
+use is_terminal::IsTerminal;
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
 use std::{env, io};
@@ -7,6 +8,13 @@ use winapi::um::wincon::SetConsoleTitleW;
 use winapi_util::console::Console;
 
 use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};
+
+/// Enumerates all the possible output streams where ANSI escape sequences can be
+/// written to change the terminal title.
+enum AnsiEscapeCodesStream {
+	Stdout,
+	Stderr
+}
 
 /// A terminal title setter for Windows platforms.
 pub struct WindowsTerminalTitleSetter {
@@ -49,10 +57,10 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 				// This is the easy case: just check if any stream is attached to an interactive
 				// terminal. Use the atty crate to handle both standard Windows consoles, including
 				// Windows Terminal, and some Unix-like terminals
-				if atty::is(Stream::Stdout) {
-					Some(Stream::Stdout)
-				} else if atty::is(Stream::Stderr) {
-					Some(Stream::Stderr)
+				if io::stdout().is_terminal() {
+					Some(AnsiEscapeCodesStream::Stdout)
+				} else if io::stderr().is_terminal() {
+					Some(AnsiEscapeCodesStream::Stderr)
 				} else {
 					None
 				}
@@ -78,13 +86,15 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 							},
 							|console| {
 								// stderr is associated with a console
-								enable_vt_processing(console).and_then(|_| Some(Stream::Stderr))
+								enable_vt_processing(console)
+									.and_then(|_| Some(AnsiEscapeCodesStream::Stderr))
 							}
 						)
 					},
 					|console| {
 						// stdout is associated with a console
-						enable_vt_processing(console).and_then(|_| Some(Stream::Stdout))
+						enable_vt_processing(console)
+							.and_then(|_| Some(AnsiEscapeCodesStream::Stdout))
 					}
 				)
 			}
@@ -114,15 +124,11 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 
 	fn set_title(&self, title: &WindowsTerminalTitleString) {
 		match &self.title_strategy {
-			WindowsTitleStrategy::AnsiEscapeCodes(Stream::Stdout) => {
+			WindowsTitleStrategy::AnsiEscapeCodes(AnsiEscapeCodesStream::Stdout) => {
 				write_ansi_set_window_title_escape_sequence(io::stdout(), title.string)
 			}
-			WindowsTitleStrategy::AnsiEscapeCodes(Stream::Stderr) => {
+			WindowsTitleStrategy::AnsiEscapeCodes(AnsiEscapeCodesStream::Stderr) => {
 				write_ansi_set_window_title_escape_sequence(io::stderr(), title.string)
-			}
-			WindowsTitleStrategy::AnsiEscapeCodes(_) => {
-				// Can't print ANSI escape codes to stdin. This is an internal error
-				unreachable!()
 			}
 			WindowsTitleStrategy::WindowsConsoleApi => {
 				// SAFETY: system calls are unsafe. We borrow a Vec whose lifetime
