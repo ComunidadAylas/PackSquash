@@ -810,7 +810,7 @@ impl Default for AudioFileOptions {
 }
 
 /// A channel mixing strategy for some audio file, contained in [`AudioFileOptions`].
-#[derive(Deserialize, Clone, Copy)]
+#[derive(Deserialize, Clone, Copy, Default)]
 #[serde(untagged)]
 pub enum ChannelMixingOption {
 	/// Downmix or upmix the sound channels in the input file to generate an output
@@ -821,13 +821,8 @@ pub enum ChannelMixingOption {
 	ToChannels(ChannelCount),
 	/// Do not change the number or layout of the sound channels of the input file
 	/// in any way.
+	#[default]
 	Skip
-}
-
-impl Default for ChannelMixingOption {
-	fn default() -> Self {
-		ChannelMixingOption::Skip
-	}
 }
 
 /// Represents a bitrate control mode that can be used by the PackSquash Vorbis encoder,
