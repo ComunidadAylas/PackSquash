@@ -6,7 +6,7 @@ use std::{
 	env,
 	fmt::Display,
 	fs,
-	io::{self, ErrorKind, Read},
+	io::{self, ErrorKind, Read, Stderr},
 	process::ExitCode,
 	sync::atomic::{AtomicU64, AtomicUsize, Ordering},
 	time::Instant
@@ -14,6 +14,7 @@ use std::{
 
 use env_logger::{fmt::Color, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
+use is_terminal::IsTerminal;
 use log::{debug, error, info, Level, LevelFilter};
 
 use crate::util::IoWriteToFmtWriteAdapter;
