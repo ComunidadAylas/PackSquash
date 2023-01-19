@@ -19,8 +19,6 @@ toml = { version = "0.7.6", default-features = false, features = ["parse"] }
 
 strum = { version = "0.24.1", features = ["derive"] }
 
-serde_path_to_error = "0.1.9"
-
 log = "0.4.17"
 env_logger = { version = "0.10.0", default-features = false, features = ["color"] }
 indenter = { version = "0.3.3", features = ["std"] }
