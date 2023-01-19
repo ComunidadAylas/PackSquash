@@ -2,8 +2,6 @@ use is_terminal::IsTerminal;
 use std::fs::{File, OpenOptions};
 use std::{env, io};
 
-use atty::Stream;
-
 use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};
 
 /// A terminal title setter for Unix-like platforms.
