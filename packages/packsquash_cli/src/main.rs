@@ -20,7 +20,7 @@ use log::{debug, error, info, Level, LevelFilter};
 use crate::util::IoWriteToFmtWriteAdapter;
 use packsquash::{PackSquashAssetProcessingStrategy, PackSquashStatus, VirtualFileSystemType};
 use packsquash_options::SquashOptions;
-use packsquash_util::PrettySerdePathErrorWrapper;
+use packsquash_util::deserialize_with_pretty_path_on_error;
 use terminal_style::{environment_allows_color, environment_allows_emoji};
 use terminal_title_controller::TerminalTitleController;
 
@@ -182,14 +182,14 @@ fn read_options_file_and_squash(
 	};
 
 	// Deserialize the options struct contained in the string
-	let squash_options = match serde_path_to_error::deserialize::<_, SquashOptions>(
+	let squash_options = match deserialize_with_pretty_path_on_error::<_, SquashOptions>(
 		&mut toml::de::Deserializer::new(&options_string)
 	) {
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
 			error!(
 				"An error occurred while parsing the options file: {}",
-				PrettySerdePathErrorWrapper::from(deserialize_error)
+				deserialize_error
 			);
 
 			return 3.into();
@@ -391,7 +391,7 @@ fn init_logging(
 			match status_type {
 				Some(PackSquashStatus::PackFileCount { count }) => {
 					// A relaxed memory ordering is enough because we will read the value of this
-					// counter after PackSquash finishes running and its thread stop (external
+					// counter after PackSquash finishes running and its thread stops (external
 					// synchronization)
 					TOTAL_FILE_COUNT.store(*count, Ordering::Relaxed);
 
@@ -446,7 +446,7 @@ fn init_logging(
 					let asset_path = asset_path.to_borrowed_str().unwrap();
 
 					// A relaxed memory ordering is enough because we will read the values of these
-					// counters after PackSquash finishes running and its thread stop (external
+					// counters after PackSquash finishes running and its thread stops (external
 					// synchronization)
 					PROCESSED_FILE_COUNT.fetch_add(1, Ordering::Relaxed);
 					ASSET_WARNING_COUNT.fetch_add(warnings.len() as u64, Ordering::Relaxed);
