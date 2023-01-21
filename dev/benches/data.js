@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1674204765258,
+  "lastUpdate": 1674260909647,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "distinct": true,
-          "id": "50f6f9262ffdde8add9b284ec92c811447bde3ed",
-          "message": "fix(deps): update rust crate uuid to 1.2.2",
-          "timestamp": "2022-11-15T10:43:01Z",
-          "tree_id": "3ccbfe7aee5ecc1d9b86b03f378ed71df64abbb1",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/50f6f9262ffdde8add9b284ec92c811447bde3ed"
-        },
-        "date": 1668511910497,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12217810,
-            "range": "± 333685",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 388881016,
-            "range": "± 6352928",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 14892634240,
-            "range": "± 29470128",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2271629609,
-            "range": "± 55518021",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 684424437,
             "range": "± 8752924",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4308e2537505a9a8f32aeaec933af755cec81669",
+          "message": "chore(deps): bump libgit2-sys from 0.14.1+1.5.0 to 0.14.2+1.5.1 (#189)\n\nBumps [libgit2-sys](https://github.com/rust-lang/git2-rs) from 0.14.1+1.5.0 to 0.14.2+1.5.1.\r\n- [Release notes](https://github.com/rust-lang/git2-rs/releases)\r\n- [Commits](https://github.com/rust-lang/git2-rs/compare/0.14.1...libgit2-sys-0.14.2)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: libgit2-sys\r\n  dependency-type: indirect\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2023-01-21T00:59:44+01:00",
+          "tree_id": "fae8916ebb49ff6969e72caf42a9c7f18aaae2f7",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/4308e2537505a9a8f32aeaec933af755cec81669"
+        },
+        "date": 1674260908483,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13168795,
+            "range": "± 829069",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 203163139,
+            "range": "± 5182589",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 4741750381,
+            "range": "± 152309257",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 740079084,
+            "range": "± 18695377",
             "unit": "ns/iter"
           }
         ]
