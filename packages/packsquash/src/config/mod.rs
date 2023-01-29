@@ -651,8 +651,12 @@ impl FileOptions {
 			file_options.audio_bitrate_control_mode = global_options.audio_bitrate_control_mode;
 			file_options.non_positional_audio_target_bitrate_control_metric =
 				global_options.non_positional_audio_target_bitrate_control_metric;
+			file_options.positional_audio_target_bitrate_control_metric =
+				global_options.positional_audio_target_bitrate_control_metric;
 			file_options.non_positional_audio_sampling_frequency =
 				global_options.non_positional_audio_sampling_frequency;
+			file_options.positional_audio_sampling_frequency =
+				global_options.positional_audio_sampling_frequency;
 			file_options.minecraft_version_supports_ogg_obfuscation = !global_options
 				.work_around_minecraft_quirks
 				.contains(MinecraftQuirk::OggObfuscationIncompatibility);
