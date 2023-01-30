@@ -388,6 +388,9 @@ jobs:
       - name: 🔍 Run quick benchmarks
         run: cargo bench -- --output-format=bencher 'wall_time' | tee /run/bench_results.txt
 
+      - name: 🐛 Set current working directory as a safe directory for git
+        run: git config --global --add safe.directory .
+
       - name: 📤 Publish quick benchmarks results
         uses: benchmark-action/github-action-benchmark@v1
         with:
