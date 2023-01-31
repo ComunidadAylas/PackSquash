@@ -10,10 +10,9 @@ import FluidSubtitleHeader from "../components/FluidSubtitleHeader";
 import PrimaryActionButton from "../components/PrimaryActionButton";
 import { useNavigate } from "@solidjs/router";
 import { open } from "@tauri-apps/api/dialog";
-import { readTextFile } from "@tauri-apps/api/fs";
-import TOML from "@iarna/toml";
 import { toast } from "solid-toast";
 import FluidSmallParagraph from "../components/FluidSmallParagraph";
+import { invoke } from "@tauri-apps/api";
 
 let packSquashOptions: Record<string, unknown> | undefined;
 export { packSquashOptions };
@@ -118,8 +117,9 @@ export default () => {
                     }
 
                     try {
-                      packSquashOptions = TOML.parse(
-                        await readTextFile(optionsFilePath)
+                      packSquashOptions = await invoke<Record<string, unknown>>(
+                        "parse_squash_options",
+                        { path: optionsFilePath }
                       );
 
                       // Overwrite any pack directory set by the options

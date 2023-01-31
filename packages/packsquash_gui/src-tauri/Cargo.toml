@@ -11,7 +11,7 @@ edition = "2021"
 
 [dependencies]
 packsquash = { path = "../../packsquash", version = "0.3.1" }
-packsquash_options = { path = "../../packsquash_options", version = "0.3.1" }
+packsquash_options = { path = "../../packsquash_options", version = "0.3.1", features = ["serializable-squash-options"] }
 
 tauri = { version = "1.2.4", features = ["clipboard-write-text", "dialog-open", "dialog-save", "os-all", "shell-execute", "shell-open", "updater", "window-request-user-attention", "window-set-title"] }
 tauri-plugin-store = { version = "0.0.0", git = "https://github.com/tauri-apps/tauri-plugin-store", rev = "4326f754" }

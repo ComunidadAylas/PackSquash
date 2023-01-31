@@ -13,7 +13,7 @@ const BUILD_VARIABLES = [
   "app_build_target_triple",
   "app_build_profile"
 ] as const;
-type BuildVariable = typeof BUILD_VARIABLES[number];
+type BuildVariable = (typeof BUILD_VARIABLES)[number];
 
 const PLACEHOLDER_BUILD_VARIABLE_VALUE = "MissingIpc.";
 const BUILD_DATA: Record<BuildVariable, string> = {
