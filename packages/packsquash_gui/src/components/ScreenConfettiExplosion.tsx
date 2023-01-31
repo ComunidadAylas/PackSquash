@@ -1,4 +1,4 @@
-import ConfettiExplosion from "solid-confetti-explosion";
+import { ConfettiExplosion } from "solid-confetti-explosion";
 
 export default () => {
   return (

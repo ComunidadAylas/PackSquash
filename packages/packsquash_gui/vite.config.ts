@@ -25,10 +25,6 @@ export default defineConfig({
       }
     }
   },
-  define: {
-    // Workaround for @iarna/toml requiring global
-    global: "window"
-  },
   esbuild: {
     // On production builds, strip out console logging and debugger instructions
     drop: ["debugger"],

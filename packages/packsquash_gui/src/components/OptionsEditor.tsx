@@ -2,13 +2,13 @@ import { For, getOwner, runWithOwner } from "solid-js";
 import PrimaryActionButton from "./PrimaryActionButton";
 import { getClosestGitObjectForBuild } from "../util/buildVersion";
 import { writeText } from "@tauri-apps/api/clipboard";
-import { JsonMap, stringify } from "@iarna/toml";
 import { toast } from "solid-toast";
 import { renderOptionsControls } from "../util/packSquashOptions";
 import { useNavigate } from "@solidjs/router";
 import { useI18n } from "../contexts/i18n";
 import { selectedPackPath } from "../views/PackSelection";
 import CenteredButtonGrid from "./CenteredButtonGrid";
+import { invoke } from "@tauri-apps/api";
 
 export default (props: {
   optionsSetter: (options: Record<string, unknown>) => void;
@@ -85,7 +85,9 @@ export default (props: {
                 closestGitObject
                   ? `\n\n# JSON schema directive for enhancing text editor support. It can be safely removed\n#:schema https://raw.githubusercontent.com/ComunidadAylas/PackSquash/${closestGitObject}/data/options_schema.json`
                   : ""
-              }\n\n${stringify(optionsObject as JsonMap)}`
+              }\n\n${await invoke("stringify_toml_document", {
+                document: optionsObject
+              })}`
             );
 
             runWithOwner(componentOwner, () =>
