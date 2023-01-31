@@ -15,7 +15,7 @@ packsquash_options = { path = "../packsquash_options", version = "0.3.1" }
 packsquash_util = { path = "../packsquash_util", version = "0.4.0" }
 
 getopts = "0.2.21"
-toml = "0.5.10"
+toml = { version = "0.7.1", default-features = false, features = ["parse"] }
 
 strum = { version = "0.24.1", features = ["derive"] }
 
