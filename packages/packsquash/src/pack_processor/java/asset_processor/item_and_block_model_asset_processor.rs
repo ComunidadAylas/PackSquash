@@ -90,7 +90,7 @@ pub struct ItemAndBlockModelAssetProcessor<
 	pack_meta: &'state PackMeta,
 	pack_files: &'state PatriciaSet,
 	global_options: &'state GlobalOptions<'state>,
-	file_options: &'state FileOptionsMap,
+	file_options: &'state FileOptionsMap<'state>,
 	squashed_pack_state: &'state SquashedPackState<'settings, 'budget, F>,
 	pub vanilla_models: Lazy<Option<AHashSet<RelativePath<'static>>>, C>,
 	game_version_supports_models: bool,

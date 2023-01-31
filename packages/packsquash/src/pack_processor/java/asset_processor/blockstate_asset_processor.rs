@@ -107,7 +107,7 @@ pub struct BlockStateAssetProcessor<
 	pack_meta: &'state PackMeta,
 	pack_files: &'state PatriciaSet,
 	global_options: &'state GlobalOptions<'state>,
-	file_options: &'state FileOptionsMap,
+	file_options: &'state FileOptionsMap<'state>,
 	squashed_pack_state: &'state SquashedPackState<'settings, 'budget, F>,
 	game_version_supports_blockstates: bool,
 	is_game_version_before_the_flattening: bool,

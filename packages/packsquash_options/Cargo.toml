@@ -32,3 +32,5 @@ mod-support = ["optifine-support", "mtr3-support"]
 
 optifine-support = []
 mtr3-support = []
+
+serializable-squash-options = []

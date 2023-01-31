@@ -22,7 +22,8 @@ use globset::{Glob, GlobBuilder, GlobSet, GlobSetBuilder};
 use schemars::gen::SchemaGenerator;
 use schemars::schema::{Schema, SchemaObject};
 use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+use serde::ser::SerializeMap;
+use serde::{Deserialize, Serialize, Serializer};
 use serde_with::serde_as;
 use strum::Display;
 use sysinfo::{RefreshKind, System, SystemExt};
@@ -61,6 +62,7 @@ macro_rules! default_variant {
 /// Contains all the options that configure a pack processing operation. This is the
 /// root level configuration struct for PackSquash.
 #[derive(Clone, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "serializable-squash-options", derive(Serialize))]
 #[schemars(deny_unknown_fields)]
 pub struct SquashOptions<'data> {
 	/// The directory where the pack that will be processed resides.
@@ -77,10 +79,11 @@ pub struct SquashOptions<'data> {
 	/// pattern are processed.
 	#[serde(flatten)]
 	#[schemars(with = "::std::collections::HashMap<String, FileOptions>")]
-	pub file_options: FileOptionsMap
+	#[serde(borrow)]
+	pub file_options: FileOptionsMap<'data>
 }
 
-#[derive(Clone, Deserialize, JsonSchema)]
+#[derive(Clone, Deserialize, Serialize, JsonSchema)]
 #[serde(try_from = "Cow<'_, Path>")]
 #[repr(transparent)]
 pub struct ExistingDirectoryPath<'data>(
@@ -120,37 +123,75 @@ impl AsRef<Path> for ExistingDirectoryPath<'_> {
 
 #[derive(Clone, Deserialize)]
 #[serde(try_from = "AHashMap<Cow<'_, str>, FileOptions>")]
-pub struct FileOptionsMap {
+pub struct FileOptionsMap<'data> {
 	globs: GlobSet,
-	file_options_list: Vec<FileOptions>
+	#[cfg(feature = "serializable-squash-options")]
+	#[serde(borrow)]
+	file_options_list: Vec<(Cow<'data, str>, FileOptions)>,
+	#[cfg(not(feature = "serializable-squash-options"))]
+	file_options_list: Vec<FileOptions>,
+	#[cfg(not(feature = "serializable-squash-options"))]
+	#[serde(borrow)]
+	lifetime_marker: std::marker::PhantomData<&'data ()>
 }
 
-impl FileOptionsMap {
+impl FileOptionsMap<'_> {
 	pub fn get<P: AsRef<Path>>(&self, path: P) -> impl Iterator<Item = &FileOptions> {
-		self.globs
-			.matches(path)
-			.into_iter()
-			.map(|i| &self.file_options_list[i])
+		let iter = self.globs.matches(path).into_iter();
+
+		#[cfg(feature = "serializable-squash-options")]
+		{
+			iter.map(|i| &self.file_options_list[i].1)
+		}
+		#[cfg(not(feature = "serializable-squash-options"))]
+		{
+			iter.map(|i| &self.file_options_list[i])
+		}
 	}
 }
 
-impl TryFrom<AHashMap<Cow<'_, str>, FileOptions>> for FileOptionsMap {
+impl<'data> TryFrom<AHashMap<Cow<'data, str>, FileOptions>> for FileOptionsMap<'data> {
 	type Error = globset::Error;
 
-	fn try_from(file_options_map: AHashMap<Cow<'_, str>, FileOptions>) -> Result<Self, Self::Error> {
+	fn try_from(
+		file_options_map: AHashMap<Cow<'data, str>, FileOptions>
+	) -> Result<Self, Self::Error> {
 		let mut file_options_list = Vec::with_capacity(file_options_map.len());
 
 		// Build glob patterns to match file paths with their options
 		let mut globset_builder = GlobSetBuilder::new();
 		for (glob_pattern, file_options) in file_options_map {
 			globset_builder.add(compile_pack_file_glob_pattern(&glob_pattern)?);
-			file_options_list.push(file_options);
+
+			#[cfg(feature = "serializable-squash-options")]
+			{
+				file_options_list.push((glob_pattern, file_options));
+			}
+			#[cfg(not(feature = "serializable-squash-options"))]
+			{
+				file_options_list.push(file_options);
+			}
 		}
 
 		Ok(Self {
 			globs: globset_builder.build()?,
-			file_options_list
+			file_options_list,
+			#[cfg(not(feature = "serializable-squash-options"))]
+			lifetime_marker: std::marker::PhantomData
 		})
+	}
+}
+
+#[cfg(feature = "serializable-squash-options")]
+impl Serialize for FileOptionsMap<'_> {
+	fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+		let mut map = serializer.serialize_map(Some(self.file_options_list.len()))?;
+
+		for (glob_pattern, file_options) in &self.file_options_list {
+			map.serialize_entry(glob_pattern, file_options)?;
+		}
+
+		map.end()
 	}
 }
 
@@ -159,7 +200,7 @@ impl TryFrom<AHashMap<Cow<'_, str>, FileOptions>> for FileOptionsMap {
 /// a wide range of use cases without using protection, compression or compressibility-improving
 /// techniques that may pose interoperability problems.
 #[serde_as]
-#[derive(Clone, Deserialize, JsonSchema)]
+#[derive(Clone, Deserialize, Serialize, JsonSchema)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct GlobalOptions<'data> {
@@ -591,7 +632,7 @@ pub enum MinecraftMod {
 }
 
 /// Options that customize how some file, of a certain file type, is processed.
-#[derive(Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Copy)]
 #[serde(untagged)]
 #[non_exhaustive]
 pub enum FileOptions {
@@ -624,7 +665,7 @@ pub enum FileOptions {
 }
 
 /// Parameters that influence how a audio file is optimized.
-#[derive(Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct AudioFileOptions {
@@ -852,7 +893,7 @@ impl From<ChannelCount> for NonZeroU8 {
 }
 
 /// Parameters that influence how a JSON file is optimized.
-#[derive(Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct JsonFileOptions {
@@ -1043,7 +1084,7 @@ impl From<UnitIntervalFloat> for f32 {
 }
 
 /// Parameters that influence how a shader file is optimized.
-#[derive(Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct ShaderFileOptions {
@@ -1111,7 +1152,7 @@ pub enum ShaderSourceTransformationStrategy {
 default_variant!(ShaderSourceTransformationStrategy::Minify);
 
 /// Parameters that influence how a legacy language file is optimized.
-#[derive(Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct LegacyLanguageFileOptions {
@@ -1144,7 +1185,7 @@ file_options_default_impl!(LegacyLanguageFileOptions => LegacyLanguageFileOption
 });
 
 /// Parameters that influence how a command function file is optimized.
-#[derive(Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct CommandFunctionFileOptions {
@@ -1166,7 +1207,7 @@ file_options_default_impl!(CommandFunctionFileOptions => CommandFunctionFileOpti
 ///
 /// These files are only supported if PackSquash was compiled with OptiFine mod support. Otherwise,
 /// these parameters are read and parsed but ignored afterwards.
-#[derive(Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 #[cfg(feature = "optifine-support")]
@@ -1189,7 +1230,7 @@ file_options_default_impl!(PropertiesFileOptions => PropertiesFileOptions {
 /// Parameters that define a custom pack file, which PackSquash doesn't expect
 /// and skips by default, but that the pack author desires to put in the
 /// generated ZIP file.
-#[derive(Deserialize, JsonSchema, Clone, Copy)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Copy)]
 #[serde(deny_unknown_fields)]
 #[non_exhaustive]
 pub struct CustomFileOptions {

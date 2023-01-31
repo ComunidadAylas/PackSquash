@@ -55,9 +55,6 @@
           }
         ]
       },
-      "fs": {
-        "readFile": true
-      },
       "clipboard": {
         "writeText": true
       },

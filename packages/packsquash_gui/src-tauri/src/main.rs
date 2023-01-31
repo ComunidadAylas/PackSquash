@@ -17,6 +17,7 @@ use std::path::Path;
 use std::{env, fs};
 use tauri::{Runtime, Window};
 use tauri_plugin_store::StoreBuilder;
+use toml::macros::Deserialize;
 
 fn main() {
 	let mut tauri_builder = tauri::Builder::default()
@@ -33,6 +34,8 @@ fn main() {
 			is_plausible_pack_directory,
 			init_optimization_progress_logger,
 			run_packsquash,
+			parse_squash_options,
+			stringify_toml_document,
 			absolutize_path,
 			get_parent_path,
 			set_working_directory
@@ -86,6 +89,21 @@ fn init_optimization_progress_logger<R: Runtime>(window: Window<R>) {
 #[tauri::command(async)]
 fn run_packsquash(options: SquashOptions) -> Result<(), String> {
 	packsquash::run(&options, VirtualFileSystemType::OsFilesystem).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+fn parse_squash_options(path: &Path) -> Result<SquashOptions, String> {
+	// TODO replace with toml::from_str once toml PR #505 is merged:
+	//      https://github.com/toml-rs/toml/pull/505
+	SquashOptions::deserialize(toml::de::Deserializer::new(
+		&fs::read_to_string(path).map_err(|err| err.to_string())?
+	))
+	.map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+fn stringify_toml_document(document: toml::Table) -> Result<String, String> {
+	toml::to_string_pretty(&document).map_err(|err| err.to_string())
 }
 
 #[tauri::command]
