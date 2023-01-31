@@ -24,9 +24,9 @@ itertools = "0.10.5"
 thiserror = "1.0.38"
 
 globset = { version = "0.4.10", default-features = false }
-patricia_tree = "0.5.0"
+patricia_tree = "0.5.5"
 quick_cache = "0.2.0"
-ahash = "0.8.2"
+ahash = "0.8.3"
 tinyvec = { version = "1.6.0", features = ["alloc", "rustc_1_55", "serde"] }
 
 rayon = "1.6.1"
@@ -48,7 +48,7 @@ json_comments = "0.2.1"
 spng = { version = "0.2.0-alpha.2", default-features = false }
 png = "0.17.7"
 rgb = "0.8.34"
-imagequant = { version = "4.0.4", default-features = false, features = ["threads"] }
+imagequant = { version = "4.1.0", default-features = false, features = ["threads"] }
 oxipng = { version = "8.0.0", default-features = false, features = ["zopfli", "parallel"] }
 
 symphonia = { version = "0.5.3", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
@@ -88,7 +88,7 @@ core-foundation = "0.9.3"
 mach2 = "0.4.1"
 
 [build-dependencies]
-git2 = { version = "0.16.0", default-features = false }
+git2 = { version = "0.16.1", default-features = false }
 time = { version = "0.3.17", default-features = false, features = ["std"] }
 schemars = { version = "0.8.11", default-features = false }
 serde_json = "1.0.91"
