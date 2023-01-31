@@ -186,7 +186,7 @@ fn read_options_file_and_squash(
 
 	// Deserialize the options struct contained in the string
 	let squash_options = match serde_path_to_error::deserialize::<_, SquashOptions>(
-		&mut toml::de::Deserializer::new(&options_string)
+		toml::de::Deserializer::new(&options_string)
 	) {
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
