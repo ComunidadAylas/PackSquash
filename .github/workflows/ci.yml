@@ -180,7 +180,7 @@ jobs:
       # See: https://github.com/actions/checkout/issues/766
       - name: 📥 Set source ownership to current user
         if: startsWith(matrix.runner, 'ubuntu')
-        run: chown -R "$(id -u):$(id -g)" *
+        run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
 
       # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
       - name: 📁 Create GUI package frontend dist directory
