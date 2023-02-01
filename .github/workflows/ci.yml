@@ -137,12 +137,6 @@ jobs:
         with:
           fetch-depth: 0  # Keep the commit history for proper version information
 
-      # Necessary for steps that invoke Git commands to work properly on workflows run on containers.
-      # See: https://github.com/actions/checkout/issues/766
-      - name: 📥 Set source ownership to current user
-        if: startsWith(matrix.runner, 'ubuntu')
-        run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
-
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: matrix.target == 'aarch64-unknown-linux-gnu'
         run: |
@@ -371,6 +365,11 @@ jobs:
 
       - name: 📥 Checkout source
         uses: actions/checkout@v3
+
+      # Necessary for steps that invoke Git commands to work properly on workflows run on containers.
+      # See: https://github.com/actions/checkout/issues/766
+      - name: 📥 Set source ownership to current user
+        run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
 
       - name: 🧰 Install Rust toolchain
         uses: actions-rs/toolchain@v1
