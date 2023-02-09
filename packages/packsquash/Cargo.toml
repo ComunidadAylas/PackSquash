@@ -40,11 +40,12 @@ imagequant = { version = "4.1.0", default-features = false }
 oxipng = { version = "8.0.0", default-features = false, features = ["zopfli"] }
 
 symphonia = { version = "0.5.2", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
-vorbis_rs = "0.1.0"
+vorbis_rs = "0.2.0"
 dasp_signal = { version = "0.11.0", default-features = false }
 dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
 dasp_ring_buffer = "0.11.0"
 dasp_frame = "0.11.0"
+dasp_sample = "0.11.0"
 rubato = "0.12.0"
 optivorbis = "0.1.2"
 
