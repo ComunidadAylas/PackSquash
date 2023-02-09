@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675925658150,
+  "lastUpdate": 1675983056475,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "distinct": true,
-          "id": "9ddef225141eb5fe7e484821e3fe6c042edd6432",
-          "message": "fix(deps): update rust crate serde to 1.0.149",
-          "timestamp": "2022-12-06T02:56:27Z",
-          "tree_id": "3077128202e8d860248902cf871fc3713348e437",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9ddef225141eb5fe7e484821e3fe6c042edd6432"
-        },
-        "date": 1670297500940,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10022025,
-            "range": "± 6744183",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 347530001,
-            "range": "± 2242714",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 10238645916,
-            "range": "± 42356086",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 2160738067,
-            "range": "± 75595220",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 623710845,
             "range": "± 3402845",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "b4efb6ebf2a8aaa5adb74e5237f56d6fc37259cc",
+          "message": "refactor(audio_file): update vorbis_rs to 0.2.0, use const generics\n\nConst generics provide for much more readable, flexible and maintainable\ncode than the custom macros we used in the signal processor. Critically,\nthey allow for better introspection by most static analysis tools and\nIDEs.",
+          "timestamp": "2023-02-09T23:06:44+01:00",
+          "tree_id": "d10ceb51b65e48f3c96e66cdb6cda1519791e200",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b4efb6ebf2a8aaa5adb74e5237f56d6fc37259cc"
+        },
+        "date": 1675983055799,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9596089,
+            "range": "± 140903",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 143835711,
+            "range": "± 8662968",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 4653305532,
+            "range": "± 62769488",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 632394874,
+            "range": "± 6160069",
             "unit": "ns/iter"
           }
         ]
