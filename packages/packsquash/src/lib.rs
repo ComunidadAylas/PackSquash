@@ -1,6 +1,7 @@
 //! A Minecraft resource and data pack optimizer that aims to achieve the best possible compression,
 //! which allows for efficient distribution and slightly improved load times in the game, at good speed.
 
+#![allow(incomplete_features)]
 #![deny(unsafe_code)]
 #![forbid(unsafe_op_in_unsafe_fn)]
 #![deny(clippy::await_holding_lock)]
@@ -12,6 +13,7 @@
 #![feature(nonzero_ops)]
 #![feature(try_find)]
 #![feature(type_alias_impl_trait)]
+#![feature(generic_const_exprs)]
 #![feature(const_option)]
 #![feature(const_fn_floating_point_arithmetic)]
 #![feature(inline_const)]

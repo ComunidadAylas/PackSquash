@@ -67,7 +67,6 @@ pub fn decode_and_process_sample_blocks(
 
 	let output_channels =
 		target_channels.map_or(input_channels, |target_channels| target_channels.into());
-	let do_channel_mixing = input_channels != output_channels;
 	let target_sampling_frequency = target_sampling_frequency_producer(
 		input_sampling_frequency,
 		input_channels,
@@ -88,20 +87,10 @@ pub fn decode_and_process_sample_blocks(
 			})?,
 			FRAME_BLOCK_SIZE,
 			2,
-			match (input_channels.get(), do_channel_mixing) {
-				(_, true) => {
-					// When channel mixing, for better performance:
-					// - For mono signals, we resample first and then upmix to stereo.
-					// - For stereo signals, we downmix to mono first and then resample.
-					// Therefore, the resampler always sees one input channel
-					1
-				}
-				(input_channels, false) => {
-					// When channel mixing is not involved, we have to resample
-					// all the input channels we have
-					input_channels as usize
-				}
-			}
+			channels_to_resample(
+				input_channels.get() as usize,
+				output_channels.get() as usize
+			)
 		)?)
 	} else {
 		None
@@ -126,26 +115,26 @@ pub fn decode_and_process_sample_blocks(
 		};
 	}
 
-	let is_silent = match (input_channels.get(), do_channel_mixing) {
-		(1, false) => execute_dasp_pipeline::<1, 1, _>(
+	let is_silent = match (input_channels.get(), output_channels.get()) {
+		(1, 1) => execute_dasp_pipeline::<1, 1, _>(
 			input_signal!(),
 			target_pitch,
 			resampler,
 			processed_sample_block_consumer
 		)?,
-		(1, true) => execute_dasp_pipeline::<1, 2, _>(
+		(1, 2) => execute_dasp_pipeline::<1, 2, _>(
 			input_signal!(),
 			target_pitch,
 			resampler,
 			processed_sample_block_consumer
 		)?,
-		(2, false) => execute_dasp_pipeline::<2, 2, _>(
+		(2, 2) => execute_dasp_pipeline::<2, 2, _>(
 			input_signal!(),
 			target_pitch,
 			resampler,
 			processed_sample_block_consumer
 		)?,
-		(2, true) => execute_dasp_pipeline::<2, 1, _>(
+		(2, 1) => execute_dasp_pipeline::<2, 1, _>(
 			input_signal!(),
 			target_pitch,
 			resampler,
@@ -169,7 +158,8 @@ pub fn decode_and_process_sample_blocks(
 
 /// Constructs and executes a dasp pipeline to process the audio frames returned by a dasp
 /// signal, applying resampling, channel mixing and pitch shifting as specified. The raw,
-/// processed samples are then yielded in blocks to the specified consumer.
+/// processed samples are then yielded in blocks to the specified consumer. The returned
+/// boolean indicates whether the input audio signal was full of silence samples.
 fn execute_dasp_pipeline<
 	const INPUT_CHANNELS: usize,
 	const OUTPUT_CHANNELS: usize,
@@ -183,7 +173,8 @@ fn execute_dasp_pipeline<
 where
 	[f32; INPUT_CHANNELS]: Frame,
 	<[f32; INPUT_CHANNELS] as Frame>::Sample: dasp_sample::FromSample<f64>,
-	f64: dasp_sample::FromSample<<[f32; INPUT_CHANNELS] as Frame>::Sample>
+	f64: dasp_sample::FromSample<<[f32; INPUT_CHANNELS] as Frame>::Sample>,
+	[(); channels_to_resample(INPUT_CHANNELS, OUTPUT_CHANNELS)]:
 {
 	let mut is_silent = true;
 
@@ -213,10 +204,8 @@ where
 
 	let mut signal_iter = pitch_shifted_signal.until_exhausted().peekable();
 
-	match (INPUT_CHANNELS != OUTPUT_CHANNELS, resampler) {
-		(_, None) => {
-			// Maybe channel mixing, no resampling
-
+	match resampler {
+		None => {
 			let mut output_frame_buf = [const { vec![] }; OUTPUT_CHANNELS];
 			for vec in &mut output_frame_buf {
 				vec.reserve_exact(FRAME_BLOCK_SIZE);
@@ -240,7 +229,7 @@ where
 				match (INPUT_CHANNELS, OUTPUT_CHANNELS) {
 					(input_channels, output_channels) if input_channels == output_channels => {
 						// No channel mixing necessary. Pass the samples through
-						for channel in 0..OUTPUT_CHANNELS {
+						for channel in 0..output_channels {
 							output_frame_buf[channel].push(frame[channel]);
 						}
 					}
@@ -260,7 +249,7 @@ where
 					_ => unimplemented!()
 				}
 
-				if output_frame_buf[0].len() >= FRAME_BLOCK_SIZE {
+				if output_frame_buf[0].len() == FRAME_BLOCK_SIZE {
 					processed_sample_block_consumer(&output_frame_buf)?;
 
 					// Discard this block of samples
@@ -275,11 +264,18 @@ where
 				processed_sample_block_consumer(&output_frame_buf)?;
 			}
 		}
-		(false, Some(mut resampler)) => {
-			// No channel mixing, resampling
+		Some(mut resampler) => {
+			// When resampling, for performance reasons, the number of channels passed to the
+			// resampler is either:
+			// - The same as the input channel count, when not channel mixing.
+			// - A single channel. The channel mixings we do are either:
+			//   · Mono to stereo: there is no point in resampling the same samples twice, so
+			//                     we resample before upmixing.
+			//   · Stereo to mono: we can downmix to mono and then resample.
 
-			let mut output_frame_buf = [const { vec![] }; OUTPUT_CHANNELS];
-			for vec in &mut output_frame_buf {
+			let mut resample_input_buf =
+				[const { vec![] }; channels_to_resample(INPUT_CHANNELS, OUTPUT_CHANNELS)];
+			for vec in &mut resample_input_buf {
 				vec.reserve_exact(FRAME_BLOCK_SIZE);
 			}
 
@@ -292,108 +288,73 @@ where
 					continue;
 				}
 
-				// The compiler can optimize the iterator out
 				is_silent &= frame.iter().all(|sample| *sample == f32::EQUILIBRIUM);
 
-				// The compiler can optimize the loop out
-				for channel in 0..OUTPUT_CHANNELS {
-					output_frame_buf[channel].push(frame[channel]);
-				}
-
-				if output_frame_buf[0].len() >= FRAME_BLOCK_SIZE {
-					resampler.process_into_buffer(
-						&output_frame_buf,
-						&mut resampled_samples_buf,
-						None
-					)?;
-
-					processed_sample_block_consumer(&resampled_samples_buf)?;
-
-					// Discard this block of samples
-					for channel_samples in &mut output_frame_buf {
-						channel_samples.clear();
+				// Do channel mixing to the frame buffer to be resampled, if necessary
+				match (INPUT_CHANNELS, resample_input_buf.len()) {
+					(input_channels, resampled_channels) if input_channels == resampled_channels => {
+						// No channel mixing necessary. Pass the samples through
+						for channel in 0..resampled_channels {
+							resample_input_buf[channel].push(frame[channel]);
+						}
 					}
-				}
-			}
-
-			// Resample and consume the frames that didn't make it to a block
-			if !output_frame_buf[0].is_empty() {
-				// The resampler requires input blocks of fixed size, so pad
-				// the buffer. Note that, as Rubato's resamplers work on fixed
-				// size input or output blocks, we can only move the padding
-				// around, not get rid of it. Luckily, this doesn't matter for
-				// practical purposes
-				for channel_samples in &mut output_frame_buf {
-					channel_samples.resize(FRAME_BLOCK_SIZE, f32::EQUILIBRIUM);
-				}
-				resampler.process_into_buffer(&output_frame_buf, &mut resampled_samples_buf, None)?;
-
-				processed_sample_block_consumer(&resampled_samples_buf)?;
-			}
-		}
-		(true, Some(mut resampler)) => {
-			// Channel mixing, resampling.
-			// Any channel mixing here has to be a mono -> stereo conversion or stereo -> mono
-			// conversion, as we only support those two. Exploit that to always downmix to
-			// achieve better performance by always downmixing to mono before resampling
-
-			let mut output_frame_buf = [Vec::with_capacity(FRAME_BLOCK_SIZE)];
-
-			let mut resampled_samples_buf = resampler.output_buffer_allocate();
-
-			// Accumulate frames (one sample for each channel) in blocks for processing
-			while let Some(frame) = signal_iter.next() {
-				// Ignore the spurious last frame (see above)
-				if signal_iter.peek().is_none() {
-					continue;
+					(input_channels, 1) => {
+						// Downmix as above
+						resample_input_buf[0].push(frame.iter().sum::<f32>() / input_channels as f32);
+					}
+					_ => unimplemented!()
 				}
 
-				// The compiler can optimize the iterator out
-				is_silent &= frame.iter().all(|sample| *sample == f32::EQUILIBRIUM);
-
-				// Downmix to mono as above before resampling. This is a no-op if we have
-				// a single input channel, and should be optimized out by the compiler
-				output_frame_buf[0].push(frame.iter().sum::<f32>() / INPUT_CHANNELS as f32);
-
-				if output_frame_buf[0].len() >= FRAME_BLOCK_SIZE {
+				if resample_input_buf[0].len() == FRAME_BLOCK_SIZE {
 					resampler.process_into_buffer(
-						&output_frame_buf,
+						&resample_input_buf,
 						&mut resampled_samples_buf,
 						None
 					)?;
 
-					// Upmix before handing off the block as above. Cloning a single channel of
-					// resampled samples is faster than resampling samples of several channels
-					for _ in 0..OUTPUT_CHANNELS - 1 {
+					// Upmix before handing off the block as above, if necessary. Cloning a single
+					// channel of resampled samples is faster than resampling samples of several
+					// channels
+					for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
 						resampled_samples_buf.push(resampled_samples_buf[0].clone());
 					}
 
 					processed_sample_block_consumer(&resampled_samples_buf)?;
 
 					// Undo the upmixing to reuse this buffer
-					for _ in 0..OUTPUT_CHANNELS - 1 {
+					for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
 						resampled_samples_buf.pop();
 					}
 
 					// Discard this block of samples
-					output_frame_buf[0].clear();
+					for channel_samples in &mut resample_input_buf {
+						channel_samples.clear();
+					}
 				}
 			}
 
 			// Resample and consume the frames that didn't make it to a block
-			if !output_frame_buf[0].is_empty() {
-				output_frame_buf[0].resize(FRAME_BLOCK_SIZE, f32::EQUILIBRIUM);
-				resampler.process_into_buffer(&output_frame_buf, &mut resampled_samples_buf, None)?;
+			if !resample_input_buf[0].is_empty() {
+				// The resampler requires input blocks of fixed size, so pad
+				// the buffer. Note that, as Rubato's resamplers work on fixed
+				// size input or output blocks, we can only move the padding
+				// around, not get rid of it. Luckily, this doesn't matter for
+				// practical purposes
+				for channel_samples in &mut resample_input_buf {
+					channel_samples.resize(FRAME_BLOCK_SIZE, f32::EQUILIBRIUM);
+				}
 
-				for _ in 0..OUTPUT_CHANNELS - 1 {
+				resampler.process_into_buffer(
+					&resample_input_buf,
+					&mut resampled_samples_buf,
+					None
+				)?;
+
+				for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
 					resampled_samples_buf.push(resampled_samples_buf[0].clone());
 				}
 
 				processed_sample_block_consumer(&resampled_samples_buf)?;
-
-				for _ in 0..OUTPUT_CHANNELS - 1 {
-					resampled_samples_buf.pop();
-				}
 			}
 		}
 	}
@@ -566,7 +527,7 @@ where
 							// The channel order is defined in the Vorbis I specification, and here:
 							// https://xiph.org/vorbis/doc/vorbisfile/ov_read.html
 							for channel_samples in audio_samples.samples() {
-								audio_samples_vec.push((*channel_samples).into());
+								audio_samples_vec.push(Box::from(*channel_samples));
 							}
 
 							self.sample_buffer = Some(audio_samples_vec.into_boxed_slice());
@@ -767,5 +728,23 @@ impl<F: Frame, S: Signal<Frame = F>, T: Signal<Frame = F>> Signal for EitherSign
 			Self::A(signal) => signal.is_exhausted(),
 			Self::B(signal) => signal.is_exhausted()
 		}
+	}
+}
+
+/// Returns the number of channels that a resampler should expect as input, given
+/// the desired input signal channel count and output signal channel count.
+///
+/// Currently, this function is designed to work with mono and stereo signals only.
+const fn channels_to_resample(input_channels: usize, output_channels: usize) -> usize {
+	if input_channels != output_channels {
+		// When channel mixing, for better performance:
+		// - For mono signals, we resample first and then upmix to stereo.
+		// - For stereo signals, we downmix to mono first and then resample.
+		// Therefore, the resampler should always see one input channel
+		1
+	} else {
+		// When channel mixing is not involved, we have to resample
+		// all the input channels
+		output_channels
 	}
 }
