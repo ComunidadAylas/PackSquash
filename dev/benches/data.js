@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1676067415594,
+  "lastUpdate": 1676109868814,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "e10712f4bed68ca18614a18b64880ed297802255",
-          "message": "deps: update oxipng to v7.0.0\n\nThis version contains nice changes that may speed up optimization and\ndecrease texture file sizes.",
-          "timestamp": "2022-12-08T12:13:20Z",
-          "tree_id": "bf34540716968988c69c88c2d6c825b44d8928d8",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e10712f4bed68ca18614a18b64880ed297802255"
-        },
-        "date": 1670503480086,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10236011,
-            "range": "± 490968",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 144231464,
-            "range": "± 2019821",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 979322577,
-            "range": "± 4175599",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 204745537,
-            "range": "± 6215170",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 652762370,
             "range": "± 4964760",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "791ae7f6e48cc708d5028f4baa2f4b14eae37533",
+          "message": "chore(deps): update dependency gdown to v4.6.2",
+          "timestamp": "2023-02-11T04:47:29Z",
+          "tree_id": "dd5202381de840147282df26284e89c80a580dea",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/791ae7f6e48cc708d5028f4baa2f4b14eae37533"
+        },
+        "date": 1676109868197,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10650396,
+            "range": "± 149340",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 149981706,
+            "range": "± 4596258",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 5250467256,
+            "range": "± 61088434",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 652358854,
+            "range": "± 5574876",
             "unit": "ns/iter"
           }
         ]
