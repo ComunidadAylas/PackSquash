@@ -35,7 +35,7 @@ jsonpath_lib = "0.3.0"
 
 spng = { version = "0.2.0-alpha.2", default-features = false }
 png = "0.17.7"
-rgb = "0.8.35"
+rgb = "0.8.36"
 imagequant = { version = "4.1.0", default-features = false }
 oxipng = { version = "8.0.0", default-features = false, features = ["zopfli"] }
 
