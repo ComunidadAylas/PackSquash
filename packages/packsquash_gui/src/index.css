@@ -6,10 +6,6 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --color-squashbrown-900: 242 176 53;
-  }
-
   /*
    * Hide the shadow user agent summary marker element, and convert it to an explicit
    * pseudo-element. This works around some browsers (e.g., Firefox) deciding to remove
@@ -140,7 +136,13 @@
 
 @keyframes credits-roll {
   0% {
-    transform: translateY(100%);
+    transform: translateY(100vh);
+  }
+  2% {
+    transform: translateY(100vh);
+  }
+  98% {
+    transform: translateY(-100%);
   }
   100% {
     transform: translateY(-100%);

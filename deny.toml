@@ -15,9 +15,8 @@ unmaintained = "warn"
 yanked = "deny"
 notice = "warn"
 ignore = [
-	# Tauri depends on xml-rs, and it is aware of this advisory. See:
-	# https://github.com/tauri-apps/tauri/issues/4951
-	"RUSTSEC-2022-0048"
+    # cargo-about, a build-time dependency, pulls atty
+    "RUSTSEC-2021-0145"
 ]
 
 [licenses]
@@ -89,6 +88,13 @@ unused-allowed-license = "allow"
 [licenses.private]
 ignore = true
 
+[[licenses.clarify]]
+name = "ring"
+expression = "ISC"
+license-files = [
+    { path = "LICENSE", hash = 0xbd0eed23 }
+]
+
 # This section is considered when running `cargo deny check bans`.
 # More documentation about the 'bans' section can be found here:
 # https://embarkstudios.github.io/cargo-deny/checks/bans/cfg.html
@@ -113,7 +119,9 @@ skip-tree = [
 	# Most of the warnings are for build-time dependencies anyway, and
 	# GUI users likely won't care that much about a few KiB here and there
 	{ name = "tauri" },
-	{ name = "tauri-build" }
+	{ name = "tauri-build" },
+	# Build dependency for which we don't need most stuff it depends on
+	{ name = "cargo-about" }
 ]
 
 [sources]
