@@ -44,7 +44,7 @@ export default () => {
   // The <ul> must be positioned for the container blur (box shadow) to display as desired
   const credits = (
     <ul
-      class="relative -z-10 mx-auto overflow-hidden text-center break-words"
+      class="relative -z-10 mx-auto overflow-hidden break-words text-center"
       lang="en"
       dir="ltr"
       style={{
@@ -52,7 +52,9 @@ export default () => {
         animation: "120s linear infinite credits-roll"
       }}
     >
-      <li><h1 class="font-bold text-lg mt-8 mb-8">Third-party libraries</h1></li>
+      <li>
+        <h1 class="mt-8 mb-8 text-lg font-bold">Third-party libraries</h1>
+      </li>
       {renderDependencyListItems()}
     </ul>
   );
