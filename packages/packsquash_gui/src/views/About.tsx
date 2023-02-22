@@ -6,6 +6,7 @@ import { useI18n } from "../contexts/i18n";
 import BackButton from "../components/BackButton";
 import { CaretDoubleDown } from "phosphor-solid";
 import { onCleanup, onMount } from "solid-js";
+import { renderDependencyListItems } from "../util/dependencyList";
 
 const BUILD_VARIABLES = [
   "app_build_version",
@@ -43,40 +44,23 @@ export default () => {
   // The <ul> must be positioned for the container blur (box shadow) to display as desired
   const credits = (
     <ul
-      class="relative -z-10 mx-auto overflow-hidden text-center"
+      class="relative -z-10 mx-auto overflow-hidden text-center break-words"
       lang="en"
       dir="ltr"
       style={{
         width: `calc(100% - ${creditsBlurSpreadRadius * 2}rem)`,
-        animation: "30s linear infinite credits-roll"
+        animation: "120s linear infinite credits-roll"
       }}
     >
-      <li>1ha</li>
-      <li>2he</li>
-      <li>3hi</li>
-      <li>4ho</li>
-      <li>5hu</li>
-      <li>6ha</li>
-      <li>7he</li>
-      <li>8hi</li>
-      <li>9ho</li>
-      <li>10hu</li>
-      <li>11ha</li>
-      <li>12he</li>
-      <li>13hi</li>
-      <li>14ho</li>
-      <li>15hu</li>
-      <li>16ha</li>
-      <li>17he</li>
-      <li>18hi</li>
-      <li>19ho</li>
+      <li><h1 class="font-bold text-lg mt-8 mb-8">Third-party libraries</h1></li>
+      {renderDependencyListItems()}
     </ul>
   );
 
   const creditsContainer = (
     <div
       class="relative overflow-hidden"
-      style={`box-shadow: inset 0 0 ${creditsBlurRadius}rem ${creditsBlurSpreadRadius}rem rgb(var(--color-squashbrown-900))`}
+      style={`box-shadow: inset 0 0 ${creditsBlurRadius}rem ${creditsBlurSpreadRadius}rem var(--color-squashbrown-900)`}
     >
       {credits}
     </div>
