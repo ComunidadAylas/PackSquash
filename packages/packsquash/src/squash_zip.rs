@@ -947,6 +947,8 @@ fn add_partial_central_directory_header(
 	}
 }
 
+/// Checks whether two fallible byte iterators return the same byte sequence, exhausting them.
+/// Any error returned by any of the iterators will be propagated to the caller.
 fn are_byte_iterators_equal(
 	data: impl Iterator<Item = Result<u8, io::Error>>,
 	other: impl Iterator<Item = Result<u8, io::Error>>,
