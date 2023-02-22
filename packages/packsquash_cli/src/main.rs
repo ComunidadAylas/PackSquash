@@ -1,5 +1,3 @@
-#![feature(cstr_from_bytes_until_nul)]
-
 use std::borrow::Cow;
 use std::fmt::Formatter;
 use std::{
