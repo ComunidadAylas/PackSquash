@@ -224,3 +224,5 @@ pack.zip
 
 # Automatically generated on packsquash_gui build
 /packages/packsquash_gui/src/data/optionsSchema.json
+/packages/packsquash_gui/src/data/cargoDependencies.json
+/packages/packsquash_gui/src/data/nodeDependencies.json
