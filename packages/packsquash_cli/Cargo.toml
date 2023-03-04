@@ -19,7 +19,7 @@ tokio = { version = "1.26.0", default-features = false }
 
 color-backtrace = { version = "0.5.1", default-features = false, optional = true }
 
-serde_path_to_error = "0.1.9"
+serde_path_to_error = "0.1.10"
 
 is-terminal = "0.4.4"
 
