@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678446086979,
+  "lastUpdate": 1678449497604,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "891abaa1b015a36b764020d3b05c7d4ff159fdf6",
-          "message": "chore(deps): addendum to 5cc8314006a7a69dfd92cc379156359361aff7f6",
-          "timestamp": "2023-01-14T13:39:27+01:00",
-          "tree_id": "a054319991bf7e4a22863b232bb867d25fb46532",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/891abaa1b015a36b764020d3b05c7d4ff159fdf6"
-        },
-        "date": 1673701787964,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9868506,
-            "range": "± 4827708",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 154874967,
-            "range": "± 4436280",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 4651435724,
-            "range": "± 78794845",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 651367863,
-            "range": "± 7865412",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 832518496,
             "range": "± 6142307",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7c1c4903598cc4969efd8c31936d9e4f461dec4e",
+          "message": "ci: speed up Cargo registry fetch\n\nLet's leverage a new Rust feature to make things faster.\r\n\r\nMore info: https://blog.rust-lang.org/inside-rust/2023/01/30/cargo-sparse-protocol.html",
+          "timestamp": "2023-03-10T12:27:06+01:00",
+          "tree_id": "0a7fc684000106988492a32f534e127357b19d31",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7c1c4903598cc4969efd8c31936d9e4f461dec4e"
+        },
+        "date": 1678449496635,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10403641,
+            "range": "± 196761",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 411219059,
+            "range": "± 2917106",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 4755650567,
+            "range": "± 15220499",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 831271451,
+            "range": "± 4940016",
             "unit": "ns/iter"
           }
         ]
