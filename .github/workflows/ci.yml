@@ -16,6 +16,8 @@ env:
 
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
 
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+
 jobs:
   static-analysis:
 
