@@ -89,7 +89,7 @@ jobs:
       matrix:
         target:
           - x86_64-unknown-linux-gnu
-          - x86_64-pc-windows-msvc
+          - x86_64-pc-windows-gnu
           - aarch64-unknown-linux-gnu
           - x86_64-apple-darwin
           - aarch64-apple-darwin
@@ -97,17 +97,17 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
-            rust-toolchain-targets: x86_64-pc-windows-msvc
+            rust-toolchain-targets: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
             container: node:16-bullseye-slim
             pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: amd64
             appimage-arch: x86_64
 
-          - target: x86_64-pc-windows-msvc
-            host-target: x86_64-pc-windows-msvc
-            rust-toolchain-targets: x86_64-pc-windows-msvc
-            tauri-target: x86_64-pc-windows-msvc
+          - target: x86_64-pc-windows-gnu
+            host-target: x86_64-pc-windows-gnu
+            rust-toolchain-targets: x86_64-pc-windows-gnu
+            tauri-target: x86_64-pc-windows-gnu
             runner: windows-latest
             cli-executable: packsquash_cli.exe
 
