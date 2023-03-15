@@ -128,7 +128,8 @@ skip-tree = [
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
-	"https://github.com/shssoichiro/oxipng"
+	"https://github.com/shssoichiro/oxipng",
+	"https://github.com/tauri-apps/tauri-plugin-store"
 ]
 
 [sources.allow-org]
