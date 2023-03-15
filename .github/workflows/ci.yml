@@ -84,7 +84,7 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
-            rust-toolchain-targets: x86_64-pc-windows-msvc
+            rust-toolchain-targets: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
             container: node:16-bullseye-slim
             pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig

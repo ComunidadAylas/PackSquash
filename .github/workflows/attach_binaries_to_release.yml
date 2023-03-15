@@ -18,17 +18,17 @@ jobs:
           #- PackSquash CLI AppImage zsync (x86_64)
           #- PackSquash CLI AppImage (aarch64)
           #- PackSquash CLI AppImage zsync (aarch64)
-          - PackSquash CLI executable (x86_64-pc-windows-msvc)
+          - PackSquash CLI executable (x86_64-pc-windows-gnu)
           #- PackSquash CLI executable (universal-apple-darwin)
 
           #- PackSquash GUI AppImage (x86_64)
           #- PackSquash GUI AppImage zsync (x86_64)
           #- PackSquash GUI AppImage (aarch64)
           #- PackSquash GUI AppImage zsync (aarch64)
-          #- PackSquash GUI MSI installer (x86_64-pc-windows-msvc)
+          #- PackSquash GUI MSI installer (x86_64-pc-windows-gnu)
           - PackSquash GUI Apple Disk Image (universal-apple-darwin)
         include:
-          - artifact: PackSquash CLI executable (x86_64-pc-windows-msvc)
+          - artifact: PackSquash CLI executable (x86_64-pc-windows-gnu)
             binary-is-zipped-artifact: true
         #  - artifact: PackSquash CLI executable (universal-apple-darwin)
         #    binary-is-zipped-artifact: true
