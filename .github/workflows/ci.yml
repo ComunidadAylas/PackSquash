@@ -209,12 +209,6 @@ jobs:
         with:
           fetch-depth: 0 # Keep the commit history for proper version information
 
-      # Necessary for steps that invoke Git commands to work properly on workflows run on containers.
-      # See: https://github.com/actions/checkout/issues/766
-      - name: 📥 Set source ownership to current user
-        if: startsWith(matrix.runner, 'ubuntu')
-        run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
-
       # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
       - name: 📁 Create GUI package frontend dist directory
         run: mkdir packages/packsquash_gui/dist
