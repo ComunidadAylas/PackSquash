@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678832059533,
+  "lastUpdate": 1678907212949,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "49699333+dependabot[bot]@users.noreply.github.com",
-            "name": "dependabot[bot]",
-            "username": "dependabot[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "5ec9db0ed9c685bf67117af461b52b7cc60d8bf0",
-          "message": "chore(deps): bump git2 from 0.16.0 to 0.16.1 (#190)\n\nBumps [git2](https://github.com/rust-lang/git2-rs) from 0.16.0 to 0.16.1.\r\n- [Release notes](https://github.com/rust-lang/git2-rs/releases)\r\n- [Commits](https://github.com/rust-lang/git2-rs/compare/git2-curl-0.16.0...0.16.1)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: git2\r\n  dependency-type: direct:production\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
-          "timestamp": "2023-01-21T00:59:59+01:00",
-          "tree_id": "c4392a6a1a258f31cd069e7101c108496fe291fd",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5ec9db0ed9c685bf67117af461b52b7cc60d8bf0"
-        },
-        "date": 1674260982843,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10931285,
-            "range": "± 215492",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 169878340,
-            "range": "± 3553782",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 5017679878,
-            "range": "± 66753131",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 687153444,
-            "range": "± 12215046",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 959974754,
             "range": "± 12059693",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "ba9902675ac1faa36f47df3e9a734b682d389229",
+          "message": "Revert \"ci: speed up Cargo registry fetch\"\n\nThis reverts commit 7c1c4903598cc4969efd8c31936d9e4f461dec4e.\n\nactions-rs/toolchain already handles this.",
+          "timestamp": "2023-03-15T18:14:48Z",
+          "tree_id": "515fec89d7934a6fee116f2d46c600f22cf0880b",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ba9902675ac1faa36f47df3e9a734b682d389229"
+        },
+        "date": 1678907211673,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13130290,
+            "range": "± 429335",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 460088066,
+            "range": "± 17578960",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 4735074794,
+            "range": "± 86148871",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 922388936,
+            "range": "± 14930790",
             "unit": "ns/iter"
           }
         ]
