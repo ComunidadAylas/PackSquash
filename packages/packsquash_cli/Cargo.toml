@@ -30,6 +30,10 @@ winapi-util = "0.1.5"
 [target.'cfg(windows)'.build-dependencies]
 winresource = "0.1.15"
 
+[[bin]]
+name = "packsquash"
+bench = false
+
 [package.metadata.deb]
 name = "packsquash"
 maintainer = "Alejandro González <me@alegon.dev>"
@@ -38,7 +42,7 @@ license-file = ["../../LICENSE", "0"]
 extended-description-file = "target/debian/extended_package_description.txt"
 suggests = "packsquash-gui"
 assets = [
-	["target/release/packsquash_cli", "usr/bin/packsquash", "755"],
+	["target/release/packsquash", "usr/bin/packsquash", "755"],
 	["../../README.md", "usr/share/doc/packsquash/README.md", "644"]
 ]
 section = "utils"
