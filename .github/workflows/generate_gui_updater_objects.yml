@@ -14,7 +14,7 @@ on:
         type: string
 
 env:
-  WINDOWS_TARGET: x86_64-pc-windows-msvc
+  WINDOWS_TARGET: x86_64-pc-windows-gnu
   MACOS_TARGET: universal-apple-darwin
   CI_WORKFLOW: ci.yml
 
