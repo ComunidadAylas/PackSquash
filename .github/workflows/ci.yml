@@ -109,7 +109,7 @@ jobs:
             rust-toolchain-targets: x86_64-pc-windows-gnu
             tauri-target: x86_64-pc-windows-gnu
             runner: windows-latest
-            cli-executable: packsquash_cli.exe
+            cli-executable: packsquash.exe
 
           - target: aarch64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
@@ -125,13 +125,13 @@ jobs:
             rust-toolchain-targets: aarch64-apple-darwin
             tauri-target: universal-apple-darwin
             runner: macos-latest
-            cli-executable: packsquash_cli
+            cli-executable: packsquash
 
           - target: aarch64-apple-darwin
             host-target: x86_64-apple-darwin
             rust-toolchain-targets: aarch64-apple-darwin
             runner: macos-latest
-            cli-executable: packsquash_cli
+            cli-executable: packsquash
 
     runs-on: ${{ matrix.runner }}
 
@@ -374,13 +374,13 @@ jobs:
           path: packsquash-aarch64
 
       - name: 🔨 Generate universal CLI binary
-        run: lipo -create -output packsquash_cli packsquash-x64/packsquash_cli packsquash-aarch64/packsquash_cli
+        run: lipo -create -output packsquash packsquash-x64/packsquash packsquash-aarch64/packsquash
 
       - name: 📤 Upload universal CLI binary
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI executable (universal-apple-darwin)
-          path: packsquash_cli
+          path: packsquash
 
   build-docker-images:
     name: Build Docker images

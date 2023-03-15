@@ -121,7 +121,6 @@ skip-tree = [
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
-	"https://github.com/Nilstrieb/winres",
 	"https://github.com/tauri-apps/tauri-plugin-store"
 ]
 

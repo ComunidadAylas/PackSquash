@@ -29,9 +29,11 @@ winapi = { version = "0.3.9", default-features = false, features = ["consoleapi"
 winapi-util = "0.1.5"
 
 [target.'cfg(windows)'.build-dependencies]
-# Fix winres not working on the latest Rust toolchain.
-# Related PR: https://github.com/mxre/winres/pull/41
-winres = { version = "0.1.11", git = "https://github.com/Nilstrieb/winres", rev = "c839134b" }
+winresource = "0.1.15"
+
+[[bin]]
+name = "packsquash"
+bench = false
 
 [package.metadata.deb]
 name = "packsquash"
@@ -41,7 +43,7 @@ license-file = ["../../LICENSE", "0"]
 extended-description-file = "target/debian/extended_package_description.txt"
 suggests = "packsquash-gui"
 assets = [
-	["target/release/packsquash_cli", "usr/bin/packsquash", "755"],
+	["target/release/packsquash", "usr/bin/packsquash", "755"],
 	["../../README.md", "usr/share/doc/packsquash/README.md", "644"]
 ]
 section = "utils"
@@ -49,7 +51,7 @@ section = "utils"
 # increment this, and change APT repo action
 revision = "0"
 
-[package.metadata.winres]
+[package.metadata.winresource]
 ProductName = "PackSquash"
 CompanyName = "Comunidad Aylas"
 OriginalFilename = "packsquash.exe"
