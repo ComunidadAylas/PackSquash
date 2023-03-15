@@ -17,8 +17,6 @@ env:
   TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
   TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
-  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-
 jobs:
   static-analysis:
     name: Static analysis
@@ -204,16 +202,12 @@ jobs:
       - name: 🧰 Install cargo-deb
         if: startsWith(matrix.runner, 'ubuntu')
         uses: taiki-e/install-action@v1
-        env:
-          CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
           tool: cargo-deb
 
       - name: 🧰 Install tauri-cli
         if: ${{ !startsWith(matrix.runner, 'ubuntu') }}
         uses: taiki-e/install-action@v1
-        env:
-          CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
           tool: tauri-cli
 
