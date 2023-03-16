@@ -20,7 +20,7 @@ ahash = "0.8.3"
 patricia_tree = "0.5.5"
 
 sysinfo = { version = "0.28.2", default-features = false }
-walkdir = "2.3.2"
+walkdir = "2.3.3"
 
 tokio = { version = "1.26.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
 tokio-util = { version = "0.7.7", default-features = false, features = ["codec", "io"] }
