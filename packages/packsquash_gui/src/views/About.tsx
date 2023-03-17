@@ -38,8 +38,6 @@ const creditsBlurSpreadRadius = 3; // Should be greater than or equal to credits
 export default () => {
   const [l10n] = useI18n();
 
-  const licenseText = l10n("about-screen-app-license-text");
-
   // TODO write credits
   // The <ul> must be positioned for the container blur (box shadow) to display as desired
   const credits = (
@@ -144,7 +142,7 @@ export default () => {
               </samp>
             </p>
             <i class="mx-auto mt-2 max-w-prose whitespace-pre-line sm:mt-4">
-              {licenseText()}
+              {l10n("about-screen-app-license-text")}
             </i>
 
             <button
