@@ -69,21 +69,19 @@ export default () => {
   );
 
   const scrollToCredits = (ev: Event) =>
-    (credits as Element).scrollIntoView({
+    (creditsContainer as Element).scrollIntoView({
       behavior: ev.type == "resize" ? "auto" : "smooth"
     });
 
-  const creditsFocusIntersectionThreshold = Number.MIN_VALUE;
   const creditsFocusObserver = new IntersectionObserver(
     ([entry]) => {
-      if (entry.intersectionRatio > creditsFocusIntersectionThreshold) {
+      if (entry.isIntersecting) {
         addEventListener("resize", scrollToCredits);
-        (credits as HTMLElement).getAnimations()[0].currentTime = 0;
       } else {
         removeEventListener("resize", scrollToCredits);
       }
     },
-    { threshold: creditsFocusIntersectionThreshold }
+    { threshold: 0.2 }
   );
 
   onMount(() => {
@@ -151,7 +149,10 @@ export default () => {
 
             <button
               class="mx-auto mt-2 text-lg font-bold transition hover:scale-110 sm:mt-4"
-              onClick={scrollToCredits}
+              onClick={(ev) => {
+                (credits as HTMLElement).getAnimations()[0].currentTime = 0;
+                scrollToCredits(ev);
+              }}
             >
               <CaretDoubleDown class="mr-2 inline" />
               {l10n("about-screen-thanks")}
