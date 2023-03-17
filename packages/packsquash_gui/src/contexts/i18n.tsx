@@ -30,7 +30,7 @@ const LOCALES = ["en", "zh-tw", "es", "fr", "ja", "ca-valencia", "gl"] as const;
 
 export type Locale = (typeof LOCALES)[number];
 
-export const AvailableLocales: Record<Locale, LocaleInfo> = {
+export const availableLocales: Record<Locale, LocaleInfo> = {
   en: {
     friendlyName: "English"
   },
