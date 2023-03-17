@@ -1,8 +1,6 @@
 import cargoDependencies from "../data/cargoDependencies.json";
 import nodeDependencies from "../data/nodeDependencies.json";
 
-import { For } from "solid-js";
-
 interface Dependency {
   name: string;
   version: string;
@@ -28,16 +26,18 @@ const dependencyListItems = cargoDependencies
       <article>
         <p class="mb-2">
           <cite>
-            {dependency.name} v{dependency.version}
+            {/* @once */ dependency.name} v{/* @once */ dependency.version}
           </cite>
         </p>
-        <p class="mb-2 text-xs">{dependency.license}</p>
-        <For each={dependency.authors}>
-          {(author) => <address class="text-sm">{author}</address>}
-        </For>
-        <p classList={{ "mb-4": i != arr.length - 1 }}>
-          <a href={dependency.homepage} class="text-sm">
-            {dependency.homepage}
+        <p class="mb-2 text-xs">{/* @once */ dependency.license}</p>
+        {
+          /* @once */ dependency.authors.map((author) => (
+            <address class="text-sm">{author}</address>
+          ))
+        }
+        <p classList={/* @once */ { "mb-4": i != arr.length - 1 }}>
+          <a href={/* @once */ dependency.homepage} class="text-sm">
+            {/* @once */ dependency.homepage}
           </a>
         </p>
       </article>
