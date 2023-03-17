@@ -1,5 +1,1 @@
-dist
-src-tauri
-*.md
-/src/data/*.json
-/src/lib/*.js
+.eslintignore
