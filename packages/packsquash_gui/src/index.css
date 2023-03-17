@@ -138,10 +138,10 @@
   0% {
     transform: translateY(100vh);
   }
-  2% {
+  1% {
     transform: translateY(100vh);
   }
-  98% {
+  99% {
     transform: translateY(-100%);
   }
   100% {
