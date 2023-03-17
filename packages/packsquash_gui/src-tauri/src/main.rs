@@ -93,8 +93,6 @@ fn run_packsquash(options: SquashOptions) -> Result<(), String> {
 
 #[tauri::command]
 fn parse_squash_options(path: &Path) -> Result<SquashOptions, String> {
-	// TODO replace with toml::from_str once toml PR #505 is merged:
-	//      https://github.com/toml-rs/toml/pull/505
 	SquashOptions::deserialize(toml::de::Deserializer::new(
 		&fs::read_to_string(path).map_err(|err| err.to_string())?
 	))
