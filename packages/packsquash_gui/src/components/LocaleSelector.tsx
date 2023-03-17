@@ -1,6 +1,6 @@
 import { For, getOwner, runWithOwner } from "solid-js";
 import { Translate } from "phosphor-solid";
-import { AvailableLocales, Locale, useI18n } from "../contexts/i18n";
+import { availableLocales, Locale, useI18n } from "../contexts/i18n";
 import { toast } from "solid-toast";
 import { tippy as solid_tippy } from "solid-tippy";
 
@@ -26,7 +26,7 @@ export default () => {
           props: {
             content: (
               <div class="grid grid-cols-2 place-items-center gap-2">
-                <For each={Object.entries(AvailableLocales)}>
+                <For each={Object.entries(availableLocales)}>
                   {(locale) => (
                     <button
                       class="rounded p-1 hover:cursor-pointer hover:bg-zinc-700"
