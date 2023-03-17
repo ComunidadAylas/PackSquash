@@ -1,18 +1,23 @@
+/**
+ * A data type that implements a circular buffer that, when reaching its maximum size,
+ * replaces its oldest elements and inserts an elision marker in the beginning,
+ * signalling that some elements were dropped.
+ */
 export class EllidedCircularBuffer<T, E> implements Iterable<T | E> {
   private buffer: (T | E)[];
   private i = 0;
-  private readonly ellisionMarker;
+  private readonly elisionMarker;
 
   constructor(size: number, ellisionMarker: E) {
     this.buffer = new Array(size + 1);
-    this.ellisionMarker = ellisionMarker;
+    this.elisionMarker = ellisionMarker;
   }
 
   push(element: T) {
     this.buffer[this.i] = element;
 
     if (++this.i == this.buffer.length) {
-      this.buffer[0] = this.ellisionMarker;
+      this.buffer[0] = this.elisionMarker;
       this.i = 1;
     }
   }

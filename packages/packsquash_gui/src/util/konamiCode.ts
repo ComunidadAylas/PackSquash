@@ -29,6 +29,8 @@ const activationMessages = [
   "Vg'f bayl bxnl gb purng sbe guvf!"
 ];
 
+const activationEffectClasses = ["font-mono", "retro-color-scheme"];
+
 function toggleKonamiCode() {
   if (!BassoonTracker.isPlaying()) {
     // Oddly enough, reloading the song each time is faster than loading it once
@@ -51,14 +53,11 @@ function toggleKonamiCode() {
       )}`
     );
 
-    document.documentElement.classList.add("font-mono", "retro-color-scheme");
+    document.documentElement.classList.add(...activationEffectClasses);
   } else {
     BassoonTracker.stop();
 
-    document.documentElement.classList.remove(
-      "font-mono",
-      "retro-color-scheme"
-    );
+    document.documentElement.classList.remove(...activationEffectClasses);
   }
 }
 
