@@ -1,5 +1,5 @@
 dist
 src-tauri
 *.md
-/src/data/optionsSchema.json
+/src/data/*.json
 /src/lib/*.js
