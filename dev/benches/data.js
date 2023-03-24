@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1679637178364,
+  "lastUpdate": 1679690155477,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "b4efb6ebf2a8aaa5adb74e5237f56d6fc37259cc",
-          "message": "refactor(audio_file): update vorbis_rs to 0.2.0, use const generics\n\nConst generics provide for much more readable, flexible and maintainable\ncode than the custom macros we used in the signal processor. Critically,\nthey allow for better introspection by most static analysis tools and\nIDEs.",
-          "timestamp": "2023-02-09T23:06:44+01:00",
-          "tree_id": "d10ceb51b65e48f3c96e66cdb6cda1519791e200",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b4efb6ebf2a8aaa5adb74e5237f56d6fc37259cc"
-        },
-        "date": 1675983055799,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9596089,
-            "range": "± 140903",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 143835711,
-            "range": "± 8662968",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 4653305532,
-            "range": "± 62769488",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 632394874,
-            "range": "± 6160069",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 786229778,
             "range": "± 14758931",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3f815744232471b6517ccc1ba6e79be75518f340",
+          "message": "chore(deps): update helper python scripts",
+          "timestamp": "2023-03-24T15:26:47Z",
+          "tree_id": "c38d68480e95b62d7e67e9230d455a0504a99339",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3f815744232471b6517ccc1ba6e79be75518f340"
+        },
+        "date": 1679690154229,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12396344,
+            "range": "± 369846",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 404098758,
+            "range": "± 3019128",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 6371717983,
+            "range": "± 69380244",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 776576858,
+            "range": "± 18453103",
             "unit": "ns/iter"
           }
         ]
