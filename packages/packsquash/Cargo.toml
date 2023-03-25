@@ -49,7 +49,7 @@ dasp_sample = "0.11.0"
 rubato = "0.12.0"
 optivorbis = "0.1.2"
 
-glsl = "6.0.1"
+glsl = "6.0.2"
 
 java-properties = { version = "1.4.1", optional = true }
 
