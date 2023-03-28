@@ -21,9 +21,8 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    # Only run if this is not a pull request, or for pull requests on forks
-    if: github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
+    # Exclude in-repo PRs from running this job
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
       - name: 📥 Checkout source
@@ -113,9 +112,8 @@ jobs:
       TARGET_APPIMAGE_ARCH: ${{ matrix.appimage-arch }}
       TARGET_APPIMAGE_APT_ARCH: ${{ matrix.apt-arch }}
 
-    # Only run if this is not a pull request, or for pull requests on forks
-    if: github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
+    # Exclude in-repo PRs from running this job
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
       - name: 💨 Cache Rust artifacts
