@@ -21,7 +21,7 @@ color-backtrace = { version = "0.5.1", default-features = false, optional = true
 
 serde_path_to_error = "0.1.11"
 
-is-terminal = "0.4.5"
+is-terminal = "0.4.6"
 
 log = "0.4.17"
 env_logger = { version = "0.10.0", default-features = false, features = ["color"] }
