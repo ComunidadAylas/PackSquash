@@ -393,7 +393,7 @@ impl GlobalOptions {
 }
 
 /// A ZIP specification intent conformance level that a squash operation can adhere to.
-#[derive(Clone, Copy, Deserialize)]
+#[derive(Default, Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum ZipSpecConformanceLevel {
@@ -413,6 +413,7 @@ pub enum ZipSpecConformanceLevel {
 	/// configured to expect and generate output ZIP files with a less strict conformance
 	/// level. Reusing them with runs configured with this same conformance level does not have
 	/// any effect.
+	#[default]
 	Pedantic,
 	/// Like [ZipSpecConformanceLevel::Pedantic], but stores the metadata needed to reuse this ZIP file
 	/// to speed up future runs, and expects this metadata from the specified output ZIP file, if it
@@ -457,12 +458,6 @@ pub enum ZipSpecConformanceLevel {
 	/// configured to expect and generate output ZIP files with the [ZipSpecConformanceLevel::Disregard]
 	/// level.
 	Disregard
-}
-
-impl Default for ZipSpecConformanceLevel {
-	fn default() -> Self {
-		Self::Pedantic
-	}
 }
 
 /// A helper struct that contains an integer guaranteed to be in the `[0, 100]` interval.
@@ -831,7 +826,7 @@ pub enum ChannelMixingOption {
 
 /// Represents a bitrate control mode that can be used by the PackSquash Vorbis encoder,
 /// a modified version of the reference encoder with the aoTuV and Lancer patches applied.
-#[derive(Deserialize, Clone, Copy)]
+#[derive(Default, Deserialize, Clone, Copy)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum AudioBitrateControlMode {
 	/// *Constant Quality Factor*: the encoder will interpret the target metric as a quality
@@ -857,6 +852,7 @@ pub enum AudioBitrateControlMode {
 	///
 	/// The quality factor is expected to be in the [-1, 10] range, where -1 means the worst audio
 	/// quality, and 10 the best.
+	#[default]
 	Cqf,
 	/// *Variable BitRate*: the encoder will interpret the target metric as an approximate bitrate,
 	/// internally translating it to a quality factor. Therefore, this mode is equivalent to
@@ -910,12 +906,6 @@ pub enum AudioBitrateControlMode {
 	/// The bitrate is interpreted in kbit/s.
 	#[serde(rename = "CABR")]
 	ConstrainedAbr
-}
-
-impl Default for AudioBitrateControlMode {
-	fn default() -> Self {
-		Self::Cqf
-	}
 }
 
 /// A helper struct that contains an integer that must be a valid number of
@@ -1093,7 +1083,7 @@ impl Default for PngFileOptions {
 }
 
 /// Possible targets the colors of a PNG file will be quantized to.
-#[derive(Deserialize, Copy, Clone)]
+#[derive(Default, Deserialize, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum ColorQuantizationTarget {
 	/// No quantization will be done. The image will be losslessly compressed.
@@ -1108,13 +1098,8 @@ pub enum ColorQuantizationTarget {
 	EightBitDepth,
 	/// The image will be quantized to at most 256 colors if and
 	/// only if doing so saves space.
+	#[default]
 	Auto
-}
-
-impl Default for ColorQuantizationTarget {
-	fn default() -> Self {
-		Self::Auto
-	}
 }
 
 impl ColorQuantizationTarget {
