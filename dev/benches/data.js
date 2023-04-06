@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1680731993705,
+  "lastUpdate": 1680800033053,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "54def76d57d7503af625d76ab50dddcecb228765",
-          "message": "fix(deps): update rust crate is-terminal to 0.4.4",
-          "timestamp": "2023-02-23T16:31:42Z",
-          "tree_id": "0af1c983e15027007700da9217345e9c0c5b3366",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/54def76d57d7503af625d76ab50dddcecb228765"
-        },
-        "date": 1677182462681,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10665178,
-            "range": "± 108085",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 168984363,
-            "range": "± 7942751",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3848189936,
-            "range": "± 33924718",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 852187953,
-            "range": "± 10270786",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 775632950,
             "range": "± 17842076",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "b12c2f341a13ffe3cc83b4e850136e553bd09862",
+          "message": "feat: overhaul shader processing code\n\nAs described in issue #187, PackSquash does not support shaders that use\npreprocessor directives in external declaration position.\n\nTo properly address this issue, it is necessary to equip PackSquash with\na GLSL preprocessor that runs before parsing the source GLSL, as the\nGLSL specification mandates for proper GLSL compilation. (Building a\nGLSL parser that accepts preprocessor directives anywhere, even in the\nmiddle of tokens, is, if not impossible, an exceedingly complex task.)\n\nThis commit improves on the situation by adding such preprocessing\ncapabilities to PackSquash, so that the preprocessing step accepts\ndirectives anywhere that are not seen by the downstream parser. However,\nif they appear in external declaration position, it is possible to\ninject them back into the AST, in order to preserve them in the\ntransformed GLSL source. Only directives that are needed by Minecraft\nare injected; others are resolved and removed by PackSquash.\n\nIn addition, include shaders now need not be full translation units:\nthey might be standalone statements or expressions, too. Functionality\nto prettify shaders was also added, revamping the `minify_shader` option\nto a more powerful `shader_source_transformation_strategy`.\n\nThese changes allow PackSquash to deal properly with a wider variety of\nshaders. The only ones that still trigger failure modes are:\n\n- Shaders which depend on `#moj_import`ed preprocessor variables to be\n  syntactically correct.\n- Shaders which depend on `#moj_import`ed preprocessor variables to\n  build the expected source code, but are syntactically correct\n  otherwise. (This can be worked around by setting\n  `source_transformation_strategy = 'keep_as_is'` for the affected\n  shaders.)\n- Shaders that include vertex or fragment shaders, relying on their\n  preprocessor variables or syntax to be valid. (This can be partially\n  worked around by setting `is_top_level_shader = false` for the\n  included shaders, although including vertex or fragment shaders is an\n  extreme edge case that we never saw before, and arguably a bad idea.)\n\nThe first two kinds of shaders should be able to be properly parsed for\nPackSquash v0.4.0, because its design allows pack files to resolve\nreferences to other files.",
+          "timestamp": "2023-04-06T17:54:11+02:00",
+          "tree_id": "cfc3949cf147af2843b1e5d5c9e15e6d0a7250ab",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b12c2f341a13ffe3cc83b4e850136e553bd09862"
+        },
+        "date": 1680800031885,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12310093,
+            "range": "± 11549413",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 398754998,
+            "range": "± 3376013",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 5617587527,
+            "range": "± 45455593",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 766546399,
+            "range": "± 8595821",
             "unit": "ns/iter"
           }
         ]
