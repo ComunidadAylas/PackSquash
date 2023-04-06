@@ -1,37 +1,45 @@
-use crate::pack_file::util::BOM;
+use crate::pack_file::util::BOM_UTF8;
 use pretty_assertions::assert_eq;
+use std::fmt::Debug;
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
 
 use super::*;
 
-static FRAGMENT_SHADER_DATA: &str = include_str!("example.fsh");
+static FRAGMENT_SHADER_DATA: &[u8] = include_bytes!("example.fsh");
+static NON_TRANSFORMABLE_SHADER_DATA: &[u8] = include_bytes!("example_non_transformable.glsl");
 
 /// Processes the given input data as a [ShaderFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
-async fn successful_process_test(
-	input_text: &str,
+async fn successful_process_test<T: Extractable<TranslationUnit> + PartialEq + Debug + 'static>(
+	input_data: &[u8],
 	add_bom: bool,
 	settings: ShaderFileOptions,
-	expect_smaller_file_size: bool
+	is_vertex_or_fragment_shader: bool,
+	is_top_level_translation_unit: bool,
+	expect_smaller_file_size: bool,
+	expect_output_equal_to_input: bool
 ) {
-	let input_ast = TranslationUnit::parse(input_text)
-		.expect("The test input data should be a valid translation unit");
+	let shader_parser = Parser::new();
 
-	let input_text = {
-		let mut input_data = Cow::Borrowed(input_text);
+	let input_data_str = std::str::from_utf8(input_data);
 
-		if add_bom {
-			input_data.to_mut().insert(0, BOM);
-		}
+	let input_ast = shader_parser
+		.parse::<T>(input_data, is_top_level_translation_unit)
+		.expect("The test input data should be a valid GLSL symbol");
 
-		input_data
+	let input_data = if add_bom {
+		let mut input_data = input_data.to_vec();
+		input_data.splice(0..0, BOM_UTF8);
+		Cow::Owned(input_data)
+	} else {
+		Cow::Borrowed(input_data)
 	};
-	let input_data = input_text.as_bytes();
 
 	let data_stream = ShaderFile {
-		read: Builder::new().read(input_data).build(),
+		read: Builder::new().read(&input_data).build(),
 		file_length_hint: input_data.len(),
+		is_vertex_or_fragment_shader,
 		optimization_settings: settings
 	}
 	.process();
@@ -41,19 +49,23 @@ async fn successful_process_test(
 		.collect()
 		.await;
 
-	assert!(
-		!process_result.is_empty(),
-		"Some data was expected for this input"
-	);
-
 	let mut data = Vec::with_capacity(input_data.len());
 	for (_, partial_data) in process_result {
 		data.extend_from_slice(&partial_data);
 	}
 
-	let data = String::from_utf8(data).expect("The result should be a UTF-8 string");
-	let processed_ast =
-		TranslationUnit::parse(&data).expect("The result should be a valid translation unit");
+	let output_data_str = std::str::from_utf8(&data);
+
+	eprintln!(
+		"Processed shader source:\n--------------------\n{}\n--------------------",
+		output_data_str.as_ref().unwrap_or(&"<NOT UTF-8>")
+	);
+
+	assert!(!data.is_empty(), "Some data was expected for this input");
+
+	let processed_ast = shader_parser
+		.parse::<T>(&data, is_top_level_translation_unit)
+		.expect("The result should be a valid GLSL symbol");
 
 	assert_eq!(
 		input_ast, processed_ast,
@@ -61,40 +73,80 @@ async fn successful_process_test(
 	);
 
 	assert!(
-		!expect_smaller_file_size || data.as_bytes().len() < input_data.len(),
+		!expect_smaller_file_size || data.len() < input_data.len(),
 		"The processed shader file should be smaller than the original"
+	);
+
+	assert!(
+		!expect_output_equal_to_input || input_data_str == output_data_str,
+		"The processed shader file should be the same as the original"
 	);
 }
 
 #[tokio::test]
 async fn minifying_works() {
-	successful_process_test(
+	successful_process_test::<TranslationUnit>(
 		FRAGMENT_SHADER_DATA,
 		false, // No BOM
-		ShaderFileOptions { minify: true },
-		true // Smaller size
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
+			..Default::default()
+		},
+		true,  // Fragment shader
+		true,  // Top-level TU
+		true,  // Smaller size
+		false  // Different output text
 	)
 	.await
 }
 
 #[tokio::test]
 async fn minifying_with_bom_works() {
-	successful_process_test(
+	successful_process_test::<TranslationUnit>(
 		FRAGMENT_SHADER_DATA,
 		true, // Add BOM
-		ShaderFileOptions { minify: true },
-		true // Smaller size
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
+			..Default::default()
+		},
+		true,  // Fragment shader
+		true,  // Top-level TU
+		true,  // Smaller size
+		false  // Different output text
+	)
+	.await
+}
+
+#[tokio::test]
+async fn prettifying_works() {
+	successful_process_test::<TranslationUnit>(
+		FRAGMENT_SHADER_DATA,
+		false, // No BOM
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Prettify,
+			..Default::default()
+		},
+		true,  // Fragment shader
+		true,  // Top-level TU
+		false, // Same/bigger size
+		false  // Different output text
 	)
 	.await
 }
 
 #[tokio::test]
 async fn passthrough_works() {
-	successful_process_test(
+	successful_process_test::<TranslationUnit>(
 		FRAGMENT_SHADER_DATA,
 		false, // No BOM
-		ShaderFileOptions { minify: false },
-		false // Same size
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::KeepAsIs,
+			..Default::default()
+		},
+		true,  // Fragment shader
+		true,  // Top-level TU
+		false, // Same size
+		true   // Same output text
 	)
 	.await
 }
@@ -104,6 +156,7 @@ async fn invalid_input_is_handled() {
 	let mut data_stream = ShaderFile {
 		read: Builder::new().read(&[]).build(),
 		file_length_hint: 0,
+		is_vertex_or_fragment_shader: true,
 		optimization_settings: Default::default()
 	}
 	.process();
@@ -113,4 +166,55 @@ async fn invalid_input_is_handled() {
 		.await
 		.expect("Expected some result for this input")
 		.expect_err("Expected an error for this input");
+}
+
+#[tokio::test]
+async fn minifying_is_averted_when_preprocessor_directives_would_be_lost() {
+	successful_process_test::<TranslationUnit>(
+		NON_TRANSFORMABLE_SHADER_DATA,
+		false, // No BOM
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
+			..Default::default()
+		},
+		true,  // Fragment shader
+		true,  // Top-level TU
+		false, // Same size
+		true   // Same output text
+	)
+	.await
+}
+
+#[tokio::test]
+async fn include_shaders_may_not_be_translation_units() {
+	successful_process_test::<Expr>(
+		b"1 + 1",
+		false, // No BOM
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
+			..Default::default()
+		},
+		false, // Include shader
+		false, // Not top-level
+		true,  // Smaller size
+		false  // Different output text
+	)
+	.await
+}
+
+#[tokio::test]
+async fn include_shaders_with_preprocessor_directives_are_passed_through() {
+	successful_process_test::<Expr>(
+		b"#define LOVE:\nyou + me",
+		false, // No BOM
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
+			..Default::default()
+		},
+		false, // Include shader
+		false, // Not top-level
+		false, // Smaller size
+		true   // Same output text
+	)
+	.await
 }

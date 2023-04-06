@@ -2,14 +2,11 @@
 members = ["packages/*"]
 
 [patch.crates-io]
-# Use our fork of glsl that allows it to parse files that use DOS-style CRLF line
-# endings, prevalent on Windows environments, fixes the #elif preprocessor directive
-# not being parsed, improves minification and fixes some incorrect transpiling
-# Related PRs:
-# https://github.com/phaazon/glsl/pull/138
-# https://github.com/ComunidadAylas/glsl/pull/1
-# https://github.com/ComunidadAylas/glsl/pull/2
-glsl = { git = "https://github.com/ComunidadAylas/glsl", branch = "packsquash" }
+# Use our fork of glsl-lang that allows it to parse #moj_import directives
+glsl-lang = { git = "https://github.com/ComunidadAylas/glsl-lang" }
+glsl-lang-lexer = { git = "https://github.com/ComunidadAylas/glsl-lang" }
+glsl-lang-pp = { git = "https://github.com/ComunidadAylas/glsl-lang" }
+glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 
 # Use a newer commit of the csv crate, that's pulled in by development dependencies
 # for benchmarking, that depends on a itoa version consistent with the rest of the

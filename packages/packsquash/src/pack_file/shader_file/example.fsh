@@ -4,8 +4,9 @@
 
 #version 120
 
-// Dummy variable added to check that transpilation doesn't mess with the preprocessor directives
-vec3 dummy_variable;
+// Dummy variables added to check that transpilation doesn't mess with the preprocessor directives
+vec2 dummy_variable;
+vec3 dummy_var_2;
 
 // Test that the #moj_import directive added in 1.17 works fine
 #moj_import <base.fsh>
@@ -30,10 +31,14 @@ void main() {
 	// color.r is red, color.g is green, color.b is blue, all values from 0 to 1.
 	vec3 color = texture2D(gcolor, point).rgb;
 
+ # if __VERSION__ == 120
 	// You can do whatever you want to the color. Here we're inverting it.
 	color.r = 1 - color.r;
 	color.g = 1 - color.g;
 	color.b = 1 - color.b;
+#else
+#error "Unexpected GLSL version"
+#endif
 
 	// Here's where we tell Minecraft what color we want this pixel.
 	gl_FragColor = vec4(color, 1.0);

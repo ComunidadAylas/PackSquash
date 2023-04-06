@@ -1,30 +1,27 @@
 //! Contains code to optimize shader files.
 
-use std::{
-	borrow::Cow,
-	io::{self, Write},
-	str::Utf8Error
-};
+use std::{borrow::Cow, io, str::Utf8Error};
 
-use bytes::{BufMut, BytesMut};
-use glsl::{
-	parser::{Parse, ParseError},
-	syntax::TranslationUnit
-};
+use bytes::BytesMut;
+use glsl_lang::ast::{Expr, Statement, TranslationUnit};
+use glsl_lang::parse::Extractable;
 use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
-use crate::config::ShaderFileOptions;
+use crate::config::{ShaderFileOptions, ShaderSourceTransformationStrategy};
+use crate::pack_file::shader_file::parser::{ParsedSymbol, Transpilable};
+use parser::{ParseError, Parser};
 
-use super::{
-	util::strip_utf8_bom, AsyncReadAndSizeHint, PackFile, PackFileAssetType, PackFileConstructor
-};
+use super::{AsyncReadAndSizeHint, PackFile, PackFileAssetType, PackFileConstructor};
+
+mod parser;
 
 #[cfg(test)]
 mod tests;
 
-/// Represents a GLSL shader file (more precisely, a translation unit or shader stage).
+/// Represents a GLSL shader file (more precisely, a translation unit or shader stage, or a
+/// segment of it).
 ///
 /// Vanilla Minecraft uses fragment and vertex shaders that can be replaced by resource
 /// packs for several effects, like the "creeper vision" showed while spectating a Creeper,
@@ -33,39 +30,30 @@ mod tests;
 pub struct ShaderFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
 	file_length_hint: usize,
+	is_vertex_or_fragment_shader: bool,
 	optimization_settings: ShaderFileOptions
-}
-
-/// Helper struct to treat a [std::io::Write] like a [std::fmt::Write],
-/// bridging the gap between character-oriented and byte-oriented sinks.
-struct FormatWrite<W: Write>(W);
-
-impl<W: Write> std::fmt::Write for FormatWrite<W> {
-	fn write_str(&mut self, s: &str) -> std::fmt::Result {
-		self.0.write_all(s.as_bytes()).map_err(|_| std::fmt::Error)
-	}
 }
 
 /// Optimizer decoder that transforms shader source code files to an optimized
 /// representation.
 pub struct OptimizerDecoder {
 	optimization_settings: ShaderFileOptions,
+	is_vertex_or_fragment_shader: bool,
 	reached_eof: bool
 }
 
+/// Represents an error that may happen while optimizing GLSL shader files.
 #[derive(Error, Debug)]
 #[non_exhaustive]
 pub enum OptimizationError {
-	#[error("Invalid UTF-8 character encoding: {0}")]
-	InvalidUtf8(#[from] Utf8Error),
-	#[error("Shader parse error: {0}")]
-	InvalidShaderStage(#[from] ParseError),
+	#[error("Invalid encoding: {0}")]
+	InvalidEncoding(#[from] Utf8Error),
+	#[error("Shader error: {0}")]
+	InvalidShader(#[from] ParseError),
 	#[error("I/O error: {0}")]
 	Io(#[from] io::Error)
 }
 
-// FIXME: actual framing?
-// (i.e. do not hold the entire file in memory before decoding, so that frame != file)
 impl Decoder for OptimizerDecoder {
 	type Item = (Cow<'static, str>, BytesMut);
 	type Error = OptimizationError;
@@ -83,30 +71,43 @@ impl Decoder for OptimizerDecoder {
 		}
 		self.reached_eof = true;
 
-		// Parse the translation unit
-		let translation_unit = TranslationUnit::parse(std::str::from_utf8(strip_utf8_bom(src))?)?;
+		let shader_parser = Parser::new();
+		let source_transformation_strategy =
+			self.optimization_settings.source_transformation_strategy;
 
-		if self.optimization_settings.minify {
-			// Transpile the translation unit back to a more compact GLSL string
-			let mut buf_writer = {
-				let mut buf = src.split_off(0);
-				buf.clear();
-				buf.writer()
-			};
-
-			glsl::transpiler::glsl::show_translation_unit(
-				&mut FormatWrite(&mut buf_writer),
-				&translation_unit
-			);
-
-			Ok(Some((Cow::Borrowed("Minified"), buf_writer.into_inner())))
+		if self.is_vertex_or_fragment_shader {
+			// Vertex or fragment shaders must be parseable as translation units
+			process_shader_as::<TranslationUnit>(
+				src,
+				&shader_parser,
+				self.optimization_settings
+					.is_top_level_shader
+					.unwrap_or(true),
+				source_transformation_strategy
+			)
 		} else {
-			// The shader is okay, but we don't want to minify it, so just
-			// return an owned view of the read bytes
-			Ok(Some((
-				Cow::Borrowed("Validated and copied"),
-				src.split_off(0)
-			)))
+			// Include shaders may not necessarily be a translation unit. In fact, they technically
+			// can be any text, as long as its inclusion in a top-level shader yields valid GLSL. As
+			// a compromise between rejecting technically valid inputs and allowing potential nonsensical
+			// text in them, which hampers validation and minification/prettifying capabilities,
+			// also accept standalone statements and expressions
+			process_shader_as::<TranslationUnit>(
+				src,
+				&shader_parser,
+				false,
+				source_transformation_strategy
+			)
+			.or_else(|_| {
+				process_shader_as::<Statement>(
+					src,
+					&shader_parser,
+					false,
+					source_transformation_strategy
+				)
+			})
+			.or_else(|_| {
+				process_shader_as::<Expr>(src, &shader_parser, false, source_transformation_strategy)
+			})
 		}
 	}
 }
@@ -121,6 +122,7 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for ShaderFile<T> {
 			self.read,
 			OptimizerDecoder {
 				optimization_settings: self.optimization_settings,
+				is_vertex_or_fragment_shader: self.is_vertex_or_fragment_shader,
 				reached_eof: false
 			},
 			self.file_length_hint
@@ -137,14 +139,61 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for ShaderFil
 
 	fn new(
 		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<T>>,
-		_: PackFileAssetType,
+		asset_type: PackFileAssetType,
 		optimization_settings: Self::OptimizationSettings
 	) -> Option<Self> {
 		file_read_producer().map(|(read, file_length_hint)| Self {
 			read,
 			// The file is too big to fit in memory if this conversion fails anyway
 			file_length_hint: file_length_hint.try_into().unwrap_or(usize::MAX),
+			is_vertex_or_fragment_shader: !matches!(
+				asset_type,
+				PackFileAssetType::TranslationUnitSegment
+			),
 			optimization_settings
 		})
+	}
+}
+
+/// Processes the shader code at the specified source buffer, trying to parse it as `T`.
+/// An error is returned when the source can't be parsed as the specified symbol, which
+/// may or may not be a format error depending on how the source is interpreted by Minecraft.
+fn process_shader_as<T: Extractable<TranslationUnit> + 'static>(
+	src: &mut BytesMut,
+	shader_parser: &Parser,
+	is_top_level_translation_unit: bool,
+	source_transformation_strategy: ShaderSourceTransformationStrategy
+) -> Result<Option<<OptimizerDecoder as Decoder>::Item>, OptimizationError>
+where
+	ParsedSymbol<T>: Transpilable
+{
+	if let (
+		Some(symbol),
+		ShaderSourceTransformationStrategy::Minify | ShaderSourceTransformationStrategy::Prettify
+	) = (
+		shader_parser.parse::<T>(src, is_top_level_translation_unit)?,
+		source_transformation_strategy
+	) {
+		// The shader is valid and safe to transform
+		let minify = matches!(
+			source_transformation_strategy,
+			ShaderSourceTransformationStrategy::Minify
+		);
+
+		let mut buf = src.split_off(0);
+		buf.clear();
+
+		buf.extend_from_slice(symbol.transpile(minify).as_bytes());
+
+		Ok(Some((
+			Cow::Borrowed(if minify { "Minified" } else { "Prettified" }),
+			buf
+		)))
+	} else {
+		// The shader is valid, but not safe to transform, or we don't want to transform it
+		Ok(Some((
+			Cow::Borrowed("Validated and copied"),
+			src.split_off(0)
+		)))
 	}
 }

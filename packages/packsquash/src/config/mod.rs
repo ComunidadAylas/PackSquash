@@ -1159,23 +1159,65 @@ impl From<UnitIntervalFloat> for f32 {
 }
 
 /// Parameters that influence how a shader file is optimized.
-#[derive(Deserialize, Clone, Copy)]
+#[derive(Deserialize, Clone, Copy, Default)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct ShaderFileOptions {
-	/// If `true`, the shader file will be minified (i.e. unnecessary white space, line breaks
-	/// and comments will be removed) to save space and improve parsing performance. If `false`,
-	/// the shader file will still be validated for errors, but left as-is.
+	/// Defines how the GLSL source code of this shader will be transformed to a more optimized
+	/// but semantically equivalent representation.
 	///
-	/// **Default value**: `true` (minify)
-	#[serde(rename = "minify_shader")]
-	pub minify: bool
+	/// **Default value**: [`ShaderSourceTransformationStrategy::Minify`]
+	#[serde(rename = "shader_source_transformation_strategy")]
+	pub source_transformation_strategy: ShaderSourceTransformationStrategy,
+	/// If `true`, PackSquash will consider this shader to be a top-level one (i.e., parsed
+	/// by Minecraft as a translation unit and never included in other shaders). When `false`,
+	/// this shader will not be considered top-level.
+	///
+	/// The value of this option is only honored for vertex and fragment shaders. By definition,
+	/// include shaders never are top-level, so they can't be marked as top-level via this option.
+	///
+	/// In the vast majority of scenarios, vertex and fragment shaders are not meant to be
+	/// included in other shaders (i.e., they are top-level). However, Minecraft technically allows
+	/// such inclusion to happen, and it is exceedingly difficult for PackSquash to determine whether
+	/// a vertex or fragment shader is being included by other shader. PackSquash needs to know
+	/// whether a shader is top-level to decide whether it is appropriate to expand and remove
+	/// preprocessor directives: if it is not top-level but PackSquash thinks it is, removing
+	/// preprocessor directives may change the preprocessor behavior in the top-level shader,
+	/// yielding potentially different GLSL source code.
+	///
+	/// It is strongly recommended to only explicitly set this option to `false` for the exceedingly
+	/// rare cases where the default behavior generates semantically altered GLSL code, as doing so
+	/// will make it harder for PackSquash to optimize the affected shaders. Otherwise, omitting
+	/// it is the most appropriate course of action.
+	///
+	/// **Default value**: `None` (`true` for every vertex and fragment shader)
+	pub is_top_level_shader: Option<bool>
 }
 
-impl Default for ShaderFileOptions {
-	fn default() -> Self {
-		Self { minify: true }
-	}
+/// A strategy that may be used to transform GLSL shader source code.
+///
+/// Please note that PackSquash may not be able to transform some shaders due to limitations
+/// in its GLSL parsing code. When this happens, the optimization strategy text for affected
+/// shaders will highlight that situation. These limitations might be removed in the future,
+/// rendering PackSquash capable of transforming more shaders according to the selected
+/// strategy.
+#[derive(Deserialize, Copy, Clone, Default)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ShaderSourceTransformationStrategy {
+	/// Attempt to minify the shader (i.e., remove unnecessary whitespace, line breaks,
+	/// comments and preprocessor directives) to save space and improve parsing performance.
+	#[default]
+	Minify,
+	/// Attempt to prettify the shader (i.e., print it in an indented, human-readable form),
+	/// while expanding and removing preprocessor directives and comments.
+	Prettify,
+	/// Add the source code as-is to the generated ZIP file, without removing or expanding
+	/// preprocessor directives.
+	///
+	/// PackSquash will automatically fall back to this strategy when it is not possible to
+	/// execute other strategies for a given shader.
+	KeepAsIs
 }
 
 /// Parameters that influence how a legacy language file is optimized.
