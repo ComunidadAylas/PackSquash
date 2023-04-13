@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1681318568090,
+  "lastUpdate": 1681396331886,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": false,
-          "id": "6de8338d99283d7da9772837e91589a1edd03c1c",
-          "message": "fix(deps): update rust crate serde_json to 1.0.94",
-          "timestamp": "2023-03-05T19:18:15Z",
-          "tree_id": "545c4ddcd9f9ebf8eab2737af935973e3bafaed7",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6de8338d99283d7da9772837e91589a1edd03c1c"
-        },
-        "date": 1678057443625,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14327303,
-            "range": "± 862311",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 220896608,
-            "range": "± 2896449",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3996071365,
-            "range": "± 131071403",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1021215889,
-            "range": "± 24603738",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 633464644,
             "range": "± 8549139",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "c629a5530cbc0f0b5bfd50fdc85e0708b6acbaa9",
+          "message": "chore: rename `type_alias_impl_trait` feature gate to `impl_trait_in_assoc_type`\n\nThis change was introduced by\nhttps://github.com/rust-lang/rust/pull/110237 in the latest nightlies.",
+          "timestamp": "2023-04-13T15:56:05+02:00",
+          "tree_id": "3d51c00c53ffc79b7b1ccbe076a0b19d99bda1bd",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c629a5530cbc0f0b5bfd50fdc85e0708b6acbaa9"
+        },
+        "date": 1681396330477,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13039263,
+            "range": "± 17630626",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 407852716,
+            "range": "± 7640996",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 5642009865,
+            "range": "± 59645559",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 776160568,
+            "range": "± 11363664",
             "unit": "ns/iter"
           }
         ]
