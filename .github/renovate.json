@@ -15,7 +15,5 @@
 			"matchManagers": ["pip_requirements"],
 			"groupName": "Helper Python scripts"
 		}
-	],
-	"description": "TODO The dependencies ignored below are pending upstream coordination to be applied effectively",
-	"ignoreDeps": ["aes", "charset-normalizer"]
+	]
 }
