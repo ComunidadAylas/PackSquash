@@ -12,7 +12,7 @@
 #![feature(lazy_cell)]
 #![feature(nonzero_ops)]
 #![feature(try_find)]
-#![feature(type_alias_impl_trait)]
+#![feature(impl_trait_in_assoc_type)]
 #![feature(generic_const_exprs)]
 #![feature(const_option)]
 #![feature(const_fn_floating_point_arithmetic)]
