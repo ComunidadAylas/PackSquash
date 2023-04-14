@@ -31,6 +31,11 @@ jobs:
       - name: 📁 Create GUI package frontend dist directory
         run: mkdir packages/packsquash_gui/dist
 
+      - name: 🧰 Install development packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install desktop-file-utils libwebkit2gtk-4.0-dev
+
       - name: 🧰 Install Rust toolchain
         uses: dtolnay/rust-toolchain@nightly
         with:
