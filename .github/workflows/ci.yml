@@ -48,8 +48,9 @@ jobs:
       - name: 🔍 Clippy check
         uses: giraffate/clippy-action@v1
         with:
-          clippy_flags: -- -D warnings
+          clippy_flags: --all-targets
           reporter: github-check
+          fail_on_error: true
 
       - name: 🔍 ESLint check
         working-directory: packages/packsquash_gui
