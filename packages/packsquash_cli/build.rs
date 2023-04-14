@@ -6,7 +6,7 @@ fn main() {
 
 #[cfg(windows)]
 fn add_executable_metadata() {
-	inresource::WindowsResource::new()
+	winresource::WindowsResource::new()
 		.set("LegalCopyright", env!("CARGO_PKG_AUTHORS"))
 		.set(
 			"FileDescription",
