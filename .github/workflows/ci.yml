@@ -45,22 +45,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install desktop-file-utils libwebkit2gtk-4.0-dev
 
-      - name: 🔍 Check workflow write permission
-        id: check_write_permission
-        uses: scherermichael-oss/action-has-permission@1.0.6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🔍 Clippy check (with annotations)
-        uses: actions-rs/clippy-check@v1
-        if: steps.check_write_permission.outputs.has-permission
+      - name: 🔍 Clippy check
+        uses: giraffate/clippy-action@v1
         with:
-          args: --all-targets
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🔍 Clippy check (without annotations)
-        if: ${{ !steps.check_write_permission.outputs.has-permission }}
-        run: cargo clippy --all-targets
+          clippy_flags: -- -D warnings
+          reporter: github-check
 
       - name: 🔍 ESLint check
         working-directory: packages/packsquash_gui
