@@ -69,9 +69,9 @@ checksum = "4b46cbb362ab8752921c97e041f5e366ee6297bd428a31275b9fcf1e380f7299"
 
 [[package]]
 name = "aotuv_lancer_vorbis_sys"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0b2ad0335c812628eb2bf621088cd079935bd3e03abfb8afb2ee64a6c947438"
+checksum = "fccf12dee70dbae164314a8218b53744422ee37c43d2df98f402001a94556d62"
 dependencies = [
  "cc",
  "ogg_next_sys",
@@ -828,17 +828,6 @@ checksum = "85cdab6a89accf66733ad5a1693a4dcced6aeff64602b634530dd73c1f3ee9f0"
 dependencies = [
  "log",
  "termcolor",
-]
-
-[[package]]
-name = "errno"
-version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f639046355ee4f37944e44f60642c6f3a7efa3cf6b78c78a0d989a8ce6c396a1"
-dependencies = [
- "errno-dragonfly",
- "libc",
- "winapi",
 ]
 
 [[package]]
@@ -1743,9 +1732,9 @@ dependencies = [
 
 [[package]]
 name = "ogg_next_sys"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb6254669d40c0ea1ca8ca05d2b320f535e968b9a91a3ef238f7529057b4f155"
+checksum = "e9fd1787d091b80a730629dc4234f93584c436b174560b5c95d8556551f15c9c"
 dependencies = [
  "cc",
 ]
@@ -2404,7 +2393,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "85597d61f83914ddeba6a47b3b8ffe7365107221c2e557ed94426489fefb5f77"
 dependencies = [
  "bitflags",
- "errno 0.3.1",
+ "errno",
  "io-lifetimes",
  "libc",
  "linux-raw-sys",
@@ -3139,12 +3128,12 @@ checksum = "91304fb1fb7f14c888496d859d627db36efdb63cdd6755e286e3dd637cc28997"
 
 [[package]]
 name = "vorbis_rs"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b389f6abdad9a8ad80f988cf4d3af68b53514de752faffcb6f259d6a6cf06dfc"
+checksum = "7294961c8fb25a627f40bb9948d9a79fcc66fd16259a5870aec57288ee468b9f"
 dependencies = [
  "aotuv_lancer_vorbis_sys",
- "errno 0.2.8",
+ "errno",
  "ogg_next_sys",
  "thiserror",
  "tinyvec",
