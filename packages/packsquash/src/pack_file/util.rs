@@ -162,19 +162,3 @@ pub fn prepare_line_for_output<
 
 	Ok((description.into(), line.into_bytes()))
 }
-
-/// Extension trait for adding a useful `try_get_or_insert_with` method to `Option<T>`.
-pub trait TryGetOrInsertOptionExt<T> {
-	/// Like [`get_or_insert_with`](Option::get_or_insert_with), but with a fallible `f` whose
-	/// errors are propagated to the caller and abort the insertion.
-	fn try_get_or_insert_with<E>(&mut self, f: impl FnOnce() -> Result<T, E>) -> Result<&mut T, E>;
-}
-
-impl<T> TryGetOrInsertOptionExt<T> for Option<T> {
-	fn try_get_or_insert_with<E>(&mut self, f: impl FnOnce() -> Result<T, E>) -> Result<&mut T, E> {
-		match self {
-			Some(value) => Ok(value),
-			None => Ok(self.insert(f()?))
-		}
-	}
-}

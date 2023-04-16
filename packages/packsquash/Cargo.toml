@@ -34,10 +34,9 @@ json_comments = "0.2.1"
 jsonpath_lib = "0.3.0"
 
 spng = { version = "0.2.0-alpha.2", default-features = false }
-png = "0.17.8"
 rgb = "0.8.36"
 imagequant = { version = "4.1.1", default-features = false }
-oxipng = { version = "8.0.0", default-features = false, features = ["zopfli"] }
+oxipng = { version = "7.0.0", default-features = false, features = ["zopfli"] }
 
 symphonia = { version = "0.5.2", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
 vorbis_rs = "0.3.0"
