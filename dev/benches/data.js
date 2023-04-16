@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1681504185131,
+  "lastUpdate": 1681667456683,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "e9b2d62073f55c709ae2e0138e832488c16fd8ef",
-          "message": "fix(deps): update rust crate serde to 1.0.153",
-          "timestamp": "2023-03-07T19:24:45Z",
-          "tree_id": "80a0565413b4209658a40c86f3c448f8b202de98",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e9b2d62073f55c709ae2e0138e832488c16fd8ef"
-        },
-        "date": 1678234638457,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10461454,
-            "range": "± 187287",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 171623371,
-            "range": "± 8502971",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3813143870,
-            "range": "± 4536762",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 829958659,
-            "range": "± 9844594",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 646574605,
             "range": "± 7304539",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "ad362f78bc8dc46b9cb7eed0321d740e77301bbb",
+          "message": "perf(png_file): use experimental OxiPNG raw API\n\nThis new API renders it unnecessary for PackSquash to encode\nintermediate PNGs for them to be consumed by OxiPNG, which is noticeably\nfaster and more memory efficient, especially for smaller images, where\nthe encoding overhead is significant.\n\nWhile at it, the image processing code was refactored to be much more\nergonomic and easier to read, 0 is now rejected as a value for the\n`maximum_width_and_height` option, the OxiPNG options were slightly\ntweaked to use a better set of filters, and images no longer are\ndownsized if their color type cannot be changed.",
+          "timestamp": "2023-04-16T19:14:07+02:00",
+          "tree_id": "46f3dbf63533ad6700c33706b267489dc7a74254",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ad362f78bc8dc46b9cb7eed0321d740e77301bbb"
+        },
+        "date": 1681667455948,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9497940,
+            "range": "± 10825940",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 289746747,
+            "range": "± 4704674",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 1801161028,
+            "range": "± 24382336",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 252057137,
+            "range": "± 7163394",
             "unit": "ns/iter"
           }
         ]
