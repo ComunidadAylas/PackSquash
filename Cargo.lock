@@ -1813,8 +1813,9 @@ dependencies = [
 
 [[package]]
 name = "oxipng"
-version = "7.0.0"
-source = "git+https://github.com/ComunidadAylas/oxipng#ce103dde7daa58270df997d4ec4b08126037389a"
+version = "8.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "630638e107fb436644c300e781d3f17e1b04656138ba0d40564be4be3b06db32"
 dependencies = [
  "bitvec",
  "crossbeam-channel",
@@ -3506,3 +3507,8 @@ dependencies = [
  "simd-adler32",
  "typed-arena",
 ]
+
+[[patch.unused]]
+name = "oxipng"
+version = "7.0.0"
+source = "git+https://github.com/ComunidadAylas/oxipng#ce103dde7daa58270df997d4ec4b08126037389a"
