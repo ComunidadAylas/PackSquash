@@ -8,12 +8,12 @@ use indexmap::IndexMap;
 use itertools::Itertools;
 use oxipng::internal_tests::{BitDepth, ColorType, IhdrData, PngImage};
 use oxipng::{Deflaters, Headers, Interlacing, Options, RowFilter};
-use rgb::{AsPixels, ComponentBytes, RGBA8};
+use rgb::{AsPixels, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
-use std::cmp;
 use std::io::Read;
 use std::num::{NonZeroU16, NonZeroU8};
 use std::time::Duration;
+use std::{cmp, iter};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -135,82 +135,40 @@ pub fn strip_unnecessary_chunks(
 	Ok(stripped_png)
 }
 
-/// An in-memory rectangular array of pixels in 8-bit RGBA format.
+/// An in-memory rectangular array of pixels in 8-bit RGBA format,
+/// stored as a raw byte buffer.
 ///
 /// A pixel array is agnostic to the ordering of its pixels in memory,
 /// but for interoperability and clarity reasons it's recommended to
 /// order them from top-left to bottom-right. This is the ordering
 /// assumed through the code in this module and by the PNG format.
-pub enum PixelArray {
-	/// A pixel array backed by a raw byte buffer, whose bytes are
-	/// to be interpreted as 8-bit RGBA pixel components for image
-	/// manipulation tasks.
-	///
-	/// In general, reinterpreting the buffer contents as another
-	/// data type relies on compiler optimizations for that to be
-	/// an O(1) operation.
-	Rgba8ByteBuffer {
-		width: NonZeroU16,
-		height: NonZeroU16,
-		buf: Vec<u8>
-	},
-	/// A pixel array backed by a buffer of 8-bit RGBA pixels.
-	PixelBuffer {
-		width: NonZeroU16,
-		height: NonZeroU16,
-		pixels: Vec<RGBA8>
-	}
+pub struct PixelArray {
+	width: NonZeroU16,
+	height: NonZeroU16,
+	buf: Vec<u8>
 }
 
 impl PixelArray {
 	/// Returns the width of this pixel array.
 	fn width(&self) -> NonZeroU16 {
-		match self {
-			Self::Rgba8ByteBuffer { width, .. } => *width,
-			Self::PixelBuffer { width, .. } => *width
-		}
+		self.width
 	}
 
 	/// Returns the height of this pixel array.
 	fn height(&self) -> NonZeroU16 {
-		match self {
-			Self::Rgba8ByteBuffer { height, .. } => *height,
-			Self::PixelBuffer { height, .. } => *height
-		}
+		self.height
 	}
 
 	/// Returns the slice of pixels contained in this array.
 	///
-	/// This method mutates `self` when it is necessary to reinterpret
-	/// its backing byte buffer as a pixel buffer, which is guaranteed
-	/// to happen at most once.
-	fn as_slice(&mut self) -> &[RGBA8] {
-		match self {
-			Self::Rgba8ByteBuffer {
-				width, height, buf, ..
-			} => {
-				*self = Self::PixelBuffer {
-					width: *width,
-					height: *height,
-					pixels: buf.as_pixels().to_vec()
-				};
-
-				self.as_slice()
-			}
-			Self::PixelBuffer { pixels, .. } => pixels
-		}
+	/// This conversion is guaranteed to be zero-cost.
+	fn as_slice(&self) -> &[RGBA8] {
+		self.buf.as_pixels()
 	}
 
 	/// Consumes this RGBA8 pixel array and returns a byte buffer with its pixels.
-	///
-	/// This conversion is guaranteed to be cost-free if the array backing buffer
-	/// already was a byte buffer; else, the performance characteristics depend on
-	/// compiler optimizations, the worst case scenario being an O(n) copy.
 	fn into_byte_buf(self) -> Vec<u8> {
-		match self {
-			Self::Rgba8ByteBuffer { buf, .. } => buf,
-			Self::PixelBuffer { pixels, .. } => pixels.as_bytes().to_vec()
-		}
+		self.buf
 	}
 }
 
@@ -294,7 +252,7 @@ impl<R: Read> ProcessedImage<R> {
 				let mut buf = vec![0; png_info.buffer_size];
 				png_reader.next_frame(&mut buf)?;
 
-				*self = PixelArray::Rgba8ByteBuffer {
+				*self = PixelArray {
 					width: NonZeroU16::new(png_info.width as u16).unwrap(),
 					height: NonZeroU16::new(png_info.height as u16).unwrap(),
 					buf
@@ -319,7 +277,7 @@ impl<R: Read> ProcessedImage<R> {
 				let mut buf = vec![0; png_info.buffer_size];
 				png_reader.next_frame(&mut buf)?;
 
-				Some(PixelArray::Rgba8ByteBuffer {
+				Some(PixelArray {
 					width: NonZeroU16::new(png_info.width as u16).unwrap(),
 					height: NonZeroU16::new(png_info.height as u16).unwrap(),
 					buf
@@ -435,18 +393,20 @@ impl<R: Read> ProcessedImage<R> {
 
 		Ok(self.as_pixel_array()?.and_then(|pixel_array| {
 			let pixels = pixel_array.as_slice();
-			pixels.iter().all_equal().then_some(
-				PixelArray::PixelBuffer {
+			pixels.iter().all_equal().then(|| {
+				PixelArray {
 					width: minimum_mipmap_level_keeping_dimension,
 					height: minimum_mipmap_level_keeping_dimension,
-					pixels: vec![
-						pixels[0];
-						minimum_mipmap_level_keeping_dimension.get() as usize
-							* minimum_mipmap_level_keeping_dimension.get() as usize
-					]
+					buf: iter::repeat(pixels[0])
+						.take(
+							minimum_mipmap_level_keeping_dimension.get() as usize
+								* minimum_mipmap_level_keeping_dimension.get() as usize
+						)
+						.flat_map(|pixel| <RGBA8 as Into<[u8; 4]>>::into(pixel).into_iter())
+						.collect()
 				}
 				.into()
-			)
+			})
 		}))
 	}
 
