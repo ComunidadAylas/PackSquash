@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1681829721643,
+  "lastUpdate": 1681864437559,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": false,
-          "id": "c98100f898d297c06fdb727acfaeff1d069026cc",
-          "message": "chore(deps): update dependency urllib3 to v1.26.15",
-          "timestamp": "2023-03-11T01:31:32Z",
-          "tree_id": "e37f479bc8bda6eab083a758d9041f6b302bf7f7",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c98100f898d297c06fdb727acfaeff1d069026cc"
-        },
-        "date": 1678513461601,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9648752,
-            "range": "± 1616932",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 370153006,
-            "range": "± 2085121",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 4358747513,
-            "range": "± 9910008",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 798403264,
-            "range": "± 4461140",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 254575024,
             "range": "± 9052605",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6312efe4d298c33e9cb0af5dab8d07ae2069f933",
+          "message": "chore(deps): update dependency filelock to v3.12.0",
+          "timestamp": "2023-04-18T18:59:30Z",
+          "tree_id": "cc9476fdce2e1144dff4138bb4f64a39667f68ae",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6312efe4d298c33e9cb0af5dab8d07ae2069f933"
+        },
+        "date": 1681864436875,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10271066,
+            "range": "± 163829",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 331244441,
+            "range": "± 13395510",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2087371286,
+            "range": "± 30188303",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 259675484,
+            "range": "± 6263788",
             "unit": "ns/iter"
           }
         ]
