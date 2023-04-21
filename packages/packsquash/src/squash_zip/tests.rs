@@ -15,7 +15,7 @@ static UNEXPECTED_OPERATION_FAILURE: &str = "This SquashZip operation should not
 static UNEXPECTED_IO_FAILURE: &str = "I/O operations are assumed not to fail";
 
 /// The size of the spooled temporary file that SquashZip will use internally.
-const SPOOL_BUFFER_SIZE: usize = 64 * 1024 * 1024;
+const DEFAULT_SPOOL_BUFFER_SIZE: usize = 64 * 1024 * 1024;
 
 /// The uncompressed size of the files that will be added to ZIP files during tests.
 const FILE_SIZE: usize = 2048;
@@ -57,7 +57,8 @@ async fn add_files_finish_and_read_back_test(
 	file_size: usize,
 	skip_compression: impl Fn(u8) -> bool,
 	test_name: &'static str,
-	files_reused_from_previous_run: usize
+	files_reused_from_previous_run: usize,
+	spool_buffer_size: Option<usize>
 ) -> PathBuf {
 	let squash_zip = squash_zip.unwrap_or(
 		SquashZip::new(
@@ -70,7 +71,7 @@ async fn add_files_finish_and_read_back_test(
 				enable_size_increasing_obfuscation: false,
 				percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 				workaround_old_java_obfuscation_quirks: false,
-				spool_buffer_size: SPOOL_BUFFER_SIZE
+				spool_buffer_size: spool_buffer_size.unwrap_or(DEFAULT_SPOOL_BUFFER_SIZE)
 			}
 		)
 		.await
@@ -114,7 +115,7 @@ async fn add_files_finish_and_read_back_test(
 			enable_size_increasing_obfuscation: false,
 			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: SPOOL_BUFFER_SIZE
+			spool_buffer_size: spool_buffer_size.unwrap_or(DEFAULT_SPOOL_BUFFER_SIZE)
 		}
 	)
 	.await
@@ -141,7 +142,8 @@ async fn add_single_finish_and_read_back_works() {
 		FILE_SIZE,
 		|_| false,
 		"add_single_finish_and_read_back_works",
-		0
+		0,
+		None
 	)
 	.await;
 }
@@ -157,7 +159,8 @@ async fn add_empty_finish_and_read_back_works() {
 		0,
 		|_| false,
 		"add_empty_finish_and_read_back_works",
-		0
+		0,
+		None
 	)
 	.await;
 }
@@ -173,7 +176,25 @@ async fn add_tiny_finish_and_read_back_works() {
 		1,
 		|_| false,
 		"add_tiny_finish_and_read_back_works",
-		0
+		0,
+		None
+	)
+	.await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn add_empty_without_spool_buffers_finish_and_read_back_works() {
+	add_files_finish_and_read_back_test(
+		None,
+		1,
+		false,
+		|i| i,
+		|_| b'a',
+		0,
+		|_| false,
+		"add_empty_without_spool_buffers_finish_and_read_back_works",
+		0,
+		Some(0)
 	)
 	.await;
 }
@@ -189,7 +210,8 @@ async fn add_several_finish_and_read_back_works() {
 		FILE_SIZE,
 		|_| false,
 		"add_several_finish_and_read_back_works",
-		0
+		0,
+		None
 	)
 	.await;
 }
@@ -205,7 +227,8 @@ async fn add_several_finish_and_read_back_with_deduplication_works() {
 		FILE_SIZE,
 		|_| true,
 		"add_several_finish_and_read_back_with_deduplication_works",
-		0
+		0,
+		None
 	)
 	.await;
 }
@@ -221,7 +244,8 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 		FILE_SIZE,
 		|i| i < 2,
 		"add_several_compressed_finish_and_read_back_with_deduplication_works (bigger file)",
-		0
+		0,
+		None
 	)
 	.await;
 
@@ -234,7 +258,8 @@ async fn add_several_compressed_finish_and_read_back_with_deduplication_works() 
 		FILE_SIZE,
 		|_| false,
 		"add_several_compressed_finish_and_read_back_with_deduplication_works (smaller file)",
-		0
+		0,
+		None
 	)
 	.await;
 
@@ -271,7 +296,8 @@ async fn add_several_and_read_back_some_duplicates_works() {
 		FILE_SIZE,
 		|_| true,
 		"add_several_and_read_back_some_duplicates_works",
-		0
+		0,
+		None
 	)
 	.await;
 }
@@ -288,7 +314,8 @@ async fn add_several_finish_then_reuse_and_add_works() {
 		FILE_SIZE,
 		|_| true,
 		"add_several_finish_then_reuse_and_add_works (first part)",
-		0
+		0,
+		None
 	)
 	.await;
 
@@ -302,7 +329,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 			enable_size_increasing_obfuscation: false,
 			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: SPOOL_BUFFER_SIZE
+			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE
 		}
 	)
 	.await
@@ -329,7 +356,8 @@ async fn add_several_finish_then_reuse_and_add_works() {
 		FILE_SIZE,
 		|_| true,
 		"add_several_finish_then_reuse_and_add_works (second part)",
-		1
+		1,
+		None
 	)
 	.await;
 
@@ -343,7 +371,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 			enable_size_increasing_obfuscation: false,
 			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: SPOOL_BUFFER_SIZE
+			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE
 		}
 	)
 	.await
@@ -373,7 +401,7 @@ async fn several_files_with_same_path_are_handled_properly() {
 			enable_size_increasing_obfuscation: false,
 			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: SPOOL_BUFFER_SIZE
+			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE
 		}
 	)
 	.await

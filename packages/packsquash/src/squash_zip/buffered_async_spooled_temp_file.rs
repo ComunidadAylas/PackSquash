@@ -93,7 +93,16 @@ impl Write for BufferedAsyncSpooledTempFile {
 					);
 				}
 
-				Ok(bytes_written)
+				if bytes_written == 0 && !buf.is_empty() {
+					// If no byte was written but the buffer was non-empty, it's because
+					// the cursor position is at the size threshold, which may happen when
+					// the size threshold is zero. Do an actual write attempt to disk to
+					// return a value that does not signal a potential rejection of bytes
+					// in the future, as the WriteAll future expects
+					self.write(buf)
+				} else {
+					Ok(bytes_written)
+				}
 			}
 			Self::OnDisk(_, file_writer) => file_writer.write(buf)
 		}
