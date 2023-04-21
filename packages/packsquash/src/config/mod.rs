@@ -324,11 +324,10 @@ pub struct GlobalOptions {
 
 impl Default for GlobalOptions {
 	fn default() -> Self {
-		// The "k" in "kB" here has an SI-compliant meaning (1000 and not 1024 bytes)
-		let available_memory_kb =
+		let available_memory =
 			System::new_with_specifics(RefreshKind::new().with_memory()).available_memory();
 
-		let hardware_threads = available_parallelism().unwrap_or(NonZeroUsize::new(1).unwrap());
+		let hardware_threads = available_parallelism().unwrap_or(NonZeroUsize::MIN);
 
 		Self {
 			skip_pack_icon: false,
@@ -353,8 +352,7 @@ impl Default for GlobalOptions {
 			threads: hardware_threads,
 			output_file_path: PathBuf::from("pack.zip"),
 			// In MiB. By default, half of available memory / (hardware threads + 1 for the output ZIP)
-			spooling_buffers_size: (available_memory_kb * 125
-				/ 262144 / (hardware_threads.get() as u64 + 1))
+			spooling_buffers_size: (available_memory / 2097152 / (hardware_threads.get() as u64 + 1))
 				.try_into()
 				.unwrap_or(usize::MAX),
 			open_files_limit: 512.try_into().unwrap()
