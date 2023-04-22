@@ -111,6 +111,7 @@ fn is_system_or_hidden_file(entry: &DirEntry) -> bool {
 			file_name == b"Network Trash Folder"
 				|| file_name == b"Temporary Items"
 				|| file_name == b"$RECYCLE.BIN"
+				|| file_name == b"__MACOSX"
 		}
 }
 
