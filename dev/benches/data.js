@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1682534636033,
+  "lastUpdate": 1682547448941,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "14fa4ea4200b9a83b1a384807cbfb3dcfc0b6c0f",
-          "message": "fix(deps): update rust crate walkdir to 2.3.3",
-          "timestamp": "2023-03-16T14:14:00Z",
-          "tree_id": "c1da65ef4bb27d5abcdc66370cc57aec3ddb15b1",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/14fa4ea4200b9a83b1a384807cbfb3dcfc0b6c0f"
-        },
-        "date": 1678989533160,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10335999,
-            "range": "± 124845",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 333371750,
-            "range": "± 2083408",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 5032262171,
-            "range": "± 58357749",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 648689002,
-            "range": "± 10541979",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 397406061,
             "range": "± 11081883",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "36e9cd4a2c254fe0894df45319de58b89fe1dab4",
+          "message": "Revert \"chore(deps): update helper python scripts (#209)\"\n\nThis reverts commit 218a32fbb150bfd120546250ae6c48297a8c9f8a.\n\nThe requests package depends on urllib3<1.27 and >=1.21.1, but we\nupdated it to the just-released 2.0.0 version.",
+          "timestamp": "2023-04-26T23:41:28+02:00",
+          "tree_id": "1fd541be3cfe373f7a92a635f8e2a8c6ba759e33",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/36e9cd4a2c254fe0894df45319de58b89fe1dab4"
+        },
+        "date": 1682547447314,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 13081007,
+            "range": "± 362639",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 510099980,
+            "range": "± 12504023",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3210250496,
+            "range": "± 24836420",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 365767891,
+            "range": "± 4072401",
             "unit": "ns/iter"
           }
         ]
