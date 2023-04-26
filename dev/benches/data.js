@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1682478166480,
+  "lastUpdate": 1682497252253,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "ba9902675ac1faa36f47df3e9a734b682d389229",
-          "message": "Revert \"ci: speed up Cargo registry fetch\"\n\nThis reverts commit 7c1c4903598cc4969efd8c31936d9e4f461dec4e.\n\nactions-rs/toolchain already handles this.",
-          "timestamp": "2023-03-15T18:14:48Z",
-          "tree_id": "515fec89d7934a6fee116f2d46c600f22cf0880b",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ba9902675ac1faa36f47df3e9a734b682d389229"
-        },
-        "date": 1678907211673,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13130290,
-            "range": "± 429335",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 460088066,
-            "range": "± 17578960",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 4735074794,
-            "range": "± 86148871",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 922388936,
-            "range": "± 14930790",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 259356831,
             "range": "± 7110143",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "998af630fda7cf2947404e7529b7848a47a5c9d0",
+          "message": "fix(deps): update rust crate tokio-util to 0.7.8",
+          "timestamp": "2023-04-26T02:26:44Z",
+          "tree_id": "9b35b6edea4de0d64fa0826a2560402438f52754",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/998af630fda7cf2947404e7529b7848a47a5c9d0"
+        },
+        "date": 1682497251525,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9863408,
+            "range": "± 246858",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 351025995,
+            "range": "± 3512131",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 1929519626,
+            "range": "± 20251310",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 263122380,
+            "range": "± 5304664",
             "unit": "ns/iter"
           }
         ]
