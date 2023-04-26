@@ -15,7 +15,7 @@ packsquash = { path = "../packsquash", version = "0.3.1" }
 getopts = "0.2.21"
 toml = { version = "0.7.3", default-features = false, features = ["parse"] }
 
-tokio = { version = "1.27.0", default-features = false }
+tokio = { version = "1.28.0", default-features = false }
 
 color-backtrace = { version = "0.5.1", default-features = false, optional = true }
 
