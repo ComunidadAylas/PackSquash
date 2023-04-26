@@ -19,6 +19,7 @@ float rand(vec2 co, vec2 _) {
 
 varying vec4 texcoord;
 uniform sampler2D gcolor;
+uniform mat3 IViewRotMat;
 
 void main() {
 	// Get the location of the current pixel on the screen.
@@ -30,6 +31,9 @@ void main() {
 	// Get the color of the pixel pointed to by the point variable.
 	// color.r is red, color.g is green, color.b is blue, all values from 0 to 1.
 	vec3 color = texture2D(gcolor, point).rgb;
+
+    // Regression test for bad indexing postfix expression transpiling
+    IViewRotMat[0][0] = 0.0;
 
  # if __VERSION__ == 120
 	// You can do whatever you want to the color. Here we're inverting it.
