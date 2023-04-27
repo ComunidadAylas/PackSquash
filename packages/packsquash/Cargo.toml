@@ -49,7 +49,7 @@ rubato = "0.12.0"
 optivorbis = "0.1.3"
 
 glsl-lang = { version = "0.5.0", features = ["lexer-v2-full", "lexer-v2-min"] }
-glsl-lang-lexer = "0.5.0"
+glsl-lang-lexer = "0.5.1"
 glsl-lang-pp = "0.5.0"
 
 java-properties = { version = "1.4.1", optional = true }
