@@ -1093,8 +1093,9 @@ dependencies = [
 
 [[package]]
 name = "glsl-lang"
-version = "0.5.0"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#d6866e5810e5b9d7dade5a1781b5141f04bc6103"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b71a2d093202bc9a72ffa28953e64f0e2d81e0a5b44ed43886bf63d7ba11780"
 dependencies = [
  "glsl-lang-lexer",
  "glsl-lang-types",
@@ -3520,3 +3521,8 @@ dependencies = [
  "simd-adler32",
  "typed-arena",
 ]
+
+[[patch.unused]]
+name = "glsl-lang"
+version = "0.5.0"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#d6866e5810e5b9d7dade5a1781b5141f04bc6103"
