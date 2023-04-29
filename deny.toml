@@ -94,18 +94,33 @@ multiple-versions = "warn"
 # dependencies. It's best to have a warning than skipping crates here
 wildcards = "warn"
 highlight = "all"
+skip = [
+	# This older version is pulled by the GLSL larlpop parser generator on build-time.
+	# It should not affect final executables
+	{ name = "regex-syntax", version = "=0.6.29" },
+	# Some parts of the ecosystem have already updated aho-corasick to v1 (e.g., the
+	# regex crate), but others didn't (e.g., globset). Let's ignore that for now,
+	# globset shouldn't stay that way for long
+	{ name = "aho-corasick", version = "=0.7.20" },
+	# winres has a build-time dependency on an older toml crate version. It should not
+	# affect final executables
+	{ name = "toml", version = "=0.5.11" }
+]
 skip-tree = [
 	# An ancient nom is pulled by the development dependency for
 	# benchmarking perfcnt. Let's ignore that for now. It doesn't
 	# affect the final user executables at all
-	{ name = "perfcnt", version = "=0.8.0" }
+	{ name = "perfcnt", version = "=0.8.0" },
+	# Some crates (parking_lot_core, tempfile) pull an older version
+	# of the windows-sys crate. That increases build times but should
+	# not have adverse effects
+	{ name = "windows-sys", version = "=0.45.0" }
 ]
 
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
-	"https://github.com/BurntSushi/rust-csv",
 	"https://github.com/Nilstrieb/winres"
 ]
 

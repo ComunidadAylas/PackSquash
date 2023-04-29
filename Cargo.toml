@@ -12,10 +12,6 @@ glsl-lang-lexer = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-pp = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 
-# Use a newer commit of the csv crate, that's pulled in by development dependencies
-# for benchmarking, that depends on a itoa version consistent with the rest of the
-# crates ecosystem. Related PR: https://github.com/BurntSushi/rust-csv/pull/255
-csv = { git = "https://github.com/BurntSushi/rust-csv", rev = "41c71ed3" }
 # Use our fork of mmap, pulled by development dependencies for benchmarking, to fix its
 # dependency on unmaintained crates and reduce duplicate dependency versions. Some of
 # the changes were authored by jbreitbart.

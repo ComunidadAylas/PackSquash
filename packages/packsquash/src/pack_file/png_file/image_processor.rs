@@ -492,8 +492,6 @@ impl<R: Read> ProcessedImage<R> {
 						interlaced: Interlacing::None
 					},
 					data: parsed_png.into_pixel_array()?.unwrap().into_byte_buf(),
-					palette: None,
-					transparency_pixel: None,
 					aux_headers: IndexMap::new()
 				},
 				&optimization_options
@@ -508,8 +506,6 @@ impl<R: Read> ProcessedImage<R> {
 						interlaced: Interlacing::None
 					},
 					data: pixels.into_byte_buf(),
-					palette: None,
-					transparency_pixel: None,
 					aux_headers: IndexMap::new()
 				},
 				&optimization_options
@@ -525,13 +521,11 @@ impl<R: Read> ProcessedImage<R> {
 					ihdr: IhdrData {
 						width: width.get() as u32,
 						height: height.get() as u32,
-						color_type: ColorType::Indexed,
+						color_type: ColorType::Indexed { palette },
 						bit_depth: BitDepth::Eight,
 						interlaced: Interlacing::None
 					},
 					data: pixel_palette_indexes,
-					palette: Some(palette),
-					transparency_pixel: None,
 					aux_headers: IndexMap::new()
 				},
 				&optimization_options

@@ -216,7 +216,7 @@ impl Parser {
 		/// The preprocessing matchers used in this method.
 		static MATCHERS: LazyLock<(AhoCorasick, Regex)> = LazyLock::new(|| {
 			(
-				AhoCorasick::new_auto_configured(NEWLINE_ESCAPES),
+				AhoCorasick::new(NEWLINE_ESCAPES).unwrap(),
 				// When this function is called we know that any present preprocessor directives
 				// are valid and follow their expected syntax, so this regex can be a bit lenient
 				Regex::new("(?m:^[[:space:]]*#[[:space:]]*(?:|define.*|undef.*|if.*|else.*|elif.*|endif.*|error.*|line.*)$)").unwrap()
