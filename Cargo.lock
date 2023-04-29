@@ -324,9 +324,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.24"
+version = "3.2.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eef2b3ded6a26dfaec672a742c93c8cf6b689220324da509ec5caa20de55dc83"
+checksum = "4ea181bf566f71cb9a5d17a59e1871af638180a18fb0035c92ae62b705207123"
 dependencies = [
  "bitflags",
  "clap_lex",
@@ -898,12 +898,12 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 
 [[package]]
 name = "flate2"
-version = "1.0.25"
+version = "1.0.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8a2db397cb1c8772f31494cb8917e48cd1e64f0fa7efac59fbd741a0a8ce841"
+checksum = "3b9429470923de8e8cbd4d2dc513535400b4b3fef0319fb5c4e1f520a7bef743"
 dependencies = [
  "crc32fast",
- "miniz_oxide 0.6.2",
+ "miniz_oxide 0.7.1",
 ]
 
 [[package]]
@@ -1093,8 +1093,8 @@ dependencies = [
 
 [[package]]
 name = "glsl-lang"
-version = "0.5.0"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#d6866e5810e5b9d7dade5a1781b5141f04bc6103"
+version = "0.5.1"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#7f926a265e93b8ba32f50c8d2ec9b19efb1c2032"
 dependencies = [
  "glsl-lang-lexer",
  "glsl-lang-types",
@@ -1107,8 +1107,8 @@ dependencies = [
 
 [[package]]
 name = "glsl-lang-lexer"
-version = "0.5.0"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#d6866e5810e5b9d7dade5a1781b5141f04bc6103"
+version = "0.5.1"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#7f926a265e93b8ba32f50c8d2ec9b19efb1c2032"
 dependencies = [
  "glsl-lang-pp",
  "glsl-lang-types",
@@ -1119,8 +1119,8 @@ dependencies = [
 
 [[package]]
 name = "glsl-lang-pp"
-version = "0.5.0"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#d6866e5810e5b9d7dade5a1781b5141f04bc6103"
+version = "0.5.1"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#7f926a265e93b8ba32f50c8d2ec9b19efb1c2032"
 dependencies = [
  "arrayvec",
  "bimap",
@@ -1139,8 +1139,8 @@ dependencies = [
 
 [[package]]
 name = "glsl-lang-types"
-version = "0.5.0"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#d6866e5810e5b9d7dade5a1781b5141f04bc6103"
+version = "0.5.1"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#7f926a265e93b8ba32f50c8d2ec9b19efb1c2032"
 dependencies = [
  "lang-util",
  "thiserror",
@@ -1345,9 +1345,9 @@ dependencies = [
 
 [[package]]
 name = "lalrpop"
-version = "0.19.10"
+version = "0.19.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06ada7ece1f5bc6d36eec2a4dc204135f14888209b3773df8fefcfe990fd4cbc"
+checksum = "0a1cbf952127589f2851ab2046af368fd20645491bb4b376f04b7f94d7a9837b"
 dependencies = [
  "ascii-canvas",
  "bit-set",
@@ -1357,7 +1357,6 @@ dependencies = [
  "itertools",
  "lalrpop-util",
  "petgraph",
- "pico-args",
  "regex",
  "regex-syntax 0.6.29",
  "string_cache",
@@ -1368,18 +1367,18 @@ dependencies = [
 
 [[package]]
 name = "lalrpop-util"
-version = "0.19.10"
+version = "0.19.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d3b45d694c8074f77bc24fc26e47633c862a9cd3b48dd51209c02ba4c434d68"
+checksum = "d3c48237b9604c5a4702de6b824e02006c3214327564636aef27c1028a8fa0ed"
 dependencies = [
  "regex",
 ]
 
 [[package]]
 name = "lang-util"
-version = "0.5.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfb1d75fb275445b95cbb56b571c87d77444c51fbf9bdc109e86f2f47a3ef455"
+checksum = "587b328c2e2ad16e7d69f4d4a95a1621e5b56749f65c2092882fb6d5905f3f87"
 dependencies = [
  "derive_more",
  "lalrpop-util",
@@ -1391,9 +1390,9 @@ dependencies = [
 
 [[package]]
 name = "lang-util-derive"
-version = "0.5.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ebed75318b3c51a691c09545d23a958e6b254218e16fe09590b258ddbfd5c5f"
+checksum = "25b966dfab07f9ae98fbff502a734d7a8ae36c9db9e05cefbc33582ace4f1ff9"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -1524,9 +1523,9 @@ checksum = "348108ab3fba42ec82ff6e9564fc4ca0247bdccdc68dd8af9764bbc79c3c8ffb"
 
 [[package]]
 name = "libz-sys"
-version = "1.1.8"
+version = "1.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9702761c3935f8cc2f101793272e202c72b99da8f4224a19ddcf1279a6450bbf"
+checksum = "56ee889ecc9568871456d42f603d6a0ce59ff328d291063a45cbdf0036baf6db"
 dependencies = [
  "cc",
  "libc",
@@ -1542,9 +1541,9 @@ checksum = "806de604a37f6d73a83c850af7b3ba33a44f330d12fd5e4ac216645b54da912b"
 
 [[package]]
 name = "linux-raw-sys"
-version = "0.3.4"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36eb31c1778188ae1e64398743890d0877fef36d11521ac60406b42016e8c2cf"
+checksum = "b64f40e5e03e0d54f03845c8197d0291253cdbedfb1cb46b13c2c117554a9f4c"
 
 [[package]]
 name = "lock_api"
@@ -2041,12 +2040,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pico-args"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5be167a7af36ee22fe3115051bc51f6e6c7054c9348e28deb4f49bd6f705a315"
-
-[[package]]
 name = "pin-project-lite"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2401,9 +2394,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.37.15"
+version = "0.37.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0661814f891c57c930a610266415528da53c4933e6dea5fb350cbfe048a9ece"
+checksum = "bc809f704c03a812ac71f22456c857be34185cac691a4316f27ab0f633bb9009"
 dependencies = [
  "bitflags",
  "errno",
@@ -2458,7 +2451,7 @@ dependencies = [
 [[package]]
 name = "serde_derive"
 version = "1.0.160"
-source = "git+https://github.com/ComunidadAylas/serde?branch=master#f070e40f80e5dfeb23d54b0e685f214ea82d1254"
+source = "git+https://github.com/ComunidadAylas/serde?branch=master#30fe67ccaa35b3f190b5b0981cd06c94f6798fa8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3025,10 +3018,11 @@ dependencies = [
 
 [[package]]
 name = "tracing"
-version = "0.1.38"
+version = "0.1.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf9cf6a813d3f40c88b0b6b6f29a5c95c6cdbf97c1f9cc53fb820200f5ad814d"
+checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
 dependencies = [
+ "cfg-if",
  "pin-project-lite",
  "tracing-core",
 ]
@@ -3110,9 +3104,9 @@ dependencies = [
 
 [[package]]
 name = "uuid"
-version = "1.3.1"
+version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b55a3fef2a1e3b3a00ce878640918820d3c51081576ac657d23af9fc7928fdb"
+checksum = "4dad5567ad0cf5b760e5665964bec1b47dfd077ba8a2544b513f3556d3d239a2"
 
 [[package]]
 name = "vcpkg"
@@ -3429,9 +3423,9 @@ checksum = "1a515f5799fe4961cb532f983ce2b23082366b898e52ffbce459c86f67c8378a"
 
 [[package]]
 name = "winnow"
-version = "0.4.1"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae8970b36c66498d8ff1d66685dc86b91b29db0c7739899012f63a63814b4b28"
+checksum = "5617da7e1f97bf363947d767b91aaf3c2bbc19db7fda9c65af1278713d58e0a2"
 dependencies = [
  "memchr",
 ]
