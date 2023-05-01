@@ -35,7 +35,7 @@ jsonpath_lib = "0.3.0"
 
 spng = { version = "0.2.0-alpha.2", default-features = false }
 rgb = "0.8.36"
-imagequant = { version = "4.1.1", default-features = false }
+imagequant = { version = "4.2.0", default-features = false }
 oxipng = { version = "8.0.0", default-features = false, features = ["zopfli"] }
 
 symphonia = { version = "0.5.2", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
