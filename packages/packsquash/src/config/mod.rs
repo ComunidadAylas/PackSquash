@@ -753,7 +753,7 @@ pub struct AudioFileOptions {
 	/// This option only has any effect if the two-pass optimization and validation step is
 	/// enabled, i.e., the `two_pass_vorbis_optimization_and_validation` option is set to `true`.
 	///
-	/// **Default value**: `true`
+	/// **Default value**: `false`
 	pub ogg_obfuscation: bool,
 	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
 	/// the value of the global option of the same name.
