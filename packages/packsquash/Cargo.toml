@@ -70,7 +70,7 @@ aho-corasick = "1.0.1"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.50.0"
-wmi = { version = "0.12.2", default-features = false, features = ["time"] }
+wmi = { version = "0.13.0", default-features = false, features = ["time"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.9.3"
