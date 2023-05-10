@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1683387196155,
+  "lastUpdate": 1683716496847,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "d6f1fdae59994a3a18d1cc9060967c196c89482f",
-          "message": "fix(deps): update rust crate serde_path_to_error to 0.1.11",
-          "timestamp": "2023-03-22T07:29:58Z",
-          "tree_id": "c5615387505cc62d7455852cb5907ff984ac76f2",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d6f1fdae59994a3a18d1cc9060967c196c89482f"
-        },
-        "date": 1679478842293,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12783873,
-            "range": "± 986146",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 412543541,
-            "range": "± 9231928",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 6230352088,
-            "range": "± 126005493",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 815715990,
-            "range": "± 12788029",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 372408006,
             "range": "± 6091462",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c65e527e9049d27d5ce7189da0205b95520fd80d",
+          "message": "fix(deps): update rust crate enumset to 1.1.2 (#220)\n\n* fix(deps): update rust crate enumset to 1.1.2\r\n\r\n* chore(clippy): fix Clippy warnings and update Cargo deny configuration\r\n\r\n---------\r\n\r\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>\r\nCo-authored-by: Alejandro González <me@alegon.dev>",
+          "timestamp": "2023-05-10T12:19:17+02:00",
+          "tree_id": "690785ea8ee7f8f02e952a66dfc1afe0e9b21b95",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c65e527e9049d27d5ce7189da0205b95520fd80d"
+        },
+        "date": 1683716496148,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10551103,
+            "range": "± 10065065",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 175813318,
+            "range": "± 798668",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2737552028,
+            "range": "± 21469248",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 298347553,
+            "range": "± 6373931",
             "unit": "ns/iter"
           }
         ]
