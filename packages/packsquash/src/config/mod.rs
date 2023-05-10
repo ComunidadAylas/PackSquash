@@ -485,7 +485,7 @@ impl From<PercentageInteger> for u8 {
 /// the generated ZIP files and that can be worked around.
 #[derive(Deserialize, Serialize, EnumSetType)]
 #[serde(rename_all = "snake_case")]
-#[enumset(serialize_deny_unknown, serialize_as_list)]
+#[enumset(serialize_deny_unknown, serialize_repr = "list")]
 #[non_exhaustive]
 pub enum MinecraftQuirk {
 	/// Older versions of Minecraft (probably all versions since 1.6 until 1.13 are affected)
@@ -562,7 +562,7 @@ impl MinecraftQuirk {
 
 /// A Minecraft modification supported by PackSquash that adds file types to packs.
 #[derive(Deserialize, Serialize, EnumSetType)]
-#[enumset(serialize_deny_unknown, serialize_as_list)]
+#[enumset(serialize_deny_unknown, serialize_repr = "list")]
 #[non_exhaustive]
 #[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 #[doc(cfg(any(feature = "optifine-support", feature = "mtr3-support")))]

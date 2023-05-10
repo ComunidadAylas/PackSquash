@@ -102,6 +102,11 @@ skip = [
 	# regex crate), but others didn't (e.g., globset). Let's ignore that for now,
 	# globset shouldn't stay that way for long
 	{ name = "aho-corasick", version = "=0.7.20" },
+	# This older version is pulled by the GLSL macro machinery on build-time.
+	# It should not affect final executables
+	{ name = "darling", version = "=0.14.4" },
+	{ name = "darling_macro", version = "=0.14.4" },
+	{ name = "darling_core", version = "=0.14.4" },
 	# winres has a build-time dependency on an older toml crate version. It should not
 	# affect final executables
 	{ name = "toml", version = "=0.5.11" }
