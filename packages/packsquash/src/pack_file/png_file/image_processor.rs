@@ -4,10 +4,8 @@ use crate::config::ColorQuantizationTarget;
 use crate::zopfli_iterations_time_model::ZopfliIterationsTimeModel;
 use bytes::BytesMut;
 use imagequant::{liq_error, Attributes};
-use indexmap::IndexMap;
 use itertools::Itertools;
-use oxipng::internal_tests::{BitDepth, ColorType, IhdrData, PngImage};
-use oxipng::{Deflaters, Headers, Interlacing, Options, RowFilter};
+use oxipng::{BitDepth, ColorType, Deflaters, Headers, Options, RowFilter};
 use rgb::{AsPixels, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
 use std::io::Read;
@@ -472,34 +470,20 @@ impl<R: Read> ProcessedImage<R> {
 			check: false
 		};
 
-		Ok(match self {
-			parsed_png @ Self::ParsedPng { .. } => oxipng::optimize_from_raw(
-				PngImage {
-					ihdr: IhdrData {
-						width: parsed_png.width().get() as u32,
-						height: parsed_png.height().get() as u32,
-						color_type: ColorType::RGBA,
-						bit_depth: BitDepth::Eight,
-						interlaced: Interlacing::None
-					},
-					data: parsed_png.into_pixel_array()?.unwrap().into_byte_buf(),
-					aux_headers: IndexMap::new()
-				},
-				&optimization_options
+		let oxipng_image = match self {
+			parsed_png @ Self::ParsedPng { .. } => oxipng::RawImage::new(
+				parsed_png.width().get() as u32,
+				parsed_png.height().get() as u32,
+				ColorType::RGBA,
+				BitDepth::Eight,
+				parsed_png.into_pixel_array()?.unwrap().into_byte_buf()
 			),
-			Self::RGBA8 { pixels } => oxipng::optimize_from_raw(
-				PngImage {
-					ihdr: IhdrData {
-						width: pixels.width().get() as u32,
-						height: pixels.height().get() as u32,
-						color_type: ColorType::RGBA,
-						bit_depth: BitDepth::Eight,
-						interlaced: Interlacing::None
-					},
-					data: pixels.into_byte_buf(),
-					aux_headers: IndexMap::new()
-				},
-				&optimization_options
+			Self::RGBA8 { pixels } => oxipng::RawImage::new(
+				pixels.width().get() as u32,
+				pixels.height().get() as u32,
+				ColorType::RGBA,
+				BitDepth::Eight,
+				pixels.into_byte_buf()
 			),
 			Self::Indexed {
 				width,
@@ -507,21 +491,16 @@ impl<R: Read> ProcessedImage<R> {
 				palette,
 				pixel_palette_indexes,
 				..
-			} => oxipng::optimize_from_raw(
-				PngImage {
-					ihdr: IhdrData {
-						width: width.get() as u32,
-						height: height.get() as u32,
-						color_type: ColorType::Indexed { palette },
-						bit_depth: BitDepth::Eight,
-						interlaced: Interlacing::None
-					},
-					data: pixel_palette_indexes,
-					aux_headers: IndexMap::new()
-				},
-				&optimization_options
+			} => oxipng::RawImage::new(
+				width.get() as u32,
+				height.get() as u32,
+				ColorType::Indexed { palette },
+				BitDepth::Eight,
+				pixel_palette_indexes
 			)
-		}?)
+		}?;
+
+		Ok(oxipng_image.create_optimized_png(&optimization_options)?)
 	}
 }
 

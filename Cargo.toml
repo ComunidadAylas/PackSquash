@@ -2,9 +2,9 @@
 members = ["packages/*"]
 
 [patch.crates-io]
-# Use our fork of oxipng with a PR that offers a more performant raw image API merged.
+# Use the fork of oxipng that hosts a PR that adds a more performant raw image API.
 # Related PR: https://github.com/shssoichiro/oxipng/pull/482
-oxipng = { git = "https://github.com/ComunidadAylas/oxipng" }
+oxipng = { git = "https://github.com/andrews05/oxipng", branch = "raw_api" }
 
 # Use our fork of glsl-lang that allows it to parse #moj_import directives
 glsl-lang = { git = "https://github.com/ComunidadAylas/glsl-lang" }

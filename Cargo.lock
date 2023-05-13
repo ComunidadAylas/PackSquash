@@ -1775,7 +1775,7 @@ dependencies = [
 [[package]]
 name = "oxipng"
 version = "8.0.0"
-source = "git+https://github.com/ComunidadAylas/oxipng#ccd57d26875dcb51c60f4f640b96d669f2e32517"
+source = "git+https://github.com/andrews05/oxipng?branch=raw_api#237a560e344bde6b85b8fe05283a835900b5af15"
 dependencies = [
  "bitvec",
  "indexmap",
@@ -2382,8 +2382,7 @@ dependencies = [
 [[package]]
 name = "serde_derive"
 version = "1.0.163"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c805777e3930c8883389c602315a24224bcc738b63905ef87cd1420353ea93e"
+source = "git+https://github.com/ComunidadAylas/serde?branch=master#9606224c248b6977b51800707305aeeea2798592"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2961,9 +2960,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.30"
+version = "0.1.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24eb03ba0eab1fd845050058ce5e616558e8f8d8fca633e6b163fe25c797213a"
+checksum = "0955b8137a1df6f1a2e9a37d8a6656291ff0297c1a97c24e0d8425fe2312f79a"
 dependencies = [
  "once_cell",
 ]
@@ -3446,8 +3445,3 @@ dependencies = [
  "simd-adler32",
  "typed-arena",
 ]
-
-[[patch.unused]]
-name = "serde_derive"
-version = "1.0.162"
-source = "git+https://github.com/ComunidadAylas/serde?branch=master#5ea41d79cd9382f7138a87facdc9bd0fda39759c"
