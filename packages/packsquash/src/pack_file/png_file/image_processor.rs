@@ -242,7 +242,7 @@ impl<R: Read> ProcessedImage<R> {
 	/// if necessary, hence why the `&mut self` receiver.
 	///
 	/// `Ok(None)` is returned if this image was quantized to a color palette, as in that
-	/// case the image lacks a backing pixel array.
+	/// case the image lacks a backing array of colors per pixel.
 	fn as_pixel_array(&mut self) -> Result<Option<&mut PixelArray>, ImageProcessingError> {
 		match self {
 			Self::ParsedPng {
@@ -268,23 +268,14 @@ impl<R: Read> ProcessedImage<R> {
 
 	/// Like [`as_pixel_array`](Self::as_pixel_array), but consumes `self` to move
 	/// the pixel array back to the caller.
-	fn into_pixel_array(self) -> Result<Option<PixelArray>, ImageProcessingError> {
-		Ok(match self {
-			Self::ParsedPng {
-				png_info,
-				mut png_reader
-			} => {
-				let mut buf = vec![0; png_info.buffer_size];
-				png_reader.next_frame(&mut buf)?;
+	fn into_pixel_array(mut self) -> Result<Option<PixelArray>, ImageProcessingError> {
+		self.as_pixel_array()?;
 
-				Some(PixelArray {
-					width: NonZeroU16::new(png_info.width as u16).unwrap(),
-					height: NonZeroU16::new(png_info.height as u16).unwrap(),
-					buf
-				})
-			}
+		Ok(match self {
 			Self::RGBA8 { pixels, .. } => Some(pixels),
-			Self::Indexed { .. } => None
+			Self::Indexed { .. } => None,
+			// as_pixel_array ensures that we transitioned out of this state
+			Self::ParsedPng { .. } => unreachable!()
 		})
 	}
 
