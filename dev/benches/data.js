@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1684161754839,
+  "lastUpdate": 1684513257387,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "3f815744232471b6517ccc1ba6e79be75518f340",
-          "message": "chore(deps): update helper python scripts",
-          "timestamp": "2023-03-24T15:26:47Z",
-          "tree_id": "c38d68480e95b62d7e67e9230d455a0504a99339",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3f815744232471b6517ccc1ba6e79be75518f340"
-        },
-        "date": 1679690154229,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12396344,
-            "range": "± 369846",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 404098758,
-            "range": "± 3019128",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 6371717983,
-            "range": "± 69380244",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 776576858,
-            "range": "± 18453103",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 259294880,
             "range": "± 5859979",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "3830950d8569cb45401704f0623f0ac50ec56050",
+          "message": "chore(deps): update OxiPNG to use latest revision\n\nThis is necessary because the raw API PR was merged, and its original\nsource branch deleted.\n\nWhile at it, let's upgrade locked dependency versions and the toml\ncrate.",
+          "timestamp": "2023-05-19T17:43:28+02:00",
+          "tree_id": "7aee3785b6841de01b96f60c68f0bd3aa4b6fa29",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3830950d8569cb45401704f0623f0ac50ec56050"
+        },
+        "date": 1684513256706,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10576230,
+            "range": "± 15947744",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 163822982,
+            "range": "± 814224",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2176419386,
+            "range": "± 41062879",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 274330556,
+            "range": "± 4597762",
             "unit": "ns/iter"
           }
         ]
