@@ -126,7 +126,7 @@ skip-tree = [
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
-	"https://github.com/andrews05/oxipng",
+	"https://github.com/shssoichiro/oxipng",
 	"https://github.com/Nilstrieb/winres"
 ]
 
