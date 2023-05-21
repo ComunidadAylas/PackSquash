@@ -24,7 +24,7 @@ interface ActionBackButton extends BaseComponentProps {
 type ComponentProps = RouteBackButton | ActionBackButton;
 
 export default (props: ComponentProps) => {
-  const [l10n] = useI18n();
+  const [, l10n] = useI18n();
 
   const goBackTooltipText = l10n("go-back");
 

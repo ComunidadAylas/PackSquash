@@ -26,41 +26,36 @@ pub(super) enum AssetProcessorType {
 
 #[derive(Display)]
 pub(super) enum AssetProcessorWrapper<
+	'params,
 	'state,
-	'settings,
-	'budget,
 	V: VirtualFileSystem + ?Sized,
 	F: Read + Seek + Send,
 	C: FnOnce() -> Option<AHashSet<RelativePath<'static>>> + Send
 > {
-	BlockStateAssetProcessor(BlockStateAssetProcessor<'state, 'settings, 'budget, V, F>),
-	ItemAndBlockModelAssetProcessor(
-		ItemAndBlockModelAssetProcessor<'state, 'settings, 'budget, V, F, C>
-	)
+	BlockStateAssetProcessor(BlockStateAssetProcessor<'params, 'state, V, F>),
+	ItemAndBlockModelAssetProcessor(ItemAndBlockModelAssetProcessor<'params, 'state, V, F, C>)
 }
 
 pub(super) fn create_asset_processors<
+	'params,
 	'state,
-	'settings,
-	'budget,
 	V: VirtualFileSystem + ?Sized,
 	F: Read + Seek + Send
 >(
-	vfs: &'state V,
-	pack_meta: &'state PackMeta,
-	pack_files: &'state PatriciaSet,
-	global_options: &'state GlobalOptions,
-	file_options: &'state FileOptionsMap,
-	squashed_pack_state: &'state SquashedPackState<'settings, 'budget, F>
+	vfs: &'params V,
+	pack_meta: &'params PackMeta,
+	pack_files: &'params PatriciaSet,
+	global_options: &'params GlobalOptions,
+	file_options: &'params FileOptionsMap,
+	squashed_pack_state: &'params SquashedPackState<'state, 'state, F>
 ) -> EnumMap<
 	AssetProcessorType,
 	AssetProcessorWrapper<
+		'params,
 		'state,
-		'settings,
-		'budget,
 		V,
 		F,
-		impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + 'state + Send
+		impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + Send + 'params
 	>
 > {
 	enum_map! {

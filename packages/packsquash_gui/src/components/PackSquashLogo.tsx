@@ -2,7 +2,7 @@ import packSquashLogoUrl from "../assets/packsquash_logo.webp";
 import { useI18n } from "../contexts/i18n";
 
 export default () => {
-  const [l10n] = useI18n();
+  const [, l10n] = useI18n();
 
   const packSquashLogoAlt = l10n("app-logo-alt");
 

@@ -14,18 +14,15 @@ use std::io::{self, BufRead, Read, Seek, Write};
 use std::time::SystemTime;
 use thiserror::Error;
 
-pub enum JsonAssetDeserializeOutcome<'path, T> {
+pub enum JsonAssetDeserializeOutcome<T> {
 	Value {
 		value: T,
-		canonical_path: RelativePath<'path>,
 		size_hint: usize,
 		fresh_in_previous_zip: bool
 	},
 	NotFound,
-	FreshInPreviousZip {
-		canonical_path: RelativePath<'path>
-	},
-	CanonicalPathAlreadyProcessed
+	FreshInPreviousZip,
+	AlreadyProcessed
 }
 
 #[derive(Error, Debug)]
@@ -37,19 +34,18 @@ pub enum JsonDeserializationError {
 }
 
 pub fn deserialize<
-	'path,
 	T: AlwaysZeroCopyDeserializable,
 	V: VirtualFileSystem + ?Sized,
 	F: Read + Seek + Send,
 	R
 >(
-	path: &'path RelativePath,
+	path: &RelativePath<'_>,
 	vfs: &V,
 	squashed_pack_state: &SquashedPackState<'_, '_, F>,
 	deserialize_if_fresh_in_previous_zip: bool,
-	always_allow_json_comments: bool,
-	canonical_extension: &str,
-	outcome_callback: impl OutcomeCallback<'path, T, R>
+	mark_as_processed: bool,
+	allow_json_comments: bool,
+	outcome_callback: impl OutcomeCallback<T, R>
 ) -> Result<R, JsonDeserializationError> {
 	macro_rules! vfs_operation {
 		($operation:ident) => {
@@ -65,9 +61,6 @@ pub fn deserialize<
 		};
 	}
 
-	let allow_json_comments =
-		always_allow_json_comments || *path == path.with_comment_extension_suffix();
-
 	let mut asset_file = if allow_json_comments {
 		// We need to strip comments in this case with a Read adapter, so there is no
 		// point in reading the whole file to a in-memory buffer anyway, which is said
@@ -77,25 +70,22 @@ pub fn deserialize<
 		vfs_operation!(mmap)
 	};
 
-	let canonical_path = path.canonicalize_extension(canonical_extension);
-
 	// Return early if it was or is being processed by another thread (the same asset may be
-	// available at several non-canonical paths). If we later error out, it doesn't matter
-	// that the file was not actually processed, because PackSquash will halt. We have to
-	// mark it after trying to open the file to ignore non-existing alternative candidate
-	// paths
-	if !squashed_pack_state.mark_file_as_processed(&canonical_path) {
+	// referenced by several sources). If we later error out, it doesn't matter that the file
+	// was not actually processed, because PackSquash will halt. We have to mark it after
+	// trying to open the file to ignore non-existing alternative candidate paths
+	if mark_as_processed && !squashed_pack_state.mark_file_as_processed(path) {
 		return Ok(outcome_callback(
-			JsonAssetDeserializeOutcome::CanonicalPathAlreadyProcessed
+			JsonAssetDeserializeOutcome::AlreadyProcessed
 		));
 	}
 
-	let fresh_in_previous_zip = squashed_pack_state
-		.is_previous_zip_file_fresh(&canonical_path, asset_file.modification_time());
+	let fresh_in_previous_zip =
+		squashed_pack_state.is_previous_zip_file_fresh(path, asset_file.modification_time());
 
 	if fresh_in_previous_zip && !deserialize_if_fresh_in_previous_zip {
 		Ok(outcome_callback(
-			JsonAssetDeserializeOutcome::FreshInPreviousZip { canonical_path }
+			JsonAssetDeserializeOutcome::FreshInPreviousZip
 		))
 	} else {
 		let size_hint = asset_file.size_hint();
@@ -103,7 +93,6 @@ pub fn deserialize<
 
 		Ok(outcome_callback(JsonAssetDeserializeOutcome::Value {
 			value: packsquash_util::deserialize_with_pretty_path_on_error(&mut deserializer)?,
-			canonical_path,
 			size_hint,
 			fresh_in_previous_zip
 		}))
@@ -137,26 +126,25 @@ pub fn serialize<T: Serialize>(
 	Ok(scratch_file)
 }
 
-pub trait Callback<'path, 'data, T: ZeroCopyDeserializable<'data>, R>:
-	FnOnce(JsonAssetDeserializeOutcome<'path, T::Type>) -> R
+pub trait Callback<'data, T: ZeroCopyDeserializable<'data>, R>:
+	FnOnce(JsonAssetDeserializeOutcome<T::Type>) -> R
 {
 }
 impl<
-		'path,
 		'data,
 		T: ZeroCopyDeserializable<'data>,
 		R,
-		F: FnOnce(JsonAssetDeserializeOutcome<'path, T::Type>) -> R
-	> Callback<'path, 'data, T, R> for F
+		F: FnOnce(JsonAssetDeserializeOutcome<T::Type>) -> R
+	> Callback<'data, T, R> for F
 {
 }
 
-pub trait OutcomeCallback<'path, T: AlwaysZeroCopyDeserializable, R>:
-	for<'any> Callback<'path, 'any, T, R>
+pub trait OutcomeCallback<T: AlwaysZeroCopyDeserializable, R>:
+	for<'any> Callback<'any, T, R>
 {
 }
-impl<'path, T: AlwaysZeroCopyDeserializable, R, F: for<'any> Callback<'path, 'any, T, R>>
-	OutcomeCallback<'path, T, R> for F
+impl<T: AlwaysZeroCopyDeserializable, R, F: for<'any> Callback<'any, T, R>> OutcomeCallback<T, R>
+	for F
 {
 }
 

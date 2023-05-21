@@ -15,8 +15,15 @@ unmaintained = "warn"
 yanked = "deny"
 notice = "warn"
 ignore = [
-    # cargo-about, a build-time dependency, pulls atty
-    "RUSTSEC-2021-0145"
+	# cargo-about, a build-time dependency, pulls atty
+	"RUSTSEC-2021-0145",
+	# tauri-utils pulls kuchiki, which is unmaintained and won't receive updates, but does not
+	# pose security risks for now, migrating to alternative crates is not trivial, and nobody
+	# is interested in doing the migration just yet
+	"RUSTSEC-2023-0019",
+	# Unsoundness in rmp-serde, a transitive dependency of cargo-about which is only used on
+	# build-time
+	"RUSTSEC-2022-0092"
 ]
 
 [licenses]
@@ -31,6 +38,7 @@ allow = [
 	"AGPL-3.0",
 	"FSFAP",
 	"Apache-2.0",
+	"Apache-2.0 WITH LLVM-exception",
 	"Artistic-2.0",
 	"ClArtistic",
 	"Sleepycat",
@@ -100,6 +108,7 @@ license-files = [
 # https://embarkstudios.github.io/cargo-deny/checks/bans/cfg.html
 [bans]
 multiple-versions = "warn"
+wildcards = "deny"
 highlight = "all"
 skip = [
 	# Some parts of the ecosystem have already updated aho-corasick to v1 (e.g., the
@@ -120,6 +129,7 @@ skip-tree = [
 	# GUI users likely won't care that much about a few KiB here and there
 	{ name = "tauri" },
 	{ name = "tauri-build" },
+	{ name = "tauri-utils" },
 	# Build dependency for which we don't need most stuff it depends on
 	{ name = "cargo-about" }
 ]
@@ -127,10 +137,6 @@ skip-tree = [
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
-allow-git = [
-	"https://github.com/shssoichiro/oxipng",
-	"https://github.com/tauri-apps/tauri-plugin-store"
-]
 
 [sources.allow-org]
-github = ["ComunidadAylas"]
+github = ["ComunidadAylas", "tauri-apps"]

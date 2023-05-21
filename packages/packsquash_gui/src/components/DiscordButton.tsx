@@ -8,7 +8,7 @@ import { tippy as solid_tippy } from "solid-tippy";
 const tippy = solid_tippy;
 
 export default () => {
-  const [l10n] = useI18n();
+  const [, l10n] = useI18n();
 
   const openDiscordTooltipText = l10n("open-project-discord");
 

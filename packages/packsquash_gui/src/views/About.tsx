@@ -51,7 +51,7 @@ export default () => {
       }}
     >
       <li>
-        <h1 class="mt-8 mb-8 text-lg font-bold">Third-party libraries</h1>
+        <h1 class="mb-8 mt-8 text-lg font-bold">Software libraries</h1>
       </li>
       {renderDependencyListItems()}
     </ul>

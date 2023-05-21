@@ -1,17 +1,14 @@
 //! Implements a ZIP friendly, UTF-8 relative path object with several useful
 //! operations and properties.
 
-use std::ffi::OsStr;
-use std::{
-	borrow::Cow,
-	io,
-	ops::Deref,
-	path::{Path, MAIN_SEPARATOR}
-};
+use camino::Utf8Path;
+use itertools::Itertools;
+use std::fmt::{Display, Formatter};
+use std::{borrow::Cow, fmt, io, ops::Deref, path::MAIN_SEPARATOR};
 
 use thiserror::Error;
 
-/// Represents a relative UTF-8 filesystem path, that doesn't begin with
+/// Represents a relative UTF-8 filesystem path that doesn't begin with
 /// prefix or root directory components, only contains normal components,
 /// and whose length is limited to 65535 bytes.
 ///
@@ -30,24 +27,14 @@ pub struct RelativePath<'path>(Cow<'path, str>);
 /// Represents an error that may happen while converting a path to a relative
 /// path.
 #[derive(Error, Debug)]
-pub enum InvalidPathError<'path> {
-	#[error("The path contains non UTF-8 characters: {0}")]
-	NonUnicode(Cow<'path, str>),
+pub enum InvalidPathError {
 	#[error("The path exceeds the 65535 bytes size limit")]
 	TooBig
 }
 
-impl From<InvalidPathError<'_>> for io::Error {
-	fn from(error: InvalidPathError<'_>) -> Self {
-		io::Error::new(
-			io::ErrorKind::Other,
-			match error {
-				InvalidPathError::NonUnicode(error_message) => {
-					InvalidPathError::NonUnicode(Cow::Owned(error_message.into_owned()))
-				}
-				InvalidPathError::TooBig => InvalidPathError::TooBig
-			}
-		)
+impl From<InvalidPathError> for io::Error {
+	fn from(_: InvalidPathError) -> Self {
+		io::Error::new(io::ErrorKind::Other, InvalidPathError::TooBig)
 	}
 }
 
@@ -63,10 +50,10 @@ impl<'path> RelativePath<'path> {
 	/// or symlink resolving is performed, as those may expose the physical
 	/// structure, which may be different than the logical, expected directory
 	/// structure.
-	pub(crate) fn new<P1: AsRef<Path> + ?Sized, P2: AsRef<Path> + ?Sized>(
+	pub(crate) fn new<P1: AsRef<Utf8Path> + ?Sized, P2: AsRef<Utf8Path> + ?Sized>(
 		ancestor_path: &P1,
 		descendant_path: &'path P2
-	) -> Result<Self, InvalidPathError<'path>> {
+	) -> Result<Self, InvalidPathError> {
 		let mut descendant_path_components = descendant_path.as_ref().components();
 
 		// Discard the first common components
@@ -82,20 +69,11 @@ impl<'path> RelativePath<'path> {
 		// component separator character for the current platform is already
 		// a forward slash
 		let relative_path_string = if MAIN_SEPARATOR == '/' {
-			Cow::Borrowed(
-				relative_path
-					.to_str()
-					.ok_or_else(|| InvalidPathError::NonUnicode(relative_path.to_string_lossy()))?
-			)
+			Cow::Borrowed(relative_path.as_str())
 		} else {
 			Cow::Owned(
 				descendant_path_components
-					.map(|component| {
-						component.as_os_str().to_str().ok_or_else(|| {
-							InvalidPathError::NonUnicode(relative_path.to_string_lossy())
-						})
-					})
-					.collect::<Result<Vec<&str>, InvalidPathError>>()?
+					.map(|component| component.as_str())
 					.join("/")
 			)
 		};
@@ -105,46 +83,6 @@ impl<'path> RelativePath<'path> {
 		}
 
 		Ok(Self(relative_path_string))
-	}
-
-	pub fn with_comment_extension_suffix(&self) -> RelativePath<'static> {
-		let current_extension = self
-			.extension()
-			.unwrap_or_else(|| OsStr::new(""))
-			.to_str()
-			.unwrap();
-
-		// Do not change the extension if this path already has the expected suffix
-		if current_extension.ends_with('c') {
-			return self.as_owned();
-		}
-
-		RelativePath(Cow::Owned(
-			self.with_extension(format!("{current_extension}c"))
-				.into_os_string()
-				.into_string()
-				.unwrap()
-		))
-	}
-
-	pub fn canonicalize_extension(&self, canonical_extension: impl AsRef<OsStr>) -> RelativePath<'_> {
-		if self.extension() != Some(canonical_extension.as_ref()) {
-			RelativePath::from_inner(
-				self.with_extension(canonical_extension)
-					.into_os_string()
-					.into_string()
-					.unwrap()
-			)
-		} else {
-			self.as_deref()
-		}
-	}
-
-	/// Returns a borrowed view to the UTF-8 string representation of this relative path.
-	/// Although a relative path can be converted to a Rust string by other means, this
-	/// method is more ergonomic to use, and avoids any runtime checks.
-	pub fn as_str(&self) -> &str {
-		self.0.as_ref()
 	}
 
 	/// Returns another relative path that owns equivalent path data to this path, so
@@ -158,7 +96,7 @@ impl<'path> RelativePath<'path> {
 		RelativePath(Cow::Owned(self.0.clone().into_owned()))
 	}
 
-	pub fn as_deref(&self) -> RelativePath<'_> {
+	pub fn reborrow(&self) -> RelativePath<'_> {
 		RelativePath(Cow::Borrowed(&self.0))
 	}
 
@@ -194,16 +132,22 @@ impl<'path> RelativePath<'path> {
 	}
 }
 
-impl AsRef<Path> for RelativePath<'_> {
-	fn as_ref(&self) -> &Path {
-		Path::new(&*self.0)
+impl AsRef<Utf8Path> for RelativePath<'_> {
+	fn as_ref(&self) -> &Utf8Path {
+		Utf8Path::new(&*self.0)
 	}
 }
 
 impl Deref for RelativePath<'_> {
-	type Target = Path;
+	type Target = Utf8Path;
 
 	fn deref(&self) -> &Self::Target {
-		Path::new(&*self.0)
+		Utf8Path::new(&*self.0)
+	}
+}
+
+impl Display for RelativePath<'_> {
+	fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+		f.write_str(self.as_str())
 	}
 }

@@ -28,8 +28,11 @@ impl PackProcessor {
 	) -> Result<(), PackError> {
 		let global_options = &options.global_options;
 
-		let scratch_files_budget =
-			ScratchFilesBudget::new(global_options.maximum_scratch_files_buffers_size);
+		let scratch_files_budget = ScratchFilesBudget::new(
+			global_options
+				.maximum_scratch_files_buffers_size
+				.saturating_mul(1024 * 1024)
+		);
 
 		let os_vfs;
 		let vfs = match vfs_type {
@@ -104,8 +107,8 @@ impl PackProcessor {
 			.install(|| match pack_type {
 				PackType::ResourcePack => ResourcePackProcessor::new().process(
 					vfs,
-					pack_meta,
-					pack_files,
+					&pack_meta,
+					&pack_files,
 					global_options,
 					file_options,
 					&squashed_pack_state
@@ -117,7 +120,8 @@ impl PackProcessor {
 				status_info!(FinishingZip);
 
 				// Generate the result ZIP file
-				squashed_pack_state.finish(|| Ok(File::create(&global_options.output_file_path)?))?;
+				squashed_pack_state
+					.finish(|| Ok(File::create(&*global_options.output_file_path)?))?;
 
 				// Warn about relevant system ID soft failure modes, if we needed to get a system ID
 				if let Some(system_id) = squash_zip::system_id::get_system_id() {

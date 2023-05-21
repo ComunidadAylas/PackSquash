@@ -1,5 +1,6 @@
 //! Implements a custom ZIP compressor that is tailored for PackSquash use cases.
 
+use std::sync::Mutex;
 use std::{
 	borrow::Cow,
 	collections::hash_map::Entry,
@@ -14,7 +15,6 @@ use aes::Aes128;
 use ahash::AHashMap;
 use once_cell::sync::Lazy;
 use packsquash_options::PercentageInteger;
-use parking_lot::Mutex;
 use tinyvec::{tiny_vec, TinyVec};
 use zopfli::Format;
 
@@ -264,7 +264,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 		let (mut local_file_header, mut compressed_data_scratch_file) =
 			self.compress_and_generate_local_header(path, processed_data, skip_compression)?;
 
-		let state = &mut *self.state.lock();
+		let state = &mut *self.state.lock().unwrap();
 		let mut output_zip = &mut state.output_zip;
 
 		let mut empty_vec = tiny_vec!();
@@ -423,7 +423,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 		local_file_header.uncompressed_size = previous_file.uncompressed_size;
 		local_file_header.compressed_size = previous_file.compressed_size;
 
-		let state = &mut *self.state.lock();
+		let state = &mut *self.state.lock().unwrap();
 		let mut output_zip = &mut state.output_zip;
 
 		let mut empty_vec = tiny_vec!();
@@ -540,7 +540,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 		self,
 		writer_provider: impl FnOnce() -> Result<W, SquashZipError>
 	) -> Result<(), SquashZipError> {
-		let state = self.state.into_inner();
+		let state = self.state.into_inner().unwrap();
 		let central_directory_data = state.central_directory_data;
 		let mut output_zip = state.output_zip;
 

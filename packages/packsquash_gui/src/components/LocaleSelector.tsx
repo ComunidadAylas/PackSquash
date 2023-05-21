@@ -9,7 +9,7 @@ import { tippy as solid_tippy } from "solid-tippy";
 const tippy = solid_tippy;
 
 export default () => {
-  const [l10n, { setSelectedLocale }] = useI18n();
+  const [l10n, , { setSelectedLocale }] = useI18n();
 
   const componentOwner = getOwner();
   if (!componentOwner) {

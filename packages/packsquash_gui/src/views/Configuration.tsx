@@ -21,7 +21,7 @@ const previousViewRoute = "/packSelection";
 const nextViewRoute = "/optimizationProgress";
 
 export default () => {
-  const [l10n] = useI18n();
+  const [l10n, l10nAccessor] = useI18n();
   const navigate = useNavigate();
   const [showOptionsEditor, setShowOptionsEditor] =
     createSignal<boolean>(false);
@@ -58,9 +58,9 @@ export default () => {
           </Show>
           <ProgressBreadcrumb
             steps={[
-              l10n("pack-selection-screen-title"),
-              l10n("configuration-screen-title"),
-              l10n("optimization-screen-title")
+              l10nAccessor("pack-selection-screen-title"),
+              l10nAccessor("configuration-screen-title"),
+              l10nAccessor("optimization-screen-title")
             ]}
             class="hidden grow drop-shadow-md sm:block"
             currentStepIndex={1}

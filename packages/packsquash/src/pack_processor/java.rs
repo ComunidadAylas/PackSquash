@@ -16,9 +16,10 @@ use std::io;
 use strum::EnumIter;
 use thiserror::Error;
 
-#[derive(Clone, Copy, EnumIter, Eq, PartialEq, Hash, Debug)]
+#[derive(Default, Clone, Copy, EnumIter, Eq, PartialEq, Hash, Debug)]
 pub enum PackType {
 	DataPack,
+	#[default]
 	ResourcePack
 }
 

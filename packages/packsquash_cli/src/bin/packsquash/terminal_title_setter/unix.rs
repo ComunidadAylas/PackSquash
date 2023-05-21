@@ -1,4 +1,3 @@
-use is_terminal::IsTerminal;
 use std::fs::{File, OpenOptions};
 use std::{
 	env,

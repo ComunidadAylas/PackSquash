@@ -1,12 +1,9 @@
+use std::borrow::Cow;
 use std::cell::Cell;
 use crate::pack_processor::java::asset_processor::compile_hardcoded_pack_file_glob_pattern;
 use crate::pack_processor::java::asset_processor::data::vanilla_model_list;
 use crate::pack_processor::java::asset_processor::helper::{self, json_helper};
-use crate::pack_processor::java::asset_processor::helper::json_helper::JsonAssetDeserializeOutcome;
-use crate::pack_processor::java::asset_processor::item_and_block_model_asset_processor::item_or_block_model::{
-	ElementFaceDirection, ItemGuiLight, ItemOrBlockModel, ItemOrBlockModelRepresentative,
-	ItemTransform, TextureLocationOrReference
-};
+use crate::pack_processor::java::asset_processor::item_and_block_model_asset_processor::item_or_block_model::{ElementFaceDirection, ItemGuiLight, ItemOrBlockModel, ItemTransform, TextureLocationOrReference};
 use crate::pack_processor::java::pack_meta::PackMeta;
 use crate::pack_processor::java::resource_location::ResourceLocation;
 use crate::relative_path::{InvalidPathError, RelativePath};
@@ -16,26 +13,30 @@ use crate::util::patricia_set_util::{PatriciaSetContainsRelativePathExt, Patrici
 use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
 use crate::vfs::VirtualFileSystem;
 use crate::PackSquashAssetProcessingStrategy;
-use ahash::AHashSet;
+use ahash::{AHashMap, AHashSet};
 use once_cell::sync::Lazy;
 use packsquash_options::{minecraft_version, FileOptionsMap, GlobalOptions, JsonFileOptions, MissingReferenceAction};
 use patricia_tree::PatriciaSet;
-use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
 use std::io;
 use std::io::{Read, Seek};
 use std::ops::Deref;
+use std::sync::{Arc, Mutex, RwLock};
+use compact_str::CompactString;
+use rayon::prelude::*;
 use strum::IntoEnumIterator;
 use thiserror::Error;
-use tinyvec::tiny_vec;
+use tinyvec::{tiny_vec, TinyVec};
+use self::cache::{ModelCache, CachedItemOrBlockModel};
 
+mod cache;
 mod item_or_block_model;
 
 #[derive(Error, Debug)]
 enum InnerItemOrBlockModelAssetError {
-	//#[error("The texture variable {0} was already referenced by a texture variable. Please remove the reference loop")]
-	//TextureVariableReferenceLoop(String),
-	//#[error("The texture variable {0} refers to an undefined texture variable")]
-	//UndefinedTransitiveTextureVariableReference(String),
+	#[error("A loop was found in the model parent hierarchy. Please ensure that a parent is not referenced several times")]
+	ModelInheritanceLoop,
+	#[error("The texture variable {0} is undefined or it was caught in a references loop")]
+	UndefinedTextureVariable(CompactString),
 	#[error("The model defines item display transforms in single-hand format, but a Minecraft version range that expects the dual-hand format is targeted")]
 	LegacyItemDisplayTransform,
 	#[error("The model defines item display transforms in the dual-hand format, but a Minecraft version range that expects the single-hand format is targeted")]
@@ -44,10 +45,10 @@ enum InnerItemOrBlockModelAssetError {
 	FutureModelAttribute(&'static str),
 	#[error("The model overrides elements from its parent, but this is not supported by the target Minecraft version range")]
 	UnsupportedParentElementsOverride,
-	//#[error("The texture variable {0} was referenced by an element face, but it is undefined")]
-	//UndefinedElementFaceTextureVariable(String),
 	#[error("An element face is missing texture UV coordinates, but this is not supported by the target Minecraft version range")]
 	MissingElementFaceTextureCoordinates,
+	#[error("The texture variable {0} was referenced by an element face, but it is undefined or it was caught in a references loop")]
+	UndefinedElementFaceTextureVariable(String),
 	#[error("Another model at {path} was referenced, but it is not a known model and it was not found in the pack{__filtered_out_text}")]
 	MissingModel {
 		path: RelativePath<'static>,
@@ -63,7 +64,7 @@ enum InnerItemOrBlockModelAssetError {
 	#[error("{0}")]
 	JsonDeserializationError(#[from] json_helper::JsonDeserializationError),
 	#[error("Invalid pack file path: {0}")]
-	InvalidRelativePath(#[from] InvalidPathError<'static>),
+	InvalidRelativePath(#[from] InvalidPathError),
 	/// Thrown when some error occurs in a ZIP file operation.
 	#[error("Error while performing a ZIP file operation: {0}")]
 	SquashZip(#[from] SquashZipError),
@@ -71,28 +72,23 @@ enum InnerItemOrBlockModelAssetError {
 	Io(#[from] io::Error)
 }
 
-#[derive(Error, Debug)]
-#[error("{file_path}: {inner}")]
-pub struct ItemOrBlockModelAssetError {
-	inner: InnerItemOrBlockModelAssetError,
-	file_path: RelativePath<'static>
-}
+define_path_wrapper_err!(InnerItemOrBlockModelAssetError: ItemOrBlockModelAssetError);
 
 pub struct ItemAndBlockModelAssetProcessor<
+	'params,
 	'state,
-	'settings,
-	'budget,
 	V: VirtualFileSystem + ?Sized,
 	F: Read + Seek + Send,
 	C: FnOnce() -> Option<AHashSet<RelativePath<'static>>> + Send
 > {
-	vfs: &'state V,
-	pack_meta: &'state PackMeta,
-	pack_files: &'state PatriciaSet,
-	global_options: &'state GlobalOptions<'state>,
-	file_options: &'state FileOptionsMap<'state>,
-	squashed_pack_state: &'state SquashedPackState<'settings, 'budget, F>,
+	vfs: &'params V,
+	pack_meta: &'params PackMeta,
+	pack_files: &'params PatriciaSet,
+	global_options: &'params GlobalOptions<'params>,
+	file_options: &'params FileOptionsMap<'params>,
+	squashed_pack_state: &'params SquashedPackState<'state, 'state, F>,
 	pub vanilla_models: Lazy<Option<AHashSet<RelativePath<'static>>>, C>,
+	pub models_referenced_by_blockstates: Mutex<AHashSet<RelativePath<'static>>>,
 	game_version_supports_models: bool,
 	game_version_supports_item_overrides_attribute: bool,
 	game_version_supports_parent_elements_override: bool,
@@ -101,20 +97,19 @@ pub struct ItemAndBlockModelAssetProcessor<
 	game_version_supports_gui_light_attribute: bool
 }
 
-pub fn new<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek + Send>(
-	vfs: &'state V,
-	pack_meta: &'state PackMeta,
-	pack_files: &'state PatriciaSet,
-	global_options: &'state GlobalOptions,
-	file_options: &'state FileOptionsMap,
-	squashed_pack_state: &'state SquashedPackState<'settings, 'budget, F>
+pub fn new<'params, 'state, V: VirtualFileSystem + ?Sized, F: Read + Seek + Send>(
+	vfs: &'params V,
+	pack_meta: &'params PackMeta,
+	pack_files: &'params PatriciaSet,
+	global_options: &'params GlobalOptions<'params>,
+	file_options: &'params FileOptionsMap<'params>,
+	squashed_pack_state: &'params SquashedPackState<'state, 'state, F>
 ) -> ItemAndBlockModelAssetProcessor<
+	'params,
 	'state,
-	'settings,
-	'budget,
 	V,
 	F,
-	impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + 'state + Send
+	impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + Send + 'params
 > {
 	let vanilla_models =
 		Lazy::new(|| vanilla_model_list::matching_for_version_range(pack_meta.game_version_range()));
@@ -141,6 +136,7 @@ pub fn new<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + 
 		file_options,
 		squashed_pack_state,
 		vanilla_models,
+		models_referenced_by_blockstates: Mutex::new(AHashSet::new()),
 		game_version_supports_models,
 		game_version_supports_item_overrides_attribute,
 		game_version_supports_parent_elements_override,
@@ -151,32 +147,75 @@ pub fn new<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + 
 }
 
 impl<
+		'params,
 		'state,
-		'settings,
-		'budget,
 		V: VirtualFileSystem + ?Sized,
 		F: Read + Seek + Send,
 		C: FnOnce() -> Option<AHashSet<RelativePath<'static>>> + Send
-	> ItemAndBlockModelAssetProcessor<'state, 'settings, 'budget, V, F, C>
+	> ItemAndBlockModelAssetProcessor<'params, 'state, V, F, C>
 {
 	pub fn process(&self) -> Result<(), ItemOrBlockModelAssetError> {
 		if !self.game_version_supports_models {
 			return Ok(());
 		}
 
-		let process_asset = |candidate_asset_path| {
-			self.process_model_asset(
-				&candidate_asset_path,
-				get_file_specific_options!(self.file_options, &candidate_asset_path, JsonFileOptions)
-			)
-		};
+		let model_cache = ModelCache::new(self.vfs, self.global_options, self.squashed_pack_state);
+		let candidate_asset_paths = self.enumerate_models();
 
+		// First, populate a set with the models that are known to have children
+		// TODO enumerate and process models_referenced_by_blockstates on finish()
+		let mut non_leaf_models = AHashSet::new();
+		for candidate_asset_path in &candidate_asset_paths {
+			if let Some(cached_model) = model_cache
+				.get(candidate_asset_path)
+				.into_err_with_path(|| candidate_asset_path.as_owned())?
+			{
+				if let Some(parent) = &cached_model.read().unwrap().model.parent {
+					non_leaf_models.insert(
+						parent
+							.as_relative_path()
+							.into_err_with_path(|| candidate_asset_path.as_owned())?
+					);
+				}
+			}
+		}
+
+		// Now process the candidate assets
+		candidate_asset_paths
+			.par_iter()
+			.try_for_each(|candidate_asset_path| {
+				if let (true, Some(cached_model_data)) = (
+					self.squashed_pack_state
+						.mark_file_as_processed(candidate_asset_path),
+					model_cache
+						.get(candidate_asset_path)
+						.into_err_with_path(|| candidate_asset_path.as_owned())?
+				) {
+					self.process_model_asset(
+						cached_model_data,
+						candidate_asset_path,
+						get_file_specific_options!(
+							self.file_options,
+							&candidate_asset_path,
+							JsonFileOptions
+						),
+						&model_cache,
+						non_leaf_models.contains(candidate_asset_path)
+					)
+					.into_err_with_path(|| candidate_asset_path.as_owned())?;
+				}
+
+				Ok(())
+			})
+	}
+
+	fn enumerate_models(&self) -> AHashSet<RelativePath<'static>> {
 		match (
 			self.global_options
 				.process_not_self_referenced_and_non_vanilla_assets,
-			self.vanilla_models.is_some()
+			&*self.vanilla_models
 		) {
-			(true, _) | (_, false) => {
+			(true, _) | (_, None) => {
 				// Exhaustive asset enumeration strategy: other packs may depend on the models defined by
 				// this pack or we don't know what vanilla models there are, so iterate over all the plausible
 				// assets
@@ -199,64 +238,49 @@ impl<
 				// in this pack, however. They will be processed as usual no matter their path, because
 				// PackSquash knows for sure that they are block models
 				let any_model_path_matcher = compile_hardcoded_pack_file_glob_pattern(
-					"assets/?*/models/{block,item}/**/?*.jso{n,nc}"
+					"assets/?*/models/{block,item}/**/?*.json"
 				)
 				.compile_matcher();
 
-				self.pack_files
-					.relative_path_iter()
-					.par_bridge()
-					.filter_map(|relative_path| {
-						// Minecraft expects model files to be located at a valid resource
-						// location (see net.minecraft.client.resources.model.ModelBakery and
-						// net.minecraft.client.resources.model.ModelResourceLocation). Every
-						// known mod for the Minecraft versions that support block states expands
-						// on this vanilla logic, so filtering by that should be fine
-						if any_model_path_matcher.is_match(&relative_path)
-							&& ResourceLocation::try_from(&relative_path).is_ok()
-						{
-							Some(relative_path)
-						} else {
-							None
-						}
-					})
-					.try_for_each(process_asset)
+				AHashSet::from_iter(
+					self.pack_files
+						.relative_path_iter()
+						.filter(|relative_path| {
+							// Minecraft expects model files to be located at a valid resource
+							// location (see net.minecraft.client.resources.model.ModelBakery and
+							// net.minecraft.client.resources.model.ModelResourceLocation). Every
+							// known mod for the Minecraft versions that support block states expands
+							// on this vanilla logic, so filtering by that should be fine
+							any_model_path_matcher.is_match(&**relative_path)
+								&& ResourceLocation::try_from(relative_path).is_ok()
+						})
+				)
 			}
-			(false, true) => {
+			(false, Some(vanilla_models)) => {
 				// Focused asset enumeration strategy: we only want vanilla assets and we know what vanilla
 				// assets there are, in addition to models self-referenced by this pack. Process unreferenced
 				// vanilla models right away; the block state asset processor will take care of telling us
 				// to process self-referenced models. If vanilla models are referenced by other parts of the
 				// pack, they won't be processed several times
 
-				self.vanilla_models
-					.as_ref()
-					.unwrap()
-					.par_iter()
-					// Cloning these elements is cheap because they are borrowed references to static data
-					.cloned()
-					.try_for_each(process_asset)
+				AHashSet::from_iter(
+					vanilla_models
+						.iter()
+						// Cloning these elements is cheap because they are references to static data
+						.cloned()
+				)
 			}
 		}
 	}
 
-	pub fn process_model_asset<'options>(
-		&self,
-		asset_path: &RelativePath,
-		file_options: impl Deref<Target = &'options JsonFileOptions>
-	) -> Result<(), ItemOrBlockModelAssetError> {
-		self.process_model_asset_inner(asset_path, file_options)
-			.map_err(|err| ItemOrBlockModelAssetError {
-				inner: err,
-				file_path: asset_path.as_owned()
-			})
-	}
-
 	#[inline]
-	fn process_model_asset_inner<'options>(
+	fn process_model_asset<'options>(
 		&self,
-		asset_path: &RelativePath,
-		file_options: impl Deref<Target = &'options JsonFileOptions>
+		cached_model_data: Arc<RwLock<CachedItemOrBlockModel>>,
+		asset_path: &RelativePath<'_>,
+		file_options: impl Deref<Target = &'options JsonFileOptions>,
+		model_cache: &ModelCache<'params, 'state, V, F>,
+		has_children: bool
 	) -> Result<(), InnerItemOrBlockModelAssetError> {
 		let check_missing_references = !matches!(
 			self.global_options.missing_reference_action,
@@ -269,162 +293,122 @@ impl<
 
 		let mut asset_warnings = tiny_vec!();
 
-		json_helper::deserialize::<ItemOrBlockModelRepresentative, _, _, _>(
+		// Several dependency handler closures can't mutably borrow the same variable at the
+		// same time. To work around that, use interior mutability
+		let warnings_cell = Cell::new(Some(&mut asset_warnings));
+
+		let mut cached_model_data = cached_model_data.write().unwrap();
+		self.process_model(
+			&mut cached_model_data.model,
 			asset_path,
-			self.vfs,
-			self.squashed_pack_state,
-			false,
-			self.global_options.always_allow_json_comments,
-			"json",
-			|outcome: JsonAssetDeserializeOutcome<'_, ItemOrBlockModel<'_>>| match outcome {
-				JsonAssetDeserializeOutcome::Value {
-					value: mut model,
-					canonical_path: canonical_asset_path,
-					size_hint,
-					..
-				} => {
-					// Several dependency handler closures can't mutably borrow the same variable at the
-					// same time. To work around that, use interior mutability
-					let warnings_cell = Cell::new(Some(&mut asset_warnings));
+			&file_options,
+			model_cache,
+			has_children,
+			&warnings_cell,
+			|model_location| {
+				if !check_missing_references {
+					return Ok(());
+				}
 
-					self.process_model(
-						&mut model,
-						&file_options,
-						|model_location| {
-							if !check_missing_references {
-								return Ok(());
-							}
+				let warnings = warnings_cell.take().unwrap();
 
-							let warnings = warnings_cell.take().unwrap();
-
-							let validation_result = helper::validate_asset_dependency(
-								model_location,
-								self.pack_meta,
-								self.global_options,
-								missing_references_are_warnings.then_some(warnings),
-								|model_path| {
-									Ok(self.pack_files.has_relative_path(model_path)
-										|| self.pack_files.has_relative_path(
-											&model_path.with_comment_extension_suffix()
-										) || is_builtin_model_path(model_path))
-								},
-								|model_path| {
-									if let Some(vanilla_models) = &*self.vanilla_models {
-										Ok(vanilla_models.contains(model_path))
-									} else {
-										// We don't know the vanilla model set. Err on the side of caution
-										Ok(false)
-									}
-								},
-								|model_path, filtered_out_text| {
-									InnerItemOrBlockModelAssetError::MissingModel {
-										path: model_path,
-										__filtered_out_text: filtered_out_text
-									}
-								}
-							);
-
-							warnings_cell.set(Some(warnings));
-
-							validation_result
-						},
-						|texture_location| {
-							if !check_missing_references {
-								return Ok(());
-							}
-
-							let warnings = warnings_cell.take().unwrap();
-
-							let validation_result = helper::validate_asset_dependency(
-								texture_location,
-								self.pack_meta,
-								self.global_options,
-								missing_references_are_warnings.then_some(warnings),
-								|texture_path| Ok(self.pack_files.contains(texture_path.as_str())),
-								|_texture_path| {
-									// TODO validate using a vanilla texture list?
-									Ok(false)
-								},
-								|model_path, filtered_out_text| {
-									InnerItemOrBlockModelAssetError::MissingTexture {
-										path: model_path,
-										__filtered_out_text: filtered_out_text
-									}
-								}
-							);
-
-							warnings_cell.set(Some(warnings));
-
-							validation_result
+				let validation_result = helper::validate_asset_dependency(
+					model_location,
+					self.pack_meta,
+					self.global_options,
+					missing_references_are_warnings.then_some(warnings),
+					|model_path| {
+						Ok(self.pack_files.has_relative_path(model_path)
+							|| is_builtin_model_path(model_path))
+					},
+					|model_path| {
+						if let Some(vanilla_models) = &*self.vanilla_models {
+							Ok(vanilla_models.contains(model_path))
+						} else {
+							// We don't know the vanilla model set. Err on the side of caution
+							Ok(false)
 						}
-					)?;
+					},
+					|model_path, filtered_out_text| InnerItemOrBlockModelAssetError::MissingModel {
+						path: model_path,
+						__filtered_out_text: filtered_out_text
+					}
+				);
 
-					// Serialize it back to a scratch file
-					let processed_file = json_helper::serialize(
-						model,
-						self.squashed_pack_state.scratch_files_budget(),
-						size_hint,
-						file_options.minify
-					)?;
+				warnings_cell.set(Some(warnings));
 
-					self.squashed_pack_state.add_file_to_zip(
-						&canonical_asset_path,
-						processed_file,
-						false
-					)?;
-
-					// Let interested parties know we've processed this file
-					status_trace!(
-						ProcessedAsset {
-							strategy: match (file_options.delete_bloat, file_options.minify) {
-								(false, false) =>
-									PackSquashAssetProcessingStrategy::ValidatedAndPrettified,
-								(false, true) =>
-									PackSquashAssetProcessingStrategy::ValidatedAndMinified,
-								(true, false) =>
-									PackSquashAssetProcessingStrategy::ValidatedDebloatedAndPrettified,
-								(true, true) =>
-									PackSquashAssetProcessingStrategy::ValidatedDebloatedAndMinified,
-							},
-							warnings: asset_warnings
-						},
-						asset_path = asset_path.as_str()
-					);
-
-					Ok(())
+				validation_result
+			},
+			|texture_location| {
+				if !check_missing_references {
+					return Ok(());
 				}
-				JsonAssetDeserializeOutcome::FreshInPreviousZip {
-					canonical_path: canonical_asset_path
-				} => {
-					self.squashed_pack_state
-						.add_previous_zip_file(&canonical_asset_path)?;
 
-					// Let interested parties know we've blindly copied this file
-					status_trace!(
-						ProcessedAsset {
-							strategy: PackSquashAssetProcessingStrategy::CopiedFromPreviousZip,
-							warnings: asset_warnings
-						},
-						asset_path = asset_path.as_str()
-					);
+				let warnings = warnings_cell.take().unwrap();
 
-					Ok(())
-				}
-				JsonAssetDeserializeOutcome::NotFound
-				| JsonAssetDeserializeOutcome::CanonicalPathAlreadyProcessed => {
-					// Ignore files that do not exist (i.e., opening them returned a "not found" error):
-					// they most likely are candidate paths the pack does not contain. Also ignore other
-					// candidates once one is processed
-					Ok(())
-				}
+				let validation_result = helper::validate_asset_dependency(
+					texture_location,
+					self.pack_meta,
+					self.global_options,
+					missing_references_are_warnings.then_some(warnings),
+					|texture_path| Ok(self.pack_files.contains(texture_path.as_str())),
+					|_texture_path| {
+						// TODO validate using a vanilla texture list?
+						Ok(false)
+					},
+					|model_path, filtered_out_text| InnerItemOrBlockModelAssetError::MissingTexture {
+						path: model_path,
+						__filtered_out_text: filtered_out_text
+					}
+				);
+
+				warnings_cell.set(Some(warnings));
+
+				validation_result
 			}
-		)?
+		)?;
+
+		// Serialize it back to a scratch file
+		let processed_file = json_helper::serialize(
+			&cached_model_data.model,
+			self.squashed_pack_state.scratch_files_budget(),
+			cached_model_data.size_hint,
+			file_options.minify
+		)?;
+
+		// The lock on the model is not necessary anymore. Release it now
+		// to shorten the critical region
+		drop(cached_model_data);
+
+		self.squashed_pack_state
+			.add_file_to_zip(asset_path, processed_file, false)?;
+
+		// Let interested parties know we've processed this file
+		status_trace!(
+			ProcessedAsset {
+				strategy: match (file_options.delete_bloat, file_options.minify) {
+					(false, false) => PackSquashAssetProcessingStrategy::ValidatedAndPrettified,
+					(false, true) => PackSquashAssetProcessingStrategy::ValidatedAndMinified,
+					(true, false) =>
+						PackSquashAssetProcessingStrategy::ValidatedDebloatedAndPrettified,
+					(true, true) => PackSquashAssetProcessingStrategy::ValidatedDebloatedAndMinified
+				},
+				warnings: asset_warnings
+			},
+			asset_path = asset_path.as_str()
+		);
+
+		Ok(())
 	}
 
 	fn process_model(
 		&self,
-		model: &mut ItemOrBlockModel,
+		model: &mut ItemOrBlockModel<'_>,
+		model_path: &RelativePath<'_>,
 		file_options: &JsonFileOptions,
+		model_cache: &ModelCache<V, F>,
+		has_children: bool,
+		asset_warnings_cell: &Cell<Option<&mut TinyVec<[Cow<'static, str>; 2]>>>,
 		mut model_dependency_handler: impl FnMut(
 			&ResourceLocation
 		) -> Result<(), InnerItemOrBlockModelAssetError>,
@@ -432,76 +416,39 @@ impl<
 			&ResourceLocation
 		) -> Result<(), InnerItemOrBlockModelAssetError>
 	) -> Result<(), InnerItemOrBlockModelAssetError> {
-		let model_lacks_parent;
-		if let Some(parent_model) = &model.parent {
-			// Check that the parent model reference is satisfied
-			model_dependency_handler(parent_model)?;
+		let mut visited_models = AHashSet::from([model_path.reborrow()]);
+		let mut parent_location = model.parent.as_ref().cloned();
 
+		while let Some(model_location) = parent_location {
+			let parent_path = model_location.as_relative_path()?;
+
+			parent_location = model_cache
+				.get(&parent_path)?
+				.and_then(|parent_model| parent_model.read().unwrap().model.parent.as_ref().cloned());
+
+			if !visited_models.insert(parent_path) {
+				return Err(InnerItemOrBlockModelAssetError::ModelInheritanceLoop);
+			}
+
+			// Check that the parent model reference is satisfied
+			model_dependency_handler(&model_location)?;
+		}
+
+		let model_lacks_parent = visited_models.len() < 2;
+
+		if !model_lacks_parent {
 			// The ambient occlusion setting is always ignored for models with parents.
 			// Set it to the default value to skip serializing it
 			model.ambient_occlusion = true;
-
-			model_lacks_parent = false;
-		} else {
-			model_lacks_parent = true;
 		}
 
-		// A model texture map may contain declarations for:
-		//
-		// - Texture variables used by element faces and the texture map on this model.
-		// - Texture variables used by element faces and texture maps on descendant models.
-		// - Texture variables used by element faces and texture maps on ancestor and
-		//   descendant models.
-		// - Texture variables unused by element faces and texture maps on this, ancestor or
-		//   descendant models.
-		//
-		// For all of these cases, we want to validate that the texture variables
-		// resolve to a valid texture (material), because even if they are unused,
-		// it is a mistake for them to hold invalid references. Minecraft is too
-		// lenient and always lets people shoot themselves in the foot, not warning
-		// a thing unless they are used in element faces.
-		//
-		// For unused texture variables in particular, removing them from the map
-		// is an optimization we want to do, because they won't contribute to the
-		// final model look.
-		//
-		// The code below does not consider the model parent hierarchy at all, because
-		// that does not play nice with parallel model processing. The ugly approaches
-		// to parents include:
-		//
-		// - Following the parent chain for each model, potentially processing common,
-		//   complex ancestor models much more times than necessary.
-		// - Memoize the visited deserialized model data to a cache. This requires
-		//   cloning or moving the data (the source buffer does not live for a static
-		//   lifetime) and thread synchronization, so it may not be more performant as
-		//   it seems in the first place when compared to the naive approach.
-		//
-		// TODO implement unused variable removal (optimization for the third case above)
-		//      and parent hierarchy (see comments below for details where this would be useful)
-
-		if let Some(texture_map) = &model.texture_map {
-			for texture_location_or_reference in texture_map.values() {
-				match texture_location_or_reference {
-					TextureLocationOrReference::Location(texture_location) => {
-						texture_dependency_handler(texture_location)?
-					}
-					TextureLocationOrReference::Reference(_texture_reference) => {
-						// TODO we can't validate anything here because the reference may be
-						//      defined in a child or parent model
-						/*if let Some(texture_location) = resolve_texture_variable_to_resource_location(
-							&**texture_reference,
-							texture_map
-						)? {
-							texture_dependency_handler(texture_location)?
-						} else if model_lacks_parent {
-							// If this model has no parents, there is no way that this reference can
-							// be resolved. Otherwise, the parent may resolve it, so it is plausible
-							return Err(InnerItemOrBlockModelAssetError::UndefinedTransitiveTextureVariableReference(texture_reference.clone().into_owned()));
-						}*/
-					}
-				}
-			}
-		}
+		let known_texture_variables = self.validate_texture_map(
+			model,
+			file_options,
+			model_cache,
+			has_children,
+			&mut texture_dependency_handler
+		)?;
 
 		if let Some(item_display_transforms) = &mut model.item_display_transforms {
 			// Check that item hand transforms are in the format expected by the target version range.
@@ -547,6 +494,12 @@ impl<
 			optimize_secondary_hand_transform!(first_person_left_hand, first_person_right_hand);
 
 			if file_options.delete_bloat {
+				fn remove_item_transform_bloat(item_transform: Option<&mut ItemTransform>) {
+					if let Some(item_transform) = item_transform {
+						item_transform.bloat_fields.clear();
+					}
+				}
+
 				remove_item_transform_bloat(item_display_transforms.third_person_left_hand.as_mut());
 				remove_item_transform_bloat(item_display_transforms.third_person_right_hand.as_mut());
 				remove_item_transform_bloat(item_display_transforms.third_person.as_mut());
@@ -604,35 +557,19 @@ impl<
 					if let Some(face) = &mut element.faces[face_direction] {
 						// Model element faces map cuboid faces to their textures (materials).
 						//
-						// Due to the texture_map field validation code, we can assume that,
-						// if a texture map defines a variable, that variable definition is
-						// valid, so we don't need to repeat the validation process again.
-						//
-						// Child models can inherit texture variables defines by their parents,
-						// and parents can use variables defined in all of their children.
-						// However, we can't properly validate that due to a lack of parent
-						// hierarchy traversal support.
-						//
-						// TODO implement the above, or think about compromising by detecting
-						//      Blockbench "#missing" placeholder variable
+						// Texture variables were validated above, but all the quirks related to
+						// non-leaf models apply here. Leverage the knowledge we have about
+						// the valid texture variables when applicable
 
-						/*let texture_map_defines_texture_variable =
-							model.texture_map.as_ref().map_or_else(
-								|| false,
-								|texture_map| {
-									texture_map.contains_key(
-										face.texture.strip_prefix('#').unwrap_or(&*face.texture)
+						if let Some((defined_texture_variables, _)) = &known_texture_variables {
+							if !defined_texture_variables.contains(&*face.texture) {
+								return Err(
+									InnerItemOrBlockModelAssetError::UndefinedElementFaceTextureVariable(
+										face.texture.clone().into_owned()
 									)
-								}
-							);
-
-						if model_lacks_parent && !texture_map_defines_texture_variable {
-							return Err(
-								InnerItemOrBlockModelAssetError::UndefinedElementFaceTextureVariable(
-									face.texture.clone().into_owned()
-								)
-							);
-						}*/
+								);
+							}
+						}
 
 						// Deal with face UV coordinates (i.e., texture coordinates): validate
 						// that UVs are not missing if the game version requires them, and
@@ -657,70 +594,283 @@ impl<
 			}
 		}
 
+		// TODO if known_texture_variables is Some, throw warnings for known undefined texture
+		//      variables (second element of the tuple)
+		if let Some((_, undefined_texture_variables)) = known_texture_variables {
+			let asset_warnings = asset_warnings_cell.take().unwrap();
+
+			asset_warnings.extend(
+				undefined_texture_variables.map(|undefined_texture_variable| {
+					InnerItemOrBlockModelAssetError::UndefinedTextureVariable(
+						undefined_texture_variable
+					)
+					.to_string()
+					.into()
+				})
+			);
+
+			asset_warnings_cell.set(Some(asset_warnings));
+		}
+
 		if file_options.delete_bloat {
 			model.bloat_fields.clear();
 		}
 
 		Ok(())
 	}
-}
 
-// TODO remove or refactor this as appropriate
-/*fn resolve_texture_variable_to_resource_location<'map, 'data, V: Into<Cow<'map, str>>>(
-	texture_variable: V,
-	texture_map: &'map AHashMap<Cow<'data, str>, TextureLocationOrReference<'data>>
-) -> Result<Option<&'map ResourceLocation<'data>>, InnerItemOrBlockModelAssetError> {
-	let mut texture_variable = texture_variable.into();
+	fn validate_texture_map(
+		&self,
+		model: &mut ItemOrBlockModel<'_>,
+		file_options: &JsonFileOptions,
+		model_cache: &ModelCache<V, F>,
+		has_children: bool,
+		mut texture_dependency_handler: impl FnMut(
+			&ResourceLocation
+		) -> Result<(), InnerItemOrBlockModelAssetError>
+	) -> Result<
+		Option<(AHashSet<CompactString>, impl Iterator<Item = CompactString>)>,
+		InnerItemOrBlockModelAssetError
+	> {
+		// A model texture map may contain declarations for:
+		//
+		// - Texture variables used by element faces and the texture map on this model.
+		// - Texture variables used by element faces and texture maps on ancestor and
+		//   descendant models.
+		// - Texture variables unused by element faces and texture maps on this,
+		//   ancestor and descendant models.
+		//
+		// For all of these cases, we want to validate that the texture variables
+		// resolve to a valid texture (material), because even if they are unused,
+		// it is a mistake for them to hold invalid references. Minecraft is too
+		// lenient and always lets people shoot themselves in the foot, not warning
+		// a thing unless they are used in element faces.
+		//
+		// The validation described above can be done safely only if blockstates
+		// or hardcoded item registries reference this model directly (causing
+		// Minecraft to resolve texture variables from this model, allowing for
+		// parent models to reference variables defined in children models, and
+		// children models to reference variables defined in some parent).
+		// However, that can't be known when optimizing most real-world packs,
+		// so as a proxy for the "Minecraft parses this model as if it were a
+		// leaf in the tree" condition, we may apply it for models that 1) cannot
+		// have unknown children (e.g., models that declare those as parents in other
+		// packs) and 2) are leaf models (with no children). This proxy condition
+		// is correct and useful in practice for packs that do not assume models
+		// from other packs (including the vanilla pack) and that do not contain
+		// any model that plays a dual role as "parsed as leaf" and as parent
+		// of other models
 
-	// The fact that texture variables can refer to other texture variables is not
-	// documented in the Minecraft Wiki, so it's very likely that few packs in the
-	// wild use it
-	let mut visited_variables = tiny_vec!([Cow<'_, str>; 1]);
+		// TODO surround the following condition with parentheses, add
+		//      || was_referenced_by_blockstate (|| was_referenced_by_item_registry?)
+		let is_parsed_as_leaf_model = !self
+			.global_options
+			.accept_references_to_unknown_packs_and_mods
+			&& file_options.assume_only_childless_models_are_baked
+			&& !has_children;
 
-	loop {
-		// A texture variable reference loop may happen if we visit the same variable twice,
-		// e.g. a -> b -> a. The game rejects such infinite loops, and so should we.
-		// Because this vector is expected to be very small, the constant factors in this
-		// O(n) lookup should offset the asymptotic O(1) cost of a set
-		if visited_variables.contains(&texture_variable) {
-			return Err(
-				InnerItemOrBlockModelAssetError::TextureVariableReferenceLoop(
-					texture_variable.into_owned()
-				)
-			);
+		if !is_parsed_as_leaf_model {
+			return Ok(None);
 		}
 
-		// Cloning here is efficient for borrowed strings
-		visited_variables.push(texture_variable.clone());
+		let mut defined_texture_variables = AHashSet::new();
+		let mut texture_variables_dependencies = AHashMap::new();
 
-		match texture_map.get(&texture_variable) {
-			Some(TextureLocationOrReference::Location(texture_location)) => {
-				// This texture variable resolves to a texture resource location. This is
-				// the final information we're looking for: variable resolution is complete
-				return Ok(Some(texture_location));
+		let mut current_texture_map = model.texture_map.as_ref().cloned();
+		let mut next_parent = model.parent.as_ref().cloned();
+
+		let mut has_unknown_parents = false;
+		while let Some(texture_map) = current_texture_map.as_ref() {
+			for (texture_variable, texture_reference) in texture_map.iter() {
+				// If this texture variable was already defined or resolved to a
+				// dependent texture variable, ignore redefinitions as the game does
+				if defined_texture_variables.contains(texture_variable)
+					|| texture_variables_dependencies.contains_key(texture_variable)
+				{
+					continue;
+				}
+
+				fn define_texture_variable(
+					texture_variable: &CompactString,
+					defined_texture_variables: &mut AHashSet<CompactString>,
+					texture_variables_dependencies: &mut AHashMap<CompactString, CompactString>
+				) {
+					let mut resolved_texture_variables =
+						tiny_vec!([_; 2] => texture_variable.clone());
+
+					while let Some(resolved_texture_variable) = resolved_texture_variables.pop() {
+						resolved_texture_variables.extend(
+							texture_variables_dependencies
+								.drain_filter(|_, child_texture_variable| {
+									*child_texture_variable == resolved_texture_variable
+								})
+								.map(|(parent_texture_variable, _)| parent_texture_variable)
+						);
+						defined_texture_variables.insert(resolved_texture_variable);
+					}
+				}
+
+				match texture_reference {
+					TextureLocationOrReference::Location(texture_location) => {
+						texture_dependency_handler(texture_location)?;
+						define_texture_variable(
+							texture_variable,
+							&mut defined_texture_variables,
+							&mut texture_variables_dependencies
+						);
+					}
+					TextureLocationOrReference::Reference(child_texture_variable) => {
+						if defined_texture_variables.contains(child_texture_variable) {
+							define_texture_variable(
+								texture_variable,
+								&mut defined_texture_variables,
+								&mut texture_variables_dependencies
+							);
+						} else {
+							texture_variables_dependencies
+								.insert(texture_variable.clone(), child_texture_variable.clone());
+						}
+					}
+				}
 			}
-			Some(TextureLocationOrReference::Reference(texture_reference)) => {
-				// This texture variable resolves to another texture variable. Follow the
-				// dependency chain, like the game does
-				texture_variable = Cow::Borrowed(&**texture_reference);
-			}
-			None => {
-				// No dependency chain to follow. The variable can't be resolved, but this
-				// may be okay if the model has a parent we are not taking into account in
-				// the texture map
-				return Ok(None);
+
+			if let Some(parent_model) = next_parent
+				.as_ref()
+				.map(|parent_location| parent_location.as_relative_path())
+				.transpose()?
+				// Models in resource packs can't override builtin models, and builtin models don't
+				// define texture variables or have parents, so we can assume that they are hierarchy
+				// terminators
+				.filter(|parent_path| !is_builtin_model_path(parent_path))
+				.map(|parent_path| {
+					let parent_model = model_cache.get(&parent_path);
+					if let Ok(None) = &parent_model {
+						has_unknown_parents = true;
+					}
+					parent_model
+				})
+				.transpose()?
+				.flatten()
+			{
+				let parent_model = &parent_model.read().unwrap().model;
+				current_texture_map = parent_model.texture_map.as_ref().cloned();
+				next_parent = parent_model.parent.as_ref().cloned();
+			} else {
+				current_texture_map = None;
 			}
 		}
-	}
-}*/
 
-fn remove_item_transform_bloat(item_transform: Option<&mut ItemTransform>) {
-	if let Some(item_transform) = item_transform {
-		item_transform.bloat_fields.clear();
+		Ok(if has_unknown_parents {
+			None
+		} else {
+			Some((
+				defined_texture_variables,
+				texture_variables_dependencies.into_keys()
+			))
+		})
 	}
+
+	/*/// Resolves a texture variable to its corresponding texture resource location, visiting
+	/// ancestor models as necessary. This method only yields accurate results when run on
+	/// texture maps belonging to models that are directly parsed by Minecraft as item or block
+	/// models, which is not the case for ancestor models that are only used as parents of other
+	/// models.
+	///
+	/// The resolution procedure is guaranteed to yield either a texture variable resolved to
+	/// a resource location or an error, in case the resolution cannot be done.
+	fn resolve_texture_variable_to_resource_location<'data>(
+		&self,
+		mut texture_variable: Arc<TextureLocationOrReference<'data>>,
+		texture_map: Arc<AHashMap<Cow<'data, str>, Arc<TextureLocationOrReference<'data>>>>,
+		mut parent_model: Option<Arc<ResourceLocation<'data>>>,
+		model_cache: &Mutex<Cache<RelativePath<'_>, Arc<RwLock<CachedItemOrBlockModel<'static>>>>>
+	) -> Result<Arc<TextureLocationOrReference<'data>>, InnerItemOrBlockModelAssetError> {
+		let mut texture_map = Some(texture_map);
+
+		// The fact that texture variables can refer to other texture variables is not
+		// documented in the Minecraft Wiki, so it's very likely that few packs in the
+		// wild use it. We don't use TinyVec here because the Default trait implementation
+		// for Arc does heap allocations, so using a Vec actually minimizes heap allocations
+		// due to not Default-initializing any backing array
+		let mut visited_variables = Vec::with_capacity(2);
+
+		loop {
+			match &*texture_variable {
+				TextureLocationOrReference::Location(_) => {
+					// This texture variable resolves to a texture resource location. This is
+					// the final information we're looking for: variable resolution is complete
+					return Ok(texture_variable);
+				}
+				TextureLocationOrReference::Reference(texture_var) => {
+					// A texture variable reference loop may happen if we visit the same variable twice,
+					// e.g. a -> b -> a. The game rejects such infinite loops, and so should we.
+					// Because this vector is expected to be very small, the constant factors in this
+					// O(n) lookup should offset the asymptotic O(1) cost offered by a hash table set
+					if visited_variables.contains(&texture_variable) {
+						return Err(
+							InnerItemOrBlockModelAssetError::TextureVariableReferenceLoop(
+								texture_var.to_string()
+							)
+						);
+					}
+
+					visited_variables.push(Arc::clone(&texture_variable));
+
+					match (
+						texture_map
+							.as_ref()
+							.and_then(|texture_map| texture_map.get(texture_var)),
+						&parent_model
+					) {
+						(Some(resolved_texture_variable), _) => {
+							// This texture variable resolves to another texture variable. Follow the
+							// dependency chain, like the game does
+							texture_variable = Arc::clone(resolved_texture_variable);
+						}
+						(None, Some(next_model)) => {
+							// The texture variable is not defined in this model, but it may be
+							// defined in some ancestor. Continue the search on the parent model
+							let next_model_path = next_model.as_relative_path()?;
+							if let Some(next_model) = self
+								.deserialize_model_asset_from_cache(&next_model_path, model_cache)?
+							{
+								let next_model = next_model.read();
+								texture_map = next_model.model.texture_map.as_ref().cloned();
+								parent_model = next_model.model.parent.as_ref().cloned();
+							} else {
+								// The model ancestors are unknown or built-in. They may not exist, they
+								// may exist but be of another pack and either define the texture variable
+								// or not. The first situation is an error; in the second, we can't be sure of
+								// the children either (other packs may define this model as a parent).
+								// Built-in models don't define texture variables to use, so error out in
+								// any case. Note that resolving texture variables may yield incorrect
+								// results when there are children or parents we don't know about, so
+								// we shouldn't attempt variable resolution in that case in the first
+								// place
+								return Err(
+									InnerItemOrBlockModelAssetError::UndefinedTransitiveTextureVariableReference(
+										texture_var.to_string()
+									)
+								);
+							}
+						}
+						(None, None) => {
+							// The texture variable is not defined in this model, and there are no
+							// ancestors to look up, so yield a resolution failure
+							return Err(
+								InnerItemOrBlockModelAssetError::UndefinedTransitiveTextureVariableReference(
+									texture_var.to_string()
+								)
+							);
+						}
+					}
+				}
+			}
+		}
+	}*/
 }
 
-fn is_builtin_model_path(relative_path: &RelativePath) -> bool {
+fn is_builtin_model_path(relative_path: &RelativePath<'_>) -> bool {
 	// See the ItemOrBlockModel struct documentation for more information about these
 	// built-in models
 	matches!(

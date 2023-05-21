@@ -15,19 +15,19 @@ impl ResourcePackProcessor {
 		Self
 	}
 
-	pub(super) fn process<F: Read + Seek + Send>(
+	pub(super) fn process<'params, 'state, F: Read + Seek + Send>(
 		self,
-		vfs: &(impl VirtualFileSystem + ?Sized),
-		pack_meta: PackMeta,
-		pack_files: PatriciaSet,
-		global_options: &GlobalOptions,
-		file_options: &FileOptionsMap,
-		squashed_pack_state: &SquashedPackState<'_, '_, F>
+		vfs: &'params (impl VirtualFileSystem + ?Sized),
+		pack_meta: &'params PackMeta,
+		pack_files: &'params PatriciaSet,
+		global_options: &'params GlobalOptions,
+		file_options: &'params FileOptionsMap,
+		squashed_pack_state: &'params SquashedPackState<'state, 'state, F>
 	) -> Result<(), PackError> {
 		let asset_processors = create_asset_processors(
 			vfs,
-			&pack_meta,
-			&pack_files,
+			pack_meta,
+			pack_files,
 			global_options,
 			file_options,
 			squashed_pack_state
