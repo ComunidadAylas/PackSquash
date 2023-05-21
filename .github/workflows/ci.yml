@@ -163,11 +163,12 @@ jobs:
           # The third line contains packages necessary for appimage-builder only.
           # The fourth line contains packages necessary for Tauri.
           # The fifth line contains packages necessary for build-time JSON Schema generation
+          # and the packsquash package build script
           apt-get install -yq build-essential git curl \
                               markdown html2text \
                               python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
                               libssl-dev:${{ matrix.apt-arch }} libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
-                              jq
+                              jq zlib1g-dev
 
       # The GitHub Windows and macOS images already have jq, git and the build-essential equivalents installed,
       # so we don't need to install them explicitly. However, that may not be the case in different environments
