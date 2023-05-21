@@ -1,11 +1,14 @@
 //! Contains the virtual file system trait and implementations.
 
+use std::{
+	borrow::Cow,
+	io::{self, BufRead, Seek},
+	ops::Deref,
+	time::SystemTime
+};
+
 use memmap2::Mmap;
 use patricia_tree::PatriciaSet;
-use std::borrow::Cow;
-use std::io::{self, BufRead, Seek};
-use std::ops::Deref;
-use std::time::SystemTime;
 
 use crate::RelativePath;
 

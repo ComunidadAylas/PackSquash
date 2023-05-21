@@ -1,14 +1,18 @@
 //! This automatically generated file contains the list of block state properties for several vanilla Minecraft versions.
 #![allow(clippy::type_complexity)]
 
-use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
+use std::{
+	fmt,
+	fmt::{Display, Formatter},
+	num::NonZeroU8,
+	ops::RangeBounds
+};
+
 use ahash::AHashMap;
 use packsquash_options::{minecraft_version, MinecraftVersion};
-use std::fmt;
-use std::fmt::{Display, Formatter};
-use std::num::NonZeroU8;
-use std::ops::RangeBounds;
 use tinyvec::{tiny_vec, TinyVec};
+
+use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
 
 /// A type of property that determines a block state.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]

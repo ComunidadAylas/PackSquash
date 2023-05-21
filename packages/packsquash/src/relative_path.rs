@@ -1,11 +1,17 @@
 //! Implements a ZIP friendly, UTF-8 relative path object with several useful
 //! operations and properties.
 
+use std::{
+	borrow::Cow,
+	fmt,
+	fmt::{Display, Formatter},
+	io,
+	ops::Deref,
+	path::MAIN_SEPARATOR
+};
+
 use camino::Utf8Path;
 use itertools::Itertools;
-use std::fmt::{Display, Formatter};
-use std::{borrow::Cow, fmt, io, ops::Deref, path::MAIN_SEPARATOR};
-
 use thiserror::Error;
 
 /// Represents a relative UTF-8 filesystem path that doesn't begin with

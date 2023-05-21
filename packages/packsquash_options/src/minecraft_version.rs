@@ -1,9 +1,11 @@
-use std::fmt::{Display, Formatter};
-use std::num::ParseIntError;
-use std::ops::{
-	Bound, Range, RangeBounds, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive
+use std::{
+	fmt::{Display, Formatter},
+	num::ParseIntError,
+	ops::{
+		Bound, Range, RangeBounds, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive
+	},
+	str::FromStr
 };
-use std::str::FromStr;
 
 #[derive(Clone, Copy, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
 pub struct MinecraftVersion {

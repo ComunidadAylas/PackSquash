@@ -5,16 +5,22 @@ mod asset_processor;
 pub(crate) mod pack_processor;
 mod resource_pack_processor;
 
-use self::asset_processor::blockstate_asset_processor::BlockStateAssetError;
-use self::pack_meta::PackMetaError;
-use crate::pack_processor::java::asset_processor::item_and_block_model_asset_processor::ItemOrBlockModelAssetError;
-use crate::squash_zip::SquashZipError;
-use crate::RelativePath;
+use std::{
+	fmt::{Display, Formatter},
+	io
+};
+
 use rayon::ThreadPoolBuildError;
-use std::fmt::{Display, Formatter};
-use std::io;
 use strum::EnumIter;
 use thiserror::Error;
+
+use self::{
+	asset_processor::blockstate_asset_processor::BlockStateAssetError, pack_meta::PackMetaError
+};
+use crate::{
+	pack_processor::java::asset_processor::item_and_block_model_asset_processor::ItemOrBlockModelAssetError,
+	squash_zip::SquashZipError, RelativePath
+};
 
 #[derive(Default, Clone, Copy, EnumIter, Eq, PartialEq, Hash, Debug)]
 pub enum PackType {

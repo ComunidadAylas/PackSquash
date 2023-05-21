@@ -1,8 +1,7 @@
-use std::borrow::Cow;
-use std::fmt::Formatter;
 use std::{
+	borrow::Cow,
 	env,
-	fmt::Display,
+	fmt::{Display, Formatter},
 	fs,
 	io::{self, ErrorKind, IsTerminal, Read, Stderr},
 	process::ExitCode,
@@ -13,13 +12,13 @@ use std::{
 use env_logger::{fmt::Color, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
 use log::{debug, error, info, Level, LevelFilter};
-
-use crate::util::IoWriteToFmtWriteAdapter;
 use packsquash::{PackSquashAssetProcessingStrategy, PackSquashStatus, VirtualFileSystemType};
 use packsquash_options::SquashOptions;
 use packsquash_util::deserialize_with_pretty_path_on_error;
 use terminal_style::{environment_allows_color, environment_allows_emoji};
 use terminal_title_controller::TerminalTitleController;
+
+use crate::util::IoWriteToFmtWriteAdapter;
 
 mod terminal_style;
 mod terminal_title_controller;
@@ -326,8 +325,9 @@ fn init_logging(
 		// Hide log messages from libraries by default
 		.filter(Some("packsquash"), LevelFilter::max())
 		.format(move |f, record| {
-			use env_logger::fmt::Style;
 			use std::fmt::Write;
+
+			use env_logger::fmt::Style;
 
 			let mut status_type = 0.into();
 			let status_type = record

@@ -1,20 +1,28 @@
-use crate::pack_processor::java::resource_location::{ResourceLocation, ResourceLocationError};
-use crate::pack_processor::java::PackType;
-use crate::util::cow_util::StripPrefixExt;
-use crate::util::enum_map_serializers::{
-	enum_map_ignore_missing_values_deserializer, enum_map_skip_none_values_serializer
-};
-use crate::util::zero_copy_deserialize_traits::ZeroCopyDeserializable;
+use std::{borrow::Cow, fmt::Formatter, sync::Arc};
+
 use ahash::AHashMap;
 use compact_str::CompactString;
 use enum_map::{Enum, EnumMap};
-use serde::de::{self, MapAccess, Visitor};
-use serde::{Deserialize, Deserializer, Serialize};
-use std::borrow::Cow;
-use std::fmt::Formatter;
-use std::sync::Arc;
+use serde::{
+	de::{self, MapAccess, Visitor},
+	Deserialize, Deserializer, Serialize
+};
 use strum::EnumIter;
 use thiserror::Error;
+
+use crate::{
+	pack_processor::java::{
+		resource_location::{ResourceLocation, ResourceLocationError},
+		PackType
+	},
+	util::{
+		cow_util::StripPrefixExt,
+		enum_map_serializers::{
+			enum_map_ignore_missing_values_deserializer, enum_map_skip_none_values_serializer
+		},
+		zero_copy_deserialize_traits::ZeroCopyDeserializable
+	}
+};
 
 /// A vanilla item or block model.
 ///

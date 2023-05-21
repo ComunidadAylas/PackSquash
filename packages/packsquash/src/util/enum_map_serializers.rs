@@ -5,11 +5,10 @@
 //! Inspired by the upstream source code at
 //! https://github.com/xfix/enum-map/blob/085679ed8bf279e4d773f58b48a12ceb7e76bf72/enum-map/src/serde.rs
 
+use std::{fmt, marker::PhantomData};
+
 use enum_map::{EnumArray, EnumMap};
-use serde::de::MapAccess;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt;
-use std::marker::PhantomData;
+use serde::{de, de::MapAccess, Deserialize, Deserializer, Serialize, Serializer};
 
 /// Serializer function for `EnumMap`s of `Option<V>` values, usable with Serde's
 /// `serialize_with` field attribute, that does not serialize entries with a `None`

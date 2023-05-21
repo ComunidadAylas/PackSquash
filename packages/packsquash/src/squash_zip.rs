@@ -1,28 +1,22 @@
 //! Implements a custom ZIP compressor that is tailored for PackSquash use cases.
 
-use std::sync::Mutex;
 use std::{
 	borrow::Cow,
 	collections::hash_map::Entry,
 	io::{self, ErrorKind, Read, Seek, SeekFrom, Write},
 	num::{NonZeroU8, TryFromIntError},
 	string::FromUtf8Error,
+	sync::Mutex,
 	time::SystemTime
 };
-use thiserror::Error;
 
 use aes::Aes128;
 use ahash::AHashMap;
 use once_cell::sync::Lazy;
 use packsquash_options::PercentageInteger;
+use thiserror::Error;
 use tinyvec::{tiny_vec, TinyVec};
 use zopfli::Format;
-
-use crate::{
-	scratch_file::{ScratchFile, ScratchFilesBudget},
-	util::crc32_hashing_read::Crc32HashingRead,
-	RelativePath
-};
 
 use self::{
 	obfuscation_engine::ObfuscationEngine,
@@ -31,6 +25,11 @@ use self::{
 		CentralDirectoryHeader, CompressionMethod, EndOfCentralDirectory, LocalFileHeader
 	},
 	zopfli_iterations_time_model::ZopfliIterationsTimeModel
+};
+use crate::{
+	scratch_file::{ScratchFile, ScratchFilesBudget},
+	util::crc32_hashing_read::Crc32HashingRead,
+	RelativePath
 };
 
 mod obfuscation_engine;

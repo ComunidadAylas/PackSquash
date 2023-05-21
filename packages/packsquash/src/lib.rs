@@ -65,17 +65,20 @@ pub static BUILD_YEAR: &str = env!("BUILD_YEAR");
 pub static CARGO_TARGET_TRIPLE: &str = env!("CARGO_TARGET_TRIPLE");
 pub static CARGO_PROFILE: &str = env!("CARGO_PROFILE");
 
-use crate::pack_processor::java;
-use crate::squash_zip::PreviousZipParseError;
-pub use crate::vfs::VirtualFileSystemType;
+use std::{
+	borrow::Cow,
+	fmt::{Display, Formatter},
+	fs::File,
+	io::{self, BufReader, ErrorKind}
+};
+
 use packsquash_options::SquashOptions;
 use relative_path::RelativePath;
-use std::borrow::Cow;
-use std::fmt::{Display, Formatter};
-use std::fs::File;
-use std::io::{self, BufReader, ErrorKind};
 use thiserror::Error;
 use tinyvec::TinyVec;
+
+pub use crate::vfs::VirtualFileSystemType;
+use crate::{pack_processor::java, squash_zip::PreviousZipParseError};
 
 #[derive(Error, Debug)]
 pub enum PackSquashError {

@@ -23,14 +23,13 @@ use rand_xoshiro::{
 	Xoshiro128Plus
 };
 
-use crate::RelativePath;
-
 use super::{
 	zip_file_record::{
 		CentralDirectoryHeader, CompressionMethod, EndOfCentralDirectory, LocalFileHeader
 	},
 	SquashZipSettings
 };
+use crate::RelativePath;
 
 const CRC32_KEY: u32 = {
 	let k = const_random!(u32);

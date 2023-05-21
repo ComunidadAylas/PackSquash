@@ -1,6 +1,9 @@
+use std::{
+	env, fs,
+	process::{Command, Stdio}
+};
+
 use serde::Serialize;
-use std::process::{Command, Stdio};
-use std::{env, fs};
 
 fn main() {
 	generate_debloated_options_file_json_schema();

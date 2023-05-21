@@ -1,10 +1,10 @@
-use crate::pack_processor::java::resource_location::ResourceLocation;
-use crate::pack_processor::java::PackType;
+use std::{borrow::Cow, ops::Deref};
+
 use ahash::AHashMap;
 use compact_str::format_compact;
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
-use std::ops::Deref;
+
+use crate::pack_processor::java::{resource_location::ResourceLocation, PackType};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct LanguageSection<'data> {

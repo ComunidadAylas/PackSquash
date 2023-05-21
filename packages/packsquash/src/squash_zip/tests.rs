@@ -1,4 +1,3 @@
-use camino::Utf8Path;
 use std::{
 	env,
 	fs::File,
@@ -6,9 +5,9 @@ use std::{
 	path::{Path, PathBuf}
 };
 
-use tempfile::{Builder, TempPath};
-
+use camino::Utf8Path;
 use pretty_assertions::assert_eq;
+use tempfile::{Builder, TempPath};
 
 use super::*;
 

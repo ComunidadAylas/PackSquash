@@ -1,11 +1,12 @@
 //! This automatically generated file contains the list of block states for several vanilla Minecraft versions.
 #![allow(clippy::type_complexity)]
 
-use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
-use crate::RelativePath;
+use std::ops::RangeBounds;
+
 use ahash::AHashSet;
 use packsquash_options::{minecraft_version, MinecraftVersion};
-use std::ops::RangeBounds;
+
+use crate::{util::range_bounds_intersect::RangeBoundsIntersectExt, RelativePath};
 
 static BLOCKSTATES_1_8_TO_1_9_EXCLUSIVE: [RelativePath<'static>; 340] = [
 	RelativePath::from_inner_borrowed("assets/minecraft/blockstates/acacia_door.json"),
