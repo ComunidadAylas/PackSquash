@@ -1,6 +1,6 @@
 #!/bin/sh -e
-# Builds the current PackSquash source in release mode and runs it with a
-# predefined set of options against some pack. Useful for manual, quick
+# Builds the current PackSquash CLI source in release mode and runs it with
+# a predefined set of options against some pack. Useful for manual, quick
 # one-off tests (just drop the assets to a folder and run). The pack
 # directory will default to "test_pack" (without the quotations)
 
@@ -31,6 +31,6 @@ fi
 
 # Build and run PackSquash. These options can be tweaked as desired.
 # Keep in mind that the text is expanded by the shell
-cargo run --release <<OPTIONS
+cargo run --release --bin packsquash <<OPTIONS
 pack_directory = '$PACK_DIRECTORY'
 OPTIONS

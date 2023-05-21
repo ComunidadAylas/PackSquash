@@ -42043,11 +42043,10 @@ pub fn matching_for_version_range(
 
 		if range_matches {
 			let matching_assets =
-				matching_assets.get_or_insert_with(|| AHashSet::with_capacity(assets.len() * 2));
+				matching_assets.get_or_insert_with(|| AHashSet::with_capacity(assets.len()));
 
 			for asset in assets {
-				matching_assets.insert(asset.as_deref());
-				matching_assets.insert(asset.with_comment_extension_suffix());
+				matching_assets.insert(asset.reborrow());
 			}
 		}
 	}

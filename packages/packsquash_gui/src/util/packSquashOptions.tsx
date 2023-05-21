@@ -1,4 +1,4 @@
-import { getOwner, JSXElement, Owner, runWithOwner } from "solid-js";
+import { Accessor, getOwner, JSXElement, Owner, runWithOwner } from "solid-js";
 import { JSONSchema7, JSONSchema7TypeName } from "json-schema";
 import optionsSchemaJson from "../data/optionsSchema.json";
 import { LocalizationProvider, useI18n } from "../contexts/i18n";
@@ -23,7 +23,7 @@ export function renderOptionsControls(): [
   JSXElement[],
   Partial<Record<string, number | boolean | string | Set<string>>>
 ] {
-  const [l10n] = useI18n();
+  const [, l10n] = useI18n();
 
   // TypeScript outputs some funky type inference errors without this double-cast.
   // It was manually checked that the types do indeed overlap for practical cases
@@ -129,7 +129,7 @@ export function renderOptionsControls(): [
 }
 
 function renderNumberOptionControl(
-  l10n: LocalizationProvider,
+  l10n: LocalizationProvider<Accessor<string>>,
   optionName: string,
   optionSchema: JSONSchema7,
   isRequired: boolean,
@@ -162,7 +162,7 @@ function renderNumberOptionControl(
 }
 
 function renderIntegerOptionControl(
-  l10n: LocalizationProvider,
+  l10n: LocalizationProvider<Accessor<string>>,
   optionName: string,
   optionSchema: JSONSchema7,
   isRequired: boolean,
@@ -241,7 +241,7 @@ function renderIntegerOptionControl(
 }
 
 function renderBooleanOptionControl(
-  l10n: LocalizationProvider,
+  l10n: LocalizationProvider<Accessor<string>>,
   optionName: string,
   optionSchema: JSONSchema7,
   isRequired: boolean,
@@ -270,7 +270,7 @@ function renderBooleanOptionControl(
 }
 
 function renderStringOptionControl(
-  l10n: LocalizationProvider,
+  l10n: LocalizationProvider<Accessor<string>>,
   optionName: string,
   optionSchema: JSONSchema7,
   isRequired: boolean,
@@ -350,7 +350,7 @@ function renderStringOptionControl(
 }
 
 function renderSavePathOptionControl(
-  l10n: LocalizationProvider,
+  l10n: LocalizationProvider<Accessor<string>>,
   optionName: string,
   optionSchema: JSONSchema7,
   isRequired: boolean,
@@ -402,7 +402,7 @@ function renderSavePathOptionControl(
 }
 
 function renderStringSetOptionControl(
-  l10n: LocalizationProvider,
+  l10n: LocalizationProvider<Accessor<string>>,
   optionName: string,
   optionSchema: JSONSchema7,
   isRequired: boolean,
@@ -463,7 +463,7 @@ function renderStringSetOptionControl(
 
 function showValidationErrorToast(
   event: Event & { currentTarget: HTMLInputElement },
-  l10n: LocalizationProvider,
+  l10n: LocalizationProvider<Accessor<string>>,
   componentOwner: Owner
 ) {
   if (!event.currentTarget.validity.valid) {

@@ -1,9 +1,9 @@
 use crate::scratch_file::ScratchFilesBudget;
 use crate::squash_zip::{SquashZip, SquashZipError, SquashZipSettings};
 use crate::RelativePath;
-use parking_lot::RwLock;
 use patricia_tree::PatriciaSet;
 use std::io::{Read, Seek, Write};
+use std::sync::RwLock;
 use std::time::SystemTime;
 
 pub struct SquashedPackState<'settings, 'budget, F: Read + Seek + Send> {
@@ -82,12 +82,10 @@ impl<'settings, 'budget, F: Read + Seek + Send> SquashedPackState<'settings, 'bu
 	}
 
 	pub fn mark_file_as_processed(&self, file_path: &RelativePath) -> bool {
-		self.processed_files.write().insert(file_path.as_str())
-	}
-
-	// TODO remove if not used
-	pub fn was_file_processed(&self, file_path: &RelativePath) -> bool {
-		self.processed_files.read().contains(file_path.as_str())
+		self.processed_files
+			.write()
+			.unwrap()
+			.insert(file_path.as_str())
 	}
 
 	pub fn finish<W: Write>(

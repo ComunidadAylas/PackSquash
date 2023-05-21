@@ -1,3 +1,4 @@
+use camino::Utf8Path;
 use std::{
 	env,
 	fs::File,
@@ -109,8 +110,8 @@ fn add_files_finish_and_read_back_test(
 		squash_zip
 			.add_file(
 				&RelativePath::new(
-					Path::new("./gimme/gimme"),
-					Path::new(&format!(
+					Utf8Path::new("./gimme/gimme"),
+					Utf8Path::new(&format!(
 						"./gimme/gimme/virtual/visions{}.bin",
 						file_name_number(i)
 					))

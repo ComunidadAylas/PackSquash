@@ -35,7 +35,9 @@ const dependencyListItems = cargoDependencies
             <address class="text-sm">{author}</address>
           ))
         }
-        <p classList={/* @once */ { "mb-4": i != arr.length - 1 }}>
+        <p
+          classList={/* @once */ { "mt-2": true, "mb-4": i != arr.length - 1 }}
+        >
           <a href={/* @once */ dependency.homepage} class="text-sm">
             {/* @once */ dependency.homepage}
           </a>

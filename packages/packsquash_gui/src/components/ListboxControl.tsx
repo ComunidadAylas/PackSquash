@@ -110,7 +110,7 @@ export default (
                 "text-form-control-placeholder-color": selectedValueIsEmpty()
               }}
             >
-              {selectedValuesText}
+              {selectedValuesText()}
             </span>
             <Show
               when={isOpen()}

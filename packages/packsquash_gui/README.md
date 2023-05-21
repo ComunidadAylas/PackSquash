@@ -57,5 +57,4 @@ language.
   bundle > windows > wix > language at `src-tauri/tauri.conf.json`.
 
 - [ ] Manually localize the Linux desktop entry comment string at
-  `src-tauri/bundles/deb/com.github.comunidadaylas.packsquash.gui.desktop` for
-  the new language.
+  `src-tauri/bundles/deb/org.aylas.packsquash.gui.desktop` for the new language.

@@ -12,7 +12,7 @@ fn generate_debloated_options_file_json_schema() {
 	let options_file_json_schema_path = env::var("DEP_PACKSQUASH_OPTIONS_FILE_JSON_SCHEMA")
 		.expect("Missing PackSquash options file JSON schema file");
 
-	// Debloat descriptions we won't need from the schema. jq also implicitly minifies the JSON data
+	// Debloat descriptions and system-specific defaults we won't need from the schema. jq also minifies the JSON data
 	let debloated_options_file_json_schema = String::from_utf8(
 		Command::new("jq")
 			.args([
@@ -22,7 +22,10 @@ fn generate_debloated_options_file_json_schema() {
 					// No-op option
 					"-r"
 				},
-				"del(.. | .description?) | del(.title)",
+				r#"
+					del(.. | .description?) |
+					del(.title)
+				"#,
 				&options_file_json_schema_path
 			])
 			.stderr(Stdio::null())

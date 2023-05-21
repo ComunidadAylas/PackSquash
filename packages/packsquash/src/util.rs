@@ -1,4 +1,4 @@
-pub mod cow_str_util;
+pub mod cow_util;
 pub mod crc32_hashing_read;
 pub mod enum_map_serializers;
 pub mod lazy_or_eager;

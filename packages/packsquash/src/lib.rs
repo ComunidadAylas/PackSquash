@@ -12,6 +12,7 @@
 #![feature(stmt_expr_attributes)]
 #![feature(const_fn_floating_point_arithmetic)]
 #![feature(impl_trait_in_assoc_type)]
+#![feature(hash_drain_filter)]
 #![feature(concat_idents)]
 #![doc(
 	html_logo_url = "https://user-images.githubusercontent.com/7822554/243825966-500faa74-de2f-462a-8f76-3a122b69856e.png"
@@ -139,8 +140,8 @@ pub enum PackSquashAssetProcessingStrategy {
 }
 
 pub fn run(options: &SquashOptions, vfs_type: VirtualFileSystemType) -> Result<(), PackSquashError> {
-	java::pack_processor::PackProcessor::new().process(
-		|| match File::open(&options.global_options.output_file_path) {
+	Ok(java::pack_processor::PackProcessor::new().process(
+		|| match File::open(&*options.global_options.output_file_path) {
 			Ok(file) => Some(BufReader::new(file)),
 			Err(err) if err.kind() == ErrorKind::NotFound => None,
 			Err(err) => {
@@ -157,7 +158,5 @@ pub fn run(options: &SquashOptions, vfs_type: VirtualFileSystemType) -> Result<(
 		},
 		vfs_type,
 		options
-	)?;
-
-	Ok(())
+	)?)
 }

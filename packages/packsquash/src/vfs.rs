@@ -31,12 +31,12 @@ pub trait VirtualFileSystem: Send + Sync {
 	fn file_set(&self) -> io::Result<PatriciaSet>;
 
 	/// Opens the file at the specified path for read-only access.
-	fn open(&self, path: &RelativePath) -> io::Result<VfsFile<Self::FileRead>>;
+	fn open(&self, path: &RelativePath<'_>) -> io::Result<VfsFile<Self::FileRead>>;
 
-	fn mmap(&self, path: &RelativePath) -> io::Result<VfsMmap>;
+	fn mmap(&self, path: &RelativePath<'_>) -> io::Result<VfsMmap>;
 
 	// TODO docs: do not return error if it does not exist
-	fn is_dir(&self, path: &RelativePath) -> io::Result<bool>;
+	fn is_dir(&self, path: &RelativePath<'_>) -> io::Result<bool>;
 }
 
 /// An open file in a virtual filesystem, from which data can be read and

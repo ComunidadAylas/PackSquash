@@ -62,7 +62,7 @@ pub enum InnerBlockStateAssetError {
 	#[error("Invalid resource location: {0}")]
 	InvalidResourceLocation(#[from] ResourceLocationError),
 	#[error("Invalid pack file path: {0}")]
-	InvalidRelativePath(#[from] InvalidPathError<'static>),
+	InvalidRelativePath(#[from] InvalidPathError),
 	#[error("Unrecognized block state property: {0}")]
 	UnrecognizedPropertyName(Cow<'static, str>),
 	#[error("Invalid value {value} for block state property {name}: Expected {expected_types}")]
@@ -88,42 +88,36 @@ pub enum InnerBlockStateAssetError {
 	Io(#[from] io::Error)
 }
 
-#[derive(Error, Debug)]
-#[error("{file_path}: {inner}")]
-pub struct BlockStateAssetError {
-	inner: InnerBlockStateAssetError,
-	file_path: RelativePath<'static>
-}
+define_path_wrapper_err!(InnerBlockStateAssetError: BlockStateAssetError);
 
 // TODO docs
 pub struct BlockStateAssetProcessor<
+	'params,
 	'state,
-	'settings,
-	'budget,
 	V: VirtualFileSystem + ?Sized,
 	F: Read + Seek + Send
 > {
-	vfs: &'state V,
-	pack_meta: &'state PackMeta,
-	pack_files: &'state PatriciaSet,
-	global_options: &'state GlobalOptions<'state>,
-	file_options: &'state FileOptionsMap<'state>,
-	squashed_pack_state: &'state SquashedPackState<'settings, 'budget, F>,
+	vfs: &'params V,
+	pack_meta: &'params PackMeta,
+	pack_files: &'params PatriciaSet,
+	global_options: &'params GlobalOptions<'params>,
+	file_options: &'params FileOptionsMap<'params>,
+	squashed_pack_state: &'params SquashedPackState<'state, 'state, F>,
 	game_version_supports_blockstates: bool,
 	is_game_version_before_the_flattening: bool,
 	game_version_has_multipart_model_strategy: bool
 }
 
-impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek + Send>
-	BlockStateAssetProcessor<'state, 'settings, 'budget, V, F>
+impl<'params, 'state, V: VirtualFileSystem + ?Sized, F: Read + Seek + Send>
+	BlockStateAssetProcessor<'params, 'state, V, F>
 {
 	pub fn new(
-		vfs: &'state V,
-		pack_meta: &'state PackMeta,
-		pack_files: &'state PatriciaSet,
-		global_options: &'state GlobalOptions,
-		file_options: &'state FileOptionsMap,
-		squashed_pack_state: &'state SquashedPackState<'settings, 'budget, F>
+		vfs: &'params V,
+		pack_meta: &'params PackMeta,
+		pack_files: &'params PatriciaSet,
+		global_options: &'params GlobalOptions,
+		file_options: &'params FileOptionsMap,
+		squashed_pack_state: &'params SquashedPackState<'state, 'state, F>
 	) -> Self {
 		let game_version_range = pack_meta.game_version_range();
 
@@ -153,7 +147,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 		model_asset_processor: &ItemAndBlockModelAssetProcessor<
 			V,
 			F,
-			impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + 'state + Send
+			impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + Send
 		>
 	) -> Result<(), BlockStateAssetError> {
 		if !self.game_version_supports_blockstates {
@@ -169,7 +163,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 		let vanilla_blockstates =
 			vanilla_blockstate_list::matching_for_version_range(game_version_range);
 
-		let process_asset = |(candidate_asset_path, is_vanilla)| -> Result<(), BlockStateAssetError> {
+		let process_asset = |(candidate_asset_path, is_vanilla)| {
 			self.process_blockstate_asset(
 				&candidate_asset_path,
 				get_file_specific_options!(self.file_options, &candidate_asset_path, JsonFileOptions),
@@ -183,18 +177,15 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 				},
 				model_asset_processor
 			)
-			.map_err(|err| BlockStateAssetError {
-				inner: err,
-				file_path: candidate_asset_path.into_owned()
-			})
+			.into_err_with_path(|| candidate_asset_path.into_owned())
 		};
 
 		match (
 			self.global_options
 				.process_not_self_referenced_and_non_vanilla_assets,
-			vanilla_blockstates.is_some()
+			vanilla_blockstates
 		) {
-			(true, _) | (_, false) => {
+			(true, vanilla_blockstates @ Some(_)) | (_, vanilla_blockstates @ None) => {
 				// Exhaustive asset enumeration strategy: we either want to include non-vanilla assets
 				// or we don't know what vanilla assets there are, so iterate over all the plausible
 				// assets
@@ -205,7 +196,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 				// namespaces themselves are only used as mod IDs. Therefore, in practice it does not happen
 				// that a mod-specific namespace reads non-blockstate assets from the block states path
 				let any_blockstate_path_matcher =
-					compile_hardcoded_pack_file_glob_pattern("assets/?*/blockstates/**/?*.jso{n,nc}")
+					compile_hardcoded_pack_file_glob_pattern("assets/?*/blockstates/**/?*.json")
 						.compile_matcher();
 
 				self.pack_files
@@ -217,7 +208,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 						// net.minecraft.client.resources.model.ModelResourceLocation). Every
 						// known mod for the Minecraft versions that support block states expands
 						// on this vanilla logic, so filtering by that should be fine
-						if any_blockstate_path_matcher.is_match(&relative_path)
+						if any_blockstate_path_matcher.is_match(&*relative_path)
 							&& ResourceLocation::try_from(&relative_path).is_ok()
 						{
 							let is_vanilla = vanilla_blockstates.as_ref().map_or_else(
@@ -232,23 +223,22 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 					})
 					.try_for_each(process_asset)
 			}
-			(false, true) => {
+			(false, Some(vanilla_blockstates)) => {
 				// Focused asset enumeration strategy: we only want vanilla assets and we know what vanilla
 				// assets there are, so process them, and only them, right away
 
 				// The Rust compiler needs some help to figure out that we want to unwrap the owned HashMap
 				// from the AHashMap deref facade, which is necessary to be able to move it to the
 				// into_par_iter() call
-				<AHashSet<RelativePath<'_>> as Into<HashSet<_, _>>>::into(
-					vanilla_blockstates.unwrap()
-				)
-				.into_par_iter()
-				.map(|relative_path| (relative_path, true))
-				.try_for_each(process_asset)
+				<AHashSet<RelativePath<'_>> as Into<HashSet<_, _>>>::into(vanilla_blockstates)
+					.into_par_iter()
+					.map(|relative_path| (relative_path, true))
+					.try_for_each(process_asset)
 			}
 		}
 	}
 
+	#[inline]
 	fn process_blockstate_asset<'options>(
 		&self,
 		asset_path: &RelativePath,
@@ -261,7 +251,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 		model_asset_processor: &ItemAndBlockModelAssetProcessor<
 			V,
 			F,
-			impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + 'state + Send
+			impl FnOnce() -> Option<AHashSet<RelativePath<'static>>> + Send
 		>
 	) -> Result<(), InnerBlockStateAssetError> {
 		let check_missing_references = !matches!(
@@ -279,21 +269,18 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 			asset_path,
 			self.vfs,
 			self.squashed_pack_state,
+			true,
 			false,
 			self.global_options.always_allow_json_comments,
-			"json",
-			|outcome: JsonAssetDeserializeOutcome<'_, BlockState<'_>>| match outcome {
+			|outcome: JsonAssetDeserializeOutcome<BlockState<'_>>| match outcome {
 				JsonAssetDeserializeOutcome::Value {
 					value: mut blockstate,
-					canonical_path: canonical_asset_path,
 					size_hint,
 					..
 				} => {
 					// The file name without the extension matches the block name
 					let block_name = asset_path
 						.file_name()
-						.unwrap()
-						.to_str()
 						.unwrap()
 						.rsplit_once('.')
 						.unwrap()
@@ -310,8 +297,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 								model_location,
 								self.pack_meta,
 								self.global_options,
-								(missing_references_are_warnings && check_missing_references)
-									.then_some(&mut asset_warnings),
+								missing_references_are_warnings.then_some(&mut asset_warnings),
 								|model_path| {
 									let model_exists = |candidate_model_path| {
 										let exists =
@@ -319,14 +305,11 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 
 										// If the model exists, it should be able to be processed
 										if exists {
-											model_asset_processor.process_model_asset(
-												candidate_model_path,
-												get_file_specific_options!(
-													self.file_options,
-													candidate_model_path,
-													JsonFileOptions
-												)
-											)?;
+											model_asset_processor
+												.models_referenced_by_blockstates
+												.lock()
+												.unwrap()
+												.insert(model_path.as_owned());
 										}
 
 										Ok::<_, InnerBlockStateAssetError>(exists)
@@ -337,8 +320,7 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 									// on existing models. Due to the logic OR operator short-circuiting
 									// property, we'll avoid checking the second path if the first candidate
 									// exists, which is desirable and saves operations
-									let exists = model_exists(model_path)?
-										|| model_exists(&model_path.with_comment_extension_suffix())?;
+									let exists = model_exists(model_path)?;
 
 									Ok(!check_missing_references || exists)
 								},
@@ -370,11 +352,8 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 						file_options.minify
 					)?;
 
-					self.squashed_pack_state.add_file_to_zip(
-						&canonical_asset_path,
-						processed_file,
-						false
-					)?;
+					self.squashed_pack_state
+						.add_file_to_zip(asset_path, processed_file, false)?;
 
 					// Let interested parties know we've processed this file
 					status_trace!(
@@ -396,30 +375,13 @@ impl<'state, 'settings, 'budget, V: VirtualFileSystem + ?Sized, F: Read + Seek +
 
 					Ok(())
 				}
-				JsonAssetDeserializeOutcome::FreshInPreviousZip {
-					canonical_path: canonical_asset_path
-				} => {
-					self.squashed_pack_state
-						.add_previous_zip_file(&canonical_asset_path)?;
-
-					// Let interested parties know we've blindly copied this file
-					status_trace!(
-						ProcessedAsset {
-							strategy: PackSquashAssetProcessingStrategy::CopiedFromPreviousZip,
-							warnings: asset_warnings
-						},
-						asset_path = asset_path.as_str()
-					);
-
-					Ok(())
-				}
-				JsonAssetDeserializeOutcome::NotFound
-				| JsonAssetDeserializeOutcome::CanonicalPathAlreadyProcessed => {
+				JsonAssetDeserializeOutcome::NotFound => {
 					// Ignore files that do not exist (i.e., opening them returned a "not found" error):
-					// they most likely are candidate paths the pack does not contain. Also ignore other
-					// candidates once one is processed
+					// they most likely are candidate paths the pack does not contain
 					Ok(())
 				}
+				JsonAssetDeserializeOutcome::FreshInPreviousZip
+				| JsonAssetDeserializeOutcome::AlreadyProcessed => unreachable!()
 			}
 		)?
 	}

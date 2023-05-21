@@ -1,22 +1,25 @@
 use crate::java::resource_location::ResourceLocation;
+use ahash::AHashMap;
 use onig::{Regex, RegexOptions, Syntax};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::marker::PhantomData;
 use std::ops::Deref;
 use tinyvec::TinyVec;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct ResourceFilterSection<'data> {
-	#[serde(borrow)]
 	#[serde(rename = "filter")]
-	pub block_filters: ResourceFilterBlockList<'data>
+	pub block_filters: ResourceFilterBlockList<'data>,
+	#[serde(flatten, borrow)]
+	pub(super) bloat_fields: AHashMap<Cow<'data, str>, ijson::IValue>
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct ResourceFilterBlockList<'data> {
 	#[serde(borrow)]
-	block: TinyVec<[ResourceBlockFilter<'data>; 2]>
+	block: TinyVec<[ResourceBlockFilter<'data>; 2]>,
+	#[serde(flatten, borrow)]
+	pub(super) bloat_fields: AHashMap<Cow<'data, str>, ijson::IValue>
 }
 
 impl<'data> Deref for ResourceFilterBlockList<'data> {
@@ -27,13 +30,19 @@ impl<'data> Deref for ResourceFilterBlockList<'data> {
 	}
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Deserialize, Serialize, Debug, Default)]
 #[serde(try_from = "ResourceBlockFilterObject<'_>")]
 pub struct ResourceBlockFilter<'data> {
+	#[serde(skip_serializing)]
 	namespace_regex: Option<Regex>,
-	path_regex: Option<Regex>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	#[serde(borrow)]
-	try_from_lifetime_marker: PhantomData<&'data ()>
+	namespace: Option<Cow<'data, str>>,
+	#[serde(skip_serializing)]
+	path_regex: Option<Regex>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(borrow)]
+	path: Option<Cow<'data, str>>
 }
 
 impl ResourceBlockFilter<'_> {
@@ -69,20 +78,23 @@ impl<'data> TryFrom<ResourceBlockFilterObject<'data>> for ResourceBlockFilter<'d
 
 		let namespace_regex = value
 			.namespace
+			.as_ref()
 			.map(|namespace| {
-				Regex::with_options(&namespace, RegexOptions::REGEX_OPTION_NONE, Syntax::java())
+				Regex::with_options(namespace, RegexOptions::REGEX_OPTION_NONE, Syntax::java())
 			})
 			.transpose()?;
 
 		let path_regex = value
 			.path
-			.map(|path| Regex::with_options(&path, RegexOptions::REGEX_OPTION_NONE, Syntax::java()))
+			.as_ref()
+			.map(|path| Regex::with_options(path, RegexOptions::REGEX_OPTION_NONE, Syntax::java()))
 			.transpose()?;
 
 		Ok(Self {
 			namespace_regex,
+			namespace: value.namespace,
 			path_regex,
-			..Default::default()
+			path: value.path
 		})
 	}
 }

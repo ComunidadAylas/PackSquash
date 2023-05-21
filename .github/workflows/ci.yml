@@ -21,7 +21,8 @@ jobs:
     timeout-minutes: 15
 
     # Exclude in-repo PRs from running this job
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
+    if: github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
 
     steps:
       - name: 📥 Checkout source
@@ -148,7 +149,8 @@ jobs:
       PKG_CONFIG_PATH: ${{ matrix.pkg-config-path }}
 
     # Exclude in-repo PRs from running this job
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
+    if: github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
 
     steps:
       - name: 🧰 Install Linux toolchain packages
@@ -246,7 +248,8 @@ jobs:
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- \
+          ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Build GUI frontend, installers and updater artifacts
         if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'

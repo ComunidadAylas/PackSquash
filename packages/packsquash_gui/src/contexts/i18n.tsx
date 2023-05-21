@@ -2,9 +2,12 @@ import {
   Accessor,
   createContext,
   createEffect,
+  createResource,
+  createMemo,
   createSignal,
   Setter,
-  useContext
+  useContext,
+  JSXElement
 } from "solid-js";
 import { ParentProps } from "solid-js/types/render/component";
 import { negotiateLanguages } from "@fluent/langneg";
@@ -62,14 +65,15 @@ export interface LocaleInfo {
   friendlyName: string;
 }
 
-export type LocalizationProvider = (
+export type LocalizationProvider<T> = (
   id: string,
   args?: Record<string, unknown>,
   fallbackMessage?: string
-) => Accessor<string>;
+) => T;
 
 type I18nContextValue = [
-  LocalizationProvider,
+  LocalizationProvider<JSXElement>,
+  LocalizationProvider<Accessor<string>>,
   {
     selectedLocale: Accessor<Locale | undefined>;
     setSelectedLocale: Setter<Locale | undefined>;
@@ -82,7 +86,6 @@ export function I18nProvider(props: ParentProps<I18nOptions>) {
   const [selectedLocale, setSelectedLocale] = createSignal(
     props.selectedLocale
   );
-  const [l10n, setL10n] = createSignal<Localization>();
 
   async function* generateBundles(resourceIds: string[]) {
     console.debug("Generating localization bundles");
@@ -100,80 +103,80 @@ export function I18nProvider(props: ParentProps<I18nOptions>) {
     for (const locale of negotiatedLocales) {
       const bundle = new FluentBundle(locale);
 
-      let resourceId;
-      try {
-        for (resourceId of resourceIds) {
-          const resourcePath = new URL(
-            `../assets/i18n/${locale}/${resourceId}`,
-            import.meta.url
-          );
-          const resource = new FluentResource(
-            await (await fetch(resourcePath)).text()
-          );
-
-          let bundleErrors;
-          if ((bundleErrors = bundle.addResource(resource)).length > 0) {
-            throw bundleErrors[0];
-          }
-        }
-
-        // The first negotiated locale is the one we will try to display. The rest are fallbacks.
-        // We always have at least one negotiated locale because we default to English
-        if (isFirstNegotiatedLocale) {
-          document.documentElement.lang = locale;
-          isFirstNegotiatedLocale = false;
-        }
-
-        yield bundle;
-      } catch (error) {
-        console.error(
-          `Could not load resource ${resourceId} for locale bundle ${locale}: ${error}`
+      for (const resourceId of resourceIds) {
+        const resourcePath = new URL(
+          `../assets/i18n/${locale}/${resourceId}`,
+          import.meta.url
         );
+        const resource = new FluentResource(
+          await (await fetch(resourcePath)).text()
+        );
+
+        let bundleErrors;
+        if ((bundleErrors = bundle.addResource(resource)).length > 0) {
+          console.error(
+            `Could not load resource ${resourceId} for locale bundle ${locale}: ${bundleErrors[0]}`
+          );
+        }
       }
+
+      // The first negotiated locale is the one we will try to display. The rest are fallbacks.
+      // We always have at least one negotiated locale because we default to English
+      if (isFirstNegotiatedLocale) {
+        document.documentElement.lang = locale;
+        isFirstNegotiatedLocale = false;
+      }
+
+      yield bundle;
     }
   }
 
-  createEffect(async () => {
-    // Generating bundles reads the selected locale, so this effect will trigger when it changes
+  const l10n = createMemo(async () => {
     const l10n = new Localization(["messages.ftl"], generateBundles);
-    setL10n(l10n);
 
     // Interesting read about directionality: https://www.w3.org/International/questions/qa-html-dir
     document.documentElement.dir = await l10n.formatValue(
       "language-text-directionality"
     );
 
+    return l10n;
+  });
+
+  createEffect(async () => {
     const newSelectedLocale = selectedLocale();
     if (newSelectedLocale) {
       await persistSelectedLocale(newSelectedLocale);
     }
   });
 
+  const l10nResource = (
+    id: string,
+    args?: Record<string, unknown>,
+    fallbackMessage?: string
+  ) => {
+    return createResource(
+      l10n,
+      async (l10n) => {
+        return (
+          (await l10n.then((l10n) => l10n.formatValue(id, args))) ??
+          fallbackMessage ??
+          id
+        );
+      },
+      {
+        initialValue: fallbackMessage ?? id
+      }
+    )[0] as Accessor<string>;
+  };
+
   return (
     <I18nContext.Provider
       value={[
-        (id, args, fallbackMessage) => {
-          const fallbackString =
-            fallbackMessage === undefined ? id : fallbackMessage;
-
-          const [translatedMessage, setTranslatedMessage] =
-            createSignal(fallbackString);
-
-          createEffect(async () => {
-            let message;
-            try {
-              message = await l10n()?.formatValue(id, args);
-            } catch (error) {
-              console.error("Translation error:", error);
-            } finally {
-              setTranslatedMessage(
-                message === undefined ? fallbackString : message
-              );
-            }
-          });
-
-          return translatedMessage;
-        },
+        // This hack is necessary since solid 1.7 because TypeScript definitions are no longer
+        // really accurate, and the alternative solutions break WebKit support.
+        // See: https://github.com/solidjs/solid/discussions/1554
+        l10nResource as unknown as LocalizationProvider<JSXElement>,
+        l10nResource,
         {
           selectedLocale: selectedLocale,
           setSelectedLocale: setSelectedLocale

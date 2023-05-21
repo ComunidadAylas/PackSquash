@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/tauri-v1.2.4/tooling/cli/schema.json",
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/tauri-v1.3.0/tooling/cli/schema.json",
   "build": {
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
@@ -74,7 +74,7 @@
         "msi",
         "dmg"
       ],
-      "identifier": "com.github.comunidadaylas.packsquash.gui",
+      "identifier": "org.aylas.packsquash.gui",
       "shortDescription": "The Minecraft: Java Edition resource and data pack optimizer",
       "publisher": "Comunidad Aylas",
       "category": "Utility",
