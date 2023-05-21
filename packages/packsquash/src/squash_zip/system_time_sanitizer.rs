@@ -4,7 +4,10 @@
 use std::time::{Duration, SystemTime, SystemTimeError};
 
 use aes::cipher::generic_array::GenericArray;
-use aes::{Aes128, Block, BlockDecrypt, BlockEncrypt, NewBlockCipher};
+use aes::{
+	cipher::{BlockCipher, BlockEncrypt, KeyInit},
+	Aes128, Block
+};
 use const_random::const_random;
 
 use fpe::ff1::{BinaryNumeralString, FF1};
@@ -38,8 +41,8 @@ pub enum SystemTimeSanitizationError {
 //
 // If you're trying to reverse the sanitized format, please consider whether doing
 // so is really worth your time and that PackSquash developers made it harder for
-// you because pack files modification dates are inteded to be private.
-pub(super) struct SystemTimeSanitizer<C: NewBlockCipher + BlockEncrypt + BlockDecrypt + Clone> {
+// you because pack files modification dates are intended to be private.
+pub(super) struct SystemTimeSanitizer<C: BlockCipher + BlockEncrypt + Clone> {
 	ff1_cipher: FF1<C>
 }
 
@@ -74,7 +77,7 @@ impl SystemTimeSanitizer<Aes128> {
 	}
 }
 
-impl<C: NewBlockCipher + BlockEncrypt + BlockDecrypt + Clone> SystemTimeSanitizer<C> {
+impl<C: BlockCipher + BlockEncrypt + Clone> SystemTimeSanitizer<C> {
 	/// Sanitizes the specified [SystemTime], using a tweak for the underlying cipher.
 	/// The tweak is somewhat similar in role to a salt and need not be secret.
 	/// The sanitization process may represent the system time with reduced precision,

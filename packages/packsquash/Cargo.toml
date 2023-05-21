@@ -1,95 +1,79 @@
 [package]
 name = "packsquash"
 description = "Minecraft resource and data pack optimizer"
-version = "0.3.1"
-authors = ["Alejandro \"AlexTMjugador\" González"]
-repository = "https://github.com/ComunidadAylas/PackSquash"
-license = "AGPL-3.0-or-later"
-readme = "../../README.md"
-publish = false
-edition = "2021"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+publish.workspace = true
+edition.workspace = true
 # Hack to make (DEP_PACKSQUASH_)OPTIONS_FILE_JSON_SCHEMA environment variable be available
 # to downstream build scripts. See:
 # https://github.com/rust-lang/cargo/issues/3544
 links = "packsquash"
 
 [dependencies]
-packsquash_options = { path = "../packsquash_options", version = "0.3.1" }
-packsquash_util = { path = "../packsquash_util", version = "0.4.0" }
+packsquash_options.workspace = true
+packsquash_util.workspace = true
 
-enumset = "1.0.12"
-enum-map = "2.4.2"
-strum = "0.24.1"
+enumset.workspace = true
+enum-map = "2.5.0"
+strum.workspace = true
 itertools = "0.10.5"
-thiserror = "1.0.38"
+thiserror = "1.0.40"
+paste = "1.0.12"
 
-globset = { version = "0.4.10", default-features = false }
-patricia_tree = "0.5.5"
-quick_cache = "0.2.2"
-ahash = "0.8.3"
+globset.workspace = true
+patricia_tree = "0.5.7"
+quick_cache = { version = "0.3.0", default-features = false, features = ["ahash"] }
+ahash.workspace = true
 tinyvec = { version = "1.6.0", features = ["alloc", "rustc_1_55", "serde"] }
+compact_str = { version = "0.7.0", features = ["serde"] }
 
-rayon = "1.6.1"
-parking_lot = { version = "0.12.1", features = ["hardware-lock-elision"] }
-once_cell = { version = "1.17.1", features = ["parking_lot"] }
+rayon = "1.7.0"
+once_cell = "1.17.1"
 
-log = { version = "0.4.17", features = ["kv_unstable"] }
+log = { workspace = true, features = ["kv_unstable"] }
 
-walkdir = "2.3.2"
-memmap2 = "0.5.9"
-path-clean = "0.1.0"
+walkdir = "2.3.3"
+memmap2 = "0.6.1"
+path-clean = "1.0.1"
 
-serde = { version = "1.0.152", features = ["derive"] }
-serde_path_to_error = "0.1.9"
+serde.workspace = true
+serde_json.workspace = true
+ijson = "0.1.3"
 
-serde_json = "1.0.93"
 json_comments = "0.2.1"
 
-spng = { version = "0.2.0-alpha.2", default-features = false }
-png = "0.17.7"
-rgb = "0.8.36"
-imagequant = { version = "4.1.0", default-features = false, features = ["threads"] }
-oxipng = { version = "8.0.0", default-features = false, features = ["zopfli", "parallel"] }
-
-symphonia = { version = "0.5.2", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
-vorbis_rs = "0.2.0"
-dasp_signal = { version = "0.11.0", default-features = false }
-dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
-dasp_ring_buffer = "0.11.0"
-dasp_frame = "0.11.0"
-rubato = "0.12.0"
-optivorbis = "0.1.2"
-
-glsl = "6.0.1"
-
-java-properties = { version = "1.4.1", optional = true }
-
-tempfile = "3.3.0"
+tempfile = "3.5.0"
 crc32fast = "1.3.2"
 zopfli = "0.7.2"
 
+camino.workspace = true
 const-random = "0.1.15"
-aes = "0.7.5"
-fpe = "0.5.1"
-uuid = "1.3.0"
+aes = "0.8.2"
+fpe = "0.6.1"
+uuid = "1.3.3"
 entropy = "0.4.1"
 rand_xoshiro = "0.6.0"
 onig = { version = "6.4.0", default-features = false }
 
 [target.'cfg(windows)'.dependencies]
-winreg = "0.11.0"
-wmi = { version = "0.11.4", default-features = false, features = ["time"] }
+winreg = "0.50.0"
+wmi = { version = "0.13.0", default-features = false, features = ["time"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.9.3"
-mach = "0.3.2"
+mach2 = "0.4.1"
 
 [build-dependencies]
-git2 = { version = "0.16.1", default-features = false }
-time = { version = "0.3.19", default-features = false, features = ["std"] }
-schemars = { version = "0.8.11", default-features = false }
-serde_json = "1.0.93"
-packsquash_options = { version = "0.3.1", path = "../packsquash_options" }
+packsquash_options.workspace = true
+
+git2 = { version = "0.17.1", default-features = false }
+time = { version = "0.3.21", default-features = false, features = ["std"] }
+
+serde_json.workspace = true
+schemars.workspace = true
 
 [dev-dependencies]
 pretty_assertions = "1.3.0"
@@ -101,5 +85,6 @@ default = ["mod-support"]
 # This feature will include support for all the mods that PackSquash will ever support
 mod-support = ["optifine-support", "mtr3-support"]
 
-optifine-support = ["java-properties"]
+# TODO implement
+optifine-support = []
 mtr3-support = []

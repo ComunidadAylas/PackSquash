@@ -1,35 +1,35 @@
 [package]
 name = "packsquash_gui"
 description = "Minecraft resource and data pack optimizer (GUI)"
-version = "0.4.0"
-authors = ["Alejandro \"AlexTMjugador\" González"]
-repository = "https://github.com/ComunidadAylas/PackSquash"
-license = "AGPL-3.0-or-later"
-readme = "../../../README.md"
-publish = false
-edition = "2021"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+publish.workspace = true
+edition.workspace = true
 
 [dependencies]
-packsquash = { path = "../../packsquash", version = "0.3.1" }
-packsquash_options = { path = "../../packsquash_options", version = "0.3.1", features = ["serializable-squash-options"] }
+packsquash.workspace = true
+packsquash_options = { workspace = true, features = ["serializable-squash-options"] }
 
-tauri = { version = "1.2.4", features = ["clipboard-write-text", "dialog-open", "dialog-save", "os-all", "shell-execute", "shell-open", "updater", "window-request-user-attention", "window-set-title"] }
-tauri-plugin-store = { version = "0.0.0", git = "https://github.com/tauri-apps/tauri-plugin-store", rev = "4326f754" }
+tauri = { version = "1.3.0", features = ["clipboard-write-text", "dialog-open", "dialog-save", "os-all", "shell-execute", "shell-open", "updater", "window-request-user-attention", "window-set-title"] }
+tauri-plugin-store = { version = "0.0.0", git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 
-log = "0.4.17"
+toml = { workspace = true, features = ["parse", "display"] }
 
-path-absolutize = "3.0.14"
+log.workspace = true
 
-toml = { version = "0.7.2", default-features = false, features = ["parse", "display"] }
+path-absolutize = "3.1.0"
 
 [build-dependencies]
-tauri-build = { version = "1.2.1", features = [] }
+tauri-build = { version = "1.3.0", features = [] }
 
-cargo-about = "0.5.4"
-krates = "0.12.6"
-serde = { version = "1.0.152", features = ["derive"] }
-serde_json = "1.0.93"
-toml = { version = "0.7.2", default-features = false, features = ["parse"] }
+serde.workspace = true
+serde_json.workspace = true
+toml = { workspace = true, features = ["parse"] }
+
+cargo-about = "0.5.6"
+krates = "0.13.0"
 
 [features]
 # Enable Tauri production mode by default.
@@ -42,7 +42,7 @@ custom-protocol = ["tauri/custom-protocol"]
 # Tauri deb bundler source: https://github.com/tauri-apps/tauri/blob/62ce02f6b5e95b1bb9682cdce7e678350ad666d1/tooling/bundler/src/bundle/linux/debian.rs
 [package.metadata.deb]
 name = "packsquash-gui"
-maintainer = "Alejandro González <AlexTMjugador@users.noreply.github.com>"
+maintainer = "Alejandro González <me@alegon.dev>"
 copyright = "PackSquash developers"
 license-file = ["../../../LICENSE", "0"]
 extended-description-file = "target/debian/extended_package_description.txt"
@@ -51,7 +51,7 @@ assets = [
     ["target/release/packsquash_gui", "usr/bin/packsquash-gui", "755"],
     ["../../../README.md", "usr/share/doc/packsquash-gui/README.md", "644"],
     ["bundles/icons/256x256.png", "usr/share/icons/hicolor/256x256/apps/packsquash.png", "644"],
-    ["bundles/deb/com.github.comunidadaylas.packsquash.gui.desktop", "usr/share/applications/", "644"]
+    ["bundles/deb/org.aylas.packsquash.gui.desktop", "usr/share/applications/", "644"]
 ]
 section = "utils"
 # For each release with the same version number (shouldn't be too many),

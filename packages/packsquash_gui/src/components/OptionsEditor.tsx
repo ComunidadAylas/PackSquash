@@ -31,7 +31,7 @@ export default (props: {
   const optionsForm = (
     <form
       id="options-form"
-      class="grid grid-cols-1 gap-y-2 gap-x-2 sm:gap-y-4 sm:gap-x-4 xl:grid-cols-2"
+      class="grid grid-cols-1 gap-x-2 gap-y-2 sm:gap-x-4 sm:gap-y-4 xl:grid-cols-2"
       noValidate={true}
       onSubmit={(event) => {
         event.preventDefault();

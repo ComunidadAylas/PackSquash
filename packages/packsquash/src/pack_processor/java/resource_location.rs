@@ -1,9 +1,10 @@
 use super::PackType;
 use crate::relative_path::InvalidPathError;
-use crate::util::cow_str_util::SplitOnceByColonWithDefaultPrefixExt;
+use crate::util::cow_util::{ReborrowExt, SplitOnceByColonWithDefaultPrefixExt};
 use crate::RelativePath;
 use serde::{Serialize, Serializer};
 use std::borrow::Cow;
+use std::path::Path;
 use strum::IntoEnumIterator;
 use thiserror::Error;
 
@@ -12,7 +13,7 @@ static DEFAULT_NAMESPACE: &str = "minecraft";
 // TODO document that these are deserialized from and serialized to resource location strings
 //      (namespace + relative asset path)
 // TODO document that Eq and Hash do stupid field-based equality comparison
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Default, Clone)]
 pub struct ResourceLocation<'location> {
 	pack_type: PackType,
 	namespace: Cow<'location, str>,
@@ -85,7 +86,7 @@ impl<'location> ResourceLocation<'location> {
 		&self.namespace
 	}
 
-	pub fn resolved_asset_path(&self) -> Cow<str> {
+	pub fn resolved_asset_path(&self) -> Cow<'_, str> {
 		if self.asset_type_directory.is_none() && self.asset_type_extension.is_none() {
 			// If there is nothing to prepend (an asset type root directory) or append
 			// (an asset type extension), the relative asset path matches the resolved
@@ -100,7 +101,7 @@ impl<'location> ResourceLocation<'location> {
 		}
 	}
 
-	pub fn as_relative_path(&self) -> Result<RelativePath<'static>, InvalidPathError<'static>> {
+	pub fn as_relative_path(&self) -> Result<RelativePath<'static>, InvalidPathError> {
 		let root_directory = self.pack_type.root_directory();
 		let root_directory = root_directory.as_str();
 		let namespace = &self.namespace;
@@ -144,6 +145,52 @@ impl<'location> ResourceLocation<'location> {
 		Ok(RelativePath::from_inner(path))
 	}
 
+	pub fn into_owned(self) -> ResourceLocation<'static> {
+		ResourceLocation {
+			pack_type: self.pack_type,
+			namespace: self.namespace.into_owned().into(),
+			asset_type_directory: self
+				.asset_type_directory
+				.map(|asset_type_directory| asset_type_directory.into_owned().into()),
+			relative_asset_path: self.relative_asset_path.into_owned().into(),
+			asset_type_extension: self
+				.asset_type_extension
+				.map(|asset_type_extension| asset_type_extension.into_owned().into())
+		}
+	}
+
+	pub fn as_owned(&self) -> ResourceLocation<'static> {
+		ResourceLocation {
+			pack_type: self.pack_type,
+			namespace: self.namespace.clone().into_owned().into(),
+			asset_type_directory: self
+				.asset_type_directory
+				.as_ref()
+				.map(|asset_type_directory| asset_type_directory.clone().into_owned().into()),
+			relative_asset_path: self.relative_asset_path.clone().into_owned().into(),
+			asset_type_extension: self
+				.asset_type_extension
+				.as_ref()
+				.map(|asset_type_extension| asset_type_extension.clone().into_owned().into())
+		}
+	}
+
+	pub fn reborrow(&self) -> ResourceLocation<'_> {
+		ResourceLocation {
+			pack_type: self.pack_type,
+			namespace: Cow::Borrowed(&self.namespace),
+			asset_type_directory: self
+				.asset_type_directory
+				.as_ref()
+				.map(|asset_type_directory| asset_type_directory.reborrow()),
+			relative_asset_path: Cow::Borrowed(&self.relative_asset_path),
+			asset_type_extension: self
+				.asset_type_extension
+				.as_ref()
+				.map(|asset_type_extension| asset_type_extension.reborrow())
+		}
+	}
+
 	fn push_resolved_asset_path_to(&self, resolved_asset_path: &mut String) {
 		if let Some(asset_type_directory) = &self.asset_type_directory {
 			if asset_type_directory.len() > 0 {
@@ -177,7 +224,7 @@ impl<'location> TryFrom<&'location RelativePath<'_>> for ResourceLocation<'locat
 
 		let (path_without_root_dir, pack_type) = PackType::iter()
 			.filter_map(|pack_type| {
-				path.strip_prefix(pack_type.root_directory())
+				path.strip_prefix(&*pack_type.root_directory())
 					.ok()
 					.map(|path_without_root_dir| (path_without_root_dir, pack_type))
 			})
@@ -268,7 +315,7 @@ fn verify_path(path: impl AsRef<str>) -> Result<(), ResourceLocationError> {
 	// Start our verification by ensuring that the path is clean (i.e., free from the
 	// gotchas stated above)
 	let cleaned_path = path_clean::clean(path);
-	if cleaned_path != path || cleaned_path == "." {
+	if cleaned_path != Path::new(path) || cleaned_path == Path::new(".") {
 		return Err(ResourceLocationError::UncleanPath(path.to_string()));
 	}
 

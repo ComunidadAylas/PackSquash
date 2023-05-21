@@ -21,11 +21,13 @@ use toml::macros::Deserialize;
 
 fn main() {
 	let mut tauri_builder = tauri::Builder::default()
-		.plugin(
-			tauri_plugin_store::PluginBuilder::default()
-				.store(StoreBuilder::new("settings.json".into()).build())
-				.build()
-		)
+		.setup(|app| {
+			Ok(app.handle().plugin(
+				tauri_plugin_store::Builder::default()
+					.store(StoreBuilder::new(app.handle(), "settings.json".into()).build())
+					.build()
+			)?)
+		})
 		.invoke_handler(tauri::generate_handler![
 			app_build_version,
 			app_build_date,

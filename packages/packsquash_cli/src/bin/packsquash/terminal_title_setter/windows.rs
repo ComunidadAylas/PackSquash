@@ -1,10 +1,12 @@
 use is_terminal::IsTerminal;
 use std::ffi::OsStr;
-use std::os::windows::ffi::OsStrExt;
-use std::{env, io};
+use std::os::windows::{ffi::OsStrExt, io::AsRawHandle, raw::HANDLE};
+use std::{
+	env,
+	io::{self, IsTerminal}
+};
 
-use winapi::um::wincon::SetConsoleTitleW;
-use winapi_util::console::Console;
+use windows_sys::Win32::System::Console::{SetConsoleTitleW, ENABLE_VIRTUAL_TERMINAL_PROCESSING};
 
 use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};
 
@@ -75,24 +77,24 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 				// (IOW, both streams share the same console, so it doesn't matter what stream
 				// we choose to get the console of). But check both anyway, to handle redirections.
 				// See: https://docs.microsoft.com/en-us/windows/console/getstdhandle#remarks
-				Console::stdout().map_or_else(
+				as_non_null_ptr(io::stdout().as_raw_handle()).map_or_else(
 					|_| {
 						// stdout is not associated with a console. Try with stderr
-						Console::stderr().map_or_else(
+						as_non_null_ptr(io::stderr().as_raw_handle()).map_or_else(
 							|_| {
 								// stderr is not associated with a console either. Give up
 								None
 							},
-							|console| {
+							|console_handle| {
 								// stderr is associated with a console
-								enable_vt_processing(console)
+								enable_vt_processing(console_handle)
 									.and_then(|_| Some(AnsiEscapeCodesStream::Stderr))
 							}
 						)
 					},
-					|console| {
+					|console_handle| {
 						// stdout is associated with a console
-						enable_vt_processing(console)
+						enable_vt_processing(console_handle)
 							.and_then(|_| Some(AnsiEscapeCodesStream::Stdout))
 					}
 				)
@@ -135,7 +137,7 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 				// passed to SetConsoleTitleW stays valid
 				#[allow(unsafe_code)]
 				unsafe {
-					SetConsoleTitleW(title.utf16_string.as_ptr());
+					SetConsoleTitleW(title.wide_string.as_ptr());
 				}
 			}
 		}
@@ -145,14 +147,14 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 /// A string that can be used to change a terminal title.
 pub struct WindowsTerminalTitleString {
 	string: &'static str,
-	utf16_string: Vec<u16>
+	wide_string: Vec<u16>
 }
 
 impl From<&'static str> for WindowsTerminalTitleString {
 	fn from(title: &'static str) -> Self {
 		Self {
 			string: title,
-			utf16_string: OsStr::new(title).encode_wide().collect()
+			wide_string: OsStr::new(title).encode_wide().collect()
 		}
 	}
 }
@@ -160,6 +162,13 @@ impl From<&'static str> for WindowsTerminalTitleString {
 /// Enables virtual terminal proccessing (i.e. ANSI escape sequence support) for
 /// the specified console. `Some(())` is returned if the VT processing mode
 /// could be enabled; otherwise, `None` is returned.
-fn enable_vt_processing(mut console: Console) -> Option<()> {
-	console.set_virtual_terminal_processing(true).ok()
+fn enable_vt_processing(console_handle: *mut HANDLE) -> Option<()> {
+	// SAFETY: system calls are unsafe. We do this call following its documented contract
+	#[allow(unsafe_code)]
+	(unsafe { SetConsoleMode(console_handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING) } != 0).then_some(())
+}
+
+/// Returns `None` if `ptr` is null, or else returns `Some(ptr)`.
+fn as_non_null_ptr<T>(ptr: *mut T) -> Option<*mut T> {
+	(!ptr.is_null()).then_some(ptr)
 }

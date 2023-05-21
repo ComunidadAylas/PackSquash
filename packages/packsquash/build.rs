@@ -1,7 +1,8 @@
 use git2::opts::set_verify_owner_validation;
 use git2::{DescribeFormatOptions, DescribeOptions, Repository};
-use packsquash_options::SquashOptions;
+use packsquash_options::{GlobalOptionsFieldName, SquashOptions};
 use schemars::gen::{SchemaGenerator, SchemaSettings};
+use schemars::schema::Schema;
 use std::env::current_dir;
 use std::error::Error;
 use std::path::PathBuf;
@@ -55,12 +56,29 @@ fn generate_options_file_json_schema() {
 	// works better with VS Code extensions such as tamasfe.even-better-toml
 	options_schema_settings.inline_subschemas = true;
 
+	let mut options_schema =
+		SchemaGenerator::new(options_schema_settings).into_root_schema_for::<SquashOptions>();
+
+	// Remove system-specific default values for non-required options. This is necessary
+	// because #[schemars(skip_serializing)] makes the option required and does not represent
+	// the desired semantics
+	for global_option in [
+		GlobalOptionsFieldName::Threads.name(),
+		GlobalOptionsFieldName::MaximumScratchFilesBuffersSize.name()
+	] {
+		if let Some(Schema::Object(schema_object)) = options_schema
+			.schema
+			.object()
+			.properties
+			.get_mut(global_option)
+		{
+			schema_object.metadata().default = None;
+		}
+	}
+
 	fs::write(
 		&options_schema_path,
-		serde_json::to_string_pretty(
-			&SchemaGenerator::new(options_schema_settings).into_root_schema_for::<SquashOptions>()
-		)
-		.unwrap()
+		serde_json::to_string_pretty(&options_schema).unwrap()
 	)
 	.expect("Could not generate options file JSON schema");
 

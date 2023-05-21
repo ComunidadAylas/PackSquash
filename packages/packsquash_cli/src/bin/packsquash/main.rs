@@ -4,7 +4,7 @@ use std::{
 	env,
 	fmt::Display,
 	fs,
-	io::{self, ErrorKind, Read, Stderr},
+	io::{self, ErrorKind, IsTerminal, Read, Stderr},
 	process::ExitCode,
 	sync::atomic::{AtomicU64, AtomicUsize, Ordering},
 	time::Instant
@@ -12,7 +12,6 @@ use std::{
 
 use env_logger::{fmt::Color, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
-use is_terminal::IsTerminal;
 use log::{debug, error, info, Level, LevelFilter};
 
 use crate::util::IoWriteToFmtWriteAdapter;
@@ -253,7 +252,7 @@ fn read_options_file_and_squash(
 				);
 
 				// Attempt to clean up the generated file
-				fs::remove_file(output_file_path).ok();
+				fs::remove_file(&*output_file_path).ok();
 
 				129.into()
 			} else {

@@ -3,15 +3,12 @@
 
 #![deny(unsafe_code)]
 #![forbid(unsafe_op_in_unsafe_fn)]
-#![feature(doc_cfg)]
 #![feature(map_entry_replace)]
 #![feature(try_find)]
-#![feature(type_alias_impl_trait)]
-#![feature(stmt_expr_attributes)]
-#![feature(const_fn_floating_point_arithmetic)]
-#![feature(concat_idents)]
+#![feature(impl_trait_in_assoc_type)]
+#![feature(hash_drain_filter)]
 #![doc(
-	html_logo_url = "https://user-images.githubusercontent.com/31966940/124388201-1f40eb80-dce2-11eb-88e8-3934d7d73c0a.png"
+	html_logo_url = "https://github.com/ComunidadAylas/PackSquash/blob/d5982c4bb5b116b80dc41869627e8e31e392759a/icons/packsquash_icon_256x256.png"
 )]
 // TODO review all source and document things
 //#![deny(missing_docs)]
@@ -136,8 +133,8 @@ pub enum PackSquashAssetProcessingStrategy {
 }
 
 pub fn run(options: &SquashOptions, vfs_type: VirtualFileSystemType) -> Result<(), PackSquashError> {
-	java::pack_processor::PackProcessor::new().process(
-		|| match File::open(&options.global_options.output_file_path) {
+	Ok(java::pack_processor::PackProcessor::new().process(
+		|| match File::open(&*options.global_options.output_file_path) {
 			Ok(file) => Some(BufReader::new(file)),
 			Err(err) if err.kind() == ErrorKind::NotFound => None,
 			Err(err) => {
@@ -154,7 +151,5 @@ pub fn run(options: &SquashOptions, vfs_type: VirtualFileSystemType) -> Result<(
 		},
 		vfs_type,
 		options
-	)?;
-
-	Ok(())
+	)?)
 }

@@ -28,17 +28,48 @@ macro_rules! get_file_specific_options {
 	};
 }
 
+macro_rules! define_path_wrapper_err {
+	($inner:ident : $wrapper:ident) => {
+		#[derive(thiserror::Error, Debug)]
+		#[error("{file_path}: {inner}")]
+		pub struct $wrapper {
+			inner: $inner,
+			file_path: $crate::relative_path::RelativePath<'static>
+		}
+
+		paste::paste! {
+			trait [<$inner ResultExt>]<T> {
+				fn into_err_with_path(
+					self,
+					file_path: impl FnOnce() -> $crate::relative_path::RelativePath<'static>
+				) -> Result<T, $wrapper>;
+			}
+
+			impl<T, E: Into<$inner>> [<$inner ResultExt>]<T> for Result<T, E> {
+				fn into_err_with_path(
+					self,
+					file_path: impl FnOnce() -> $crate::relative_path::RelativePath<'static>
+				) -> Result<T, $wrapper> {
+					self.map_err(|inner| $wrapper {
+						inner: inner.into(),
+						file_path: file_path()
+					})
+				}
+			}
+		}
+	};
+}
+
 pub(super) fn validate_asset_dependency<
-	'path,
 	A: Array<Item = Cow<'static, str>>,
-	E: From<InvalidPathError<'path>> + Display
+	E: From<InvalidPathError> + Display
 >(
 	asset_location: &ResourceLocation,
 	pack_meta: &PackMeta,
 	global_options: &GlobalOptions,
 	warning_list: Option<&mut TinyVec<A>>,
-	asset_existence_predicate: impl FnOnce(&RelativePath) -> Result<bool, E>,
-	is_vanilla_asset_predicate: impl FnOnce(&RelativePath) -> Result<bool, E>,
+	asset_existence_predicate: impl FnOnce(&RelativePath<'_>) -> Result<bool, E>,
+	is_vanilla_asset_predicate: impl FnOnce(&RelativePath<'_>) -> Result<bool, E>,
 	missing_reference_error_factory: impl FnOnce(RelativePath<'static>, &'static str) -> E
 ) -> Result<(), E> {
 	let asset_path = asset_location.as_relative_path()?;

@@ -1,5 +1,6 @@
 use crate::util::zero_copy_deserialize_traits::ZeroCopyDeserializable;
 use ahash::AHashMap;
+use compact_str::CompactString;
 use serde::{Deserialize, Serialize, Serializer};
 use std::borrow::Cow;
 use std::fmt::{Display, Formatter, Write};
@@ -27,12 +28,8 @@ pub(super) struct BlockState<'data> {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[serde(borrow)]
 	pub(super) multipart_variants: Option<Vec<MultipartVariantSelector<'data>>>,
-	// FIXME In principle, the bloat fields could be deserialized more efficiently by using RawValue
-	//       as map values, but that doesn't work due to this upstream issue:
-	//       https://github.com/serde-rs/json/issues/599
-	#[serde(flatten)]
-	#[serde(borrow)]
-	pub(super) bloat_fields: AHashMap<Cow<'data, str>, serde_json::Value>
+	#[serde(flatten, borrow)]
+	pub(super) bloat_fields: AHashMap<Cow<'data, str>, ijson::IValue>
 }
 
 /// A dummy struct with no generic parameters that represents [`BlockState`] on
@@ -45,7 +42,7 @@ impl<'data> ZeroCopyDeserializable<'data> for BlockStateRepresentative {
 #[derive(Debug, Deserialize, Eq, PartialEq, Hash)]
 #[serde(try_from = "Cow<'_, str>")]
 pub(super) struct VariantPredicate {
-	pub(super) property_value_pairs: TinyVec<[(String, String); 2]>,
+	pub(super) property_value_pairs: TinyVec<[(CompactString, CompactString); 2]>,
 	pub(super) is_legacy_invariant: bool
 }
 
@@ -93,7 +90,7 @@ impl TryFrom<Cow<'_, str>> for VariantPredicate {
 
 impl Serialize for VariantPredicate {
 	fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-		struct PredicatePairsWrapper<'pairs>(&'pairs [(String, String)]);
+		struct PredicatePairsWrapper<'pairs>(&'pairs [(CompactString, CompactString)]);
 
 		impl Display for PredicatePairsWrapper<'_> {
 			fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -175,9 +172,8 @@ pub(super) struct Variant<'data> {
 	#[serde(default = "default_weight")]
 	#[serde(skip_serializing_if = "is_default_weight")]
 	pub(super) weight: NonZeroI32,
-	#[serde(flatten)]
-	#[serde(borrow)]
-	pub(super) bloat_fields: AHashMap<Cow<'data, str>, serde_json::Value>
+	#[serde(flatten, borrow)]
+	pub(super) bloat_fields: AHashMap<Cow<'data, str>, ijson::IValue>
 }
 
 impl Default for Variant<'_> {
@@ -225,9 +221,8 @@ pub(super) struct MultipartVariantSelector<'data> {
 	#[serde(rename = "apply")]
 	#[serde(borrow)]
 	pub(super) variants: VariantList<'data>,
-	#[serde(flatten)]
-	#[serde(borrow)]
-	pub(super) bloat_fields: AHashMap<Cow<'data, str>, serde_json::Value>
+	#[serde(flatten, borrow)]
+	pub(super) bloat_fields: AHashMap<Cow<'data, str>, ijson::IValue>
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -273,7 +268,7 @@ impl<'data> TryFrom<Cow<'data, str>> for Property<'data> {
 #[serde(try_from = "Cow<'_, str>")]
 pub(super) struct PropertyPredicate {
 	negate: bool,
-	pub(super) values: TinyVec<[String; 4]>
+	pub(super) values: TinyVec<[CompactString; 4]>
 }
 
 impl TryFrom<Cow<'_, str>> for PropertyPredicate {
@@ -311,7 +306,7 @@ impl TryFrom<Cow<'_, str>> for PropertyPredicate {
 
 impl Serialize for PropertyPredicate {
 	fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-		struct SeparatorWrapper<'vals>(&'vals [String]);
+		struct SeparatorWrapper<'vals>(&'vals [CompactString]);
 
 		impl Display for SeparatorWrapper<'_> {
 			fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -372,7 +367,7 @@ fn is_default<T: Default + PartialEq>(value: &T) -> bool {
 }
 
 fn default_weight() -> NonZeroI32 {
-	NonZeroI32::new(1).unwrap()
+	NonZeroI32::MIN
 }
 
 fn is_default_weight(weight: &NonZeroI32) -> bool {

@@ -1,15 +1,12 @@
 //! Contains the data types that support a virtual filesystem implementation
 //! that operates with files from the operating system filesystems.
 
+use camino::{Utf8Path, Utf8PathBuf};
 use memmap2::Mmap;
 use patricia_tree::PatriciaSet;
 use std::borrow::Cow;
-use std::io::{BufReader, ErrorKind, Read};
-use std::{
-	fs::{self, File},
-	io,
-	path::Path
-};
+use std::fs::{self, File};
+use std::io::{self, BufReader, ErrorKind, Read};
 
 use walkdir::{DirEntry, WalkDir};
 
@@ -21,13 +18,13 @@ use super::{VfsFile, VfsMmap, VirtualFileSystem};
 /// A virtual filesystem implementation that operates with files in the mounted
 /// operating system filesystems. In other words, it is a facade for `std::fs`.
 pub struct OsFilesystem<'path, 'budget> {
-	root_path: Cow<'path, Path>,
+	root_path: Cow<'path, Utf8Path>,
 	memory_budget: &'budget ScratchFilesBudget
 }
 
 impl<'path, 'budget> OsFilesystem<'path, 'budget> {
 	pub fn new(
-		root_path: impl Into<Cow<'path, Path>>,
+		root_path: impl Into<Cow<'path, Utf8Path>>,
 		memory_budget: &'budget ScratchFilesBudget
 	) -> Self {
 		Self {
@@ -41,7 +38,7 @@ impl VirtualFileSystem for OsFilesystem<'_, '_> {
 	type FileRead = BufReader<File>;
 
 	fn file_set(&self) -> io::Result<PatriciaSet> {
-		WalkDir::new(&self.root_path)
+		WalkDir::new(&*self.root_path)
 			.min_depth(1) // Do not yield the root path itself, but all of its children
 			.follow_links(true)
 			.max_open(2)
@@ -55,7 +52,11 @@ impl VirtualFileSystem for OsFilesystem<'_, '_> {
 							// Use the entry depth to efficiently get a root path without doing
 							// additional allocations or moving ownership of the method parameter
 							let entry_depth = entry.depth();
-							let file_path = entry.into_path();
+
+							let file_path =
+								Utf8PathBuf::try_from(entry.into_path()).map_err(|path_error| {
+									io::Error::new(io::ErrorKind::Other, path_error)
+								})?;
 							let root_path =
 								file_path.ancestors().take(1 + entry_depth).last().unwrap();
 
@@ -113,7 +114,7 @@ impl VirtualFileSystem for OsFilesystem<'_, '_> {
 				// it indeed is immutable, leading to undefined behavior if that turns out to
 				// be wrong. In practice, however:
 				// - It is unlikely for pack files to be changed while they are being processed.
-				// - Accessing memory from memory map whose backing file was truncated or deleted
+				// - Accessing memory from a memory map whose backing file was truncated or deleted
 				//   may generate an unsolvable page fault, in which case the OS will kill us
 				//   before we have any chance of working with garbage data (on Linux, with SIGBUS).
 				// - On Linux, the ELF loader memory maps executables, but almost nobody ever
@@ -231,9 +232,12 @@ mod tests {
 			File::create(file3_path).expect("I/O operations are assumed not to fail during tests");
 		}
 
-		let file_set = OsFilesystem::new(root_dir.path(), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
-			.file_set()
-			.expect("I/O operations are assumed not to fail during tests");
+		let file_set = OsFilesystem::new(
+			<&Utf8Path>::try_from(root_dir.path()).expect("Paths are asumed to be UTF-8"),
+			&VIRTUALLY_UNLIMITED_MEMORY_BUDGET
+		)
+		.file_set()
+		.expect("I/O operations are assumed not to fail during tests");
 
 		const RELATIVE_PATHS: &[&str] = &[
 			"hello/world.txt",
@@ -257,7 +261,7 @@ mod tests {
 
 	#[test]
 	fn single_component_dot_relative_path_works() {
-		let file_set = OsFilesystem::new(Path::new("."), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
+		let file_set = OsFilesystem::new(Utf8Path::new("."), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
 			.file_set()
 			.expect("I/O operations are assumed not to fail during tests");
 
@@ -269,7 +273,7 @@ mod tests {
 
 	#[test]
 	fn single_component_double_dot_relative_path_works() {
-		let file_set = OsFilesystem::new(Path::new(".."), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
+		let file_set = OsFilesystem::new(Utf8Path::new(".."), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
 			.file_set()
 			.expect("I/O operations are assumed not to fail during tests");
 
@@ -289,9 +293,12 @@ mod tests {
 		File::create(root_dir.path().join("file.bin"))
 			.expect("I/O operations are assumed not to fail during tests");
 
-		let file_set = OsFilesystem::new(root_dir.path(), &VIRTUALLY_UNLIMITED_MEMORY_BUDGET)
-			.file_set()
-			.expect("I/O operations are assumed not to fail during tests");
+		let file_set = OsFilesystem::new(
+			<&Utf8Path>::try_from(root_dir.path()).expect("Paths are asumed to be UTF-8"),
+			&VIRTUALLY_UNLIMITED_MEMORY_BUDGET
+		)
+		.file_set()
+		.expect("I/O operations are assumed not to fail during tests");
 
 		assert_eq!(
 			file_set.into_iter().count(),

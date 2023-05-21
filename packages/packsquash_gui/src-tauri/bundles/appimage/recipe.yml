@@ -29,7 +29,7 @@ script:
 
 AppDir:
   app_info:
-    id: com.github.comunidadaylas.packsquash.gui
+    id: org.aylas.packsquash.gui
     name: PackSquash (GUI)
     icon: packsquash
     version: !ENV ${VERSION}

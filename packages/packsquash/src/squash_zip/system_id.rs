@@ -184,7 +184,7 @@ fn compute_system_id() -> SystemId {
 		.expect(ERROR_MESSAGE)
 }
 
-#[cfg(any(target_os = "macos"))]
+#[cfg(target_os = "macos")]
 fn compute_system_id() -> SystemId {
 	use self::os::{get_host_id, get_platform_serial_number};
 
@@ -198,7 +198,7 @@ fn compute_system_id() -> SystemId {
 		.expect(ERROR_MESSAGE)
 }
 
-#[cfg(any(target_os = "windows"))]
+#[cfg(target_os = "windows")]
 fn compute_system_id() -> SystemId {
 	use self::os::{get_install_date, get_machine_id, get_product_id};
 

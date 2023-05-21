@@ -8,24 +8,24 @@ pub use minecraft_version::MinecraftVersion;
 pub use minecraft_version::MinecraftVersionRange;
 
 use ahash::AHashMap;
+use camino::Utf8Path;
 use const_default::ConstDefault;
 use std::borrow::Cow;
+use std::fmt::{Display, Formatter};
 use std::io::ErrorKind;
 use std::num::{NonZeroU32, NonZeroU8, NonZeroUsize};
 use std::ops::Deref;
-use std::path::Path;
 use std::thread::available_parallelism;
-use std::{fs, io};
+use std::{fmt, fs, io};
 
 use enumset::{EnumSet, EnumSetType};
+use field_types::FieldName;
 use globset::{Glob, GlobBuilder, GlobSet, GlobSetBuilder};
 use schemars::gen::SchemaGenerator;
 use schemars::schema::{Schema, SchemaObject};
 use schemars::JsonSchema;
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use strum::Display;
 use sysinfo::{RefreshKind, System, SystemExt};
 
 macro_rules! file_options_default_impl {
@@ -71,32 +71,30 @@ pub struct SquashOptions<'data> {
 	#[serde(borrow)]
 	pub pack_directory: ExistingDirectoryPath<'data>,
 	/// Global options that tweak how the operation is done at a pack scale.
-	#[serde(flatten)]
-	#[serde(borrow)]
+	#[serde(flatten, borrow)]
 	pub global_options: GlobalOptions<'data>,
 	/// A map that relates glob patterns that match relative file paths within the
 	/// pack to file options, to further customize how the files that match the
 	/// pattern are processed.
-	#[serde(flatten)]
+	#[serde(flatten, borrow)]
 	#[schemars(with = "::std::collections::HashMap<String, FileOptions>")]
-	#[serde(borrow)]
 	pub file_options: FileOptionsMap<'data>
 }
 
 #[derive(Clone, Deserialize, Serialize, JsonSchema)]
-#[serde(try_from = "Cow<'_, Path>")]
+#[serde(try_from = "Cow<'_, Utf8Path>")]
 #[repr(transparent)]
 pub struct ExistingDirectoryPath<'data>(
 	#[schemars(schema_with = "with_directory_path_format")]
 	#[serde(borrow)]
-	Cow<'data, Path>
+	Cow<'data, Utf8Path>
 );
 
-impl<'data> TryFrom<Cow<'data, Path>> for ExistingDirectoryPath<'data> {
+impl<'data> TryFrom<Cow<'data, Utf8Path>> for ExistingDirectoryPath<'data> {
 	type Error = io::Error;
 
-	fn try_from(value: Cow<'data, Path>) -> Result<Self, Self::Error> {
-		if fs::metadata(&value)?.is_dir() {
+	fn try_from(value: Cow<'data, Utf8Path>) -> Result<Self, Self::Error> {
+		if fs::metadata(&*value)?.is_dir() {
 			Ok(Self(value))
 		} else {
 			Err(io::Error::new(
@@ -108,15 +106,15 @@ impl<'data> TryFrom<Cow<'data, Path>> for ExistingDirectoryPath<'data> {
 }
 
 impl Deref for ExistingDirectoryPath<'_> {
-	type Target = Path;
+	type Target = Utf8Path;
 
 	fn deref(&self) -> &Self::Target {
 		&self.0
 	}
 }
 
-impl AsRef<Path> for ExistingDirectoryPath<'_> {
-	fn as_ref(&self) -> &Path {
+impl AsRef<Utf8Path> for ExistingDirectoryPath<'_> {
+	fn as_ref(&self) -> &Utf8Path {
 		&self.0
 	}
 }
@@ -136,8 +134,8 @@ pub struct FileOptionsMap<'data> {
 }
 
 impl FileOptionsMap<'_> {
-	pub fn get<P: AsRef<Path>>(&self, path: P) -> impl Iterator<Item = &FileOptions> {
-		let iter = self.globs.matches(path).into_iter();
+	pub fn get<P: AsRef<Utf8Path>>(&self, path: P) -> impl Iterator<Item = &FileOptions> {
+		let iter = self.globs.matches(path.as_ref()).into_iter();
 
 		#[cfg(feature = "serializable-squash-options")]
 		{
@@ -184,7 +182,9 @@ impl<'data> TryFrom<AHashMap<Cow<'data, str>, FileOptions>> for FileOptionsMap<'
 
 #[cfg(feature = "serializable-squash-options")]
 impl Serialize for FileOptionsMap<'_> {
-	fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+	fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+		use serde::ser::SerializeMap;
+
 		let mut map = serializer.serialize_map(Some(self.file_options_list.len()))?;
 
 		for (glob_pattern, file_options) in &self.file_options_list {
@@ -200,7 +200,7 @@ impl Serialize for FileOptionsMap<'_> {
 /// a wide range of use cases without using protection, compression or compressibility-improving
 /// techniques that may pose interoperability problems.
 #[serde_as]
-#[derive(Clone, Deserialize, Serialize, JsonSchema)]
+#[derive(Clone, Deserialize, Serialize, JsonSchema, FieldName)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
 pub struct GlobalOptions<'data> {
@@ -403,7 +403,7 @@ pub struct GlobalOptions<'data> {
 	pub threads: NonZeroUsize,
 	/// Internally, PackSquash uses buffers to work with the files it processes in-memory as much as
 	/// possible. However, doing so naively also limits its scalability to bigger packs, depending on the
-	/// available memory of the environment it is running on. This option sets, **in MiB**, the total size
+	/// available memory of the environment it is running on. This option sets the total size **in MiB**
 	/// those buffers will be able to grow up to before being rolling over their contents disk, freeing
 	/// memory and diverting the operations to temporary files, which is slower.
 	///
@@ -413,8 +413,7 @@ pub struct GlobalOptions<'data> {
 
 impl Default for GlobalOptions<'_> {
 	fn default() -> Self {
-		// The "k" in "kB" here has an SI-compliant meaning (1000 and not 1024 bytes)
-		let available_memory_kb =
+		let available_memory =
 			System::new_with_specifics(RefreshKind::new().with_memory()).available_memory();
 
 		Self {
@@ -441,10 +440,10 @@ impl Default for GlobalOptions<'_> {
 			non_positional_audio_sampling_frequency: NonZeroU32::new(40_050).unwrap(),
 			positional_audio_target_bitrate_control_metric: 0.0,
 			positional_audio_sampling_frequency: NonZeroU32::new(32_000).unwrap(),
-			threads: available_parallelism().unwrap_or(NonZeroUsize::new(1).unwrap()),
-			output_file_path: MaybeNonexistentFilePath(Path::new("pack.zip").into()),
+			threads: available_parallelism().unwrap_or(NonZeroUsize::MIN),
+			output_file_path: MaybeNonexistentFilePath(Utf8Path::new("pack.zip").into()),
 			// In MiB. By default, half of available memory
-			maximum_scratch_files_buffers_size: (available_memory_kb.saturating_mul(125) / 262144)
+			maximum_scratch_files_buffers_size: (available_memory / 2097152)
 				// usize is defined to be able to represent any location in memory, so the conversion
 				// seems infallible. However, the available system memory may be greater than the
 				// virtual memory space given to the process by the OS. This can happen on 32-bit
@@ -458,19 +457,19 @@ impl Default for GlobalOptions<'_> {
 
 // Derive Serialize to work around schemars quirk: https://github.com/GREsau/schemars/issues/140
 #[derive(Clone, Deserialize, JsonSchema, Serialize)]
-#[serde(try_from = "Cow<'_, Path>")]
+#[serde(try_from = "Cow<'_, Utf8Path>")]
 #[repr(transparent)]
 pub struct MaybeNonexistentFilePath<'data>(
 	#[schemars(schema_with = "with_maybe_nonexistent_file_path_format")]
 	#[serde(borrow)]
-	Cow<'data, Path>
+	Cow<'data, Utf8Path>
 );
 
-impl<'data> TryFrom<Cow<'data, Path>> for MaybeNonexistentFilePath<'data> {
+impl<'data> TryFrom<Cow<'data, Utf8Path>> for MaybeNonexistentFilePath<'data> {
 	type Error = io::Error;
 
-	fn try_from(value: Cow<'data, Path>) -> Result<Self, Self::Error> {
-		match fs::metadata(&value) {
+	fn try_from(value: Cow<'data, Utf8Path>) -> Result<Self, Self::Error> {
+		match fs::metadata(&*value) {
 			// Consider everything that causes I/O errors or is not a directory as a file.
 			// This allows non-regular files to slip through (named pipes, devices...)
 			Ok(metadata) if !metadata.is_dir() => Ok(Self(value)),
@@ -485,15 +484,15 @@ impl<'data> TryFrom<Cow<'data, Path>> for MaybeNonexistentFilePath<'data> {
 }
 
 impl Deref for MaybeNonexistentFilePath<'_> {
-	type Target = Path;
+	type Target = Utf8Path;
 
 	fn deref(&self) -> &Self::Target {
 		&self.0
 	}
 }
 
-impl AsRef<Path> for MaybeNonexistentFilePath<'_> {
-	fn as_ref(&self) -> &Path {
+impl AsRef<Utf8Path> for MaybeNonexistentFilePath<'_> {
+	fn as_ref(&self) -> &Utf8Path {
 		&self.0
 	}
 }
@@ -606,9 +605,9 @@ impl From<PercentageInteger> for u8 {
 
 /// A Minecraft file parsing quirk that negatively affects the perceived correctness of
 /// the generated ZIP files and that can be worked around.
-#[derive(Deserialize, Serialize, EnumSetType, Display, JsonSchema)]
+#[derive(Deserialize, Serialize, EnumSetType, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[enumset(serialize_deny_unknown, serialize_as_list)]
+#[enumset(serialize_deny_unknown, serialize_repr = "list")]
 #[non_exhaustive]
 pub enum MinecraftQuirk {
 	/// Older versions of Minecraft (probably all versions since 1.6 until 1.13 are affected)
@@ -667,9 +666,17 @@ pub enum MinecraftQuirk {
 	OggObfuscationIncompatibility
 }
 
+impl Display for MinecraftQuirk {
+	fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+		// End-users should appreciate quirk strings being displayed with
+		// the same casing rules used for serialization
+		self.serialize(f)
+	}
+}
+
 /// A Minecraft modification supported by PackSquash that adds file types to packs.
 #[derive(Deserialize, Serialize, EnumSetType, JsonSchema)]
-#[enumset(serialize_deny_unknown, serialize_as_list)]
+#[enumset(serialize_deny_unknown, serialize_repr = "list")]
 #[non_exhaustive]
 #[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 #[doc(cfg(any(feature = "optifine-support", feature = "mtr3-support")))]
@@ -678,7 +685,7 @@ pub enum MinecraftMod {
 	///
 	/// Currently, this adds support for the following file types:
 	/// - Properties files (`.properties`).
-	/// - Custom entity model files (`.jem`, `.jemc`, `.jpm` and `.jpmc`).
+	/// - Custom entity model files (`.jem`, and `.jpm`).
 	#[serde(rename = "OptiFine")]
 	#[cfg(feature = "optifine-support")]
 	#[doc(cfg(feature = "optifine-support"))]
@@ -686,7 +693,7 @@ pub enum MinecraftMod {
 	/// Minecraft Transit Railway, version 3.0 and compatibles.
 	///
 	/// Currently, this adds support for the following file types:
-	/// - Blockbench modded entity model projects for custom train models (`.bbmodel` and `.bbmodelc`).
+	/// - Blockbench modded entity model projects for custom train models (`.bbmodel`).
 	#[serde(rename = "Minecraft Transit Railway 3")]
 	#[cfg(feature = "mtr3-support")]
 	#[doc(cfg(feature = "mtr3-support"))]
@@ -985,12 +992,15 @@ pub struct JsonFileOptions {
 	///
 	/// **Default value**: `true` (delete superfluous keys)
 	#[serde(rename = "delete_bloat_keys")]
-	pub delete_bloat: bool
+	pub delete_bloat: bool,
+	// TODO docs
+	pub assume_only_childless_models_are_baked: bool
 }
 
 file_options_default_impl!(JsonFileOptions => JsonFileOptions {
 	minify: true,
-	delete_bloat: true
+	delete_bloat: true,
+	assume_only_childless_models_are_baked: false
 });
 
 /// Parameters that influence how a PNG file is optimized.
@@ -1286,7 +1296,7 @@ fn with_directory_path_format(gen: &mut SchemaGenerator) -> Schema {
 }
 
 fn with_format(gen: &mut SchemaGenerator, format: impl Into<String>) -> Schema {
-	let mut schema: SchemaObject = <Path>::json_schema(gen).into();
+	let mut schema: SchemaObject = <str>::json_schema(gen).into();
 	schema.format = Some(format.into());
 	schema.into()
 }

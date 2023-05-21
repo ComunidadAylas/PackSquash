@@ -17,15 +17,17 @@ env:
   TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
   TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
+  CARGO_BUILD_FLAGS: -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort
+
 jobs:
   static-analysis:
     name: Static analysis
 
     runs-on: ubuntu-latest
 
-    # Only run if this is not a pull request, or for pull requests on forks
+    # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
+      github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
 
     steps:
       - name: 📥 Checkout source
@@ -134,9 +136,9 @@ jobs:
       PKG_CONFIG_ALLOW_CROSS: 1
       PKG_CONFIG_PATH: ${{ matrix.pkg-config-path }}
 
-    # Only run if this is not a pull request, or for pull requests on forks
+    # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != 'ComunidadAylas/PackSquash'
+      github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
 
     steps:
       - name: 📦 Add Linux ARM64 architecture APT packages
@@ -213,7 +215,7 @@ jobs:
         run: cargo test --release -- -Z unstable-options --report-time
 
       - name: 🔨 Build with optimized standard library
-        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.CARGO_BUILD_FLAGS }} --release
 
       - name: 🔨 Build GUI frontend
         if: ${{ !startsWith(matrix.runner, 'macos') && matrix.tauri-target == '' }}
@@ -227,7 +229,8 @@ jobs:
 
       - name: 🔨 Generate CLI Debian package
         if: startsWith(matrix.runner, 'ubuntu')
-        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- \
+          ${{ env.CARGO_BUILD_FLAGS }}
 
       - name: 🔨 Generate CLI AppImage
         if: startsWith(matrix.runner, 'ubuntu')
@@ -238,11 +241,12 @@ jobs:
         working-directory: packages/packsquash_gui
         run: |
           npm ci
-          cargo tauri build --target ${{ matrix.tauri-target }} -- -Z build-std
+          cargo tauri build --target ${{ matrix.tauri-target }} -- ${{ env.CARGO_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI Debian package
         if: startsWith(matrix.runner, 'ubuntu')
-        run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- -Z build-std
+        run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
+          ${{ env.CARGO_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI AppImage
         if: startsWith(matrix.runner, 'ubuntu')

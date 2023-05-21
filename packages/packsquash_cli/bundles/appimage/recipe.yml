@@ -25,11 +25,11 @@ script:
   # autogenerate a desktop file if needed, but if there is one present
   # appimage-builder uses it
   - mkdir -p "$TARGET_APPDIR"/usr/share/applications
-  - cp -f packages/packsquash_cli/bundles/appimage/com.github.comunidadaylas.packsquash.desktop "$TARGET_APPDIR"/usr/share/applications
+  - cp -f packages/packsquash_cli/bundles/appimage/org.aylas.packsquash.desktop "$TARGET_APPDIR"/usr/share/applications
 
 AppDir:
   app_info:
-    id: com.github.comunidadaylas.packsquash
+    id: org.aylas.packsquash
     name: PackSquash
     icon: packsquash
     version: !ENV ${VERSION}

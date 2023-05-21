@@ -32,7 +32,7 @@ impl ZopfliIterationsTimeModel {
 	/// return for data of 1 MiB of magnitude, tuning the model compression-speed tradeoff. The
 	/// `magnitude_power` sets the fractional power that will be used to get a magnitude from the
 	/// size, so a value of 1 is equivalent to an identity function.
-	pub(crate) const fn new(one_mib_iterations: u8, magnitude_power: f32) -> Self {
+	pub(crate) fn new(one_mib_iterations: u8, magnitude_power: f32) -> Self {
 		Self {
 			target_compression_time: (A * one_mib_iterations as f32 + B) * 16.0,
 			magnitude_power
