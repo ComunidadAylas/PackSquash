@@ -7,7 +7,7 @@
   "scripts": {
     "predev": "npm run prebuild",
     "dev": "vite",
-    "prebuild": "tsc && license-report --only=prod | jq -c \"del(.[].department, .[].relatedTo, .[].licensePeriod, .[].material, .[].remoteVersion, .[].definedVersion)\" > src/data/nodeDependencies.json",
+    "prebuild": "license-report --only=prod | jq -c \"del(.[].department, .[].relatedTo, .[].licensePeriod, .[].material, .[].remoteVersion, .[].definedVersion)\" > src/data/nodeDependencies.json",
     "build": "vite build",
     "serve": "vite preview",
     "lint": "eslint .",
