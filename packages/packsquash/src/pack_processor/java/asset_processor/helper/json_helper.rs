@@ -1,18 +1,23 @@
-use crate::relative_path::RelativePath;
-use crate::scratch_file::{ScratchFile, ScratchFilesBudget};
-use crate::squashed_pack_state::SquashedPackState;
-use crate::util::strip_utf8_bom::{StripUtf8Bom, StripUtf8BomExt};
-use crate::util::zero_copy_deserialize_traits::{
-	AlwaysZeroCopyDeserializable, ZeroCopyDeserializable
+use std::{
+	io::{self, BufRead, Read, Seek, Write},
+	time::SystemTime
 };
-use crate::vfs::{VfsFile, VfsMmap, VirtualFileSystem};
+
 use json_comments::StripComments;
-use serde::de::Visitor;
-use serde::{Deserializer, Serialize};
+use serde::{de::Visitor, Deserializer, Serialize};
 use serde_json::ser::{CharEscape, CompactFormatter, Formatter, PrettyFormatter};
-use std::io::{self, BufRead, Read, Seek, Write};
-use std::time::SystemTime;
 use thiserror::Error;
+
+use crate::{
+	relative_path::RelativePath,
+	scratch_file::{ScratchFile, ScratchFilesBudget},
+	squashed_pack_state::SquashedPackState,
+	util::{
+		strip_utf8_bom::{StripUtf8Bom, StripUtf8BomExt},
+		zero_copy_deserialize_traits::{AlwaysZeroCopyDeserializable, ZeroCopyDeserializable}
+	},
+	vfs::{VfsFile, VfsMmap, VirtualFileSystem}
+};
 
 pub enum JsonAssetDeserializeOutcome<T> {
 	Value {

@@ -1,5 +1,6 @@
-use pretty_assertions::assert_eq;
 use std::io::{Read, Seek, Write};
+
+use pretty_assertions::assert_eq;
 
 use super::*;
 

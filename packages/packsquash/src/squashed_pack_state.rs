@@ -1,10 +1,16 @@
-use crate::scratch_file::ScratchFilesBudget;
-use crate::squash_zip::{SquashZip, SquashZipError, SquashZipSettings};
-use crate::RelativePath;
+use std::{
+	io::{Read, Seek, Write},
+	sync::RwLock,
+	time::SystemTime
+};
+
 use patricia_tree::PatriciaSet;
-use std::io::{Read, Seek, Write};
-use std::sync::RwLock;
-use std::time::SystemTime;
+
+use crate::{
+	scratch_file::ScratchFilesBudget,
+	squash_zip::{SquashZip, SquashZipError, SquashZipSettings},
+	RelativePath
+};
 
 pub struct SquashedPackState<'settings, 'budget, F: Read + Seek + Send> {
 	squash_zip: SquashZip<'settings, 'budget, F>,

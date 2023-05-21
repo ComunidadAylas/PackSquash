@@ -3,13 +3,11 @@
 
 use std::time::{Duration, SystemTime, SystemTimeError};
 
-use aes::cipher::generic_array::GenericArray;
 use aes::{
-	cipher::{BlockCipher, BlockEncrypt, KeyInit},
+	cipher::{generic_array::GenericArray, BlockCipher, BlockEncrypt, KeyInit},
 	Aes128, Block
 };
 use const_random::const_random;
-
 use fpe::ff1::{BinaryNumeralString, FF1};
 use thiserror::Error;
 

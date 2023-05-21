@@ -1,6 +1,8 @@
-use crate::RelativePath;
-use patricia_tree::PatriciaSet;
 use std::iter::Map;
+
+use patricia_tree::PatriciaSet;
+
+use crate::RelativePath;
 
 pub trait PatriciaSetRelativePathIterExt<'this> {
 	type Iterator: Iterator<Item = RelativePath<'static>>;

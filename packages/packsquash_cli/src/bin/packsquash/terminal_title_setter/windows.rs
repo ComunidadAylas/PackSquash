@@ -1,11 +1,11 @@
-use is_terminal::IsTerminal;
-use std::ffi::OsStr;
-use std::os::windows::{ffi::OsStrExt, io::AsRawHandle, raw::HANDLE};
 use std::{
 	env,
-	io::{self, IsTerminal}
+	ffi::OsStr,
+	io::{self, IsTerminal},
+	os::windows::{ffi::OsStrExt, io::AsRawHandle, raw::HANDLE}
 };
 
+use is_terminal::IsTerminal;
 use windows_sys::Win32::System::Console::{SetConsoleTitleW, ENABLE_VIRTUAL_TERMINAL_PROCESSING};
 
 use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};

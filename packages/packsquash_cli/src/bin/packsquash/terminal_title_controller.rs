@@ -1,8 +1,10 @@
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+use strum::FromRepr;
+
 use crate::terminal_title_setter::{
 	TerminalTitleSetter, TerminalTitleSetterTrait, TerminalTitleString
 };
-use std::sync::atomic::{AtomicUsize, Ordering};
-use strum::FromRepr;
 
 /// Controller for the title to be shown in the terminal or console attached to this process.
 /// There are several title phases, each corresponding to one phase in the application lifecycle.

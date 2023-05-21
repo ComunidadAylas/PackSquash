@@ -1,16 +1,20 @@
-use self::blockstate_asset_processor::BlockStateAssetProcessor;
-use self::item_and_block_model_asset_processor::ItemAndBlockModelAssetProcessor;
-use crate::pack_processor::java::pack_meta::PackMeta;
-use crate::relative_path::RelativePath;
-use crate::squashed_pack_state::SquashedPackState;
-use crate::vfs::VirtualFileSystem;
+use std::io::{Read, Seek};
+
 use ahash::AHashSet;
 use enum_map::{enum_map, Enum, EnumMap};
 use globset::Glob;
 use packsquash_options::{FileOptionsMap, GlobalOptions};
 use patricia_tree::PatriciaSet;
-use std::io::{Read, Seek};
 use strum::Display;
+
+use self::{
+	blockstate_asset_processor::BlockStateAssetProcessor,
+	item_and_block_model_asset_processor::ItemAndBlockModelAssetProcessor
+};
+use crate::{
+	pack_processor::java::pack_meta::PackMeta, relative_path::RelativePath,
+	squashed_pack_state::SquashedPackState, vfs::VirtualFileSystem
+};
 
 #[macro_use]
 mod helper;

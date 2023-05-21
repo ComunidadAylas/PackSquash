@@ -7,9 +7,8 @@ use std::{
 
 use enumset::{EnumSet, EnumSetType};
 
-use crate::RelativePath;
-
 use super::PreviousZipParseError;
+use crate::RelativePath;
 
 #[cfg(test)]
 mod tests;

@@ -1,10 +1,12 @@
-use crate::pack_processor::java::pack_meta::PackMeta;
-use crate::pack_processor::java::resource_location::ResourceLocation;
-use crate::relative_path::{InvalidPathError, RelativePath};
+use std::{borrow::Cow, fmt::Display};
+
 use packsquash_options::GlobalOptions;
-use std::borrow::Cow;
-use std::fmt::Display;
 use tinyvec::{Array, TinyVec};
+
+use crate::{
+	pack_processor::java::{pack_meta::PackMeta, resource_location::ResourceLocation},
+	relative_path::{InvalidPathError, RelativePath}
+};
 
 pub(super) mod json_helper;
 

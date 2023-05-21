@@ -1,16 +1,22 @@
-use super::pack_meta::PackMeta;
-use super::resource_pack_processor::ResourcePackProcessor;
-use super::{PackError, PackType};
-use crate::scratch_file::ScratchFilesBudget;
-use crate::squash_zip;
-use crate::squash_zip::SquashZipSettings;
-use crate::squashed_pack_state::SquashedPackState;
-use crate::vfs::{os_fs::OsFilesystem, VirtualFileSystem, VirtualFileSystemType};
+use std::{
+	fs::File,
+	io::{Read, Seek}
+};
+
 use itertools::Itertools;
 use packsquash_options::{MinecraftQuirk, SquashOptions, ZipSpecConformanceLevel};
 use rayon::ThreadPoolBuilder;
-use std::fs::File;
-use std::io::{Read, Seek};
+
+use super::{
+	pack_meta::PackMeta, resource_pack_processor::ResourcePackProcessor, PackError, PackType
+};
+use crate::{
+	scratch_file::ScratchFilesBudget,
+	squash_zip,
+	squash_zip::SquashZipSettings,
+	squashed_pack_state::SquashedPackState,
+	vfs::{os_fs::OsFilesystem, VirtualFileSystem, VirtualFileSystemType}
+};
 
 // TODO
 pub struct PackProcessor;

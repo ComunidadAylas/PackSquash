@@ -1,11 +1,12 @@
 //! This automatically generated file contains the list of models for several vanilla Minecraft versions.
 #![allow(clippy::type_complexity)]
 
-use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
-use crate::RelativePath;
+use std::ops::RangeBounds;
+
 use ahash::AHashSet;
 use packsquash_options::{minecraft_version, MinecraftVersion};
-use std::ops::RangeBounds;
+
+use crate::{util::range_bounds_intersect::RangeBoundsIntersectExt, RelativePath};
 
 static MODELS_1_8_TO_1_8_2_EXCLUSIVE: [RelativePath<'static>; 1469] = [
 	RelativePath::from_inner_borrowed("assets/minecraft/models/block/acacia_bark.json"),

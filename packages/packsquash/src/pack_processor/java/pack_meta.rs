@@ -1,33 +1,32 @@
 //! Contains types to gather Minecraft: Java Edition pack metadata relevant for optimization
 //! purposes.
 
-use ahash::AHashMap;
-use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
-use std::fmt::Display;
-use std::io;
-use std::io::Read;
-use std::ops::RangeBounds;
+use std::{borrow::Cow, fmt::Display, io, io::Read, ops::RangeBounds};
 
+use ahash::AHashMap;
 use enumset::EnumSet;
 use json_comments::StripComments;
 use packsquash_options::{
 	minecraft_version, MinecraftQuirk, MinecraftVersion, MinecraftVersionRange
 };
 use packsquash_util::PrettySerdePathErrorWrapper;
+use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 use thiserror::Error;
 
-use crate::java::pack_meta::filter_section::ResourceFilterSection;
-use crate::java::resource_location::ResourceLocation;
-use crate::java::PackType;
-use crate::pack_processor::java::pack_meta::feature_flags_section::FeatureFlagsSection;
-use crate::pack_processor::java::pack_meta::language_section::LanguageSection;
-use crate::pack_processor::java::pack_meta::metadata_section::MetadataSection;
-use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
-use crate::util::strip_utf8_bom::StripUtf8BomExt;
-use crate::vfs::VirtualFileSystem;
-use crate::RelativePath;
+use crate::{
+	java::{
+		pack_meta::filter_section::ResourceFilterSection, resource_location::ResourceLocation,
+		PackType
+	},
+	pack_processor::java::pack_meta::{
+		feature_flags_section::FeatureFlagsSection, language_section::LanguageSection,
+		metadata_section::MetadataSection
+	},
+	util::{range_bounds_intersect::RangeBoundsIntersectExt, strip_utf8_bom::StripUtf8BomExt},
+	vfs::VirtualFileSystem,
+	RelativePath
+};
 
 mod feature_flags_section;
 mod filter_section;

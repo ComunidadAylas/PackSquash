@@ -1,33 +1,12 @@
-use self::blockstate::{
-	BlockState, BlockStateRepresentative, CompositeBooleanCondition, Condition, Property,
-	PropertyPredicate, VariantList
+use std::{
+	borrow::Cow,
+	collections::HashSet,
+	io,
+	io::{Read, Seek},
+	mem,
+	ops::Deref
 };
-use super::compile_hardcoded_pack_file_glob_pattern;
-use crate::pack_processor::java::asset_processor::data::vanilla_blockstate_property_list::BlockStatePropertyType;
-use crate::pack_processor::java::asset_processor::data::{
-	vanilla_blockstate_list, vanilla_blockstate_property_list
-};
-use crate::pack_processor::java::asset_processor::helper;
-use crate::pack_processor::java::asset_processor::helper::json_helper::{
-	self, JsonAssetDeserializeOutcome
-};
-use crate::pack_processor::java::asset_processor::item_and_block_model_asset_processor::{
-	ItemAndBlockModelAssetProcessor, ItemOrBlockModelAssetError
-};
-use crate::pack_processor::java::{
-	pack_meta::PackMeta, resource_location::ResourceLocation,
-	resource_location::ResourceLocationError
-};
-use crate::relative_path::InvalidPathError;
-use crate::squash_zip::SquashZipError;
-use crate::squashed_pack_state::SquashedPackState;
-use crate::util::patricia_set_util::PatriciaSetContainsRelativePathExt;
-use crate::util::{
-	lazy_or_eager::LazyOrEager, patricia_set_util::PatriciaSetRelativePathIterExt,
-	range_bounds_intersect::RangeBoundsIntersectExt
-};
-use crate::vfs::VirtualFileSystem;
-use crate::{PackSquashAssetProcessingStrategy, RelativePath};
+
 use ahash::{AHashMap, AHashSet};
 use itertools::Itertools;
 use once_cell::sync::Lazy;
@@ -36,13 +15,41 @@ use packsquash_options::{
 };
 use patricia_tree::PatriciaSet;
 use rayon::prelude::*;
-use std::borrow::Cow;
-use std::collections::HashSet;
-use std::io::{Read, Seek};
-use std::ops::Deref;
-use std::{io, mem};
 use thiserror::Error;
 use tinyvec::{tiny_vec, TinyVec};
+
+use self::blockstate::{
+	BlockState, BlockStateRepresentative, CompositeBooleanCondition, Condition, Property,
+	PropertyPredicate, VariantList
+};
+use super::compile_hardcoded_pack_file_glob_pattern;
+use crate::{
+	pack_processor::java::{
+		asset_processor::{
+			data::{
+				vanilla_blockstate_list, vanilla_blockstate_property_list,
+				vanilla_blockstate_property_list::BlockStatePropertyType
+			},
+			helper,
+			helper::json_helper::{self, JsonAssetDeserializeOutcome},
+			item_and_block_model_asset_processor::{
+				ItemAndBlockModelAssetProcessor, ItemOrBlockModelAssetError
+			}
+		},
+		pack_meta::PackMeta,
+		resource_location::{ResourceLocation, ResourceLocationError}
+	},
+	relative_path::InvalidPathError,
+	squash_zip::SquashZipError,
+	squashed_pack_state::SquashedPackState,
+	util::{
+		lazy_or_eager::LazyOrEager,
+		patricia_set_util::{PatriciaSetContainsRelativePathExt, PatriciaSetRelativePathIterExt},
+		range_bounds_intersect::RangeBoundsIntersectExt
+	},
+	vfs::VirtualFileSystem,
+	PackSquashAssetProcessingStrategy, RelativePath
+};
 
 mod blockstate;
 
@@ -279,12 +286,7 @@ impl<'params, 'state, V: VirtualFileSystem + ?Sized, F: Read + Seek + Send>
 					..
 				} => {
 					// The file name without the extension matches the block name
-					let block_name = asset_path
-						.file_name()
-						.unwrap()
-						.rsplit_once('.')
-						.unwrap()
-						.0;
+					let block_name = asset_path.file_name().unwrap().rsplit_once('.').unwrap().0;
 
 					// Validate and optimize the deserialized block state data
 					self.process_blockstate(

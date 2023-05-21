@@ -1,19 +1,19 @@
 //! Contains the data types that support a virtual filesystem implementation
 //! that operates with files from the operating system filesystems.
 
+use std::{
+	borrow::Cow,
+	fs::{self, File},
+	io::{self, BufReader, ErrorKind, Read}
+};
+
 use camino::{Utf8Path, Utf8PathBuf};
 use memmap2::Mmap;
 use patricia_tree::PatriciaSet;
-use std::borrow::Cow;
-use std::fs::{self, File};
-use std::io::{self, BufReader, ErrorKind, Read};
-
 use walkdir::{DirEntry, WalkDir};
 
-use crate::scratch_file::ScratchFilesBudget;
-use crate::RelativePath;
-
 use super::{VfsFile, VfsMmap, VirtualFileSystem};
+use crate::{scratch_file::ScratchFilesBudget, RelativePath};
 
 /// A virtual filesystem implementation that operates with files in the mounted
 /// operating system filesystems. In other words, it is a facade for `std::fs`.
@@ -182,13 +182,13 @@ fn is_system_or_hidden_file(entry: &DirEntry) -> bool {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
-
 	use std::fs::File;
 
-	use crate::util::patricia_set_util::PatriciaSetRelativePathIterExt;
 	use pretty_assertions::assert_eq;
 	use tempfile::Builder;
+
+	use super::*;
+	use crate::util::patricia_set_util::PatriciaSetRelativePathIterExt;
 
 	static VIRTUALLY_UNLIMITED_MEMORY_BUDGET: ScratchFilesBudget =
 		ScratchFilesBudget::new(usize::MAX);

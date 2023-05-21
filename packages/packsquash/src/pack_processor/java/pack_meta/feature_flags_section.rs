@@ -1,8 +1,12 @@
-use crate::pack_processor::java::resource_location::{ResourceLocation, ResourceLocationError};
-use crate::pack_processor::java::PackType;
-use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
+
+use serde::{Deserialize, Serialize};
 use tinyvec::ArrayVec;
+
+use crate::pack_processor::java::{
+	resource_location::{ResourceLocation, ResourceLocationError},
+	PackType
+};
 
 /// The Minecraft client builds a long integer mask with the set of feature flags,
 /// so the maximum number of flags is 64.

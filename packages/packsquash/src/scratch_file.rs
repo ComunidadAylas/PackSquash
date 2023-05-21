@@ -1,6 +1,9 @@
-use std::fs::File;
-use std::io::{self, BufRead, BufReader, BufWriter, Cursor, Read, Seek, SeekFrom, Write};
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{
+	fs::File,
+	io::{self, BufRead, BufReader, BufWriter, Cursor, Read, Seek, SeekFrom, Write},
+	sync::atomic::{AtomicUsize, Ordering}
+};
+
 use tempfile::tempfile;
 
 #[cfg(test)]

@@ -1,14 +1,18 @@
-use crate::util::zero_copy_deserialize_traits::ZeroCopyDeserializable;
+use std::{
+	borrow::Cow,
+	fmt::{Display, Formatter, Write},
+	num::NonZeroI32,
+	ops::{Deref, DerefMut},
+	slice
+};
+
 use ahash::AHashMap;
 use compact_str::CompactString;
 use serde::{Deserialize, Serialize, Serializer};
-use std::borrow::Cow;
-use std::fmt::{Display, Formatter, Write};
-use std::num::NonZeroI32;
-use std::ops::{Deref, DerefMut};
-use std::slice;
 use thiserror::Error;
 use tinyvec::{tiny_vec, TinyVec};
+
+use crate::util::zero_copy_deserialize_traits::ZeroCopyDeserializable;
 
 /// References:
 /// - Vanilla deserializer: `net.minecraft.client.renderer.block.model.BlockModelDefinition`

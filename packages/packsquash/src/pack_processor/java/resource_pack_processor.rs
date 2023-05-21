@@ -1,11 +1,14 @@
-use super::{pack_meta::PackMeta, PackError};
-use crate::pack_processor::java::asset_processor::create_asset_processors;
-use crate::squashed_pack_state::SquashedPackState;
-use crate::vfs::VirtualFileSystem;
+use std::io::{Read, Seek};
+
 use itertools::Itertools;
 use packsquash_options::{FileOptionsMap, GlobalOptions};
 use patricia_tree::PatriciaSet;
-use std::io::{Read, Seek};
+
+use super::{pack_meta::PackMeta, PackError};
+use crate::{
+	pack_processor::java::asset_processor::create_asset_processors,
+	squashed_pack_state::SquashedPackState, vfs::VirtualFileSystem
+};
 
 // TODO
 pub(super) struct ResourcePackProcessor;

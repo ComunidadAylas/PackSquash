@@ -1,12 +1,11 @@
-use git2::opts::set_verify_owner_validation;
-use git2::{DescribeFormatOptions, DescribeOptions, Repository};
+use std::{env, env::current_dir, error::Error, fs, path::PathBuf};
+
+use git2::{opts::set_verify_owner_validation, DescribeFormatOptions, DescribeOptions, Repository};
 use packsquash_options::{GlobalOptionsFieldName, SquashOptions};
-use schemars::gen::{SchemaGenerator, SchemaSettings};
-use schemars::schema::Schema;
-use std::env::current_dir;
-use std::error::Error;
-use std::path::PathBuf;
-use std::{env, fs};
+use schemars::{
+	gen::{SchemaGenerator, SchemaSettings},
+	schema::Schema
+};
 use time::OffsetDateTime;
 
 fn main() {
