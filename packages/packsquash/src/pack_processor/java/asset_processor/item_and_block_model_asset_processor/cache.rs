@@ -1,16 +1,21 @@
-use super::item_or_block_model::ItemOrBlockModel;
-use super::item_or_block_model::ItemOrBlockModelRepresentative;
-use super::InnerItemOrBlockModelAssetError;
-use crate::pack_processor::java::asset_processor::helper::json_helper::{
-	self, JsonAssetDeserializeOutcome
+use std::{
+	io::{Read, Seek},
+	sync::{Arc, RwLock}
 };
-use crate::relative_path::RelativePath;
-use crate::squashed_pack_state::SquashedPackState;
-use crate::vfs::VirtualFileSystem;
+
 use packsquash_options::GlobalOptions;
 use quick_cache::sync::Cache;
-use std::io::{Read, Seek};
-use std::sync::{Arc, RwLock};
+
+use super::{
+	item_or_block_model::{ItemOrBlockModel, ItemOrBlockModelRepresentative},
+	InnerItemOrBlockModelAssetError
+};
+use crate::{
+	pack_processor::java::asset_processor::helper::json_helper::{self, JsonAssetDeserializeOutcome},
+	relative_path::RelativePath,
+	squashed_pack_state::SquashedPackState,
+	vfs::VirtualFileSystem
+};
 
 // TODO gather stats to dynamically size this cache better
 const CACHE_SIZE: usize = 128;

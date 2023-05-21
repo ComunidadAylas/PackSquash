@@ -8,16 +8,16 @@
 
 mod optimization_progress_logger;
 
-use crate::optimization_progress_logger::OptimizationProgressLogger;
+use std::{borrow::Cow, env, fs, path::Path};
+
 use packsquash::VirtualFileSystemType;
 use packsquash_options::SquashOptions;
 use path_absolutize::Absolutize;
-use std::borrow::Cow;
-use std::path::Path;
-use std::{env, fs};
 use tauri::{Runtime, Window};
 use tauri_plugin_store::StoreBuilder;
 use toml::macros::Deserialize;
+
+use crate::optimization_progress_logger::OptimizationProgressLogger;
 
 fn main() {
 	let mut tauri_builder = tauri::Builder::default()

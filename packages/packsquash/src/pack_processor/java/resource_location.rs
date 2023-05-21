@@ -1,12 +1,15 @@
-use super::PackType;
-use crate::relative_path::InvalidPathError;
-use crate::util::cow_util::{ReborrowExt, SplitOnceByColonWithDefaultPrefixExt};
-use crate::RelativePath;
+use std::{borrow::Cow, path::Path};
+
 use serde::{Serialize, Serializer};
-use std::borrow::Cow;
-use std::path::Path;
 use strum::IntoEnumIterator;
 use thiserror::Error;
+
+use super::PackType;
+use crate::{
+	relative_path::InvalidPathError,
+	util::cow_util::{ReborrowExt, SplitOnceByColonWithDefaultPrefixExt},
+	RelativePath
+};
 
 static DEFAULT_NAMESPACE: &str = "minecraft";
 

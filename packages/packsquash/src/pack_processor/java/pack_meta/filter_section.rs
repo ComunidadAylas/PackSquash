@@ -1,10 +1,11 @@
-use crate::java::resource_location::ResourceLocation;
+use std::{borrow::Cow, ops::Deref};
+
 use ahash::AHashMap;
 use onig::{Regex, RegexOptions, Syntax};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
-use std::ops::Deref;
 use tinyvec::TinyVec;
+
+use crate::java::resource_location::ResourceLocation;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct ResourceFilterSection<'data> {

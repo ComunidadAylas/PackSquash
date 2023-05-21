@@ -15,9 +15,9 @@
 // https://docs.rs/crate/machine-uid/0.2.0
 // https://github.com/tilda/rust-hwid
 
-use once_cell::sync::Lazy;
 use std::{cmp::Ordering, env};
 
+use once_cell::sync::Lazy;
 use uuid::Uuid;
 
 mod os;

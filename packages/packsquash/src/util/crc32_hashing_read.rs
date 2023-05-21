@@ -1,5 +1,4 @@
-use std::io;
-use std::io::Read;
+use std::{io, io::Read};
 
 pub struct Crc32HashingRead<'hasher, R: Read> {
 	inner: R,

@@ -4,26 +4,29 @@
 
 mod minecraft_version;
 
-pub use minecraft_version::MinecraftVersion;
-pub use minecraft_version::MinecraftVersionRange;
+use std::{
+	borrow::Cow,
+	fmt,
+	fmt::{Display, Formatter},
+	fs, io,
+	io::ErrorKind,
+	num::{NonZeroU32, NonZeroU8, NonZeroUsize},
+	ops::Deref,
+	thread::available_parallelism
+};
 
 use ahash::AHashMap;
 use camino::Utf8Path;
 use const_default::ConstDefault;
-use std::borrow::Cow;
-use std::fmt::{Display, Formatter};
-use std::io::ErrorKind;
-use std::num::{NonZeroU32, NonZeroU16, NonZeroU8, NonZeroUsize};
-use std::ops::Deref;
-use std::thread::available_parallelism;
-use std::{fmt, fs, io};
-
 use enumset::{EnumSet, EnumSetType};
 use field_types::FieldName;
 use globset::{Glob, GlobBuilder, GlobSet, GlobSetBuilder};
-use schemars::gen::SchemaGenerator;
-use schemars::schema::{Schema, SchemaObject};
-use schemars::JsonSchema;
+pub use minecraft_version::{MinecraftVersion, MinecraftVersionRange};
+use schemars::{
+	gen::SchemaGenerator,
+	schema::{Schema, SchemaObject},
+	JsonSchema
+};
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use sysinfo::{RefreshKind, System, SystemExt};

@@ -1,9 +1,9 @@
 //! OS-specific functions to get PackSquash system IDs.
 
-use super::SystemId;
-
 #[cfg(all(unix, not(target_os = "macos")))]
 use std::{fs, io, path::Path};
+
+use super::SystemId;
 
 /// Gets the D-Bus and/or systemd generated machine ID. This machine ID is
 /// 128-bit wide, and is intended to be constant for all the lifecycle of the
@@ -69,9 +69,12 @@ pub(super) fn get_boot_id() -> Option<SystemId> {
 /// - <https://github.com/netdata/netdata/issues/2682#issuecomment-327721829>
 #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
 pub(super) fn get_kernel_host_id() -> Option<SystemId> {
-	use std::ffi::{CStr, CString};
-	use std::os::raw::{c_char, c_int, c_void};
-	use std::ptr;
+	use std::{
+		ffi::{CStr, CString},
+		os::raw::{c_char, c_int, c_void},
+		ptr
+	};
+
 	use uuid::Uuid;
 
 	extern "C" {
@@ -129,8 +132,11 @@ pub(super) fn get_kernel_host_id() -> Option<SystemId> {
 /// - <https://lists.freebsd.org/pipermail/freebsd-hackers/2007-February/019456.html>
 #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
 pub(super) fn get_dmi_product_id() -> Option<SystemId> {
-	use std::ffi::{CStr, CString};
-	use std::os::raw::{c_char, c_int};
+	use std::{
+		ffi::{CStr, CString},
+		os::raw::{c_char, c_int}
+	};
+
 	use uuid::Uuid;
 
 	extern "C" {
@@ -197,13 +203,14 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 #[cfg(target_os = "macos")]
 #[allow(unsafe_code, non_camel_case_types)]
 pub(super) fn get_platform_serial_number() -> Option<SystemId> {
+	use std::{ffi::CString, os::raw::c_char};
+
 	use core_foundation::{
 		base::{kCFAllocatorDefault, mach_port_t, CFAllocatorRef, CFTypeRef, TCFType},
 		dictionary::{CFDictionaryRef, CFMutableDictionaryRef},
 		string::{CFString, CFStringRef}
 	};
 	use mach2::kern_return::kern_return_t;
-	use std::{ffi::CString, os::raw::c_char};
 
 	type io_object_t = mach_port_t;
 	type io_registry_entry_t = io_object_t;

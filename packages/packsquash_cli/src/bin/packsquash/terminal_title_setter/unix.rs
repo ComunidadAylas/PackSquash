@@ -1,6 +1,6 @@
-use std::fs::{File, OpenOptions};
 use std::{
 	env,
+	fs::{File, OpenOptions},
 	io::{self, IsTerminal}
 };
 
@@ -80,8 +80,7 @@ impl From<&'static str> for UnixTerminalTitleString {
 /// Returns a file path to the controlling terminal of this process. If this
 /// process has no controlling terminal, `None` will be returned.
 fn controlling_terminal() -> Option<String> {
-	use std::ffi::CStr;
-	use std::os::raw::c_char;
+	use std::{ffi::CStr, os::raw::c_char};
 
 	extern "C" {
 		/// `char* ctermid(char* s)`, from `#include <stdio.h>`.

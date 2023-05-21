@@ -1,32 +1,49 @@
-use std::borrow::Cow;
-use std::cell::Cell;
-use crate::pack_processor::java::asset_processor::compile_hardcoded_pack_file_glob_pattern;
-use crate::pack_processor::java::asset_processor::data::vanilla_model_list;
-use crate::pack_processor::java::asset_processor::helper::{self, json_helper};
-use crate::pack_processor::java::asset_processor::item_and_block_model_asset_processor::item_or_block_model::{ElementFaceDirection, ItemGuiLight, ItemOrBlockModel, ItemTransform, TextureLocationOrReference};
-use crate::pack_processor::java::pack_meta::PackMeta;
-use crate::pack_processor::java::resource_location::ResourceLocation;
-use crate::relative_path::{InvalidPathError, RelativePath};
-use crate::squash_zip::SquashZipError;
-use crate::squashed_pack_state::SquashedPackState;
-use crate::util::patricia_set_util::{PatriciaSetContainsRelativePathExt, PatriciaSetRelativePathIterExt};
-use crate::util::range_bounds_intersect::RangeBoundsIntersectExt;
-use crate::vfs::VirtualFileSystem;
-use crate::PackSquashAssetProcessingStrategy;
+use std::{
+	borrow::Cow,
+	cell::Cell,
+	io,
+	io::{Read, Seek},
+	ops::Deref,
+	sync::{Arc, Mutex, RwLock}
+};
+
 use ahash::{AHashMap, AHashSet};
-use once_cell::sync::Lazy;
-use packsquash_options::{minecraft_version, FileOptionsMap, GlobalOptions, JsonFileOptions, MissingReferenceAction};
-use patricia_tree::PatriciaSet;
-use std::io;
-use std::io::{Read, Seek};
-use std::ops::Deref;
-use std::sync::{Arc, Mutex, RwLock};
 use compact_str::CompactString;
+use once_cell::sync::Lazy;
+use packsquash_options::{
+	minecraft_version, FileOptionsMap, GlobalOptions, JsonFileOptions, MissingReferenceAction
+};
+use patricia_tree::PatriciaSet;
 use rayon::prelude::*;
 use strum::IntoEnumIterator;
 use thiserror::Error;
 use tinyvec::{tiny_vec, TinyVec};
-use self::cache::{ModelCache, CachedItemOrBlockModel};
+
+use self::cache::{CachedItemOrBlockModel, ModelCache};
+use crate::{
+	pack_processor::java::{
+		asset_processor::{
+			compile_hardcoded_pack_file_glob_pattern,
+			data::vanilla_model_list,
+			helper::{self, json_helper},
+			item_and_block_model_asset_processor::item_or_block_model::{
+				ElementFaceDirection, ItemGuiLight, ItemOrBlockModel, ItemTransform,
+				TextureLocationOrReference
+			}
+		},
+		pack_meta::PackMeta,
+		resource_location::ResourceLocation
+	},
+	relative_path::{InvalidPathError, RelativePath},
+	squash_zip::SquashZipError,
+	squashed_pack_state::SquashedPackState,
+	util::{
+		patricia_set_util::{PatriciaSetContainsRelativePathExt, PatriciaSetRelativePathIterExt},
+		range_bounds_intersect::RangeBoundsIntersectExt
+	},
+	vfs::VirtualFileSystem,
+	PackSquashAssetProcessingStrategy
+};
 
 mod cache;
 mod item_or_block_model;

@@ -1,5 +1,6 @@
-use once_cell::sync::Lazy;
 use std::ops::Deref;
+
+use once_cell::sync::Lazy;
 
 pub enum LazyOrEager<'lazy, T, F: FnOnce() -> T> {
 	Lazy(&'lazy Lazy<T, F>),

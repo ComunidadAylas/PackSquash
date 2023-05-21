@@ -1,6 +1,7 @@
+use std::borrow::Cow;
+
 use ahash::AHashMap;
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct MetadataSection<'data> {

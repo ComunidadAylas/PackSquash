@@ -1,8 +1,11 @@
 //! Contains the implementation of the [`StripUtf8BomExt`] trait.
 
-use std::convert::Infallible;
-use std::error::Error;
-use std::io::{self, Read};
+use std::{
+	convert::Infallible,
+	error::Error,
+	io::{self, Read}
+};
+
 use tinyvec::ArrayVec;
 
 /// The UTF-8 representation of the Unicode byte order mark character.
@@ -101,9 +104,11 @@ impl<R: Read> Read for StripUtf8Bom<R> {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
-	use pretty_assertions::assert_eq;
 	use std::io::Cursor;
+
+	use pretty_assertions::assert_eq;
+
+	use super::*;
 
 	fn strip_utf8_bom_and_expect<T: Read, E: Error>(
 		read: impl StripUtf8BomExt<T, E>,

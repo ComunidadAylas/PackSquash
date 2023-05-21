@@ -1,5 +1,7 @@
-use std::fmt::{Arguments, Write as FmtWrite};
-use std::io::{IoSlice, Write as IoWrite};
+use std::{
+	fmt::{Arguments, Write as FmtWrite},
+	io::{IoSlice, Write as IoWrite}
+};
 
 /// Newtype adapter struct to bridge `io::Write` implementations
 /// to the `fmt::Write` trait.

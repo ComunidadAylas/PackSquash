@@ -1,6 +1,9 @@
+use std::{
+	error::Error,
+	fmt::{Debug, Display, Formatter}
+};
+
 use serde::{de::Deserialize, Deserializer};
-use std::error::Error;
-use std::fmt::{Debug, Display, Formatter};
 
 /// Newtype wrapper struct to prettify how `serde` errors with path information
 /// are displayed.
