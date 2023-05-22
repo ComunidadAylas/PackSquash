@@ -2,11 +2,13 @@ use std::{
 	env,
 	ffi::OsStr,
 	io::{self, IsTerminal},
-	os::windows::{ffi::OsStrExt, io::AsRawHandle, raw::HANDLE}
+	os::windows::{ffi::OsStrExt, io::AsRawHandle},
+	ptr::NonNull
 };
 
-use windows_sys::Win32::System::Console::{
-	SetConsoleMode, SetConsoleTitleW, ENABLE_VIRTUAL_TERMINAL_PROCESSING
+use windows_sys::Win32::{
+	Foundation::HANDLE,
+	System::Console::{SetConsoleMode, SetConsoleTitleW, ENABLE_VIRTUAL_TERMINAL_PROCESSING}
 };
 
 use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};
@@ -78,24 +80,24 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 				// (IOW, both streams share the same console, so it doesn't matter what stream
 				// we choose to get the console of). But check both anyway, to handle redirections.
 				// See: https://docs.microsoft.com/en-us/windows/console/getstdhandle#remarks
-				as_non_null_ptr(io::stdout().as_raw_handle()).map_or_else(
+				NonNull::new(io::stdout().as_raw_handle()).map_or_else(
 					|| {
 						// stdout is not associated with a console. Try with stderr
-						as_non_null_ptr(io::stderr().as_raw_handle()).map_or_else(
+						NonNull::new(io::stderr().as_raw_handle()).map_or_else(
 							|| {
 								// stderr is not associated with a console either. Give up
 								None
 							},
 							|console_handle| {
 								// stderr is associated with a console
-								enable_vt_processing(console_handle)
+								enable_vt_processing(console_handle.as_ptr() as HANDLE)
 									.and_then(|_| Some(TerminalStream::Stderr))
 							}
 						)
 					},
 					|console_handle| {
 						// stdout is associated with a console
-						enable_vt_processing(console_handle)
+						enable_vt_processing(console_handle.as_ptr() as HANDLE)
 							.and_then(|_| Some(TerminalStream::Stdout))
 					}
 				)
@@ -167,9 +169,4 @@ fn enable_vt_processing(console_handle: HANDLE) -> Option<()> {
 	// SAFETY: system calls are unsafe. We do this call following its documented contract
 	#[allow(unsafe_code)]
 	(unsafe { SetConsoleMode(console_handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING) } != 0).then_some(())
-}
-
-/// Returns `None` if `ptr` is null, or else returns `Some(ptr)`.
-fn as_non_null_ptr<T>(ptr: *mut T) -> Option<*mut T> {
-	(!ptr.is_null()).then_some(ptr)
 }
