@@ -230,7 +230,7 @@ jobs:
 
       - name: 🔨 Generate CLI Debian package
         if: startsWith(matrix.runner, 'ubuntu')
-        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- \
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
           ${{ env.CARGO_BUILD_FLAGS }}
 
       - name: 🔨 Generate CLI AppImage
