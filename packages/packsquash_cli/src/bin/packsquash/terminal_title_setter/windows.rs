@@ -5,8 +5,9 @@ use std::{
 	os::windows::{ffi::OsStrExt, io::AsRawHandle, raw::HANDLE}
 };
 
-use is_terminal::IsTerminal;
-use windows_sys::Win32::System::Console::{SetConsoleTitleW, ENABLE_VIRTUAL_TERMINAL_PROCESSING};
+use windows_sys::Win32::System::Console::{
+	SetConsoleMode, SetConsoleTitleW, ENABLE_VIRTUAL_TERMINAL_PROCESSING
+};
 
 use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};
 
@@ -78,10 +79,10 @@ impl TerminalTitleSetterTrait for WindowsTerminalTitleSetter {
 				// we choose to get the console of). But check both anyway, to handle redirections.
 				// See: https://docs.microsoft.com/en-us/windows/console/getstdhandle#remarks
 				as_non_null_ptr(io::stdout().as_raw_handle()).map_or_else(
-					|_| {
+					|| {
 						// stdout is not associated with a console. Try with stderr
 						as_non_null_ptr(io::stderr().as_raw_handle()).map_or_else(
-							|_| {
+							|| {
 								// stderr is not associated with a console either. Give up
 								None
 							},
@@ -162,7 +163,7 @@ impl From<&'static str> for WindowsTerminalTitleString {
 /// Enables virtual terminal proccessing (i.e. ANSI escape sequence support) for
 /// the specified console. `Some(())` is returned if the VT processing mode
 /// could be enabled; otherwise, `None` is returned.
-fn enable_vt_processing(console_handle: *mut HANDLE) -> Option<()> {
+fn enable_vt_processing(console_handle: HANDLE) -> Option<()> {
 	// SAFETY: system calls are unsafe. We do this call following its documented contract
 	#[allow(unsafe_code)]
 	(unsafe { SetConsoleMode(console_handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING) } != 0).then_some(())
