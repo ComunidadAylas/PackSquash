@@ -146,6 +146,7 @@ jobs:
     container: ${{ matrix.container }}
 
     env:
+      RUSTUP_TOOLCHAIN: ${{ matrix.host-target }}
       CARGO_BUILD_TARGET: ${{ matrix.target }}
       TARGET_APPIMAGE_ARCH: ${{ matrix.appimage-arch }}
       TARGET_APPIMAGE_APT_ARCH: ${{ matrix.apt-arch }}
@@ -190,7 +191,7 @@ jobs:
 
       # As of 2023-05-24, only the Debian unstable musl-dev ARM64 package ships with an
       # aarch64-linux-musl-gcc script that wraps the aarch64-linux-gnu-gcc cross-compiler
-      # provided by gcc-aarch64-linux-gnu package to link against musl
+      # provided by the gcc-aarch64-linux-gnu package to link against musl
       - name: 🧰 Install Linux ARM64 cross-compilation musl development files
         if: matrix.target == 'aarch64-unknown-linux-musl'
         run: apt-get install -yq musl-dev:arm64
