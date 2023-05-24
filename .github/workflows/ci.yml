@@ -256,7 +256,7 @@ jobs:
       # is owned by an unprivileged user. Change the cache directory to be within the container
       # to avoid permission issues
       - name: 📏 Change npm cache directory to one with appropriate permissions
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: startsWith(matrix.runner, 'ubuntu') && !endsWith(matrix.target, '-musl')
         run: npm config --global set cache /tmp/.npm
 
       - name: 📥 Checkout source
