@@ -18,7 +18,7 @@ rustflags = ["-C", "target-cpu=x86-64-v2"]
 [target.'cfg(target_os = "linux")']
 rustflags = ["-C", "relocation-model=static"]
 
-[target.'cfg(target_os = "linux", target_arch = "aarch64")']
+[target.'cfg(all(target_os = "linux", target_arch = "aarch64"))']
 runner = 'qemu-aarch64'
 
 [target.aarch64-unknown-linux-gnu]
