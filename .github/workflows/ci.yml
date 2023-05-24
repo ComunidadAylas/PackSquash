@@ -167,6 +167,7 @@ jobs:
     container: ${{ matrix.container }}
 
     env:
+      RUSTUP_TOOLCHAIN: ${{ matrix.host-target }}
       CARGO_BUILD_TARGET: ${{ matrix.target }}
       RUSTUP_TOOLCHAIN: nightly-${{ matrix.host-target }}
       TARGET_APPIMAGE_ARCH: ${{ matrix.appimage-arch }}
