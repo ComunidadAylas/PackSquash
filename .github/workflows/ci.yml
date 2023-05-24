@@ -154,7 +154,6 @@ jobs:
     container: ${{ matrix.container }}
 
     env:
-      RUSTUP_TOOLCHAIN: ${{ matrix.host-target }}
       CARGO_BUILD_TARGET: ${{ matrix.target }}
       # nextext requires this on Windows to pick the intended GNU toolchain
       RUSTUP_TOOLCHAIN: nightly-${{ matrix.host-target }}
