@@ -93,7 +93,6 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             rust-toolchain-targets: x86_64-unknown-linux-gnu
-            tauri-target: x86_64-unknown-linux-gnu
             appimage-arch: x86_64
             runner: ubuntu-latest
             container: node:16-bullseye-slim
@@ -110,7 +109,6 @@ jobs:
           - target: aarch64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             rust-toolchain-targets: aarch64-unknown-linux-gnu
-            tauri-target: aarch64-unknown-linux-gnu
             appimage-arch: aarch64
             runner: ubuntu-latest
             container: node:16-bullseye-slim
@@ -122,7 +120,7 @@ jobs:
             rust-toolchain-targets: aarch64-unknown-linux-musl
             runner: ubuntu-latest
             container: debian:sid-slim
-            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
+            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: arm64
 
           - target: x86_64-unknown-linux-musl
@@ -190,7 +188,7 @@ jobs:
           # The fourth line contains packages necessary for Tauri.
           # The fifth line contains packages necessary for build-time JSON Schema generation
           # and the packsquash package build script
-          apt-get install -yq build-essential git curl \
+          apt-get install -yq build-essential musl-tools git curl \
                               markdown html2text \
                               python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
                               libssl-dev:${{ matrix.apt-arch }} libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
@@ -318,12 +316,12 @@ jobs:
           ${{ env.CARGO_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI Debian package
-        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
+        if: endsWith(matrix.target, '-linux-gnu')
         run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
           ${{ env.CARGO_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI AppImage
-        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
+        if: endsWith(matrix.target, '-linux-gnu')
         run: packages/packsquash_gui/src-tauri/bundles/appimage/build.sh
 
       - name: 🔨 Generate multilingual GUI MSI installer
@@ -345,21 +343,21 @@ jobs:
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
       - name: 📤 Upload GUI Debian package
-        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
+        if: endsWith(matrix.target, '-linux-gnu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash-gui_*.deb
 
       - name: 📤 Upload GUI AppImage
-        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
+        if: endsWith(matrix.target, '-linux-gnu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI AppImage (${{ matrix.appimage-arch }})
           path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage
 
       - name: 📤 Upload GUI AppImage update diff
-        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
+        if: endsWith(matrix.target, '-linux-gnu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI AppImage zsync (${{ matrix.appimage-arch }})
