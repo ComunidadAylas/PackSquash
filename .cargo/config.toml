@@ -7,20 +7,18 @@
 # 2009 is compatible) and provides some nice speedups. CPUs that
 # don't support it probably are too slow for PackSquash anyway. See:
 # https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels
-#
+[target.'cfg(target_arch = "x86_64")']
+rustflags = ["-C", "target-cpu=x86-64-v2"]
+
 # Disabling PIE codegen substantially reduces binary size (~20% on Linux x64) due to
 # big relocation ELF headers, with hopefully negligible impact in security given our
 # little usage of unsafe code. See:
 # https://doc.rust-lang.org/rustc/exploit-mitigations.html#position-independent-executable
 # https://gist.github.com/reveng007/b9ef8c7c7ed7a46b10a325f4dee42ac4
+[target.'cfg(target_os = "linux")']
+rustflags = ["-C", "relocation-model=static"]
 
-[target.x86_64-unknown-linux-gnu]
-rustflags = ["-C", "target-cpu=x86-64-v2", "-C", "relocation-model=static"]
-
-[target.x86_64-pc-windows-gnu]
-rustflags = ["-C", "target-cpu=x86-64-v2"]
-
-[target.'cfg(all(target_os = "linux", target_arch = "aarch64"))']
+[target.'cfg(target_os = "linux", target_arch = "aarch64")']
 runner = 'qemu-aarch64'
 
 [target.aarch64-unknown-linux-gnu]

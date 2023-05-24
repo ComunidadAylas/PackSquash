@@ -93,11 +93,36 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             rust-toolchain-targets: x86_64-unknown-linux-gnu
+            tauri-target: x86_64-unknown-linux-gnu
+            appimage-arch: x86_64
             runner: ubuntu-latest
             container: node:16-bullseye-slim
-            pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: amd64
-            appimage-arch: x86_64
+            pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
+
+          - target: x86_64-unknown-linux-musl
+            host-target: x86_64-unknown-linux-gnu
+            rust-toolchain-targets: x86_64-unknown-linux-musl
+            runner: ubuntu-latest
+            container: debian:sid-slim
+            apt-arch: amd64
+
+          - target: aarch64-unknown-linux-gnu
+            host-target: x86_64-unknown-linux-gnu
+            rust-toolchain-targets: aarch64-unknown-linux-gnu
+            tauri-target: aarch64-unknown-linux-gnu
+            appimage-arch: aarch64
+            runner: ubuntu-latest
+            container: node:16-bullseye-slim
+            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
+            apt-arch: arm64
+
+          - target: aarch64-unknown-linux-musl
+            host-target: x86_64-unknown-linux-gnu
+            rust-toolchain-targets: aarch64-unknown-linux-musl
+            runner: ubuntu-latest
+            container: debian:sid-slim
+            apt-arch: arm64
 
           - target: x86_64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
@@ -155,7 +180,7 @@ jobs:
 
     steps:
       - name: 🧰 Install Linux toolchain packages
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: contains(matrix.target, '-linux-')
         run: |
           apt-get update
           # curl is required by rustup and Tauri.
@@ -244,8 +269,27 @@ jobs:
       # testing the system ID retrieval code, so copy a dummy one
       - name: 📏 Set up a dummy D-Bus machine ID for tests
         if: startsWith(matrix.runner, 'ubuntu')
-        run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
+        run: cat /proc/sys/kernel/random/uuid | tr -d '-' > /run/machine-id
 
+      # The default npm cache directory resides at the home directory. Because our Linux
+      # jobs run on containers, that directory is bind-mounted from the host runner, which
+      # is owned by an unprivileged user. Change the cache directory to be within the container
+      # to avoid permission issues
+      - name: 📏 Change npm cache directory to one with appropriate permissions
+        if: startsWith(matrix.runner, 'ubuntu')
+        run: npm config --global set cache /tmp/.npm
+
+      - name: 📥 Checkout source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Keep the commit history for proper version information
+
+      # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
+      - name: 📁 Create GUI package frontend dist directory
+        run: mkdir packages/packsquash_gui/dist
+
+      # We can only run tests if the target architecture matches the host architecture,
+      # or if the target (and therefore host) OS is Linux, as we can leverage QEMU there
       - name: ✔️ Run tests
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
         run: cargo test --release -- -Z unstable-options --report-time
@@ -254,19 +298,11 @@ jobs:
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.CARGO_BUILD_FLAGS }} --release
 
       - name: 🔨 Build GUI frontend
-        if: ${{ !startsWith(matrix.runner, 'macos') && matrix.tauri-target == '' }}
+        if: matrix.tauri-target == '' && !endsWith(matrix.target, '-musl')
         working-directory: packages/packsquash_gui
         run: |
-          # The default npm cache directory resides at the home directory. That directory is
-          # bind-mounted from the host runner, which is owned by an unprivileged user. To
-          # avoid permission issues, change the cache directory to be within the container
-          npm ci --cache=/tmp/.npm
+          npm ci
           npm run build
-
-      - name: 🔨 Generate CLI Debian package
-        if: endsWith(matrix.target, '-linux-gnu')
-        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} -- \
-          ${{ env.CARGO_BUILD_FLAGS }}
 
       - name: 🔨 Build GUI frontend, installers and updater artifacts
         if: matrix.tauri-target != ''
@@ -275,13 +311,18 @@ jobs:
           npm ci
           cargo tauri build --target ${{ matrix.tauri-target }} -- ${{ env.CARGO_BUILD_FLAGS }}
 
+      - name: 🔨 Generate CLI Debian package
+        if: endsWith(matrix.target, '-linux-gnu')
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
+          ${{ env.CARGO_BUILD_FLAGS }}
+
       - name: 🔨 Generate GUI Debian package
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
           ${{ env.CARGO_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI AppImage
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         run: packages/packsquash_gui/src-tauri/bundles/appimage/build.sh
 
       - name: 🔨 Generate multilingual GUI MSI installer
@@ -303,21 +344,21 @@ jobs:
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
       - name: 📤 Upload GUI Debian package
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash-gui_*.deb
 
       - name: 📤 Upload GUI AppImage
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI AppImage (${{ matrix.appimage-arch }})
           path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage
 
       - name: 📤 Upload GUI AppImage update diff
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI AppImage zsync (${{ matrix.appimage-arch }})
