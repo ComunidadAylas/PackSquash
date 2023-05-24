@@ -81,8 +81,10 @@ jobs:
       matrix:
         target:
           - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
           - x86_64-pc-windows-gnu
           - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
           - x86_64-apple-darwin
           - aarch64-apple-darwin
 
@@ -90,40 +92,54 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             rust-toolchain-targets: x86_64-unknown-linux-gnu
+            tauri-target: x86_64-unknown-linux-gnu
+            appimage-arch: x86_64
             runner: ubuntu-latest
             container: node:16-bullseye-slim
-            pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: amd64
-            appimage-arch: x86_64
+            pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
+
+          - target: x86_64-unknown-linux-musl
+            host-target: x86_64-unknown-linux-gnu
+            rust-toolchain-targets: x86_64-unknown-linux-musl
+            runner: ubuntu-latest
+            container: debian:sid-slim
+            apt-arch: amd64
+
+          - target: aarch64-unknown-linux-gnu
+            host-target: x86_64-unknown-linux-gnu
+            rust-toolchain-targets: aarch64-unknown-linux-gnu
+            tauri-target: aarch64-unknown-linux-gnu
+            appimage-arch: aarch64
+            runner: ubuntu-latest
+            container: node:16-bullseye-slim
+            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
+            apt-arch: arm64
+
+          - target: aarch64-unknown-linux-musl
+            host-target: x86_64-unknown-linux-gnu
+            rust-toolchain-targets: aarch64-unknown-linux-musl
+            runner: ubuntu-latest
+            container: debian:sid-slim
+            apt-arch: arm64
 
           - target: x86_64-pc-windows-gnu
             host-target: x86_64-pc-windows-gnu
             rust-toolchain-targets: x86_64-pc-windows-gnu
             tauri-target: x86_64-pc-windows-gnu
             runner: windows-latest
-            cli-executable: packsquash.exe
-
-          - target: aarch64-unknown-linux-gnu
-            host-target: x86_64-unknown-linux-gnu
-            rust-toolchain-targets: aarch64-unknown-linux-gnu
-            runner: ubuntu-latest
-            container: node:16-bullseye-slim
-            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
-            apt-arch: arm64
-            appimage-arch: aarch64
+            executable-extension: .exe
 
           - target: x86_64-apple-darwin
             host-target: x86_64-apple-darwin
             rust-toolchain-targets: aarch64-apple-darwin
             tauri-target: universal-apple-darwin
             runner: macos-latest
-            cli-executable: packsquash
 
           - target: aarch64-apple-darwin
             host-target: x86_64-apple-darwin
             rust-toolchain-targets: aarch64-apple-darwin
             runner: macos-latest
-            cli-executable: packsquash
 
     runs-on: ${{ matrix.runner }}
 
@@ -141,12 +157,12 @@ jobs:
       github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
 
     steps:
-      - name: 📦 Add Linux ARM64 architecture APT packages
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
+      - name: 📦 Add ARM64 architecture APT packages
+        if: startsWith(matrix.target, 'aarch64-unknown-linux')
         run: dpkg --add-architecture arm64
 
       - name: 🧰 Install Linux toolchain packages
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: contains(matrix.target, '-linux-')
         run: |
           apt-get update
           # curl is required by rustup and Tauri.
@@ -164,28 +180,25 @@ jobs:
       # The GitHub Windows and macOS images already have jq, git and the build-essential equivalents installed,
       # so we don't need to install them explicitly. However, that may not be the case in different environments
 
-      - name: 📥 Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Keep the commit history for proper version information
-
-      # Necessary for steps that invoke Git commands to work properly on workflows run on containers.
-      # See: https://github.com/actions/checkout/issues/766
-      - name: 📥 Set source ownership to current user
-        if: startsWith(matrix.runner, 'ubuntu')
-        run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
-
-      # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
-      - name: 📁 Create GUI package frontend dist directory
-        run: mkdir packages/packsquash_gui/dist
+      - name: 🧰 Install QEMU
+        if: contains(matrix.target, '-linux-') && !startsWith(matrix.target, 'x86_64-')
+        run: apt-get install -yq qemu-user
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: apt-get install -yq gcc-aarch64-linux-gnu qemu-user
+        if: startsWith(matrix.target, 'aarch64-unknown-linux')
+        run: apt-get install -yq gcc-aarch64-linux-gnu
+
+      # As of 2023-05-24, only the Debian unstable musl-dev ARM64 package ships with an
+      # aarch64-linux-musl-gcc script that wraps the aarch64-linux-gnu-gcc cross-compiler
+      # provided by gcc-aarch64-linux-gnu package to link against musl
+      - name: 🧰 Install Linux ARM64 cross-compilation musl development files
+        if: matrix.target == 'aarch64-unknown-linux-musl'
+        run: apt-get install -yq musl-dev:arm64
 
       - name: 🧰 Install Rust toolchain
         uses: dtolnay/rust-toolchain@nightly
         with:
+          toolchain: nightly-${{ matrix.host-target }}
           targets: ${{ matrix.rust-toolchain-targets }}
           components: rust-src
 
@@ -193,49 +206,62 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: 🧰 Install cargo-deb
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: contains(matrix.target, '-linux-')
         uses: taiki-e/install-action@v1
         with:
           tool: cargo-deb
 
       - name: 🧰 Install tauri-cli
-        if: ${{ !startsWith(matrix.runner, 'ubuntu') }}
+        if: matrix.tauri-target != ''
         uses: taiki-e/install-action@v1
         with:
           tool: tauri-cli
+
+      # Necessary for steps that invoke Git commands to work properly on workflows run on containers.
+      # See: https://github.com/actions/checkout/issues/766
+      - name: 📥 Set source ownership to current user
+        if: startsWith(matrix.runner, 'ubuntu')
+        run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
 
       # Our build container is minimal, and it doesn't contain any systemd package.
       # systemd is responsible for setting up the machine ID files we use for
       # testing the system ID retrieval code, so copy a dummy one
       - name: 📏 Set up a dummy D-Bus machine ID for tests
         if: startsWith(matrix.runner, 'ubuntu')
-        run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
+        run: cat /proc/sys/kernel/random/uuid | tr -d '-' > /run/machine-id
 
+      # The default npm cache directory resides at the home directory. Because our Linux
+      # jobs run on containers, that directory is bind-mounted from the host runner, which
+      # is owned by an unprivileged user. Change the cache directory to be within the container
+      # to avoid permission issues
+      - name: 📏 Change npm cache directory to one with appropriate permissions
+        if: startsWith(matrix.runner, 'ubuntu')
+        run: npm config --global set cache /tmp/.npm
+
+      - name: 📥 Checkout source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Keep the commit history for proper version information
+
+      # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
+      - name: 📁 Create GUI package frontend dist directory
+        run: mkdir packages/packsquash_gui/dist
+
+      # We can only run tests if the target architecture matches the host architecture,
+      # or if the target (and therefore host) OS is Linux, as we can leverage QEMU there
       - name: ✔️ Run tests
-        if: matrix.target != 'aarch64-apple-darwin'
+        if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
         run: cargo test --release -- -Z unstable-options --report-time
 
       - name: 🔨 Build with optimized standard library
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.CARGO_BUILD_FLAGS }} --release
 
       - name: 🔨 Build GUI frontend
-        if: ${{ !startsWith(matrix.runner, 'macos') && matrix.tauri-target == '' }}
+        if: matrix.tauri-target == '' && !endsWith(matrix.target, '-musl')
         working-directory: packages/packsquash_gui
         run: |
-          # The default npm cache directory resides at the home directory. That directory is
-          # bind-mounted from the host runner, which is owned by an unprivileged user. To
-          # avoid permission issues, change the cache directory to be within the container
-          npm ci --cache=/tmp/.npm
+          npm ci
           npm run build
-
-      - name: 🔨 Generate CLI Debian package
-        if: startsWith(matrix.runner, 'ubuntu')
-        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
-          ${{ env.CARGO_BUILD_FLAGS }}
-
-      - name: 🔨 Generate CLI AppImage
-        if: startsWith(matrix.runner, 'ubuntu')
-        run: packages/packsquash_cli/bundles/appimage/build.sh
 
       - name: 🔨 Build GUI frontend, installers and updater artifacts
         if: matrix.tauri-target != ''
@@ -244,13 +270,18 @@ jobs:
           npm ci
           cargo tauri build --target ${{ matrix.tauri-target }} -- ${{ env.CARGO_BUILD_FLAGS }}
 
+      - name: 🔨 Generate CLI Debian package
+        if: endsWith(matrix.target, '-linux-gnu')
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
+          ${{ env.CARGO_BUILD_FLAGS }}
+
       - name: 🔨 Generate GUI Debian package
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
           ${{ env.CARGO_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI AppImage
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         run: packages/packsquash_gui/src-tauri/bundles/appimage/build.sh
 
       - name: 🔨 Generate multilingual GUI MSI installer
@@ -258,49 +289,35 @@ jobs:
         run: packages/packsquash_gui/src-tauri/bundles/wix/build_multilingual_installer.ps1
 
       - name: 📤 Upload CLI binary
-        if: ${{ !startsWith(matrix.runner, 'ubuntu') }}
+        if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
-          path: target/${{ env.CARGO_BUILD_TARGET }}/release/${{ matrix.cli-executable }}
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash${{ matrix.executable-extension }}
 
       - name: 📤 Upload CLI Debian package
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
-      - name: 📤 Upload CLI AppImage
-        if: startsWith(matrix.runner, 'ubuntu')
-        uses: actions/upload-artifact@v3
-        with:
-          name: PackSquash CLI AppImage (${{ matrix.appimage-arch }})
-          path: target/appimage/PackSquash-*-${{ matrix.appimage-arch }}.AppImage
-
-      - name: 📤 Upload CLI AppImage update diff
-        if: startsWith(matrix.runner, 'ubuntu')
-        uses: actions/upload-artifact@v3
-        with:
-          name: PackSquash CLI AppImage zsync (${{ matrix.appimage-arch }})
-          path: target/appimage/PackSquash-*-${{ matrix.appimage-arch }}.AppImage.zsync
-
       - name: 📤 Upload GUI Debian package
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash-gui_*.deb
 
       - name: 📤 Upload GUI AppImage
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI AppImage (${{ matrix.appimage-arch }})
           path: target/appimage/PackSquash (GUI)-*-${{ matrix.appimage-arch }}.AppImage
 
       - name: 📤 Upload GUI AppImage update diff
-        if: startsWith(matrix.runner, 'ubuntu')
+        if: endsWith(matrix.target, '-linux-gnu') && matrix.tauri-target != ''
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI AppImage zsync (${{ matrix.appimage-arch }})
@@ -413,22 +430,21 @@ jobs:
           labels: |
             org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
-      - name: 📥 Download PackSquash x64 AppImage
+      - name: 📥 Download PackSquash CLI x64 musl executable
         uses: actions/download-artifact@v3
         with:
-          name: PackSquash CLI AppImage (x86_64)
+          name: PackSquash CLI executable (x86_64-unknown-linux-musl)
 
-      # Docker uses different architecture names
-      - name: 📁 Rename PackSquash x64 AppImage
-        run: mv PackSquash-*-x86_64.AppImage PackSquash-*-amd64.AppImage
+      - name: 📁 Rename PackSquash CLI x64 musl executable
+        run: mv packsquash packsquash-amd64
 
-      - name: 📥 Download PackSquash ARM64 AppImage
+      - name: 📥 Download PackSquash CLI ARM64 musl executable
         uses: actions/download-artifact@v3
         with:
-          name: PackSquash CLI AppImage (aarch64)
+          name: PackSquash CLI executable (aarch64-unknown-linux-musl)
 
-      - name: 📁 Rename PackSquash ARM64 AppImage
-        run: mv PackSquash-*-aarch64.AppImage PackSquash-*-arm64.AppImage
+      - name: 📁 Rename PackSquash CLI ARM64 musl executable
+        run: mv packsquash packsquash-arm64
 
       - name: 🔍 Check workflow package write permission
         id: check_write_permission
