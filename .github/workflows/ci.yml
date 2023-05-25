@@ -119,7 +119,6 @@ jobs:
             rust-toolchain-targets: aarch64-unknown-linux-musl
             runner: ubuntu-latest
             container: debian:sid-slim
-            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: arm64
 
           - target: x86_64-pc-windows-gnu
@@ -161,7 +160,7 @@ jobs:
         if: startsWith(matrix.target, 'aarch64-unknown-linux')
         run: dpkg --add-architecture arm64
 
-      - name: 🧰 Install toolchain packages
+      - name: 🧰 Install toolchain APT packages
         if: contains(matrix.target, '-linux-')
         run: |
           apt-get update
@@ -206,7 +205,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: 🧰 Install cargo-deb
-        if: contains(matrix.target, '-linux-')
+        if: endsWith(matrix.target, '-linux-gnu')
         uses: taiki-e/install-action@v1
         with:
           tool: cargo-deb
