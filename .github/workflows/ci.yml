@@ -112,7 +112,6 @@ jobs:
             rust-toolchain-targets: aarch64-unknown-linux-musl
             runner: ubuntu-latest
             container: debian:sid-slim
-            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: arm64
 
           - target: x86_64-unknown-linux-musl
