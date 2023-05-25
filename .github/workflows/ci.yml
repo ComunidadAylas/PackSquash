@@ -212,6 +212,12 @@ jobs:
       - name: 💨 Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
 
+      - name: 🧰 Install nextest
+        if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
+        uses: taiki-e/install-action@v1
+        with:
+          tool: nextest
+
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
         uses: taiki-e/install-action@v1
@@ -258,12 +264,12 @@ jobs:
       # or if the target (and therefore host) OS is Linux, as we can leverage QEMU there
       - name: ✔️ Run tests
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        run: cargo test --workspace --exclude '${{ matrix.excluded-workspace-packages }}'
-          --release -- -Z unstable-options --report-time
+        run: |
+          cargo nextest run --release --workspace --exclude '${{ matrix.excluded-workspace-packages }}'
+          cargo test --doc --release --workspace --exclude '${{ matrix.excluded-workspace-packages }}'
 
       - name: 🔨 Build with optimized standard library
-        run: cargo build --workspace --exclude '${{ matrix.excluded-workspace-packages }}'
-          --release --target ${{ env.CARGO_BUILD_TARGET }}
+        run: cargo rbuild --target ${{ matrix.target }} --workspace --exclude '${{ matrix.excluded-workspace-packages }}'
 
       - name: 🔨 Build GUI frontend
         if: matrix.tauri-target == '' && !endsWith(matrix.target, '-musl')
@@ -278,6 +284,7 @@ jobs:
         run: |
           npm ci
           cargo tauri build --target ${{ matrix.tauri-target }}
+            -- -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
