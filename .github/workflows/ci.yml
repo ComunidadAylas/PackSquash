@@ -322,8 +322,7 @@ jobs:
         working-directory: packages/packsquash_gui
         run: |
           npm ci
-          cargo tauri build --target ${{ matrix.tauri-target }}
-            -- -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort
+          cargo tauri build --target ${{ matrix.tauri-target }} -- -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
