@@ -62,9 +62,12 @@ fn host_id_works() {
 
 	eprintln!(
 		"host_id: {:?}",
-		if cfg!(target_os = "macos") {
+		if cfg!(any(target_os = "macos", target_env = "musl")) {
 			// gethostid() is known to be buggy on macOS and return all zeros sometimes, so this can fail.
 			// See: https://bug-coreutils.gnu.narkive.com/4cnKKtfD/workaround-for-hostid-on-darwin-8-macppc
+			// musl has a stub implementation of gethostid() that returns zero, so this may also fail when
+			// targeting musl. See:
+			// https://github.com/AssemblyScript/musl/blob/aad50fcd791e009961621ddfbe3d4c245fd689a3/src/misc/gethostid.c#L3-L6
 			host_id
 		} else {
 			Some(
