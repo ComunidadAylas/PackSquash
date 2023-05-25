@@ -2,6 +2,9 @@
 # Reference: https://doc.rust-lang.org/cargo/reference/config.html
 # This file is primarily useful for specifying custom rustflags
 
+[alias]
+rbuild = "build --release -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort"
+
 # Generate code for the x64 microarchitecture level 2 for x64 targets.
 # This is broadly compatible (virtually any CPU manufactured after
 # 2009 is compatible) and provides some nice speedups. CPUs that
