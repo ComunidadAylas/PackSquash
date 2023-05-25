@@ -88,7 +88,6 @@ jobs:
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
             container: node:16-bullseye-slim
-            pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: amd64
 
           - target: x86_64-unknown-linux-musl
@@ -112,6 +111,7 @@ jobs:
             rust-toolchain-targets: aarch64-unknown-linux-musl
             runner: ubuntu-latest
             container: debian:sid-slim
+            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
             apt-arch: arm64
 
           - target: x86_64-unknown-linux-musl
