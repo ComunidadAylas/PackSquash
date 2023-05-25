@@ -88,6 +88,7 @@ jobs:
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
             container: node:16-bullseye-slim
+            excluded-workspace-packages: none
             apt-arch: amd64
 
           - target: x86_64-unknown-linux-musl
@@ -95,6 +96,9 @@ jobs:
             rust-toolchain-targets: x86_64-unknown-linux-musl
             runner: ubuntu-latest
             container: debian:sid-slim
+            # The GUI dynamically links to system webview components,
+            # so building it statically does not make sense
+            excluded-workspace-packages: packsquash_gui
             apt-arch: amd64
 
           - target: aarch64-unknown-linux-gnu
@@ -104,6 +108,7 @@ jobs:
             runner: ubuntu-latest
             container: node:16-bullseye-slim
             pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
+            excluded-workspace-packages: none
             apt-arch: arm64
 
           - target: aarch64-unknown-linux-musl
@@ -111,7 +116,7 @@ jobs:
             rust-toolchain-targets: aarch64-unknown-linux-musl
             runner: ubuntu-latest
             container: debian:sid-slim
-            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
+            excluded-workspace-packages: packsquash_gui
             apt-arch: arm64
 
           - target: x86_64-unknown-linux-musl
@@ -142,10 +147,12 @@ jobs:
             host-target: x86_64-apple-darwin
             tauri-target: universal-apple-darwin
             runner: macos-latest
+            excluded-workspace-packages: none
 
           - target: aarch64-apple-darwin
             host-target: x86_64-apple-darwin
             runner: macos-latest
+            excluded-workspace-packages: none
 
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
