@@ -24,6 +24,7 @@ jobs:
     name: Static analysis
 
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' ||
@@ -95,7 +96,6 @@ jobs:
             appimage-arch: x86_64
             runner: ubuntu-latest
             container: node:16-bullseye-slim
-            pkg-config-path: /usr/lib/x86_64-linux-gnu/pkgconfig
             apt-arch: amd64
 
           - target: x86_64-unknown-linux-musl
@@ -119,6 +119,7 @@ jobs:
             rust-toolchain-targets: aarch64-unknown-linux-musl
             runner: ubuntu-latest
             container: debian:sid-slim
+            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
             apt-arch: arm64
 
           - target: x86_64-pc-windows-gnu
@@ -140,6 +141,7 @@ jobs:
             runner: macos-latest
 
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
 
     container: ${{ matrix.container }}
 
@@ -173,7 +175,7 @@ jobs:
           apt-get install -yq build-essential musl-tools git curl \
                               markdown html2text \
                               python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
-                              libssl-dev:${{ matrix.apt-arch }} libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
+                              libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} \
                               jq zlib1g-dev
 
       # The GitHub Windows and macOS images already have jq, git and the build-essential equivalents installed,
