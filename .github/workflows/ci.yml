@@ -17,8 +17,6 @@ env:
   TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
   TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
-  CARGO_BUILD_FLAGS: -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort
-
 jobs:
   static-analysis:
     name: Static analysis
@@ -299,12 +297,12 @@ jobs:
       # or if the target (and therefore host) OS is Linux, as we can leverage QEMU there
       - name: ✔️ Run tests
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        run: cargo test --workspace --exclude "${{ matrix.excluded-workspace-packages }}"
+        run: cargo test --workspace --exclude '${{ matrix.excluded-workspace-packages }}'
           --release -- -Z unstable-options --report-time
 
       - name: 🔨 Build with optimized standard library
-        run: cargo build --workspace --exclude "${{ matrix.excluded-workspace-packages }}"
-          --release --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.CARGO_BUILD_FLAGS }}
+        run: cargo build --workspace --exclude '${{ matrix.excluded-workspace-packages }}'
+          --release --target ${{ env.CARGO_BUILD_TARGET }}
 
       - name: 🔨 Build GUI frontend
         if: matrix.tauri-target == '' && !endsWith(matrix.target, '-musl')
@@ -318,17 +316,15 @@ jobs:
         working-directory: packages/packsquash_gui
         run: |
           npm ci
-          cargo tauri build --target ${{ matrix.tauri-target }} -- ${{ env.CARGO_BUILD_FLAGS }}
+          cargo tauri build --target ${{ matrix.tauri-target }}
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
-          ${{ env.CARGO_BUILD_FLAGS }}
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }}
 
       - name: 🔨 Generate GUI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
-          ${{ env.CARGO_BUILD_FLAGS }}
+        run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }}
 
       - name: 🔨 Generate GUI AppImage
         if: endsWith(matrix.target, '-linux-gnu')
