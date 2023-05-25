@@ -307,8 +307,7 @@ jobs:
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }} --
-          ${{ env.CARGO_BUILD_FLAGS }}
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }}
 
       - name: 🔨 Generate GUI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
