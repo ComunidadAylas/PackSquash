@@ -26,3 +26,11 @@ linker = 'aarch64-linux-gnu-gcc'
 
 [target.aarch64-unknown-linux-musl]
 linker = 'aarch64-linux-musl-gcc'
+# Statically link with gcc to provide long double builtins required on Aarch64
+# but not reliably provided by the Rust toolchain.
+# See: https://github.com/rust-lang/rust/issues/46651#issuecomment-641172562
+rustflags = [ "-C", "link-arg=-lgcc" ]
+
+[unstable]
+build-std = ["std", "panic_abort"]
+build-std-features = ["panic_immediate_abort"]
