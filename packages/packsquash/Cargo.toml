@@ -36,7 +36,7 @@ once_cell = "1.17.1"
 log = { workspace = true, features = ["kv_unstable"] }
 
 walkdir = "2.3.3"
-memmap2 = "0.6.1"
+memmap2 = "0.6.2"
 path-clean = "1.0.1"
 
 serde.workspace = true
@@ -47,7 +47,7 @@ json_comments = "0.2.1"
 
 tempfile = "3.5.0"
 crc32fast = "1.3.2"
-zopfli = "0.7.2"
+zopfli = { version = "0.7.3", default-features = false, features = ["std"] }
 
 camino.workspace = true
 const-random = "0.1.15"
