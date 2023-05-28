@@ -8,9 +8,8 @@ use std::{
 };
 
 use memmap2::Mmap;
-use patricia_tree::PatriciaSet;
 
-use crate::RelativePath;
+use crate::{relative_path::RelativePathPatriciaSet, RelativePath};
 
 pub(crate) mod os_fs;
 
@@ -26,12 +25,11 @@ pub trait VirtualFileSystem: Send + Sync {
 
 	/// Returns a set containing all the files that belong to this virtual filesystem.
 	/// Files that don't hold any readable user data (i.e., directories) are not
-	/// included in the set. The entries in the set are guaranteed to be valid
-	/// [`RelativePath`] inner contents.
+	/// included in the set.
 	///
 	/// Any I/O error that may happen is propagated to the caller.
 	// TODO document TOCTOU possibility
-	fn file_set(&self) -> io::Result<PatriciaSet>;
+	fn file_set(&self) -> io::Result<RelativePathPatriciaSet<'static>>;
 
 	/// Opens the file at the specified path for read-only access.
 	fn open(&self, path: &RelativePath<'_>) -> io::Result<VfsFile<Self::FileRead>>;

@@ -13,7 +13,6 @@ use once_cell::sync::Lazy;
 use packsquash_options::{
 	minecraft_version, FileOptionsMap, GlobalOptions, JsonFileOptions, MissingReferenceAction
 };
-use patricia_tree::PatriciaSet;
 use rayon::prelude::*;
 use thiserror::Error;
 use tinyvec::{tiny_vec, TinyVec};
@@ -39,14 +38,10 @@ use crate::{
 		pack_meta::PackMeta,
 		resource_location::{ResourceLocation, ResourceLocationError}
 	},
-	relative_path::InvalidPathError,
+	relative_path::{InvalidPathError, RelativePathPatriciaSet},
 	squash_zip::SquashZipError,
 	squashed_pack_state::SquashedPackState,
-	util::{
-		lazy_or_eager::LazyOrEager,
-		patricia_set_util::{PatriciaSetContainsRelativePathExt, PatriciaSetRelativePathIterExt},
-		range_bounds_intersect::RangeBoundsIntersectExt
-	},
+	util::{lazy_or_eager::LazyOrEager, range_bounds_intersect::RangeBoundsIntersectExt},
 	vfs::VirtualFileSystem,
 	PackSquashAssetProcessingStrategy, RelativePath
 };
@@ -106,7 +101,7 @@ pub struct BlockStateAssetProcessor<
 > {
 	vfs: &'params V,
 	pack_meta: &'params PackMeta,
-	pack_files: &'params PatriciaSet,
+	pack_files: &'params RelativePathPatriciaSet<'static>,
 	global_options: &'params GlobalOptions<'params>,
 	file_options: &'params FileOptionsMap<'params>,
 	squashed_pack_state: &'params SquashedPackState<'state, 'state, F>,
@@ -121,7 +116,7 @@ impl<'params, 'state, V: VirtualFileSystem + ?Sized, F: Read + Seek + Send>
 	pub fn new(
 		vfs: &'params V,
 		pack_meta: &'params PackMeta,
-		pack_files: &'params PatriciaSet,
+		pack_files: &'params RelativePathPatriciaSet<'static>,
 		global_options: &'params GlobalOptions,
 		file_options: &'params FileOptionsMap,
 		squashed_pack_state: &'params SquashedPackState<'state, 'state, F>
@@ -207,7 +202,7 @@ impl<'params, 'state, V: VirtualFileSystem + ?Sized, F: Read + Seek + Send>
 						.compile_matcher();
 
 				self.pack_files
-					.relative_path_iter()
+					.iter()
 					.par_bridge()
 					.filter_map(|relative_path| {
 						// Minecraft expects block state files to be located at a valid resource
@@ -302,8 +297,7 @@ impl<'params, 'state, V: VirtualFileSystem + ?Sized, F: Read + Seek + Send>
 								missing_references_are_warnings.then_some(&mut asset_warnings),
 								|model_path| {
 									let model_exists = |candidate_model_path| {
-										let exists =
-											self.pack_files.has_relative_path(candidate_model_path);
+										let exists = self.pack_files.contains(candidate_model_path);
 
 										// If the model exists, it should be able to be processed
 										if exists {

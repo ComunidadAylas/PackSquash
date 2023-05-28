@@ -2,12 +2,12 @@ use std::io::{Read, Seek};
 
 use itertools::Itertools;
 use packsquash_options::{FileOptionsMap, GlobalOptions};
-use patricia_tree::PatriciaSet;
 
 use super::{pack_meta::PackMeta, PackError};
 use crate::{
 	pack_processor::java::asset_processor::create_asset_processors,
-	squashed_pack_state::SquashedPackState, vfs::VirtualFileSystem
+	relative_path::RelativePathPatriciaSet, squashed_pack_state::SquashedPackState,
+	vfs::VirtualFileSystem
 };
 
 // TODO
@@ -22,7 +22,7 @@ impl ResourcePackProcessor {
 		self,
 		vfs: &'params (impl VirtualFileSystem + ?Sized),
 		pack_meta: &'params PackMeta,
-		pack_files: &'params PatriciaSet,
+		pack_files: &'params RelativePathPatriciaSet<'static>,
 		global_options: &'params GlobalOptions,
 		file_options: &'params FileOptionsMap,
 		squashed_pack_state: &'params SquashedPackState<'state, 'state, F>

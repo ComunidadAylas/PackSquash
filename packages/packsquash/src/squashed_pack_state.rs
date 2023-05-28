@@ -4,9 +4,8 @@ use std::{
 	time::SystemTime
 };
 
-use patricia_tree::PatriciaSet;
-
 use crate::{
+	relative_path::RelativePathPatriciaSet,
 	scratch_file::ScratchFilesBudget,
 	squash_zip::{SquashZip, SquashZipError, SquashZipSettings},
 	RelativePath
@@ -16,7 +15,7 @@ pub struct SquashedPackState<'settings, 'budget, F: Read + Seek + Send> {
 	squash_zip: SquashZip<'settings, 'budget, F>,
 	recompress_compressed_files: bool,
 	scratch_files_budget: &'budget ScratchFilesBudget,
-	processed_files: RwLock<PatriciaSet>
+	processed_files: RwLock<RelativePathPatriciaSet<'static>>
 }
 
 impl<'settings, 'budget, F: Read + Seek + Send> SquashedPackState<'settings, 'budget, F> {
@@ -51,7 +50,7 @@ impl<'settings, 'budget, F: Read + Seek + Send> SquashedPackState<'settings, 'bu
 			},
 			recompress_compressed_files,
 			scratch_files_budget,
-			processed_files: RwLock::new(PatriciaSet::new())
+			processed_files: RwLock::new(RelativePathPatriciaSet::new())
 		})
 	}
 
@@ -88,10 +87,7 @@ impl<'settings, 'budget, F: Read + Seek + Send> SquashedPackState<'settings, 'bu
 	}
 
 	pub fn mark_file_as_processed(&self, file_path: &RelativePath) -> bool {
-		self.processed_files
-			.write()
-			.unwrap()
-			.insert(file_path.as_str())
+		self.processed_files.write().unwrap().insert(file_path)
 	}
 
 	pub fn finish<W: Write>(
