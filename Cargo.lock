@@ -1834,9 +1834,9 @@ dependencies = [
 
 [[package]]
 name = "patricia_tree"
-version = "0.5.7"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3bc1f0380d1594aff660cf73ed9a38cfb9947ae2824cddf49d9aa0b8e6b8c40"
+checksum = "eca3001d507390a7b3aaeebd901668405d34b51690d45d7c3a6ef524e05ab755"
 dependencies = [
  "bitflags",
 ]
