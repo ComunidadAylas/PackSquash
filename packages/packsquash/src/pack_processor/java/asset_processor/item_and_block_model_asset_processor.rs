@@ -13,7 +13,6 @@ use once_cell::sync::Lazy;
 use packsquash_options::{
 	minecraft_version, FileOptionsMap, GlobalOptions, JsonFileOptions, MissingReferenceAction
 };
-use patricia_tree::PatriciaSet;
 use rayon::prelude::*;
 use strum::IntoEnumIterator;
 use thiserror::Error;
@@ -34,13 +33,10 @@ use crate::{
 		pack_meta::PackMeta,
 		resource_location::ResourceLocation
 	},
-	relative_path::{InvalidPathError, RelativePath},
+	relative_path::{InvalidPathError, RelativePath, RelativePathPatriciaSet},
 	squash_zip::SquashZipError,
 	squashed_pack_state::SquashedPackState,
-	util::{
-		patricia_set_util::{PatriciaSetContainsRelativePathExt, PatriciaSetRelativePathIterExt},
-		range_bounds_intersect::RangeBoundsIntersectExt
-	},
+	util::range_bounds_intersect::RangeBoundsIntersectExt,
 	vfs::VirtualFileSystem,
 	PackSquashAssetProcessingStrategy
 };
@@ -100,7 +96,7 @@ pub struct ItemAndBlockModelAssetProcessor<
 > {
 	vfs: &'params V,
 	pack_meta: &'params PackMeta,
-	pack_files: &'params PatriciaSet,
+	pack_files: &'params RelativePathPatriciaSet<'static>,
 	global_options: &'params GlobalOptions<'params>,
 	file_options: &'params FileOptionsMap<'params>,
 	squashed_pack_state: &'params SquashedPackState<'state, 'state, F>,
@@ -117,7 +113,7 @@ pub struct ItemAndBlockModelAssetProcessor<
 pub fn new<'params, 'state, V: VirtualFileSystem + ?Sized, F: Read + Seek + Send>(
 	vfs: &'params V,
 	pack_meta: &'params PackMeta,
-	pack_files: &'params PatriciaSet,
+	pack_files: &'params RelativePathPatriciaSet<'static>,
 	global_options: &'params GlobalOptions<'params>,
 	file_options: &'params FileOptionsMap<'params>,
 	squashed_pack_state: &'params SquashedPackState<'state, 'state, F>
@@ -259,19 +255,15 @@ impl<
 				)
 				.compile_matcher();
 
-				AHashSet::from_iter(
-					self.pack_files
-						.relative_path_iter()
-						.filter(|relative_path| {
-							// Minecraft expects model files to be located at a valid resource
-							// location (see net.minecraft.client.resources.model.ModelBakery and
-							// net.minecraft.client.resources.model.ModelResourceLocation). Every
-							// known mod for the Minecraft versions that support block states expands
-							// on this vanilla logic, so filtering by that should be fine
-							any_model_path_matcher.is_match(&**relative_path)
-								&& ResourceLocation::try_from(relative_path).is_ok()
-						})
-				)
+				AHashSet::from_iter(self.pack_files.iter().filter(|relative_path| {
+					// Minecraft expects model files to be located at a valid resource
+					// location (see net.minecraft.client.resources.model.ModelBakery and
+					// net.minecraft.client.resources.model.ModelResourceLocation). Every
+					// known mod for the Minecraft versions that support block states expands
+					// on this vanilla logic, so filtering by that should be fine
+					any_model_path_matcher.is_match(&**relative_path)
+						&& ResourceLocation::try_from(relative_path).is_ok()
+				}))
 			}
 			(false, Some(vanilla_models)) => {
 				// Focused asset enumeration strategy: we only want vanilla assets and we know what vanilla
@@ -335,8 +327,7 @@ impl<
 					self.global_options,
 					missing_references_are_warnings.then_some(warnings),
 					|model_path| {
-						Ok(self.pack_files.has_relative_path(model_path)
-							|| is_builtin_model_path(model_path))
+						Ok(self.pack_files.contains(model_path) || is_builtin_model_path(model_path))
 					},
 					|model_path| {
 						if let Some(vanilla_models) = &*self.vanilla_models {
@@ -368,7 +359,7 @@ impl<
 					self.pack_meta,
 					self.global_options,
 					missing_references_are_warnings.then_some(warnings),
-					|texture_path| Ok(self.pack_files.contains(texture_path.as_str())),
+					|texture_path| Ok(self.pack_files.contains(texture_path)),
 					|_texture_path| {
 						// TODO validate using a vanilla texture list?
 						Ok(false)
