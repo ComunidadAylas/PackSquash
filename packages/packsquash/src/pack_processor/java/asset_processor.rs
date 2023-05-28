@@ -4,7 +4,6 @@ use ahash::AHashSet;
 use enum_map::{enum_map, Enum, EnumMap};
 use globset::Glob;
 use packsquash_options::{FileOptionsMap, GlobalOptions};
-use patricia_tree::PatriciaSet;
 use strum::Display;
 
 use self::{
@@ -12,8 +11,10 @@ use self::{
 	item_and_block_model_asset_processor::ItemAndBlockModelAssetProcessor
 };
 use crate::{
-	pack_processor::java::pack_meta::PackMeta, relative_path::RelativePath,
-	squashed_pack_state::SquashedPackState, vfs::VirtualFileSystem
+	pack_processor::java::pack_meta::PackMeta,
+	relative_path::{RelativePath, RelativePathPatriciaSet},
+	squashed_pack_state::SquashedPackState,
+	vfs::VirtualFileSystem
 };
 
 #[macro_use]
@@ -48,7 +49,7 @@ pub(super) fn create_asset_processors<
 >(
 	vfs: &'params V,
 	pack_meta: &'params PackMeta,
-	pack_files: &'params PatriciaSet,
+	pack_files: &'params RelativePathPatriciaSet<'static>,
 	global_options: &'params GlobalOptions,
 	file_options: &'params FileOptionsMap,
 	squashed_pack_state: &'params SquashedPackState<'state, 'state, F>

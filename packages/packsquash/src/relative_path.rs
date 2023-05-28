@@ -2,7 +2,7 @@
 //! operations and properties.
 
 use std::{
-	borrow::Cow,
+	borrow::{Borrow, Cow},
 	fmt,
 	fmt::{Display, Formatter},
 	io,
@@ -12,7 +12,12 @@ use std::{
 
 use camino::Utf8Path;
 use itertools::Itertools;
+use patricia_tree::{BorrowedBytes, Bytes, GenericPatriciaSet};
+use ref_cast::RefCast;
 use thiserror::Error;
+
+/// A Patricia set of [`RelativePath`].
+pub type RelativePathPatriciaSet<'path> = GenericPatriciaSet<RelativePath<'path>>;
 
 /// Represents a relative UTF-8 filesystem path that doesn't begin with
 /// prefix or root directory components, only contains normal components,
@@ -144,6 +149,12 @@ impl AsRef<Utf8Path> for RelativePath<'_> {
 	}
 }
 
+impl AsRef<BorrowedRelativePath> for RelativePath<'_> {
+	fn as_ref(&self) -> &BorrowedRelativePath {
+		BorrowedRelativePath::ref_cast(self.as_str())
+	}
+}
+
 impl Deref for RelativePath<'_> {
 	type Target = Utf8Path;
 
@@ -155,5 +166,46 @@ impl Deref for RelativePath<'_> {
 impl Display for RelativePath<'_> {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
 		f.write_str(self.as_str())
+	}
+}
+
+impl Bytes for RelativePath<'static> {
+	type Borrowed = BorrowedRelativePath;
+}
+
+/// A borrowed, unsized view of a [`RelativePath`].
+#[derive(RefCast)]
+#[repr(transparent)]
+pub struct BorrowedRelativePath(str);
+
+impl Borrow<BorrowedRelativePath> for RelativePath<'_> {
+	fn borrow(&self) -> &BorrowedRelativePath {
+		BorrowedRelativePath::ref_cast(self.as_str())
+	}
+}
+
+impl ToOwned for BorrowedRelativePath {
+	type Owned = RelativePath<'static>;
+
+	fn to_owned(&self) -> Self::Owned {
+		RelativePath(Cow::Owned(self.0.to_string()))
+	}
+}
+
+impl BorrowedBytes for BorrowedRelativePath {
+	fn as_bytes(&self) -> &[u8] {
+		self.0.as_bytes()
+	}
+
+	fn is_valid_bytes(bytes: &[u8]) -> bool {
+		<str as BorrowedBytes>::is_valid_bytes(bytes)
+	}
+
+	fn from_bytes(bytes: &[u8]) -> &Self {
+		BorrowedRelativePath::ref_cast(<str as BorrowedBytes>::from_bytes(bytes))
+	}
+
+	fn strip_common_prefix(&self, bytes: &[u8]) -> &Self {
+		BorrowedRelativePath::ref_cast(self.0.strip_common_prefix(bytes))
 	}
 }

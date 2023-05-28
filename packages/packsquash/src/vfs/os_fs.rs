@@ -9,11 +9,10 @@ use std::{
 
 use camino::{Utf8Path, Utf8PathBuf};
 use memmap2::Mmap;
-use patricia_tree::PatriciaSet;
 use walkdir::{DirEntry, WalkDir};
 
 use super::{VfsFile, VfsMmap, VirtualFileSystem};
-use crate::{scratch_file::ScratchFilesBudget, RelativePath};
+use crate::{relative_path::RelativePathPatriciaSet, scratch_file::ScratchFilesBudget, RelativePath};
 
 /// A virtual filesystem implementation that operates with files in the mounted
 /// operating system filesystems. In other words, it is a facade for `std::fs`.
@@ -37,7 +36,7 @@ impl<'path, 'budget> OsFilesystem<'path, 'budget> {
 impl VirtualFileSystem for OsFilesystem<'_, '_> {
 	type FileRead = BufReader<File>;
 
-	fn file_set(&self) -> io::Result<PatriciaSet> {
+	fn file_set(&self) -> io::Result<RelativePathPatriciaSet<'static>> {
 		WalkDir::new(&*self.root_path)
 			.min_depth(1) // Do not yield the root path itself, but all of its children
 			.follow_links(true)
@@ -60,10 +59,7 @@ impl VirtualFileSystem for OsFilesystem<'_, '_> {
 							let root_path =
 								file_path.ancestors().take(1 + entry_depth).last().unwrap();
 
-							Ok(RelativePath::new(root_path, &file_path)?
-								.into_owned()
-								.into_inner()
-								.into_owned())
+							Ok(RelativePath::new(root_path, &file_path)?.into_owned())
 						})
 					}
 				)
@@ -187,7 +183,6 @@ mod tests {
 	use tempfile::Builder;
 
 	use super::*;
-	use crate::util::patricia_set_util::PatriciaSetRelativePathIterExt;
 
 	static VIRTUALLY_UNLIMITED_MEMORY_BUDGET: ScratchFilesBudget =
 		ScratchFilesBudget::new(usize::MAX);
@@ -246,7 +241,7 @@ mod tests {
 		];
 
 		let mut file_count = 0;
-		for file in file_set.relative_path_iter() {
+		for file in file_set.iter() {
 			assert!(RELATIVE_PATHS.contains(&file.as_str()));
 
 			file_count += 1;
