@@ -38,7 +38,7 @@ rgb = "0.8.36"
 imagequant = { version = "4.2.0", default-features = false }
 oxipng = { version = "8.0.0", default-features = false, features = ["zopfli"] }
 
-symphonia = { version = "0.5.2", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
+symphonia = { version = "0.5.3", default-features = false, features = ["wav", "isomp4", "flac", "pcm", "mp3", "aac"] }
 vorbis_rs = "0.3.0"
 dasp_signal = { version = "0.11.0", default-features = false }
 dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
