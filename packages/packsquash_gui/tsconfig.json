@@ -9,7 +9,7 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+    "types": ["vite/client", "@wdio/globals/types", "@wdio/cucumber-framework"],
     "noEmit": true,
     "isolatedModules": true,
     "resolveJsonModule": true

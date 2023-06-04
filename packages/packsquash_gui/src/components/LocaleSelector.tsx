@@ -3,6 +3,7 @@ import { Translate } from "phosphor-solid";
 import { availableLocales, Locale, useI18n } from "../contexts/i18n";
 import { toast } from "solid-toast";
 import { tippy as solid_tippy } from "solid-tippy";
+import testIdAttribute from "../util/testIdAttribute";
 
 // Hack to make the TypeScript compiler happy with the use:tippy directive
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -21,6 +22,7 @@ export default () => {
       <button
         class="h-12 w-12 rounded bg-packblue-100 drop-shadow-md hover:scale-110"
         title=""
+        {...testIdAttribute("locale-selector")}
         use:tippy={{
           hidden: true,
           props: {
