@@ -11,6 +11,7 @@ import PackSquashLogo from "../components/PackSquashLogo";
 import PrimaryActionNavigateButton from "../components/PrimaryActionNavigateButton";
 import FluidTitleHeader from "../components/FluidTitleHeader";
 import FluidSubtitleHeader from "../components/FluidSubtitleHeader";
+import testIdAttribute from "../util/testIdAttribute";
 
 export default () => {
   const [l10n] = useI18n();
@@ -43,12 +44,15 @@ export default () => {
           <PrimaryActionNavigateButton
             class="mx-auto mt-2"
             route="/packSelection"
+            {...testIdAttribute("start")}
           >
             {l10n("home-screen-squash-action")}
           </PrimaryActionNavigateButton>
 
           <div class="mx-auto text-lg text-zinc-700 drop-shadow-sm transition hover:text-zinc-800">
-            <A href="/about">{l10n("home-screen-about-action")}</A>
+            <A href="/about" {...testIdAttribute("about")}>
+              {l10n("home-screen-about-action")}
+            </A>
           </div>
         </div>
       </ViewContainer>
