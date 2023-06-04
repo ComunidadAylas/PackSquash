@@ -31,7 +31,7 @@ tinyvec = { version = "1.6.0", features = ["alloc", "rustc_1_55", "serde"] }
 compact_str = { version = "0.7.0", features = ["serde"] }
 
 rayon = "1.7.0"
-once_cell = "1.17.2"
+once_cell = "1.18.0"
 
 log = { workspace = true, features = ["kv_unstable"] }
 
