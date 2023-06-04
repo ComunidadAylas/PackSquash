@@ -12,6 +12,7 @@ import ListboxControl from "../components/ListboxControl";
 const PACK_DIRECTORY_OPTION = "pack_directory";
 export { PACK_DIRECTORY_OPTION };
 
+// TODO read pack_directory and output_file_path from backend
 export function getOutputZipPath(
   packSquashOptions: Record<string, unknown>
 ): string {
