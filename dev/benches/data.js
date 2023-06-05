@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1685993527235,
+  "lastUpdate": 1685995548566,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "89b9dff884d33472989cad64bf1309c6c7ee31f0",
-          "message": "chore(deps): update dependency filelock to v3.11.0",
-          "timestamp": "2023-04-06T21:43:13Z",
-          "tree_id": "15315fd679427be9a685b5c01814712f4186e96e",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/89b9dff884d33472989cad64bf1309c6c7ee31f0"
-        },
-        "date": 1680833343067,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9452406,
-            "range": "± 13683869",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 287357797,
-            "range": "± 3173682",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 4297310163,
-            "range": "± 28739037",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 618833477,
-            "range": "± 6650683",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 275311023,
             "range": "± 8495467",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "5d4c414cde25969e3fd3e53f0a09dd146c678664",
+          "message": "fix(png_file): drop trailing bytes check\n\nThis check may cause lots of trouble to unsuspecting, not-so-technical\nusers with lots of PNG files, all for the little benefit of complying to\na standard that few applications are sensitive to anyway. Shame on image\neditors for generating this garbage, but we should handle it better,\nwhile letting users know that something is wrong.\n\nv0.4.0 will turn this to a warning. This can't be done now because the\ncurrent design does not allow this.",
+          "timestamp": "2023-06-05T21:30:11+02:00",
+          "tree_id": "a1cbb98023d2e5a1d9658f75482c430b840653aa",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5d4c414cde25969e3fd3e53f0a09dd146c678664"
+        },
+        "date": 1685995547090,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 11326228,
+            "range": "± 10928578",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 205471591,
+            "range": "± 3533384",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3492365429,
+            "range": "± 91469448",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 336295972,
+            "range": "± 8930466",
             "unit": "ns/iter"
           }
         ]
