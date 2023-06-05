@@ -117,19 +117,6 @@ pub fn strip_unnecessary_chunks(
 		}
 	}
 
-	// If we didn't consume all the input PNG bytes and didn't error out it's because
-	// IEND was reached, but there are trailing bytes at the end of the file. This
-	// explicitly violates the PNG standard. For now, reject such PNG files to
-	// future-proof ourselves and users against decoders that are not lenient (they
-	// are hard to find, but exist)
-	// TODO for v0.4.0, turn this error to a warning instead
-	if i < input_png.len() {
-		return Err(ImageProcessingError::StripValidateError(
-			"Non-conforming trailing bytes at the end of the file. \
-			Please re-export with a known-good PNG encoder"
-		));
-	}
-
 	Ok(stripped_png)
 }
 

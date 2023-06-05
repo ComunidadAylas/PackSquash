@@ -279,17 +279,21 @@ async fn invalid_input_is_handled() {
 
 #[tokio::test]
 async fn png_data_with_trailing_bytes_is_handled() {
-	let mut data_stream = PngFile {
-		read: Builder::new().read(PNG_DATA).read(&[0]).build(),
-		asset_type: PackFileAssetType::GenericTexture,
-		file_length_hint: PNG_DATA.len() + 1,
-		optimization_settings: Default::default()
-	}
-	.process();
+	let png_data = Vec::from_iter(PNG_DATA.iter().copied().chain(std::iter::once(0)));
 
-	data_stream
-		.next()
-		.await
-		.expect("Expected some result for this input")
-		.expect_err("Expected an error for this input");
+	successful_process_test(
+		&png_data,
+		PngFileOptions {
+			color_quantization_target: ColorQuantizationTarget::None,
+			skip_alpha_optimizations: true,
+			..Default::default()
+		},
+		true,           // Same pixels
+		true,           // Smaller size
+		false,          // Not necessarily the same color type
+		Some((16, 16)), // Same resolution
+		PackFileAssetType::GenericTexture,
+		"png_data_with_trailing_bytes_is_handled"
+	)
+	.await
 }
