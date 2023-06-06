@@ -78,7 +78,7 @@ fn git_version() -> Result<String, Box<dyn Error>> {
 
 #[cfg(windows)]
 fn add_executable_metadata() {
-	let mut windows_resource = winres::WindowsResource::new();
+	let mut windows_resource = winresource::WindowsResource::new();
 	windows_resource.set("LegalCopyright", env!("CARGO_PKG_AUTHORS"));
 	windows_resource.set(
 		"FileDescription",

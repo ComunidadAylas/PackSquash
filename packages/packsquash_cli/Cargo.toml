@@ -15,7 +15,7 @@ packsquash = { path = "../packsquash", version = "0.3.1" }
 getopts = "0.2.21"
 toml = { version = "0.7.4", default-features = false, features = ["parse"] }
 
-tokio = { version = "1.28.2", default-features = false }
+tokio = { version = "1.28.2", default-features = false, features = ["time"] }
 
 serde_path_to_error = "0.1.11"
 
