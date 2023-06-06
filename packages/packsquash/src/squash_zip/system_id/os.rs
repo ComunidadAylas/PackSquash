@@ -202,7 +202,7 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 		dictionary::{CFDictionaryRef, CFMutableDictionaryRef},
 		string::{CFString, CFStringRef}
 	};
-	use mach::kern_return::kern_return_t;
+	use mach2::kern_return::kern_return_t;
 	use std::{ffi::CString, os::raw::c_char};
 
 	type io_object_t = mach_port_t;

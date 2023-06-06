@@ -74,7 +74,7 @@ wmi = { version = "0.13.1", default-features = false, features = ["time"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.9.3"
-mach = "0.3.2"
+mach2 = "0.4.1"
 
 [dev-dependencies]
 tokio-test = "0.4.2"
