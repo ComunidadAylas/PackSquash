@@ -1797,7 +1797,6 @@ dependencies = [
  "env_logger",
  "getopts",
  "git2",
- "is-terminal",
  "log",
  "packsquash",
  "serde_path_to_error",
