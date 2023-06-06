@@ -32,9 +32,6 @@ const LOG_TARGET: Target = Target::Stderr;
 const LOG_TARGET_STREAM: fn() -> Stderr = io::stderr;
 
 fn main() {
-	#[cfg(feature = "color-backtrace")]
-	color_backtrace::install();
-
 	process::exit(run(TerminalTitleController::new()));
 }
 

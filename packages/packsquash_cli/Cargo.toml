@@ -17,8 +17,6 @@ toml = { version = "0.7.4", default-features = false, features = ["parse"] }
 
 tokio = { version = "1.28.2", default-features = false }
 
-color-backtrace = { version = "0.5.1", default-features = false, optional = true }
-
 serde_path_to_error = "0.1.11"
 
 log = "0.4.18"
@@ -34,10 +32,6 @@ time = { version = "0.3.21", default-features = false, features = ["std"] }
 
 [target.'cfg(windows)'.build-dependencies]
 winresource = "0.1.15"
-
-[features]
-# Support pretty panic messages by default
-default = ["color-backtrace"]
 
 [[bin]]
 name = "packsquash"
