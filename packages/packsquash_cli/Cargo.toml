@@ -35,9 +35,7 @@ git2 = { version = "0.17.2", default-features = false }
 time = { version = "0.3.21", default-features = false, features = ["std"] }
 
 [target.'cfg(windows)'.build-dependencies]
-# Fix winres not working on the latest Rust toolchain.
-# Related PR: https://github.com/mxre/winres/pull/41
-winres = { version = "0.1.11", git = "https://github.com/Nilstrieb/winres", rev = "c839134b" }
+winresource = "0.1.15"
 
 [features]
 # Support pretty panic messages by default
@@ -49,12 +47,12 @@ bench = false
 
 [package.metadata.deb]
 name = "packsquash"
-maintainer = "Alejandro González <AlexTMjugador@users.noreply.github.com>"
+maintainer = "Alejandro González <me@alegon.dev>"
 copyright = "PackSquash developers"
 license-file = ["../../LICENSE", "0"]
 extended-description-file = "target/debian/extended_package_description.txt"
 assets = [
-	["target/release/packsquash", "usr/bin/", "755"],
+	["target/release/packsquash", "usr/bin/packsquash", "755"],
 	["../../README.md", "usr/share/doc/packsquash/README.md", "644"]
 ]
 section = "utils"
@@ -62,7 +60,7 @@ section = "utils"
 # increment this, and change APT repo action
 revision = "1"
 
-[package.metadata.winres]
+[package.metadata.winresource]
 ProductName = "PackSquash"
 CompanyName = "Comunidad Aylas"
 OriginalFilename = "packsquash.exe"
