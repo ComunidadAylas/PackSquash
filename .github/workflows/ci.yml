@@ -118,7 +118,7 @@ jobs:
           apt-get update
           # curl is required by rustup.
           # markdown and html2text are required to generate the Debian package only
-          apt-get install -yq build-essential git curl \
+          apt-get install -yq build-essential musl-tools git curl \
                               markdown html2text
 
       - name: 📥 Checkout source
@@ -131,7 +131,7 @@ jobs:
         run: |
           dpkg --add-architecture arm64
           apt-get update
-          apt-get install -yq gcc-aarch64-linux-gnu qemu-user
+          apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
 
       # As of 2023-05-24, only the Debian unstable musl-dev ARM64 package ships with an
       # aarch64-linux-musl-gcc script that wraps the aarch64-linux-gnu-gcc cross-compiler
