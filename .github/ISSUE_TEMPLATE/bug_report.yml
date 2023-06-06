@@ -22,11 +22,9 @@ body:
       description: What flavor of PackSquash are you using?
       options:
         - Windows executable
-        - Linux x64 executable (deprecated, please use the AppImage instead)
-        - Linux x64 AppImage
+        - Linux x64 executable
         - Linux x64 APT package
-        - Linux ARM64/AArch64 executable (deprecated, please use the AppImage instead)
-        - Linux ARM64/AArch64 AppImage
+        - Linux ARM64/AArch64 executable
         - Linux ARM64/AArch64 APT package
         - macOS x64 executable
         - GitHub action

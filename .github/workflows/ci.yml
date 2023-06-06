@@ -11,7 +11,6 @@ on:
       - published
 
 env:
-  CARGO_TERM_COLOR: always
   DEBIAN_FRONTEND: noninteractive
 
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
@@ -29,38 +28,19 @@ jobs:
         uses: actions/checkout@v3
 
       - name: 🧰 Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
           components: rustfmt, clippy
 
-      - name: 🧰 Install development packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install desktop-file-utils
-
-      - name: 🔍 Check workflow write permission
-        id: check_write_permission
-        uses: scherermichael-oss/action-has-permission@1.0.6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🔍 Clippy check (with annotations)
-        uses: actions-rs/clippy-check@v1
-        if: steps.check_write_permission.outputs.has-permission
+      - name: 🔍 Clippy check
+        uses: giraffate/clippy-action@v1
         with:
-          args: --all-targets -- -D warnings
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🔍 Clippy check (without annotations)
-        if: ${{ !steps.check_write_permission.outputs.has-permission }}
-        run: cargo clippy --all-targets -- -D warnings
+          clippy_flags: --all-targets
+          reporter: github-check
+          fail_on_error: true
 
       - name: 🔍 Cargo deny check
         uses: EmbarkStudios/cargo-deny-action@v1
-
-      - name: 🔍 Check PackSquash Linux desktop entries correctness
-        run: desktop-file-validate common/assets/*.desktop
 
       - name: 🔍 Check Rust source code format
         run: cargo fmt --all --check
@@ -72,45 +52,58 @@ jobs:
       matrix:
         target:
           - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
           - x86_64-pc-windows-gnu
           - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
           - x86_64-apple-darwin
-          - aarch64-apple-darwin
+
         include:
           - target: x86_64-unknown-linux-gnu
+            host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: debian:bullseye-slim
+            container: node:16-bullseye-slim
             apt-arch: amd64
-            appimage-arch: x86_64
-            cli-executable: packsquash
 
-          - target: x86_64-pc-windows-gnu
-            runner: windows-latest
-            cli-executable: packsquash.exe
+          - target: x86_64-unknown-linux-musl
+            host-target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            container: debian:sid-slim
+            apt-arch: amd64
 
           - target: aarch64-unknown-linux-gnu
+            host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: debian:bullseye-slim
+            container: node:16-bullseye-slim
             apt-arch: arm64
-            appimage-arch: aarch64
-            cli-executable: packsquash
+
+          - target: aarch64-unknown-linux-musl
+            host-target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            container: debian:sid-slim
+            apt-arch: arm64
+
+          - target: x86_64-pc-windows-gnu
+            host-target: x86_64-pc-windows-gnu
+            runner: windows-latest
+            executable-extension: .exe
 
           - target: x86_64-apple-darwin
+            host-target: x86_64-apple-darwin
             runner: macos-latest
-            cli-executable: packsquash
 
           - target: aarch64-apple-darwin
+            host-target: x86_64-apple-darwin
             runner: macos-latest
-            cli-executable: packsquash
 
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
 
     container: ${{ matrix.container }}
 
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
-      TARGET_APPIMAGE_ARCH: ${{ matrix.appimage-arch }}
-      TARGET_APPIMAGE_APT_ARCH: ${{ matrix.apt-arch }}
+      RUSTUP_TOOLCHAIN: nightly-${{ matrix.host-target }}
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
@@ -124,11 +117,9 @@ jobs:
         run: |
           apt-get update
           # curl is required by rustup.
-          # markdown and html2text are required to generate the Debian package only.
-          # The last line contains packages necessary for appimage-builder only
+          # markdown and html2text are required to generate the Debian package only
           apt-get install -yq build-essential git curl \
-                              markdown html2text \
-                              python3-pip file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools
+                              markdown html2text
 
       - name: 📥 Checkout source
         uses: actions/checkout@v3
@@ -136,95 +127,63 @@ jobs:
           fetch-depth: 0  # Keep the commit history for proper version information
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        if: startsWith(matrix.target, 'aarch64-unknown-linux')
         run: |
           dpkg --add-architecture arm64
           apt-get update
-          apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
+          apt-get install -yq gcc-aarch64-linux-gnu qemu-user
+
+      # As of 2023-05-24, only the Debian unstable musl-dev ARM64 package ships with an
+      # aarch64-linux-musl-gcc script that wraps the aarch64-linux-gnu-gcc cross-compiler
+      # provided by the gcc-aarch64-linux-gnu package to link against musl
+      - name: 🧰 Install Linux ARM64 cross-compilation musl development files
+        if: matrix.target == 'aarch64-unknown-linux-musl'
+        run: apt-get install -yq musl-dev:arm64
 
       - name: 🧰 Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
-          target: ${{ env.CARGO_BUILD_TARGET }}
+          toolchain: nightly-${{ matrix.host-target }}
+          targets: ${{ env.CARGO_BUILD_TARGET }}
           components: rust-src
 
       - name: 🧰 Install cargo-deb
-        if: matrix.runner == 'ubuntu-latest'
-        uses: actions-rs/install@v0.1
-        env:
-          # Guarantee that cargo-deb is built for the host when cross-compiling
-          CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
+        if: endsWith(matrix.target, '-linux-gnu')
+        uses: taiki-e/install-action@v1
         with:
-          crate: cargo-deb
-          version: 1.39.3
-
-      - name: 🧰 Install appimage-builder
-        if: matrix.runner == 'ubuntu-latest'
-        run: |
-          pip install appimage-builder==1.1.0
-          curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
-          chmod ugo+x /opt/appimagetool
-          # Workaround from https://github.com/AppImageCrafters/appimage-builder/blob/v1.0.0-alpha.3/Dockerfile#L11-L15
-          # to extract the appimagetool AppImage within a container
-          cd /opt
-          sed -i 's|AI\x02|\x00\x00\x00|' appimagetool
-          /opt/appimagetool --appimage-extract > /dev/null
-          mv /opt/squashfs-root /opt/appimagetool.AppDir
-          ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
+          tool: cargo-deb
 
       # Our build container is minimal, and it doesn't contain any systemd package.
       # systemd is responsible for setting up the machine ID files we use for
       # testing the system ID retrieval code, so copy a dummy one
       - name: 📏 Set up a dummy D-Bus machine ID for tests
-        if: matrix.runner == 'ubuntu-latest'
+        if: startsWith(matrix.runner, 'ubuntu')
         run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
 
       - name: ✔️ Run tests
-        if: matrix.target != 'aarch64-apple-darwin'
+        if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
         run: cargo test --release -- -Z unstable-options --report-time
 
       - name: 🔨 Build with optimized standard library
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
 
       - name: 🔨 Generate CLI Debian package
-        if: matrix.runner == 'ubuntu-latest'
+        if: endsWith(matrix.target, '-linux-gnu')
         run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
 
-      - name: 🔨 Generate CLI AppImage
-        if: matrix.runner == 'ubuntu-latest'
-        env:
-          APPDIR: AppDir
-          REPO_DIR: /pkgs
-        run: VERSION="$(git describe --tags --dirty=-custom --always)"
-          appimage-builder --recipe appimage/recipe.yml --skip-test
-
       - name: 📤 Upload CLI binary
+        if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
-          path: target/${{ env.CARGO_BUILD_TARGET }}/release/${{ matrix.cli-executable }}
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash${{ matrix.executable-extension }}
 
       - name: 📤 Upload CLI Debian package
-        if: matrix.runner == 'ubuntu-latest'
+        if: endsWith(matrix.target, '-linux-gnu')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
-
-      - name: 📤 Upload CLI AppImage
-        if: matrix.runner == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
-        with:
-          name: PackSquash CLI AppImage (${{ matrix.appimage-arch }})
-          path: PackSquash-*-${{ matrix.appimage-arch }}.AppImage
-
-      - name: 📤 Upload CLI AppImage update diff
-        if: matrix.runner == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
-        with:
-          name: PackSquash CLI AppImage zsync (${{ matrix.appimage-arch }})
-          path: PackSquash-*-${{ matrix.appimage-arch }}.AppImage.zsync
 
   build-universal-macos-binaries:
 
@@ -287,22 +246,21 @@ jobs:
           labels: |
             org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
-      - name: 📥 Download PackSquash x64 AppImage
+      - name: 📥 Download PackSquash CLI x64 musl executable
         uses: actions/download-artifact@v3
         with:
-          name: PackSquash CLI AppImage (x86_64)
+          name: PackSquash CLI executable (x86_64-unknown-linux-musl)
 
-      # Docker uses different architecture names
-      - name: 📁 Rename PackSquash x64 AppImage
-        run: mv PackSquash-*-x86_64.AppImage PackSquash-*-amd64.AppImage
+      - name: 📁 Rename PackSquash CLI x64 musl executable
+        run: mv packsquash packsquash-amd64
 
-      - name: 📥 Download PackSquash ARM64 AppImage
+      - name: 📥 Download PackSquash CLI ARM64 musl executable
         uses: actions/download-artifact@v3
         with:
-          name: PackSquash CLI AppImage (aarch64)
+          name: PackSquash CLI executable (aarch64-unknown-linux-musl)
 
-      - name: 📁 Rename PackSquash ARM64 AppImage
-        run: mv PackSquash-*-aarch64.AppImage PackSquash-*-arm64.AppImage
+      - name: 📁 Rename PackSquash CLI ARM64 musl executable
+        run: mv packsquash packsquash-arm64
 
       - name: 🔍 Check workflow package write permission
         id: check_write_permission
