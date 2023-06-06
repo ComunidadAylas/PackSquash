@@ -3,7 +3,7 @@ title: Home
 show_download: true
 ---
 
-<p align="center"><img src="https://user-images.githubusercontent.com/31966940/124388201-1f40eb80-dce2-11eb-88e8-3934d7d73c0a.png" alt="PackSquash logo" width="300" height="300"></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/7822554/243825966-500faa74-de2f-462a-8f76-3a122b69856e.png" alt="PackSquash logo" width="300" height="300"></p>
 <p align="center"><i>Create more. Worry less about distribution and storage intricacies.</i></p>
 
 A Minecraft: Java Edition resource and data pack optimizer which aims to achieve
