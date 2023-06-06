@@ -89,10 +89,6 @@ ignore = true
 # https://embarkstudios.github.io/cargo-deny/checks/bans/cfg.html
 [bans]
 multiple-versions = "warn"
-# Temporarily set to warn instead of deny to ignore a dev-dependency
-# without explicit version requirements in color-backtrace transitive
-# dependencies. It's best to have a warning than skipping crates here
-wildcards = "warn"
 highlight = "all"
 skip = [
 	# This older version is pulled by the GLSL larlpop parser generator on build-time.
@@ -106,20 +102,13 @@ skip = [
 	# It should not affect final executables
 	{ name = "darling", version = "=0.14.4" },
 	{ name = "darling_macro", version = "=0.14.4" },
-	{ name = "darling_core", version = "=0.14.4" },
-	# winres has a build-time dependency on an older toml crate version. It should not
-	# affect final executables
-	{ name = "toml", version = "=0.5.11" }
+	{ name = "darling_core", version = "=0.14.4" }
 ]
 skip-tree = [
 	# An ancient nom is pulled by the development dependency for
 	# benchmarking perfcnt. Let's ignore that for now. It doesn't
 	# affect the final user executables at all
-	{ name = "perfcnt", version = "=0.8.0" },
-	# Some crates (parking_lot_core, tempfile) pull an older version
-	# of the windows-sys crate. That increases build times but should
-	# not have adverse effects
-	{ name = "windows-sys", version = "=0.45.0" }
+	{ name = "perfcnt", version = "=0.8.0" }
 ]
 
 [sources]
