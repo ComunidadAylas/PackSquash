@@ -5,7 +5,7 @@ use crate::zopfli_iterations_time_model::ZopfliIterationsTimeModel;
 use bytes::BytesMut;
 use imagequant::{liq_error, Attributes};
 use itertools::Itertools;
-use oxipng::{BitDepth, ColorType, Deflaters, Headers, Options, RowFilter};
+use oxipng::{BitDepth, ColorType, Deflaters, Options, RowFilter, StripChunks};
 use rgb::{AsPixels, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
 use std::io::Read;
@@ -451,7 +451,8 @@ impl<R: Read> ProcessedImage<R> {
 			grayscale_reduction: can_convert_to_grayscale && can_change_color_type,
 			preserve_attrs: false,
 			pretend: false,
-			strip: Headers::All,
+			scale_16: can_change_color_type,
+			strip: StripChunks::All,
 			timeout: Some(Duration::from_secs(600)), // Bail out if the optimization takes too long
 			fast_evaluation: true,
 			check: false

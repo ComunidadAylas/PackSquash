@@ -3,7 +3,7 @@ use std::{
 	env,
 	fmt::Display,
 	fs,
-	io::{self, Read, Stderr},
+	io::{self, Read, Stderr, IsTerminal},
 	process,
 	time::{Duration, Instant}
 };
