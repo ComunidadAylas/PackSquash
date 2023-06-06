@@ -1,7 +1,8 @@
 use std::fs::{File, OpenOptions};
-use std::{env, io};
-
-use is_terminal::IsTerminal;
+use std::{
+	env,
+	io::{self, IsTerminal}
+};
 
 use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};
 

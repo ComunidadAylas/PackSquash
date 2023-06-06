@@ -3,7 +3,7 @@ use std::{
 	env,
 	fmt::Display,
 	fs,
-	io::{self, IsTerminal, Read, Stderr},
+	io::{self, IsTerminal, IsTerminal, Read, Stderr},
 	process,
 	time::{Duration, Instant}
 };
@@ -11,7 +11,6 @@ use std::{
 use env_logger::fmt::Color;
 use env_logger::{Builder, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
-use is_terminal::IsTerminal;
 use log::{debug, error, info, trace, warn, Level, LevelFilter};
 use tokio::{runtime, select, sync::mpsc::channel, time::sleep};
 
