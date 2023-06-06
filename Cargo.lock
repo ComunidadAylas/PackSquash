@@ -1803,10 +1803,10 @@ dependencies = [
  "serde_path_to_error",
  "time",
  "tokio",
- "toml 0.7.4",
+ "toml",
  "winapi",
  "winapi-util",
- "winres",
+ "winresource",
 ]
 
 [[package]]
@@ -2654,15 +2654,16 @@ dependencies = [
 
 [[package]]
 name = "tempfile"
-version = "3.5.0"
+version = "3.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9fbec84f381d5795b08656e4912bec604d162bff9291d6189a78f4c8ab87998"
+checksum = "31c0432476357e58790aaa47a8efb0c5138f137343f3b5f23bd36a27e3b0a6d6"
 dependencies = [
+ "autocfg",
  "cfg-if",
  "fastrand",
  "redox_syscall 0.3.5",
  "rustix",
- "windows-sys 0.45.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -2834,15 +2835,6 @@ dependencies = [
  "pin-project-lite",
  "tokio",
  "tracing",
-]
-
-[[package]]
-name = "toml"
-version = "0.5.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4f7f0dd8d50a853a531c426359045b1998f04219d88799810762cd4ad314234"
-dependencies = [
- "serde",
 ]
 
 [[package]]
@@ -3304,11 +3296,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "winres"
-version = "0.1.11"
-source = "git+https://github.com/Nilstrieb/winres?rev=c839134b#c839134b5f78d7dd0f5c8211ec6c7b675b0026fc"
+name = "winresource"
+version = "0.1.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5cd38cf1ae6704c0bd03ee663068b8303b9c4bb069f83143c21ef25b19d1bc30"
 dependencies = [
- "toml 0.5.11",
+ "toml",
  "version_check 0.9.4",
 ]
 
