@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1685995548566,
+  "lastUpdate": 1686136140408,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "ca4dae092ad8294044c3c49e86d7ae112ce108ae",
-          "message": "chore(deps): update dependency beautifulsoup4 to v4.12.2",
-          "timestamp": "2023-04-07T18:15:26Z",
-          "tree_id": "0d27a75469d877106b8145bad96f4843831203a6",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ca4dae092ad8294044c3c49e86d7ae112ce108ae"
-        },
-        "date": 1680910395577,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13200465,
-            "range": "± 11591176",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 382516771,
-            "range": "± 6682846",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 4975124429,
-            "range": "± 44874585",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 729724099,
-            "range": "± 9594511",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 336295972,
             "range": "± 8930466",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "0f92f66760385b09443812ff05a839a119be882b",
+          "message": "ci: ignore flaky ARM64 QEMU musl test\n\nI've run the affected test on my development workstation successfully,\nso the source code is not to blame. My best guess is that the CI runner\nmay be running out of memory, given that the affected tests are\nexpensive to run.\n\nGiven that the affected code tests successfully when targeting glibc for\nthe same arch on CI, we don't have to dig on whatever QEMU/environment\nquirk is causing the issue, so let's just skip the troublesome test.",
+          "timestamp": "2023-06-07T12:31:02+02:00",
+          "tree_id": "971080e761041e021dc1e93fa3006dc5a6ba7e16",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/0f92f66760385b09443812ff05a839a119be882b"
+        },
+        "date": 1686136139162,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10666372,
+            "range": "± 294084",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 198443940,
+            "range": "± 2112340",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3440695122,
+            "range": "± 31101984",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 324483243,
+            "range": "± 8993117",
             "unit": "ns/iter"
           }
         ]
