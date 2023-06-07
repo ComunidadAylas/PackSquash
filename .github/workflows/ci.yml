@@ -264,7 +264,7 @@ jobs:
 
       - name: 🔍 Check workflow package write permission
         id: check_write_permission
-        uses: scherermichael-oss/action-has-permission@1.0.6
+        uses: assaferan/action-has-permission@3d96069159254de543039461dc5a9c20fadbd6e6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
