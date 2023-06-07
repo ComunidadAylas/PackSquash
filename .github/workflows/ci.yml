@@ -109,9 +109,6 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
-      - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@v2
-
       - name: 🧰 Install toolchain
         if: matrix.runner == 'ubuntu-latest'
         run: |
@@ -120,11 +117,6 @@ jobs:
           # markdown and html2text are required to generate the Debian package only
           apt-get install -yq build-essential musl-tools git curl \
                               markdown html2text
-
-      - name: 📥 Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Keep the commit history for proper version information
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: startsWith(matrix.target, 'aarch64-unknown-linux')
@@ -147,11 +139,19 @@ jobs:
           targets: ${{ env.CARGO_BUILD_TARGET }}
           components: rust-src
 
+      - name: 💨 Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-deb
+
+      - name: 📥 Checkout source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Keep the commit history for proper version information
 
       # Our build container is minimal, and it doesn't contain any systemd package.
       # systemd is responsible for setting up the machine ID files we use for
