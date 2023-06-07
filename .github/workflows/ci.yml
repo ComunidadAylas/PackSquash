@@ -328,9 +328,7 @@ jobs:
         run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
 
       - name: 🧰 Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
+        uses: dtolnay/rust-toolchain@nightly
 
       - name: 💨 Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
