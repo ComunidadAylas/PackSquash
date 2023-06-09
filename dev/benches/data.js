@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686345550194,
+  "lastUpdate": 1686345728218,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "de8730a2be619efcb1ecbbf6cdb1ca8ae1ce11a5",
-          "message": "chore(deps): update dependency soupsieve to v2.4.1",
-          "timestamp": "2023-04-17T02:17:59Z",
-          "tree_id": "5cc04d34d2b4718520d583f3158ff638066c6f4c",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/de8730a2be619efcb1ecbbf6cdb1ca8ae1ce11a5"
-        },
-        "date": 1681722722671,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9843554,
-            "range": "± 11586265",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 292780185,
-            "range": "± 4517863",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 1812536600,
-            "range": "± 30747045",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 254944974,
-            "range": "± 8308215",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 341458163,
             "range": "± 7130420",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "2c44a5c6f6153a46e8862beb90823f60d513c41b",
+          "message": "refactor: drop `open_files_limit` option\n\nThis option is rather advanced to use, and so far I have not seen a\nlegitimate reason for users to change its default value. The only times\nit's been included in an options file is because people copied the\ncomplete example on the wiki, despite my advice to the contrary.\n\nTo prevent people from shooting themselves in the foot while\naccomodating advanced needs, let's drop the option and make PackSquash\ntry to raise the file descriptor limit as needed for the desired\nconcurrency level. If that fails, fall back to throttling concurrency\nand output an user-friendly warning explaining what happened and how to\nget the intended performance.\n\nA convenient way to test these changes is by using a command like this\non a Linux workstation:\n\n$ systemd-run --user -GPdt -p LimitNOFILE=<soft>:<hard> target/release/packsquash /tmp/packsquash.toml",
+          "timestamp": "2023-06-09T22:30:12+02:00",
+          "tree_id": "b888a4727738a2e1c28c2d21b6f7cbe373d77791",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2c44a5c6f6153a46e8862beb90823f60d513c41b"
+        },
+        "date": 1686345727561,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9624612,
+            "range": "± 101848",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 177518274,
+            "range": "± 6667589",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3068061814,
+            "range": "± 57494195",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 281634968,
+            "range": "± 8638235",
             "unit": "ns/iter"
           }
         ]
