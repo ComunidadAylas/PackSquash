@@ -271,7 +271,7 @@ where
 			// - A single channel. The channel mixings we do are either:
 			//   · Mono to stereo: there is no point in resampling the same samples twice, so
 			//                     we resample before upmixing.
-			//   · Stereo to mono: we can downmix to mono and then resample.
+			//   · Stereo to mono: we downmix to mono and then resample.
 
 			let mut resample_input_buf =
 				[const { vec![] }; channels_to_resample(INPUT_CHANNELS, OUTPUT_CHANNELS)];
