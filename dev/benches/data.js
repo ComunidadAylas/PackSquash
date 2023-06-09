@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686343341500,
+  "lastUpdate": 1686344961670,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "ad362f78bc8dc46b9cb7eed0321d740e77301bbb",
-          "message": "perf(png_file): use experimental OxiPNG raw API\n\nThis new API renders it unnecessary for PackSquash to encode\nintermediate PNGs for them to be consumed by OxiPNG, which is noticeably\nfaster and more memory efficient, especially for smaller images, where\nthe encoding overhead is significant.\n\nWhile at it, the image processing code was refactored to be much more\nergonomic and easier to read, 0 is now rejected as a value for the\n`maximum_width_and_height` option, the OxiPNG options were slightly\ntweaked to use a better set of filters, and images no longer are\ndownsized if their color type cannot be changed.",
-          "timestamp": "2023-04-16T19:14:07+02:00",
-          "tree_id": "46f3dbf63533ad6700c33706b267489dc7a74254",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ad362f78bc8dc46b9cb7eed0321d740e77301bbb"
-        },
-        "date": 1681667455948,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9497940,
-            "range": "± 10825940",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 289746747,
-            "range": "± 4704674",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 1801161028,
-            "range": "± 24382336",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 252057137,
-            "range": "± 7163394",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 273845486,
             "range": "± 5180443",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "3007b5a37fab2081de0070e1d0613aa721df1bb2",
+          "message": "refactor: drop `open_files_limit` option\n\nThis option is rather advanced to use, and so far I have not seen a\nlegitimate reason for users to change its default value. The only times\nit's been included in an options file is because people copied the\ncomplete example on the wiki, despite my advice to the contrary.\n\nTo prevent people from shooting themselves in the foot while\naccomodating advanced needs, let's drop the option and make PackSquash\ntry to raise the file descriptor limit as needed for the desired\nconcurrency level. If that fails, fall back to throttling concurrency\nand output an user-friendly warning explaining what happened and how to\nget the intended performance.\n\nA convenient way to test these changes is by using a command like this\non a Linux workstation:\n\n$ systemd-run --user -GPdt -p LimitNOFILE=<soft>:<hard> target/release/packsquash /tmp/packsquash.toml",
+          "timestamp": "2023-06-09T22:07:35+02:00",
+          "tree_id": "e382f7988c3929b572ab17545982b5bc9f7a232c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3007b5a37fab2081de0070e1d0613aa721df1bb2"
+        },
+        "date": 1686344960994,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8409166,
+            "range": "± 225788",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 166410616,
+            "range": "± 2293022",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2746654739,
+            "range": "± 43589134",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 259873077,
+            "range": "± 9131347",
             "unit": "ns/iter"
           }
         ]
