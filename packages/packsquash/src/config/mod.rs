@@ -223,64 +223,6 @@ pub struct GlobalOptions {
 	#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 	#[doc(cfg(any(feature = "optifine-support", feature = "mtr3-support")))]
 	pub allow_mods: EnumSet<MinecraftMod>,
-	/// The bitrate control mode that will be used for transcoding audio files that do not explicitly
-	/// override the bitrate control mode via file-specific options. Different bitrate control modes
-	/// have different trade-offs between audio quality, file size, bandwidth predictability and
-	/// encoding speed.
-	///
-	/// Changing the bitrate control mode usually requires changing its target metrics, too. See the
-	/// `non_positional_audio_target_bitrate_control_metric` and
-	/// `positional_audio_target_bitrate_control_metric` options for details.
-	///
-	/// **Default value**: constant quality factor (CQF)
-	pub audio_bitrate_control_mode: AudioBitrateControlMode,
-	/// The metric that will be used as a target for the specified bitrate control mode. Depending
-	/// on the selected bitrate control mode, this will be interpreted as a quality factor, average
-	/// bitrate, approximate bitrate, or maximum bitrate.
-	///
-	/// This metric will be used for non-positional (i.e., stereo) sounds only. For mono sounds,
-	/// please check out the `positional_audio_target_bitrate_control_metric` option. The
-	/// rationale of using different metrics for each sound type is that positional sounds tend to
-	/// be shorter and combined with others, so players are expected to be less sensitive to them
-	/// being encoded with a slightly lower quality, which helps saving space.
-	///
-	/// **Default value**: `0.25` (interpreted as a quality factor, ≈68 kbit/s for stereo, 44.1 kHz
-	/// audio)
-	pub non_positional_audio_target_bitrate_control_metric: f32,
-	/// The sampling frequency that non-positional (i.e., stereo) audio will be resampled to.
-	/// Downsampling helps saving space, at the cost of potentially introducing aliasing artifacts
-	/// if the input audio contains frequencies higher than half the new sampling rate and narrowing
-	/// margins for filters and further signal processing work. If the specified sampling frequency
-	/// is higher than the sampling frequency of the input audio file, no resampling will be done.
-	///
-	/// This metric is used for non-positional sounds only. For mono sounds, please check out the
-	/// `positional_audio_sampling_frequency` option.
-	///
-	/// **Default value**: `40050` (40.05 kHz)
-	pub non_positional_audio_sampling_frequency: NonZeroU32,
-	/// The metric that will be used as a target for the specified bitrate control mode. Depending
-	/// on the selected bitrate control mode, this will be interpreted as a quality factor, average
-	/// bitrate, approximate bitrate, or maximum bitrate.
-	///
-	/// This metric will be used for positional (i.e., mono) sounds only. For stereo sounds,
-	/// please check out the `non_positional_audio_target_bitrate_control_metric` option. The
-	/// rationale of using different metrics for each sound type is that positional sounds tend to
-	/// be shorter and combined with others, so players are expected to be less sensitive to them
-	/// being encoded with a slightly lower quality, which helps saving space.
-	///
-	/// **Default value**: `0.0` (interpreted as a quality factor)
-	pub positional_audio_target_bitrate_control_metric: f32,
-	/// The sampling frequency that positional (i.e., mono) audio will be resampled to.
-	/// Downsampling helps saving space, at the cost of potentially introducing aliasing artifacts
-	/// if the input audio contains frequencies higher than half the new sampling rate and narrowing
-	/// margins for filters and further signal processing work. If the specified sampling frequency
-	/// is higher than the sampling frequency of the input audio file, no resampling will be done.
-	///
-	/// This metric is used for positional sounds only. For stereo sounds, please check out the
-	/// `non_positional_audio_sampling_frequency` option.
-	///
-	/// **Default value**: `32000` (32 kHz)
-	pub positional_audio_sampling_frequency: NonZeroU32,
 	/// The output file path where the result ZIP will be written to. This path must not point to a
 	/// folder.
 	///
@@ -330,11 +272,6 @@ impl Default for GlobalOptions {
 			ignore_system_and_hidden_files: true,
 			#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
 			allow_mods: EnumSet::empty(),
-			audio_bitrate_control_mode: Default::default(),
-			non_positional_audio_target_bitrate_control_metric: 0.25, // ~ 68 kbit/s for stereo, 44.1 kHz signals
-			non_positional_audio_sampling_frequency: NonZeroU32::new(40_050).unwrap(),
-			positional_audio_target_bitrate_control_metric: 0.0,
-			positional_audio_sampling_frequency: NonZeroU32::new(32_000).unwrap(),
 			threads: hardware_threads,
 			output_file_path: PathBuf::from("pack.zip"),
 			// In MiB. By default, half of available memory / (hardware threads + 1 for the output ZIP)
@@ -626,15 +563,6 @@ impl FileOptions {
 		}
 
 		if let FileOptions::AudioFileOptions(file_options) = &mut self {
-			file_options.audio_bitrate_control_mode = global_options.audio_bitrate_control_mode;
-			file_options.non_positional_audio_target_bitrate_control_metric =
-				global_options.non_positional_audio_target_bitrate_control_metric;
-			file_options.positional_audio_target_bitrate_control_metric =
-				global_options.positional_audio_target_bitrate_control_metric;
-			file_options.non_positional_audio_sampling_frequency =
-				global_options.non_positional_audio_sampling_frequency;
-			file_options.positional_audio_sampling_frequency =
-				global_options.positional_audio_sampling_frequency;
 			file_options.minecraft_version_supports_ogg_obfuscation = !global_options
 				.work_around_minecraft_quirks
 				.contains(MinecraftQuirk::OggObfuscationIncompatibility);
@@ -685,41 +613,30 @@ pub struct AudioFileOptions {
 	///
 	/// **Default value**: do not downmix or upmix (keep the channels of the input file)
 	pub channels: ChannelMixingOption,
-	/// Sets whether this sound should be treated as positional (i.e., mono) or non-positional
-	/// (i.e., stereo) for bitrate control and resampling purposes, without affecting its channel
-	/// count. This is useful to override the channel count based classification heuristic used
-	/// by PackSquash in cases where the different treatment is warranted (e.g., a mono sound
-	/// being used prominently in the foreground, or a stereo sound being a faint background
-	/// detail).
+	/// The bitrate control mode that will be used for transcoding the audio file. Different bitrate
+	/// control modes have different trade-offs between audio quality, file size, bandwidth
+	/// predictability and encoding speed.
 	///
-	/// This option only has any effect when the audio file is transcoded.
+	/// **Default value**: constant quality factor (CQF)
+	pub bitrate_control_mode: AudioBitrateControlMode,
+	/// The metric that will be used as a target for the specified bitrate control mode. Depending
+	/// on the selected bitrate control mode, this will be interpreted as a quality factor, average
+	/// bitrate, approximate bitrate, or maximum bitrate.
 	///
-	/// **Default value**: `None` (let PackSquash decide according to the number of channels)
-	pub is_positional_audio: Option<bool>,
-	/// Overrides the sampling frequency to resample this audio file to, ignoring whether it is
-	/// positional or not and the global `positional_audio_sampling_frequency` and
-	/// `non_positional_audio_sampling_frequency` options.
+	/// **Default value**: `0.25` for stereo audio (interpreted as a quality factor, ≈68 kbit/s for
+	/// stereo, 44.1 kHz audio) and `0.0` for mono audio, interpreted as quality factors
+	pub target_bitrate_control_metric: Option<f32>,
+	/// The sampling frequency that non-positional (i.e., stereo) audio will be resampled to, in Hz.
+	/// Downsampling helps saving space, at the cost of potentially introducing aliasing artifacts
+	/// if the input audio contains frequencies higher than half the new sampling rate and narrowing
+	/// margins for filters and further signal processing work. If the specified sampling frequency
+	/// is higher than the sampling frequency of the input audio file, no resampling will be done.
 	///
-	/// This option only has any effect when the audio file is transcoded.
+	/// This metric is used for non-positional sounds only. For mono sounds, please check out the
+	/// `positional_audio_sampling_frequency` option.
 	///
-	/// **Default value**: `None` (let PackSquash decide based on the value of the global options
-	/// and whether this sound is positional or not)
-	pub sampling_frequency_override: Option<NonZeroU32>,
-	/// Overrides the bitrate control mode used for encoding this audio file, ignoring the global
-	/// `audio_bitrate_control_mode` option.
-	///
-	/// **Default value**: `None` (use the global bitrate control mode)
-	pub audio_bitrate_control_mode_override: Option<AudioBitrateControlMode>,
-	/// Overrides the target bitrate control metric to use for encoding this audio file, ignoring
-	/// whether it is positional or not and the global
-	/// `positional_audio_target_bitrate_control_metric` and
-	/// `non_positional_audio_target_bitrate_control_metric` options.
-	///
-	/// This option only has any effect when the audio file is transcoded.
-	///
-	/// **Default value**: `None` (let PackSquash decide based on the value of the global options
-	/// and whether this sound is positional or not)
-	pub target_bitrate_control_metric_override: Option<f32>,
+	/// **Default value**: `40050` (40.05 kHz) for stereo audio, `32000` for mono audio
+	pub sampling_frequency: Option<NonZeroU32>,
 	/// Sets the pitch shift coefficient that will have to be used to play back the sound
 	/// at the original pitch. This pitch shift coefficient can be used directly in Minecraft
 	/// commands like `/playsound`.
@@ -740,26 +657,6 @@ pub struct AudioFileOptions {
 	///
 	/// **Default value**: `false`
 	pub ogg_obfuscation: bool,
-	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
-	/// the value of the global option of the same name.
-	#[serde(skip)]
-	pub(crate) audio_bitrate_control_mode: AudioBitrateControlMode,
-	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
-	/// the value of the global option of the same name.
-	#[serde(skip)]
-	pub(crate) non_positional_audio_target_bitrate_control_metric: f32,
-	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
-	/// the value of the global option of the same name.
-	#[serde(skip)]
-	pub(crate) non_positional_audio_sampling_frequency: NonZeroU32,
-	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
-	/// the value of the global option of the same name.
-	#[serde(skip)]
-	pub(crate) positional_audio_target_bitrate_control_metric: f32,
-	/// Crate-private option set by [FileOptions::tweak_from_global_options] to pass through
-	/// the value of the global option of the same name.
-	#[serde(skip)]
-	pub(crate) positional_audio_sampling_frequency: NonZeroU32,
 	/// Crate-private option set by the [MinecraftQuirk::OggObfuscationIncompatibility]
 	/// workaround to not obfuscate Ogg Vorbis files.
 	///
@@ -773,19 +670,13 @@ impl Default for AudioFileOptions {
 		Self {
 			transcode_ogg: true,
 			two_pass_vorbis_optimization_and_validation: true,
-			channels: Default::default(),
-			is_positional_audio: None,
-			sampling_frequency_override: None,
-			audio_bitrate_control_mode_override: None,
-			target_bitrate_control_metric_override: None,
-			target_pitch: 1.0,
 			empty_audio_optimization: true,
+			channels: Default::default(),
+			bitrate_control_mode: Default::default(),
+			target_bitrate_control_metric: None,
+			sampling_frequency: None,
+			target_pitch: 1.0,
 			ogg_obfuscation: false,
-			audio_bitrate_control_mode: Default::default(),
-			non_positional_audio_target_bitrate_control_metric: 0.25,
-			non_positional_audio_sampling_frequency: NonZeroU32::new(40_050).unwrap(),
-			positional_audio_target_bitrate_control_metric: 0.0,
-			positional_audio_sampling_frequency: NonZeroU32::new(32_000).unwrap(),
 			minecraft_version_supports_ogg_obfuscation: true
 		}
 	}

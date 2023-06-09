@@ -120,9 +120,9 @@ async fn transcoding_works() {
 		FLAC_AUDIO_DATA,
 		false, // Is not Ogg
 		Default::default(),
-		false,                                                           // Smaller file size
-		1,                                                               // One channel (mono)
-		AudioFileOptions::default().positional_audio_sampling_frequency  // Default sampling frequency
+		false,                               // Smaller file size
+		1,                                   // One channel (mono)
+		POSITIONAL_AUDIO_SAMPLING_FREQUENCY  // Default sampling frequency
 	)
 	.await
 }
@@ -154,9 +154,9 @@ async fn pitch_shifting_works() {
 			target_pitch: 1.25,
 			..Default::default()
 		},
-		false,                                                           // Smaller file size
-		1,                                                               // One channel (mono)
-		AudioFileOptions::default().positional_audio_sampling_frequency  // Default sampling frequency
+		false,                               // Smaller file size
+		1,                                   // One channel (mono)
+		POSITIONAL_AUDIO_SAMPLING_FREQUENCY  // Default sampling frequency
 	)
 	.await
 }
@@ -170,9 +170,9 @@ async fn channel_mixing_works() {
 			channels: ChannelMixingOption::ToChannels(NonZeroU8::new(2).unwrap().try_into().unwrap()),
 			..Default::default()
 		},
-		false,                                                               // Bigger file size
-		2,                                                                   // Two channels (stereo)
-		AudioFileOptions::default().non_positional_audio_sampling_frequency  // Default sampling frequency
+		false,                                   // Bigger file size
+		2,                                       // Two channels (stereo)
+		NON_POSITIONAL_AUDIO_SAMPLING_FREQUENCY  // Default sampling frequency
 	)
 	.await
 }
@@ -187,9 +187,9 @@ async fn channel_mixing_and_pitch_shifting_work() {
 			channels: ChannelMixingOption::ToChannels(NonZeroU8::new(2).unwrap().try_into().unwrap()),
 			..Default::default()
 		},
-		false,                                                               // Smaller file size
-		2,                                                                   // Two channels (stereo)
-		AudioFileOptions::default().non_positional_audio_sampling_frequency  // Default sampling frequency
+		false,                                   // Smaller file size
+		2,                                       // Two channels (stereo)
+		NON_POSITIONAL_AUDIO_SAMPLING_FREQUENCY  // Default sampling frequency
 	)
 	.await
 }
@@ -238,7 +238,7 @@ async fn invalid_non_empty_input_is_handled() {
 	error_process_test(
 		Builder::new()
 			.read(&[1, 2])
-			.wait(Duration::from_millis(100))
+			.wait(Duration::from_millis(20))
 			.read(&[3, 4])
 			.build(),
 		false, // Is not Ogg

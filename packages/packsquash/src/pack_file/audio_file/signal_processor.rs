@@ -74,24 +74,27 @@ pub fn decode_and_process_sample_blocks(
 	)?;
 
 	let resampler = if target_sampling_frequency != input_sampling_frequency {
-		Some(FftFixedIn::new(
-			input_sampling_frequency.get().try_into().map_err(|_| {
-				OptimizationError::InvalidSourceSamplingFrequency {
-					sampling_frequency: input_sampling_frequency
-				}
-			})?,
-			target_sampling_frequency.get().try_into().map_err(|_| {
-				OptimizationError::InvalidTargetSamplingFrequency {
-					sampling_frequency: target_sampling_frequency
-				}
-			})?,
-			FRAME_BLOCK_SIZE,
-			2,
-			channels_to_resample(
-				input_channels.get() as usize,
-				output_channels.get() as usize
+		Some(
+			FftFixedIn::new(
+				input_sampling_frequency.get().try_into().map_err(|_| {
+					OptimizationError::InvalidSourceSamplingFrequency {
+						sampling_frequency: input_sampling_frequency
+					}
+				})?,
+				target_sampling_frequency.get().try_into().map_err(|_| {
+					OptimizationError::InvalidTargetSamplingFrequency {
+						sampling_frequency: target_sampling_frequency
+					}
+				})?,
+				FRAME_BLOCK_SIZE,
+				2,
+				channels_to_resample(
+					input_channels.get() as usize,
+					output_channels.get() as usize
+				)
 			)
-		)?)
+			.unwrap()
+		)
 	} else {
 		None
 	};

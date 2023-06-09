@@ -5,7 +5,7 @@ use optivorbis::remuxer::ogg_to_ogg;
 use optivorbis::{
 	Remuxer, VorbisCommentFieldsAction, VorbisOptimizerSettings, VorbisVendorStringAction
 };
-use rubato::{ResampleError, ResamplerConstructionError};
+use rubato::ResampleError;
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::cmp;
@@ -29,6 +29,20 @@ mod tests;
 
 mod signal_processor;
 mod vorbis_stream_mangler;
+
+/// The default sampling frequency to resample positional (i.e., mono) sounds to.
+/// "Positional" sounds are named as such because the game attenuates and pans their volume
+/// depending on the 3D position of the listener, e.g. computes position effects.
+const POSITIONAL_AUDIO_SAMPLING_FREQUENCY: NonZeroU32 = NonZeroU32::new(32_000).unwrap();
+/// The default sampling frequency to resample non-positional (i.e., stereo) sounds to.
+/// "Non-positional" sounds are named as such because they are played at a constant volume
+/// by the game, without taking into account the position of any listeners.
+const NON_POSITIONAL_AUDIO_SAMPLING_FREQUENCY: NonZeroU32 = NonZeroU32::new(40_050).unwrap();
+/// The default target quality for positional sounds, used when transcoding.
+const POSITIONAL_AUDIO_TARGET_QUALITY: f32 = 0.0;
+/// The default target quality for non-positional sounds, used when transcoding. For stereo,
+/// 44.1 kHz audio this translates to an average bitrate around ≈68 kbit/s.
+const NON_POSITIONAL_AUDIO_TARGET_QUALITY: f32 = 0.25;
 
 /// Represents an audio file, that can be optimized and/or transcoded to Ogg.
 ///
@@ -62,13 +76,11 @@ pub enum OptimizationError {
 	UnsupportedChannelCount,
 	#[error("Unknown sampling frequency. Is this file corrupt?")]
 	UnknownSamplingFrequency,
-	#[error("Could not set up resampling: {0}")]
-	ResamplerConstructionFailure(#[from] ResamplerConstructionError),
 	#[error("Tried to resample from {sampling_frequency} Hz, but that frequency is too high. Please lower it")]
 	InvalidSourceSamplingFrequency { sampling_frequency: NonZeroU32 },
 	#[error("Tried to resample to {sampling_frequency} Hz, but that frequency is too high. Please lower it")]
 	InvalidTargetSamplingFrequency { sampling_frequency: NonZeroU32 },
-	#[error("An invalid target bitrate of zero was specified")]
+	#[error("An invalid target bitrate was specified in the options")]
 	InvalidTargetBitrate,
 	#[error("Resample error: {0}")]
 	ResamplingFailure(#[from] ResampleError),
@@ -213,9 +225,7 @@ fn process_and_transcode(
 			ChannelMixingOption::Skip => None
 		},
 		|input_sampling_frequency, input_channel_count, output_channel_count| {
-			let is_positional_audio = optimization_settings
-				.is_positional_audio
-				.unwrap_or(output_channel_count.get() == 1);
+			let is_positional_audio = output_channel_count.get() == 1;
 
 			channel_mixing_done = input_channel_count != output_channel_count;
 
@@ -225,11 +235,11 @@ fn process_and_transcode(
 			// costs. Let's not do that
 			let output_sampling_frequency = cmp::min(
 				optimization_settings
-					.sampling_frequency_override
+					.sampling_frequency
 					.unwrap_or(if is_positional_audio {
-						optimization_settings.positional_audio_sampling_frequency
+						POSITIONAL_AUDIO_SAMPLING_FREQUENCY
 					} else {
-						optimization_settings.non_positional_audio_sampling_frequency
+						NON_POSITIONAL_AUDIO_SAMPLING_FREQUENCY
 					}),
 				input_sampling_frequency
 			);
@@ -242,10 +252,7 @@ fn process_and_transcode(
 				[("", ""); 0],
 				output_sampling_frequency,
 				output_channel_count,
-				match optimization_settings
-					.audio_bitrate_control_mode_override
-					.unwrap_or(optimization_settings.audio_bitrate_control_mode)
-				{
+				match optimization_settings.bitrate_control_mode {
 					AudioBitrateControlMode::Cqf => VorbisBitrateManagementStrategy::QualityVbr {
 						target_quality: target_bitrate_control_metric_to_quality(
 							optimization_settings,
@@ -254,21 +261,18 @@ fn process_and_transcode(
 					},
 					AudioBitrateControlMode::Vbr => VorbisBitrateManagementStrategy::Vbr {
 						target_bitrate: target_bitrate_control_metric_to_bitrate(
-							optimization_settings,
-							is_positional_audio
+							optimization_settings
 						)?
 					},
 					AudioBitrateControlMode::Abr => VorbisBitrateManagementStrategy::Abr {
 						average_bitrate: target_bitrate_control_metric_to_bitrate(
-							optimization_settings,
-							is_positional_audio
+							optimization_settings
 						)?
 					},
 					AudioBitrateControlMode::ConstrainedAbr => {
 						VorbisBitrateManagementStrategy::ConstrainedAbr {
 							maximum_bitrate: target_bitrate_control_metric_to_bitrate(
-								optimization_settings,
-								is_positional_audio
+								optimization_settings
 							)?
 						}
 					}
@@ -368,11 +372,11 @@ fn target_bitrate_control_metric_to_quality(
 	is_positional_audio: bool
 ) -> f32 {
 	let target_bitrate_control_metric = optimization_settings
-		.target_bitrate_control_metric_override
+		.target_bitrate_control_metric
 		.unwrap_or(if is_positional_audio {
-			optimization_settings.positional_audio_target_bitrate_control_metric
+			POSITIONAL_AUDIO_TARGET_QUALITY
 		} else {
-			optimization_settings.non_positional_audio_target_bitrate_control_metric
+			NON_POSITIONAL_AUDIO_TARGET_QUALITY
 		});
 
 	// Convert the more user-friendly range of [-1, 10] to the
@@ -383,16 +387,11 @@ fn target_bitrate_control_metric_to_quality(
 /// Converts the applicable target bitrate control metric, as defined in the specified
 /// optimization settings, to a bitrate ready to pass on to a Vorbis encoder.
 fn target_bitrate_control_metric_to_bitrate(
-	optimization_settings: &AudioFileOptions,
-	is_positional_audio: bool
+	optimization_settings: &AudioFileOptions
 ) -> Result<NonZeroU32, OptimizationError> {
 	let target_bitrate_control_metric = optimization_settings
-		.target_bitrate_control_metric_override
-		.unwrap_or(if is_positional_audio {
-			optimization_settings.positional_audio_target_bitrate_control_metric
-		} else {
-			optimization_settings.non_positional_audio_target_bitrate_control_metric
-		});
+		.target_bitrate_control_metric
+		.ok_or(OptimizationError::InvalidTargetBitrate)?;
 
 	// Convert the more user-friendly unit of kbits/s to bits/s, as
 	// expected by Vorbis
