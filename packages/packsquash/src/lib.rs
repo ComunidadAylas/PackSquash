@@ -293,22 +293,54 @@ impl PackSquasher {
 
 			// Instantiate a semaphore that will help us limit the number of in-flight tasks.
 			// This is needed because if we spawn those tasks faster than we finish them we
-			// may end up opening a lot of files, needlessly consuming memory and exhausting
-			// open file limits
+			// may end up opening a lot of files, needlessly consuming resources
 			let in_flight_tasks_semaphore = Arc::new(Semaphore::new(
-				// - 2 because we open the output file and the previous file
-				// - 10 because the OsFilesystem VFS may keep some files open
-				// / 3 because each task may consume 3 descriptors: the pack file itself,
-				// and two temporary files
-				(options_holder
-					.options
-					.global_options
-					.open_files_limit
-					.get()
-					.saturating_sub(2)
-					.saturating_sub(10) / 3)
-					.clamp(1, options_holder.options.global_options.threads.get() * 2)
+				options_holder.options.global_options.threads.get() * 2
 			));
+
+			#[cfg(unix)]
+			{
+				let maximum_in_flight_tasks_count =
+					in_flight_tasks_semaphore.available_permits() as u64;
+
+				// On Unix-like systems, exceeding open file limits may be a concern on multi-socket
+				// motherboards with high-end CPUs, or very constrained environments. In general, we
+				// need to open:
+				// - 3 files per task: the pack file itself, and two temporary files.
+				// - 2 files for the output file and the previous file.
+				// - 10 files for OsFilesystem VFS operation.
+				let maximum_open_files_count = maximum_in_flight_tasks_count * 3 + 2 + 10;
+
+				// Ask the OS for a higher limit to satisfy our concurrency demands
+				let actual_open_files_limit =
+					rlimit::increase_nofile_limit(maximum_open_files_count)?;
+
+				// If our request couldn't be satisfied, it is because we requested a too high limit.
+				// Throttle concurrency to stay below the limit
+				if actual_open_files_limit < maximum_open_files_count {
+					let maximum_semaphore_permits = std::cmp::max(
+						actual_open_files_limit.saturating_sub(2).saturating_sub(10) / 3,
+						1 // Spawn at least a task at a time to avoid a deadlock
+					);
+					let semaphore_permits_diff =
+						(maximum_in_flight_tasks_count - maximum_semaphore_permits) as u32;
+
+					// Adjust the number of semaphore permits accordingly
+					in_flight_tasks_semaphore
+						.acquire_many(semaphore_permits_diff)
+						.await
+						.unwrap()
+						.forget();
+
+					if let Some(tx) = &pack_file_status_sender {
+						tx.send(PackSquasherStatus::Warning(
+							PackSquasherWarning::ConcurrencyLimitedDueToOpenFdLimits
+						))
+						.await
+						.ok();
+					}
+				}
+			}
 
 			let pack_file_optimization_failed = Arc::new(AtomicBool::new(false));
 
@@ -599,7 +631,11 @@ pub enum PackSquasherWarning {
 	LowEntropySystemId,
 	/// A system identifier that may change even if no targeted action by the
 	/// user to explicitly change it was done was used.
-	VolatileSystemId
+	VolatileSystemId,
+	/// The number of parallel tasks used to process pack files was limited
+	/// due to limits on the number of concurrent open file descriptors.
+	#[cfg(unix)]
+	ConcurrencyLimitedDueToOpenFdLimits
 }
 
 /// A status message concerning an in-progress squash operation.

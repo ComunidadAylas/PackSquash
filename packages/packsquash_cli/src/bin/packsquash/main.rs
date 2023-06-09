@@ -348,6 +348,11 @@ fn squash(
 									as unexpected results can occur after you use your device as usual. For more information \
 									about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"
 							),
+							#[cfg(unix)]
+							PackSquasherWarning::ConcurrencyLimitedDueToOpenFdLimits => warn!(
+								"The number of pack files that will be processed in parallel was reduced to avoid \
+								exceeding open file descriptor limits. Please increase the open file descriptor \
+								limit for optimum performance, or decrease the number of threads"),
 							_ => unimplemented!()
 						},
 						_ => unimplemented!()
