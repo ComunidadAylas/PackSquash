@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686346950115,
+  "lastUpdate": 1686347527245,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "6312efe4d298c33e9cb0af5dab8d07ae2069f933",
-          "message": "chore(deps): update dependency filelock to v3.12.0",
-          "timestamp": "2023-04-18T18:59:30Z",
-          "tree_id": "cc9476fdce2e1144dff4138bb4f64a39667f68ae",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6312efe4d298c33e9cb0af5dab8d07ae2069f933"
-        },
-        "date": 1681864436875,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10271066,
-            "range": "± 163829",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 331244441,
-            "range": "± 13395510",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2087371286,
-            "range": "± 30188303",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 259675484,
-            "range": "± 6263788",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 331841073,
             "range": "± 7673960",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "df32489d2ef3027ebdacf0b09400f3d9f9bc2cf1",
+          "message": "refactor: remove global audio options\n\nThese were a bit weird and complicated, and the file-specific options\nmechanism is powerful enough to implement advanced use cases, even\nthough it might be verbose.\n\nWhile at it, let's assert that no error happens when creating a\nresampler, as such a thing signals an internal logic error worth of\npanicking.",
+          "timestamp": "2023-06-09T23:14:48+02:00",
+          "tree_id": "0ed715b57629fd2cf8d6102e0165c03bb0e5f752",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/df32489d2ef3027ebdacf0b09400f3d9f9bc2cf1"
+        },
+        "date": 1686347525818,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9253153,
+            "range": "± 1560165",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 171598822,
+            "range": "± 7107775",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2938299172,
+            "range": "± 24652601",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 273352605,
+            "range": "± 6416076",
             "unit": "ns/iter"
           }
         ]
