@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686397097611,
+  "lastUpdate": 1686471555940,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "e3b4c031a83d9583243cb9b23e0cf9dedebb6012",
-          "message": "fix(squash_zip): do not return zero bytes written when the spooling buffer size is zero\n\nThis causes a WriteZero I/O error by the WriteAll future, as it assumes\nthat writing zero bytes signals a definitive \"stream full\" condition.",
-          "timestamp": "2023-04-21T18:33:09+02:00",
-          "tree_id": "f2b62460cc0153be932d0b46cab600cdcc7e6289",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e3b4c031a83d9583243cb9b23e0cf9dedebb6012"
-        },
-        "date": 1682096964775,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10106566,
-            "range": "± 340124",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 292684784,
-            "range": "± 5556453",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 1809873040,
-            "range": "± 4939037",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 241724986,
-            "range": "± 5783850",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 280038459,
             "range": "± 6812904",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "689f9ed49a7f801595aa1bc507ad7998bb98b883",
+          "message": "fix(deps): update rust crate log to 0.4.19",
+          "timestamp": "2023-06-11T04:01:11Z",
+          "tree_id": "4df9d59ded1425fd87efcb6592929afc6dd77871",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/689f9ed49a7f801595aa1bc507ad7998bb98b883"
+        },
+        "date": 1686471554773,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8991642,
+            "range": "± 117604",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 173374159,
+            "range": "± 23000746",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3061156790,
+            "range": "± 99947045",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 293240507,
+            "range": "± 7146085",
             "unit": "ns/iter"
           }
         ]
