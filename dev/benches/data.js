@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686471555940,
+  "lastUpdate": 1686484036953,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "f4b1eb5a34c1ca50e9232eb8ed0b05f55ad0b71d",
-          "message": "fix(deps): update rust crate regex to 1.8.1",
-          "timestamp": "2023-04-21T21:11:28Z",
-          "tree_id": "33439370e7bbe77232581c34fe1d2a4c9747fa09",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f4b1eb5a34c1ca50e9232eb8ed0b05f55ad0b71d"
-        },
-        "date": 1682131110544,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10508081,
-            "range": "± 9359141",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 334865046,
-            "range": "± 5804094",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2030309069,
-            "range": "± 26869130",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 264583240,
-            "range": "± 5591367",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 293240507,
             "range": "± 7146085",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "2dcc8cea2bf7c2b5aaa62b48f7878574f0e19bed",
+          "message": "chore: update rubato to 0.14\n\nThis update entailed some breaking changes. I was careful to test that\naudio files were resampled correctly after the upgrade.",
+          "timestamp": "2023-06-11T13:15:18+02:00",
+          "tree_id": "f4afaf9172b4d469513c8ced021f468f705b818e",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2dcc8cea2bf7c2b5aaa62b48f7878574f0e19bed"
+        },
+        "date": 1686484035522,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9161370,
+            "range": "± 267049",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 170525711,
+            "range": "± 663023",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2988083960,
+            "range": "± 43945692",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 274182014,
+            "range": "± 4914374",
             "unit": "ns/iter"
           }
         ]
