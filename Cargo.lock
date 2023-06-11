@@ -277,18 +277,18 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.3.2"
+version = "4.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "401a4694d2bf92537b6867d94de48c4842089645fdcdf6c71865b175d836e9c2"
+checksum = "ca8f255e4b8027970e78db75e78831229c9815fdbfa67eb1a1b777a62e24b4a0"
 dependencies = [
  "clap_builder",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.3.1"
+version = "4.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72394f3339a76daf211e57d4bcb374410f3965dcc606dd0e03738c7888766980"
+checksum = "acd4f3c17c83b0ba34ffbc4f8bbd74f079413f747f84a6f89292f138057e36ab"
 dependencies = [
  "anstyle",
  "bitflags",
@@ -1952,9 +1952,9 @@ checksum = "dc375e1527247fe1a97d8b7156678dfe7c1af2fc075c9a4db3690ecd2a148068"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.59"
+version = "1.0.60"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6aeca18b86b413c660b781aa319e4e2648a3e6f9eadc9b47e9038e6fe9f3451b"
+checksum = "dec2b086b7a862cf4de201096214fa870344cf922b2b30c167badb3af3195406"
 dependencies = [
  "unicode-ident",
 ]
@@ -2138,9 +2138,9 @@ dependencies = [
 
 [[package]]
 name = "rubato"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd70209c27d5b08f5528bdc779ea3ffb418954e28987f9f9775c6eac41003f9c"
+checksum = "4191a1456beb356999454c55cf94fe6a64400dd15ee5c21ee0df88845b667fa4"
 dependencies = [
  "num-complex",
  "num-integer",
@@ -2237,8 +2237,7 @@ dependencies = [
 [[package]]
 name = "serde_derive"
 version = "1.0.164"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9735b638ccc51c28bf6914d90a2e9725b377144fc612c49a611fddd1b631d68"
+source = "git+https://github.com/ComunidadAylas/serde?branch=master#f4f62fafb5f73a85a9a51c6e0dad229d262634c5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3221,8 +3220,3 @@ dependencies = [
  "simd-adler32",
  "typed-arena",
 ]
-
-[[patch.unused]]
-name = "serde_derive"
-version = "1.0.163"
-source = "git+https://github.com/ComunidadAylas/serde?branch=master#4df8e5f2a9debd95f46e9c447957c1933e5d3647"

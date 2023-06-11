@@ -282,7 +282,7 @@ where
 				vec.reserve_exact(FRAME_BLOCK_SIZE);
 			}
 
-			let mut resampled_samples_buf = resampler.output_buffer_allocate();
+			let mut resampled_samples_buf = resampler.output_buffer_allocate(true);
 
 			// Accumulate frames (one sample for each channel) in blocks for processing
 			while let Some(frame) = signal_iter.next() {
@@ -309,10 +309,10 @@ where
 				}
 
 				if resample_input_buf[0].len() == FRAME_BLOCK_SIZE {
-					resampler.process_into_buffer(
+					resample_buffer(
 						&resample_input_buf,
 						&mut resampled_samples_buf,
-						None
+						&mut resampler
 					)?;
 
 					// Upmix before handing off the block as above, if necessary. Cloning a single
@@ -347,10 +347,10 @@ where
 					channel_samples.resize(FRAME_BLOCK_SIZE, f32::EQUILIBRIUM);
 				}
 
-				resampler.process_into_buffer(
+				resample_buffer(
 					&resample_input_buf,
 					&mut resampled_samples_buf,
-					None
+					&mut resampler
 				)?;
 
 				for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
@@ -363,6 +363,30 @@ where
 	}
 
 	Ok(is_silent)
+}
+
+/// Resamples the samples at the specified input buffer to the given output buffer.
+/// This function assumes that the number of channels for both buffers match.
+fn resample_buffer<T: rubato::Sample, R: Resampler<T>>(
+	input_buf: &[Vec<T>],
+	output_buf: &mut [Vec<T>],
+	resampler: &mut R
+) -> Result<(), OptimizationError> {
+	// Ensure that the buffer of samples for each channel has enough length for the
+	// resampler to work (we truncate excess samples below, so the length might not
+	// always be enough)
+	for channel_sample_buf in output_buf.iter_mut() {
+		channel_sample_buf.resize(resampler.output_frames_max(), T::zero());
+	}
+
+	let (_, output_samples) = resampler.process_into_buffer(input_buf, output_buf, None)?;
+
+	// Discard placeholder output samples that were not written by the resampler
+	for channel_sample_buf in output_buf {
+		channel_sample_buf.truncate(output_samples);
+	}
+
+	Ok(())
 }
 
 /// Helper enum to treat two different signal decoder types as if they were of
