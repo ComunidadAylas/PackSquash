@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686484036953,
+  "lastUpdate": 1686671822931,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "74f533e11946908e799f840de823f464f2eaeaa2",
-          "message": "feat(os_fs): add MacOS resource fork ZIP folder to list of folders to ignore\n\nYou know Apple, you could have used the extra field feature defined in\nthe ZIP specification to store resource fork data, but I get you think\ndifferent.",
-          "timestamp": "2023-04-22T12:33:02+02:00",
-          "tree_id": "70c67732df402704470deb1429944148c33007b4",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/74f533e11946908e799f840de823f464f2eaeaa2"
-        },
-        "date": 1682162488687,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10142093,
-            "range": "± 200967",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 293243901,
-            "range": "± 18161686",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 1859669820,
-            "range": "± 24416085",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 247022198,
-            "range": "± 4647456",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 274182014,
             "range": "± 4914374",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "ec85d33f876a6f1774c87feab753888a818d6890",
+          "message": "ci: fix AArch64 workflow failures\n\nYou do you, sid-slim package repositories.",
+          "timestamp": "2023-06-13T17:02:14+02:00",
+          "tree_id": "9c9a617524b7a25eec02ce4bdff52a07a4d67efd",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ec85d33f876a6f1774c87feab753888a818d6890"
+        },
+        "date": 1686671821873,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8365348,
+            "range": "± 54038",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 167896828,
+            "range": "± 11957957",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2739233519,
+            "range": "± 51361711",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 263891010,
+            "range": "± 9538484",
             "unit": "ns/iter"
           }
         ]
