@@ -123,7 +123,11 @@ jobs:
         run: |
           dpkg --add-architecture arm64
           apt-get update
-          apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
+          # libgcc-s1:arm64 is a dependency of libc6:arm64 that Aptitude
+          # installs as usual, but for some reason the latest sid-slim image
+          # as of 2023-06-13 refers to broken repositories or packages where
+          # apt-get install fails
+          apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64 libgcc-s1:arm64
 
       # As of 2023-05-24, only the Debian unstable musl-dev ARM64 package ships with an
       # aarch64-linux-musl-gcc script that wraps the aarch64-linux-gnu-gcc cross-compiler
