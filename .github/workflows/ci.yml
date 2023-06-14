@@ -14,8 +14,6 @@ env:
   DEBIAN_FRONTEND: noninteractive
 
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
-  TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-  TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
 jobs:
   static-analysis:
@@ -233,7 +231,7 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@v1
+        uses: taiki-e/install-action@v2
         with:
           tool: nextest
 
@@ -244,10 +242,8 @@ jobs:
           tool: cargo-deb
 
       - name: 🧰 Install tauri-cli
-        if: endsWith(matrix.target, '-linux-gnu')
-        uses: actions-rs/install@v0.1
-        env:
-          CARGO_BUILD_TARGET: ${{ matrix.host-target }}
+        if: matrix.tauri-target != ''
+        uses: taiki-e/install-action@v2
         with:
           crate: tauri-cli
 
@@ -320,6 +316,9 @@ jobs:
       - name: 🔨 Build GUI frontend, installers and updater artifacts
         if: matrix.tauri-target != ''
         working-directory: packages/packsquash_gui
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         run: |
           npm ci
           cargo tauri build --target ${{ matrix.tauri-target }} -- -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort
