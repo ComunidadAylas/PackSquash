@@ -35,32 +35,32 @@ python3 -m venv "$APPIMAGE_WORKDIR/.venv"
 echo '> Install appimage-build in temporary Python virtual environment'
 pip3 install -r /proc/self/fd/0 <<'REQUIREMENTS'
 appimage-builder==1.1.0
-certifi==2022.6.15
-charset-normalizer==2.1.0
+certifi==2023.5.7
+charset-normalizer==3.1.0
 contextlib2==21.6.0
 decorator==5.1.1
-docker==5.0.3
-emrichen==0.2.3
-idna==3.3
+docker==6.1.3
+emrichen==0.4.0
+idna==3.4
 jsonpath-rw==1.4.0
-lief==0.12.1
-packaging==21.3
+lief==0.13.1
+packaging==23.1
 ply==3.11
-prompt-toolkit==3.0.30
+prompt-toolkit==3.0.38
 pyaml==21.10.1
 pyparsing==3.0.9
-python-gnupg==0.4.9
+python-gnupg==0.5.0
 PyYAML==6.0
 questionary==1.10.0
-requests==2.28.1
+requests==2.31.0
 roam==0.3.1
-ruamel.yaml==0.17.21
-ruamel.yaml.clib==0.2.6
+ruamel.yaml==0.17.31
+ruamel.yaml.clib==0.2.7
 schema==0.7.5
 six==1.16.0
-urllib3==1.26.11
-wcwidth==0.2.5
-websocket-client==1.3.3
+urllib3==2.0.3
+wcwidth==0.2.6
+websocket-client==1.5.3
 REQUIREMENTS
 
 echo '> Running appimage-builder'
