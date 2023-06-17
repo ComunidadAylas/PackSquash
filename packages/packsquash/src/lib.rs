@@ -12,7 +12,7 @@
 #![feature(stmt_expr_attributes)]
 #![feature(const_fn_floating_point_arithmetic)]
 #![feature(impl_trait_in_assoc_type)]
-#![feature(hash_drain_filter)]
+#![feature(hash_extract_if)]
 #![feature(concat_idents)]
 #![doc(
 	html_logo_url = "https://user-images.githubusercontent.com/7822554/243825966-500faa74-de2f-462a-8f76-3a122b69856e.png"

@@ -709,7 +709,7 @@ impl<
 					while let Some(resolved_texture_variable) = resolved_texture_variables.pop() {
 						resolved_texture_variables.extend(
 							texture_variables_dependencies
-								.drain_filter(|_, child_texture_variable| {
+								.extract_if(|_, child_texture_variable| {
 									*child_texture_variable == resolved_texture_variable
 								})
 								.map(|(parent_texture_variable, _)| parent_texture_variable)
