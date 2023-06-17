@@ -6,7 +6,7 @@
 #![feature(map_entry_replace)]
 #![feature(try_find)]
 #![feature(impl_trait_in_assoc_type)]
-#![feature(hash_drain_filter)]
+#![feature(hash_extract_if)]
 #![doc(
 	html_logo_url = "https://github.com/ComunidadAylas/PackSquash/blob/d5982c4bb5b116b80dc41869627e8e31e392759a/icons/packsquash_icon_256x256.png"
 )]
