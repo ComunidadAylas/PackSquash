@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686913387132,
+  "lastUpdate": 1687005155119,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "36e9cd4a2c254fe0894df45319de58b89fe1dab4",
-          "message": "Revert \"chore(deps): update helper python scripts (#209)\"\n\nThis reverts commit 218a32fbb150bfd120546250ae6c48297a8c9f8a.\n\nThe requests package depends on urllib3<1.27 and >=1.21.1, but we\nupdated it to the just-released 2.0.0 version.",
-          "timestamp": "2023-04-26T23:41:28+02:00",
-          "tree_id": "1fd541be3cfe373f7a92a635f8e2a8c6ba759e33",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/36e9cd4a2c254fe0894df45319de58b89fe1dab4"
-        },
-        "date": 1682547447314,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13081007,
-            "range": "± 362639",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 510099980,
-            "range": "± 12504023",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3210250496,
-            "range": "± 24836420",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 365767891,
-            "range": "± 4072401",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 233874876,
             "range": "± 2250476",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "b0b8503c6482a8e30c127478813ec65ae90aaccb",
+          "message": "chore: fix Cargo warning due to unspecified workspace resolver version",
+          "timestamp": "2023-06-17T13:58:42+02:00",
+          "tree_id": "c09fdca6dc3094ce7c63ccbf0c66977b52b6e7f1",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b0b8503c6482a8e30c127478813ec65ae90aaccb"
+        },
+        "date": 1687005154432,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8379362,
+            "range": "± 126959",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 157738671,
+            "range": "± 10831667",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2396551440,
+            "range": "± 31116347",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 234070865,
+            "range": "± 2318538",
             "unit": "ns/iter"
           }
         ]
