@@ -3,6 +3,7 @@ members = [
     "packages/packsquash", "packages/packsquash_cli", "packages/packsquash_gui/src-tauri",
     "packages/packsquash_options", "packages/packsquash_util"
 ]
+resolver = "2"
 
 [workspace.package]
 version = "0.4.0"
