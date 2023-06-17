@@ -379,8 +379,8 @@ fn target_bitrate_control_metric_to_quality(
 			NON_POSITIONAL_AUDIO_TARGET_QUALITY
 		});
 
-	// Convert the more user-friendly range of [-1, 10] to the
-	// [-0.1, 1] range expected by aoTuV
+	// Convert the more user-friendly range of [-2, 10] to the
+	// [-0.2, 1] range expected by aoTuV
 	target_bitrate_control_metric / 10.0
 }
 
