@@ -6,7 +6,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Alejandro \"AlexTMjugador\" González"]
 repository = "https://github.com/ComunidadAylas/PackSquash"
 license = "AGPL-3.0-or-later"
@@ -14,9 +14,9 @@ publish = false
 edition = "2021"
 
 [workspace.dependencies]
-packsquash = { path = "packages/packsquash", version = "0.4.0" }
-packsquash_options = { path = "packages/packsquash_options", version = "0.4.0" }
-packsquash_util = { path = "packages/packsquash_util", version = "0.4.0" }
+packsquash = { path = "packages/packsquash", version = "0.5.0" }
+packsquash_options = { path = "packages/packsquash_options", version = "0.5.0" }
+packsquash_util = { path = "packages/packsquash_util", version = "0.5.0" }
 
 serde = { version = "1.0.163", features = ["derive", "rc"] }
 serde_json = "1.0.96"
