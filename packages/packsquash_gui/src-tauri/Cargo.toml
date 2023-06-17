@@ -17,7 +17,7 @@ tauri-plugin-store = { version = "0.0.0", git = "https://github.com/tauri-apps/p
 
 toml = { workspace = true, features = ["parse", "display"] }
 
-log.workspace = true
+log = { workspace = true, features = ["std"] }
 
 path-absolutize = "3.1.0"
 
