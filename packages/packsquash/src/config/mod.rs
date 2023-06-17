@@ -582,23 +582,22 @@ pub struct AudioFileOptions {
 	///
 	/// **Default value**: `true`
 	pub transcode_ogg: bool,
-	/// If `true`, an additional, fast two-pass optimization and validation step will be executed
-	/// on the generated Ogg Vorbis file before adding it to the pack, no matter if it was
-	/// transcoded or not. This enables PackSquash to ensure that the generated file will work fine
-	/// in Minecraft, losslessly reduce its size by 5% on average, and optionally obfuscate it to
-	/// thwart its use outside of Minecraft.
+	/// If `true`, an additional fast two-pass optimization and validation step will be performed
+	/// on the generated Ogg Vorbis file before it is added to the pack, regardless of whether it
+	/// has been transcoded. This enables PackSquash to ensure that the generated file will work
+	/// fine in Minecraft, losslessly reduce its size by an average of 5%, and optionally
+	/// obfuscate it to thwart its playback outside of Minecraft.
 	///
 	/// Due to how fast and unobtrusive this step is, it's usually best to leave it enabled. Good
-	/// reasons for disabling it include troubleshooting and wanting a slightly faster execution
-	/// at the cost of missing out on the aforementioned features.
+	/// reasons to disable it include troubleshooting and wanting a slightly faster execution
+	/// at the cost of missing out on the features described above.
 	///
 	/// **Default value**: `true`
 	pub two_pass_vorbis_optimization_and_validation: bool,
 	/// If `true`, empty audio files (i.e., with no audio data, or full of complete silence)
-	/// will be replaced with a specially-crafted, but valid empty audio file that is
-	/// optimized for size and contains no audio data. This kind of files work fine in
-	/// Minecraft and most media players, but some might consider the lack of audio data as
-	/// an error.
+	/// will be replaced with a special empty audio file that is optimized for size and contains
+	/// no audio data. This kind of file works fine in Minecraft and most media players, but
+	/// some might consider the lack of audio data an error.
 	///
 	/// This option is only honored if the audio file is being transcoded, which is always the
 	/// case when the `transcode_ogg` option is set to `true`.
@@ -619,21 +618,18 @@ pub struct AudioFileOptions {
 	///
 	/// **Default value**: constant quality factor (CQF)
 	pub bitrate_control_mode: AudioBitrateControlMode,
-	/// The metric that will be used as a target for the specified bitrate control mode. Depending
-	/// on the selected bitrate control mode, this will be interpreted as a quality factor, average
-	/// bitrate, approximate bitrate, or maximum bitrate.
+	/// The metric to use as a target for the specified bitrate control mode when trancoding.
+	/// Depending on the selected bitrate control mode, this will be interpreted as a quality
+	/// factor, average bitrate, approximate bitrate, or maximum bitrate.
 	///
 	/// **Default value**: `0.25` for stereo audio (interpreted as a quality factor, ≈68 kbit/s for
 	/// stereo, 44.1 kHz audio) and `0.0` for mono audio, interpreted as quality factors
 	pub target_bitrate_control_metric: Option<f32>,
-	/// The sampling frequency that non-positional (i.e., stereo) audio will be resampled to, in Hz.
-	/// Downsampling helps saving space, at the cost of potentially introducing aliasing artifacts
-	/// if the input audio contains frequencies higher than half the new sampling rate and narrowing
-	/// margins for filters and further signal processing work. If the specified sampling frequency
-	/// is higher than the sampling frequency of the input audio file, no resampling will be done.
-	///
-	/// This metric is used for non-positional sounds only. For mono sounds, please check out the
-	/// `positional_audio_sampling_frequency` option.
+	/// The sampling frequency that the audio will be resampled to, in Hz. Downsampling helps saving
+	/// space, at the cost of potentially introducing aliasing artifacts if the input audio contains
+	/// frequencies higher than half the new sampling rate and narrowing margins for filters and
+	/// further signal processing work. If the specified sampling frequency is higher than the
+	/// sampling frequency of the input audio file, no resampling will be done.
 	///
 	/// **Default value**: `40050` (40.05 kHz) for stereo audio, `32000` for mono audio
 	pub sampling_frequency: Option<NonZeroU32>,
@@ -648,12 +644,13 @@ pub struct AudioFileOptions {
 	///
 	/// **Default value**: `1.0` (the audio pitch is not shifted)
 	pub target_pitch: f32,
-	/// If `true`, the generated Ogg Vorbis files will be mangled in a way meant to make them
-	/// harder to play outside of Minecraft. The obfuscation technique used is not robust
-	/// against being reversed by an expert and does not affect file sizes.
+	/// If `true`, the generated Ogg Vorbis files will be mangled in a way so that they will be
+	/// harder to play outside of Minecraft. The obfuscation technique used is not robust against
+	/// some scenarios or expert knowledge, but it does not increase file size.
 	///
-	/// This option only has any effect if the two-pass optimization and validation step is
-	/// enabled, i.e., the `two_pass_vorbis_optimization_and_validation` option is set to `true`.
+	/// This option is only taken into account if the two-pass optimization and validation step is
+	/// enabled, i.e., the `two_pass_vorbis_optimization_and_validation` option is set to `true`,
+	/// and the `ogg_obfuscation_incompatibility` quirk is not being worked around.
 	///
 	/// **Default value**: `false`
 	pub ogg_obfuscation: bool,
@@ -724,13 +721,13 @@ pub enum AudioBitrateControlMode {
 	/// - There is no hard guarantee against hard to encode segments bumping the average bitrate
 	///   up.
 	///
-	/// The quality factor is expected to be in the [-1, 10] range, where -1 means the worst audio
-	/// quality, and 10 the best.
+	/// The quality factor is expected to be in the [-2, 10] range, where -2 is the worst audio
+	/// quality, and 10 is the best.
 	#[default]
 	Cqf,
 	/// *Variable BitRate*: the encoder will interpret the target metric as an approximate bitrate,
 	/// internally translating it to a quality factor. Therefore, this mode is equivalent to
-	/// [CQF](AudioBitrateControlMode::Cqf), but with the quality factor selected in another way.
+	/// [CQF](AudioBitrateControlMode::Cqf), but with the quality factor selected in a different way.
 	///
 	/// Some advantages of this bitrate control mode over CQF include:
 	/// - The relationship between quality factor and actual average bitrate is more predictable.
@@ -742,39 +739,40 @@ pub enum AudioBitrateControlMode {
 	/// The bitrate is interpreted in kbit/s.
 	Vbr,
 	/// **Average BitRate**: the encoder will interpret the target metric as an average bitrate,
-	/// and will be pressured to meet that bitrate for the whole audio signal. No specific subjective
-	/// quality level will be targeted.
+	/// and will be coerced to meet that bitrate for the entire audio signal by using a bitrate
+	/// management engine. No specific subjective quality level will be targeted.
 	///
-	/// Some advantages of this bitrate control mode include:
+	/// Some advantages of this bitrate control mode over CQF and VBR include:
 	/// - The actual average stream bitrate is guaranteed to very closely meet the specified average
-	///   bitrate. Therefore, the resulting file sizes are easier to predict.
-	/// - The maximum instantaneous bitrate for an audio segment might be higher than average in a
-	///   small time window, as long as it doesn't affect the average.
+	///   bitrate. Therefore, the resulting file sizes are more predictable.
+	/// - The maximum instantaneous bitrate for an audio segment might be higher than average for a
+	///   small time window, as long as it doesn't affect the long-term average.
 	///
-	/// Some disadvantages of this bitrate control mode include:
-	/// - Setting too low bitrates for the input signal may severely degrade audio quality, and
-	///   setting too high bitrates will waste space on padding the data to meet the average.
-	/// - Easy to encode audio segments may be stored using more bits than necessary for a certain
-	///   quality level in order to meet the average bitrate. Conversely, harder to encode segments
-	///   may sound worse due to the encoder being deprived of bits to dedicate to them, if running
-	///   high on bitrate. The resulting subjective quality will be more inconsistent.
-	/// - Performance is significantly worse than when using CQF or VBR modes, because the Vorbis
-	///   bitrate management engine logic is used.
+	/// Some disadvantages of this bitrate control mode over CQF and VBR include:
+	/// - Setting too low bitrates for the input signal may severely degrade audio quality, while
+	///   setting too high bitrates may waste space on padding the data to maintain the average.
+	/// - Easy-to-encode audio segments may be stored using more bits than necessary for a certain
+	///   quality level in order to meet the average bitrate. CConversely, harder-to-encode segments
+	///   may sound worse when the encoder is already outputting at a high bitrate, as it will be
+	///   deprived of bits to devote to them. The resulting subjective quality will be more
+	///   inconsistent.
+	/// - Performance is significantly worse than when using CQF or VBR due to the bitrate
+	///   management engine being engaged.
 	///
 	/// The bitrate is interpreted in kbit/s.
 	Abr,
 	/// **Constrained Average BitRate**: the encoder will interpret the target metric as a hard
-	/// maximum bitrate, internally selecting a slightly lower average bitrate than the maximum
+	/// maximum bitrate and internally select a slightly lower average bitrate than the maximum
 	/// to meet. This mode is similar to [ABR](AudioBitrateControlMode::Abr), but with the addition
 	/// of a maximum bitrate.
 	///
 	/// Some advantages of this bitrate control mode over ABR include:
 	/// - The actual average bitrate is guaranteed to never exceed the specified maximum bitrate,
-	///   allowing to bound the maximum file size with certainty.
+	///   which limits the maximum file size with certainty.
 	///
 	/// Some disadvantages of this bitrate control mode over ABR include:
-	/// - To make sure that the hard maximum bitrate is never exceeded, a lower average bitrate
-	///   will be targeted, which ensures headroom for hard to encode segments, but usually yields
+	/// - To ensure that the hard maximum bitrate is never exceeded, a lower average bitrate will
+	///   be targeted, which provides headroom for hard to encode segments, but usually results in
 	///   inferior quality.
 	///
 	/// The bitrate is interpreted in kbit/s.
