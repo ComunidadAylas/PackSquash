@@ -1,0 +1,224 @@
+{
+  "projectName": "PackSquash",
+  "projectOwner": "ComunidadAylas",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 75,
+  "commit": false,
+  "commitConvention": "none",
+  "contributorsSortAlphabetically": true,
+  "contributors": [
+    {
+      "login": "AlexTMjugador",
+      "name": " Alejandro González",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7822554?v=4",
+      "profile": "https://alegon.dev/",
+      "contributions": [
+        "code",
+        "content",
+        "doc",
+        "example",
+        "maintenance",
+        "projectManagement",
+        "mentoring",
+        "question",
+        "research",
+        "translation",
+        "review",
+        "test",
+        "promotion",
+        "platform"
+      ]
+    },
+    {
+      "login": "clrxbl",
+      "name": "Michael",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28601081?v=4",
+      "profile": "https://iptables.sh/",
+      "contributions": [
+        "data",
+        "ideas",
+        "userTesting"
+      ]
+    },
+    {
+      "login": "realkarmakun",
+      "name": "realkarmakun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20980281?v=4",
+      "profile": "https://github.com/realkarmakun",
+      "contributions": [
+        "platform",
+        "ideas",
+        "userTesting",
+        "doc"
+      ]
+    },
+    {
+      "login": "Silmarost",
+      "name": "Silmarost",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52896544?v=4",
+      "profile": "https://github.com/Silmarost",
+      "contributions": [
+        "data",
+        "ideas",
+        "userTesting",
+        "financial",
+        "translation"
+      ]
+    },
+    {
+      "login": "MiguelDreamer",
+      "name": "Miguel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31966940?v=4",
+      "profile": "https://discord.gg/RVAgQRS",
+      "contributions": [
+        "design",
+        "ideas"
+      ]
+    },
+    {
+      "login": "SuperJohan16",
+      "name": "SuperJohan16",
+      "avatar_url": "https://avatars.githubusercontent.com/u/73500074?v=4",
+      "profile": "https://github.com/SuperJohan16",
+      "contributions": [
+        "translation",
+        "financial"
+      ]
+    },
+    {
+      "login": "Joshinn-io",
+      "name": "Joshua",
+      "avatar_url": "https://avatars.githubusercontent.com/u/39896452?v=4",
+      "profile": "https://github.com/Joshinn-io",
+      "contributions": [
+        "bug",
+        "financial"
+      ]
+    },
+    {
+      "login": "victorlf4",
+      "name": "victorlf4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/33629877?v=4",
+      "profile": "https://github.com/victorlf4",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "alumina6767",
+      "name": "alumina6767",
+      "avatar_url": "https://avatars.githubusercontent.com/u/85728971?v=4",
+      "profile": "https://alumina6767.net/",
+      "contributions": [
+        "blog",
+        "translation",
+        "ideas"
+      ]
+    },
+    {
+      "login": "CallumBugajski",
+      "name": "CallumBugajski",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11320476?v=4",
+      "profile": "https://github.com/CallumBugajski",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "LuishMC",
+      "name": "Luis",
+      "avatar_url": "https://avatars.githubusercontent.com/u/103937012?v=4",
+      "profile": "https://www.planetminecraft.com/member/luish54/",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Kenny-Hui",
+      "name": "LX862",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28094366?v=4",
+      "profile": "https://lx862.com/",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "Aiamded",
+      "name": "Aiamded",
+      "avatar_url": "https://avatars.githubusercontent.com/u/71924226?v=4",
+      "profile": "https://github.com/Aiamded",
+      "contributions": [
+        "ideas",
+        "bug",
+        "data",
+        "userTesting",
+        "financial"
+      ]
+    },
+    {
+      "login": "pau101",
+      "name": "Paul Fulham",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5201207?v=4",
+      "profile": "https://paulf.me/",
+      "contributions": [
+        "ideas",
+        "code",
+        "research"
+      ]
+    },
+    {
+      "login": "xMikux",
+      "name": "Miku",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26039249?v=4",
+      "profile": "https://github.com/xMikux",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "pacificminer",
+      "name": "pacificminer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24826002?v=4",
+      "profile": "https://github.com/pacificminer",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "rswishart",
+      "name": "rswishart",
+      "avatar_url": "https://avatars.githubusercontent.com/u/115955715?v=4",
+      "profile": "https://github.com/rswishart",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "mergu",
+      "name": "Jay Hopkins",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29823405?v=4",
+      "profile": "https://github.com/mergu",
+      "contributions": [
+        "userTesting",
+        "data"
+      ]
+    },
+    {
+      "login": "Felixx61",
+      "name": "Felixx61",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4580537?v=4",
+      "profile": "https://github.com/Felixx61",
+      "contributions": [
+        "userTesting",
+        "data",
+        "ideas"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": false
+}
