@@ -1632,7 +1632,7 @@ dependencies = [
 [[package]]
 name = "oxipng"
 version = "8.0.0"
-source = "git+https://github.com/shssoichiro/oxipng?rev=86fccf08#86fccf082a92f4fc2e394a964b4126ae6fa983ac"
+source = "git+https://github.com/shssoichiro/oxipng?rev=96122fa4#96122fa45a2c500515bf0875bfbce6f803d6e9a2"
 dependencies = [
  "bitvec",
  "indexmap",
