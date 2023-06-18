@@ -34,6 +34,7 @@ jobs:
 
       - name: 🔍 Clippy check
         uses: giraffate/clippy-action@v1
+        if: github.event_name != 'release'
         with:
           clippy_flags: --all-targets
           reporter: github-check
