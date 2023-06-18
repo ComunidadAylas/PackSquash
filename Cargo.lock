@@ -3,12 +3,6 @@
 version = 3
 
 [[package]]
-name = "Inflector"
-version = "0.11.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe438c63458706e03479442743baae6c88256498e6431708f6dfc520a26515d3"
-
-[[package]]
 name = "aes"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1582,9 +1576,9 @@ checksum = "0ab1bc2a289d34bd04a330323ac98a1b4bc82c9d9fcb1e66b63caa84da26b575"
 
 [[package]]
 name = "optivorbis"
-version = "0.1.3"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6780e31be6e014c3032b665af070614f560c7c84c9671af298b48b0a19868858"
+checksum = "3141e2f376d183dc2ae2f52a3a4e60ea2181454aa1a81c6acef272718f4d2038"
 dependencies = [
  "bumpalo",
  "getrandom",
@@ -1604,25 +1598,26 @@ dependencies = [
 
 [[package]]
 name = "ouroboros"
-version = "0.15.6"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1358bd1558bd2a083fed428ffeda486fbfb323e698cdda7794259d592ca72db"
+checksum = "d813b7b31a82efae94bd30ffaac09aec85efc18db2d5ec3aead1a220ee954351"
 dependencies = [
  "aliasable",
  "ouroboros_macro",
+ "static_assertions",
 ]
 
 [[package]]
 name = "ouroboros_macro"
-version = "0.15.6"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f7d21ccd03305a674437ee1248f3ab5d4b1db095cf1caf49f1713ddf61956b7"
+checksum = "5a56f651b4dd45ae3ac3d260ced32eaf0620cddaae5f26c69b554a9016594726"
 dependencies = [
- "Inflector",
+ "heck",
  "proc-macro-error",
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.18",
 ]
 
 [[package]]

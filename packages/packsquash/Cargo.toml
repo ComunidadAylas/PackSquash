@@ -46,7 +46,7 @@ dasp_ring_buffer = "0.11.0"
 dasp_frame = "0.11.0"
 dasp_sample = "0.11.0"
 rubato = "0.14.0"
-optivorbis = "0.1.3"
+optivorbis = "0.1.4"
 
 glsl-lang = { version = "0.5.1", features = ["lexer-v2-full", "lexer-v2-min"] }
 glsl-lang-lexer = "0.5.1"
