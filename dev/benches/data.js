@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1687086326707,
+  "lastUpdate": 1687117167481,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": false,
-          "id": "f27b5b6a0bf89db17ee710e2b58ac194f915d053",
-          "message": "fix(deps): update rust crate enumset to 1.0.13",
-          "timestamp": "2023-05-01T14:42:22Z",
-          "tree_id": "579e601afd786097393e0928a75dfd37fb4caae9",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f27b5b6a0bf89db17ee710e2b58ac194f915d053"
-        },
-        "date": 1682966485255,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10913455,
-            "range": "± 133105",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 177619233,
-            "range": "± 1255956",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2812607837,
-            "range": "± 26516435",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 303427367,
-            "range": "± 3616701",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 236269648,
             "range": "± 1643871",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "18e0c4c8a6bd53a72c765c6be5b5f42a7cf7799d",
+          "message": "chore: update some dependencies\n\nThis gets rid of a security advisory reported by cargo-deny relative to\nOptiVorbis' transitive dependency on Ouroboros.",
+          "timestamp": "2023-06-18T15:48:14+02:00",
+          "tree_id": "54f27724d38b53aa377f668663013e9282bda1bd",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/18e0c4c8a6bd53a72c765c6be5b5f42a7cf7799d"
+        },
+        "date": 1687117166131,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9079973,
+            "range": "± 286815",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 161474555,
+            "range": "± 11602388",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2451356058,
+            "range": "± 26390295",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 238615353,
+            "range": "± 15514715",
             "unit": "ns/iter"
           }
         ]
