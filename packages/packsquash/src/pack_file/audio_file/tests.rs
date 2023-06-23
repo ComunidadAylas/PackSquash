@@ -92,7 +92,7 @@ async fn successful_process_test(
 	);
 
 	if env::var("WRITE_AUDIO_TEST_RESULTS").as_deref().ok() == Some("1") {
-		fs::write(format!("../../target/audio_test_result.ogg"), &data)
+		fs::write("../../target/audio_test_result.ogg", &data)
 			.expect("No error should happen while writing a test result to disk")
 	}
 }
