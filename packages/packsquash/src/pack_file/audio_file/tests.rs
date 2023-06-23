@@ -1,6 +1,7 @@
 use pretty_assertions::assert_eq;
 use std::num::NonZeroU8;
 use std::time::Duration;
+use std::{env, fs};
 
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
@@ -11,6 +12,7 @@ static FLAC_AUDIO_DATA: &[u8] = include_bytes!("dtmf_tone.flac");
 static FLAC_AUDIO_DATA_8KHZ: &[u8] = include_bytes!("dtmf_tone_8khz.flac");
 static OGG_AUDIO_DATA: &[u8] = include_bytes!("dtmf_tone.ogg");
 static EMPTY_OGG_AUDIO_DATA: &[u8] = include_bytes!("empty.ogg");
+static OGG_AUDIO_DATA_UNUSUAL_SAMPLE_RATE: &[u8] = include_bytes!("araquanid_ambient.ogg");
 
 /// Processes the given input data as a [AudioFile], using the provided settings,
 /// expecting a successful result.
@@ -88,6 +90,11 @@ async fn successful_process_test(
 		"The processed audio file has an unexpected sampling frequency: {}",
 		u32::from_le_bytes(data[40..=43].try_into().unwrap())
 	);
+
+	if env::var("WRITE_AUDIO_TEST_RESULTS").as_deref().ok() == Some("1") {
+		fs::write(format!("../../target/audio_test_result.ogg"), &data)
+			.expect("No error should happen while writing a test result to disk")
+	}
 }
 
 /// Processes the given input data as a [AudioFile], using the provided settings,
@@ -119,6 +126,19 @@ async fn transcoding_works() {
 	successful_process_test(
 		FLAC_AUDIO_DATA,
 		false, // Is not Ogg
+		Default::default(),
+		false,                               // Smaller file size
+		1,                                   // One channel (mono)
+		POSITIONAL_AUDIO_SAMPLING_FREQUENCY  // Default sampling frequency
+	)
+	.await
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+async fn transcoding_unusual_sample_rate_works() {
+	successful_process_test(
+		OGG_AUDIO_DATA_UNUSUAL_SAMPLE_RATE,
+		true, // Is Ogg
 		Default::default(),
 		false,                               // Smaller file size
 		1,                                   // One channel (mono)

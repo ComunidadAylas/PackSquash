@@ -315,18 +315,26 @@ where
 						&mut resampler
 					)?;
 
-					// Upmix before handing off the block as above, if necessary. Cloning a single
-					// channel of resampled samples is faster than resampling samples of several
-					// channels
-					for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
-						resampled_samples_buf.push(resampled_samples_buf[0].clone());
-					}
+					// The resampler may output no samples when it needs to buffer more
+					// input data to do its work. Passing such an empty sample buffer
+					// along is not only wasteful, but also does not play nice with
+					// libvorbis, which insists on outputting silence anyway, corrupting
+					// the resulting audio. Therefore, do nothing in that case. Note that
+					// the resampler outputs the same number of samples for every channel
+					if !resampled_samples_buf[0].is_empty() {
+						// Upmix before handing off the block as above, if necessary. Cloning a single
+						// channel of resampled samples is faster than resampling samples of several
+						// channels
+						for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
+							resampled_samples_buf.push(resampled_samples_buf[0].clone());
+						}
 
-					processed_sample_block_consumer(&resampled_samples_buf)?;
+						processed_sample_block_consumer(&resampled_samples_buf)?;
 
-					// Undo the upmixing to reuse this buffer
-					for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
-						resampled_samples_buf.pop();
+						// Undo the upmixing to reuse this buffer
+						for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
+							resampled_samples_buf.pop();
+						}
 					}
 
 					// Discard this block of samples
@@ -353,11 +361,13 @@ where
 					&mut resampler
 				)?;
 
-				for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
-					resampled_samples_buf.push(resampled_samples_buf[0].clone());
-				}
+				if !resampled_samples_buf[0].is_empty() {
+					for _ in 0..OUTPUT_CHANNELS - resample_input_buf.len() {
+						resampled_samples_buf.push(resampled_samples_buf[0].clone());
+					}
 
-				processed_sample_block_consumer(&resampled_samples_buf)?;
+					processed_sample_block_consumer(&resampled_samples_buf)?;
+				}
 			}
 		}
 	}
