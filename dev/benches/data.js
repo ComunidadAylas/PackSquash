@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1687476020957,
+  "lastUpdate": 1687561718886,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "c65e527e9049d27d5ce7189da0205b95520fd80d",
-          "message": "fix(deps): update rust crate enumset to 1.1.2 (#220)\n\n* fix(deps): update rust crate enumset to 1.1.2\r\n\r\n* chore(clippy): fix Clippy warnings and update Cargo deny configuration\r\n\r\n---------\r\n\r\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>\r\nCo-authored-by: Alejandro González <me@alegon.dev>",
-          "timestamp": "2023-05-10T12:19:17+02:00",
-          "tree_id": "690785ea8ee7f8f02e952a66dfc1afe0e9b21b95",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c65e527e9049d27d5ce7189da0205b95520fd80d"
-        },
-        "date": 1683716496148,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10551103,
-            "range": "± 10065065",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 175813318,
-            "range": "± 798668",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2737552028,
-            "range": "± 21469248",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 298347553,
-            "range": "± 6373931",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 265940469,
             "range": "± 2817248",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "ac401148d0710c69a5681c2fab88d66bb569b4bd",
+          "message": "chore: fix Clippy lint",
+          "timestamp": "2023-06-24T00:35:27+02:00",
+          "tree_id": "d3e5189dbc77155e5b5a0d3bae769e0c7d4b0d13",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ac401148d0710c69a5681c2fab88d66bb569b4bd"
+        },
+        "date": 1687561718200,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9397768,
+            "range": "± 105223",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 167315195,
+            "range": "± 10272612",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3020918063,
+            "range": "± 52482249",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 264085849,
+            "range": "± 3112326",
             "unit": "ns/iter"
           }
         ]
