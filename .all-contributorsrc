@@ -41,7 +41,9 @@
       "contributions": [
         "data",
         "ideas",
-        "userTesting"
+        "userTesting",
+        "fundingFinding",
+        "tool"
       ]
     },
     {
@@ -225,6 +227,16 @@
       "profile": "https://github.com/MKMakroM",
       "contributions": [
         "financial"
+      ]
+    },
+    {
+      "login": "benwickham",
+      "name": "Ben Wickham (Eraze)",
+      "avatar_url": "https://avatars.githubusercontent.com/u/137005985?v=4",
+      "profile": "https://github.com/benwickham",
+      "contributions": [
+        "financial",
+        "ideas"
       ]
     }
   ],
