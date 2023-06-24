@@ -1,7 +1,21 @@
-<p align="center"><img src="https://user-images.githubusercontent.com/7822554/243825966-500faa74-de2f-462a-8f76-3a122b69856e.png" alt="PackSquash logo" width="300" height="300"></p>
-<p align="center"><i>Create more. Worry less about distribution and storage intricacies.</i></p>
+<div align="center">
+<img src="https://user-images.githubusercontent.com/7822554/243825966-500faa74-de2f-462a-8f76-3a122b69856e.png" alt="PackSquash logo" width="300" height="300">
+<h1>PackSquash</h1>
 
-# PackSquash [![Build](https://github.com/ComunidadAylas/PackSquash/workflows/CI/badge.svg)](https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3ACI) [![Latest version](https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Total downloads](https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/total?label=Downloads)](https://github.com/ComunidadAylas/PackSquash/releases/latest) [![Discord server online count](https://img.shields.io/discord/85364538328768512?label=Discord&logo=discord)](https://discord.gg/bGUSamzJYp)
+<i>Create more. Worry less about distribution and storage intricacies.</i>
+
+<a
+href="https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3ACI"><img
+alt="CI workflow status"
+src="https://github.com/ComunidadAylas/PackSquash/workflows/CI/badge.svg"></a>
+<a href="https://github.com/ComunidadAylas/PackSquash/releases/latest"><img
+alt="Latest version"
+src="https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version"></a>
+<img alt="Total downloads"
+src="https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/total?label=Downloads">
+<a href="https://discord.gg/bGUSamzJYp"><img alt="Discord server online count"
+src="https://img.shields.io/discord/85364538328768512?label=Discord&logo=discord"></a>
+</div>
 
 A Minecraft: Java Edition resource and data pack optimizer which aims to achieve
 the best possible compression, performance, and protection, improving pack
