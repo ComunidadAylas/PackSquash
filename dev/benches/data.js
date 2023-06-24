@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1687639360297,
+  "lastUpdate": 1687639486420,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "a92fd5d68b111d2d1d1b290704354248047c438e",
-          "message": "chore: update several dependencies",
-          "timestamp": "2023-05-27T13:45:51+02:00",
-          "tree_id": "f54d150ed833d0986af80c4f9f27cea204b19716",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a92fd5d68b111d2d1d1b290704354248047c438e"
-        },
-        "date": 1685190105319,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9195229,
-            "range": "± 9911931",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 157132022,
-            "range": "± 1997578",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2024196726,
-            "range": "± 34426655",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 245145514,
-            "range": "± 2131100",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 244092539,
             "range": "± 1885729",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "b69f5c955001202c539be32b831e7b536678cd15",
+          "message": "docs(README): make Discord join call to action text less targeted to Spanish-speaking audiences\n\nWe welcome anyone regardless of their native language, although for\npractical reasons communication can only happen either in English or\nSpanish.",
+          "timestamp": "2023-06-24T22:14:01+02:00",
+          "tree_id": "370d60504bbaefc758b23f6e01a3062bdc27a451",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b69f5c955001202c539be32b831e7b536678cd15"
+        },
+        "date": 1687639485050,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10779549,
+            "range": "± 534953",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 183234403,
+            "range": "± 2685338",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2918668572,
+            "range": "± 29401180",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 287191208,
+            "range": "± 4770463",
             "unit": "ns/iter"
           }
         ]
