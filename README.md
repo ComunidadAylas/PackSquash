@@ -121,9 +121,10 @@ feedback, suggestions, congratulations, or assisting you on your use of
 PackSquash (if I can and want to). If you wish to drop me a line for whatever
 reason related to PackSquash, you can contact me on Discord: _alextmjugador_.
 
-Also, if you speak Spanish, you may find that our Spanish-speaking community,
-_Comunidad Aylas_, suits you well. You can [join us on
-Discord](https://discord.gg/bGUSamzJYp). Don't forget to introduce yourself!
+You can also [join the Discord server of our
+community](https://discord.gg/bGUSamzJYp), _Comunidad Aylas_, which has
+dedicated spaces to welcome English-language PackSquash chat and support, among
+other topics. Don't forget to introduce yourself!
 
 ## 🎁 Sponsoring
 
