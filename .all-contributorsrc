@@ -238,6 +238,15 @@
         "financial",
         "ideas"
       ]
+    },
+    {
+      "login": "MinecraftAdmin",
+      "name": "MinecraftAdmin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1650123?v=4",
+      "profile": "https://github.com/MinecraftAdmin",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
