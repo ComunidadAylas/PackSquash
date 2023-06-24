@@ -247,6 +247,16 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "Derkades",
+      "name": "Robin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15892014?v=4",
+      "profile": "https://github.com/Derkades",
+      "contributions": [
+        "ideas",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
