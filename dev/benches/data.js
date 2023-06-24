@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1687604195984,
+  "lastUpdate": 1687604611051,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "428cc044867903d47c7fbc30d1178b805ca13b9c",
-          "message": "fix(deps): update rust crate java-properties to v2 (#222)\n\n* fix(deps): update rust crate java-properties to v2\r\n\r\n* chore(clippy): fix new lints\r\n\r\n---------\r\n\r\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>\r\nCo-authored-by: Alejandro González <me@alegon.dev>",
-          "timestamp": "2023-05-21T11:38:00+02:00",
-          "tree_id": "5183cfeb080c6d2419a0dc2011935d295adb6d3b",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/428cc044867903d47c7fbc30d1178b805ca13b9c"
-        },
-        "date": 1684664021604,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13529112,
-            "range": "± 12868829",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 195156520,
-            "range": "± 3173213",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2241027611,
-            "range": "± 78577416",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 309825118,
-            "range": "± 5220158",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 270437156,
             "range": "± 2756815",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "bf795a5592c1f048de39ae8a6b84c345bdd59029",
+          "message": "docs(contributors): add @MKMakroM",
+          "timestamp": "2023-06-24T12:31:55+02:00",
+          "tree_id": "cee863a81461e360580d9cc391f0ac3d6ea0548d",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/bf795a5592c1f048de39ae8a6b84c345bdd59029"
+        },
+        "date": 1687604609717,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8352393,
+            "range": "± 269604",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 155020043,
+            "range": "± 12184389",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2752652788,
+            "range": "± 7158352",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 245529864,
+            "range": "± 3657866",
             "unit": "ns/iter"
           }
         ]
