@@ -102,6 +102,11 @@ No changes yet.
     that mono sounds tend to be shorter and mixed with other world sounds, so a
     drop in quality is less noticeable in them than in persistent, music-like
     stereo sounds.
+  - PackSquash now falls back to outputting the input audio file if resampling
+    did not help to reduce the file size, as long as channel mixing or pitch
+    shifting are not requested. This input audio file will be optimized (and
+    protected if requested) if the `two_pass_vorbis_optimization_and_validation`
+    option is enabled (its default value).
 - Revised shader processing code to partially fix long-standing preprocessor
   directive support issues. (Related issue:
   [#187](https://github.com/ComunidadAylas/PackSquash/issues/187))
