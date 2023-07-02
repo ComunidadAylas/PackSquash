@@ -2227,8 +2227,9 @@ dependencies = [
 
 [[package]]
 name = "rubato"
-version = "0.14.0"
-source = "git+https://github.com/HEnquist/rubato?branch=another_max_size_bug#1f34a8699b1fea5a9491cf9d8ec393ced8e196e3"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e6dd52e80cfc21894deadf554a5673002938ae4625f7a283e536f9cf7c17b0d5"
 dependencies = [
  "num-complex",
  "num-integer",
@@ -3314,3 +3315,8 @@ dependencies = [
  "simd-adler32",
  "typed-arena",
 ]
+
+[[patch.unused]]
+name = "rubato"
+version = "0.14.0"
+source = "git+https://github.com/HEnquist/rubato?branch=another_max_size_bug#1f34a8699b1fea5a9491cf9d8ec393ced8e196e3"
