@@ -91,9 +91,6 @@ ignore = true
 multiple-versions = "warn"
 highlight = "all"
 skip = [
-	# This older version is pulled by the GLSL larlpop parser generator on build-time.
-	# It should not affect final executables
-	{ name = "regex-syntax", version = "=0.6.29" },
 	# Some parts of the ecosystem have already updated aho-corasick to v1 (e.g., the
 	# regex crate), but others didn't (e.g., globset). Let's ignore that for now,
 	# globset shouldn't stay that way for long
@@ -108,15 +105,16 @@ skip-tree = [
 	# An ancient nom is pulled by the development dependency for
 	# benchmarking perfcnt. Let's ignore that for now. It doesn't
 	# affect the final user executables at all
-	{ name = "perfcnt", version = "=0.8.0" }
+	{ name = "perfcnt" },
+	# Criterion itself also pulls some older dependencies
+	{ name = "criterion" }
 ]
 
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
-	"https://github.com/shssoichiro/oxipng",
-	"https://github.com/HEnquist/rubato"
+	"https://github.com/shssoichiro/oxipng"
 ]
 
 [sources.allow-org]

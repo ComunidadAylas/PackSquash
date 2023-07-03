@@ -13,11 +13,6 @@ glsl-lang-lexer = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-pp = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 
-# Use the commits of a PR of Rubato that fix a critical regression when calculating the maximum
-# resampler output length, which is used to size buffers as needed:
-# https://github.com/HEnquist/rubato/pull/66
-rubato = { git = "https://github.com/HEnquist/rubato", branch = "another_max_size_bug" }
-
 # Use our fork of mmap, pulled by development dependencies for benchmarking, to fix its
 # dependency on unmaintained crates and reduce duplicate dependency versions. Some of
 # the changes were authored by jbreitbart.
