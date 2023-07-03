@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1688346091278,
+  "lastUpdate": 1688406320376,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "a1db553e674ab9879f1f10b127471cd5c5691f42",
-          "message": "fix(deps): update rust crate aho-corasick to 1.0.2",
-          "timestamp": "2023-06-04T14:30:51Z",
-          "tree_id": "caf32efb4525aea410f47dc381439cd92a3ae548",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a1db553e674ab9879f1f10b127471cd5c5691f42"
-        },
-        "date": 1685898732095,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11752752,
-            "range": "± 10556383",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 208626155,
-            "range": "± 2876487",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3592785750,
-            "range": "± 80376671",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 343861423,
-            "range": "± 6138692",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 268355433,
             "range": "± 5696052",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "5d0ce1d63359b6d4e0345b628d4d2a918209f127",
+          "message": "tweak: disable `downsize_if_single_color` by default\n\nWhile a good idea in theory, the experience with v0.4.0 has shown that\nmore packs are broken by this optimization than helped. Let's disable it\nby default for now, but with a disposition to apply it in a smarter way\nin the future, once the necessary refactors to detect how the image is\nused by the game are in place.",
+          "timestamp": "2023-07-03T18:55:35+02:00",
+          "tree_id": "fca4f29608785745d64640c827248dfec85f35b3",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5d0ce1d63359b6d4e0345b628d4d2a918209f127"
+        },
+        "date": 1688406319657,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8309610,
+            "range": "± 2733095",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 173089066,
+            "range": "± 7422689",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2751874945,
+            "range": "± 34550985",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 251996009,
+            "range": "± 3575345",
             "unit": "ns/iter"
           }
         ]
