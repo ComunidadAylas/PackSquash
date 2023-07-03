@@ -147,8 +147,8 @@ fn compute_system_id() -> SystemId {
 		.or_else(|| {
 			get_dbus_machine_id()
 				.into_iter()
-				.chain(get_boot_id().into_iter())
-				.chain(get_host_id().into_iter())
+				.chain(get_boot_id())
+				.chain(get_host_id())
 				.max()
 		})
 		.expect(ERROR_MESSAGE)
