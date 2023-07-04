@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1688446158068,
+  "lastUpdate": 1688464529603,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "0f92f66760385b09443812ff05a839a119be882b",
-          "message": "ci: ignore flaky ARM64 QEMU musl test\n\nI've run the affected test on my development workstation successfully,\nso the source code is not to blame. My best guess is that the CI runner\nmay be running out of memory, given that the affected tests are\nexpensive to run.\n\nGiven that the affected code tests successfully when targeting glibc for\nthe same arch on CI, we don't have to dig on whatever QEMU/environment\nquirk is causing the issue, so let's just skip the troublesome test.",
-          "timestamp": "2023-06-07T12:31:02+02:00",
-          "tree_id": "971080e761041e021dc1e93fa3006dc5a6ba7e16",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/0f92f66760385b09443812ff05a839a119be882b"
-        },
-        "date": 1686136139162,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10666372,
-            "range": "± 294084",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 198443940,
-            "range": "± 2112340",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3440695122,
-            "range": "± 31101984",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 324483243,
-            "range": "± 8993117",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 266943515,
             "range": "± 5692782",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "301a3f17991586f99ad578ba9b2a9f1fe06dd2b6",
+          "message": "fix(deps): update rust crate rlimit to 0.10.0",
+          "timestamp": "2023-07-04T08:27:14Z",
+          "tree_id": "b0392e6b96e20c17672cadf4df96d248deb06c4a",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/301a3f17991586f99ad578ba9b2a9f1fe06dd2b6"
+        },
+        "date": 1688464528091,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12194711,
+            "range": "± 621738",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 218908403,
+            "range": "± 8095926",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3266179246,
+            "range": "± 132302614",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 326440976,
+            "range": "± 4588114",
             "unit": "ns/iter"
           }
         ]
