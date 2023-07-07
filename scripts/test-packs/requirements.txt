@@ -1,6 +1,6 @@
 beautifulsoup4==4.12.2
 certifi==2023.5.7
-charset-normalizer==3.1.0
+charset-normalizer==3.2.0
 filelock==3.12.2
 gdown==4.7.1
 idna==3.4
