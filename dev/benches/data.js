@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1688903762867,
+  "lastUpdate": 1688909979508,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "df32489d2ef3027ebdacf0b09400f3d9f9bc2cf1",
-          "message": "refactor: remove global audio options\n\nThese were a bit weird and complicated, and the file-specific options\nmechanism is powerful enough to implement advanced use cases, even\nthough it might be verbose.\n\nWhile at it, let's assert that no error happens when creating a\nresampler, as such a thing signals an internal logic error worth of\npanicking.",
-          "timestamp": "2023-06-09T23:14:48+02:00",
-          "tree_id": "0ed715b57629fd2cf8d6102e0165c03bb0e5f752",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/df32489d2ef3027ebdacf0b09400f3d9f9bc2cf1"
-        },
-        "date": 1686347525818,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9253153,
-            "range": "± 1560165",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 171598822,
-            "range": "± 7107775",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2938299172,
-            "range": "± 24652601",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 273352605,
-            "range": "± 6416076",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 322353759,
             "range": "± 3232569",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "aeb13f4caa6c3b6c08556ced88869921f5b19b81",
+          "message": "fix(deps): update rust crate serde to 1.0.169",
+          "timestamp": "2023-07-09T11:24:32Z",
+          "tree_id": "5edef196d136e8b54f45f8fd6c103a3a5e31dc32",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/aeb13f4caa6c3b6c08556ced88869921f5b19b81"
+        },
+        "date": 1688909978850,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9531103,
+            "range": "± 1683985",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 210256415,
+            "range": "± 1396174",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2062460404,
+            "range": "± 7862409",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 291309155,
+            "range": "± 4828742",
             "unit": "ns/iter"
           }
         ]
