@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1688878955799,
+  "lastUpdate": 1688903762867,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "aa202456fa21df131462e0127c74dab92d1adf9b",
-          "message": "refactor: drop `open_files_limit` option\n\nThis option is rather advanced to use, and so far I have not seen a\nlegitimate reason for users to change its default value. The only times\nit's been included in an options file is because people copied the\ncomplete example on the wiki, despite my advice to the contrary.\n\nTo prevent people from shooting themselves in the foot while\naccomodating advanced needs, let's drop the option and make PackSquash\ntry to raise the file descriptor limit as needed for the desired\nconcurrency level. If that fails, fall back to throttling concurrency\nand output an user-friendly warning explaining what happened and how to\nget the intended performance.\n\nA convenient way to test these changes is by using a command like this\non a Linux workstation:\n\n$ systemd-run --user -GPdt -p LimitNOFILE=<soft>:<hard> target/release/packsquash /tmp/packsquash.toml",
-          "timestamp": "2023-06-09T22:40:43+02:00",
-          "tree_id": "06eac3385adf5a705bec0d037904cc85dfe3430b",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/aa202456fa21df131462e0127c74dab92d1adf9b"
-        },
-        "date": 1686346948816,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11795619,
-            "range": "± 678283",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 207055267,
-            "range": "± 3913485",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3227237964,
-            "range": "± 83197395",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 331841073,
-            "range": "± 7673960",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 287834439,
             "range": "± 2756396",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "d57301dd00fec034175be09bf207a9c49b4d27ec",
+          "message": "chore(deps): update rust crate time to 0.3.23",
+          "timestamp": "2023-07-09T07:56:36Z",
+          "tree_id": "2eab6ea403db46a7800a124501cd526873d9708e",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d57301dd00fec034175be09bf207a9c49b4d27ec"
+        },
+        "date": 1688903761483,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 11919799,
+            "range": "± 801366",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 244534438,
+            "range": "± 8257757",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2111493361,
+            "range": "± 30826128",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 322353759,
+            "range": "± 3232569",
             "unit": "ns/iter"
           }
         ]
