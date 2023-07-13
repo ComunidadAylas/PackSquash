@@ -84,7 +84,7 @@ tokio-test = "0.4.2"
 pretty_assertions = "1.4.0"
 
 criterion = { version = "0.5.1", features = ["html_reports"] }
-tar = { version = "0.4.38", default-features = false }
+tar = { version = "0.4.39", default-features = false }
 xz2 = "0.1.7"
 
 # criterion-perf-events depends on perfcnt, and perfcnt is so tightly coupled with
