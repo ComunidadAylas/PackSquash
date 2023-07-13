@@ -63,25 +63,25 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: node:16-bullseye-slim
+            container: debian:bullseye-slim
             apt-arch: amd64
 
           - target: x86_64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: debian:sid-slim
+            container: debian:testing-slim
             apt-arch: amd64
 
           - target: aarch64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: node:16-bullseye-slim
+            container: debian:bullseye-slim
             apt-arch: arm64
 
           - target: aarch64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: debian:sid-slim
+            container: debian:testing-slim
             apt-arch: arm64
 
           - target: x86_64-pc-windows-gnu
@@ -115,8 +115,12 @@ jobs:
         run: |
           apt-get update
           # curl is required by rustup.
+          # musl-tools is required to build musl binaries for the host architecture,
+          # and the arch-specific musl-dev package is required to build binaries for
+          # a target architecture when cross-compiling
           # markdown and html2text are required to generate the Debian package only
-          apt-get install -yq build-essential musl-tools git curl \
+          apt-get install -yq build-essential git curl \
+                              musl-tools musl-dev:${{ matrix.apt-arch }} \
                               markdown html2text
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
@@ -124,18 +128,7 @@ jobs:
         run: |
           dpkg --add-architecture arm64
           apt-get update
-          # libgcc-s1:arm64 is a dependency of libc6:arm64 that Aptitude
-          # installs as usual, but for some reason the latest sid-slim image
-          # as of 2023-06-13 refers to broken repositories or packages where
-          # apt-get install fails
-          apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64 libgcc-s1:arm64
-
-      # As of 2023-05-24, only the Debian unstable musl-dev ARM64 package ships with an
-      # aarch64-linux-musl-gcc script that wraps the aarch64-linux-gnu-gcc cross-compiler
-      # provided by the gcc-aarch64-linux-gnu package to link against musl
-      - name: 🧰 Install Linux ARM64 cross-compilation musl development files
-        if: matrix.target == 'aarch64-unknown-linux-musl'
-        run: apt-get install -yq musl-dev:arm64
+          apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
 
       - name: 🧰 Install Rust toolchain
         uses: dtolnay/rust-toolchain@nightly
