@@ -113,6 +113,9 @@ jobs:
       - name: 🧰 Install toolchain
         if: matrix.runner == 'ubuntu-latest'
         run: |
+          if [ "$(dpkg --print-architecture)" != '${{ matrix.apt-arch }}' ]; then
+            dpkg --add-architecture '${{ matrix.apt-arch }}'
+          fi
           apt-get update
           # curl is required by rustup.
           # musl-tools is required to build musl binaries for the host architecture,
@@ -125,10 +128,7 @@ jobs:
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: startsWith(matrix.target, 'aarch64-unknown-linux')
-        run: |
-          dpkg --add-architecture arm64
-          apt-get update
-          apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
+        run: apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
 
       - name: 🧰 Install Rust toolchain
         uses: dtolnay/rust-toolchain@nightly
