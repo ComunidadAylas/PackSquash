@@ -17,9 +17,6 @@
 #![feature(const_option)]
 #![feature(const_fn_floating_point_arithmetic)]
 #![feature(inline_const)]
-#![doc(
-	html_logo_url = "https://user-images.githubusercontent.com/7822554/243825966-500faa74-de2f-462a-8f76-3a122b69856e.png"
-)]
 #![deny(missing_docs)]
 #![deny(rustdoc::invalid_html_tags)]
 #![deny(rustdoc::broken_intra_doc_links)]
