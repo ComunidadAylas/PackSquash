@@ -22,7 +22,7 @@ if ! [ -f "$PACK_DIRECTORY/pack.mcmeta" ]; then
 	cat <<-MCMETA > "$PACK_DIRECTORY/pack.mcmeta"
 	{
 		"pack": {
-			"pack_format": ${PACK_FORMAT:-8},
+			"pack_format": ${PACK_FORMAT:-15},
 			"description": "Test pack"
 		}
 	}
