@@ -104,6 +104,7 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
+      RUSTUP_TOOLCHAIN: nightly-${{ matrix.host-target }}
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
@@ -154,7 +155,7 @@ jobs:
       - name: 📥 Checkout source
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Keep the commit history for proper version information
+          fetch-depth: 0 # Keep the commit history for proper version information
 
       # Our build container is minimal, and it doesn't contain any systemd package.
       # systemd is responsible for setting up the machine ID files we use for
