@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1689465423846,
+  "lastUpdate": 1689468761083,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "b0b8503c6482a8e30c127478813ec65ae90aaccb",
-          "message": "chore: fix Cargo warning due to unspecified workspace resolver version",
-          "timestamp": "2023-06-17T13:58:42+02:00",
-          "tree_id": "c09fdca6dc3094ce7c63ccbf0c66977b52b6e7f1",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b0b8503c6482a8e30c127478813ec65ae90aaccb"
-        },
-        "date": 1687005154432,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 8379362,
-            "range": "± 126959",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 157738671,
-            "range": "± 10831667",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2396551440,
-            "range": "± 31116347",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 234070865,
-            "range": "± 2318538",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 341870099,
             "range": "± 3405646",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "AlexTMjugador@users.noreply.github.com",
+            "name": "AlexTMjugador",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "f90f1e35a00fd585499ffe472c8f4092287cf645",
+          "message": "ci: slightly optimize size of generated executables\n\nLet's drop useless panic backtrace logic from them.",
+          "timestamp": "2023-07-16T02:05:37+02:00",
+          "tree_id": "f4a0c50186b244b73c4177044172cff1b9e977f8",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f90f1e35a00fd585499ffe472c8f4092287cf645"
+        },
+        "date": 1689468760336,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8460913,
+            "range": "± 63400",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 202838709,
+            "range": "± 1484476",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 1913502739,
+            "range": "± 15143965",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 270595967,
+            "range": "± 1778971",
             "unit": "ns/iter"
           }
         ]
