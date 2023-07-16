@@ -246,10 +246,6 @@ jobs:
       - name: 📏 Change npm cache directory to one with appropriate permissions
         run: npm config --global set cache /tmp/.npm
 
-      # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
-      - name: 📁 Create GUI package frontend dist directory
-        run: mkdir packages/packsquash_gui/dist
-
       # We can only run tests if the target architecture matches the host architecture,
       # or if the target (and therefore host) OS is Linux, as we can leverage QEMU there
       - name: ✔️ Run tests
