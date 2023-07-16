@@ -47,6 +47,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+          cache-dependency-path: '**/package-lock.json'
 
       - name: 🔍 Clippy check
         uses: giraffate/clippy-action@v1
@@ -220,6 +221,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+          cache-dependency-path: '**/package-lock.json'
 
       - name: 📥 Checkout source
         uses: actions/checkout@v3
