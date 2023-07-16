@@ -17,8 +17,10 @@ env:
 
 jobs:
   static-analysis:
+    name: Static analysis
 
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
@@ -34,7 +36,6 @@ jobs:
 
       - name: 🔍 Clippy check
         uses: giraffate/clippy-action@v1
-        if: github.event_name != 'release'
         with:
           clippy_flags: --all-targets -D warnings
           reporter: github-check
@@ -58,6 +59,7 @@ jobs:
           - aarch64-unknown-linux-gnu
           - aarch64-unknown-linux-musl
           - x86_64-apple-darwin
+          - aarch64-apple-darwin
 
         include:
           - target: x86_64-unknown-linux-gnu
@@ -87,7 +89,6 @@ jobs:
           - target: x86_64-pc-windows-gnu
             host-target: x86_64-pc-windows-gnu
             runner: windows-latest
-            executable-extension: .exe
 
           - target: x86_64-apple-darwin
             host-target: x86_64-apple-darwin
@@ -104,7 +105,9 @@ jobs:
 
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
+      # nextext requires this on Windows to pick the intended GNU toolchain
       RUSTUP_TOOLCHAIN: nightly-${{ matrix.host-target }}
+
       # Rust stdlib default backtrace feature doesn't actually work because our
       # release executables are stripped, so skipping it shaves off quite some KiB.
       # References:
@@ -116,8 +119,8 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
-      - name: 🧰 Install toolchain
-        if: matrix.runner == 'ubuntu-latest'
+      - name: 🧰 Install Linux toolchain packages
+        if: contains(matrix.target, '-linux-')
         run: |
           if [ "$(dpkg --print-architecture)" != '${{ matrix.apt-arch }}' ]; then
             dpkg --add-architecture '${{ matrix.apt-arch }}'
@@ -168,7 +171,7 @@ jobs:
       # testing the system ID retrieval code, so copy a dummy one
       - name: 📏 Set up a dummy D-Bus machine ID for tests
         if: startsWith(matrix.runner, 'ubuntu')
-        run: cat /proc/sys/kernel/random/boot_id | tr -d '-' > /run/machine-id
+        run: cat /proc/sys/kernel/random/uuid | tr -d '-' > /run/machine-id
 
       - name: ✔️ Run tests
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
@@ -177,7 +180,7 @@ jobs:
           cargo test --doc --release --workspace
 
       - name: 🔨 Build with optimized standard library
-        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }} --release
+        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
@@ -188,7 +191,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
-          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash${{ matrix.executable-extension }}
+          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash*
 
       - name: 📤 Upload CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
@@ -199,18 +202,20 @@ jobs:
 
   build-universal-macos-binaries:
 
+    name: Build universal macOS binaries
+
     runs-on: macos-latest
 
     needs: build
 
     steps:
-      - name: 📥 Download PackSquash CLI x64 MacOS executable
+      - name: 📥 Download PackSquash CLI x64 macOS executable
         uses: actions/download-artifact@v3
         with:
           name: PackSquash CLI executable (x86_64-apple-darwin)
           path: packsquash-x64
 
-      - name: 📥 Download PackSquash CLI ARM64 MacOS executable
+      - name: 📥 Download PackSquash CLI ARM64 macOS executable
         uses: actions/download-artifact@v3
         with:
           name: PackSquash CLI executable (aarch64-apple-darwin)
@@ -226,6 +231,8 @@ jobs:
           path: packsquash
 
   build-docker-images:
+
+    name: Build Docker images
 
     runs-on: ubuntu-latest
 
@@ -250,11 +257,13 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # Tag the image as "edge" for every commit on master.
+          # Tag the image by its ref for every commit on non-master branches.
           # Maintain the "latest", full and major and minor semver tags for each semver tag push
           tags: |
             type=edge,branch=master
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
           labels: |
             org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
