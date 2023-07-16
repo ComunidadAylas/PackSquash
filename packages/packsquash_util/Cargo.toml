@@ -10,4 +10,4 @@ edition.workspace = true
 
 [dependencies]
 serde.workspace = true
-serde_path_to_error = "0.1.11"
+serde_path_to_error = "0.1.14"

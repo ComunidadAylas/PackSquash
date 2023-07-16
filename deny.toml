@@ -112,17 +112,6 @@ license-files = [
 multiple-versions = "warn"
 wildcards = "deny"
 highlight = "all"
-skip = [
-	# Some parts of the ecosystem have already updated aho-corasick to v1 (e.g., the
-	# regex crate), but others didn't (e.g., globset). Let's ignore that for now,
-	# globset shouldn't stay that way for long
-	{ name = "aho-corasick", version = "=0.7.20" },
-	# This older version is pulled by the GLSL macro machinery on build-time.
-	# It should not affect final executables
-	{ name = "darling", version = "=0.14.4" },
-	{ name = "darling_macro", version = "=0.14.4" },
-	{ name = "darling_core", version = "=0.14.4" }
-]
 skip-tree = [
 	# Tauri is such a complex beast with so many dependencies that
 	# matching every transitive dependency version is an incommensurate
