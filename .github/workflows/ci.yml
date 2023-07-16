@@ -11,6 +11,7 @@ on:
       - published
 
 env:
+  NODE_VERSION: 18
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
 
 jobs:
@@ -21,8 +22,7 @@ jobs:
     timeout-minutes: 15
 
     # Exclude in-repo PRs from running this job
-    if: github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
       - name: 📥 Checkout source
@@ -41,6 +41,12 @@ jobs:
         uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt, clippy
+
+      - name: 🧰 Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
       - name: 🔍 Clippy check
         uses: giraffate/clippy-action@v1
@@ -87,72 +93,42 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: node:16-bullseye-slim
-            excluded-workspace-packages: none
+            container: debian:bullseye-slim
             apt-arch: amd64
-
-          - target: x86_64-unknown-linux-musl
-            host-target: x86_64-unknown-linux-gnu
-            rust-toolchain-targets: x86_64-unknown-linux-musl
-            runner: ubuntu-latest
-            container: debian:sid-slim
-            # The GUI dynamically links to system webview components,
-            # so building it statically does not make sense
-            excluded-workspace-packages: packsquash_gui
-            apt-arch: amd64
-
-          - target: aarch64-unknown-linux-gnu
-            host-target: x86_64-unknown-linux-gnu
-            rust-toolchain-targets: aarch64-unknown-linux-gnu
-            appimage-arch: aarch64
-            runner: ubuntu-latest
-            container: node:16-bullseye-slim
-            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
-            excluded-workspace-packages: none
-            apt-arch: arm64
-
-          - target: aarch64-unknown-linux-musl
-            host-target: x86_64-unknown-linux-gnu
-            rust-toolchain-targets: aarch64-unknown-linux-musl
-            runner: ubuntu-latest
-            container: debian:sid-slim
-            excluded-workspace-packages: packsquash_gui
-            apt-arch: arm64
+            appimage-arch: x64
 
           - target: x86_64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
             container: debian:testing-slim
             apt-arch: amd64
-
-          - target: aarch64-unknown-linux-gnu
-            host-target: x86_64-unknown-linux-gnu
-            runner: ubuntu-latest
-            container: node:16-bullseye-slim
-            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
-            apt-arch: arm64
-            appimage-arch: aarch64
-
-          - target: aarch64-unknown-linux-musl
-            host-target: x86_64-unknown-linux-gnu
-            runner: ubuntu-latest
-            container: debian:testing-slim
-            apt-arch: arm64
 
           - target: x86_64-pc-windows-gnu
             host-target: x86_64-pc-windows-gnu
             runner: windows-latest
 
+          - target: aarch64-unknown-linux-gnu
+            host-target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            container: debian:bullseye-slim
+            pkg-config-path: /usr/lib/aarch64-linux-gnu/pkgconfig
+            apt-arch: arm64
+            appimage-arch: aarch64
+
+          - target: aarch64-unknown-linux-musl
+            host-target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            container: debian:testing-slim
+            apt-arch: arm64
+
           - target: x86_64-apple-darwin
             host-target: x86_64-apple-darwin
             tauri-target: universal-apple-darwin
             runner: macos-latest
-            excluded-workspace-packages: none
 
           - target: aarch64-apple-darwin
             host-target: x86_64-apple-darwin
             runner: macos-latest
-            excluded-workspace-packages: none
 
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
@@ -178,8 +154,7 @@ jobs:
       PKG_CONFIG_PATH: ${{ matrix.pkg-config-path }}
 
     # Exclude in-repo PRs from running this job
-    if: github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
       - name: 🧰 Install Linux toolchain packages
@@ -240,6 +215,12 @@ jobs:
         with:
           tool: tauri-cli
 
+      - name: 🧰 Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
       - name: 📥 Checkout source
         uses: actions/checkout@v3
         with:
@@ -261,13 +242,7 @@ jobs:
       # is owned by an unprivileged user. Change the cache directory to be within the container
       # to avoid permission issues
       - name: 📏 Change npm cache directory to one with appropriate permissions
-        if: startsWith(matrix.runner, 'ubuntu') && !endsWith(matrix.target, '-musl')
         run: npm config --global set cache /tmp/.npm
-
-      - name: 📥 Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Keep the commit history for proper version information
 
       # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
       - name: 📁 Create GUI package frontend dist directory
@@ -367,14 +342,14 @@ jobs:
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/bundle/msi/PackSquash_*_x64.msi
 
       - name: 📤 Upload GUI MSI update bundle
-        if: startsWith(matrix.runner, 'windows')
+        if: contains(matrix.target, '-windows-')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI MSI update bundle (${{ matrix.target }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/release/bundle/msi/PackSquash_*_x64_en-US.msi.zip
 
       - name: 📤 Upload GUI MSI update bundle signature
-        if: startsWith(matrix.runner, 'windows')
+        if: contains(matrix.target, '-windows-')
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash GUI MSI update bundle signature (${{ matrix.target }})
@@ -388,22 +363,20 @@ jobs:
           path: target/${{ matrix.tauri-target || matrix.target }}/release/bundle/dmg/PackSquash_*.dmg
 
       - name: 📤 Upload GUI macOS update bundle
-        if: startsWith(matrix.runner, 'macos') && matrix.tauri-target != ''
+        if: matrix.target == 'x86_64-apple-darwin'
         uses: actions/upload-artifact@v3
         with:
-          name: PackSquash GUI macOS update bundle (${{ matrix.tauri-target }})
-          path: target/${{ matrix.tauri-target }}/release/bundle/macos/PackSquash.app.tar.gz
+          name: PackSquash GUI macOS update bundle (${{ matrix.tauri-target || matrix.target }})
+          path: target/${{ matrix.tauri-target || matrix.target }}/release/bundle/macos/PackSquash.app.tar.gz
 
       - name: 📤 Upload GUI macOS update bundle signature
-        if: startsWith(matrix.runner, 'macos') && matrix.tauri-target != ''
+        if: matrix.target == 'x86_64-apple-darwin'
         uses: actions/upload-artifact@v3
         with:
-          name: PackSquash GUI macOS update bundle signature (${{ matrix.tauri-target }})
-          path: target/${{ matrix.tauri-target }}/release/bundle/macos/PackSquash.app.tar.gz.sig
+          name: PackSquash GUI macOS update bundle signature (${{ matrix.tauri-target || matrix.target }})
+          path: target/${{ matrix.tauri-target || matrix.target }}/release/bundle/macos/PackSquash.app.tar.gz.sig
 
   build-universal-macos-binaries:
-    name: Build universal macOS binaries
-
     name: Build universal macOS binaries
 
     runs-on: macos-latest
@@ -433,8 +406,6 @@ jobs:
           path: packsquash
 
   build-docker-images:
-    name: Build Docker images
-
     name: Build Docker images
 
     runs-on: ubuntu-latest
