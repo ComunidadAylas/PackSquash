@@ -105,6 +105,12 @@ jobs:
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
       RUSTUP_TOOLCHAIN: nightly-${{ matrix.host-target }}
+      # Rust stdlib default backtrace feature doesn't actually work because our
+      # release executables are stripped, so skipping it shaves off quite some KiB.
+      # References:
+      # https://doc.rust-lang.org/cargo/reference/unstable.html#build-std-features
+      # https://github.com/rust-lang/rust/blob/4c8bb79d9f565115637cc6da739f8389e79f3a29/library/std/Cargo.toml#L54-L79
+      OPTIMIZED_RELEASE_BUILD_FLAGS: -Z build-std -Z build-std-features=panic-unwind
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
@@ -171,11 +177,11 @@ jobs:
           cargo test --doc --release --workspace
 
       - name: 🔨 Build with optimized standard library
-        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} -Z build-std --release
+        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }} --release
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- -Z build-std
+        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
