@@ -13,7 +13,7 @@ fn add_executable_metadata() {
 			&format!("PackSquash - {}", env!("CARGO_PKG_DESCRIPTION"))
 		)
 		.set_language(0x0409) // English (US)
-		.set_icon("../../icons/packsquash_icon_256x256.ico")
+		.set_icon("../../icons/packsquash_256x256.ico")
 		.compile()
 		.expect("Windows executable resource build failure");
 }
