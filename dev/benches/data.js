@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1689542174637,
+  "lastUpdate": 1689585322121,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "2e751256f8e42f2af3176241b9ef8c30159f492e",
-          "message": "fix(deps): update rust crate aes to 0.8.3",
-          "timestamp": "2023-06-18T03:26:01Z",
-          "tree_id": "3a761d4c777c8a99b57294a1a780f3826d25eb8f",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2e751256f8e42f2af3176241b9ef8c30159f492e"
-        },
-        "date": 1687086325262,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 8669652,
-            "range": "± 79001",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 156822538,
-            "range": "± 32729425",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2415137599,
-            "range": "± 19870074",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 236269648,
-            "range": "± 1643871",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 289804621,
             "range": "± 1884800",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "988368aa95ce7a2b335f8213b7ffa98a1f7d3c81",
+          "message": "ci: skip ditherbomb tests for AArch64 on CI\n\nQEMU emulation imposes a noticeable performance hit that causes our CI\ntimes to be a lot longer for little benefit.",
+          "timestamp": "2023-07-17T10:40:13+02:00",
+          "tree_id": "b71c789aa899f038ae847c67ef5d5c8e6f34ef5c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/988368aa95ce7a2b335f8213b7ffa98a1f7d3c81"
+        },
+        "date": 1689585321354,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9479328,
+            "range": "± 185141",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 210854966,
+            "range": "± 1682004",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2053964015,
+            "range": "± 12548803",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 288984689,
+            "range": "± 3549044",
             "unit": "ns/iter"
           }
         ]
