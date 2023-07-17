@@ -53,7 +53,7 @@ camino.workspace = true
 const-random = "0.1.15"
 aes = "0.8.3"
 fpe = "0.6.1"
-uuid = "1.4.0"
+uuid = "1.4.1"
 entropy = "0.4.1"
 rand_xoshiro = "0.6.0"
 onig = { version = "6.4.0", default-features = false }

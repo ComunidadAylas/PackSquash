@@ -1,6 +1,6 @@
 [package]
 name = "packsquash_options"
-description = "Options files and configuration data structures for PackSquash"
+description = "Configuration data structures for PackSquash"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true
