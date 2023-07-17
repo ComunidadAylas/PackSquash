@@ -191,7 +191,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
-          path: target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash*
+          path: |
+            target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash*
+            !target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.d
 
       - name: 📤 Upload CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
