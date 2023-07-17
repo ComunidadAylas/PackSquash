@@ -15,9 +15,9 @@
 // https://docs.rs/crate/machine-uid/0.2.0
 // https://github.com/tilda/rust-hwid
 
-use std::{cmp::Ordering, env, sync::OnceLock};
+use once_cell::sync::Lazy;
+use std::{cmp::Ordering, env};
 
-use tokio::task;
 use uuid::Uuid;
 
 mod os;
@@ -102,9 +102,9 @@ impl PartialEq for SystemId {
 
 impl Eq for SystemId {}
 
-/// The cell that will be used to memoize the result of computing the system ID, so
-/// it's done only once in the lifetime of the process.
-static SYSTEM_ID: OnceLock<SystemId> = OnceLock::new();
+/// The ID for the system PackSquash is running on, calculated on demand the first
+/// time it is necessary.
+static SYSTEM_ID: Lazy<SystemId> = Lazy::new(compute_system_id);
 
 /// Returns the system ID, calculating it if that was not done yet.
 ///
@@ -113,13 +113,13 @@ static SYSTEM_ID: OnceLock<SystemId> = OnceLock::new();
 /// change during the lifetime of the process. However, obtaining a system ID for the first time
 /// may be a relatively expensive operation, involving I/O and system calls.
 pub(super) fn get_or_compute_system_id() -> &'static SystemId {
-	SYSTEM_ID.get_or_init(|| task::block_in_place(compute_system_id))
+	&SYSTEM_ID
 }
 
 /// Gets the system ID if and only if it was calculated at some point. If not, this function
-/// returns `None`. This function is guaranteed to never block.
+/// returns `None`.
 pub fn get_system_id() -> Option<&'static SystemId> {
-	SYSTEM_ID.get()
+	Lazy::get(&SYSTEM_ID)
 }
 
 /// Reads a system ID from a special process environment variable. This environment variable
