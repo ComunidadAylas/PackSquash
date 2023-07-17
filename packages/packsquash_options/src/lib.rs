@@ -1,6 +1,7 @@
 //! Contains the configuration options for PackSquash.
 
 #![feature(doc_cfg)]
+#![feature(const_option)]
 
 mod minecraft_version;
 
@@ -10,7 +11,7 @@ use std::{
 	fmt::{Display, Formatter},
 	fs, io,
 	io::ErrorKind,
-	num::{NonZeroU32, NonZeroU8, NonZeroUsize},
+	num::{NonZeroU16, NonZeroU32, NonZeroU8, NonZeroUsize},
 	ops::Deref,
 	thread::available_parallelism
 };
@@ -383,7 +384,7 @@ impl Default for GlobalOptions<'_> {
 			// TODO default to true
 			process_not_self_referenced_and_non_vanilla_assets: false,
 			threads: available_parallelism().unwrap_or(NonZeroUsize::MIN),
-			output_file_path: MaybeNonexistentFilePath(Path::new("pack.zip").into()),
+			output_file_path: MaybeNonexistentFilePath(Utf8Path::new("pack.zip").into()),
 			// In MiB. By default, half of available memory
 			maximum_scratch_files_buffers_size: (available_memory / 2097152)
 				// usize is defined to be able to represent any location in memory, so the conversion
@@ -762,13 +763,12 @@ pub struct AudioFileOptions {
 file_options_default_impl!(AudioFileOptions => AudioFileOptions {
 	transcode_ogg: true,
 	two_pass_vorbis_optimization_and_validation: true,
-	channels: ChannelMixingOption::DEFAULT,
-	is_positional_audio: None,
-	sampling_frequency_override: None,
-	audio_bitrate_control_mode_override: None,
-	target_bitrate_control_metric_override: None,
-	target_pitch: 1.0,
 	empty_audio_optimization: true,
+	channels: ChannelMixingOption::DEFAULT,
+	bitrate_control_mode: AudioBitrateControlMode::DEFAULT,
+	target_bitrate_control_metric: None,
+	sampling_frequency: None,
+	target_pitch: 1.0,
 	ogg_obfuscation: false
 });
 
@@ -1145,7 +1145,7 @@ file_options_default_impl!(ShaderFileOptions => ShaderFileOptions {
 /// shaders will highlight that situation. These limitations might be removed in the future,
 /// rendering PackSquash capable of transforming more shaders according to the selected
 /// strategy.
-#[derive(Deserialize, Copy, Clone)]
+#[derive(Deserialize, Serialize, JsonSchema, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum ShaderSourceTransformationStrategy {
