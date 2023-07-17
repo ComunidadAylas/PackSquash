@@ -176,7 +176,7 @@ jobs:
       - name: ✔️ Run tests
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
         run: |
-          cargo nextest run --release --workspace
+          cargo nextest run --release --workspace --status-level all
           cargo test --doc --release --workspace
 
       - name: 🔨 Build with optimized standard library

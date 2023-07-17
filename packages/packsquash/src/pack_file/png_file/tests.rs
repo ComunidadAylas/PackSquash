@@ -205,6 +205,10 @@ async fn banner_layer_check_workaround_works() {
 }
 
 #[tokio::test]
+#[cfg_attr(
+	all(ci, target_arch = "aarch64", target_os = "linux"),
+	ignore = "Due to QEMU emulation, quite slow on CI"
+)]
 async fn ditherbomb_does_not_get_bigger() {
 	successful_process_test(
 		DITHERBOMB_DATA,
@@ -225,8 +229,8 @@ async fn ditherbomb_does_not_get_bigger() {
 
 #[tokio::test]
 #[cfg_attr(
-	all(ci, target_arch = "aarch64", target_os = "linux", target_env = "musl"),
-	ignore = "Flaky on CI when targeting musl due to QEMU emulation"
+	all(ci, target_arch = "aarch64", target_os = "linux"),
+	ignore = "Due to QEMU emulation, flaky on CI when targeting musl, and quite slow"
 )]
 async fn ditherbomb_can_be_defused() {
 	successful_process_test(
