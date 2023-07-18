@@ -250,7 +250,7 @@ jobs:
           cargo test --doc --release --workspace ${{ matrix.excluded-packages }}
 
       - name: 🔨 Build with optimized standard library
-        run: cargo build ${{ matrix.excluded-packages }}
+        run: cargo build --workspace ${{ matrix.excluded-packages }}
           --target ${{ env.CARGO_BUILD_TARGET }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Build GUI frontend
