@@ -39,7 +39,6 @@ indenter = { git = "https://github.com/ComunidadAylas/indenter" }
 [profile.release]
 lto = "fat"
 codegen-units = 1
-panic = "abort"
 strip = "symbols"
 
 [profile.bench]
