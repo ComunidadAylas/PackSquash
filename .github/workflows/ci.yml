@@ -164,11 +164,6 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
-      - name: 📥 Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Keep the commit history for proper version information
-
       - name: 🧰 Install Linux toolchain packages
         if: contains(matrix.target, '-linux-')
         run: |
@@ -240,6 +235,11 @@ jobs:
           # Show color for npm commands on CI logs
           npm config set color always
           npm ci
+
+      - name: 📥 Checkout source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Keep the commit history for proper version information
 
       # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
       - name: 📁 Create GUI package frontend dist directory
