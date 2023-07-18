@@ -50,7 +50,7 @@ suggests = "packsquash"
 assets = [
     ["target/release/packsquash_gui", "usr/bin/packsquash-gui", "755"],
     ["../../../README.md", "usr/share/doc/packsquash-gui/README.md", "644"],
-    ["bundles/icons/256x256.png", "usr/share/icons/hicolor/256x256/apps/packsquash.png", "644"],
+    ["bundles/icons/icon.png", "usr/share/icons/hicolor/256x256/apps/packsquash.png", "644"],
     ["bundles/deb/org.aylas.packsquash.gui.desktop", "usr/share/applications/", "644"]
 ]
 section = "utils"
