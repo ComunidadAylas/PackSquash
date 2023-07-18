@@ -96,7 +96,7 @@ jobs:
             runner: ubuntu-latest
             container: debian:bullseye-slim
             apt-arch: amd64
-            appimage-arch: x64
+            appimage-arch: x86_64
 
           - target: x86_64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
