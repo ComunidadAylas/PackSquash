@@ -103,6 +103,7 @@ jobs:
             runner: ubuntu-latest
             container: debian:testing-slim
             apt-arch: amd64
+            excluded-packages: --exclude packsquash_gui
 
           - target: x86_64-pc-windows-gnu
             host-target: x86_64-pc-windows-gnu
@@ -121,6 +122,7 @@ jobs:
             runner: ubuntu-latest
             container: debian:testing-slim
             apt-arch: arm64
+            excluded-packages: --exclude packsquash_gui
 
           - target: x86_64-apple-darwin
             host-target: x86_64-apple-darwin
@@ -251,14 +253,15 @@ jobs:
       - name: ✔️ Run tests
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
         run: |
-          cargo nextest run --release --workspace --status-level all
-          cargo test --doc --release --workspace
+          cargo nextest run --release --workspace --status-level all ${{ matrix.excluded-packages }}
+          cargo test --doc --release --workspace ${{ matrix.excluded-packages }}
 
       - name: 🔨 Build with optimized standard library
-        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
+        run: cargo build ${{ matrix.excluded-packages }}
+          --target ${{ env.CARGO_BUILD_TARGET }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Build GUI frontend
-        if: ${{ !contains(matrix.target, '-windows-') && matrix.target != 'x86_64-apple-darwin' }}
+        if: ${{ !contains(matrix.target, '-windows-') && matrix.target != 'x86_64-apple-darwin' && endsWith(matrix.target, '-linux-gnu') }}
         working-directory: packages/packsquash_gui
         run: |
           npm ci
