@@ -222,6 +222,11 @@ jobs:
         with:
           tool: tauri-cli
 
+      - name: 📥 Checkout source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Keep the commit history for proper version information
+
       - name: 🧰 Install Node.js
         uses: actions/setup-node@v3
         with:
@@ -235,11 +240,6 @@ jobs:
           # Show color for npm commands on CI logs
           npm config set color always
           npm ci
-
-      - name: 📥 Checkout source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Keep the commit history for proper version information
 
       # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
       - name: 📁 Create GUI package frontend dist directory
