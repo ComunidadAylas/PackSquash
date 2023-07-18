@@ -129,6 +129,7 @@ jobs:
 
           - target: x86_64-apple-darwin
             host-target: x86_64-apple-darwin
+            extra-targets: aarch64-apple-darwin
             tauri-target: universal-apple-darwin
             runner: macos-latest
 
@@ -202,7 +203,7 @@ jobs:
         uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: ${{ env.RUSTUP_TOOLCHAIN }}
-          targets: ${{ matrix.target }}
+          targets: ${{ matrix.target }} ${{ matrix.extra-targets }}
           components: rust-src
 
       - name: 💨 Cache Rust artifacts
