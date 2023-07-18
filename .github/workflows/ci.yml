@@ -103,6 +103,9 @@ jobs:
             runner: ubuntu-latest
             container: debian:testing-slim
             apt-arch: amd64
+            # Exclude the GUI because showing a webview depends by design
+            # on dynamically-linked libraries, and statically linking to
+            # musl just doesn't fit that
             excluded-packages: --exclude packsquash_gui
 
           - target: x86_64-pc-windows-gnu
