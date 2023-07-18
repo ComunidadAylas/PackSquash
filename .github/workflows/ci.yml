@@ -48,6 +48,7 @@ jobs:
         run: cargo fmt --all --check
 
   build:
+    name: Build
 
     strategy:
       fail-fast: false
