@@ -182,7 +182,7 @@ jobs:
           # markdown and html2text are required to generate the Debian package.
           apt-get install -yq build-essential git curl \
                               musl-tools musl-dev:${{ matrix.apt-arch }} \
-                              libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} zlib1g-dev:${{ matrix.apt-arch }} \
+                              libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} zlib1g-dev \
                               jq \
                               python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
                               markdown html2text
