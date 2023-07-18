@@ -233,6 +233,13 @@ jobs:
           cache: npm
           cache-dependency-path: '**/package-lock.json'
 
+      - name: 🧰 Install GUI Node dependencies
+        working-directory: packages/packsquash_gui
+        run: |
+          # Show color for npm commands on CI logs
+          npm config set color always
+          npm ci
+
       # Necessary due to Tauri macro expectations. See: https://github.com/tauri-apps/tauri/issues/3142
       - name: 📁 Create GUI package frontend dist directory
         run: mkdir packages/packsquash_gui/dist
@@ -259,9 +266,7 @@ jobs:
       - name: 🔨 Build GUI frontend
         if: ${{ !contains(matrix.target, '-windows-') && matrix.target != 'x86_64-apple-darwin' && endsWith(matrix.target, '-linux-gnu') }}
         working-directory: packages/packsquash_gui
-        run: |
-          npm ci
-          npm run build
+        run: npm run build
 
       - name: 🔨 Build GUI frontend, installers and updater artifacts
         if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'
@@ -269,13 +274,8 @@ jobs:
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-        run: |
-          (
-            # Do not trust Node package installation scripts with sensitive keys
-            unset -v TAURI_PRIVATE_KEY TAURI_KEY_PASSWORD
-            npm ci
-          )
-          cargo tauri build -v --target ${{ matrix.tauri-target || matrix.target }} -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
+        run: cargo tauri build -v --target ${{ matrix.tauri-target || matrix.target }}
+          -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
