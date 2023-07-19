@@ -69,7 +69,7 @@ regex = "1.9.1"
 aho-corasick = "1.0.2"
 
 [target.'cfg(unix)'.dependencies]
-rlimit = "0.10.0"
+rlimit = "0.10.1"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.50.0"
