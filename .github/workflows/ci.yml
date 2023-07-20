@@ -303,7 +303,8 @@ jobs:
           # https://gitlab.freedesktop.org/xorg/xserver/-/tree/master/hw/vfb
           # https://www.x.org/archive/X11R7.5/doc/man/man5/xorg.conf.5.html
 
-          xinit "$(command -v npm)" run test -- -config /proc/self/fd/0 -logfile /proc/self/fd/2 -quiet <<'XORG_CONF'
+          xinit /bin/sh -c 'npm run test; echo $? > /run/test_exit_code' \
+          -- -config /proc/self/fd/0 -logfile /proc/self/fd/2 -quiet <<'XORG_CONF'
           Section "Device"
             Identifier "DummyCard"
             Driver "dummy"
@@ -314,6 +315,7 @@ jobs:
             Device "DummyCard"
           EndSection
           XORG_CONF
+          exit $(cat /run/test_exit_code)
 
       - name: 🔨 Build GUI frontend, installers and updater artifacts
         if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'
