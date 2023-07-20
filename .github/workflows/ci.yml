@@ -287,20 +287,22 @@ jobs:
       - name: ✔️ Run GUI frontend E2E tests
         if: matrix.target == 'x86_64-unknown-linux-gnu'
         working-directory: packages/packsquash_gui
+        env:
+          FORCE_COLOR: 1
         run: |
           # E2E GUI tests need to be run in the context of a desktop, which on CI must be headless (i.e., not
-          # relying on any graphics device). To achieve it on Linux, we employ a stock Xorg server with the
+          # rely on any graphics device). To achieve it on Linux, we employ a stock Xorg server with the
           # dummy video driver instead of Xvfb, which is a different X server implementation. While both of
           # them should work fine for our purposes, the latter doesn't share all the code and thus features
           # with Xorg, so it's less representative of an actual Linux user environment. Also, Xorg is run as
           # root here due to our usage of Docker containers. References:
           # https://wiki.archlinux.org/title/xorg
           # https://fedoraproject.org/wiki/PackageMaintainers/GraphicalTests
+          # https://techoverflow.net/2019/02/23/how-to-run-x-server-using-xserver-xorg-video-dummy-driver-on-ubuntu/
           # https://gitlab.freedesktop.org/xorg/driver/xf86-video-dummy/-/blob/master/src/dummy_driver.c
           # https://gitlab.freedesktop.org/xorg/xserver/-/tree/master/hw/vfb
           # https://www.x.org/archive/X11R7.5/doc/man/man5/xorg.conf.5.html
 
-          export PACKSQUASH_GUI_WDIO_SKIP_PREPARE=1
           xinit "$(command -v npm)" run test -- -config /proc/self/fd/0 -logfile /proc/self/fd/2 -quiet <<'XORG_CONF'
           Section "Device"
             Identifier "DummyCard"
