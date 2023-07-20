@@ -275,7 +275,7 @@ jobs:
           cargo nextest run --release --workspace --status-level all ${{ matrix.excluded-packages }}
           cargo test --doc --release --workspace ${{ matrix.excluded-packages }}
 
-      - name: ✔️ Run GUI frontend E2E tests
+      - name: ✔️ Run GUI frontend E2E tests (Linux)
         if: matrix.target == 'x86_64-unknown-linux-gnu'
         working-directory: packages/packsquash_gui
         env:
@@ -308,6 +308,13 @@ jobs:
           XORG_CONF
           exit $(cat /run/test_exit_code)
 
+      - name: ✔️ Run GUI frontend E2E tests (Windows)
+        if: contains(matrix.target, '-windows-')
+        working-directory: packages/packsquash_gui
+        env:
+          FORCE_COLOR: 1
+        run: npm run test
+
       - name: 🔨 Build GUI frontend
         if: ${{ !contains(matrix.target, '-windows-') && matrix.target != 'x86_64-apple-darwin' && endsWith(matrix.target, '-linux-gnu') }}
         working-directory: packages/packsquash_gui
@@ -327,11 +334,13 @@ jobs:
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        run: packages/packsquash_cli/bundles/deb/build.sh
+        run: packages/packsquash_cli/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }}
+          -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
+        run: packages/packsquash_gui/src-tauri/bundles/deb/build.sh --target ${{ env.CARGO_BUILD_TARGET }}
+          -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Generate GUI AppImage
         if: endsWith(matrix.target, '-linux-gnu')
