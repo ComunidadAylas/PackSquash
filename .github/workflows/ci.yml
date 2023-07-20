@@ -185,7 +185,7 @@ jobs:
                               musl-tools musl-dev:${{ matrix.apt-arch }} \
                               libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} zlib1g-dev \
                               jq \
-                              "$(if [ "$CARGO_BUILD_TARGET" = 'x86_64-unknown-linux-gnu' ]; then printf 'xserver-xorg xserver-xorg-video-dummy webkit2gtk-driver xinit'; fi)" \
+                              $(if [ "$CARGO_BUILD_TARGET" = 'x86_64-unknown-linux-gnu' ]; then printf 'xserver-xorg xserver-xorg-video-dummy webkit2gtk-driver xinit'; fi) \
                               python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
                               markdown html2text
 
