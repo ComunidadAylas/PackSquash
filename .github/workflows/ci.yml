@@ -13,6 +13,7 @@ on:
 env:
   NODE_VERSION: 18
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
+  DEBIAN_FRONTEND: noninteractive
 
 jobs:
   static-analysis:
