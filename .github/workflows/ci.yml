@@ -221,7 +221,7 @@ jobs:
 
       - name: 🧰 Install tauri-driver
         if: matrix.target == 'x86_64-unknown-linux-gnu' || contains(matrix.target, '-windows-')
-        run: cargo install --git https://github.com/ComunidadAylas/tauri.git tauri-driver
+        run: cargo install --locked --git https://github.com/ComunidadAylas/tauri.git tauri-driver
 
       - name: 🧰 Install tauri-cli
         if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'

@@ -13,6 +13,12 @@ export const config: Options.Testrunner = {
   // On production builds Tauri uses a custom URL scheme
   baseUrl: "tauri://localhost#",
 
+  // Tauri WebDriver intermediate end listens on the first
+  // IPv4 loopback address only, but the default value for
+  // this hostname, localhost, may resolve to an IPv6 address
+  // on Windows
+  hostname: "127.0.0.1",
+
   // Tests to run
   specs: ["test/features/**/*.feature"],
 
