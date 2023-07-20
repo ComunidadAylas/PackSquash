@@ -1,6 +1,14 @@
 import type { Options, Services } from "@wdio/types";
 import { spawn, spawnSync, ChildProcess } from "child_process";
 
+const executableExtension = (
+  process.env.CARGO_BUILD_TARGET
+    ? process.env.CARGO_BUILD_TARGET.includes("-windows-")
+    : process.platform == "win32"
+)
+  ? ".exe"
+  : "";
+
 export const config: Options.Testrunner = {
   // On production builds Tauri uses a custom URL scheme
   baseUrl: "tauri://localhost#",
@@ -18,7 +26,7 @@ export const config: Options.Testrunner = {
       "tauri:options": {
         application: `../../target/${
           process.env.CARGO_BUILD_TARGET || "."
-        }/release/packsquash_gui`
+        }/release/packsquash_gui${executableExtension}`
       }
     }
   ],
