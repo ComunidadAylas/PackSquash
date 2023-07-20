@@ -1,7 +1,5 @@
-import type { Options } from "@wdio/types";
+import type { Options, Services } from "@wdio/types";
 import { spawn, spawnSync, ChildProcess } from "child_process";
-
-let tauriDriver: ChildProcess;
 
 export const config: Options.Testrunner = {
   // On production builds Tauri uses a custom URL scheme
@@ -38,17 +36,34 @@ export const config: Options.Testrunner = {
   // running tests. In usual web applications, services (see https://webdriver.io/docs/customservices/),
   // which package reusable WDIO hooks, take care of launching the browser-specific driver
   // process, which handles capabilities that target such a browser. However, Tauri doesn't
-  // ship with WDIO services to do that, so bring our own hooks to launch the Tauri proxy
-  // driver as documented at
+  // ship with WDIO services to do that, so bring our own to launch the Tauri proxy driver
+  // as documented at the following pages:
   // https://tauri.app/v1/guides/testing/webdriver/example/webdriverio/#config
-  onPrepare: () => {
-    if (process.env.PACKSQUASH_GUI_WDIO_SKIP_PREPARE) {
-      return;
-    }
-    spawnSync("npm", ["run", "build:staging"], { stdio: "inherit" });
-    spawnSync("cargo", ["build", "--release"], { stdio: "inherit" });
-  },
-  beforeSession: () =>
-    (tauriDriver = spawn("tauri-driver", { stdio: "ignore" })),
-  afterSession: () => tauriDriver?.kill()
+  // https://webdriver.io/docs/customservices
+  services: [
+    [
+      new (class implements Services.ServiceInstance {
+        private tauriDriver?: ChildProcess;
+
+        onPrepare() {
+          if (process.env.PACKSQUASH_GUI_WDIO_SKIP_PREPARE) {
+            return;
+          }
+          spawnSync("npm", ["run", "build:staging"], { stdio: "inherit" });
+          spawnSync("cargo", ["build", "--release"], { stdio: "inherit" });
+        }
+
+        beforeSession() {
+          this.tauriDriver = spawn("tauri-driver", {
+            stdio: ["ignore", "ignore", "inherit"]
+          });
+        }
+
+        afterSession() {
+          this.tauriDriver?.kill();
+        }
+      })(),
+      {}
+    ] as never // Cast necessary due to WDIO's bad TypeScript definitions
+  ]
 };
