@@ -16,7 +16,7 @@ export const config: Options.Testrunner = {
       browserName: "wry",
       // @ts-expect-error "tauri:options" is a Tauri-specific WebDriver proxy extension capability
       "tauri:options": {
-        application: "../../target/release/packsquash_gui"
+        application: `../../target/${process.env.CARGO_BUILD_TARGET ? `${process.env.CARGO_BUILD_TARGET}/` : ""}release/packsquash_gui`
       }
     }
   ],
