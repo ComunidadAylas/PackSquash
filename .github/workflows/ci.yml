@@ -178,12 +178,14 @@ jobs:
           # The third line contains packages neccessary for Tauri.
           # The fourth line contains packages necessary for build-time JSON
           # Schema generation.
-          # The fifth line contains packages necessary for appimage-builder.
+          # The fifth line contains packages necessary for headless GUI testing.
+          # The sixth line contains packages necessary for appimage-builder.
           # markdown and html2text are required to generate the Debian package.
           apt-get install -yq build-essential git curl \
                               musl-tools musl-dev:${{ matrix.apt-arch }} \
                               libwebkit2gtk-4.0-dev:${{ matrix.apt-arch }} zlib1g-dev \
                               jq \
+                              "$(if [ "$CARGO_BUILD_TARGET" == 'x86_64-unknown-linux-gnu' ]; then printf 'xserver-xorg xserver-xorg-video-dummy webkit2gtk-driver xinit'; fi)" \
                               python3-venv file zsync desktop-file-utils gtk-update-icon-cache fakeroot squashfs-tools gstreamer1.0-tools \
                               markdown html2text
 
@@ -215,6 +217,12 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-deb
+
+      - name: 🧰 Install tauri-driver
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        uses: taiki-e/install-action@v2
+        with:
+          tool: tauri-driver
 
       - name: 🧰 Install tauri-cli
         if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'
@@ -274,6 +282,35 @@ jobs:
         if: ${{ !contains(matrix.target, '-windows-') && matrix.target != 'x86_64-apple-darwin' && endsWith(matrix.target, '-linux-gnu') }}
         working-directory: packages/packsquash_gui
         run: npm run build
+
+      - name: ✔️ Run GUI frontend E2E tests
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        working-directory: packages/packsquash_gui
+        run: |
+          # E2E GUI tests need to be run in the context of a desktop, which on CI must be headless (i.e., not
+          # relying on any graphics device). To achieve it on Linux, we employ a stock Xorg server with the
+          # dummy video driver instead of Xvfb, which is a different X server implementation. While both of
+          # them should work fine for our purposes, the latter doesn't share all the code and thus features
+          # with Xorg, so it's less representative of an actual Linux user environment. Also, Xorg is run as
+          # root here due to our usage of Docker containers. References:
+          # https://wiki.archlinux.org/title/xorg
+          # https://fedoraproject.org/wiki/PackageMaintainers/GraphicalTests
+          # https://gitlab.freedesktop.org/xorg/driver/xf86-video-dummy/-/blob/master/src/dummy_driver.c
+          # https://gitlab.freedesktop.org/xorg/xserver/-/tree/master/hw/vfb
+          # https://www.x.org/archive/X11R7.5/doc/man/man5/xorg.conf.5.html
+
+          export PACKSQUASH_GUI_WDIO_SKIP_PREPARE=1
+          xinit "$(command -v npm)" run test -- -config /proc/self/fd/0 -logfile /proc/self/fd/2 -quiet <<'XORG_CONF'
+          Section "Device"
+            Identifier "DummyCard"
+            Driver "dummy"
+          EndSection
+
+          Section "Screen"
+            Identifier "DummyScreen"
+            Device "DummyCard"
+          EndSection
+          XORG_CONF
 
       - name: 🔨 Build GUI frontend, installers and updater artifacts
         if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'
