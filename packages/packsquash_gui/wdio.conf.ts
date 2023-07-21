@@ -1,13 +1,11 @@
 import type { Options, Services } from "@wdio/types";
 import { spawn, spawnSync, ChildProcess } from "child_process";
 
-const executableExtension = (
-  process.env.CARGO_BUILD_TARGET
-    ? process.env.CARGO_BUILD_TARGET.includes("-windows-")
-    : process.platform == "win32"
-)
-  ? ".exe"
-  : "";
+const targettingWindows = process.env.CARGO_BUILD_TARGET
+  ? process.env.CARGO_BUILD_TARGET.includes("-windows-")
+  : process.platform == "win32";
+
+const executableExtension = targettingWindows ? ".exe" : "";
 
 export const config: Options.Testrunner = {
   // On production builds Tauri uses a custom URL scheme
@@ -32,7 +30,8 @@ export const config: Options.Testrunner = {
       "tauri:options": {
         application: `../../target/${
           process.env.CARGO_BUILD_TARGET || "."
-        }/release/packsquash_gui${executableExtension}`
+        }/release/packsquash_gui${executableExtension}`,
+        args: targettingWindows ? ["--headless=chrome"] : []
       }
     }
   ],
@@ -72,8 +71,8 @@ export const config: Options.Testrunner = {
         beforeSession() {
           this.tauriDriver = spawn(
             "tauri-driver",
-            process.env.EDGEWEBDRIVER
-              ? ["--native-driver", process.env.EDGEWEBDRIVER]
+            process.env.NATIVE_WEBDRIVER_BINARY
+              ? ["--native-driver", process.env.NATIVE_WEBDRIVER_BINARY]
               : [],
             {
               stdio: ["ignore", "ignore", "inherit"]
