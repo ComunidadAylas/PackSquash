@@ -2,15 +2,17 @@ import type { Options, Services } from "@wdio/types";
 import { spawn, spawnSync, ChildProcess } from "child_process";
 import { mkdirSync } from "fs";
 
+const isWindowsHost = process.platform == "win32";
+
 const targettingWindows = process.env.CARGO_BUILD_TARGET
   ? process.env.CARGO_BUILD_TARGET.includes("-windows-")
-  : process.platform == "win32";
+  : isWindowsHost;
 
 const executableExtension = targettingWindows ? ".exe" : "";
 
 export const config: Options.Testrunner = {
   // On production builds Tauri uses a custom URL scheme
-  baseUrl: "tauri://localhost",
+  baseUrl: targettingWindows ? "https://tauri.localhost" : "tauri://localhost",
 
   // Tauri WebDriver intermediate end listens on the first
   // IPv4 loopback address only, but the default value for
@@ -88,7 +90,9 @@ export const config: Options.Testrunner = {
           if (process.env.PACKSQUASH_GUI_WDIO_SKIP_PREPARE) {
             return;
           }
-          spawnSync("npm", ["run", "build:staging"], { stdio: "inherit" });
+          spawnSync(`npm${isWindowsHost ? ".cmd" : ""}`, ["run", "build:staging"], {
+            stdio: "inherit"
+          });
           spawnSync("cargo", ["build", "--release"], { stdio: "inherit" });
         }
 
