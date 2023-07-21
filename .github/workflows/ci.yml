@@ -198,7 +198,6 @@ jobs:
           $tmp_file | Expand-Archive -DestinationPath "$env:RUNNER_TEMP\edgedriver" -Force
           $tmp_file | Remove-Item
           "EDGEWEBDRIVER=$env:RUNNER_TEMP\edgedriver\msedgedriver.exe" | Out-File -FilePath "$env:GITHUB_ENV" -Encoding utf8 -Append
-          ls "$env:RUNNER_TEMP\edgedriver"
 
       # The GitHub Windows and macOS images already have jq, git and the build-essential equivalents installed,
       # so we don't need to install them explicitly. However, that may not be the case in different environments
