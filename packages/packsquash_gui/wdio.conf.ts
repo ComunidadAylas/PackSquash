@@ -11,7 +11,7 @@ const executableExtension = (
 
 export const config: Options.Testrunner = {
   // On production builds Tauri uses a custom URL scheme
-  baseUrl: "tauri://localhost#",
+  baseUrl: "tauri://localhost",
 
   // Tauri WebDriver intermediate end listens on the first
   // IPv4 loopback address only, but the default value for

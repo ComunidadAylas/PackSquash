@@ -5,7 +5,7 @@ export default abstract class Page {
 
   /// Brings this page into view.
   public async open() {
-    await browser.url(this.urlSlug);
+    await browser.url(`#${this.urlSlug}`);
   }
 
   /// Checks whether this page is the one currently shown.
