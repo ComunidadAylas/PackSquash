@@ -1,5 +1,6 @@
 import type { Options, Services } from "@wdio/types";
 import { spawn, spawnSync, ChildProcess } from "child_process";
+import { mkdirSync } from "fs";
 
 const targettingWindows = process.env.CARGO_BUILD_TARGET
   ? process.env.CARGO_BUILD_TARGET.includes("-windows-")
@@ -51,6 +52,18 @@ export const config: Options.Testrunner = {
   // Allow relative imports without .js extension in WDIO test code.
   // See: https://stackoverflow.com/questions/62619058/appending-js-extension-on-relative-import-statements-during-typescript-compilat
   execArgv: ["--experimental-specifier-resolution=node"],
+
+  // Save screenshots of failing Cucumber steps for debugging
+  afterStep: async (step, scenario, result) => {
+    if (!result.passed) {
+      await mkdirSync(`reports/${scenario.name}/failures`, {
+        recursive: true
+      });
+      await browser.saveScreenshot(
+        `reports/${scenario.name}/failures/${step.text}.png`
+      );
+    }
+  },
 
   // WebdriverIO assumes that the Webdriver remote or intermediate end is running when
   // running tests. In usual web applications, services (see https://webdriver.io/docs/customservices/),
