@@ -70,9 +70,15 @@ export const config: Options.Testrunner = {
         }
 
         beforeSession() {
-          this.tauriDriver = spawn("tauri-driver", {
-            stdio: ["ignore", "ignore", "inherit"]
-          });
+          this.tauriDriver = spawn(
+            "tauri-driver",
+            process.env.EDGEWEBDRIVER
+              ? ["--native-driver", process.env.EDGEWEBDRIVER]
+              : [],
+            {
+              stdio: ["ignore", "ignore", "inherit"]
+            }
+          );
         }
 
         afterSession() {
