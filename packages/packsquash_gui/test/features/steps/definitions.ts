@@ -32,10 +32,10 @@ When(/^I click the (\w+) button$/, async (buttonId) => {
   }
 });
 
-Then(/^[Tt]he start button text is "(.+)"$/, (text) =>
-  expect(HomePage.startButton).toHaveText(text)
+Then(/^[Tt]he start button text is "(.+)"$/, async (text) =>
+  expect(await HomePage.startButton).toHaveText(text)
 );
 
-Then(/^I move to the (\w+) page$/, (page) =>
-  expect(pages[page].isCurrent()).toBeTruthy()
+Then(/^I move to the (\w+) page$/, async (page) =>
+    expect(await pages[page].isCurrent()).toBeTruthy()
 );
