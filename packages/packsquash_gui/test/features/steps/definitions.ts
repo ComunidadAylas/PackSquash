@@ -37,5 +37,5 @@ Then(/^[Tt]he start button text is "(.+)"$/, async (text) =>
 );
 
 Then(/^I move to the (\w+) page$/, async (page) =>
-    expect(await pages[page].isCurrent()).toBeTruthy()
+  expect(await pages[page].isCurrent()).toBeTruthy()
 );
