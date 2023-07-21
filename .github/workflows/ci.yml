@@ -326,6 +326,7 @@ jobs:
             Device "DummyCard"
           EndSection
           XORG_CONF
+          exit $(cat /run/test_exit_code)
 
       - name: ✔️ Run GUI frontend E2E tests (Windows)
         if: contains(matrix.target, '-windows-')
