@@ -10,6 +10,10 @@ export default abstract class Page {
 
   /// Checks whether this page is the one currently shown.
   public async isCurrent() {
-    return (await browser.getUrl()).endsWith(`#${this.urlSlug}`);
+    const currentUrl = await browser.getUrl();
+    return (
+      currentUrl.endsWith(`#${this.urlSlug}`) ||
+      (this.urlSlug == "/" && !currentUrl.match(/#.+$/))
+    );
   }
 }
