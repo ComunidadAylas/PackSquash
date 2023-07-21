@@ -31,8 +31,7 @@ export const config: Options.Testrunner = {
       "tauri:options": {
         application: `../../target/${
           process.env.CARGO_BUILD_TARGET || "."
-        }/release/packsquash_gui${executableExtension}`,
-        args: targettingWindows ? ["--headless=chrome"] : []
+        }/release/packsquash_gui${executableExtension}`
       }
     }
   ],
