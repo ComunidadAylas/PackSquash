@@ -56,11 +56,18 @@ export const config: Options.Testrunner = {
   // Save screenshots of failing Cucumber steps for debugging
   afterStep: async (step, scenario, result) => {
     if (!result.passed) {
-      await mkdirSync(`reports/${scenario.name}/failures`, {
+      const sanitizedScenarioName = sanitizeMaybeReservedFilenameCharacters(
+        scenario.name
+      );
+      const sanitizedStepName = sanitizeMaybeReservedFilenameCharacters(
+        step.text
+      );
+
+      await mkdirSync(`reports/${sanitizedScenarioName}/failures`, {
         recursive: true
       });
       await browser.saveScreenshot(
-        `reports/${scenario.name}/failures/${step.text}.png`
+        `reports/${sanitizedScenarioName}/failures/${sanitizedStepName}.png`
       );
     }
   },
@@ -106,3 +113,7 @@ export const config: Options.Testrunner = {
     ] as never // Cast necessary due to WDIO's bad TypeScript definitions
   ]
 };
+
+function sanitizeMaybeReservedFilenameCharacters(filePath: string) {
+  return filePath.replace(/[^a-zA-Z0-9 +-_]/g, "-");
+}
