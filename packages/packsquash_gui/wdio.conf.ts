@@ -36,7 +36,12 @@ export const config: Options.Testrunner = {
     }
   ],
 
-  reporters: ["spec"],
+  reporters: [
+    [
+      "spec",
+      { realtimeReporting: true, addConsoleLogs: true, showPreface: false }
+    ]
+  ],
 
   framework: "cucumber",
   cucumberOpts: {
