@@ -90,9 +90,13 @@ export const config: Options.Testrunner = {
           if (process.env.PACKSQUASH_GUI_WDIO_SKIP_PREPARE) {
             return;
           }
-          spawnSync(`npm${isWindowsHost ? ".cmd" : ""}`, ["run", "build:staging"], {
-            stdio: "inherit"
-          });
+          spawnSync(
+            `npm${isWindowsHost ? ".cmd" : ""}`,
+            ["run", "build:staging"],
+            {
+              stdio: "inherit"
+            }
+          );
           spawnSync("cargo", ["build", "--release"], { stdio: "inherit" });
         }
 

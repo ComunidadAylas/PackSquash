@@ -342,7 +342,7 @@ jobs:
       - name: 🔨 Build with optimized standard library
         run: cargo build --workspace ${{ matrix.excluded-packages }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
-      - name: 🔨 Build GUI frontend, installers and updater artifacts
+      - name: 🔨 Build GUI, installers and updater artifacts
         if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'
         working-directory: packages/packsquash_gui
         env:
