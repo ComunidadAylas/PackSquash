@@ -234,9 +234,7 @@ jobs:
 
       - name: 🧰 Install tauri-cli
         if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'
-        uses: taiki-e/install-action@v2
-        with:
-          tool: tauri-cli
+        run: cargo install --git https://github.com/ComunidadAylas/tauri.git --branch temp/1.x tauri-cli
 
       - name: 📥 Checkout source
         uses: actions/checkout@v3
