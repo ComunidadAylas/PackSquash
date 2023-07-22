@@ -234,7 +234,9 @@ jobs:
 
       - name: 🧰 Install tauri-cli
         if: contains(matrix.target, '-windows-') || matrix.target == 'x86_64-apple-darwin'
-        run: cargo install --git https://github.com/ComunidadAylas/tauri.git --branch temp/1.x tauri-cli
+        uses: taiki-e/install-action@v2
+        with:
+          tool: tauri-cli
 
       - name: 📥 Checkout source
         uses: actions/checkout@v3
@@ -346,7 +348,7 @@ jobs:
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-          RUST_LOG_STYLE: always
+          RUST_LOG_STYLE: always # Makes tauri-cli output colored messages
         run: cargo tauri build --target ${{ matrix.tauri-target || matrix.target }}
           -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 

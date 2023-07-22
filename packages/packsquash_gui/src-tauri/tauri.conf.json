@@ -70,9 +70,10 @@
     "bundle": {
       "active": true,
       "targets": [
-        "updater",
         "msi",
-        "dmg"
+        "dmg",
+        "app",
+        "updater"
       ],
       "identifier": "org.aylas.packsquash.gui",
       "shortDescription": "The Minecraft: Java Edition resource and data pack optimizer",
