@@ -348,7 +348,7 @@ jobs:
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-        run: cargo tauri build -v --target ${{ matrix.tauri-target || matrix.target }}
+        run: cargo tauri build --target ${{ matrix.tauri-target || matrix.target }}
           -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Generate CLI Debian package
