@@ -3197,9 +3197,9 @@ dependencies = [
 
 [[package]]
 name = "winresource"
-version = "0.1.15"
+version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cd38cf1ae6704c0bd03ee663068b8303b9c4bb069f83143c21ef25b19d1bc30"
+checksum = "8ba0f9a8c8deba5c08bb4ca5a03bdc3068e572d9b8ae46738fd3a78504249c23"
 dependencies = [
  "toml",
  "version_check 0.9.4",
