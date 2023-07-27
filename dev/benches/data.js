@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1690224970717,
+  "lastUpdate": 1690425076857,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "AlexTMjugador@users.noreply.github.com",
-            "name": "AlexTMjugador",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "b69f5c955001202c539be32b831e7b536678cd15",
-          "message": "docs(README): make Discord join call to action text less targeted to Spanish-speaking audiences\n\nWe welcome anyone regardless of their native language, although for\npractical reasons communication can only happen either in English or\nSpanish.",
-          "timestamp": "2023-06-24T22:14:01+02:00",
-          "tree_id": "370d60504bbaefc758b23f6e01a3062bdc27a451",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b69f5c955001202c539be32b831e7b536678cd15"
-        },
-        "date": 1687639485050,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10779549,
-            "range": "± 534953",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 183234403,
-            "range": "± 2685338",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2918668572,
-            "range": "± 29401180",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 287191208,
-            "range": "± 4770463",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 348618840,
             "range": "± 4205791",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ebc24aa20e35750027d939e528dc3b1c3d3f5b2c",
+          "message": "fix(deps): update rust crate serde to 1.0.176",
+          "timestamp": "2023-07-26T21:56:12Z",
+          "tree_id": "1424af5f257d802e2c4b6f7cefecab8d5510c4f6",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ebc24aa20e35750027d939e528dc3b1c3d3f5b2c"
+        },
+        "date": 1690425076180,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8407152,
+            "range": "± 379326",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 202034332,
+            "range": "± 1322984",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 1886298652,
+            "range": "± 8410923",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 268062471,
+            "range": "± 2292449",
             "unit": "ns/iter"
           }
         ]
