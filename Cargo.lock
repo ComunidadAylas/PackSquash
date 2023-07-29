@@ -2955,12 +2955,13 @@ checksum = "91304fb1fb7f14c888496d859d627db36efdb63cdd6755e286e3dd637cc28997"
 
 [[package]]
 name = "vorbis_rs"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7294961c8fb25a627f40bb9948d9a79fcc66fd16259a5870aec57288ee468b9f"
+checksum = "3df98c6aafefa076ceaf5423ff2dd828884da4b707b86a369bd750b68f15b053"
 dependencies = [
  "aotuv_lancer_vorbis_sys",
  "errno",
+ "getrandom",
  "ogg_next_sys",
  "thiserror",
  "tinyvec",
