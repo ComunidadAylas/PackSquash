@@ -14,7 +14,7 @@ use std::num::NonZeroU32;
 use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
-use vorbis_rs::{VorbisBitrateManagementStrategy, VorbisEncoder};
+use vorbis_rs::{VorbisBitrateManagementStrategy, VorbisEncoderBuilder};
 
 use crate::config::{AudioBitrateControlMode, AudioFileOptions, ChannelMixingOption};
 use crate::pack_file::asset_type::PackFileAssetType;
@@ -244,15 +244,19 @@ fn process_and_transcode(
 				input_sampling_frequency
 			);
 
-			encoder.set(Some(VorbisEncoder::new(
-				// Use a fixed serial for better compressibility when not using OptiVorbis,
-				// which is non-zero to avoid some warnings
-				1,
-				// No comments
-				[("", ""); 0],
+			let mut encoder_builder = VorbisEncoderBuilder::new_with_serial(
 				output_sampling_frequency,
 				output_channel_count,
-				match optimization_settings.bitrate_control_mode {
+				&mut transcoded_file,
+				// Use a fixed serial for better compressibility when not using OptiVorbis,
+				// which is non-zero to avoid some warnings
+				1
+			);
+
+			encoder_builder
+				// Use jumbo Ogg pages for the least encapsulation overhead
+				.minimum_page_data_size(Some(u16::MAX))
+				.bitrate_management_strategy(match optimization_settings.bitrate_control_mode {
 					AudioBitrateControlMode::Cqf => VorbisBitrateManagementStrategy::QualityVbr {
 						target_quality: target_bitrate_control_metric_to_quality(
 							optimization_settings,
@@ -276,11 +280,9 @@ fn process_and_transcode(
 							)?
 						}
 					}
-				},
-				// Use jumbo Ogg pages for the least encapsulation overhead
-				Some(u16::MAX),
-				&mut transcoded_file
-			)?));
+				});
+
+			encoder.set(Some(encoder_builder.build()?));
 
 			Ok(output_sampling_frequency)
 		},
