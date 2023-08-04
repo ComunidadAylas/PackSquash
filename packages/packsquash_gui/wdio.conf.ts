@@ -65,7 +65,7 @@ export const config: Options.Testrunner = {
         step.text
       );
 
-      await mkdirSync(`reports/${sanitizedScenarioName}/failures`, {
+      mkdirSync(`reports/${sanitizedScenarioName}/failures`, {
         recursive: true
       });
       await browser.saveScreenshot(
