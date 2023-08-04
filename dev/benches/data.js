@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691146322597,
+  "lastUpdate": 1691177781060,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "301a3f17991586f99ad578ba9b2a9f1fe06dd2b6",
-          "message": "fix(deps): update rust crate rlimit to 0.10.0",
-          "timestamp": "2023-07-04T08:27:14Z",
-          "tree_id": "b0392e6b96e20c17672cadf4df96d248deb06c4a",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/301a3f17991586f99ad578ba9b2a9f1fe06dd2b6"
-        },
-        "date": 1688464528091,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12194711,
-            "range": "± 621738",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 218908403,
-            "range": "± 8095926",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3266179246,
-            "range": "± 132302614",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 326440976,
-            "range": "± 4588114",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 254539924,
             "range": "± 5145306",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "40a1959886c70f929ca1076e116e79cc15cd7213",
+          "message": "chore(deps): drop better `serde` error message patch\n\nOur `serde_derive` fork for better error messages when deserializing\nuntagged enums does no longer build fine, and troubleshooting that has a\nsignificant maintenance cost. Let's drop that patch and explore the\nbetter-supported alternative of using custom visitors, preferably after\ngetting some kind of resolution to\nhttps://github.com/jonasbb/serde_with/issues/635.",
+          "timestamp": "2023-08-04T20:57:52+02:00",
+          "tree_id": "33fda700e13646e7a59bd513ef5400b3e4336fd2",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/40a1959886c70f929ca1076e116e79cc15cd7213"
+        },
+        "date": 1691177779730,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 11455605,
+            "range": "± 505264",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 199871113,
+            "range": "± 3256022",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2469982121,
+            "range": "± 20564080",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 314288570,
+            "range": "± 5139878",
             "unit": "ns/iter"
           }
         ]
