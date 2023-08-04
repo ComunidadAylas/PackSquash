@@ -187,7 +187,7 @@ fn read_options_file_and_squash(
 			error!(
 				"An error occurred while parsing the options file from {}: {}",
 				user_friendly_options_path,
-				PrettyPathDeserializeErrorDisplay::from(deserialize_error)
+				PrettyPathDeserializeErrorDisplay(deserialize_error)
 			);
 
 			return 3;
@@ -496,11 +496,5 @@ impl<E: Display> Display for PrettyPathDeserializeErrorDisplay<E> {
 		} else {
 			inner.fmt(f)
 		}
-	}
-}
-
-impl<E> From<serde_path_to_error::Error<E>> for PrettyPathDeserializeErrorDisplay<E> {
-	fn from(value: serde_path_to_error::Error<E>) -> Self {
-		Self(value)
 	}
 }
