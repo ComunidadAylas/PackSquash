@@ -3749,7 +3749,8 @@ dependencies = [
 [[package]]
 name = "serde_derive"
 version = "1.0.171"
-source = "git+https://github.com/ComunidadAylas/serde?branch=master#fa62653e9ef7473024f6c1f620f117b67828956f"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "389894603bd18c46fa56231694f8d827779c0951a667087194cf9de94ed24682"
 dependencies = [
  "proc-macro2 1.0.65",
  "quote 1.0.30",
@@ -5489,9 +5490,9 @@ dependencies = [
 
 [[package]]
 name = "winresource"
-version = "0.1.15"
+version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cd38cf1ae6704c0bd03ee663068b8303b9c4bb069f83143c21ef25b19d1bc30"
+checksum = "8ba0f9a8c8deba5c08bb4ca5a03bdc3068e572d9b8ae46738fd3a78504249c23"
 dependencies = [
  "toml 0.7.6",
  "version_check",

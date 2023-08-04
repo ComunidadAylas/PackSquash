@@ -19,6 +19,7 @@ export const config: Options.Testrunner = {
   // this hostname, localhost, may resolve to an IPv6 address
   // on Windows
   hostname: "127.0.0.1",
+  port: 4444,
 
   // Tests to run
   specs: ["test/features/**/*.feature"],
