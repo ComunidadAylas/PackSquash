@@ -2295,7 +2295,8 @@ dependencies = [
 [[package]]
 name = "serde_derive"
 version = "1.0.181"
-source = "git+https://github.com/ComunidadAylas/serde?branch=master#786f220c4c943ab4019b9c20187fad808d49cdba"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be02f6cb0cd3a5ec20bbcfbcbd749f57daddb1a0882dc2e46a6c236c90b977ed"
 dependencies = [
  "proc-macro2",
  "quote",

@@ -18,10 +18,6 @@ glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 # the changes were authored by jbreitbart.
 # Related PR: https://github.com/rbranson/rust-mmap/pull/13
 mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
-# Use a patch of the serde_derive crate with PR #1544 merged, which greatly improves error
-# messages when deserializing data, including options files.
-# See: https://github.com/serde-rs/serde/pull/1544
-serde_derive = { git = "https://github.com/ComunidadAylas/serde", branch = "master" }
 
 [profile.release]
 opt-level = 3
