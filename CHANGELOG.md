@@ -23,6 +23,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   stack backtraces on panic, which never worked because such binaries don't
   contain the necessary debug symbol data.
 
+#### User experience
+
+- Some options file deserialization error messages have been shortened and made
+  aware of the context in which they appear to suggest likely helpful corrective
+  actions.
+
 ## [0.4.0] - 2023-06-25
 
 ### Added

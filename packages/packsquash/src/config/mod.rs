@@ -512,7 +512,11 @@ pub enum MinecraftMod {
 // When adding new variants to this enum, please update the lib.rs file too, so
 // the default options are used for new file types too
 #[derive(Deserialize, Clone, Copy)]
-#[serde(untagged)]
+#[serde(
+	untagged,
+	expecting = "some options did not match the expected global or file-specific options.\n\
+	Are you using file-specific options as global options, or migrating from a PackSquash version that recognized other options?"
+)]
 #[non_exhaustive]
 pub enum FileOptions {
 	/// The options for transcoding audio files to a more space-efficient format that is
