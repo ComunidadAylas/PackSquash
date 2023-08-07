@@ -244,16 +244,15 @@ fn process_and_transcode(
 				input_sampling_frequency
 			);
 
-			let mut encoder_builder = VorbisEncoderBuilder::new_with_serial(
-				output_sampling_frequency,
-				output_channel_count,
-				&mut transcoded_file,
-				// Use a fixed serial for better compressibility when not using OptiVorbis,
-				// which is non-zero to avoid some warnings
-				1
-			);
-
-			encoder_builder
+			encoder.set(Some(
+				VorbisEncoderBuilder::new_with_serial(
+					output_sampling_frequency,
+					output_channel_count,
+					&mut transcoded_file,
+					// Use a fixed serial for better compressibility when not using OptiVorbis,
+					// which is non-zero to avoid some warnings
+					1
+				)
 				// Use jumbo Ogg pages for the least encapsulation overhead
 				.minimum_page_data_size(Some(u16::MAX))
 				.bitrate_management_strategy(match optimization_settings.bitrate_control_mode {
@@ -280,9 +279,9 @@ fn process_and_transcode(
 							)?
 						}
 					}
-				});
-
-			encoder.set(Some(encoder_builder.build()?));
+				})
+				.build()?
+			));
 
 			Ok(output_sampling_frequency)
 		},
