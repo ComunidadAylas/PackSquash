@@ -8,7 +8,20 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-No changes yet.
+### Changed
+
+#### Compression
+
+- The single-color texture downsizing optimization introduced in v0.4.0 is now
+  disabled by default until the necessary features to better automatically
+  determine its default value are implemented, as it caused issues with e.g.
+  more common than expected single-color font textures.
+
+#### Distribution
+
+- The official binaries have been slimmed down by not including code to show
+  stack backtraces on panic, which never worked because such binaries don't
+  contain the necessary debug symbol data.
 
 ## [0.4.0] - 2023-06-25
 
