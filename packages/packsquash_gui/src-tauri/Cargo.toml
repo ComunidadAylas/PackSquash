@@ -14,6 +14,7 @@ packsquash_options = { workspace = true, features = ["serializable-squash-option
 
 tauri = { version = "1.4.1", features = ["clipboard-write-text", "dialog-open", "dialog-save", "native-tls-vendored", "os-all", "shell-execute", "shell-open", "updater", "window-request-user-attention", "window-set-title"] }
 tauri-plugin-store = { version = "0.0.0", git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+msgbox = "0.7.0"
 
 toml = { workspace = true, features = ["parse", "display"] }
 

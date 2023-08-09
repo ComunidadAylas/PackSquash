@@ -8,7 +8,7 @@
 
 mod optimization_progress_logger;
 
-use std::{borrow::Cow, env, fs, path::Path};
+use std::{borrow::Cow, env, fs, path::Path, process::ExitCode};
 
 use packsquash::VirtualFileSystemType;
 use packsquash_options::SquashOptions;
@@ -19,7 +19,7 @@ use toml::macros::Deserialize;
 
 use crate::optimization_progress_logger::OptimizationProgressLogger;
 
-fn main() {
+fn main() -> ExitCode {
 	let mut tauri_builder = tauri::Builder::default()
 		.setup(|app| {
 			Ok(app.handle().plugin(
@@ -53,9 +53,34 @@ fn main() {
 		tauri_builder = tauri_builder.updater_target("darwin-universal");
 	}
 
-	tauri_builder
-		.run(tauri::generate_context!())
-		.expect("Could not launch application")
+	// Launching a Tauri app can fail if e.g. the webview components are not available, which
+	// may happen if the GUI executable was not installed as intended, or if such components
+	// were removed after installation. Therefore, we must handle this error. Informing users
+	// with a modal message box should fit our target users and is simple enough to do
+	match tauri_builder.run(tauri::generate_context!()) {
+		Ok(_) => ExitCode::SUCCESS,
+		Err(err) => {
+			let error_message = format!(
+				"PackSquash encountered a fatal error during GUI initialization and must close. \
+				Please try reinstalling PackSquash, or consider using its command-line version instead.\n\n\
+				Technical description: {err}"
+			);
+
+			if msgbox::create("PackSquash", &error_message, msgbox::IconType::Error).is_err() {
+				// Fallback to outputting the message to stderr if a GUI message box can't be
+				// created, which might happen in headless environments (e.g., Linux terminals
+				// running out of the context of a display server), and other bizarre environments.
+				// On Windows, getting an executable using the windows susbsystem that does not
+				// allocate any console to print anything to stderr requires redirecting that
+				// stream to a file, which is not a particularly intuitive thing to do, but
+				// hopefully calling the MessageBox Win32 API function there is extremely unlikely
+				// to fail
+				eprintln!("{error_message}");
+			}
+
+			ExitCode::FAILURE
+		}
+	}
 }
 
 #[tauri::command]

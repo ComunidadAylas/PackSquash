@@ -2384,6 +2384,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "msgbox"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c50ad84d85f9deb59cf8bee0cd5a274504a4247f446ce089fdf8475d77fe605"
+dependencies = [
+ "cocoa",
+ "glib",
+ "gtk",
+ "objc",
+ "thiserror",
+ "winapi",
+]
+
+[[package]]
 name = "native-tls"
 version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2782,6 +2796,7 @@ dependencies = [
  "cargo-about",
  "krates 0.14.0",
  "log",
+ "msgbox",
  "packsquash",
  "packsquash_options",
  "path-absolutize",
