@@ -108,7 +108,7 @@
           }
         },
         "webviewInstallMode": {
-          "type": "embedBootstrapper"
+          "type": "downloadBootstrapper"
         }
       }
     },
