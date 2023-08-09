@@ -18,8 +18,8 @@ packsquash = { path = "packages/packsquash", version = "0.5.0" }
 packsquash_options = { path = "packages/packsquash_options", version = "0.5.0" }
 packsquash_util = { path = "packages/packsquash_util", version = "0.5.0" }
 
-serde = { version = "1.0.171", features = ["derive", "rc"] }
-serde_json = "1.0.103"
+serde = { version = "1.0.183", features = ["derive", "rc"] }
+serde_json = "1.0.104"
 toml = { version = "0.7.6", default-features = false }
 schemars = { version = "0.8.12", default-features = false }
 
@@ -27,7 +27,7 @@ log = "0.4.19"
 
 ahash = "0.8.3"
 enumset = "1.1.2"
-globset = { version = "0.4.11", default-features = false }
+globset = { version = "0.4.13", default-features = false }
 strum = { version = "0.25.0", features = ["derive"] }
 camino = "1.1.6"
 
