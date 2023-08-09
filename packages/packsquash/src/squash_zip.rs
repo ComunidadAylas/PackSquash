@@ -28,7 +28,7 @@ use self::{
 };
 use crate::{
 	scratch_file::{ScratchFile, ScratchFilesBudget},
-	util::crc32_hashing_read::Crc32HashingRead,
+	util::{crc32_hashing_read::Crc32HashingRead, fallible_iterator_util::FallibleIterExt},
 	RelativePath
 };
 
@@ -300,11 +300,10 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 				.take(local_file_header.compressed_size as u64)
 				.bytes();
 
-			already_stored = are_byte_iterators_equal(
-				Read::by_ref(&mut compressed_data_scratch_file).bytes(),
-				matching_output_zip_data,
-				local_file_header.compressed_size
-			)?;
+			already_stored = compressed_data_scratch_file
+				.by_ref()
+				.bytes()
+				.try_eq(matching_output_zip_data)?;
 
 			if already_stored {
 				// We know for sure we found a matching file, so just add another pointer to an
@@ -464,11 +463,7 @@ impl<'settings, 'budget, F: Read + Seek> SquashZip<'settings, 'budget, F> {
 				.take(previous_file.compressed_size as u64)
 				.bytes();
 
-			already_stored = are_byte_iterators_equal(
-				previous_zip_data,
-				matching_output_zip_data,
-				previous_file.compressed_size
-			)?;
+			already_stored = previous_zip_data.try_eq(matching_output_zip_data)?;
 
 			if already_stored {
 				// We know for sure we found a matching file, so just add another pointer to
@@ -944,41 +939,6 @@ fn add_partial_central_directory_header(
 			Ok(())
 		}
 		Entry::Occupied(entry) => Err(SquashZipError::FileAlreadyAdded(entry.replace_key()))
-	}
-}
-
-/// Checks whether two fallible byte iterators return the same byte sequence, exhausting them.
-/// Any error returned by any of the iterators will be propagated to the caller.
-fn are_byte_iterators_equal(
-	data: impl Iterator<Item = Result<u8, io::Error>>,
-	other: impl Iterator<Item = Result<u8, io::Error>>,
-	data_size: u32
-) -> Result<bool, SquashZipError> {
-	let mut bytes_compared = 0;
-
-	match data.zip(other).find(|(byte, other_byte)| {
-		bytes_compared += 1;
-
-		if let (Ok(byte), Ok(other_byte)) = (byte, other_byte) {
-			*byte != *other_byte
-		} else {
-			true
-		}
-	}) {
-		Some((Ok(_), Ok(_))) => {
-			// Found a different byte
-			Ok(false)
-		}
-		Some((Err(err), _) | (_, Err(err))) => {
-			// An I/O error occurred. Propagate it
-			Err(err.into())
-		}
-		None => {
-			// A different byte was not found (i.e., the bytes read from both iterators
-			// were equal). Make sure we read the same number of bytes from both, as one
-			// may still be shorter than the other
-			Ok(bytes_compared == data_size)
-		}
 	}
 }
 

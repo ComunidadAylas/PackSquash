@@ -6,3 +6,5 @@ pub mod range_bounds_intersect;
 pub mod range_bounds_only;
 pub mod strip_utf8_bom;
 pub mod zero_copy_deserialize_traits;
+
+pub mod fallible_iterator_util;
