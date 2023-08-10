@@ -27,7 +27,7 @@ export default () => {
         }
       }}
     >
-      <GithubLogo class="w-full p-2 text-zinc-50" size="auto" />
+      <GithubLogo class="p-2 text-zinc-50" size="100%" />
     </button>
   );
 };

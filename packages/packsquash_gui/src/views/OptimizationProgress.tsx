@@ -188,8 +188,8 @@ export default () => {
 
         <div class="container mx-auto flex min-h-0 grow flex-col justify-center gap-4 text-center">
           <SpinnerGap
-            size="auto"
             class="max-h-36 min-h-0 animate-spin text-zinc-900 drop-shadow-md"
+            size="100%"
           />
           <FluidTitleHeader>
             <label for="optimization-progress">

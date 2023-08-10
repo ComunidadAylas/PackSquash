@@ -60,7 +60,7 @@ export default () => {
 
       <ViewContainer>
         <div class="container mx-auto flex min-h-0 grow flex-col justify-center gap-3 break-words text-center drop-shadow-md">
-          <CheckCircle class="max-h-48 min-h-0 drop-shadow-md" size="auto" />
+          <CheckCircle class="max-h-48 min-h-0 drop-shadow-md" size="100%" />
 
           <FluidTitleHeader>
             {l10n("optimization-success-screen-done-text")}

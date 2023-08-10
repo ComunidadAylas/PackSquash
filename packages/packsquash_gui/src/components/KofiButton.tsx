@@ -25,7 +25,7 @@ export default () => {
         }
       }}
     >
-      <KofiLogo class="w-full" />
+      <KofiLogo />
     </button>
   );
 };

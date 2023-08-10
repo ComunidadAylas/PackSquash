@@ -27,7 +27,7 @@ export default () => {
         }
       }}
     >
-      <DiscordLogo class="w-full p-2 text-zinc-50" size="auto" />
+      <DiscordLogo class="p-2 text-zinc-50" size="100%" />
     </button>
   );
 };

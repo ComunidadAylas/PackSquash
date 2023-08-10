@@ -60,7 +60,7 @@ export default () => {
           }
         }}
       >
-        <Translate class="w-full p-2 text-zinc-50" size="auto" />
+        <Translate class="p-2 text-zinc-50" size="100%" />
       </button>
     </div>
   );

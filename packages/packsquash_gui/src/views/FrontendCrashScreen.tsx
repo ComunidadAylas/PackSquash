@@ -29,7 +29,7 @@ export default (props: { throwable: unknown; reset: () => void }) => {
 
       <ViewContainer>
         <div class="container mx-auto flex min-h-0 grow flex-col justify-center gap-3 break-words text-center">
-          <CircleWavyWarning class="max-h-48 min-h-0" size="auto" />
+          <CircleWavyWarning class="max-h-48 min-h-0" size="100%" />
 
           <h1 class="text-[7vmin] text-lg font-bold drop-shadow-md sm:text-xl md:text-3xl lg:text-4xl">
             {l10n("crash-screen-header")}

@@ -31,10 +31,10 @@ export default (props: ComponentProps) => {
   const backIcon = (
     <CaretLeft
       class={
-        "w-full rounded-full p-2 text-zinc-700 hover:text-zinc-800" +
+        "rounded-full p-2 text-zinc-700 hover:text-zinc-800" +
         (props.class !== undefined ? ` ${props.class}` : "")
       }
-      size="auto"
+      size="100%"
     />
   );
 
