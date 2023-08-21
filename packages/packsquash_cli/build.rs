@@ -1,9 +1,10 @@
+use chrono::{Datelike, TimeZone, Utc};
 use git2::opts::set_verify_owner_validation;
 use git2::{DescribeFormatOptions, DescribeOptions, Repository};
 use std::env;
 use std::env::current_dir;
 use std::error::Error;
-use time::OffsetDateTime;
+use std::time::SystemTime;
 
 /// Initializes environment variables that will be accessible in the source
 /// code via the env! macro, and takes care of build-time metadata.
@@ -34,13 +35,26 @@ fn main() {
 	);
 
 	// Set variables with the build dates, for copyright and version strings
-	let build_date = OffsetDateTime::now_utc();
-	let (build_year, build_month, build_day) = build_date.to_calendar_date();
+	let build_date = Utc
+		.timestamp_opt(
+			SystemTime::UNIX_EPOCH
+				.elapsed()
+				.expect("The system clock is set behind the UNIX epoch")
+				.as_secs()
+				.try_into()
+				.expect("The system clock is too far in the future"),
+			0
+		)
+		.single()
+		.expect("The system clock is too far in the future");
+
 	println!(
 		"cargo:rustc-env=BUILD_DATE={}-{:02}-{:02}",
-		build_year, build_month as u8, build_day
+		build_date.year(),
+		build_date.month(),
+		build_date.day()
 	);
-	println!("cargo:rustc-env=BUILD_YEAR={build_year}");
+	println!("cargo:rustc-env=BUILD_YEAR={}", build_date.year());
 
 	// Add platform-specific metadata to the executable
 	add_executable_metadata();

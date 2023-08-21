@@ -19,6 +19,10 @@ glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 # Related PR: https://github.com/rbranson/rust-mmap/pull/13
 mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
 
+# Use our fork of chrono to drop a dependency on android-tzdata when not used.
+# Related PR: https://github.com/chronotope/chrono/pull/1220
+chrono = { git = "https://github.com/ComunidadAylas/chrono", branch = "0.4.x" }
+
 [profile.release]
 opt-level = 3
 lto = "fat"

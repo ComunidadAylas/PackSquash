@@ -73,7 +73,7 @@ rlimit = "0.10.1"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.51.0"
-wmi = { version = "0.13.1", default-features = false, features = ["time"] }
+wmi = { version = "0.13.1", default-features = false }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.9.3"
