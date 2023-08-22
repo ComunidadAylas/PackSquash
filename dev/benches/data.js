@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1692643386165,
+  "lastUpdate": 1692725361483,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "2146593f96c64a35323e333a25d88bf1b16ec925",
-          "message": "fix(deps): update rust crate tempfile to 3.7.0",
-          "timestamp": "2023-07-20T19:33:26Z",
-          "tree_id": "e1e9b9ec6ad4ca7955d35f2aa5b4f85ab8c7fe68",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2146593f96c64a35323e333a25d88bf1b16ec925"
-        },
-        "date": 1689888774352,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9981865,
-            "range": "± 366407",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 209975621,
-            "range": "± 1514617",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2070699935,
-            "range": "± 12927101",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 290937303,
-            "range": "± 3093243",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 244133541,
             "range": "± 1323134",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f3e6bfdc45a6c174aadb3eecb56328e9ffc7c0d1",
+          "message": "chore(deps): update rust crate winresource to 0.1.17",
+          "timestamp": "2023-08-22T14:33:27Z",
+          "tree_id": "bf4789a7853c5b01ff26c09e283855a8d585e07b",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f3e6bfdc45a6c174aadb3eecb56328e9ffc7c0d1"
+        },
+        "date": 1692725360784,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9734727,
+            "range": "± 636121",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 159406780,
+            "range": "± 3835385",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2736514586,
+            "range": "± 24199585",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 243791427,
+            "range": "± 2485925",
             "unit": "ns/iter"
           }
         ]
