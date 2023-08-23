@@ -80,7 +80,7 @@ core-foundation = "0.9.3"
 mach2 = "0.4.1"
 
 [dev-dependencies]
-tokio-test = "0.4.2"
+tokio-test = "0.4.3"
 pretty_assertions = "1.4.0"
 
 criterion = { version = "0.5.1", features = ["html_reports"] }
