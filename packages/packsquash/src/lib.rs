@@ -24,7 +24,6 @@
 
 use std::borrow::Cow;
 use std::convert::Infallible;
-use std::hint::unreachable_unchecked;
 use std::io::ErrorKind;
 use std::panic;
 use std::pin::Pin;
@@ -599,13 +598,8 @@ pub enum PackSquasherError {
 }
 
 impl From<Infallible> for PackSquasherError {
-	fn from(_: Infallible) -> Self {
-		// SAFETY: by construction, Infallible cannot be instantiated, so this
-		// code can't ever be executed
-		#[allow(unsafe_code)]
-		unsafe {
-			unreachable_unchecked()
-		}
+	fn from(x: Infallible) -> Self {
+		match x {}
 	}
 }
 
