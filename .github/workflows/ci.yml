@@ -219,7 +219,7 @@ jobs:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
-      - name: 🛡️ Generate SLSA attestation subject data for binaries
+      - name: ✒️ Generate SLSA attestation subject data for binaries
         id: slsa-attestation-subjects
         shell: bash
         run: echo "hashes-${{ matrix.target }}=$(shasum -b -a 256 target/${{ env.CARGO_BUILD_TARGET }}/{release,debian}/packsquash{,.exe,_*.deb} | sed -E 's/ \*(.*)$/  \1/' | tr '\n' '|')" >> "$GITHUB_OUTPUT"
@@ -257,7 +257,7 @@ jobs:
           name: PackSquash CLI executable (universal-apple-darwin)
           path: packsquash
 
-      - name: 🛡️ Generate SLSA attestation subject data for binary
+      - name: ✒️ Generate SLSA attestation subject data for binary
         id: slsa-attestation-subjects
         shell: bash
         run: echo "hashes-universal-apple-darwin=$(shasum -b -a 256 packsquash | sed -E 's/ \*(.*)$/  \1/' | tr '\n' '|')" >> "$GITHUB_OUTPUT"
@@ -433,14 +433,14 @@ jobs:
     continue-on-error: true
 
     outputs:
-      slsa-attestation-subjects-hashes: ${{ steps.merge-subjects.outputs.merged-subjects }}
+      subject-hashes: ${{ steps.merge-subjects.outputs.merged-subjects }}
 
     steps:
-      - name: 🔗 Merge and encode attestation subject hash data
+      - name: 🔗 Merge and encode attestation subject data
         id: merge-subjects
         shell: bash
         run: |
-          ATTESTATION_SUBJECTS=$(cat <<'ATTESTATION_SUBJECTS' | tr -d '\n' | tr '|' '\n' | base64 | tr -d '\n'
+          ATTESTATION_SUBJECTS=$(cat <<'ATTESTATION_SUBJECTS' | tr -d '\n' | tr '|' '\n' | base64 -w0
           ${{ needs.build.outputs.slsa-attestation-subject-hashes-x86_64-unknown-linux-gnu }}
           ${{ needs.build.outputs.slsa-attestation-subject-hashes-x86_64-unknown-linux-musl }}
           ${{ needs.build.outputs.slsa-attestation-subject-hashes-aarch64-unknown-linux-gnu }}
@@ -456,7 +456,7 @@ jobs:
 
   build-slsa-provenance:
 
-    name: Generate SLSA level 3 provenance data
+    name: Generate SLSA v1.0 build L3 provenance data
 
     needs: merge-slsa-attestation-subjects-data
 
@@ -467,5 +467,5 @@ jobs:
 
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
     with:
-      base64-subjects: ${{ needs.merge-slsa-attestation-subjects-data.outputs.slsa-attestation-subjects-hashes }}
+      base64-subjects: ${{ needs.merge-slsa-attestation-subjects-data.outputs.subject-hashes }}
       provenance-name: binary_provenance.intoto.jsonl
