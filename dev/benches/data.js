@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693399381276,
+  "lastUpdate": 1693401673805,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "6590f6faab40332763b2193bfafe169548f8a1c8",
-          "message": "fix(deps): update rust crate serde to 1.0.178",
-          "timestamp": "2023-07-29T00:26:31Z",
-          "tree_id": "250157baabefb7c7e67ff7f716cefc3af7b001d9",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6590f6faab40332763b2193bfafe169548f8a1c8"
-        },
-        "date": 1690606006722,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9376946,
-            "range": "± 136812",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 209809557,
-            "range": "± 1667287",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2048172011,
-            "range": "± 12594137",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 288274915,
-            "range": "± 2014188",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 311647915,
             "range": "± 2808737",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "a08f953c73ce065b6e4f348e2acb75f38e77f8f8",
+          "message": "ci(slsa): do not use GNU-specific `base64` command flag\n\nThe POSIX standard does not define the `base64` command, and it turns\nout that its macOS flavor does not have the `-w` flag, which is\nLinux-specific. Let's use `tr` instead to delete newlines, which is\nspecified by POSIX.",
+          "timestamp": "2023-08-30T14:47:36+02:00",
+          "tree_id": "1edc31b41d0fa71680b119c7938c91212980099b",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a08f953c73ce065b6e4f348e2acb75f38e77f8f8"
+        },
+        "date": 1693401672681,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9338693,
+            "range": "± 239599",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 166283687,
+            "range": "± 6592389",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3177960269,
+            "range": "± 33497023",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 259788785,
+            "range": "± 2334975",
             "unit": "ns/iter"
           }
         ]
