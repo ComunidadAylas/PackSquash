@@ -210,7 +210,7 @@ jobs:
       - name: 🛡️ Generate SLSA attestation subject data for binaries
         id: slsa-attestation-subjects
         shell: bash
-        run: echo "hashes=$(sha256sum target/${{ env.CARGO_BUILD_TARGET }}/{release,debian}/packsquash{,.exe,_*.deb} | base64 -w0)" >> "$GITHUB_OUTPUT"
+        run: echo "hashes=$(sha256sum target/${{ env.CARGO_BUILD_TARGET }}/{release,debian}/packsquash{,.exe,_*.deb} | base64 | tr -d '\n')" >> "$GITHUB_OUTPUT"
 
   build-universal-macos-binaries:
 
@@ -248,7 +248,7 @@ jobs:
       - name: 🛡️ Generate SLSA attestation subject data for binary
         id: slsa-attestation-subjects
         shell: bash
-        run: echo "hashes=$(sha256sum packsquash | base64 -w0)" >> "$GITHUB_OUTPUT"
+        run: echo "hashes=$(sha256sum packsquash | base64 | tr -d '\n')" >> "$GITHUB_OUTPUT"
 
   build-docker-images:
 
