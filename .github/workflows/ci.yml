@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       - name: 🧰 Install Rust toolchain
         uses: dtolnay/rust-toolchain@nightly
@@ -35,14 +35,14 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🔍 Clippy check
-        uses: giraffate/clippy-action@v1
+        uses: giraffate/clippy-action@13b9d32482f25d29ead141b79e7e04e7900281e0 # v1
         with:
           clippy_flags: --all-targets -D warnings
           reporter: github-check
           fail_on_error: true
 
       - name: 🔍 Cargo deny check
-        uses: EmbarkStudios/cargo-deny-action@v1
+        uses: EmbarkStudios/cargo-deny-action@a50c7d5f86370e02fae8472c398f15a36e517bb8 # v1
 
       - name: 🔍 Check Rust source code format
         run: cargo fmt --all --check
@@ -148,22 +148,22 @@ jobs:
           components: rust-src
 
       - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@cc5a5c56a296ea597e6ea38f551f25dee8be1225 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@cc5a5c56a296ea597e6ea38f551f25dee8be1225 # v2
         with:
           tool: cargo-deb
 
       - name: 📥 Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
         with:
           fetch-depth: 0 # Keep the commit history for proper version information
 
@@ -189,7 +189,7 @@ jobs:
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
           path: |
@@ -198,7 +198,7 @@ jobs:
 
       - name: 📤 Upload CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3
         with:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
@@ -213,13 +213,13 @@ jobs:
 
     steps:
       - name: 📥 Download PackSquash CLI x64 macOS executable
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
         with:
           name: PackSquash CLI executable (x86_64-apple-darwin)
           path: packsquash-x64
 
       - name: 📥 Download PackSquash CLI ARM64 macOS executable
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
         with:
           name: PackSquash CLI executable (aarch64-apple-darwin)
           path: packsquash-aarch64
@@ -228,7 +228,7 @@ jobs:
         run: lipo -create -output packsquash packsquash-x64/packsquash packsquash-aarch64/packsquash
 
       - name: 📤 Upload universal CLI binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3
         with:
           name: PackSquash CLI executable (universal-apple-darwin)
           path: packsquash
@@ -249,14 +249,14 @@ jobs:
 
     steps:
       - name: 📥 Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       - name: 🧰 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55 # v2
 
       - name: ⚙️ Generate Docker image metadata
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175 # v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # Tag the image as "edge" for every commit on master.
@@ -271,7 +271,7 @@ jobs:
             org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
       - name: 📥 Download PackSquash CLI x64 musl executable
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
         with:
           name: PackSquash CLI executable (x86_64-unknown-linux-musl)
 
@@ -279,7 +279,7 @@ jobs:
         run: mv packsquash packsquash-amd64
 
       - name: 📥 Download PackSquash CLI ARM64 musl executable
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
         with:
           name: PackSquash CLI executable (aarch64-unknown-linux-musl)
 
@@ -296,7 +296,7 @@ jobs:
       # This permission is not given to PRs from forked repositories.
       # See: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
       - name: ⚙️ Login to ${{ env.REGISTRY }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2
         if: steps.check_write_permission.outputs.has-permission
         with:
           registry: ${{ env.REGISTRY }}
@@ -304,7 +304,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔨 Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825 # v4
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -316,7 +316,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim
+    container: debian:bullseye-slim@sha256:61386e11b5256efa33823cbfafd668dd651dbce810b24a8fb7b2e32fa7f65a85
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
@@ -344,7 +344,7 @@ jobs:
                               python3-venv gpg
 
       - name: 📥 Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       # Necessary for steps that invoke Git commands to work properly on workflows run on containers.
       # See: https://github.com/actions/checkout/issues/766
@@ -355,7 +355,7 @@ jobs:
         uses: dtolnay/rust-toolchain@nightly
 
       - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2
 
       - name: 📥 Download test packs dataset
         run: scripts/test-packs/download.sh
