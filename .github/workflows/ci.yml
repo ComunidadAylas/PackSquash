@@ -413,6 +413,7 @@ jobs:
     needs: build
 
     permissions:
+      contents: write
       actions: read
       id-token: write
 
@@ -427,6 +428,7 @@ jobs:
     needs: build-universal-macos-binaries
 
     permissions:
+      contents: write
       actions: read
       id-token: write
 
