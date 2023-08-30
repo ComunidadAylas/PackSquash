@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693401673805,
+  "lastUpdate": 1693404277080,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "64cbe897f95dcb260dcf4ecd7b542a8f7ebd1ad0",
-          "message": "chore(deps): update `vorbis_rs` to 0.4.0",
-          "timestamp": "2023-07-29T23:18:27+02:00",
-          "tree_id": "d310a8ba844e7ccb4c725285fd0068e01668113d",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/64cbe897f95dcb260dcf4ecd7b542a8f7ebd1ad0"
-        },
-        "date": 1690667592722,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 8598908,
-            "range": "± 140225",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 204001559,
-            "range": "± 926286",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 1904202073,
-            "range": "± 18939708",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 272091024,
-            "range": "± 2716456",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 259788785,
             "range": "± 2334975",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "22d48092f8530d78cda0283ed336c428524364b0",
+          "message": "ci(slsa): more macOS command portability fixes",
+          "timestamp": "2023-08-30T15:31:05+02:00",
+          "tree_id": "6fb46102aaedeecf9663ed33d55c49ad92a43546",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/22d48092f8530d78cda0283ed336c428524364b0"
+        },
+        "date": 1693404276014,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9401506,
+            "range": "± 496251",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 169233615,
+            "range": "± 11951801",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3137221041,
+            "range": "± 53863990",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 257741409,
+            "range": "± 1797717",
             "unit": "ns/iter"
           }
         ]
