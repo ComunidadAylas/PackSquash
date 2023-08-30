@@ -30,8 +30,9 @@ jobs:
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       - name: 🧰 Install Rust toolchain
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@v1
         with:
+          toolchain: nightly
           components: rustfmt, clippy
 
       - name: 🔍 Clippy check
@@ -116,6 +117,9 @@ jobs:
       # https://github.com/rust-lang/rust/blob/4c8bb79d9f565115637cc6da739f8389e79f3a29/library/std/Cargo.toml#L54-L79
       OPTIMIZED_RELEASE_BUILD_FLAGS: -Z build-std -Z build-std-features=panic-unwind
 
+    outputs:
+      slsa-attestation-subjects-hashes: ${{ steps.slsa-attestation-subjects.outputs.hashes }}
+
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
@@ -141,7 +145,7 @@ jobs:
         run: apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
 
       - name: 🧰 Install Rust toolchain
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: nightly-${{ matrix.host-target }}
           targets: ${{ env.CARGO_BUILD_TARGET }}
@@ -203,6 +207,11 @@ jobs:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
+      - name: 🛡️ Generate SLSA attestation subject data for binaries
+        id: slsa-attestation-subjects
+        shell: bash
+        run: echo "hashes=$(sha256sum target/${{ env.CARGO_BUILD_TARGET }}/{release,debian}/packsquash{,.exe,_*.deb} | base64 -w0)" >> "$GITHUB_OUTPUT"
+
   build-universal-macos-binaries:
 
     name: Build universal macOS binaries
@@ -210,6 +219,9 @@ jobs:
     runs-on: macos-latest
 
     needs: build
+
+    outputs:
+      slsa-attestation-subjects-hashes: ${{ steps.slsa-attestation-subjects.outputs.hashes }}
 
     steps:
       - name: 📥 Download PackSquash CLI x64 macOS executable
@@ -232,6 +244,11 @@ jobs:
         with:
           name: PackSquash CLI executable (universal-apple-darwin)
           path: packsquash
+
+      - name: 🛡️ Generate SLSA attestation subject data for binary
+        id: slsa-attestation-subjects
+        shell: bash
+        run: echo "hashes=$(sha256sum packsquash | base64 -w0)" >> "$GITHUB_OUTPUT"
 
   build-docker-images:
 
@@ -326,7 +343,9 @@ jobs:
     timeout-minutes: 30
 
     # Only benchmark code that passes all the checks
-    needs: [ static-analysis, build ]
+    needs:
+      - static-analysis
+      - build
 
     # Ignore runs that don't have the secret needed to decrypt packs (this happens for PRs outside
     # the repository). First-time would-be contributors need to have their workflows approved
@@ -352,7 +371,9 @@ jobs:
         run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
 
       - name: 🧰 Install Rust toolchain
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: nightly
 
       - name: 💨 Cache Rust artifacts
         uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2
@@ -384,3 +405,31 @@ jobs:
           alert-threshold: 150%
           fail-on-alert: false
           max-items-in-chart: 50
+
+  build-slsa-provenance:
+
+    name: Generate SLSA level 3 provenance data
+
+    needs: build
+
+    permissions:
+      actions: read
+      id-token: write
+
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+    with:
+      base64-subjects: ${{ needs.build.outputs.slsa-attestation-subjects-hashes }}
+
+  build-universal-macos-binaries-slsa-provenance:
+
+    name: Generate SLSA level 3 provenance data (universal macOS binaries)
+
+    needs: build-universal-macos-binaries
+
+    permissions:
+      actions: read
+      id-token: write
+
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+    with:
+      base64-subjects: ${{ needs.build-universal-macos-binaries.outputs.slsa-attestation-subjects-hashes }}

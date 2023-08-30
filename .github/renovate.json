@@ -14,6 +14,11 @@
 		{
 			"matchManagers": ["pip_requirements"],
 			"groupName": "Helper Python scripts"
+		},
+		{
+			"matchManagers": ["github-actions"],
+			"matchPackageNames": ["slsa-framework/slsa-github-generator"],
+			"pinDigests": false
 		}
 	]
 }
