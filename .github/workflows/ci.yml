@@ -118,7 +118,19 @@ jobs:
       OPTIMIZED_RELEASE_BUILD_FLAGS: -Z build-std -Z build-std-features=panic-unwind
 
     outputs:
-      slsa-attestation-subjects-hashes: ${{ steps.slsa-attestation-subjects.outputs.hashes }}
+      # Uglier than it needs to be because GitHub laid off the team whose
+      # responsibility was to deploy a better alternative. Talk about increased
+      # productivity... See:
+      # https://github.com/orgs/community/discussions/17245
+      # https://stackoverflow.com/questions/70287603/github-actions-dynamic-outputs-for-job-with-strategy-matrix
+      slsa-attestation-subject-hashes-x86_64-unknown-linux-gnu: ${{ steps.slsa-attestation-subjects.outputs.hashes-x86_64-unknown-linux-gnu }}
+      slsa-attestation-subject-hashes-x86_64-unknown-linux-musl: ${{ steps.slsa-attestation-subjects.outputs.hashes-x86_64-unknown-linux-musl }}
+      slsa-attestation-subject-hashes-aarch64-unknown-linux-gnu: ${{ steps.slsa-attestation-subjects.outputs.hashes-aarch64-unknown-linux-gnu }}
+      slsa-attestation-subject-hashes-aarch64-unknown-linux-musl: ${{ steps.slsa-attestation-subjects.outputs.hashes-aarch64-unknown-linux-musl }}
+      slsa-attestation-subject-hashes-x86_64-pc-windows-gnu: ${{ steps.slsa-attestation-subjects.outputs.hashes-x86_64-pc-windows-gnu }}
+      slsa-attestation-subject-hashes-x86_64-apple-darwin: ${{ steps.slsa-attestation-subjects.outputs.hashes-x86_64-apple-darwin }}
+      slsa-attestation-subject-hashes-aarch64-apple-darwin: ${{ steps.slsa-attestation-subjects.outputs.hashes-aarch64-apple-darwin }}
+      slsa-attestation-subject-hashes-universal-apple-darwin: ${{ steps.slsa-attestation-subjects.outputs.hashes-universal-apple-darwin }}
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
@@ -210,7 +222,7 @@ jobs:
       - name: 🛡️ Generate SLSA attestation subject data for binaries
         id: slsa-attestation-subjects
         shell: bash
-        run: echo "hashes=$(shasum -b -a 256 target/${{ env.CARGO_BUILD_TARGET }}/{release,debian}/packsquash{,.exe,_*.deb} | sed -E 's/ \*(.*)$/  \1/' | base64 | tr -d '\n')" >> "$GITHUB_OUTPUT"
+        run: echo "hashes-${{ matrix.target }}=$(shasum -b -a 256 target/${{ env.CARGO_BUILD_TARGET }}/{release,debian}/packsquash{,.exe,_*.deb} | sed -E 's/ \*(.*)$/  \1/' | tr '\n' '|')" >> "$GITHUB_OUTPUT"
 
   build-universal-macos-binaries:
 
@@ -248,7 +260,7 @@ jobs:
       - name: 🛡️ Generate SLSA attestation subject data for binary
         id: slsa-attestation-subjects
         shell: bash
-        run: echo "hashes=$(shasum -b -a 256 packsquash | sed -E 's/ \*(.*)$/  \1/' | base64 | tr -d '\n')" >> "$GITHUB_OUTPUT"
+        run: echo "hashes-universal-apple-darwin=$(shasum -b -a 256 packsquash | sed -E 's/ \*(.*)$/  \1/' | tr '\n' '|')" >> "$GITHUB_OUTPUT"
 
   build-docker-images:
 
@@ -406,11 +418,47 @@ jobs:
           fail-on-alert: false
           max-items-in-chart: 50
 
+  merge-slsa-attestation-subjects-data:
+
+    name: Merge SLSA attestation subjects data
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - build
+      - build-universal-macos-binaries
+
+    timeout-minutes: 5
+
+    continue-on-error: true
+
+    outputs:
+      slsa-attestation-subjects-hashes: ${{ steps.merge-subjects.outputs.merged-subjects }}
+
+    steps:
+      - name: 🔗 Merge and encode attestation subject hash data
+        id: merge-subjects
+        shell: bash
+        run: |
+          ATTESTATION_SUBJECTS=$(cat <<'ATTESTATION_SUBJECTS' | tr -d '\n' | tr '|' '\n' | base64 | tr -d '\n'
+          ${{ needs.build.outputs.slsa-attestation-subject-hashes-x86_64-unknown-linux-gnu }}
+          ${{ needs.build.outputs.slsa-attestation-subject-hashes-x86_64-unknown-linux-musl }}
+          ${{ needs.build.outputs.slsa-attestation-subject-hashes-aarch64-unknown-linux-gnu }}
+          ${{ needs.build.outputs.slsa-attestation-subject-hashes-aarch64-unknown-linux-musl }}
+          ${{ needs.build.outputs.slsa-attestation-subject-hashes-x86_64-pc-windows-gnu }}
+          ${{ needs.build.outputs.slsa-attestation-subject-hashes-x86_64-apple-darwin }}
+          ${{ needs.build.outputs.slsa-attestation-subject-hashes-aarch64-apple-darwin }}
+          ${{ needs.build.outputs.slsa-attestation-subject-hashes-universal-apple-darwin }}
+          ATTESTATION_SUBJECTS
+          )
+          echo "$ATTESTATION_SUBJECTS"
+          echo "merged-subjects=$ATTESTATION_SUBJECTS" >> "$GITHUB_OUTPUT"
+
   build-slsa-provenance:
 
     name: Generate SLSA level 3 provenance data
 
-    needs: build
+    needs: merge-slsa-attestation-subjects-data
 
     permissions:
       contents: write
@@ -419,21 +467,5 @@ jobs:
 
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
     with:
-      base64-subjects: ${{ needs.build.outputs.slsa-attestation-subjects-hashes }}
+      base64-subjects: ${{ needs.merge-slsa-attestation-subjects-data.outputs.slsa-attestation-subjects-hashes }}
       provenance-name: binary_provenance.intoto.jsonl
-
-  build-universal-macos-binaries-slsa-provenance:
-
-    name: Generate SLSA level 3 provenance data (universal macOS binaries)
-
-    needs: build-universal-macos-binaries
-
-    permissions:
-      contents: write
-      actions: read
-      id-token: write
-
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
-    with:
-      base64-subjects: ${{ needs.build-universal-macos-binaries.outputs.slsa-attestation-subjects-hashes }}
-      provenance-name: universal_macos_binary_provenance.intoto.jsonl
