@@ -22,6 +22,19 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - The official binaries have been slimmed down by not including code to show
   stack backtraces on panic, which never worked because such binaries don't
   contain the necessary debug symbol data.
+- [SLSA](https://slsa.dev/) v1.0 attestations conforming to the level 3 of the
+  build track are now generated for the official PackSquash binary artifacts and
+  containers.
+  - These attestations allow security-conscious users to assert that they were
+    generated on GitHub Actions runners with a well-defined build process, and
+    that they have not been tampered with since they were generated.
+  - The third-party
+    [`slsa-verifier`](https://github.com/slsa-framework/slsa-verifier) and
+    [Cosign](https://docs.sigstore.dev/verifying/attestation/) tools can be used
+    to verify these attestations after downloading the attached provenance data.
+  - Due to the numerous technical advantages of SLSA attestations, in addition
+    to their decentralized and free nature, the PackSquash project will most
+    likely not pursue signing binaries with code signing certificates.
 
 #### User experience
 
