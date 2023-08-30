@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693395286784,
+  "lastUpdate": 1693399164574,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "750dee3553f1514b54ca2edd217c0b2201476d49",
-          "message": "fix(deps): update rust crate sysinfo to 0.29.7",
-          "timestamp": "2023-07-27T06:13:19Z",
-          "tree_id": "44f777a79df24bb75663aa47ab72a72e0ebf0aef",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/750dee3553f1514b54ca2edd217c0b2201476d49"
-        },
-        "date": 1690452593869,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 8716997,
-            "range": "± 258213",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 204005834,
-            "range": "± 1019314",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 1924841868,
-            "range": "± 4264024",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 272353111,
-            "range": "± 1732683",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 257052174,
             "range": "± 2154835",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "6bc0d50da96d63e6c646b99fd81f4d516c693ff8",
+          "message": "ci: add missing permission to SLSA provenance generation jobs",
+          "timestamp": "2023-08-30T14:05:51+02:00",
+          "tree_id": "29b408417a0a54c682ee68a6e1f4a77849bd4475",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6bc0d50da96d63e6c646b99fd81f4d516c693ff8"
+        },
+        "date": 1693399163337,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 12521827,
+            "range": "± 588356",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 203246250,
+            "range": "± 1833729",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3308304463,
+            "range": "± 84290163",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 336294893,
+            "range": "± 3218502",
             "unit": "ns/iter"
           }
         ]
