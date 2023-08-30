@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       - name: 🧰 Install Rust toolchain
-        uses: dtolnay/rust-toolchain@v1
+        uses: dtolnay/rust-toolchain@0e66bd3e6b38ec0ad5312288c83e47c143e6b09e # v1
         with:
           toolchain: nightly
           components: rustfmt, clippy
@@ -145,7 +145,7 @@ jobs:
         run: apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
 
       - name: 🧰 Install Rust toolchain
-        uses: dtolnay/rust-toolchain@v1
+        uses: dtolnay/rust-toolchain@0e66bd3e6b38ec0ad5312288c83e47c143e6b09e # v1
         with:
           toolchain: nightly-${{ matrix.host-target }}
           targets: ${{ env.CARGO_BUILD_TARGET }}
@@ -371,7 +371,7 @@ jobs:
         run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
 
       - name: 🧰 Install Rust toolchain
-        uses: dtolnay/rust-toolchain@v1
+        uses: dtolnay/rust-toolchain@0e66bd3e6b38ec0ad5312288c83e47c143e6b09e # v1
         with:
           toolchain: nightly
 
