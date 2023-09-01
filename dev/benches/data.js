@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693455063881,
+  "lastUpdate": 1693556846635,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "40a1959886c70f929ca1076e116e79cc15cd7213",
-          "message": "chore(deps): drop better `serde` error message patch\n\nOur `serde_derive` fork for better error messages when deserializing\nuntagged enums does no longer build fine, and troubleshooting that has a\nsignificant maintenance cost. Let's drop that patch and explore the\nbetter-supported alternative of using custom visitors, preferably after\ngetting some kind of resolution to\nhttps://github.com/jonasbb/serde_with/issues/635.",
-          "timestamp": "2023-08-04T20:57:52+02:00",
-          "tree_id": "33fda700e13646e7a59bd513ef5400b3e4336fd2",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/40a1959886c70f929ca1076e116e79cc15cd7213"
-        },
-        "date": 1691177779730,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11455605,
-            "range": "± 505264",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 199871113,
-            "range": "± 3256022",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2469982121,
-            "range": "± 20564080",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 314288570,
-            "range": "± 5139878",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 259446635,
             "range": "± 2858119",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "eab0dc059c1db4b5db8144b464023e05933d739c",
+          "message": "chore(deps): update taiki-e/install-action digest to 6801bd5",
+          "timestamp": "2023-09-01T04:09:46Z",
+          "tree_id": "98e93160c0544bd16ef0e3f6b619cddd5506e3e1",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/eab0dc059c1db4b5db8144b464023e05933d739c"
+        },
+        "date": 1693556845976,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9410109,
+            "range": "± 118124",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 166257663,
+            "range": "± 10982443",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2953190437,
+            "range": "± 27679317",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 264223454,
+            "range": "± 2286303",
             "unit": "ns/iter"
           }
         ]
