@@ -190,6 +190,12 @@ jobs:
         if: startsWith(matrix.runner, 'ubuntu')
         run: cat /proc/sys/kernel/random/uuid | tr -d '-' > /run/machine-id
 
+      - name: 📅 Gather build date and version metadata
+        shell: bash
+        run: |
+          echo "PACKSQUASH_BUILD_VERSION=$(git describe --tags --dirty=-custom --always)" >> "$GITHUB_ENV"
+          echo "PACKSQUASH_BUILD_DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
+
       - name: ✔️ Run tests
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
         run: |

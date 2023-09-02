@@ -398,9 +398,9 @@ fn squash(
 fn print_version_information(verbose: bool) {
 	println!(
 		"PackSquash {} ({}, {}) for {}",
-		env!("BUILD_VERSION"),
+		env!("PACKSQUASH_BUILD_VERSION"),
 		env!("CARGO_PROFILE"),
-		env!("BUILD_DATE"),
+		env!("PACKSQUASH_BUILD_DATE"),
 		env!("CARGO_TARGET_TRIPLE")
 	);
 	println!("{}", env!("CARGO_PKG_DESCRIPTION"));
@@ -408,8 +408,8 @@ fn print_version_information(verbose: bool) {
 
 	if verbose {
 		println!(
-			"Copyright (C) {} {}",
-			env!("BUILD_YEAR"),
+			"Copyright (C){} {}",
+			env!("PACKSQUASH_COPYRIGHT_BUILD_YEAR_SUFFIX"),
 			env!("CARGO_PKG_AUTHORS")
 		);
 		println!();

@@ -114,8 +114,9 @@ skip-tree = [
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
-	"https://github.com/shssoichiro/oxipng"
+	"https://github.com/shssoichiro/oxipng",
+	"https://github.com/RustAudio/ogg"
 ]
 
 [sources.allow-org]
-github = ["ComunidadAylas"]
+github = ["ComunidadAylas", "OptiVorbis"]
