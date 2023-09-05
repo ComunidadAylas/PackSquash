@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693928705070,
+  "lastUpdate": 1693939481343,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "0e5fdeab23026c521be482b1119013b0f3239846",
-          "message": "chore: shorten and increase helpfulness of some options deserialization error messages\n\nAs a spiritual successor to 40a1959886c70f929ca1076e116e79cc15cd7213, let's use a\n`serde` option we've just documented to improve error messages.",
-          "timestamp": "2023-08-07T14:30:57+02:00",
-          "tree_id": "aa833c4baa9899551189934c5a634633fabb2616",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/0e5fdeab23026c521be482b1119013b0f3239846"
-        },
-        "date": 1691413314820,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 13750288,
-            "range": "± 2125056",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 203268193,
-            "range": "± 3373879",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2724931133,
-            "range": "± 33540174",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 325327938,
-            "range": "± 6855182",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 345047854,
             "range": "± 7508886",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3d42d8b5ba67ec68b8a6ac5dc6dbb1c60cb25775",
+          "message": "fix(deps): update rust crate walkdir to 2.4.0",
+          "timestamp": "2023-09-05T15:11:56Z",
+          "tree_id": "4731a8b87541e5f7ce26ef5192f3277fbe6c3f69",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3d42d8b5ba67ec68b8a6ac5dc6dbb1c60cb25775"
+        },
+        "date": 1693939480681,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9268220,
+            "range": "± 266787",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 169195855,
+            "range": "± 2063116",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3243635847,
+            "range": "± 55265674",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 257851199,
+            "range": "± 2115952",
             "unit": "ns/iter"
           }
         ]
