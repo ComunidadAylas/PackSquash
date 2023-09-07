@@ -10,7 +10,7 @@ publish = false
 edition = "2021"
 
 [dependencies]
-bytes = "1.4.0"
+bytes = "1.5.0"
 globset = { version = "0.4.13", default-features = false }
 enumset = { version = "1.1.2", features = ["serde"] }
 indexmap = { version = "2.0.0", features = ["serde"] }
