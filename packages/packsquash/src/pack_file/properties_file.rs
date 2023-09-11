@@ -9,11 +9,8 @@ use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
 use crate::config::PropertiesFileOptions;
-use crate::pack_file::util::{starts_with_bom, BOM_UTF8};
 
-use super::{
-	util::strip_utf8_bom, AsyncReadAndSizeHint, PackFile, PackFileAssetType, PackFileConstructor
-};
+use super::{AsyncReadAndSizeHint, PackFile, PackFileAssetType, PackFileConstructor};
 
 #[cfg(test)]
 mod tests;
@@ -95,7 +92,7 @@ impl Decoder for OptimizerDecoder {
 			minified_properties_writer.set_line_ending(LineEnding::LF);
 			minified_properties_writer.set_kv_separator("=").unwrap();
 
-			PropertiesIter::new(strip_utf8_bom(src)).read_into(|key, value| {
+			PropertiesIter::new(&**src).read_into(|key, value| {
 				minified_properties_writer.write(&key, &value).unwrap();
 			})?;
 
@@ -109,20 +106,11 @@ impl Decoder for OptimizerDecoder {
 		} else {
 			// Parse the properties file to check its correctness, and then just copy the
 			// original file
-			PropertiesIter::new(strip_utf8_bom(src)).read_into(|_, _| ())?;
-
-			// Strip the BOM anyway because it can be part of the first key name, OptiFine
-			// will not strip it when trying to get its value, and it just adds bytes for
-			// nothing
-			let split_index = if starts_with_bom(&src) {
-				BOM_UTF8.len()
-			} else {
-				0
-			};
+			PropertiesIter::new(&**src).read_into(|_, _| ())?;
 
 			Ok(Some((
 				Cow::Borrowed("Validated and copied"),
-				ByteBuffer::BytesMut(src.split_off(split_index))
+				ByteBuffer::BytesMut(src.split_off(0))
 			)))
 		}
 	}

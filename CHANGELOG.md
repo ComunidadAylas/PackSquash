@@ -37,6 +37,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
     to their decentralized and free nature, the PackSquash project will most
     likely not pursue signing binaries with code signing certificates.
 
+#### Fixed
+
+- The UTF-8 BOM is no longer automatically stripped from properties files, as
+  they should not be encoded in UTF-8 to begin with, and carrying on processing
+  with mismatched encodings may cause mojibake.
+
 #### User experience
 
 - Some options file deserialization error messages have been shortened and made
