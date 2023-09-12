@@ -332,7 +332,7 @@ jobs:
       # This permission is not given to PRs from forked repositories.
       # See: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
       - name: ⚙️ Login to ${{ env.REGISTRY }}
-        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3
         if: steps.check_write_permission.outputs.has-permission
         with:
           registry: ${{ env.REGISTRY }}
