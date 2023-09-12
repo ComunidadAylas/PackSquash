@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1694519192173,
+  "lastUpdate": 1694519584252,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "b0217d18471dc53fd7d77c37a70b1470fd34c734",
-          "message": "chore: remove unnecessary `unreachable_unchecked` usage\n\nIt turns out that match expressions can be used for this purpose better.",
-          "timestamp": "2023-08-25T17:36:28+02:00",
-          "tree_id": "80b3992f1f2eea498e483142bfc805fbddeafeb4",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/b0217d18471dc53fd7d77c37a70b1470fd34c734"
-        },
-        "date": 1692980269835,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10628590,
-            "range": "± 399811",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 170293457,
-            "range": "± 11956966",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3187584437,
-            "range": "± 33456169",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 261236715,
-            "range": "± 2188638",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 317125061,
             "range": "± 7048630",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e2f356b1773e97976557ade42fcca953a240cce8",
+          "message": "chore(deps): update docker/setup-buildx-action action to v3 (#252)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2023-09-12T13:21:21+02:00",
+          "tree_id": "780f4a1e03532b2a90a7daa88504aa0b09613972",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e2f356b1773e97976557ade42fcca953a240cce8"
+        },
+        "date": 1694519583487,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9373994,
+            "range": "± 598739",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 169396947,
+            "range": "± 6272330",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3028196272,
+            "range": "± 32320625",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 262855269,
+            "range": "± 1881572",
             "unit": "ns/iter"
           }
         ]
