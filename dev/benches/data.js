@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1694512804323,
+  "lastUpdate": 1694513144930,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "29003831b69247fab7427961c215cc2c9dab0e75",
-          "message": "chore: migrate from `time` to `chrono`\n\n`chrono` is now actively maintained, and `time` has been taking some\nmandatory political decisions I, quite frankly, do not agree with, and\ncause me significant burnout to (not) deal with every few months.",
-          "timestamp": "2023-08-21T15:18:31+02:00",
-          "tree_id": "51f79584fc58365968beddfcf47e3b895efbf7fb",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/29003831b69247fab7427961c215cc2c9dab0e75"
-        },
-        "date": 1692626478329,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 14079067,
-            "range": "± 680372",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 211690128,
-            "range": "± 6868987",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3351766725,
-            "range": "± 49170822",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 340202246,
-            "range": "± 8097697",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 247912694,
             "range": "± 3112067",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cb5a0a4ba11c2002d6cb5b330b87e1e4e9ac923d",
+          "message": "chore(deps): update docker/login-action action to v3 (#250)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2023-09-12T11:23:44+02:00",
+          "tree_id": "c6d9b4a5d6c2686be51db44a8b7fe991696290ab",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/cb5a0a4ba11c2002d6cb5b330b87e1e4e9ac923d"
+        },
+        "date": 1694513144194,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8549108,
+            "range": "± 109956",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 156826305,
+            "range": "± 9165108",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2712534146,
+            "range": "± 26322149",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 246208811,
+            "range": "± 2431997",
             "unit": "ns/iter"
           }
         ]
