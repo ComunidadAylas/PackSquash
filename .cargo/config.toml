@@ -18,7 +18,8 @@ linker = 'aarch64-linux-gnu-gcc'
 
 [target.aarch64-unknown-linux-musl]
 linker = 'aarch64-linux-musl-gcc'
-# Statically link with gcc to provide long double builtins required on Aarch64
-# but not reliably provided by the Rust toolchain.
-# See: https://github.com/rust-lang/rust/issues/46651#issuecomment-641172562
-rustflags = ["-C", "link-arg=-lgcc"]
+# Link with the C library after linking with Rust compiler builtins to prevent
+# long double and atomic builtins from missing on Aarch64 platforms. See:
+# https://github.com/rust-lang/rust/issues/46651#issuecomment-641172562
+# https://github.com/rust-lang/rust/issues/89626#issuecomment-1686073426
+rustflags = ["-C", "link-arg=-lc"]
