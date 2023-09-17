@@ -155,7 +155,7 @@ impl PackSquasher {
 			.worker_threads(options_holder.options.global_options.threads.get())
 			// The actual number of blocking threads will be worker threads + 1 + this (1)
 			.max_blocking_threads(1)
-			.thread_name("packsquasher-worker")
+			.thread_name("packsquash-worker")
 			// 2 MiB -> 4 MiB. Avoids stack overflow during Zopfli sometimes, even on Linux
 			.thread_stack_size(4 * 1024 * 1024)
 			.build()
