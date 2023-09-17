@@ -26,6 +26,15 @@ env_logger = { version = "0.10.0", default-features = false, features = ["color"
 winapi = { version = "0.3.9", default-features = false, features = ["consoleapi"] }
 winapi-util = "0.1.5"
 
+[target.'cfg(all(target_os = "linux", target_env = "musl"))'.dependencies]
+# The mimalloc C malloc override feature is troublesome on macOS and Windows, but
+# luckily the Linux musl C library should support this well. See:
+# https://github.com/purpleprotocol/mimalloc_rust/issues/41
+# We are interested in overriding malloc because we depend on C libraries, and doing
+# so buys us a safety net against mismatching memory managed by different allocators,
+# in addition to keep binary sizes down
+mimalloc = { version = "0.1.39", default-features = false, features = ["override"] }
+
 [target.'cfg(windows)'.build-dependencies]
 winresource = "0.1.17"
 

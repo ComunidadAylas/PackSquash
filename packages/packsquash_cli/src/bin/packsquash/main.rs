@@ -30,6 +30,15 @@ const LOG_TARGET: Target = Target::Stderr;
 /// A producer of the [`IsTerminal`] implementation that matches the [`LOG_TARGET`] constant.
 const LOG_TARGET_STREAM: fn() -> Stderr = io::stderr;
 
+/// Zopfli compression is pretty intensive on the memory allocator, and musl
+/// is known to use a simple but prone to extreme thread contention allocator.
+/// Replace its allocator with one whose performance is close to glibc so that
+/// the PackSquash CLI musl binaries have a similar performance to glibc
+/// binaries; otherwise, slowdowns of 5x or more are to be expected.
+#[cfg(all(target_os = "linux", target_env = "musl"))]
+#[global_allocator]
+static GLOBAL_ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 fn main() {
 	process::exit(run(TerminalTitleController::new()));
 }

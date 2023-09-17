@@ -37,6 +37,18 @@ Versioning](https://semver.org/spec/v2.0.0.html).
     to their decentralized and free nature, the PackSquash project will most
     likely not pursue signing binaries with code signing certificates.
 
+#### Performance
+
+- The statically-linked PackSquash CLI Linux binaries now use the
+  [`mimalloc`](https://github.com/microsoft/mimalloc) memory allocator, instead
+  of the default `musl` C library allocator.
+  - This brings the performance of such binaries roughly in line with those
+    packaged for Debian, which dynamically link against `glibc`. Previously,
+    slowdowns of 5x or more could be expected, depending on the number of
+    threads used.
+  - Because they use statically-linked binaries, the PackSquash GitHub
+    Action and Docker container also saw performance improvements.
+
 #### Fixed
 
 - The UTF-8 BOM is no longer automatically stripped from properties files, as
