@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1694998615619,
+  "lastUpdate": 1695066114016,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "6bc0d50da96d63e6c646b99fd81f4d516c693ff8",
-          "message": "ci: add missing permission to SLSA provenance generation jobs",
-          "timestamp": "2023-08-30T14:05:51+02:00",
-          "tree_id": "29b408417a0a54c682ee68a6e1f4a77849bd4475",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6bc0d50da96d63e6c646b99fd81f4d516c693ff8"
-        },
-        "date": 1693399163337,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12521827,
-            "range": "± 588356",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 203246250,
-            "range": "± 1833729",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3308304463,
-            "range": "± 84290163",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 336294893,
-            "range": "± 3218502",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 252516035,
             "range": "± 4231557",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "66d279fde0a7e9aa6e45960a02728c494a387d93",
+          "message": "ci: slightly simplify workflow definition\n\nIt turns out that omitting matrix keys altogether should make the CI\njobs execute as we want, while leading to shorter workflow definition\nYAML. Related docs: https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs#example-adding-configurations",
+          "timestamp": "2023-09-18T21:09:11+02:00",
+          "tree_id": "60f8444c9d591f3cc1b62830fba606b0c9e598de",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/66d279fde0a7e9aa6e45960a02728c494a387d93"
+        },
+        "date": 1695066113322,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9125309,
+            "range": "± 148611",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 159899248,
+            "range": "± 13175597",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2736779602,
+            "range": "± 66392033",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 268558834,
+            "range": "± 8235975",
             "unit": "ns/iter"
           }
         ]
