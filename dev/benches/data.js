@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695074318509,
+  "lastUpdate": 1695083679925,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "22d48092f8530d78cda0283ed336c428524364b0",
-          "message": "ci(slsa): more macOS command portability fixes",
-          "timestamp": "2023-08-30T15:31:05+02:00",
-          "tree_id": "6fb46102aaedeecf9663ed33d55c49ad92a43546",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/22d48092f8530d78cda0283ed336c428524364b0"
-        },
-        "date": 1693404276014,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9401506,
-            "range": "± 496251",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 169233615,
-            "range": "± 11951801",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3137221041,
-            "range": "± 53863990",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 257741409,
-            "range": "± 1797717",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 337488644,
             "range": "± 6444812",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "40e5dbeda3b6cdb5a9902f2983fc97dee4ba9615",
+          "message": "fix(deps): update rust crate aho-corasick to 1.1.0",
+          "timestamp": "2023-09-18T21:29:41Z",
+          "tree_id": "58da962a111fdb4b799a250b8234d68bdd94503a",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/40e5dbeda3b6cdb5a9902f2983fc97dee4ba9615"
+        },
+        "date": 1695083679181,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9484431,
+            "range": "± 211113",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 165323064,
+            "range": "± 4941881",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2758860164,
+            "range": "± 64311877",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 269471304,
+            "range": "± 14725128",
             "unit": "ns/iter"
           }
         ]
