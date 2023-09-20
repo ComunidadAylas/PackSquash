@@ -24,7 +24,7 @@ env_logger = { version = "0.10.0", default-features = false, features = ["color"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", default-features = false, features = ["consoleapi"] }
-winapi-util = "0.1.5"
+winapi-util = "0.1.6"
 
 [target.'cfg(all(target_os = "linux", target_env = "musl"))'.dependencies]
 # The mimalloc C malloc override feature is troublesome on macOS and Windows, but
