@@ -94,7 +94,10 @@ async fn add_files_finish_and_read_back_test(
 				.expect(RELATIVE_PATH_INSTANTIATION_FAILURE),
 				&mut tokio_stream::iter(std::iter::repeat(&[file_byte(i)][..]).take(file_size)),
 				skip_compression(i),
-				file_size
+				file_size,
+				FileListingCircumstances {
+					is_atlas_texture: false
+				}
 			)
 			.await
 			.expect(UNEXPECTED_OPERATION_FAILURE);
@@ -338,7 +341,12 @@ async fn add_several_finish_then_reuse_and_add_works() {
 
 	// Add the previous visions0.bin file
 	squash_zip
-		.add_previous_file(&RelativePath::from_inner("virtual/visions0.bin"))
+		.add_previous_file(
+			&RelativePath::from_inner("virtual/visions0.bin"),
+			FileListingCircumstances {
+				is_atlas_texture: false
+			}
+		)
 		.await
 		.expect(UNEXPECTED_OPERATION_FAILURE);
 
@@ -409,7 +417,17 @@ async fn several_files_with_same_path_are_handled_properly() {
 	.expect(INSTANTIATION_FAILURE);
 
 	let file_path = &RelativePath::from_inner("virtual/visions0.bin");
-	let add_file = || squash_zip.add_file(file_path, tokio_stream::once([0]), true, 1);
+	let add_file = || {
+		squash_zip.add_file(
+			file_path,
+			tokio_stream::once([0]),
+			true,
+			1,
+			FileListingCircumstances {
+				is_atlas_texture: false
+			}
+		)
+	};
 
 	add_file().await.expect(UNEXPECTED_OPERATION_FAILURE);
 	add_file().await.expect_err(UNEXPECTED_OPERATION_FAILURE);
