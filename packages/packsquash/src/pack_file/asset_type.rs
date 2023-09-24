@@ -18,6 +18,7 @@ use crate::pack_file::png_file::PngFile;
 #[cfg(feature = "optifine-support")]
 use crate::pack_file::properties_file::PropertiesFile;
 use crate::pack_file::shader_file::ShaderFile;
+use crate::squash_zip::FileListingCircumstances;
 use crate::{
 	config::{compile_pack_file_glob_pattern, CustomFileOptions, FileOptions},
 	RelativePath
@@ -732,6 +733,9 @@ fn pack_file_to_process_data(
 	pack_file.map(|pack_file| PackFileProcessData {
 		is_compressed: pack_file.is_compressed(),
 		canonical_extension: asset_type.canonical_extension(),
+		listing_circumstances: FileListingCircumstances {
+			is_atlas_texture: pack_file.may_be_atlas_texture()
+		},
 		optimized_byte_chunks_stream: Box::new(pack_file.process().map(|byte_chunk_result| {
 			match byte_chunk_result {
 				Ok((optimization_strategy, optimized_bytes)) => Ok((

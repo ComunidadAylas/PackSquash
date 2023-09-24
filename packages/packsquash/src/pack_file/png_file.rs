@@ -246,6 +246,10 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for PngFile<T> {
 	fn is_compressed(&self) -> bool {
 		true
 	}
+
+	fn may_be_atlas_texture(&self) -> bool {
+		self.optimization_settings.may_be_atlas_texture
+	}
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for PngFile<T> {

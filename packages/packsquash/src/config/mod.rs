@@ -922,6 +922,23 @@ pub struct PngFileOptions {
 	///
 	/// **Default value**: `false`
 	pub downsize_if_single_color: bool,
+	/// Controls whether PackSquash should assume that this texture may be stitched by the game as
+	/// a part of an internal or custom atlas. For performance reasons, Minecraft stitches most
+	/// game textures into atlases, including those of item and block models, but there are a few
+	/// exceptions, such as main menu panorama textures, or those sampled directly from shaders.
+	///
+	/// Currently, this option only affects how PackSquash protects images when
+	/// [`size_increasing_zip_obfuscation`](GlobalOptions::size_increasing_zip_obfuscation) is in
+	/// effect. `true` is a safe default value that causes textures to be less protected. Setting
+	/// it to `false` for better protection is, however, only recommended if you have detailed
+	/// knowledge of how the game stitches textures and are willing to test the correctness of this
+	/// assumption on a case-by-case basis.
+	///
+	/// This option may be changed in the future to have more side effects. It may also be removed,
+	/// depending on how PackSquash improves its atlas texture detection capabilities.
+	///
+	/// **Default value**: `true`
+	pub may_be_atlas_texture: bool,
 	/// Crate-private option set by the [MinecraftQuirk::GrayscaleImagesGammaMiscorrection]
 	/// workaround to not reduce color images to grayscale.
 	///
@@ -951,6 +968,7 @@ impl Default for PngFileOptions {
 			maximum_width_and_height: NonZeroU16::new(8192).unwrap(),
 			skip_alpha_optimizations: false,
 			downsize_if_single_color: false,
+			may_be_atlas_texture: true,
 			working_around_grayscale_reduction_quirk: false,
 			working_around_color_type_change_quirk: false,
 			working_around_transparent_pixel_colors_change_quirk: false

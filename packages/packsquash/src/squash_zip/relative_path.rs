@@ -139,6 +139,12 @@ impl<'a> RelativePath<'a> {
 		self.0
 	}
 
+	/// Mutably borrows the internal copy-on-write smart pointer held by this relative
+	/// path.
+	pub fn as_inner_mut(&mut self) -> &mut Cow<'a, str> {
+		&mut self.0
+	}
+
 	/// Creates a new relative path directly from its raw representation, without
 	/// any checks or processing. This is a low-level constructor.
 	///

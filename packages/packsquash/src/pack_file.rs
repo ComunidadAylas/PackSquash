@@ -14,6 +14,7 @@ use tokio_stream::Stream;
 pub use util::strip_utf8_bom;
 
 use crate::pack_file::asset_type::PackFileAssetType;
+use crate::squash_zip::FileListingCircumstances;
 
 pub mod asset_type;
 
@@ -96,6 +97,12 @@ trait PackFile {
 	/// Returns whether the contents of this pack file are already internally compressed, and as such any
 	/// attempt to further compress them will likely result in lower than usual space savings.
 	fn is_compressed(&self) -> bool;
+
+	/// Returns whether this pack file may be stitched into an atlas texture by the game. Most pack files
+	/// should return `false` here, except for texture (i.e., PNG) files.
+	fn may_be_atlas_texture(&self) -> bool {
+		false
+	}
 }
 
 /// Factory trait for a [`PackFile`] that allows it to be instantiated in an standard way. It is separated
@@ -122,7 +129,7 @@ trait PackFileConstructor<R: AsyncRead + Unpin + 'static>: PackFile + Sized {
 	) -> Option<Self>;
 }
 
-/// Contains the different pieces of data obtained by processing some pack file.
+/// Contains the different pieces of data obtained or related to processing some pack file.
 pub struct PackFileProcessData {
 	/// A stream that contains the byte chunks of the processed pack file data.
 	pub optimized_byte_chunks_stream: Box<dyn Stream<Item = OptimizedBoxedBytesChunk> + Send + Unpin>,
@@ -132,5 +139,8 @@ pub struct PackFileProcessData {
 	pub is_compressed: bool,
 	/// The canonical extension for the pack file, which Minecraft expects. It might be `None`
 	/// if the pack file is already known to have a canonical extension.
-	pub canonical_extension: Option<&'static str>
+	pub canonical_extension: Option<&'static str>,
+	/// The circumstances affecting how this file is listed (i.e., enumerated) alongside other
+	/// pack files of its type by the game.
+	pub listing_circumstances: FileListingCircumstances
 }

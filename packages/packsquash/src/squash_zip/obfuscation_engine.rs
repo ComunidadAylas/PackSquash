@@ -23,6 +23,8 @@ use rand_xoshiro::{
 };
 use tokio::io::{AsyncWrite, AsyncWriteExt};
 
+pub use self::pseudodir_concealment::FileListingCircumstances;
+use self::pseudodir_concealment::PseudodirConcealer;
 use crate::{config::PercentageInteger, RelativePath};
 
 use super::{
@@ -31,6 +33,8 @@ use super::{
 	},
 	SquashZipSettings
 };
+
+mod pseudodir_concealment;
 
 const CRC32_KEY: u32 = {
 	let k = const_random!(u32);
@@ -44,10 +48,20 @@ const CRC32_KEY: u32 = {
 
 thread_local!(static RNG: Cell<Option<Xoshiro128Plus>> = const { Cell::new(None) });
 
-pub(super) enum ObfuscationEngine {
+enum SizeIncreasingObfuscation {
+	Disabled,
+	Enabled {
+		pseudodir_concealer: PseudodirConcealer
+	}
+}
+
+#[repr(transparent)]
+pub(super) struct ObfuscationEngine(SealedObfuscationEngine);
+
+enum SealedObfuscationEngine {
 	NoObfuscation,
 	Obfuscation {
-		size_increasing_obfuscation: bool,
+		size_increasing_obfuscation: SizeIncreasingObfuscation,
 		obfuscation_discretion_records_percentage: PercentageInteger,
 		workaround_old_java_obfuscation_quirks: bool
 	}
@@ -56,17 +70,24 @@ pub(super) enum ObfuscationEngine {
 impl ObfuscationEngine {
 	/// Instantiates an [`ObfuscationEngine`] appropriate for the provided [`SquashZipSettings`].
 	pub fn from_squash_zip_settings(squash_zip_settings: &SquashZipSettings) -> Self {
-		if squash_zip_settings.enable_obfuscation {
-			Self::Obfuscation {
-				size_increasing_obfuscation: squash_zip_settings.enable_size_increasing_obfuscation,
+		Self(if squash_zip_settings.enable_obfuscation {
+			SealedObfuscationEngine::Obfuscation {
+				size_increasing_obfuscation: if squash_zip_settings.enable_size_increasing_obfuscation
+				{
+					SizeIncreasingObfuscation::Enabled {
+						pseudodir_concealer: PseudodirConcealer::new()
+					}
+				} else {
+					SizeIncreasingObfuscation::Disabled
+				},
 				obfuscation_discretion_records_percentage: squash_zip_settings
 					.percentage_of_records_tuned_for_obfuscation_discretion,
 				workaround_old_java_obfuscation_quirks: squash_zip_settings
 					.workaround_old_java_obfuscation_quirks
 			}
 		} else {
-			Self::NoObfuscation
-		}
+			SealedObfuscationEngine::NoObfuscation
+		})
 	}
 
 	pub async fn obfuscating_header<T: AsyncWrite + Unpin>(
@@ -74,10 +95,10 @@ impl ObfuscationEngine {
 		mut output_zip: T,
 		seed: u64
 	) -> io::Result<()> {
-		if let ObfuscationEngine::Obfuscation {
-			size_increasing_obfuscation: true,
+		if let SealedObfuscationEngine::Obfuscation {
+			size_increasing_obfuscation: SizeIncreasingObfuscation::Enabled { .. },
 			..
-		} = self
+		} = self.0
 		{
 			output_zip
 				.write_all(&if random_u32(seed) % 5 == 0 {
@@ -92,7 +113,7 @@ impl ObfuscationEngine {
 	}
 
 	pub fn obfuscate_local_file_header(&self, local_file_header: &mut LocalFileHeader<'_>) {
-		if let ObfuscationEngine::Obfuscation { .. } = self {
+		if let SealedObfuscationEngine::Obfuscation { .. } = self.0 {
 			let seed = local_file_header.crc32 as u64;
 			let discretion = self.use_discretion(seed);
 
@@ -163,12 +184,14 @@ impl ObfuscationEngine {
 
 	pub fn obfuscate_central_directory_header(
 		&self,
-		central_directory_header: &mut CentralDirectoryHeader<'_>
+		central_directory_header: &mut CentralDirectoryHeader<'_>,
+		listing_circumstances: FileListingCircumstances
 	) {
-		if let ObfuscationEngine::Obfuscation {
+		if let SealedObfuscationEngine::Obfuscation {
 			workaround_old_java_obfuscation_quirks,
+			size_increasing_obfuscation,
 			..
-		} = self
+		} = &self.0
 		{
 			let seed = central_directory_header.crc32 as u64;
 			let discretion = self.use_discretion(seed);
@@ -193,6 +216,16 @@ impl ObfuscationEngine {
 				central_directory_header.local_header_disk_number = u16::MAX;
 			}
 
+			if let SizeIncreasingObfuscation::Enabled {
+				pseudodir_concealer
+			} = size_increasing_obfuscation
+			{
+				pseudodir_concealer.conceal(
+					&mut central_directory_header.file_name,
+					listing_circumstances
+				);
+			}
+
 			central_directory_header.crc32 ^= CRC32_KEY;
 			central_directory_header.local_header_offset -= self.obfuscating_header_size();
 			central_directory_header.spoof_version_made_by = true;
@@ -203,7 +236,7 @@ impl ObfuscationEngine {
 		&self,
 		end_of_central_directory: &mut EndOfCentralDirectory
 	) {
-		if let ObfuscationEngine::Obfuscation { .. } = self {
+		if let SealedObfuscationEngine::Obfuscation { .. } = self.0 {
 			let seed = end_of_central_directory.total_central_directory_entry_count
 				^ end_of_central_directory.current_file_offset;
 			let discretion = self.use_discretion(seed);
@@ -231,7 +264,7 @@ impl ObfuscationEngine {
 	}
 
 	pub fn deobfuscate_crc32(&self, obfuscated_crc32: u32) -> u32 {
-		if let ObfuscationEngine::Obfuscation { .. } = self {
+		if let SealedObfuscationEngine::Obfuscation { .. } = self.0 {
 			obfuscated_crc32 ^ CRC32_KEY
 		} else {
 			obfuscated_crc32
@@ -239,10 +272,10 @@ impl ObfuscationEngine {
 	}
 
 	pub fn obfuscating_header_size(&self) -> u64 {
-		if let ObfuscationEngine::Obfuscation {
-			size_increasing_obfuscation: true,
+		if let SealedObfuscationEngine::Obfuscation {
+			size_increasing_obfuscation: SizeIncreasingObfuscation::Enabled { .. },
 			..
-		} = self
+		} = self.0
 		{
 			4
 		} else {
@@ -251,10 +284,10 @@ impl ObfuscationEngine {
 	}
 
 	fn use_discretion(&self, seed: u64) -> bool {
-		if let ObfuscationEngine::Obfuscation {
+		if let SealedObfuscationEngine::Obfuscation {
 			obfuscation_discretion_records_percentage,
 			..
-		} = self
+		} = &self.0
 		{
 			random_u32(seed) % 100 < u8::from(*obfuscation_discretion_records_percentage) as u32
 		} else {

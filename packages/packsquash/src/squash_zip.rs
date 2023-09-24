@@ -37,6 +37,8 @@ use self::{
 	}
 };
 
+pub use self::obfuscation_engine::FileListingCircumstances;
+
 mod buffered_async_spooled_temp_file;
 mod obfuscation_engine;
 pub mod relative_path;
@@ -81,7 +83,8 @@ struct PartialCentralDirectoryHeader {
 	squash_time: [u8; 4],
 	crc32: u32,
 	compressed_size: u32,
-	uncompressed_size: u32
+	uncompressed_size: u32,
+	listing_circumstances: FileListingCircumstances
 }
 
 /// Represents a ZIP file hash and size pair.
@@ -277,7 +280,8 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		path: &RelativePath<'_>,
 		processed_data: S,
 		skip_compression: bool,
-		file_size_hint: usize
+		file_size_hint: usize,
+		listing_circumstances: FileListingCircumstances
 	) -> Result<(), SquashZipError> {
 		let (mut local_file_header, mut compressed_data_scratch_file) = self
 			.compress_and_generate_local_header(
@@ -355,6 +359,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 					path,
 					&local_file_header,
 					*matching_header_offset,
+					listing_circumstances,
 					&mut state.central_directory_data
 				)?;
 
@@ -384,6 +389,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				path,
 				&local_file_header,
 				new_local_file_header_offset,
+				listing_circumstances,
 				&mut state.central_directory_data
 			)?;
 
@@ -435,7 +441,11 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// was not present in the previous ZIP file. In this case it is guaranteed that no bad
 	/// state was introduced in the result output ZIP file, and the instance can still used
 	/// normally.
-	pub async fn add_previous_file(&self, path: &RelativePath<'_>) -> Result<(), SquashZipError> {
+	pub async fn add_previous_file(
+		&self,
+		path: &RelativePath<'_>,
+		listing_circumstances: FileListingCircumstances
+	) -> Result<(), SquashZipError> {
 		// For this method we implement a simpler version of the algorithm of add_file. It can be
 		// summarised as follows:
 		// 1. Check if the file is in map 1) (hash, size) -> (LOC offset list).
@@ -559,6 +569,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 					path,
 					&local_file_header,
 					*matching_header_offset,
+					listing_circumstances,
 					&mut state.central_directory_data
 				)?;
 
@@ -588,6 +599,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				path,
 				&local_file_header,
 				new_local_file_header_offset,
+				listing_circumstances,
 				&mut state.central_directory_data
 			)?;
 
@@ -644,8 +656,10 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				spoof_version_made_by: false
 			};
 
-			self.obfuscation_engine
-				.obfuscate_central_directory_header(&mut central_directory_header);
+			self.obfuscation_engine.obfuscate_central_directory_header(
+				&mut central_directory_header,
+				header_data.listing_circumstances
+			);
 
 			central_directory_header.write(&mut output_zip).await?;
 		}
@@ -930,6 +944,11 @@ async fn read_previous_zip_contents<F: AsyncRead + AsyncSeek + Unpin>(
 
 			previous_zip.read_exact(&mut filename_buf).await?;
 
+			// Normalize directories
+			if filename_buf.ends_with(&[b'/']) {
+				filename_buf.pop();
+			}
+
 			// In the unlikely case this relative path is corrupt and/or invalid, but
 			// still valid UTF-8, it'll be effectively ignored, so it doesn't really
 			// matter
@@ -1028,6 +1047,7 @@ fn add_partial_central_directory_header(
 	path: &RelativePath<'_>,
 	local_file_header: &LocalFileHeader<'_>,
 	local_file_header_offset: u64,
+	listing_circumstances: FileListingCircumstances,
 	central_directory_data: &mut AHashMap<RelativePath<'static>, PartialCentralDirectoryHeader>
 ) -> Result<(), SquashZipError> {
 	match central_directory_data.entry(path.as_owned()) {
@@ -1038,7 +1058,8 @@ fn add_partial_central_directory_header(
 				squash_time: local_file_header.squash_time,
 				crc32: local_file_header.crc32,
 				compressed_size: local_file_header.compressed_size,
-				uncompressed_size: local_file_header.uncompressed_size
+				uncompressed_size: local_file_header.uncompressed_size,
+				listing_circumstances
 			});
 
 			Ok(())

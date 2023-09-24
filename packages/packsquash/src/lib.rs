@@ -797,7 +797,10 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 
 	if copy_previous_file {
 		optimization_error = squash_zip
-			.add_previous_file(&pack_file_path)
+			.add_previous_file(
+				&pack_file_path,
+				pack_file_process_data.listing_circumstances
+			)
 			.await
 			.err()
 			.map(|err| err.to_string());
@@ -844,7 +847,8 @@ async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
 				&pack_file_path,
 				processed_pack_file_chunks,
 				!compress_already_compressed && pack_file_process_data.is_compressed,
-				file_size_hint.try_into().unwrap_or(0)
+				file_size_hint.try_into().unwrap_or(0),
+				pack_file_process_data.listing_circumstances
 			)
 			.await
 			.err()

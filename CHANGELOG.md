@@ -50,6 +50,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
     Action and Docker container also saw performance improvements. (Thanks
     _@xMikux_ for reporting the performance differences!)
 
+#### Protection
+
+- PackSquash now adds an extra layer of protection when
+  `size_increasing_zip_obfuscation` is enabled on a small subset of pack files,
+  as far as it safe to do so due to the inner workings of Minecraft. (Thanks to
+  a Discord user for bringing this idea to my attention)
+  - Select textures may optionally be more protected by changing the new
+    `may_be_atlas_texture` PNG-specific option, but it is advised that you only
+    do this if you have detailed knowledge of how the game processes textures,
+    as otherwise the game may not load the pack correctly.
+
 #### Fixed
 
 - The UTF-8 BOM is no longer automatically stripped from properties files, as
