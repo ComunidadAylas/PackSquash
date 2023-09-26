@@ -30,6 +30,7 @@ body:
         - GitHub action
         - Unstable or custom build (please describe in the "Additional context" section)
         - Other (please describe in the "Additional context" section)
+        - N/A (the distribution does not matter; please explain why if it's not obvious)
     validations:
       required: true
 
