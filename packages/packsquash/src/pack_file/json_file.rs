@@ -155,6 +155,18 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for JsonFile<T> {
 	fn is_compressed(&self) -> bool {
 		false
 	}
+
+	fn may_be_directory_listed_atlas_texture_sprite(&self) -> bool {
+		// FIXME only return true if both the asset types match and the
+		//       corresponding texture has the may_be_directory_listed_atlas_texture
+		//       option set to true. This cannot be done elegantly with the current
+		//       iterator design though
+		matches!(
+			self.asset_type,
+			PackFileAssetType::MinecraftTextureMetadata
+				| PackFileAssetType::MinecraftTextureMetadataWithComments
+		)
+	}
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for JsonFile<T> {
@@ -183,7 +195,8 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for JsonFile<
 )]
 const fn asset_type_has_comments_extension(asset_type: PackFileAssetType) -> bool {
 	match asset_type {
-		PackFileAssetType::MinecraftMetadataWithComments
+		PackFileAssetType::MinecraftTextureMetadataWithComments
+		| PackFileAssetType::MinecraftMetadataWithComments
 		| PackFileAssetType::MinecraftModelWithComments
 		| PackFileAssetType::GenericJsonWithComments => true,
 		#[cfg(feature = "optifine-support")]

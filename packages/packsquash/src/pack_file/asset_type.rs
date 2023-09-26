@@ -35,6 +35,11 @@ use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor, PackFileProcess
 #[derive(Debug, EnumSetType)]
 #[repr(usize)]
 pub enum PackFileAssetType {
+	/// A Minecraft texture metadata asset, with `.mcmeta` extension. These files describe
+	/// properties of textures.
+	MinecraftTextureMetadata,
+	/// A Minecraft texture metadata asset, maybe with comments and `.mcmetac` extension.
+	MinecraftTextureMetadataWithComments,
 	/// A Minecraft metadata asset, with `.mcmeta` extension. These files describe properties
 	/// of textures and the pack itself.
 	MinecraftMetadata,
@@ -180,12 +185,16 @@ impl PackFileAssetType {
 	/// [`PackFileConstructor`] belonging to this pack file asset type.
 	fn to_glob_pattern(self) -> Glob {
 		match self {
-			Self::MinecraftMetadata => compile_hardcoded_pack_file_glob_pattern(
-				"{pack.mcmeta,assets/*/textures/**/?*.mcmeta}"
-			),
-			Self::MinecraftMetadataWithComments => compile_hardcoded_pack_file_glob_pattern(
-				"{pack.mcmetac,assets/*/textures/**/?*.mcmetac}"
-			),
+			Self::MinecraftTextureMetadata => {
+				compile_hardcoded_pack_file_glob_pattern("assets/*/textures/**/?*.mcmeta")
+			}
+			Self::MinecraftTextureMetadataWithComments => {
+				compile_hardcoded_pack_file_glob_pattern("assets/*/textures/**/?*.mcmetac")
+			}
+			Self::MinecraftMetadata => compile_hardcoded_pack_file_glob_pattern("pack.mcmeta"),
+			Self::MinecraftMetadataWithComments => {
+				compile_hardcoded_pack_file_glob_pattern("pack.mcmetac")
+			}
 			Self::MinecraftModel => {
 				// It is technically possible in vanilla resource packs to have a model file
 				// in folders other than "block" and "item", and in namespaces other than
@@ -431,6 +440,8 @@ impl PackFileAssetType {
 	/// canonicalized.
 	const fn canonical_extension(self) -> Option<&'static str> {
 		match self {
+			Self::MinecraftTextureMetadata => None,
+			Self::MinecraftTextureMetadataWithComments => Some("mcmeta"),
 			Self::MinecraftMetadata => None,
 			Self::MinecraftMetadataWithComments => Some("mcmeta"),
 			Self::MinecraftModel => None,
@@ -580,6 +591,10 @@ impl PackFileAssetTypeMatches {
 			// However, some of the additional redundancy is mitigated thanks to the macro, and the fact that
 			// there are almost as many arms as asset types can make future additions easier, so it's not that bad
 			match asset_type {
+				PackFileAssetType::MinecraftTextureMetadata if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::MinecraftTextureMetadataWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
+					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				PackFileAssetType::MinecraftMetadata if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
 					return_pack_file_to_process_data!(JsonFile, optimization_settings),
 				PackFileAssetType::MinecraftMetadataWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
