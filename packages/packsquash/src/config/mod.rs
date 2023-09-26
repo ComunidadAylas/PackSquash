@@ -939,7 +939,7 @@ pub struct PngFileOptions {
 	/// depending on how PackSquash improves its atlas texture detection capabilities.
 	///
 	/// **Default value**: `true`
-	pub may_be_directory_listed_atlas_texture: bool,
+	pub may_be_directory_listed_atlas_sprite: bool,
 	/// Crate-private option set by the [MinecraftQuirk::GrayscaleImagesGammaMiscorrection]
 	/// workaround to not reduce color images to grayscale.
 	///
@@ -969,7 +969,7 @@ impl Default for PngFileOptions {
 			maximum_width_and_height: NonZeroU16::new(8192).unwrap(),
 			skip_alpha_optimizations: false,
 			downsize_if_single_color: false,
-			may_be_directory_listed_atlas_texture: true,
+			may_be_directory_listed_atlas_sprite: true,
 			working_around_grayscale_reduction_quirk: false,
 			working_around_color_type_change_quirk: false,
 			working_around_transparent_pixel_colors_change_quirk: false
