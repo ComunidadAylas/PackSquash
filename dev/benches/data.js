@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695723443197,
+  "lastUpdate": 1695750030472,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "3d42d8b5ba67ec68b8a6ac5dc6dbb1c60cb25775",
-          "message": "fix(deps): update rust crate walkdir to 2.4.0",
-          "timestamp": "2023-09-05T15:11:56Z",
-          "tree_id": "4731a8b87541e5f7ce26ef5192f3277fbe6c3f69",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3d42d8b5ba67ec68b8a6ac5dc6dbb1c60cb25775"
-        },
-        "date": 1693939480681,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9268220,
-            "range": "± 266787",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 169195855,
-            "range": "± 2063116",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3243635847,
-            "range": "± 55265674",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 257851199,
-            "range": "± 2115952",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 340762258,
             "range": "± 10434200",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "acd056b3d36b41def43e925ac070939899436588",
+          "message": "fix(json_file): consider tex. meta as being potentially directory-listed\n\nNot doing so when using the features introduced at\nea933d50675366d36d9e23af55e0c4e38d232388 causes the game to not read\ntexture metadata, potentially breaking effect like texture animations.",
+          "timestamp": "2023-09-26T19:06:02+02:00",
+          "tree_id": "c4e6d1d4cef222a5d749c333d38635e5ba6207b4",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/acd056b3d36b41def43e925ac070939899436588"
+        },
+        "date": 1695750029738,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9166893,
+            "range": "± 83947",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 164071061,
+            "range": "± 7247101",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2961750849,
+            "range": "± 80867983",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 264129711,
+            "range": "± 5007452",
             "unit": "ns/iter"
           }
         ]
