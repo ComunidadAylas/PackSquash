@@ -734,7 +734,8 @@ fn pack_file_to_process_data(
 		is_compressed: pack_file.is_compressed(),
 		canonical_extension: asset_type.canonical_extension(),
 		listing_circumstances: FileListingCircumstances {
-			is_atlas_texture: pack_file.may_be_atlas_texture()
+			is_directory_listed_atlas_texture_sprite: pack_file
+				.may_be_directory_listed_atlas_texture_sprite()
 		},
 		optimized_byte_chunks_stream: Box::new(pack_file.process().map(|byte_chunk_result| {
 			match byte_chunk_result {

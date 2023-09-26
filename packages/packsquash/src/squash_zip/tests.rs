@@ -96,7 +96,7 @@ async fn add_files_finish_and_read_back_test(
 				skip_compression(i),
 				file_size,
 				FileListingCircumstances {
-					is_atlas_texture: false
+					is_directory_listed_atlas_texture_sprite: false
 				}
 			)
 			.await
@@ -344,7 +344,7 @@ async fn add_several_finish_then_reuse_and_add_works() {
 		.add_previous_file(
 			&RelativePath::from_inner("virtual/visions0.bin"),
 			FileListingCircumstances {
-				is_atlas_texture: false
+				is_directory_listed_atlas_texture_sprite: false
 			}
 		)
 		.await
@@ -424,7 +424,7 @@ async fn several_files_with_same_path_are_handled_properly() {
 			true,
 			1,
 			FileListingCircumstances {
-				is_atlas_texture: false
+				is_directory_listed_atlas_texture_sprite: false
 			}
 		)
 	};

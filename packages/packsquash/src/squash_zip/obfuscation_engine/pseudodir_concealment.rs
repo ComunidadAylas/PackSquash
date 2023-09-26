@@ -45,7 +45,7 @@ static KNOWN_LISTED_RESOURCE_PATTERNS: &[&str] = &[
 
 #[derive(Copy, Clone)]
 pub struct FileListingCircumstances {
-	pub is_atlas_texture: bool
+	pub is_directory_listed_atlas_texture_sprite: bool
 }
 
 pub struct PseudodirConcealer {
@@ -70,6 +70,7 @@ impl PseudodirConcealer {
 	}
 
 	fn is_concealable(&self, path: &RelativePath, circumstances: FileListingCircumstances) -> bool {
-		!circumstances.is_atlas_texture && !self.known_listed_resources.is_match(path)
+		!circumstances.is_directory_listed_atlas_texture_sprite
+			&& !self.known_listed_resources.is_match(path)
 	}
 }

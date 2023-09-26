@@ -247,8 +247,9 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for PngFile<T> {
 		true
 	}
 
-	fn may_be_atlas_texture(&self) -> bool {
-		self.optimization_settings.may_be_atlas_texture
+	fn may_be_directory_listed_atlas_texture_sprite(&self) -> bool {
+		self.optimization_settings
+			.may_be_directory_listed_atlas_texture
 	}
 }
 

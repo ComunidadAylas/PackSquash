@@ -99,8 +99,8 @@ trait PackFile {
 	fn is_compressed(&self) -> bool;
 
 	/// Returns whether this pack file may be stitched into an atlas texture by the game. Most pack files
-	/// should return `false` here, except for texture (i.e., PNG) files.
-	fn may_be_atlas_texture(&self) -> bool {
+	/// should return `false` here, except for texture (i.e., PNG) files and their associated metadata.
+	fn may_be_directory_listed_atlas_texture_sprite(&self) -> bool {
 		false
 	}
 }
