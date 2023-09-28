@@ -28,7 +28,7 @@ mod tests;
 /// to read these files.
 ///
 /// References:
-/// - <https://minecraft.fandom.com/wiki/Function_(Java_Edition)>
+/// - <https://minecraft.wiki/w/Function_(Java_Edition)>
 /// - Minecraft class `net.minecraft.commands.CommandFunction`
 pub struct CommandFunctionFile<T: AsyncRead + Send + Unpin + 'static> {
 	read: T,
