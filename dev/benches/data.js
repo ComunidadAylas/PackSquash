@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695895643076,
+  "lastUpdate": 1695897779216,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "63d19081a415083dbe190e2e0ad3497b939d5e8a",
-          "message": "chore(deps): update docker/build-push-action digest to 0a97817",
-          "timestamp": "2023-09-08T14:30:36Z",
-          "tree_id": "0d00a676ba6555ca8d8a4c86312e17f23c9c695d",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/63d19081a415083dbe190e2e0ad3497b939d5e8a"
-        },
-        "date": 1694195152538,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 8402459,
-            "range": "± 9380100",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 157081256,
-            "range": "± 2572254",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2696300758,
-            "range": "± 34907571",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 244442125,
-            "range": "± 3646965",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 346496840,
             "range": "± 11518856",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e95ed38da4f8e7845c3c86bae122175aec9ed336",
+          "message": "fix(deps): update rust crate zopfli to 0.8.0 (#255)\n\n* fix(deps): update rust crate zopfli to 0.8.0\r\n\r\n* chore(deps): adapt to Zopfli v0.8.0 API changes\r\n\r\n* chore(deps): enable nightly features of some dependencies\r\n\r\nThis might provide a slight performance benefit at no cost for us.\r\n\r\n---------\r\n\r\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>\r\nCo-authored-by: Alejandro González <me@alegon.dev>",
+          "timestamp": "2023-09-28T12:15:00+02:00",
+          "tree_id": "f34b952060bfb8c0855f92df4cb2ea0725e59e4b",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e95ed38da4f8e7845c3c86bae122175aec9ed336"
+        },
+        "date": 1695897778119,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8129842,
+            "range": "± 1140762",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 159423780,
+            "range": "± 5091081",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2128000360,
+            "range": "± 26188930",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 260150711,
+            "range": "± 6687530",
             "unit": "ns/iter"
           }
         ]
