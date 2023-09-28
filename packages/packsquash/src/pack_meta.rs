@@ -28,8 +28,8 @@ pub const PACK_FORMAT_VERSION_1_17: i32 = 7;
 /// `pack.mcmetac` file in the root folder of a pack.
 ///
 /// References:
-/// - <https://minecraft.fandom.com/wiki/Resource_Pack#Contents>
-/// - <https://minecraft.fandom.com/wiki/Data_Pack#pack.mcmeta>
+/// - <https://minecraft.wiki/w/Resource_Pack#Contents>
+/// - <https://minecraft.wiki/w/Data_Pack#pack.mcmeta>
 /// - Minecraft class `net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer`
 pub struct PackMeta {
 	pack_format_version: i32

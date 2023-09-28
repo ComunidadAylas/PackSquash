@@ -53,7 +53,7 @@ static FORMAT_SPECIFIER_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 /// files in Minecraft 1.13. Only Minecraft 1.12 and older versions use this type of files.
 ///
 /// References:
-/// - <https://minecraft.fandom.com/wiki/Resource_Pack?oldid=1257552#Language>
+/// - <https://minecraft.wiki/w/Resource_Pack?oldid=1257552#Language>
 /// - Minecraft class `net.minecraft.client.resources.Locale` (MCP 1.12.2 name)
 /// - OpenJDK 11 implementation of class `java.util.Formatter`
 pub struct LegacyLanguageFile<T: AsyncRead + Send + Unpin + 'static> {
