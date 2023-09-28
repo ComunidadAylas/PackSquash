@@ -5,7 +5,7 @@ resolver = "2"
 [patch.crates-io]
 # Use a newer commit of oxipng that has a PR that adds a more performant raw image API merged.
 # Related PR: https://github.com/shssoichiro/oxipng/pull/482
-oxipng = { git = "https://github.com/shssoichiro/oxipng", rev = "96122fa4" }
+oxipng = { git = "https://github.com/shssoichiro/oxipng", rev = "1f002df0" }
 
 # Use our fork of glsl-lang that allows it to parse #moj_import directives
 glsl-lang = { git = "https://github.com/ComunidadAylas/glsl-lang" }

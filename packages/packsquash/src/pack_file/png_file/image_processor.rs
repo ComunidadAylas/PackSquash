@@ -5,7 +5,7 @@ use crate::zopfli_iterations_time_model::ZopfliIterationsTimeModel;
 use bytes::BytesMut;
 use imagequant::{liq_error, Attributes};
 use itertools::Itertools;
-use oxipng::{BitDepth, ColorType, Deflaters, Options, RowFilter, StripChunks};
+use oxipng::{indexset, BitDepth, ColorType, Deflaters, Options, RowFilter, StripChunks};
 use rgb::{AsPixels, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
 use std::io::Read;
@@ -400,16 +400,6 @@ impl<R: Read> ProcessedImage<R> {
 		can_change_transparent_pixel_colors: bool,
 		can_convert_to_grayscale: bool
 	) -> Result<Vec<u8>, ImageProcessingError> {
-		/// The strategies that OxiPNG will try on the image to find the scanline
-		/// filter that minimizes file size the most.
-		const FILTER_STRATEGIES: [RowFilter; 5] = [
-			RowFilter::None,
-			RowFilter::Bigrams,
-			RowFilter::MinSum,
-			RowFilter::BigEnt,
-			RowFilter::Brute
-		];
-
 		let zopfli_iterations_model =
 			ZopfliIterationsTimeModel::new(zopfli_compression_iterations, 2.0);
 
@@ -417,21 +407,12 @@ impl<R: Read> ProcessedImage<R> {
 
 		let optimization_options = Options {
 			optimize_alpha: can_change_transparent_pixel_colors,
-			backup: false,
 			bit_depth_reduction: can_change_color_type,
 			color_type_reduction: can_change_color_type,
 			// Compute an appropriate number of Zopfli compression iterations using our
 			// model. If the number of iterations drops to zero, switch to the much faster,
-			// but not so space-efficient, cloudflare-zlib deflater
-			deflate: match zopfli_iterations_model.iterations_for_data_size(
-				// OxiPNG does one Zopfli compression attempt per PNG filter configured below
-				// and returns the combination that yields the best result, so it's desired to
-				// consider that the data size was multiplied by the number of filters to bound
-				// execution time properly
-				pixel_count.saturating_mul(FILTER_STRATEGIES.len() as u32),
-				0,
-				15
-			) {
+			// but not so space-efficient, libdeflater
+			deflate: match zopfli_iterations_model.iterations_for_data_size(pixel_count, 0, 15) {
 				0 => Deflaters::Libdeflater {
 					// Use the maximum compression level for the best compression.
 					// This is still acceptably fast for bigger images of realistic
@@ -442,20 +423,25 @@ impl<R: Read> ProcessedImage<R> {
 					iterations: NonZeroU8::new(zopfli_iterations).unwrap()
 				}
 			},
-			filter: FILTER_STRATEGIES.into_iter().collect(),
+			filter: indexset! {
+				// Try the usually most promising filters. Only a single Zopfli run with
+				// the estimated best filter will be attempted
+				RowFilter::None,
+				RowFilter::Bigrams,
+				RowFilter::BigEnt,
+				RowFilter::MinSum,
+				RowFilter::Brute
+			},
 			fix_errors: true, // Ignore CRC for speed. We assume a reliable data source
 			force: false,
 			idat_recoding: true,
 			interlace: None, // We provide raw pixel data to OxiPNG, so interlacing is not a concern
 			palette_reduction: true,
 			grayscale_reduction: can_convert_to_grayscale && can_change_color_type,
-			preserve_attrs: false,
-			pretend: false,
 			scale_16: can_change_color_type,
 			strip: StripChunks::All,
 			timeout: Some(Duration::from_secs(600)), // Bail out if the optimization takes too long
-			fast_evaluation: true,
-			check: false
+			fast_evaluation: true
 		};
 
 		let oxipng_image = match self {

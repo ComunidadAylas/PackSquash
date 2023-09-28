@@ -1079,16 +1079,6 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
-dependencies = [
- "autocfg",
- "hashbrown 0.12.3",
-]
-
-[[package]]
-name = "indexmap"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad227c3af19d4914570ad36d30409928b75967c298feb9ea1969db3a610bb14e"
@@ -1323,18 +1313,18 @@ checksum = "b4668fb0ea861c1df094127ac5f1da3409a82116a4ba74fca2e58ef927159bb3"
 
 [[package]]
 name = "libdeflate-sys"
-version = "0.11.0"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb6784b6b84b67d71b4307963d456a9c7c29f9b47c658f533e598de369e34277"
+checksum = "67921a7f85100c1559efc3d1c7c472091b7da05f304b4bbd5356f075e97f1cc2"
 dependencies = [
  "cc",
 ]
 
 [[package]]
 name = "libdeflater"
-version = "0.11.0"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8e285aa6a046fd338b2592c16bee148b2b00789138ed6b7bb56bb13d585050d"
+checksum = "3a31b22f662350ec294b13859f935aea772ba7b2bc8776269f4a5627308eab7d"
 dependencies = [
  "libdeflate-sys",
 ]
@@ -1584,7 +1574,7 @@ source = "git+https://github.com/OptiVorbis/OptiVorbis#a7e7983e7bd65108da3bcfdbf
 dependencies = [
  "bumpalo",
  "getrandom",
- "indexmap 2.0.1",
+ "indexmap",
  "log",
  "ogg",
  "ouroboros",
@@ -1623,16 +1613,16 @@ dependencies = [
 [[package]]
 name = "oxipng"
 version = "8.0.0"
-source = "git+https://github.com/shssoichiro/oxipng?rev=96122fa4#96122fa45a2c500515bf0875bfbce6f803d6e9a2"
+source = "git+https://github.com/shssoichiro/oxipng?rev=1f002df0#1f002df0a2755ad7d1294413ab91ffc7919e9ecf"
 dependencies = [
  "bitvec",
- "indexmap 1.9.3",
+ "indexmap",
  "libdeflater",
  "log",
  "rgb",
  "rustc-hash",
  "rustc_version",
- "zopfli 0.7.4",
+ "zopfli",
 ]
 
 [[package]]
@@ -1663,7 +1653,7 @@ dependencies = [
  "glsl-lang-lexer",
  "glsl-lang-pp",
  "imagequant",
- "indexmap 2.0.1",
+ "indexmap",
  "itertools 0.11.0",
  "java-properties",
  "json_comments",
@@ -1697,7 +1687,7 @@ dependencies = [
  "winreg",
  "wmi",
  "xz2",
- "zopfli 0.8.0",
+ "zopfli",
 ]
 
 [[package]]
@@ -1769,7 +1759,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e1d3afd2628e69da2be385eb6f2fd57c8ac7977ceeff6dc166ff1657b0e386a9"
 dependencies = [
  "fixedbitset",
- "indexmap 2.0.1",
+ "indexmap",
 ]
 
 [[package]]
@@ -2254,7 +2244,7 @@ version = "1.0.107"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6b420ce6e3d8bd882e9b243c6eed35dbc9a6110c9769e74b584e0d68d1f20c65"
 dependencies = [
- "indexmap 2.0.1",
+ "indexmap",
  "itoa",
  "ryu",
  "serde",
@@ -2756,7 +2746,7 @@ version = "0.19.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b5bb770da30e5cbfde35a2d7b9b8a2c4b8ef89548a7a6aeab5c9a576e3e7421"
 dependencies = [
- "indexmap 2.0.1",
+ "indexmap",
  "serde",
  "serde_spanned",
  "toml_datetime",
@@ -2769,7 +2759,7 @@ version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca676d9ba1a322c1b64eb8045a5ec5c0cfb0c9d08e15e9ff622589ad5221c8fe"
 dependencies = [
- "indexmap 2.0.1",
+ "indexmap",
  "serde",
  "serde_spanned",
  "toml_datetime",
@@ -3168,18 +3158,6 @@ name = "yansi"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09041cd90cf85f7f8b2df60c646f853b7f535ce68f85244eb6731cf89fa498ec"
-
-[[package]]
-name = "zopfli"
-version = "0.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e0650ae6a051326d798eb099b632f1afb0d323d25ee4ec82ffb0779512084d5"
-dependencies = [
- "crc32fast",
- "log",
- "simd-adler32",
- "typed-arena",
-]
 
 [[package]]
 name = "zopfli"
