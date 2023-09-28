@@ -1632,7 +1632,7 @@ dependencies = [
  "rgb",
  "rustc-hash",
  "rustc_version",
- "zopfli",
+ "zopfli 0.7.4",
 ]
 
 [[package]]
@@ -1697,7 +1697,7 @@ dependencies = [
  "winreg",
  "wmi",
  "xz2",
- "zopfli",
+ "zopfli 0.8.0",
 ]
 
 [[package]]
@@ -3174,6 +3174,18 @@ name = "zopfli"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e0650ae6a051326d798eb099b632f1afb0d323d25ee4ec82ffb0779512084d5"
+dependencies = [
+ "crc32fast",
+ "log",
+ "simd-adler32",
+ "typed-arena",
+]
+
+[[package]]
+name = "zopfli"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c1f48f3508a3a3f2faee01629564400bc12260f6214a056d06a3aaaa6ef0736"
 dependencies = [
  "crc32fast",
  "log",
