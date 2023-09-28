@@ -37,8 +37,8 @@ mod metadata_section;
 /// root folder of a pack.
 ///
 /// References:
-/// - <https://minecraft.fandom.com/wiki/Resource_Pack#Contents>
-/// - <https://minecraft.fandom.com/wiki/Data_Pack#pack.mcmeta>
+/// - <https://minecraft.wiki/w/Resource_Pack#Contents>
+/// - <https://minecraft.wiki/w/Data_Pack#pack.mcmeta>
 /// - Minecraft class `net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer`
 /// - Minecraft class `net.minecraft.server.packs.resources.ResourceFilterSection`
 pub struct PackMeta {

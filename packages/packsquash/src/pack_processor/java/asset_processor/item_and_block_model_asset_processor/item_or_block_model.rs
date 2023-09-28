@@ -31,8 +31,8 @@ use crate::{
 ///   (used for both item and block models)
 /// - `net.minecraft.client.resources.model.ModelBakery#BUILTIN_*`
 ///   (look at `GENERATION_MARKER` and `BLOCK_ENTITY_MARKER` usages at `ModelBakery`)
-/// - https://minecraft.fandom.com/wiki/Tutorials/Models#Block_models
-/// - https://minecraft.fandom.com/wiki/Tutorials/Models#Item_models
+/// - https://minecraft.wiki/w/Tutorials/Models#Block_models
+/// - https://minecraft.wiki/w/Tutorials/Models#Item_models
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) struct ItemOrBlockModel<'data> {
 	/// The location of the parent model of this model.
