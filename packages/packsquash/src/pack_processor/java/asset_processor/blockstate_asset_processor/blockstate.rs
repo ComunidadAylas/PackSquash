@@ -16,7 +16,7 @@ use crate::util::zero_copy_deserialize_traits::ZeroCopyDeserializable;
 
 /// References:
 /// - Vanilla deserializer: `net.minecraft.client.renderer.block.model.BlockModelDefinition`
-/// - https://minecraft.fandom.com/wiki/Tutorials/Models#Block_states
+/// - https://minecraft.wiki/w/Tutorials/Models#Block_states
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) struct BlockState<'data> {
 	// TODO docs: must be present if not multipart. The game falls back silently if some variant is
