@@ -4,7 +4,7 @@ use std::{
 	borrow::Cow,
 	collections::hash_map::Entry,
 	io::{self, ErrorKind, Read, SeekFrom},
-	num::{NonZeroU8, TryFromIntError},
+	num::{NonZeroU64, TryFromIntError},
 	path::Path,
 	string::FromUtf8Error,
 	sync::LazyLock,
@@ -750,18 +750,18 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			processed_data_scratch_file.rewind().await?;
 
 			zopfli::compress(
-				&zopfli::Options {
-					iteration_count: NonZeroU8::new(
+				zopfli::Options {
+					iteration_count: NonZeroU64::new(
 						self.zopfli_iterations_time_model.iterations_for_data_size(
 							processed_data_size,
 							1,
 							MAXIMUM_ZOPFLI_ITERATIONS
-						)
+						) as u64
 					)
 					.unwrap(),
 					..Default::default()
 				},
-				&Format::Deflate,
+				Format::Deflate,
 				&mut processed_data_scratch_file,
 				&mut compressed_data_scratch_file
 			)?;
