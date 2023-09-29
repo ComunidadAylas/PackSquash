@@ -405,13 +405,26 @@ impl<R: Read> ProcessedImage<R> {
 
 		let pixel_count = self.width().get() as u32 * self.height().get() as u32;
 
+		let filter_strategies = indexset! {
+			// The usually most promising filters. Only a single Zopfli run with
+			// the estimated best filter will be attempted
+			RowFilter::None,
+			RowFilter::Bigrams,
+			RowFilter::BigEnt,
+			RowFilter::MinSum,
+			RowFilter::Brute
+		};
+
 		let optimization_options = Options {
 			optimize_alpha: can_change_transparent_pixel_colors,
 			bit_depth_reduction: can_change_color_type,
 			color_type_reduction: can_change_color_type,
 			// Compute an appropriate number of Zopfli compression iterations using our
 			// model. If the number of iterations drops to zero, switch to the much faster,
-			// but not so space-efficient, libdeflater
+			// but not so space-efficient, libdeflater. Take into account that OxiPNG does
+			// a run per filter with a faster compressor than Zopfli to evaluate the best
+			// filtering strategy per image, but that still takes a significant amount of
+			// time
 			deflate: match zopfli_iterations_model.iterations_for_data_size(pixel_count, 0, 15) {
 				0 => Deflaters::Libdeflater {
 					// Use the maximum compression level for the best compression.
@@ -423,15 +436,7 @@ impl<R: Read> ProcessedImage<R> {
 					iterations: NonZeroU8::new(zopfli_iterations).unwrap()
 				}
 			},
-			filter: indexset! {
-				// Try the usually most promising filters. Only a single Zopfli run with
-				// the estimated best filter will be attempted
-				RowFilter::None,
-				RowFilter::Bigrams,
-				RowFilter::BigEnt,
-				RowFilter::MinSum,
-				RowFilter::Brute
-			},
+			filter: filter_strategies,
 			fix_errors: true, // Ignore CRC for speed. We assume a reliable data source
 			force: false,
 			idat_recoding: true,

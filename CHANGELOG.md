@@ -16,6 +16,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   disabled by default until the necessary features to better automatically
   determine its default value are implemented, as it caused issues with e.g.
   more common than expected single-color font textures.
+- Updated OxiPNG, bringing image compression improvements at the cost of
+  slightly slower execution times.
 
 #### Distribution
 
