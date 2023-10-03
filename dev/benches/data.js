@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696287799635,
+  "lastUpdate": 1696306085123,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "d3c3e13f6e8e5348f5409d9fa0f2d3b04215771e",
-          "message": "refactor(properties_file): simplify, standarize on Windows-1252 encoding\n\nThe Java documentation specifies that .properties files should use the\nWindows-1252 (also imprecisely known as ISO-8859-1) encoding, but there\nwas code for supporting the Unicode BOM, which should not appear on the\nfirst place and does not help with incompatible misinterpretations of\nthe source encoding as UTF-8; it'd only help if a UTF-8 with BOM file\nonly uses ASCII characters, but break in other cases.\n\nIn the future, we might study and implement ways of handling several\nencodings, depending on the encoding expected by the mod using these\nfiles.",
-          "timestamp": "2023-09-11T21:22:37+02:00",
-          "tree_id": "5dfb46497166e6ee7e05831468cd1360605ab029",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d3c3e13f6e8e5348f5409d9fa0f2d3b04215771e"
-        },
-        "date": 1694461927209,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9418391,
-            "range": "± 179838",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 172061743,
-            "range": "± 1654214",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3045057505,
-            "range": "± 54966918",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 265867836,
-            "range": "± 3601289",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 920434558,
             "range": "± 6392038",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e1547ee702f7e6f38b92f4c0aa8e2cf77aff1ff3",
+          "message": "chore(deps): update taiki-e/install-action digest to dd5387d",
+          "timestamp": "2023-10-03T01:11:52Z",
+          "tree_id": "f9fa2e52b64d4333b0945f85df038a4e5e4f9984",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e1547ee702f7e6f38b92f4c0aa8e2cf77aff1ff3"
+        },
+        "date": 1696306084466,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 7984771,
+            "range": "± 69932",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 155056625,
+            "range": "± 3693039",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 4761469297,
+            "range": "± 46187290",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 920710533,
+            "range": "± 8975287",
             "unit": "ns/iter"
           }
         ]
