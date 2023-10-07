@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696647174160,
+  "lastUpdate": 1696712090097,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "a9c37e3d90c01cc2a2cd7c54b371631709d9d22f",
-          "message": "chore(deps): update docker/metadata-action action to v5 (#251)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
-          "timestamp": "2023-09-12T11:24:18+02:00",
-          "tree_id": "c512866daebb5349a63b337604cf1681c1a7245a",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a9c37e3d90c01cc2a2cd7c54b371631709d9d22f"
-        },
-        "date": 1694513524178,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 8583485,
-            "range": "± 258501",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 158638536,
-            "range": "± 15740486",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2727095698,
-            "range": "± 23943300",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 248313073,
-            "range": "± 1935193",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 933767251,
             "range": "± 24786646",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "a44d1736ad45d8475f12e527d74283ba363ccfc1",
+          "message": "fix(shader_file): fallback to compat. no transform if `#moj_import` is involved\n\nAs highlighted in issue #187, a significant number of practical shaders\nuse `#moj_import`s in ways that are tricky for PackSquash to handle\nwithout import expansion capabilities. The necessary redesign to achieve\nexpansion will ikely take some time, but there is stakeholder pressure\nto get better (and more correct) solutions working now: PackSquash has\narguably been incorrect in how it processes shaders for months, and\njustifying the status quo with upcoming plans to tackle the problems at\ntheir source is no longer a tenable proposition, leading to\nrelatively frequent uncomfortable situations for both me and users.\n\nTherefore, let's play the cards very close to our chest when it comes to\ntransforming GLSL sources: don't do it unless we can be certain that we\nhave a full AST and all the preprocessor state is known. This entails\nsignificant optimization regressions for any shader that uses\n`#moj_import`, as not expanding that directive is the root of all evil,\nbut PackSquash will at least just work in much more cases. In\nparticular, these changes were tested with FancyPants, TextEffects v2.1\nand objmc, which are interesting shaders from a parsing standpoint due\nto their popularity and intensive usage of GLSL language features.",
+          "timestamp": "2023-10-07T22:25:18+02:00",
+          "tree_id": "523584bd56e3a8f612bca53adbb87b5f4f5ba7e0",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a44d1736ad45d8475f12e527d74283ba363ccfc1"
+        },
+        "date": 1696712089354,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 7406791,
+            "range": "± 180830",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 152704841,
+            "range": "± 22916690",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 4255512547,
+            "range": "± 104547322",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 890275752,
+            "range": "± 7592016",
             "unit": "ns/iter"
           }
         ]
