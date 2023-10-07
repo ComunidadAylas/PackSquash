@@ -85,6 +85,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   statements or expressions. Failure to parse them as such will result in a
   tentative syntax error to be shown, but such an error will not be fatal and
   PackSquash will fall back to no source transformation.
+- Include shaders consisting of a list of statements no longer have only their
+  first instruction transformed when minifying or prettifying, which broke the
+  semantics of the shader code.
 - The UTF-8 BOM is no longer automatically stripped from properties files, as
   they should not be encoded in UTF-8 to begin with, and carrying on processing
   with mismatched encodings may cause mojibake.

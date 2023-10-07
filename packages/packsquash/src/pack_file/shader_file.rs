@@ -100,7 +100,7 @@ impl Decoder for OptimizerDecoder {
 				source_transformation_strategy
 			)
 			.or_else(|_| {
-				process_shader_as::<Statement>(
+				process_shader_as::<Vec<Statement>>(
 					src,
 					&shader_parser,
 					false,

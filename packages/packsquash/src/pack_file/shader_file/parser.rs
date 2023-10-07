@@ -346,13 +346,17 @@ impl TranspilableInner for ParsedSymbol<TranslationUnit> {
 	}
 }
 
-impl TranspilableInner for ParsedSymbol<Statement> {
+impl TranspilableInner for ParsedSymbol<Vec<Statement>> {
 	fn transpile<W: Write + ?Sized>(
 		&self,
 		f: &mut W,
 		formatting_state: &mut FormattingState
 	) -> fmt::Result {
-		glsl_lang::transpiler::glsl::show_statement(f, self, formatting_state)
+		for statement in &self.symbol {
+			glsl_lang::transpiler::glsl::show_statement(f, statement, formatting_state)?;
+		}
+
+		Ok(())
 	}
 }
 
