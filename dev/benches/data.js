@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696712090097,
+  "lastUpdate": 1696715267709,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "dd8d026c36736a3efd5e3bfc56321326c77789bc",
-          "message": "chore(deps): update taiki-e/install-action digest to 0163f6c (#248)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
-          "timestamp": "2023-09-12T13:19:04+02:00",
-          "tree_id": "2c557f6dafd42676ff079552e74028628fb9d072",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/dd8d026c36736a3efd5e3bfc56321326c77789bc"
-        },
-        "date": 1694519190645,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11146199,
-            "range": "± 319496",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 203156533,
-            "range": "± 4451017",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3638800912,
-            "range": "± 47267150",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 317125061,
-            "range": "± 7048630",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 890275752,
             "range": "± 7592016",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "886cbe57f46c82b82797fdc9608f017fd879f785",
+          "message": "fix(shader_file): correctly parse incl. shaders that are statement lists\n\nPreviously, when an include shader contained a statement list, only the\nfirst statement in the AST would be transpiled, which broke the shader,\nand is likely to be a common use case (I've seen it happen on objmc).",
+          "timestamp": "2023-10-07T23:17:58+02:00",
+          "tree_id": "f4e6d6e2e091ea2c3313eb16b9741b3f502f588e",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/886cbe57f46c82b82797fdc9608f017fd879f785"
+        },
+        "date": 1696715266949,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 7569937,
+            "range": "± 728878",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 152340937,
+            "range": "± 7924592",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 4373874494,
+            "range": "± 69027520",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 911169346,
+            "range": "± 9630950",
             "unit": "ns/iter"
           }
         ]
