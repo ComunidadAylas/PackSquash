@@ -88,9 +88,11 @@ impl Decoder for OptimizerDecoder {
 		} else {
 			// Include shaders may not necessarily be a translation unit. In fact, they technically
 			// can be any text, as long as its inclusion in a top-level shader yields valid GLSL. As
-			// a compromise between rejecting technically valid inputs and allowing potential nonsensical
-			// text in them, which hampers validation and minification/prettifying capabilities,
-			// also accept standalone statements and expressions
+			// a compromise between requiring include shaders to conform to a known GLSL grammar symbol,
+			// which is required for validation and minification/prettifying capabilities, and accepting
+			// practical input that may not be parsable as a grammar symbol, also accept standalone
+			// statements and expressions, and fall back to warning about tentative syntax errors if
+			// parsing the source as any GLSL grammar symbol failed
 			process_shader_as::<TranslationUnit>(
 				src,
 				&shader_parser,
@@ -107,6 +109,16 @@ impl Decoder for OptimizerDecoder {
 			})
 			.or_else(|_| {
 				process_shader_as::<Expr>(src, &shader_parser, false, source_transformation_strategy)
+			})
+			.or_else(|err| {
+				if let OptimizationError::InvalidShader(err) = err {
+					Ok(Some((
+						Cow::Owned(format!("Copied, but validation tentatively failed: {err}")),
+						src.split_off(0)
+					)))
+				} else {
+					Err(err)
+				}
 			})
 		}
 	}
@@ -167,33 +179,51 @@ fn process_shader_as<T: Extractable<TranslationUnit> + 'static>(
 where
 	ParsedSymbol<T>: Transpilable
 {
-	if let (
-		Some(symbol),
-		ShaderSourceTransformationStrategy::Minify | ShaderSourceTransformationStrategy::Prettify
-	) = (
-		shader_parser.parse::<T>(src, is_top_level_translation_unit)?,
+	match (
+		shader_parser.parse::<T>(src, is_top_level_translation_unit),
 		source_transformation_strategy
 	) {
-		// The shader is valid and safe to transform
-		let minify = matches!(
-			source_transformation_strategy,
-			ShaderSourceTransformationStrategy::Minify
-		);
+		(
+			Ok(Some(symbol)),
+			ShaderSourceTransformationStrategy::Minify | ShaderSourceTransformationStrategy::Prettify
+		) => {
+			// The shader is valid and safe to transform, and we want to transform it
+			let minify = matches!(
+				source_transformation_strategy,
+				ShaderSourceTransformationStrategy::Minify
+			);
 
-		let mut buf = src.split_off(0);
-		buf.clear();
+			let mut buf = src.split_off(0);
+			buf.clear();
 
-		buf.extend_from_slice(symbol.transpile(minify).as_bytes());
+			buf.extend_from_slice(symbol.transpile(minify).as_bytes());
 
-		Ok(Some((
-			Cow::Borrowed(if minify { "Minified" } else { "Prettified" }),
-			buf
-		)))
-	} else {
-		// The shader is valid, but not safe to transform, or we don't want to transform it
-		Ok(Some((
-			Cow::Borrowed("Validated and copied"),
+			Ok(Some((
+				Cow::Borrowed(if minify { "Minified" } else { "Prettified" }),
+				buf
+			)))
+		}
+		(Ok(None), _) | (Ok(Some(_)), ShaderSourceTransformationStrategy::KeepAsIs) => {
+			// The shader is valid, but not safe to transform, or we don't want to transform it
+			Ok(Some((
+				Cow::Borrowed("Validated and copied"),
+				src.split_off(0)
+			)))
+		}
+		(
+			Err(ParseError::Syntax {
+				error,
+				found_unresolvable_moj_import: true
+			}),
+			_
+		) => Ok(Some((
+			// The shader is not valid, but the syntax error may be a false positive due to
+			// missing preprocessor context
+			Cow::Owned(format!(
+				"Copied, but validation tentatively failed: {error}"
+			)),
 			src.split_off(0)
-		)))
+		))),
+		(Err(err), _) => Err(err.into())
 	}
 }

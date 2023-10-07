@@ -65,6 +65,26 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 #### Fixed
 
+- Shaders that depend on `#moj_import`ed or parent-defined preprocessor
+  variables to be syntactically correct or expand to the intended source code
+  will no longer cause PackSquash to fail or change their semantics.
+  - Since PackSquash still can't resolve `#moj_import` directives, this fix came
+    at the cost of falling back to not doing any source transformations
+    (minification, transformation) when this directive is used. Note that
+    PackSquash will never be able to resolve these directives in the general
+    case, because shaders can import shaders from other packs, including the
+    default game pack, which PackSquash doesn't have access to.
+  - If PackSquash cannot parse a shader, the parsing error is now considered
+    tentative, causing a fallback to no source transformation, if the shader
+    contains a `#moj_import` directive, as it cannot be ruled out that the
+    shader source would be valid if the `#moj_import` is expanded.
+  - In the future, we look forward to improve PackSquash `#moj_import` expansion
+    capabilities. At least, we should be able to better handle the common case
+    of imports of other shaders from the same pack.
+- Include shaders now do not need to be parsable as translation units,
+  statements or expressions. Failure to parse them as such will result in a
+  tentative syntax error to be shown, but such an error will not be fatal and
+  PackSquash will fall back to no source transformation.
 - The UTF-8 BOM is no longer automatically stripped from properties files, as
   they should not be encoded in UTF-8 to begin with, and carrying on processing
   with mismatched encodings may cause mojibake.

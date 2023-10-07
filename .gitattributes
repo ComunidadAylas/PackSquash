@@ -3,5 +3,6 @@
 packages/packsquash/src/pack_file/json_file/*.json                     eol=lf
 packages/packsquash/src/pack_file/properties_file/*.properties         eol=lf
 packages/packsquash/src/pack_file/shader_file/*.fsh                    eol=lf
+packages/packsquash/src/pack_file/shader_file/*.glsl                   eol=lf
 packages/packsquash/src/pack_file/legacy_lang_file/*.lang              eol=lf
 packages/packsquash/src/pack_file/command_function_file/*.mcfunction   eol=lf

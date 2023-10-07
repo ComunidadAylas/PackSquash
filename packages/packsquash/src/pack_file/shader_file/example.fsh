@@ -5,12 +5,8 @@
 #version 120
 
 // Dummy variables added to check that transpilation doesn't mess with the preprocessor directives
-vec2 dummy_variable;
-vec3 dummy_var_2;
-
-// Test that the #moj_import directive added in 1.17 works fine
-#moj_import <base.fsh>
-#moj_import "common.fsh"
+vec2 dummyVariable;
+vec3 dummyVariable2;
 
 // Dummy function added to check that it transpiles fine
 float rand(vec2 co, vec2 _) {
@@ -20,6 +16,8 @@ float rand(vec2 co, vec2 _) {
 varying vec4 texcoord;
 uniform sampler2D gcolor;
 uniform mat3 IViewRotMat;
+
+#pragma optimize(on)
 
 void main() {
 	// Get the location of the current pixel on the screen.
@@ -43,6 +41,13 @@ void main() {
 #else
 #error "Unexpected GLSL version"
 #endif
+
+	// The following lines would cause our current lacks_injectable_pp_directives_out_of_external_declaration_position
+	// implementation to return false, even though all the preprocessor directives here would be expanded, because
+	// TYPE and SEMICOLON would not be defined identifiers
+	//#define TYPE vec2
+	//#define SEMICOLON ;
+	//TYPE dummyVar SEMICOLON
 
 	// Here's where we tell Minecraft what color we want this pixel.
 	gl_FragColor = vec4(color, 1.0);

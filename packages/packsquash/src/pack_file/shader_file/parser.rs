@@ -2,8 +2,6 @@
 
 use crate::pack_file::strip_utf8_bom;
 use aho_corasick::AhoCorasick;
-use const_format::concatcp;
-use const_random::const_random;
 use glsl_lang::ast::{
 	Expr, ExternalDeclarationData, FileId, Statement, TranslationUnit, TypeSpecifierNonArrayData
 };
@@ -18,12 +16,12 @@ use std::any::TypeId;
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::convert::Infallible;
+use std::fmt;
 use std::fmt::Write;
 use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 use std::str::Utf8Error;
 use std::sync::LazyLock;
-use std::{fmt, path};
 use thiserror::Error;
 
 /// A GLSL lexer that does not preprocess its input before parsing, considering
@@ -41,32 +39,19 @@ type NonPreprocessingLexer<'i> = glsl_lang_lexer::v2_min::str::Lexer<'i>;
 type PreprocessingLexer<'r, 'p, 'flag> =
 	glsl_lang_lexer::v2_full::fs::Lexer<'r, 'p, ImportFileSystem<'flag>>;
 
-/// The path prefix used in [`MOJ_IMPORT_PLACEHOLDER_PRAGMA`] to mark a given path as
-/// included via `<...>` syntax (i.e., relative to the `include` folder, a.k.a.
-/// "system include" in C/GLSL preprocessor literature), as opposed to `"..."` syntax.
-const MOJ_IMPORT_PLACEHOLDER_PRAGMA_RELATIVE_MARKER_PATH_PREFIX: &str =
-	// The # character prevents this prefix from forming a valid resource location:
-	// Minecraft parses import paths as resource locations
-	concatcp!("__packsquash_internal_relative_marker#", const_random!(u16));
-
-/// A placeholder, to be used only by PackSquash `#pragma` preprocessor directive that
-/// signals that there was a `#moj_import` preprocessor directive at its position in
-/// the original source.
-///
-/// This directive is replaced by PackSquash before outputting transpiled shader code
-/// with its corresponding `#moj_import`. It should not be used by any external application
-/// under any circumstances.
-static MOJ_IMPORT_PLACEHOLDER_PRAGMA: &str = concatcp!(
-	"#pragma __PACKSQUASH_INTERNAL_MOJ_IMPORT_PLACEHOLDER_",
-	const_random!(u16),
-	" "
-);
-
 /// An error that may happen while parsing a GLSL grammar symbol.
 #[derive(Error, Debug)]
 pub enum ParseError {
-	#[error("Syntax error: {0}")]
-	Syntax(#[from] glsl_lang::parse::ParseError<LexicalError<Infallible>>),
+	#[error("Syntax error: {error}")]
+	Syntax {
+		error: glsl_lang::parse::ParseError<LexicalError<Infallible>>,
+		/// Represents whether this syntax error happened when the source file contained
+		/// an unresolvable `#moj_import` directive. This indicates that the syntax error
+		/// might be a false positive, as it can be caused due to preprocessor directives
+		/// being inappropriately expanded or masked: imported shaders can change the
+		/// outcome of the preprocessing stage.
+		found_unresolvable_moj_import: bool
+	},
 	#[error("Non-included shaders must define a main function, but it was not defined")]
 	MissingMainFunction,
 	#[error("Invalid encoding: {0}")]
@@ -111,17 +96,14 @@ impl Parser {
 		// Wrap the input GLSL symbol into something that parses as a translation unit
 		let source = T::wrap(std::str::from_utf8(strip_utf8_bom(source))?);
 
-		let inserted_moj_import_placeholder_pragma = Cell::new(false);
+		let found_unresolvable_moj_import = Cell::new(false);
 
-		let mut preprocessor = Processor::new_with_fs(ImportFileSystem::new(
-			&inserted_moj_import_placeholder_pragma
-		));
+		let mut preprocessor =
+			Processor::new_with_fs(ImportFileSystem::new(&found_unresolvable_moj_import));
 
 		// Imports using the <...> syntax are known as "system imports", and the preprocessor needs
 		// to know at least one system include directory to resolve them
-		preprocessor
-			.system_paths_mut()
-			.push(MOJ_IMPORT_PLACEHOLDER_PRAGMA_RELATIVE_MARKER_PATH_PREFIX.into());
+		preprocessor.system_paths_mut().push(PathBuf::new());
 
 		TranslationUnit::parse_with_options::<PreprocessingLexer>(
 			preprocessor.open_source(&source, ""),
@@ -158,19 +140,21 @@ impl Parser {
 
 				// Expanding and removing preprocessor directives in top-level shaders does not alter
 				// their semantics, as long as we are able to resolve every #moj_import to its source
-				// code, or no shader imported with #moj_import defines preprocessor variables that
-				// affect the source code compiled in the top-level shader.
+				// code, because shaders imported with #moj_import may define preprocessor variables
+				// that affect the source code compiled in the top-level shader.
 				//
 				// In general, we may not be able to resolve #moj_import to source files. But we can
-				// keep potential semantic alterations to a minimum if we check that the AST is capable
-				// of holding preprocessor directives that cannot be expanded in the same position as
-				// they originally were in the source. If that's not the case, then it's definitely not
-				// safe to transform this code
-				Ok((lacks_preprocessor_directives
-					|| self.lacks_injectable_pp_directives_out_of_external_declaration_position(
-						&source
-					))
-				.then(|| {
+				// keep semantics if we check that we could resolve all the #moj_import directives, and
+				// the AST is capable of holding preprocessor directives that cannot be expanded in the
+				// same position as they originally were in the source. If that's not the case, then
+				// it's definitely not safe to transform this code
+				let safe_to_transpile = lacks_preprocessor_directives
+					|| (!found_unresolvable_moj_import.get()
+						&& self.lacks_injectable_pp_directives_out_of_external_declaration_position(
+							&source
+						));
+
+				Ok(safe_to_transpile.then(|| {
 					preprocessor_directives.inject(&mut translation_unit);
 
 					// Wrapping and extracting a TU into itself is a no-op, so this always returns Some
@@ -185,28 +169,31 @@ impl Parser {
 			}
 		})
 		.map_or_else(
-			|err| Err(err.into()),
-			|map_result| {
-				map_result.map(|symbol| {
-					symbol.flatten().map(|symbol| ParsedSymbol {
-						symbol,
-						inserted_moj_import_placeholder_pragma:
-							inserted_moj_import_placeholder_pragma.into_inner()
-					})
+			|error| {
+				Err(ParseError::Syntax {
+					error,
+					found_unresolvable_moj_import: found_unresolvable_moj_import.get()
 				})
+			},
+			|map_result| {
+				map_result.map(|symbol| symbol.flatten().map(|symbol| ParsedSymbol { symbol }))
 			}
 		)
 	}
 
-	/// Checks whether the specified GLSL source lacks injectable preprocessor directives
+	/// Checks whether the specified valid GLSL source lacks injectable preprocessor directives
 	/// out of external declaration position. Currently, the injectable preprocessor directives
-	/// are `#version`, `#extension`, `#pragma` and `#moj_import`, which are necessary to
-	/// preserve in the generated GLSL code for the game to parse shaders as intended.
+	/// are `#version`, `#extension`, `#pragma` and `#moj_import`, which are necessary to preserve
+	/// (or, in the case of `#moj_import`, expand) in the generated GLSL code for the game to
+	/// parse shaders as intended.
 	///
 	/// Currently, this method is implemented by removing preprocessor directives that do not get
 	/// injected (i.e., are expanded) and trying to parse the result with a non-preprocessing lexer
 	/// that only accepts preprocessor directives in external declaration position. Therefore, if
 	/// it is best to avoid calling it if it is known that there are no preprocessor directives.
+	/// False negatives are returned if the source cannot be parsed when removing preprocessor
+	/// directives whose expansion is necessary for syntax correctness, which given the usage of
+	/// this function is a safe but inefficient fallback.
 	fn lacks_injectable_pp_directives_out_of_external_declaration_position(
 		&self,
 		source: &str
@@ -219,7 +206,7 @@ impl Parser {
 				AhoCorasick::new(NEWLINE_ESCAPES).unwrap(),
 				// When this function is called we know that any present preprocessor directives
 				// are valid and follow their expected syntax, so this regex can be a bit lenient
-				Regex::new("(?m:^[[:space:]]*#[[:space:]]*(?:|define.*|undef.*|if.*|else.*|elif.*|endif.*|error.*|line.*)$)").unwrap()
+				Regex::new("(?m:^[[:space:]]*#[[:space:]]*(?:|define.*|undef.*|if.*|else.*|elif.*|endif.*|error.*|line.*|moj_import.*)$)").unwrap()
 			)
 		});
 
@@ -242,38 +229,6 @@ impl Parser {
 		)
 		.is_ok()
 	}
-
-	/// Replaces internal, temporary `#moj_import` placeholder pragmas with their corresponding
-	/// `#moj_import` directive in the provided `source`, which is assumed to have been generated
-	/// by the GLSL transpiler used by PackSquash. See [`MOJ_IMPORT_PLACEHOLDER_PRAGMA`] for more
-	/// details.
-	///
-	/// The implementation of this method is optimized for the case where there is at least one
-	/// placeholder `#pragma` to replace.
-	fn replace_moj_import_placeholder_pragmas(source: &str) -> String {
-		source
-			.split('\n') // Our GLSL transpiler always uses LF and doesn't insert newline escapes
-			.map(|line| {
-				if let Some(import_path) = line
-					.trim_start_matches(|c: char| c.is_ascii_whitespace())
-					.strip_prefix(MOJ_IMPORT_PLACEHOLDER_PRAGMA)
-				{
-					if let Some(import_path) = import_path.strip_prefix(concatcp!(
-						MOJ_IMPORT_PLACEHOLDER_PRAGMA_RELATIVE_MARKER_PATH_PREFIX,
-						path::MAIN_SEPARATOR
-					)) {
-						// Luckily, Minecraft does not support escaping > or " in #moj_import paths
-						Cow::Owned(format!("#moj_import <{import_path}>"))
-					} else {
-						Cow::Owned(format!("#moj_import \"{import_path}\""))
-					}
-				} else {
-					Cow::Borrowed(line)
-				}
-			})
-			.intersperse(Cow::Borrowed("\n"))
-			.collect()
-	}
 }
 
 /// The virtual filesystem used by [`PreprocessingLexer`] to expand `#moj_import`
@@ -281,16 +236,17 @@ impl Parser {
 ///
 /// This filesystem records whether any `#moj_import` directive was expanded.
 struct ImportFileSystem<'flag> {
-	inserted_moj_import_placeholder_pragma: &'flag Cell<bool>
+	found_unresolvable_moj_import: &'flag Cell<bool>
 }
 
 impl<'flag> ImportFileSystem<'flag> {
 	/// Creates a new virtual filesystem used by the preprocessing shader lexer.
-	/// `inserted_moj_import_placeholder_pragma` will be set to `true` if any
-	/// `#moj_import` directive is expanded.
-	fn new(inserted_moj_import_placeholder_pragma: &'flag Cell<bool>) -> Self {
+	/// `found_unresolvable_moj_import` will be set to `true` if any `#moj_import`
+	/// directive is found, because it is not possible to expand them at the
+	/// moment.
+	fn new(found_unresolvable_moj_import: &'flag Cell<bool>) -> Self {
 		Self {
-			inserted_moj_import_placeholder_pragma
+			found_unresolvable_moj_import
 		}
 	}
 }
@@ -298,32 +254,34 @@ impl<'flag> ImportFileSystem<'flag> {
 impl FileSystem for ImportFileSystem<'_> {
 	type Error = Infallible;
 
-	fn canonicalize(&self, path: &Path) -> Result<PathBuf, Self::Error> {
-		Ok(path.into())
+	fn canonicalize(&self, _: &Path) -> Result<PathBuf, Self::Error> {
+		Ok(PathBuf::new())
 	}
 
 	fn exists(&self, _: &Path) -> bool {
 		true
 	}
 
-	fn read(&self, path: &Path) -> Result<Cow<'_, str>, Self::Error> {
-		// For now, always expand included files to placeholder #pragmas, to replace them
-		// back with #moj_imports when transpiling. For v0.4.0, we could try to actually
-		// expand the files for parsing, which should support more inputs (e.g., shaders
-		// that depend on included tokens to be syntactically correct, or rely on included
-		// preprocessor variables to select code to compile). If the referenced file does
-		// not exist on this pack, then we could fall back to accepting potentially invalid
-		// input: it could become valid after resolving imports
-		self.inserted_moj_import_placeholder_pragma.set(true);
-		Ok(format!("{MOJ_IMPORT_PLACEHOLDER_PRAGMA}{}", path.to_str().unwrap()).into())
+	fn read(&self, _: &Path) -> Result<Cow<'_, str>, Self::Error> {
+		// For now, just record that a #moj_import was found. A #moj_import'ed file
+		// may contain preprocessor directives whose knowledge may be necessary to properly
+		// expand other preprocessor directives, and thus keep the GLSL source semantics
+		// when doing AST transformations and transpiling. We can't resolve #moj_import
+		// at the moment because we can't access pack files here, so if such a directive
+		// is found, we know we should not proceed with any transformations: doing AST
+		// transformations and transpiling is appropriate if and only if we can expand all
+		// the preprocessor directives. Also consider that not expanding can cause failure
+		// to correctly parse shaders that depend on imported text to be syntactically
+		// correct, but those should be not that common to find in practice
+		self.found_unresolvable_moj_import.set(true);
+		Ok("".into())
 	}
 }
 
 /// A parsed GLSL grammar symbol returned by a [`Parser`].
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ParsedSymbol<T> {
-	symbol: T,
-	inserted_moj_import_placeholder_pragma: bool
+	symbol: T
 }
 
 /// Represents a GLSL grammar symbol that can be transpiled back to GLSL.
@@ -351,11 +309,7 @@ where
 		)
 		.unwrap();
 
-		if self.inserted_moj_import_placeholder_pragma {
-			Parser::replace_moj_import_placeholder_pragmas(&output)
-		} else {
-			output
-		}
+		output
 	}
 }
 
@@ -373,16 +327,7 @@ impl<T> DerefMut for ParsedSymbol<T> {
 	}
 }
 
-impl<T: PartialEq> PartialEq for ParsedSymbol<T> {
-	fn eq(&self, other: &Self) -> bool {
-		self.symbol.eq(&other.symbol)
-	}
-}
-
-impl<T: Eq> Eq for ParsedSymbol<T> {}
-
-/// Internal trait used to mark types that can carry out a part of the
-/// transpilation steps for GLSL symbols.
+/// Internal trait used to encapsulate GLSL symbol-specific transpilation logic.
 trait TranspilableInner {
 	fn transpile<W: Write + ?Sized>(
 		&self,
