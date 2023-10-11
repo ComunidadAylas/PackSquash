@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696883014082,
+  "lastUpdate": 1696999368730,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "98c0ece69aaf2c176d343f542d3d0a4b62efbed3",
-          "message": "fix(deps): update rust crate serde_json to 1.0.107",
-          "timestamp": "2023-09-14T00:14:10Z",
-          "tree_id": "fbc515de3edf0017c0f880b09f77d8817dfa928b",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/98c0ece69aaf2c176d343f542d3d0a4b62efbed3"
-        },
-        "date": 1694666067015,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11000198,
-            "range": "± 1343903",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 194117981,
-            "range": "± 2557380",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3601016628,
-            "range": "± 71818588",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 318242633,
-            "range": "± 13774911",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 930072787,
             "range": "± 9425728",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0271e570918ca5a49707d03f33cb4aa2903cdf36",
+          "message": "chore(deps): update taiki-e/install-action digest to e659bf8",
+          "timestamp": "2023-10-11T01:44:42Z",
+          "tree_id": "b1cffb5b1a8d5daa0fd1841af16712bb0e58c381",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/0271e570918ca5a49707d03f33cb4aa2903cdf36"
+        },
+        "date": 1696999367579,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9254810,
+            "range": "± 515924",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 171085721,
+            "range": "± 4454909",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 4415810579,
+            "range": "± 81275934",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 948222932,
+            "range": "± 19772262",
             "unit": "ns/iter"
           }
         ]
