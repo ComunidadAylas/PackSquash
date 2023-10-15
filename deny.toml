@@ -91,10 +91,6 @@ ignore = true
 multiple-versions = "warn"
 highlight = "all"
 skip = [
-	# Some parts of the ecosystem have already updated aho-corasick to v1 (e.g., the
-	# regex crate), but others didn't (e.g., globset). Let's ignore that for now,
-	# globset shouldn't stay that way for long
-	{ name = "aho-corasick", version = "=0.7.20" },
 	# This older version is pulled by the GLSL macro machinery on build-time.
 	# It should not affect final executables
 	{ name = "darling", version = "=0.14.4" },
@@ -107,14 +103,16 @@ skip-tree = [
 	# affect the final user executables at all
 	{ name = "perfcnt" },
 	# Criterion itself also pulls some older dependencies
-	{ name = "criterion" }
+	{ name = "criterion" },
+	# The build-time winresource dependency pulls slightly older toml
+	# crate versions. They don't affect final executables
+	{ name = "winresource" }
 ]
 
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
-	"https://github.com/shssoichiro/oxipng",
 	"https://github.com/RustAudio/ogg"
 ]
 
