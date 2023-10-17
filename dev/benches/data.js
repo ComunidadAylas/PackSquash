@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1697569654539,
+  "lastUpdate": 1697572022038,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "66d279fde0a7e9aa6e45960a02728c494a387d93",
-          "message": "ci: slightly simplify workflow definition\n\nIt turns out that omitting matrix keys altogether should make the CI\njobs execute as we want, while leading to shorter workflow definition\nYAML. Related docs: https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs#example-adding-configurations",
-          "timestamp": "2023-09-18T21:09:11+02:00",
-          "tree_id": "60f8444c9d591f3cc1b62830fba606b0c9e598de",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/66d279fde0a7e9aa6e45960a02728c494a387d93"
-        },
-        "date": 1695066113322,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9125309,
-            "range": "± 148611",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 159899248,
-            "range": "± 13175597",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2736779602,
-            "range": "± 66392033",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 268558834,
-            "range": "± 8235975",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 907910790,
             "range": "± 5927739",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "770c86c3e88a618e82e72766d66a070b719f4a4e",
+          "message": "chore(deps): update taiki-e/install-action digest to ac7879e (#263)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2023-10-17T21:16:32+02:00",
+          "tree_id": "3a498c42efaba7bc1c125d09ef58fe4dd2e5730c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/770c86c3e88a618e82e72766d66a070b719f4a4e"
+        },
+        "date": 1697572021273,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 8291557,
+            "range": "± 353109",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 155620667,
+            "range": "± 5547870",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 4790289011,
+            "range": "± 106509064",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 926313812,
+            "range": "± 9988736",
             "unit": "ns/iter"
           }
         ]
