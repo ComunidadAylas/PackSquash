@@ -168,7 +168,7 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@47d27149ff6b3422864ec504071d5cc7873d642e# v2
+        uses: taiki-e/install-action@47d27149ff6b3422864ec504071d5cc7873d642e # v2
         with:
           tool: nextest
 
