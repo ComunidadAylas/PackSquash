@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1697572022038,
+  "lastUpdate": 1697572598646,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "c1886441c796557bafcb3cdc747ad6147ff2c2d4",
-          "message": "Revert \"ci: slightly simplify workflow definition\"\n\nThis reverts commit 66d279fde0a7e9aa6e45960a02728c494a387d93.\n\nWhile the change worked, it lead to workflows showing a different and\nuglier name on the GitHub web UI, which was not worth it when compared\nto the DRY benefits.",
-          "timestamp": "2023-09-18T21:10:02+02:00",
-          "tree_id": "5007f3652e737151ede891a5590bfbf94165498c",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c1886441c796557bafcb3cdc747ad6147ff2c2d4"
-        },
-        "date": 1695066879664,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 12815395,
-            "range": "± 493267",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 198897744,
-            "range": "± 2158351",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2930680784,
-            "range": "± 61591238",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 329158473,
-            "range": "± 10391630",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 926313812,
             "range": "± 9988736",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dab77c4f23a8122c1bea8be53a037e136651bb45",
+          "message": "fix(deps): update rust crate regex to 1.10.2 (#265)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2023-10-17T21:16:48+02:00",
+          "tree_id": "fa9ffa388dcc4b249c5f0cc48289aa566b6a6d38",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/dab77c4f23a8122c1bea8be53a037e136651bb45"
+        },
+        "date": 1697572597126,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 11208357,
+            "range": "± 818510",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 196652144,
+            "range": "± 2672981",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 5021627471,
+            "range": "± 88691373",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 1114997482,
+            "range": "± 27163150",
             "unit": "ns/iter"
           }
         ]
