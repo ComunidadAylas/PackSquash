@@ -695,9 +695,9 @@ dependencies = [
 
 [[package]]
 name = "entropy"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e885f8dca86fbf1999f9b4643d6e94e984c5c8b36073404dd227be3e5255f1d5"
+checksum = "d68716e45ef572f351be6fad93a7bbf35242b4289a2ff75434032e5d73d74cc2"
 
 [[package]]
 name = "enumset"
