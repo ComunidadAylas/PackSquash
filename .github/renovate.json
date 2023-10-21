@@ -1,32 +1,52 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["config:best-practices"],
-	"addLabels": ["dependencies"],
-	"reviewers": ["team:packsquash-developers"],
+	"extends": [
+		"config:best-practices"
+	],
+	"addLabels": [
+		"dependencies"
+	],
+	"reviewers": [
+		"team:packsquash-developers"
+	],
 	"automerge": true,
 	"automergeType": "branch",
 	"minimumReleaseAge": "2 days",
-	"schedule": ["every 3 days"],
+	"schedule": [
+		"every 3 day"
+	],
 	"packageRules": [
 		{
-			"matchUpdateTypes": ["major"],
+			"matchUpdateTypes": [
+				"major"
+			],
 			"dependencyDashboardApproval": true
 		},
 		{
-			"matchCategories": ["python"],
+			"matchCategories": [
+				"python"
+			],
 			"groupName": "Helper Python scripts"
 		},
 		{
-			"matchCategories": ["rust"],
+			"matchCategories": [
+				"rust"
+			],
 			"groupName": "Rust dependencies"
 		},
 		{
-			"matchCategories": ["ci"],
+			"matchCategories": [
+				"ci"
+			],
 			"groupName": "CI dependencies"
 		},
 		{
-			"matchManagers": ["github-actions"],
-			"matchPackageNames": ["slsa-framework/slsa-github-generator"],
+			"matchManagers": [
+				"github-actions"
+			],
+			"matchPackageNames": [
+				"slsa-framework/slsa-github-generator"
+			],
 			"pinDigests": false
 		}
 	]
