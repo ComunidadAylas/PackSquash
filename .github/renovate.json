@@ -1,19 +1,28 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": [
-		"config:best-practices"
-	],
+	"extends": ["config:best-practices"],
 	"addLabels": ["dependencies"],
 	"reviewers": ["team:packsquash-developers"],
+	"automerge": true,
 	"automergeType": "branch",
+	"minimumReleaseAge": "2 days",
+	"schedule": ["every 3 days"],
 	"packageRules": [
 		{
-			"matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-			"automerge": true
+			"matchUpdateTypes": ["major"],
+			"dependencyDashboardApproval": true
 		},
 		{
-			"matchManagers": ["pip_requirements"],
+			"matchCategories": ["python"],
 			"groupName": "Helper Python scripts"
+		},
+		{
+			"matchCategories": ["rust"],
+			"groupName": "Rust dependencies"
+		},
+		{
+			"matchCategories": ["ci"],
+			"groupName": "CI dependencies"
 		},
 		{
 			"matchManagers": ["github-actions"],
