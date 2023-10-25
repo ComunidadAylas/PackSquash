@@ -591,98 +591,237 @@ impl PackFileAssetTypeMatches {
 			// However, some of the additional redundancy is mitigated thanks to the macro, and the fact that
 			// there are almost as many arms as asset types can make future additions easier, so it's not that bad
 			match asset_type {
-				PackFileAssetType::MinecraftTextureMetadata if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
-				PackFileAssetType::MinecraftTextureMetadataWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
-				PackFileAssetType::MinecraftMetadata if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
-				PackFileAssetType::MinecraftMetadataWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
-				PackFileAssetType::MinecraftModel if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
-				PackFileAssetType::MinecraftModelWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::MinecraftTextureMetadata
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
+				PackFileAssetType::MinecraftTextureMetadataWithComments
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
+				PackFileAssetType::MinecraftMetadata
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
+				PackFileAssetType::MinecraftMetadataWithComments
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
+				PackFileAssetType::MinecraftModel
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
+				PackFileAssetType::MinecraftModelWithComments
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::OptifineCustomEntityModel if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::OptifineCustomEntityModel
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::OptifineCustomEntityModelWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::OptifineCustomEntityModelWithComments
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::OptifineCustomEntityModelPart if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::OptifineCustomEntityModelPart
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::OptifineCustomEntityModelPartWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::OptifineCustomEntityModelPartWithComments
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::OptifineVanillaItemModel if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::OptifineVanillaItemModel
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::OptifineVanillaItemModelWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::OptifineVanillaItemModelWithComments
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::OptifineVanillaTextureMetadata if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::OptifineVanillaTextureMetadata
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::OptifineVanillaTextureMetadataWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::OptifineVanillaTextureMetadataWithComments
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "mtr3-support")]
-				PackFileAssetType::Mtr3CustomTrainModel if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
+				PackFileAssetType::Mtr3CustomTrainModel
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
 				#[cfg(feature = "mtr3-support")]
-				PackFileAssetType::Mtr3CustomTrainModelWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
-				PackFileAssetType::GenericJson if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
-				PackFileAssetType::GenericJsonWithComments if let Some(FileOptions::JsonFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(JsonFile, optimization_settings),
-				PackFileAssetType::GenericOggVorbisAudio if let Some(FileOptions::AudioFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(AudioFile, optimization_settings),
-				PackFileAssetType::GenericAudio if let Some(FileOptions::AudioFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(AudioFile, optimization_settings),
-				PackFileAssetType::PackIcon if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(PngFile, optimization_settings),
-				PackFileAssetType::BannerLayer if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(PngFile, optimization_settings),
-				PackFileAssetType::EyeLayer if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(PngFile, optimization_settings),
-				PackFileAssetType::AuxiliaryShaderTargetTexture if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(PngFile, optimization_settings),
+				PackFileAssetType::Mtr3CustomTrainModelWithComments
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
+				PackFileAssetType::GenericJson
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
+				PackFileAssetType::GenericJsonWithComments
+					if let Some(FileOptions::JsonFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(JsonFile, optimization_settings)
+				}
+				PackFileAssetType::GenericOggVorbisAudio
+					if let Some(FileOptions::AudioFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(AudioFile, optimization_settings)
+				}
+				PackFileAssetType::GenericAudio
+					if let Some(FileOptions::AudioFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(AudioFile, optimization_settings)
+				}
+				PackFileAssetType::PackIcon
+					if let Some(FileOptions::PngFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(PngFile, optimization_settings)
+				}
+				PackFileAssetType::BannerLayer
+					if let Some(FileOptions::PngFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(PngFile, optimization_settings)
+				}
+				PackFileAssetType::EyeLayer
+					if let Some(FileOptions::PngFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(PngFile, optimization_settings)
+				}
+				PackFileAssetType::AuxiliaryShaderTargetTexture
+					if let Some(FileOptions::PngFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(PngFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::OptifineTexture if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(PngFile, optimization_settings),
+				PackFileAssetType::OptifineTexture
+					if let Some(FileOptions::PngFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(PngFile, optimization_settings)
+				}
 				#[cfg(feature = "mtr3-support")]
-				PackFileAssetType::Mtr3CustomGenericTexture if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(PngFile, optimization_settings),
-				PackFileAssetType::GenericTexture if let Some(FileOptions::PngFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(PngFile, optimization_settings),
+				PackFileAssetType::Mtr3CustomGenericTexture
+					if let Some(FileOptions::PngFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(PngFile, optimization_settings)
+				}
+				PackFileAssetType::GenericTexture
+					if let Some(FileOptions::PngFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(PngFile, optimization_settings)
+				}
 				#[cfg(feature = "optifine-support")]
-				PackFileAssetType::GenericProperties if let Some(FileOptions::PropertiesFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(PropertiesFile, optimization_settings),
-				PackFileAssetType::VertexShader if let Some(FileOptions::ShaderFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(ShaderFile, optimization_settings),
-				PackFileAssetType::FragmentShader if let Some(FileOptions::ShaderFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(ShaderFile, optimization_settings),
-				PackFileAssetType::TranslationUnitSegment if let Some(FileOptions::ShaderFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(ShaderFile, optimization_settings),
-				PackFileAssetType::LegacyLanguageFile if let Some(FileOptions::LegacyLanguageFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(LegacyLanguageFile, optimization_settings),
-				PackFileAssetType::CommandFunction if let Some(FileOptions::CommandFunctionFileOptions(optimization_settings)) = file_options =>
-					return_pack_file_to_process_data!(CommandFunctionFile, optimization_settings),
+				PackFileAssetType::GenericProperties
+					if let Some(FileOptions::PropertiesFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(PropertiesFile, optimization_settings)
+				}
+				PackFileAssetType::VertexShader
+					if let Some(FileOptions::ShaderFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(ShaderFile, optimization_settings)
+				}
+				PackFileAssetType::FragmentShader
+					if let Some(FileOptions::ShaderFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(ShaderFile, optimization_settings)
+				}
+				PackFileAssetType::TranslationUnitSegment
+					if let Some(FileOptions::ShaderFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(ShaderFile, optimization_settings)
+				}
+				PackFileAssetType::LegacyLanguageFile
+					if let Some(FileOptions::LegacyLanguageFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(LegacyLanguageFile, optimization_settings)
+				}
+				PackFileAssetType::CommandFunction
+					if let Some(FileOptions::CommandFunctionFileOptions(optimization_settings)) =
+						file_options =>
+				{
+					return_pack_file_to_process_data!(CommandFunctionFile, optimization_settings)
+				}
 				PackFileAssetType::TrueTypeFont
 				| PackFileAssetType::FontCharacterSizes
 				| PackFileAssetType::Text
 				| PackFileAssetType::LegacyTextCredits
-				| PackFileAssetType::NbtStructure if file_options.is_none() =>
-					return_pack_file_to_process_data!(PassthroughFile, ()),
-				PackFileAssetType::Custom if let Some(
-					FileOptions::CustomFileOptions(CustomFileOptions { force_include: true, .. })
-				) = file_options =>
-					return_pack_file_to_process_data!(PassthroughFile, ()),
+				| PackFileAssetType::NbtStructure
+					if file_options.is_none() =>
+				{
+					return_pack_file_to_process_data!(PassthroughFile, ())
+				}
+				PackFileAssetType::Custom
+					if let Some(FileOptions::CustomFileOptions(CustomFileOptions {
+						force_include: true,
+						..
+					})) = file_options =>
+				{
+					return_pack_file_to_process_data!(PassthroughFile, ())
+				}
 				_ => {
 					// The file options do not match the asset type, but maybe we have more asset types to try
-					continue
+					continue;
 				}
 			}
 		}
