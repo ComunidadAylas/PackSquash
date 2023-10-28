@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1698477677615,
+  "lastUpdate": 1698508878140,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "917f1aca6dfe624b9f279c21d87c954fbf379e72",
-          "message": "chore: rename `may_be_directory_listed_atlas_texture` to `may_be_directory_listed_atlas_sprite`\n\nGiven that atlases can be textures themselves, I think that referring to\ntheir constituent textures using the word \"sprite\" has less potential\nfor ambiguity.",
-          "timestamp": "2023-09-26T19:13:32+02:00",
-          "tree_id": "10fbb38d8945c6757f1ab0412da3abc95a065c56",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/917f1aca6dfe624b9f279c21d87c954fbf379e72"
-        },
-        "date": 1695750391008,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11542921,
-            "range": "± 946762",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 204173002,
-            "range": "± 4306532",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3647734041,
-            "range": "± 89153270",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 325437774,
-            "range": "± 6561237",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 942853523,
             "range": "± 23170112",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a2f46fb17ad6c219f13ec117bfa449cde8290406",
+          "message": "chore(deps): update taiki-e/install-action digest to f860c89",
+          "timestamp": "2023-10-28T13:49:47Z",
+          "tree_id": "34ee6e836d031112680313cdf11ce6798200bac2",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/a2f46fb17ad6c219f13ec117bfa449cde8290406"
+        },
+        "date": 1698508876691,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 7572411,
+            "range": "± 181258",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 187030723,
+            "range": "± 1833692",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 3702090325,
+            "range": "± 417282177",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 902325816,
+            "range": "± 2886425",
             "unit": "ns/iter"
           }
         ]
