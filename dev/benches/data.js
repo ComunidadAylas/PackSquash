@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1700625158256,
+  "lastUpdate": 1700639813240,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "886cbe57f46c82b82797fdc9608f017fd879f785",
-          "message": "fix(shader_file): correctly parse incl. shaders that are statement lists\n\nPreviously, when an include shader contained a statement list, only the\nfirst statement in the AST would be transpiled, which broke the shader,\nand is likely to be a common use case (I've seen it happen on objmc).",
-          "timestamp": "2023-10-07T23:17:58+02:00",
-          "tree_id": "f4e6d6e2e091ea2c3313eb16b9741b3f502f588e",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/886cbe57f46c82b82797fdc9608f017fd879f785"
-        },
-        "date": 1696715266949,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 7569937,
-            "range": "± 728878",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 152340937,
-            "range": "± 7924592",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 4373874494,
-            "range": "± 69027520",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 911169346,
-            "range": "± 9630950",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 813888634,
             "range": "± 2651488",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2229d25d1330e5f38825379daacd9970cd42cf11",
+          "message": "chore(deps): update dependency certifi to v2023.11.17",
+          "timestamp": "2023-11-22T03:29:04Z",
+          "tree_id": "88becf917909a6fe183294e7f975e56a59704091",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2229d25d1330e5f38825379daacd9970cd42cf11"
+        },
+        "date": 1700639812599,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10217819,
+            "range": "± 654841",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 128741728,
+            "range": "± 4121832",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2749069460,
+            "range": "± 150497462",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 815164029,
+            "range": "± 5839120",
             "unit": "ns/iter"
           }
         ]
