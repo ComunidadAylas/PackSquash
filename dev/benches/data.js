@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1700639813240,
+  "lastUpdate": 1700741216264,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "448fadd1365ee9477b1a76891e203cfb73416d2a",
-          "message": "chore(deps): update taiki-e/install-action digest to f6df2ed",
-          "timestamp": "2023-10-08T13:56:24Z",
-          "tree_id": "e2bc81a4bda921c5ab575ab81ee5f70291db1fe8",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/448fadd1365ee9477b1a76891e203cfb73416d2a"
-        },
-        "date": 1696784837700,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 7374184,
-            "range": "± 55101",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 150896342,
-            "range": "± 18993070",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 4293345760,
-            "range": "± 68835218",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 891952562,
-            "range": "± 6451920",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 815164029,
             "range": "± 5839120",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "f7604fcf99622c010639963ffba2daa00633eeca",
+          "message": "fix(shader_file): make missing main errors tentative if imports are used\n\nAs we can't resolve imports right now, and they can define the main\nfunction for a shader, any missing main error should also be considered\ntentative, as other syntax errors.",
+          "timestamp": "2023-11-23T12:40:47+01:00",
+          "tree_id": "9c1d164d79775d6873b522c0c664ada9901b1dc7",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f7604fcf99622c010639963ffba2daa00633eeca"
+        },
+        "date": 1700741215431,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10068480,
+            "range": "± 84443",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 128159975,
+            "range": "± 2387837",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2713297495,
+            "range": "± 34376504",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 806587889,
+            "range": "± 3213426",
             "unit": "ns/iter"
           }
         ]
