@@ -48,9 +48,9 @@ dasp_sample = "0.11.0"
 rubato = "0.14.1"
 optivorbis = "0.1.4"
 
-glsl-lang = { version = "0.5.1", features = ["lexer-v2-full", "lexer-v2-min"] }
-glsl-lang-lexer = "0.5.1"
-glsl-lang-pp = "0.5.1"
+glsl-lang = { version = "0.5.2", features = ["lexer-v2-full", "lexer-v2-min"] }
+glsl-lang-lexer = "0.5.2"
+glsl-lang-pp = "0.5.2"
 
 java-properties = { version = "2.0.0", optional = true }
 

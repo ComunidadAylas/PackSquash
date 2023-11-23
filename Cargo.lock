@@ -935,13 +935,13 @@ dependencies = [
 
 [[package]]
 name = "glsl-lang"
-version = "0.5.1"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#196d7b2a0b8db75655b3a1697fd1f8927a5da6c7"
+version = "0.5.2"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#c5a627c7b2020a1b87956619fc3f5c63f8283df8"
 dependencies = [
  "glsl-lang-lexer",
  "glsl-lang-types",
  "lalrpop",
- "lalrpop-util 0.20.0",
+ "lalrpop-util",
  "lang-util",
  "once_cell",
  "thiserror",
@@ -949,20 +949,20 @@ dependencies = [
 
 [[package]]
 name = "glsl-lang-lexer"
-version = "0.5.1"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#196d7b2a0b8db75655b3a1697fd1f8927a5da6c7"
+version = "0.5.2"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#c5a627c7b2020a1b87956619fc3f5c63f8283df8"
 dependencies = [
  "glsl-lang-pp",
  "glsl-lang-types",
- "lalrpop-util 0.20.0",
+ "lalrpop-util",
  "lang-util",
  "thiserror",
 ]
 
 [[package]]
 name = "glsl-lang-pp"
-version = "0.5.1"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#196d7b2a0b8db75655b3a1697fd1f8927a5da6c7"
+version = "0.5.2"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#c5a627c7b2020a1b87956619fc3f5c63f8283df8"
 dependencies = [
  "arrayvec",
  "bimap",
@@ -980,8 +980,8 @@ dependencies = [
 
 [[package]]
 name = "glsl-lang-types"
-version = "0.5.1"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#196d7b2a0b8db75655b3a1697fd1f8927a5da6c7"
+version = "0.5.2"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#c5a627c7b2020a1b87956619fc3f5c63f8283df8"
 dependencies = [
  "lang-util",
  "thiserror",
@@ -1147,7 +1147,7 @@ dependencies = [
  "ena",
  "is-terminal",
  "itertools 0.10.5",
- "lalrpop-util 0.20.0",
+ "lalrpop-util",
  "petgraph",
  "pico-args",
  "regex",
@@ -1160,12 +1160,6 @@ dependencies = [
 
 [[package]]
 name = "lalrpop-util"
-version = "0.19.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3c48237b9604c5a4702de6b824e02006c3214327564636aef27c1028a8fa0ed"
-
-[[package]]
-name = "lalrpop-util"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f35c735096c0293d313e8f2a641627472b83d01b937177fe76e5e2708d31e0d"
@@ -1175,12 +1169,12 @@ dependencies = [
 
 [[package]]
 name = "lang-util"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "587b328c2e2ad16e7d69f4d4a95a1621e5b56749f65c2092882fb6d5905f3f87"
+checksum = "0cf0aae06114893d875013813541b9c9ada8b3235885879811f2efdcd0f6cc69"
 dependencies = [
  "derive_more",
- "lalrpop-util 0.19.12",
+ "lalrpop-util",
  "lang-util-derive",
  "line-span",
  "smol_str",
