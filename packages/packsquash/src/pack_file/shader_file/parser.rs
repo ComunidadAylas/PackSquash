@@ -53,7 +53,13 @@ pub enum ParseError {
 		found_unresolvable_moj_import: bool
 	},
 	#[error("Non-included shaders must define a main function, but it was not defined")]
-	MissingMainFunction,
+	MissingMainFunction {
+		/// Represents whether this error happened when the source file contained an
+		/// unresolvable `#moj_import` directive. This indicates that the error might
+		/// be a false positive, as it can be caused due to changes in the outcome of
+		/// the preprocessing stage compared to during runtime.
+		found_unresolvable_moj_import: bool
+	},
 	#[error("Invalid encoding: {0}")]
 	InvalidEncoding(#[from] Utf8Error)
 }
@@ -135,7 +141,9 @@ impl Parser {
 						false
 					}
 				}) {
-					return Err(ParseError::MissingMainFunction);
+					return Err(ParseError::MissingMainFunction {
+						found_unresolvable_moj_import: found_unresolvable_moj_import.get()
+					});
 				}
 
 				// Expanding and removing preprocessor directives in top-level shaders does not alter

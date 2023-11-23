@@ -211,10 +211,15 @@ where
 			)))
 		}
 		(
-			Err(ParseError::Syntax {
-				error,
-				found_unresolvable_moj_import: true
-			}),
+			Err(
+				error @ ParseError::Syntax {
+					found_unresolvable_moj_import: true,
+					..
+				}
+				| error @ ParseError::MissingMainFunction {
+					found_unresolvable_moj_import: true
+				}
+			),
 			_
 		) => Ok(Some((
 			// The shader is not valid, but the syntax error may be a false positive due to

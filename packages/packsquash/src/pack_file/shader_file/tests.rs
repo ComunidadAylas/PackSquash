@@ -8,7 +8,8 @@ use super::*;
 
 static FRAGMENT_SHADER_DATA: &[u8] = include_bytes!("example.fsh");
 static NON_TRANSFORMABLE_SHADER_DATA: &[u8] = include_bytes!("example_non_transformable.glsl");
-static FALSE_POSITIVE_PARSE_ERROR: &[u8] = include_bytes!("example_false_positive_parse_error.glsl");
+static FALSE_POSITIVE_SYNTAX_ERROR: &[u8] = include_bytes!("example_false_positive_parse_error.glsl");
+static FALSE_POSITIVE_MISSING_MAIN: &[u8] = include_bytes!("example_false_positive_missing_main.fsh");
 
 /// Processes the given input data as a [ShaderFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
@@ -198,7 +199,7 @@ async fn minifying_is_averted_when_preprocessor_expansion_would_be_incomplete() 
 #[tokio::test]
 async fn tentative_parsing_errors_are_not_fatal() {
 	successful_process_test::<TranslationUnit>(
-		FALSE_POSITIVE_PARSE_ERROR,
+		FALSE_POSITIVE_SYNTAX_ERROR,
 		false, // No BOM
 		ShaderFileOptions {
 			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
@@ -210,7 +211,22 @@ async fn tentative_parsing_errors_are_not_fatal() {
 		false, // Same size
 		true   // Same output text
 	)
-	.await
+	.await;
+
+	successful_process_test::<TranslationUnit>(
+		FALSE_POSITIVE_MISSING_MAIN,
+		false, // No BOM
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
+			..Default::default()
+		},
+		true,  // Fragment shader
+		true,  // Top-level TU
+		false, // The input AST cannot be constructed
+		false, // Same size
+		true   // Same output text
+	)
+	.await;
 }
 
 #[tokio::test]
