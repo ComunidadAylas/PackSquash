@@ -17,7 +17,7 @@ indexmap = { version = "2.1.0", features = ["serde"] }
 itertools = "0.12.0"
 thiserror = "1.0.50"
 ahash = "0.8.6"
-patricia_tree = "0.6.3"
+patricia_tree = "0.7.0"
 
 sysinfo = { version = "0.29.11", default-features = false }
 walkdir = "2.4.0"
