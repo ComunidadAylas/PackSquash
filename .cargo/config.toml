@@ -34,4 +34,4 @@ runner = 'qemu-aarch64'
 #   Linking again to libc is a hack that fixes the issue, but a more effective
 #   hack that also has the nice side effect of speeding up builds when mold
 #   is not used is to use the LLVM LLD linker included with the Rust toolchain
-rustflags = ["-Zunstable-options", "-Clinker-flavor=gnu-lld-cc", "-C", "link-args=-lgcc"]
+rustflags = ["-Zunstable-options", "-Clinker-flavor=gnu-lld-cc", "-Clink-args=-lgcc"]
