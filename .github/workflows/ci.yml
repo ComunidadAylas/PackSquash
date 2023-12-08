@@ -200,8 +200,8 @@ jobs:
       - name: ✔️ Run tests
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
         run: |
-          cargo nextest run --release --workspace --status-level all
-          cargo test --doc --release --workspace
+          cargo nextest run --workspace --status-level all --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
+          cargo test --doc --workspace --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Build with optimized standard library
         run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
