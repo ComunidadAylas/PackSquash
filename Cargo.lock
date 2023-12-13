@@ -1436,8 +1436,9 @@ dependencies = [
 
 [[package]]
 name = "ogg"
-version = "0.9.0"
-source = "git+https://github.com/RustAudio/ogg?rev=f22b096a#f22b096a80e6cbac8363a137321ea5668c203c34"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5477016638150530ba21dec7caac835b29ef69b20865751d2973fce6be386cf1"
 dependencies = [
  "byteorder",
 ]
@@ -1465,8 +1466,9 @@ checksum = "0ab1bc2a289d34bd04a330323ac98a1b4bc82c9d9fcb1e66b63caa84da26b575"
 
 [[package]]
 name = "optivorbis"
-version = "0.1.4"
-source = "git+https://github.com/OptiVorbis/OptiVorbis#2fbb8b6de11e65ddfce217b3a1884dc3d8f18e54"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "055727959561866acbe505db55b8919e1e6b347951a39bd1b4dc051208a0360e"
 dependencies = [
  "bumpalo",
  "getrandom",
@@ -1483,9 +1485,9 @@ dependencies = [
 
 [[package]]
 name = "ouroboros"
-version = "0.18.0"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c86de06555b970aec45229b27291b53154f21a5743a163419f4e4c0b065dcde"
+checksum = "aab3e3891cfef81d47b93c6e0aeaf4828b2dc19c0bde389f4a988fbbfe5a8f4b"
 dependencies = [
  "aliasable",
  "ouroboros_macro",
@@ -1494,9 +1496,9 @@ dependencies = [
 
 [[package]]
 name = "ouroboros_macro"
-version = "0.18.0"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cad0c4b129e9696e37cb712b243777b90ef489a0bfaa0ac34e7d9b860e4f134"
+checksum = "f1dd5c45035b07108752f091edb8fcc13dcaffcdb8d9f40cc017e3c9afc1a5bd"
 dependencies = [
  "heck",
  "itertools 0.11.0",
@@ -2746,7 +2748,8 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 [[package]]
 name = "vorbis_bitpack"
 version = "0.1.1"
-source = "git+https://github.com/OptiVorbis/OptiVorbis#2fbb8b6de11e65ddfce217b3a1884dc3d8f18e54"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "91304fb1fb7f14c888496d859d627db36efdb63cdd6755e286e3dd637cc28997"
 
 [[package]]
 name = "vorbis_rs"
@@ -3149,3 +3152,13 @@ dependencies = [
  "simd-adler32",
  "typed-arena",
 ]
+
+[[patch.unused]]
+name = "ogg"
+version = "0.9.0"
+source = "git+https://github.com/RustAudio/ogg?rev=f22b096a#f22b096a80e6cbac8363a137321ea5668c203c34"
+
+[[patch.unused]]
+name = "optivorbis"
+version = "0.1.4"
+source = "git+https://github.com/OptiVorbis/OptiVorbis#2fbb8b6de11e65ddfce217b3a1884dc3d8f18e54"
