@@ -168,13 +168,13 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@0f94aa2032e24d01f7ae1cc63f71b13418365efd # v2
+        uses: taiki-e/install-action@525c724fc8527de72a5fe5c1fb16c18c97f9cdad # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@0f94aa2032e24d01f7ae1cc63f71b13418365efd # v2
+        uses: taiki-e/install-action@525c724fc8527de72a5fe5c1fb16c18c97f9cdad # v2
         with:
           tool: cargo-deb
 
