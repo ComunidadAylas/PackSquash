@@ -15,12 +15,6 @@ glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 # Related PR: https://github.com/rbranson/rust-mmap/pull/13
 mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
 
-# Use a newer OptiVorbis commit to take advantage of not-yet-released build and runtime
-# performance improvements. These commits depend on unreleased commits of the ogg crate,
-# so patch it too
-optivorbis = { git = "https://github.com/OptiVorbis/OptiVorbis" }
-ogg = { git = "https://github.com/RustAudio/ogg", rev = "f22b096a" }
-
 [profile.release]
 opt-level = 3
 lto = "fat"
