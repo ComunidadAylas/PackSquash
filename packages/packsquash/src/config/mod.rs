@@ -8,7 +8,7 @@ use enumset::{EnumSet, EnumSetType};
 use globset::{Glob, GlobBuilder, GlobSet, GlobSetBuilder};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use sysinfo::{RefreshKind, System, SystemExt};
+use sysinfo::{MemoryRefreshKind, RefreshKind, System};
 
 use crate::squash_zip::SquashZipSettings;
 
@@ -252,8 +252,10 @@ pub struct GlobalOptions {
 
 impl Default for GlobalOptions {
 	fn default() -> Self {
-		let available_memory =
-			System::new_with_specifics(RefreshKind::new().with_memory()).available_memory();
+		let available_memory = System::new_with_specifics(
+			RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram())
+		)
+		.available_memory();
 
 		let hardware_threads = available_parallelism().unwrap_or(NonZeroUsize::MIN);
 
