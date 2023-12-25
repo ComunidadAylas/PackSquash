@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1702774527465,
+  "lastUpdate": 1703523893777,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "05d0da73aa326e56c35e6505d0c7330e985a2275",
-          "message": "chore: run `cargo fmt`\n\nThis fixes some new formatting differences that were causing CI to fail\ndue to newer nightly builds.",
-          "timestamp": "2023-10-25T20:34:53+02:00",
-          "tree_id": "92473b1e2eedf6806530fa71ff090695e8c48fab",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/05d0da73aa326e56c35e6505d0c7330e985a2275"
-        },
-        "date": 1698261126236,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11571445,
-            "range": "± 1384611",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 206332222,
-            "range": "± 5132921",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 4637885665,
-            "range": "± 102066693",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1334637930,
-            "range": "± 18712453",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 738610240,
             "range": "± 2647922",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "9fe0b4aa7d088d45f633d801a64031a038bf49a1",
+          "message": "chore(deps): fixup recent breaking `sysinfo` upgrade",
+          "timestamp": "2023-12-25T17:40:08+01:00",
+          "tree_id": "f2fafba8a91d4e840836dcaab72858a2b72d1d04",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9fe0b4aa7d088d45f633d801a64031a038bf49a1"
+        },
+        "date": 1703523893192,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10192754,
+            "range": "± 1282962",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 141068841,
+            "range": "± 3692061",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2836609985,
+            "range": "± 81616604",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 733755715,
+            "range": "± 3720775",
             "unit": "ns/iter"
           }
         ]
