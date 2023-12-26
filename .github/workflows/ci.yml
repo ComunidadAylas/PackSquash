@@ -168,13 +168,13 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@a1f180f99a1c725ceb0e42382d8aa2402edf1558 # v2
+        uses: taiki-e/install-action@b59252d3011a820248187cab9d45aecbbf97e3b8 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@a1f180f99a1c725ceb0e42382d8aa2402edf1558 # v2
+        uses: taiki-e/install-action@b59252d3011a820248187cab9d45aecbbf97e3b8 # v2
         with:
           tool: cargo-deb
 
@@ -292,7 +292,7 @@ jobs:
 
       - name: ⚙️ Generate Docker image metadata
         id: meta
-        uses: docker/metadata-action@31cebacef4805868f9ce9a0cb03ee36c32df2ac4 # v5
+        uses: docker/metadata-action@9dc751fe249ad99385a2583ee0d084c400eee04e # v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # Tag the image as "edge" for every commit on master.
@@ -352,7 +352,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim@sha256:5aab272aa24713622bfac9dba239bc7488d9979b0d82d19a9dffccd99292154d
+    container: debian:bullseye-slim@sha256:d3d0d14f49b49a4dd98a436711f5646dc39e1c99203ef223d1b6620061e2c0e5
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
