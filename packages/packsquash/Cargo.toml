@@ -29,7 +29,7 @@ futures = { version = "0.3.30", default-features = false }
 
 serde = { version = "1.0.194", features = ["derive"] }
 
-serde_json = "1.0.110"
+serde_json = "1.0.111"
 json_comments = "0.2.2"
 jsonpath_lib = "0.3.0"
 
