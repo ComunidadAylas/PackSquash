@@ -531,18 +531,23 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			.try_flatten();
 
 			let mut bytes_compared = 0;
+			let bytes_are_equal = |(result_byte_previous, result_byte_stored): &(
+				Result<u8, io::Error>,
+				Result<u8, io::Error>
+			)| {
+				bytes_compared += 1;
+
+				future::ready(
+					result_byte_previous.is_ok()
+						&& result_byte_stored.is_ok()
+						&& *result_byte_previous.as_ref().unwrap()
+							== *result_byte_stored.as_ref().unwrap()
+				)
+			};
+
 			already_stored = match previous_zip_data
 				.zip(matching_output_zip_data)
-				.skip_while(|(result_byte_previous, result_byte_stored)| {
-					bytes_compared += 1;
-
-					future::ready(
-						result_byte_previous.is_ok()
-							&& result_byte_stored.is_ok()
-							&& *result_byte_previous.as_ref().unwrap()
-								== *result_byte_stored.as_ref().unwrap()
-					)
-				})
+				.skip_while(bytes_are_equal)
 				.next()
 				.await
 			{
