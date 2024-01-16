@@ -51,6 +51,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - Because they use statically-linked binaries, the PackSquash GitHub
     Action and Docker container also saw performance improvements. (Thanks
     _@xMikux_ for reporting the performance differences!)
+- Updated `libspng` to v0.7.4, bringing decoding speed improvements for ARM CPUs
+  that support NEON extensions.
 
 #### Protection
 
@@ -91,6 +93,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - The UTF-8 BOM is no longer automatically stripped from properties files, as
   they should not be encoded in UTF-8 to begin with, and carrying on processing
   with mismatched encodings may cause mojibake.
+- Processing input PNG files with colors in palette format should no longer
+  sometimes cause ARM binaries to crash on CPUs that support NEON extensions.
+  (Thanks @lucian929 for reporting the issue!)
 
 #### User experience
 

@@ -15,6 +15,16 @@ glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 # Related PR: https://github.com/rbranson/rust-mmap/pull/13
 mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
 
+# Use a PR we submitted for updating the libspng version their Rust bindings link to.
+# This is a best-effort fix for memory management errors in libspng v0.7.0-rc2 when
+# decoding PNGs with color palettes on ARM CPUs with NEON extensions, as reported by
+# a PackSquash user of an M1 Pro, and other ARM users in other projects:
+# https://github.com/lovell/sharp/issues/3222
+# We could not reproduce the reported PackSquash issue on an ARM Ubuntu 22.04 virtual
+# machine with an Ampere Altra Neoverse-N1 CPU using the musl binaries with mimalloc,
+# so it may be dependent on the malloc implementation or other environment factors
+spng = { git = "https://github.com/aloucks/spng-rs", ref = "refs/pull/8/head" }
+
 [profile.release]
 opt-level = 3
 lto = "fat"

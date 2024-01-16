@@ -68,16 +68,17 @@ async fn successful_process_test(
 			.expect("No error should happen while writing a test result to disk")
 		}
 
-		let (image_info, mut png_reader) = spng::Decoder::new(&*data)
+		let mut png_reader = spng::Decoder::new(&*data)
 			.with_decode_flags(DecodeFlags::TRANSPARENCY)
 			.with_output_format(Format::Rgba8)
 			.read_info()
 			.expect("No error should happen while decoding processed PNG");
+		let image_info = png_reader.info();
 
 		processed_color_type = image_info.color_type;
 		processed_resolution = (image_info.width, image_info.height);
 
-		decoded_pixels = vec![0; image_info.buffer_size];
+		decoded_pixels = vec![0; png_reader.output_buffer_size()];
 		png_reader
 			.next_frame(&mut decoded_pixels)
 			.expect("No error should happen while reading processed PNG frame");
@@ -87,15 +88,16 @@ async fn successful_process_test(
 	let mut original_pixels;
 	let original_color_type;
 	{
-		let (image_info, mut png_reader) = spng::Decoder::new(input_data)
+		let mut png_reader = spng::Decoder::new(input_data)
 			.with_decode_flags(DecodeFlags::GAMMA | DecodeFlags::TRANSPARENCY)
 			.with_output_format(Format::Rgba8)
 			.read_info()
 			.expect("No error should happen while decoding example PNG");
+		let image_info = png_reader.info();
 
 		original_color_type = image_info.color_type;
 
-		original_pixels = vec![0; image_info.buffer_size];
+		original_pixels = vec![0; png_reader.output_buffer_size()];
 		png_reader
 			.next_frame(&mut original_pixels)
 			.expect("No error should happen while reading example PNG frame");

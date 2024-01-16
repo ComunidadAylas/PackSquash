@@ -166,10 +166,7 @@ impl PixelArray {
 /// decoding the same PNG several times) or do it more efficiently.
 pub enum ProcessedImage<R: Read> {
 	/// A PNG image that was parsed by `spng`, but whose pixels have not been decoded yet.
-	ParsedPng {
-		png_info: spng::OutputInfo,
-		png_reader: spng::Reader<R>
-	},
+	ParsedPng { png_reader: spng::Reader<R> },
 	/// An in-memory image whose pixels have been decoded to RGBA8 format.
 	RGBA8 { pixels: PixelArray },
 	/// An in-memory image in palette format, generated after applying color quantization
@@ -196,19 +193,16 @@ impl<R: Read> ProcessedImage<R> {
 			.read_info()
 			.map_or_else(
 				|err| Err(err.into()),
-				|(png_info, png_reader)| {
-					Ok(Self::ParsedPng {
-						png_info,
-						png_reader
-					})
-				}
+				|png_reader| Ok(Self::ParsedPng { png_reader })
 			)
 	}
 
 	/// Returns the width of this image, in pixels.
 	pub fn width(&self) -> NonZeroU16 {
 		match self {
-			Self::ParsedPng { png_info, .. } => NonZeroU16::new(png_info.width as u16).unwrap(),
+			Self::ParsedPng { png_reader } => {
+				NonZeroU16::new(png_reader.info().width as u16).unwrap()
+			}
 			Self::RGBA8 { pixels } => pixels.width(),
 			Self::Indexed { width, .. } => *width
 		}
@@ -217,7 +211,9 @@ impl<R: Read> ProcessedImage<R> {
 	/// Returns the height of this image, in pixels.
 	pub fn height(&self) -> NonZeroU16 {
 		match self {
-			Self::ParsedPng { png_info, .. } => NonZeroU16::new(png_info.height as u16).unwrap(),
+			Self::ParsedPng { png_reader } => {
+				NonZeroU16::new(png_reader.info().height as u16).unwrap()
+			}
 			Self::RGBA8 { pixels } => pixels.height(),
 			Self::Indexed { height, .. } => *height
 		}
@@ -230,16 +226,13 @@ impl<R: Read> ProcessedImage<R> {
 	/// case the image lacks a backing array of colors per pixel.
 	fn as_pixel_array(&mut self) -> Result<Option<&mut PixelArray>, ImageProcessingError> {
 		match self {
-			Self::ParsedPng {
-				png_info,
-				png_reader
-			} => {
-				let mut buf = vec![0; png_info.buffer_size];
+			Self::ParsedPng { png_reader } => {
+				let mut buf = vec![0; png_reader.output_buffer_size()];
 				png_reader.next_frame(&mut buf)?;
 
 				*self = PixelArray {
-					width: NonZeroU16::new(png_info.width as u16).unwrap(),
-					height: NonZeroU16::new(png_info.height as u16).unwrap(),
+					width: NonZeroU16::new(png_reader.info().width as u16).unwrap(),
+					height: NonZeroU16::new(png_reader.info().height as u16).unwrap(),
 					buf
 				}
 				.into();
