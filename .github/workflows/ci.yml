@@ -164,17 +164,17 @@ jobs:
           components: rust-src
 
       - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@a22603398250b864f7190077025cf752307154dc # v2
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@51767789bcd596c475bee2e8b0a6a8fc191f66d8 # v2
+        uses: taiki-e/install-action@4f8e32492b3baed061f7836e6a4d40eb19e49b71 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@51767789bcd596c475bee2e8b0a6a8fc191f66d8 # v2
+        uses: taiki-e/install-action@4f8e32492b3baed061f7836e6a4d40eb19e49b71 # v2
         with:
           tool: cargo-deb
 
@@ -395,7 +395,7 @@ jobs:
           toolchain: nightly
 
       - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@a22603398250b864f7190077025cf752307154dc # v2
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
 
       - name: 📥 Download test packs dataset
         run: scripts/test-packs/download.sh
