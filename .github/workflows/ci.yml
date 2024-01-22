@@ -43,7 +43,7 @@ jobs:
           fail_on_error: true
 
       - name: 🔍 Cargo deny check
-        uses: EmbarkStudios/cargo-deny-action@c9a2a6316320da223aaf3b59d1ac70572e8cf1f8 # v1
+        uses: EmbarkStudios/cargo-deny-action@1350841d0991444487fd89747f1e39de5349455f # v1
         continue-on-error: true
 
       - name: 🔍 Check Rust source code format
