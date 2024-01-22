@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1705436584268,
+  "lastUpdate": 1705934375816,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "50b2fb3f7583421ee856ee9ac98a98e4f942eec4",
-          "message": "fix(deps): update rust crate tokio to 1.34.0",
-          "timestamp": "2023-11-10T01:19:22Z",
-          "tree_id": "8b869db0b13ba01a65994c85c472edc1fccbb57e",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/50b2fb3f7583421ee856ee9ac98a98e4f942eec4"
-        },
-        "date": 1699587159744,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 11825178,
-            "range": "± 701848",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 221189222,
-            "range": "± 16622961",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 3591004794,
-            "range": "± 105176482",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 1339062081,
-            "range": "± 21768001",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 732650413,
             "range": "± 5154041",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "3cd24a38a9189b464a044a83bcc2fab1c08ceb56",
+          "message": "ci: temporarily ignore `cargo deny` action run failures\n\nThis is a temporary workaround until\nhttps://github.com/EmbarkStudios/krates/issues/72 is solved.",
+          "timestamp": "2024-01-22T15:15:52+01:00",
+          "tree_id": "0af6e3c3064286b611fd39ca521064bb469961a2",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3cd24a38a9189b464a044a83bcc2fab1c08ceb56"
+        },
+        "date": 1705934375194,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10070538,
+            "range": "± 2963890",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 144509172,
+            "range": "± 1899720",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2734022851,
+            "range": "± 76485160",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 730296754,
+            "range": "± 3049321",
             "unit": "ns/iter"
           }
         ]
