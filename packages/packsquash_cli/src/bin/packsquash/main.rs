@@ -1,3 +1,4 @@
+use anstyle::{AnsiColor, Color, Effects};
 use std::{
 	borrow::Cow,
 	env,
@@ -8,7 +9,6 @@ use std::{
 	time::{Duration, Instant}
 };
 
-use env_logger::fmt::Color;
 use env_logger::{Builder, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
 use log::{debug, error, info, trace, warn, Level, LevelFilter};
@@ -459,25 +459,49 @@ fn init_logger(enable_emoji: bool, enable_colors: bool) {
 		.format(move |f, record| {
 			use std::io::Write;
 
-			let (level_color, level_icon, level_bold_style) = match record.level() {
-				Level::Error => (Color::Red, if enable_emoji { '❌' } else { '!' }, true),
-				Level::Warn => (Color::Yellow, if enable_emoji { '⚡' } else { '*' }, false),
-				Level::Info => (Color::Cyan, if enable_emoji { '🔷' } else { '-' }, false),
-				Level::Debug => (Color::Green, if enable_emoji { '🍀' } else { '#' }, false),
-				Level::Trace => (Color::White, if enable_emoji { '🏁' } else { '>' }, false)
+			let (level_color, level_icon, bold_effect) = match record.level() {
+				Level::Error => (
+					Color::Ansi(AnsiColor::Red),
+					if enable_emoji { '❌' } else { '!' },
+					Effects::BOLD
+				),
+				Level::Warn => (
+					Color::Ansi(AnsiColor::Yellow),
+					if enable_emoji { '⚡' } else { '*' },
+					Effects::new()
+				),
+				Level::Info => (
+					Color::Ansi(AnsiColor::Cyan),
+					if enable_emoji { '🔷' } else { '-' },
+					Effects::new()
+				),
+				Level::Debug => (
+					Color::Ansi(AnsiColor::Green),
+					if enable_emoji { '🍀' } else { '#' },
+					Effects::new()
+				),
+				Level::Trace => (
+					Color::Ansi(AnsiColor::White),
+					if enable_emoji { '🏁' } else { '>' },
+					Effects::new()
+				)
 			};
 
-			let mut style = f.style();
-			style.set_color(level_color).set_bold(level_bold_style);
+			let default_style = f.default_level_style(record.level());
+			let style = default_style
+				.fg_color(Some(level_color))
+				.effects(bold_effect)
+				.render();
+			let reset_style = default_style.render_reset();
 
-			let message = style.value(
-				format!("{} {}", level_icon, record.args())
+			writeln!(
+				f,
+				"{}",
+				format!("{style}{} {}{reset_style}", level_icon, record.args())
 					// Emojis are usually displayed with a non-monospaced font that is wider
 					// than other characters. Output an extra space as a hack to look pretty
 					.replace('\n', if enable_emoji { "\n   " } else { "\n  " })
-			);
-
-			writeln!(f, "{message}")
+			)
 		});
 
 	if let Ok(log_filters) = env::var("PACKSQUASH_LOG").or_else(|_| env::var("RUST_LOG")) {
