@@ -53,7 +53,7 @@ pub enum OptimizationError {
 	Io(#[from] std::io::Error)
 }
 
-thread_local!(static DEBLOATER: Debloater = Debloater::new());
+thread_local!(static DEBLOATER: Debloater = const { Debloater::new() });
 
 // FIXME: actual framing?
 // (i.e. do not hold the entire file in memory before decoding, so that frame != file)
