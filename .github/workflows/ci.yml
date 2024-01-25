@@ -44,7 +44,6 @@ jobs:
 
       - name: 🔍 Cargo deny check
         uses: EmbarkStudios/cargo-deny-action@748857f070c53667b2b8de8bdf468ac75a6b757c # v1
-        continue-on-error: true
 
       - name: 🔍 Check Rust source code format
         run: cargo fmt --all --check
