@@ -168,13 +168,13 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@bee85d7ea77c01f7a403c22ac2c802b431b093df # v2
+        uses: taiki-e/install-action@7dcb31b8033f96afe112f0df83dcb01f9969d23b # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@bee85d7ea77c01f7a403c22ac2c802b431b093df # v2
+        uses: taiki-e/install-action@7dcb31b8033f96afe112f0df83dcb01f9969d23b # v2
         with:
           tool: cargo-deb
 
@@ -292,7 +292,7 @@ jobs:
 
       - name: ⚙️ Generate Docker image metadata
         id: meta
-        uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # Tag the image as "edge" for every commit on master.
