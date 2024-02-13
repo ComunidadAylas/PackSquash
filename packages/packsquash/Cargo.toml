@@ -61,7 +61,7 @@ crc32fast = { version = "1.4.0", features = ["nightly"] }
 zopfli = { version = "0.8.0", default-features = false, features = ["std"] }
 
 const-random = "0.1.17"
-aes = "0.8.3"
+aes = "0.8.4"
 fpe = "0.6.1"
 uuid = "1.7.0"
 entropy = "0.4.2"
