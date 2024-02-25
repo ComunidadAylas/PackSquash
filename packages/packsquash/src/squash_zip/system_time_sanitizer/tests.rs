@@ -1,5 +1,4 @@
 use pretty_assertions::assert_eq;
-use std::time::SystemTime;
 
 use super::*;
 
