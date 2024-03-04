@@ -60,7 +60,7 @@ crc32fast = { version = "1.4.0", features = ["nightly"] }
 # well with the latest nightlies: https://github.com/mcountryman/simd-adler32/issues/15
 zopfli = { version = "0.8.0", default-features = false, features = ["std"] }
 
-const-random = "0.1.17"
+const-random = "0.1.18"
 aes = "0.8.4"
 fpe = "0.6.1"
 uuid = "1.7.0"
