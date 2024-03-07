@@ -43,7 +43,7 @@ jobs:
           fail_on_error: true
 
       - name: 🔍 Cargo deny check
-        uses: EmbarkStudios/cargo-deny-action@68cd9c5e3e16328a430a37c743167572e3243e7e # v1
+        uses: EmbarkStudios/cargo-deny-action@64015a69ee7ee08f6c56455089cdaf6ad974fd15 # v1
 
       - name: 🔍 Check Rust source code format
         run: cargo fmt --all --check
@@ -168,13 +168,13 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@dabb9c1ee51c21c545764a0d517f069ff52e6477 # v2
+        uses: taiki-e/install-action@4978b3c8549425a60eb2d68446d0b58cef63ad0a # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@dabb9c1ee51c21c545764a0d517f069ff52e6477 # v2
+        uses: taiki-e/install-action@4978b3c8549425a60eb2d68446d0b58cef63ad0a # v2
         with:
           tool: cargo-deb
 
