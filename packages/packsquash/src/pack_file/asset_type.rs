@@ -127,10 +127,8 @@ pub enum PackFileAssetType {
 	#[doc(cfg(feature = "optifine-support"))]
 	OptifineTexture,
 	/// A texture used for train models and maybe other assets in the Minecraft Transit Railway
-	/// 3 mod, located within the `assets/mtr/custom_directory` directory. The mod can deal with
-	/// textures located in the more common `assets/namespace/textures` directory supported by
-	/// the `GenericTexture` asset type, but widely deployed resource packs for this mod place
-	/// them in that directory.
+	/// 3 mod. The mod can deal with textures located in any place within the `assets/namespace`
+	/// directory.
 	#[cfg(feature = "mtr3-support")]
 	#[doc(cfg(feature = "mtr3-support"))]
 	Mtr3CustomGenericTexture,
@@ -308,7 +306,7 @@ impl PackFileAssetType {
 			}
 			#[cfg(feature = "mtr3-support")]
 			Self::Mtr3CustomGenericTexture => {
-				compile_hardcoded_pack_file_glob_pattern("assets/mtr/custom_directory/**/?*.png")
+				compile_hardcoded_pack_file_glob_pattern("assets/?*/**/?*.png")
 			}
 			Self::GenericTexture => {
 				// Some mods might accept textures in any resource location, but to keep things tidier
