@@ -305,9 +305,7 @@ impl PackFileAssetType {
 				compile_hardcoded_pack_file_glob_pattern("assets/*/{mcpatcher,optifine}/**/?*.png")
 			}
 			#[cfg(feature = "mtr3-support")]
-			Self::Mtr3CustomGenericTexture => {
-				compile_hardcoded_pack_file_glob_pattern("assets/?*/**/?*.png")
-			}
+			Self::Mtr3CustomGenericTexture => compile_hardcoded_pack_file_glob_pattern("assets/?*/**/?*.png"),
 			Self::GenericTexture => {
 				// Some mods might accept textures in any resource location, but to keep things tidier
 				// and do some potentially unwanted PNG file cleanup, enforce them to be within a
