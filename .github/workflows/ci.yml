@@ -168,13 +168,13 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@4978b3c8549425a60eb2d68446d0b58cef63ad0a # v2
+        uses: taiki-e/install-action@df5e716edf4c11dc1966e25f20b2301dd33dc1eb # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@4978b3c8549425a60eb2d68446d0b58cef63ad0a # v2
+        uses: taiki-e/install-action@df5e716edf4c11dc1966e25f20b2301dd33dc1eb # v2
         with:
           tool: cargo-deb
 
@@ -340,7 +340,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔨 Build and push Docker image
-        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5
+        uses: docker/build-push-action@af5a7ed5ba88268d5278f7203fb52cd833f66d6e # v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64
