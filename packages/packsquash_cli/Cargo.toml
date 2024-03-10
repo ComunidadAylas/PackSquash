@@ -17,7 +17,7 @@ toml = { version = "0.8.10", default-features = false, features = ["parse"] }
 
 tokio = { version = "1.36.0", default-features = false, features = ["time"] }
 
-serde_path_to_error = "0.1.15"
+serde_path_to_error = "0.1.16"
 
 log = "0.4.21"
 env_logger = { version = "0.11.3", default-features = false, features = ["color"] }
