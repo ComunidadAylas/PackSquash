@@ -43,7 +43,7 @@ jobs:
           fail_on_error: true
 
       - name: 🔍 Cargo deny check
-        uses: EmbarkStudios/cargo-deny-action@64015a69ee7ee08f6c56455089cdaf6ad974fd15 # v1
+        uses: EmbarkStudios/cargo-deny-action@b01e7a8cfb1f496c52d77361e84c1840d8246393 # v1
 
       - name: 🔍 Check Rust source code format
         run: cargo fmt --all --check
@@ -168,13 +168,13 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@f03bd5e420b56953c9c6d492f25b1bdeed9c5aec # v2
+        uses: taiki-e/install-action@9b5b983efc779f85e5e5d11539f005e85ccb27ff # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@f03bd5e420b56953c9c6d492f25b1bdeed9c5aec # v2
+        uses: taiki-e/install-action@9b5b983efc779f85e5e5d11539f005e85ccb27ff # v2
         with:
           tool: cargo-deb
 
@@ -472,7 +472,7 @@ jobs:
       actions: read
       id-token: write
 
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
     with:
       base64-subjects: ${{ needs.merge-slsa-attestation-subjects-data.outputs.subject-hashes }}
       provenance-name: binary_provenance.intoto.jsonl
