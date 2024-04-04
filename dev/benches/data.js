@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1712234181572,
+  "lastUpdate": 1712271218020,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "69c5eb1784f8918bf5a367c24e1e8c762be2533c",
-          "message": "fix(ci): update `gdown` to make benchmarks work again\n\nGoogle Drive started being more strict on what user agent strings are\nallowed to use it, and `gdown` was just updated to reflect that.",
-          "timestamp": "2024-01-16T20:58:36+01:00",
-          "tree_id": "8379106418002f34f6449e9854ee1c365c89f95c",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/69c5eb1784f8918bf5a367c24e1e8c762be2533c"
-        },
-        "date": 1705436583626,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10096872,
-            "range": "± 1085970",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 138809425,
-            "range": "± 1965010",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2661175562,
-            "range": "± 32347747",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 732650413,
-            "range": "± 5154041",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 836478305,
             "range": "± 2793646",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8ea29179033b44b77a7ff6a39b4b7e22103f41ac",
+          "message": "chore(deps): update taiki-e/install-action digest to 882330f",
+          "timestamp": "2024-04-04T18:51:49Z",
+          "tree_id": "4120431c26e7ef400938422852975d9fdaa3ee82",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/8ea29179033b44b77a7ff6a39b4b7e22103f41ac"
+        },
+        "date": 1712271217470,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10411302,
+            "range": "± 349806",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 116178763,
+            "range": "± 3424835",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2593794392,
+            "range": "± 63276870",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 841740412,
+            "range": "± 2422292",
             "unit": "ns/iter"
           }
         ]
