@@ -34,7 +34,7 @@ winapi-util = "0.1.6"
 # We are interested in overriding malloc because we depend on C libraries, and doing
 # so buys us a safety net against mismatching memory managed by different allocators,
 # in addition to keep binary sizes down
-mimalloc = { version = "0.1.39", default-features = false, features = ["override"] }
+mimalloc = { version = "0.1.41", default-features = false, features = ["override"] }
 
 [target.'cfg(windows)'.build-dependencies]
 winresource = "0.1.17"
