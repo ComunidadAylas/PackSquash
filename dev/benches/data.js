@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713824146713,
+  "lastUpdate": 1713833575224,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "2feeccc2fd5a226cf0af2544f49fd583d4845ba1",
-          "message": "chore(deps): update taiki-e/install-action digest to f0940d2",
-          "timestamp": "2024-02-01T18:27:43Z",
-          "tree_id": "ca7da09e2e1e17f1726daabe6a6e53c14ef87de3",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/2feeccc2fd5a226cf0af2544f49fd583d4845ba1"
-        },
-        "date": 1706825322412,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10064860,
-            "range": "± 161902",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 129411117,
-            "range": "± 1382066",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2665554036,
-            "range": "± 145184227",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 816104023,
-            "range": "± 3039101",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 816508765,
             "range": "± 3804615",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1a949454c871b55640e79442f147e6aa529a206e",
+          "message": "fix(deps): update rust crate mimalloc to 0.1.41",
+          "timestamp": "2024-04-22T21:52:35Z",
+          "tree_id": "9ec29423359ef94069ba17371996c44fc6e83574",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/1a949454c871b55640e79442f147e6aa529a206e"
+        },
+        "date": 1713833574626,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10196372,
+            "range": "± 556095",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 130151260,
+            "range": "± 2487967",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2746393394,
+            "range": "± 65857375",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 817503679,
+            "range": "± 4554992",
             "unit": "ns/iter"
           }
         ]
