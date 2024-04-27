@@ -1,6 +1,7 @@
 # Configuration file format reference:
 # https://embarkstudios.github.io/cargo-deny/checks/index.html
 
+[graph]
 targets = [
 	{ triple = "x86_64-unknown-linux-gnu" },
 	{ triple = "aarch64-unknown-linux-gnu" },
@@ -10,13 +11,11 @@ targets = [
 ]
 
 [advisories]
-vulnerability = "deny"
-unmaintained = "warn"
+version = 2
 yanked = "deny"
-notice = "warn"
 
 [licenses]
-unlicensed = "deny"
+version = 2
 allow = [
 	# Free software licenses compatible with (A)GPL.
 	# List extracted from: https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses
@@ -77,8 +76,6 @@ allow = [
 	# https://spdx.org/licenses/Unicode-DFS-2016.html
 	"Unicode-DFS-2016"
 ]
-default = "deny"
-copyleft = "allow"
 unused-allowed-license = "allow"
 
 [licenses.private]
@@ -112,9 +109,6 @@ skip-tree = [
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
-allow-git = [
-	"https://github.com/aloucks/spng-rs"
-]
 
 [sources.allow-org]
 github = ["ComunidadAylas"]
