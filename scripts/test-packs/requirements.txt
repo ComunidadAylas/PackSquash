@@ -8,5 +8,5 @@ PySocks==1.7.1
 requests==2.31.0
 six==1.16.0
 soupsieve==2.5
-tqdm==4.66.2
+tqdm==4.66.4
 urllib3==2.2.1
