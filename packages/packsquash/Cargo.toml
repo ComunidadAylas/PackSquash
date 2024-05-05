@@ -23,7 +23,7 @@ sysinfo = { version = "0.30.11", default-features = false }
 walkdir = "2.5.0"
 
 tokio = { version = "1.37.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
-tokio-util = { version = "0.7.10", default-features = false, features = ["codec", "io"] }
+tokio-util = { version = "0.7.11", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.15", default-features = false }
 futures = { version = "0.3.30", default-features = false }
 
