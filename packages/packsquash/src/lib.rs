@@ -17,7 +17,6 @@
 #![feature(generic_const_exprs)]
 #![feature(const_option)]
 #![feature(const_fn_floating_point_arithmetic)]
-#![feature(inline_const)]
 #![deny(missing_docs)]
 #![deny(rustdoc::invalid_html_tags)]
 #![deny(rustdoc::broken_intra_doc_links)]
