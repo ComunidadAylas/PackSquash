@@ -168,13 +168,13 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@5ee12b256842c489ae5e3e84eb6f5c6e71ee618f # v2
+        uses: taiki-e/install-action@309ee827157913f18776c5df82be5609e6e2ae30 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@5ee12b256842c489ae5e3e84eb6f5c6e71ee618f # v2
+        uses: taiki-e/install-action@309ee827157913f18776c5df82be5609e6e2ae30 # v2
         with:
           tool: cargo-deb
 
@@ -352,7 +352,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim@sha256:0e75382930ceb533e2f438071307708e79dc86d9b8e433cc6dd1a96872f2651d
+    container: debian:bullseye-slim@sha256:acc5810124f0929ab44fc7913c0ad936b074cbd3eadf094ac120190862ba36c4
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
