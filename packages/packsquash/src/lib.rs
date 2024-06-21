@@ -10,7 +10,6 @@
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
 #![feature(map_entry_replace)]
-#![feature(lazy_cell)]
 #![feature(nonzero_ops)]
 #![feature(try_find)]
 #![feature(impl_trait_in_assoc_type)]
