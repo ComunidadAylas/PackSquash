@@ -105,6 +105,10 @@ jobs:
 
     container: ${{ matrix.container }}
 
+    permissions:
+      id-token: write
+      attestations: write
+
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
       # nextext requires this on Windows to pick the intended GNU toolchain
@@ -223,6 +227,10 @@ jobs:
     runs-on: macos-latest
 
     needs: build
+
+    permissions:
+      id-token: write
+      attestations: write
 
     steps:
       - name: 📥 Download PackSquash CLI x64 macOS executable
