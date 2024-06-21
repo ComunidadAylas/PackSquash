@@ -222,7 +222,10 @@ jobs:
       - name: ✒️ Generate SLSA attestation subject data for binaries
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: target/${{ env.CARGO_BUILD_TARGET }}/{release,debian}/packsquash{,.exe,_*.deb}
+          subject-path: |
+            target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
+            target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe
+            target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
 
   build-universal-macos-binaries:
 
