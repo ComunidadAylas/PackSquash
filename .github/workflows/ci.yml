@@ -121,6 +121,10 @@ jobs:
       # https://github.com/rust-lang/rust/blob/4c8bb79d9f565115637cc6da739f8389e79f3a29/library/std/Cargo.toml#L54-L79
       OPTIMIZED_RELEASE_BUILD_FLAGS: -Z build-std -Z build-std-features=panic-unwind
 
+      # Set up sccache with GitHub Actions cache
+      RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: true
+
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
@@ -152,8 +156,8 @@ jobs:
           targets: ${{ env.CARGO_BUILD_TARGET }}
           components: rust-src
 
-      - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
+      - name: 💨 Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
@@ -363,6 +367,11 @@ jobs:
     # Renovate branches to reduce noise
     if: success() && github.event_name != 'pull_request' && !startsWith(github.ref_name, 'renovate/')
 
+    env:
+      # Set up sccache with GitHub Actions cache
+      RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: true
+
     steps:
       - name: 🧰 Install development packages and benchmark script packages
         run: |
@@ -384,8 +393,8 @@ jobs:
         with:
           toolchain: nightly
 
-      - name: 💨 Cache Rust artifacts
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
+      - name: 💨 Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: 📥 Download test packs dataset
         run: scripts/test-packs/download.sh
