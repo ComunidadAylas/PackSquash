@@ -205,7 +205,7 @@ jobs:
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
           path: |
@@ -214,7 +214,7 @@ jobs:
 
       - name: 📤 Upload CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
         with:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
@@ -241,13 +241,13 @@ jobs:
 
     steps:
       - name: 📥 Download PackSquash CLI x64 macOS executable
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
         with:
           name: PackSquash CLI executable (x86_64-apple-darwin)
           path: packsquash-x64
 
       - name: 📥 Download PackSquash CLI ARM64 macOS executable
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
         with:
           name: PackSquash CLI executable (aarch64-apple-darwin)
           path: packsquash-aarch64
@@ -256,7 +256,7 @@ jobs:
         run: lipo -create -output packsquash packsquash-x64/packsquash packsquash-aarch64/packsquash
 
       - name: 📤 Upload universal CLI binary
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
         with:
           name: PackSquash CLI executable (universal-apple-darwin)
           path: packsquash
@@ -304,7 +304,7 @@ jobs:
             org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
       - name: 📥 Download PackSquash CLI x64 musl executable
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
         with:
           name: PackSquash CLI executable (x86_64-unknown-linux-musl)
 
@@ -312,7 +312,7 @@ jobs:
         run: mv packsquash packsquash-amd64
 
       - name: 📥 Download PackSquash CLI ARM64 musl executable
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
         with:
           name: PackSquash CLI executable (aarch64-unknown-linux-musl)
 
