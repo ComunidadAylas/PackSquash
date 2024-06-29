@@ -14,6 +14,7 @@ env:
   DEBIAN_FRONTEND: noninteractive
 
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
+  RUSTC_WRAPPER: sccache
 
 jobs:
   static-analysis:
@@ -121,10 +122,6 @@ jobs:
       # https://github.com/rust-lang/rust/blob/4c8bb79d9f565115637cc6da739f8389e79f3a29/library/std/Cargo.toml#L54-L79
       OPTIMIZED_RELEASE_BUILD_FLAGS: -Z build-std -Z build-std-features=panic-unwind
 
-      # Set up sccache with GitHub Actions cache
-      RUSTC_WRAPPER: sccache
-      SCCACHE_GHA_ENABLED: true
-
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
@@ -158,6 +155,15 @@ jobs:
 
       - name: 💨 Set up sccache
         uses: mozilla-actions/sccache-action@89e9040de88b577a072e3760aaf59f585da083af # v0.0.5
+
+      - name: ⚙️ Prime sccache cache backend
+        shell: bash
+        env:
+          SCCACHE_REDIS_ENDPOINT: ${{ secrets.SCCACHE_REDIS_ENDPOINT }}
+          SCCACHE_REDIS_USERNAME: ${{ secrets.SCCACHE_REDIS_USERNAME }}
+          SCCACHE_REDIS_PASSWORD: ${{ secrets.SCCACHE_REDIS_PASSWORD }}
+          SCCACHE_REDIS_KEY_PREFIX: ${{ secrets.SCCACHE_REDIS_KEY_PREFIX }}
+        run: sccache --start-server
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
@@ -370,11 +376,6 @@ jobs:
     # Renovate branches to reduce noise
     if: success() && github.event_name != 'pull_request' && !startsWith(github.ref_name, 'renovate/')
 
-    env:
-      # Set up sccache with GitHub Actions cache
-      RUSTC_WRAPPER: sccache
-      SCCACHE_GHA_ENABLED: true
-
     steps:
       - name: 🧰 Install development packages and benchmark script packages
         run: |
@@ -398,6 +399,15 @@ jobs:
 
       - name: 💨 Set up sccache
         uses: mozilla-actions/sccache-action@89e9040de88b577a072e3760aaf59f585da083af # v0.0.5
+
+      - name: ⚙️ Prime sccache cache backend
+        shell: bash
+        env:
+          SCCACHE_REDIS_ENDPOINT: ${{ secrets.SCCACHE_REDIS_ENDPOINT }}
+          SCCACHE_REDIS_USERNAME: ${{ secrets.SCCACHE_REDIS_USERNAME }}
+          SCCACHE_REDIS_PASSWORD: ${{ secrets.SCCACHE_REDIS_PASSWORD }}
+          SCCACHE_REDIS_KEY_PREFIX: ${{ secrets.SCCACHE_REDIS_KEY_PREFIX }}
+        run: sccache --start-server
 
       - name: 📥 Download test packs dataset
         run: scripts/test-packs/download.sh
