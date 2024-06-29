@@ -14,7 +14,6 @@ env:
   DEBIAN_FRONTEND: noninteractive
 
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
-  RUSTC_WRAPPER: sccache
 
 jobs:
   static-analysis:
@@ -121,6 +120,9 @@ jobs:
       # https://doc.rust-lang.org/cargo/reference/unstable.html#build-std-features
       # https://github.com/rust-lang/rust/blob/4c8bb79d9f565115637cc6da739f8389e79f3a29/library/std/Cargo.toml#L54-L79
       OPTIMIZED_RELEASE_BUILD_FLAGS: -Z build-std -Z build-std-features=panic-unwind
+
+      # Use sccache to speed up Rust compilation
+      RUSTC_WRAPPER: sccache
 
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
@@ -375,6 +377,10 @@ jobs:
     # Workflows triggered by PRs don't have access to secrets either. We also ignore temporary
     # Renovate branches to reduce noise
     if: success() && github.event_name != 'pull_request' && !startsWith(github.ref_name, 'renovate/')
+
+    env:
+      # Use sccache to speed up Rust compilation
+      RUSTC_WRAPPER: sccache
 
     steps:
       - name: 🧰 Install development packages and benchmark script packages
