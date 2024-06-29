@@ -36,3 +36,18 @@ strip = "symbols"
 inherits = "release"
 debug = true
 strip = "none"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_docs = "deny"
+# deny instead of forbid is required by the thread_local macro with const initializers
+unsafe_op_in_unsafe_fn = "deny"
+
+[workspace.lints.clippy]
+cargo = "warn"
+pedantic = "warn"
+
+[workspace.lints.rustdoc]
+invalid_html_tags = "deny"
+broken_intra_doc_links = "deny"
+private_intra_doc_links = "deny"

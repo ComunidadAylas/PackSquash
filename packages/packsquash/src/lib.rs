@@ -2,10 +2,6 @@
 //! which allows for efficient distribution and slightly improved load times in the game, at good speed.
 
 #![allow(incomplete_features)]
-#![deny(unsafe_code)]
-// deny instead of forbid is required by the thread_local macro with const initializers
-#![deny(unsafe_op_in_unsafe_fn)]
-#![deny(clippy::await_holding_lock)]
 #![feature(doc_cfg)]
 #![feature(if_let_guard)]
 #![feature(iter_intersperse)]
@@ -16,10 +12,6 @@
 #![feature(generic_const_exprs)]
 #![feature(const_option)]
 #![feature(const_fn_floating_point_arithmetic)]
-#![deny(missing_docs)]
-#![deny(rustdoc::invalid_html_tags)]
-#![deny(rustdoc::broken_intra_doc_links)]
-#![deny(rustdoc::private_intra_doc_links)]
 
 use std::borrow::Cow;
 use std::convert::Infallible;
