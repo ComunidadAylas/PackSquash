@@ -46,7 +46,7 @@ pub struct LineNumber(Option<NonZeroUsize>);
 impl LineNumber {
 	/// Creates a new line number counter that would display a line number of 1.
 	pub const fn new() -> Self {
-		Self(Some(NonZeroUsize::new(1).unwrap()))
+		Self(Some(NonZeroUsize::MIN))
 	}
 
 	/// Checks whether this line number counter would display a line number of 1

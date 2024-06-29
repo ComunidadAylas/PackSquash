@@ -327,30 +327,26 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 				.seek(SeekFrom::Start(matching_data_start_offset))
 				.await?;
 
-			let mut bytes_compared = 0;
-			already_stored = compressed_data_scratch_file
+			let mut equal_bytes = 0;
+			compressed_data_scratch_file
 				.by_ref()
 				.bytes()
 				.zip(Read::take(&mut *output_zip, local_file_header.compressed_size as u64).bytes())
-				.try_find(|(byte_new, byte_stored)| {
-					// Find the first byte that differs in both streams. If the streams are
-					// equal so far, but one is shorter than another, we won't find any
-					// difference, so keep a counter to know whether we read all the bytes
-					// we should have, and only consider them equal when we read the same
-					// number of equal bytes from both
-					bytes_compared += 1;
-
-					let to_owned_io_error = |err: &io::Error| -> io::Error {
-						err.raw_os_error()
-							.map_or_else(|| err.kind().into(), io::Error::from_raw_os_error)
-					};
-
-					let byte_new = byte_new.as_ref().map_err(to_owned_io_error);
-					let byte_stored = byte_stored.as_ref().map_err(to_owned_io_error);
-
-					Ok::<bool, io::Error>(byte_new? != byte_stored?)
-				})?
-				.is_none() && bytes_compared == local_file_header.compressed_size;
+				.map_while(|byte_result_pair| {
+					// Consider the data equal when both streams have the same number of equal bytes.
+					// As soon as a different byte is found, or an error happens, stop iterating over
+					// both byte streams
+					match byte_result_pair {
+						(Ok(new_byte), Ok(stored_byte)) if new_byte == stored_byte => {
+							equal_bytes += 1;
+							Some(Ok(()))
+						}
+						(Ok(_), Ok(_)) => None,
+						(Err(err), _) | (_, Err(err)) => Some(Err(err))
+					}
+				})
+				.collect::<Result<(), _>>()?;
+			already_stored = equal_bytes == local_file_header.compressed_size;
 
 			if already_stored {
 				// We know for sure we found a matching file, so just add another pointer to an
@@ -1069,6 +1065,6 @@ fn add_partial_central_directory_header(
 
 			Ok(())
 		}
-		Entry::Occupied(entry) => Err(SquashZipError::FileAlreadyAdded(entry.replace_key()))
+		Entry::Occupied(entry) => Err(SquashZipError::FileAlreadyAdded(entry.key().clone()))
 	}
 }

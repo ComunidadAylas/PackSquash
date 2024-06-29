@@ -33,11 +33,21 @@ mod vorbis_stream_mangler;
 /// The default sampling frequency to resample positional (i.e., mono) sounds to.
 /// "Positional" sounds are named as such because the game attenuates and pans their volume
 /// depending on the 3D position of the listener, e.g. computes position effects.
-const POSITIONAL_AUDIO_SAMPLING_FREQUENCY: NonZeroU32 = NonZeroU32::new(32_000).unwrap();
+const POSITIONAL_AUDIO_SAMPLING_FREQUENCY: NonZeroU32 =
+	if let Some(frequency) = NonZeroU32::new(32_000) {
+		frequency
+	} else {
+		unreachable!()
+	};
 /// The default sampling frequency to resample non-positional (i.e., stereo) sounds to.
 /// "Non-positional" sounds are named as such because they are played at a constant volume
 /// by the game, without taking into account the position of any listeners.
-const NON_POSITIONAL_AUDIO_SAMPLING_FREQUENCY: NonZeroU32 = NonZeroU32::new(40_050).unwrap();
+const NON_POSITIONAL_AUDIO_SAMPLING_FREQUENCY: NonZeroU32 =
+	if let Some(frequency) = NonZeroU32::new(40_050) {
+		frequency
+	} else {
+		unreachable!()
+	};
 /// The default target quality for positional sounds, used when transcoding.
 const POSITIONAL_AUDIO_TARGET_QUALITY: f32 = 0.0;
 /// The default target quality for non-positional sounds, used when transcoding. For stereo,

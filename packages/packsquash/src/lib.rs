@@ -4,15 +4,10 @@
 #![allow(incomplete_features)]
 #![feature(doc_cfg)]
 #![feature(if_let_guard)]
-#![feature(iter_intersperse)]
-#![feature(map_entry_replace)]
-#![feature(nonzero_ops)]
-#![feature(try_find)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(generic_const_exprs)]
-#![feature(const_option)]
-#![feature(const_fn_floating_point_arithmetic)]
 
+use itertools::Itertools;
 use std::borrow::Cow;
 use std::convert::Infallible;
 use std::io::ErrorKind;
@@ -192,11 +187,7 @@ impl PackSquasher {
 						if !quirks.is_empty() {
 							let notice_message = format!(
 								"Working around automatically detected Minecraft quirks: {}",
-								quirks
-									.iter()
-									.map(|quirk| quirk.as_str())
-									.intersperse(", ")
-									.collect::<String>()
+								quirks.iter().map(|quirk| quirk.as_str()).join(", ")
 							);
 
 							pack_file_status_sender
