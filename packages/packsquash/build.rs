@@ -1,3 +1,5 @@
+//! Build helper for the `PackSquash` package.
+
 use std::env;
 
 fn main() {

@@ -1,3 +1,5 @@
+//! Build helper for the `PackSquash` CLI.
+
 use std::env;
 
 /// Initializes environment variables that will be accessible in the source

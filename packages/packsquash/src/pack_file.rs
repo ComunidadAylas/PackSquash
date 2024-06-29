@@ -28,8 +28,8 @@ mod passthrough_file;
 mod png_file;
 mod shader_file;
 
-#[cfg(feature = "optifine-support")]
-#[doc(cfg(feature = "optifine-support"))]
+#[cfg(feature = "optifine")]
+#[doc(cfg(feature = "optifine"))]
 mod properties_file;
 
 /// Represents an error that may occur while optimizing a pack file.
@@ -39,8 +39,8 @@ pub enum OptimizationError {
 	AudioFile(#[from] audio_file::OptimizationError),
 	JsonFile(#[from] json_file::OptimizationError),
 	PngFile(#[from] png_file::OptimizationError),
-	#[cfg(feature = "optifine-support")]
-	#[doc(cfg(feature = "optifine-support"))]
+	#[cfg(feature = "optifine")]
+	#[doc(cfg(feature = "optifine"))]
 	PropertiesFile(#[from] properties_file::OptimizationError),
 	ShaderFile(#[from] shader_file::OptimizationError),
 	LegacyLanguageFile(#[from] legacy_lang_file::OptimizationError),

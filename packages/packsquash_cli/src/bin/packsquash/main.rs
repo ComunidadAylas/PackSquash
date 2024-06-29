@@ -1,3 +1,5 @@
+//! The `PackSquash` proper CLI application code.
+
 use anstyle::{AnsiColor, Color, Effects};
 use std::{
 	borrow::Cow,
@@ -43,7 +45,7 @@ fn main() {
 	process::exit(run(TerminalTitleController::new()));
 }
 
-/// Runs PackSquash, parsing the command line parameters and deciding what options file
+/// Runs `PackSquash`, parsing the command line parameters and deciding what options file
 /// to read to process a pack.
 fn run(title_controller: Option<TerminalTitleController>) -> i32 {
 	// Show initial title
@@ -166,14 +168,13 @@ fn read_options_file_and_squash(
 	);
 
 	// Read the TOML configuration data from the specified source
-	let options_string = match match options_file_path {
-		Some(path) => fs::read_to_string(path),
-		None => {
-			let mut buf = String::new();
-			match io::stdin().read_to_string(&mut buf) {
-				Ok(_) => Ok(buf),
-				Err(err) => Err(err)
-			}
+	let options_string = match if let Some(path) = options_file_path {
+		fs::read_to_string(path)
+	} else {
+		let mut buf = String::new();
+		match io::stdin().read_to_string(&mut buf) {
+			Ok(_) => Ok(buf),
+			Err(err) => Err(err)
 		}
 	} {
 		Ok(options_string) => options_string,
@@ -297,7 +298,7 @@ fn squash(
 					Some(status_update) => match status_update {
 						PackSquasherStatus::PackFileProcessed(pack_file_status) => {
 							total_file_count += 1;
-							processed_file_count += 1 - pack_file_status.skipped() as u64;
+							processed_file_count += 1 - u64::from(pack_file_status.skipped());
 
 							match pack_file_status.optimization_error() {
 								Some(error_description) => error!(
@@ -311,13 +312,13 @@ fn squash(
 											"{}: {}",
 											pack_file_status.path().as_str(),
 											pack_file_status.optimization_strategy()
-										)
+										);
 									} else {
 										trace!(
 											"{}: {}",
 											pack_file_status.path().as_str(),
 											pack_file_status.optimization_strategy()
-										)
+										);
 									};
 								}
 							};
@@ -371,7 +372,7 @@ fn squash(
 						break
 					}
 				},
-				_ = &mut progress_tick_timer => {
+				() = &mut progress_tick_timer => {
 					// We have not yet received any message from the PackSquasher. Change the title
 					// so that we give the user the illusion of some progress, and then schedule
 					// another progress tick
@@ -397,13 +398,13 @@ fn squash(
 		// Wait for completion. Unwrap the handle because any panic in the thread is fatal anyway,
 		// and we should propagate it
 		match packsquasher.await.unwrap() {
-			Ok(_) => Ok(cli_update_task.await.ok()),
+			Ok(()) => Ok(cli_update_task.await.ok()),
 			Err(err) => Err(err)
 		}
 	})
 }
 
-/// Prints PackSquash version information to the standard output stream.
+/// Prints `PackSquash` version information to the standard output stream.
 fn print_version_information(verbose: bool) {
 	println!(
 		"PackSquash {} ({}, {}) for {}",

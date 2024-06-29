@@ -32,7 +32,7 @@ use pack_meta::{PackMeta, PackMetaError};
 use squash_zip::{SquashZip, SquashZipError};
 
 use crate::config::AudioFileOptions;
-#[cfg(feature = "optifine-support")]
+#[cfg(feature = "optifine")]
 use crate::config::PropertiesFileOptions;
 use crate::config::{
 	CommandFunctionFileOptions, FileOptions, JsonFileOptions, LegacyLanguageFileOptions,
@@ -446,7 +446,7 @@ impl PackSquasher {
 							Some(FileOptions::JsonFileOptions(JsonFileOptions::default())),
 							Some(FileOptions::AudioFileOptions(AudioFileOptions::default())),
 							Some(FileOptions::PngFileOptions(PngFileOptions::default())),
-							#[cfg(feature = "optifine-support")]
+							#[cfg(feature = "optifine")]
 							Some(FileOptions::PropertiesFileOptions(
 								PropertiesFileOptions::default()
 							)),

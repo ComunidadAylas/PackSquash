@@ -190,7 +190,7 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for JsonFile<
 /// Checks whether the specified asset type is an extension type whose file extension
 /// signals that its JSON data might have comments.
 #[cfg_attr(
-	not(any(feature = "optifine-support", feature = "mtr3-support")),
+	not(any(feature = "optifine", feature = "mtr3")),
 	allow(clippy::match_like_matches_macro)
 )]
 const fn asset_type_has_comments_extension(asset_type: PackFileAssetType) -> bool {
@@ -199,12 +199,12 @@ const fn asset_type_has_comments_extension(asset_type: PackFileAssetType) -> boo
 		| PackFileAssetType::MinecraftMetadataWithComments
 		| PackFileAssetType::MinecraftModelWithComments
 		| PackFileAssetType::GenericJsonWithComments => true,
-		#[cfg(feature = "optifine-support")]
+		#[cfg(feature = "optifine")]
 		PackFileAssetType::OptifineCustomEntityModelWithComments
 		| PackFileAssetType::OptifineCustomEntityModelPartWithComments
 		| PackFileAssetType::OptifineVanillaItemModelWithComments
 		| PackFileAssetType::OptifineVanillaTextureMetadataWithComments => true,
-		#[cfg(feature = "mtr3-support")]
+		#[cfg(feature = "mtr3")]
 		PackFileAssetType::Mtr3CustomTrainModelWithComments => true,
 		_ => false
 	}

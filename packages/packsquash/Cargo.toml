@@ -96,13 +96,13 @@ perfcnt = "0.8.0"
 
 [features]
 # Support all kinds of files added by modifications by default
-default = ["mod-support"]
+default = ["mods"]
 
 # This feature will include support for all the mods that PackSquash will ever support
-mod-support = ["optifine-support", "mtr3-support"]
+mods = ["optifine", "mtr3"]
 
-optifine-support = ["java-properties"]
-mtr3-support = []
+optifine = ["java-properties"]
+mtr3 = []
 
 [lib]
 bench = false
@@ -110,3 +110,6 @@ bench = false
 [[bench]]
 name = "benches"
 harness = false
+
+[lints]
+workspace = true

@@ -1,4 +1,4 @@
-//! Automated benchmarks for the PackSquash library, using the Criterion framework.
+//! Automated benchmarks for the `PackSquash` library, using the Criterion framework.
 
 use std::path::Path;
 use std::time::Duration;
@@ -44,7 +44,7 @@ fn empty_pack<M: Measurement + 'static>(
 			},
 			squash_pack,
 			BatchSize::SmallInput
-		)
+		);
 	});
 }
 
@@ -66,7 +66,7 @@ fn aylas_khron_micro_pack<M: Measurement + 'static>(
 			},
 			squash_pack,
 			BatchSize::SmallInput
-		)
+		);
 	});
 }
 
@@ -94,7 +94,7 @@ fn jilchu_chronos_micro_pack<M: Measurement + 'static>(
 			},
 			squash_pack,
 			BatchSize::SmallInput
-		)
+		);
 	});
 }
 
@@ -122,7 +122,7 @@ fn aiamded_breadstick_micro_pack<M: Measurement + 'static>(
 			},
 			squash_pack,
 			BatchSize::SmallInput
-		)
+		);
 	});
 }
 

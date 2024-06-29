@@ -220,8 +220,8 @@ pub struct GlobalOptions {
 	/// in the result ZIP file.
 	///
 	/// **Default value**: empty set (do not add any mod-specific files)
-	#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
-	#[doc(cfg(any(feature = "optifine-support", feature = "mtr3-support")))]
+	#[cfg(any(feature = "optifine", feature = "mtr3"))]
+	#[doc(cfg(any(feature = "optifine", feature = "mtr3")))]
 	pub allow_mods: EnumSet<MinecraftMod>,
 	/// The output file path where the result ZIP will be written to. This path must not point to a
 	/// folder.
@@ -272,7 +272,7 @@ impl Default for GlobalOptions {
 			work_around_minecraft_quirks: EnumSet::empty(),
 			automatic_asset_types_mask_detection: true,
 			ignore_system_and_hidden_files: true,
-			#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
+			#[cfg(any(feature = "optifine", feature = "mtr3"))]
 			allow_mods: EnumSet::empty(),
 			threads: hardware_threads,
 			output_file_path: PathBuf::from("pack.zip"),
@@ -488,8 +488,8 @@ impl MinecraftQuirk {
 #[derive(Deserialize, Serialize, EnumSetType)]
 #[enumset(serialize_deny_unknown, serialize_repr = "list")]
 #[non_exhaustive]
-#[cfg(any(feature = "optifine-support", feature = "mtr3-support"))]
-#[doc(cfg(any(feature = "optifine-support", feature = "mtr3-support")))]
+#[cfg(any(feature = "optifine", feature = "mtr3"))]
+#[doc(cfg(any(feature = "optifine", feature = "mtr3")))]
 pub enum MinecraftMod {
 	/// OptiFine.
 	///
@@ -497,16 +497,16 @@ pub enum MinecraftMod {
 	/// - Properties files (`.properties`).
 	/// - Custom entity model files (`.jem`, `.jemc`, `.jpm` and `.jpmc`).
 	#[serde(rename = "OptiFine")]
-	#[cfg(feature = "optifine-support")]
-	#[doc(cfg(feature = "optifine-support"))]
+	#[cfg(feature = "optifine")]
+	#[doc(cfg(feature = "optifine"))]
 	Optifine,
 	/// Minecraft Transit Railway, version 3.0 and compatibles.
 	///
 	/// Currently, this adds support for the following file types:
 	/// - Blockbench modded entity model projects for custom train models (`.bbmodel` and `.bbmodelc`).
 	#[serde(rename = "Minecraft Transit Railway 3")]
-	#[cfg(feature = "mtr3-support")]
-	#[doc(cfg(feature = "mtr3-support"))]
+	#[cfg(feature = "mtr3")]
+	#[doc(cfg(feature = "mtr3"))]
 	MinecraftTransitRailway3
 }
 
@@ -534,8 +534,8 @@ pub enum FileOptions {
 	ShaderFileOptions(ShaderFileOptions),
 	/// Options that influence how property files are converted to a more distribution-friendly
 	/// representation.
-	#[cfg(feature = "optifine-support")]
-	#[doc(cfg(feature = "optifine-support"))]
+	#[cfg(feature = "optifine")]
+	#[doc(cfg(feature = "optifine"))]
 	PropertiesFileOptions(PropertiesFileOptions),
 	/// Options that influence how legacy language files are converted to a more
 	/// distribution-friendly representation.
@@ -1182,8 +1182,8 @@ impl Default for CommandFunctionFileOptions {
 #[derive(Deserialize, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
-#[cfg(feature = "optifine-support")]
-#[doc(cfg(feature = "optifine-support"))]
+#[cfg(feature = "optifine")]
+#[doc(cfg(feature = "optifine"))]
 pub struct PropertiesFileOptions {
 	/// If `true`, the properties file will be minified (i.e. unnecessary white space, line breaks
 	/// and comments will be removed) to save space and improve parsing performance. If `false`,
@@ -1194,7 +1194,7 @@ pub struct PropertiesFileOptions {
 	pub minify: bool
 }
 
-#[cfg(feature = "optifine-support")]
+#[cfg(feature = "optifine")]
 impl Default for PropertiesFileOptions {
 	fn default() -> Self {
 		Self { minify: true }

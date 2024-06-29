@@ -17,6 +17,7 @@ pub struct PackDataset<'path> {
 impl<'path> PackDataset<'path> {
 	/// Creates a new pack dataset.
 	#[allow(clippy::new_without_default)]
+	#[must_use]
 	pub fn new() -> Self {
 		Self {
 			extracted_packs: HashMap::new()

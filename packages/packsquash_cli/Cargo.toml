@@ -63,3 +63,6 @@ ProductName = "PackSquash"
 CompanyName = "Comunidad Aylas"
 OriginalFilename = "packsquash.exe"
 InternalName = "packsquash.exe"
+
+[lints]
+workspace = true

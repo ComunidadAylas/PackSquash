@@ -52,7 +52,7 @@ impl TerminalTitleController {
 	/// Shows the current title for the current title phase.
 	pub fn show(&self) {
 		self.title_setter
-			.set_title(&self.title_strings[self.current_title as usize])
+			.set_title(&self.title_strings[self.current_title as usize]);
 	}
 
 	/// Moves on to the next title of the current phase, and then shows that title.

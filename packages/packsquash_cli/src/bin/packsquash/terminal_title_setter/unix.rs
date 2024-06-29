@@ -55,13 +55,13 @@ impl<'title> TerminalTitleSetterTrait<'title> for UnixTerminalTitleSetter {
 	fn set_title(&self, title: &'title UnixTerminalTitleString) {
 		match &self.escape_codes_stream {
 			AnsiEscapeCodesStream::Stdout => {
-				write_ansi_set_window_title_escape_sequence(io::stdout(), title.0)
+				write_ansi_set_window_title_escape_sequence(io::stdout(), title.0);
 			}
 			AnsiEscapeCodesStream::Stderr => {
-				write_ansi_set_window_title_escape_sequence(io::stderr(), title.0)
+				write_ansi_set_window_title_escape_sequence(io::stderr(), title.0);
 			}
 			AnsiEscapeCodesStream::ControllingTty(ctty) => {
-				write_ansi_set_window_title_escape_sequence(ctty, title.0)
+				write_ansi_set_window_title_escape_sequence(ctty, title.0);
 			}
 		}
 	}
@@ -100,12 +100,12 @@ fn controlling_terminal() -> Option<String> {
 	// layout than c_char and are interchangeable
 	#[allow(unsafe_code)]
 	unsafe {
-		ctermid(path_buf.as_mut_ptr() as *mut c_char)
+		ctermid(path_buf.as_mut_ptr().cast::<c_char>())
 	};
 
 	let path = CStr::from_bytes_until_nul(&path_buf[..]);
 
 	path.ok()
-		.and_then(|path_cstr| path_cstr.to_str().ok().map(|path_str| path_str.to_string()))
+		.and_then(|path_cstr| path_cstr.to_str().ok().map(String::from))
 		.filter(|path| !path.is_empty())
 }

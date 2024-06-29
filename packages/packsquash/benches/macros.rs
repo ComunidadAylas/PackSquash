@@ -6,6 +6,7 @@
 /// benchmark group, and allows changing the sampling mode of the benchmark group.
 macro_rules! custom_criterion_group {
     (name = $name:ident; config = $config:expr; sampling_mode = $sampling_mode:expr; targets = $( $target:path ),+ $(,)*) => {
+        #[allow(missing_docs)]
         pub fn $name(pack_dataset: &mut $crate::pack_dataset::PackDataset) {
             let mut criterion: ::criterion::Criterion<_> = $config
                 .configure_from_args();
