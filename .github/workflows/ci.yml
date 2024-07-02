@@ -121,13 +121,15 @@ jobs:
       # https://github.com/rust-lang/rust/blob/4c8bb79d9f565115637cc6da739f8389e79f3a29/library/std/Cargo.toml#L54-L79
       OPTIMIZED_RELEASE_BUILD_FLAGS: -Z build-std -Z build-std-features=panic-unwind
 
-      # Use sccache to speed up Rust compilation
-      RUSTC_WRAPPER: sccache
-
     # Exclude in-repo PRs from running this job
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
+      - name: 📥 Checkout source
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        with:
+          fetch-depth: 0 # Keep the commit history for proper version information
+
       - name: 🧰 Install Linux toolchain packages
         if: contains(matrix.target, '-linux-')
         run: |
@@ -156,16 +158,24 @@ jobs:
           components: rust-src
 
       - name: 💨 Set up sccache
+        if: ${{ !endsWith(matrix.target, '-pc-windows-gnu') }} # See comment above on sccache for Windows
         uses: mozilla-actions/sccache-action@89e9040de88b577a072e3760aaf59f585da083af # v0.0.5
 
       - name: ⚙️ Prime sccache cache backend
+        if: ${{ !endsWith(matrix.target, '-pc-windows-gnu') }}
         shell: bash
         env:
           SCCACHE_REDIS_ENDPOINT: ${{ secrets.SCCACHE_REDIS_ENDPOINT }}
           SCCACHE_REDIS_USERNAME: ${{ secrets.SCCACHE_REDIS_USERNAME }}
           SCCACHE_REDIS_PASSWORD: ${{ secrets.SCCACHE_REDIS_PASSWORD }}
           SCCACHE_REDIS_KEY_PREFIX: ${{ secrets.SCCACHE_REDIS_KEY_PREFIX }}
-        run: sccache --start-server
+        run: |
+          sccache --start-server
+          echo 'RUSTC_WRAPPER=sccache' >> "$GITHUB_ENV"
+
+      - name: 💨 Cache Rust artifacts (Windows)
+        if: endsWith(matrix.target, '-pc-windows-gnu')
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
@@ -178,11 +188,6 @@ jobs:
         uses: taiki-e/install-action@331a600f1b10a3fed8dc56f925012bede91ae51f # v2
         with:
           tool: cargo-deb
-
-      - name: 📥 Checkout source
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-        with:
-          fetch-depth: 0 # Keep the commit history for proper version information
 
       # Our build container is minimal, and it doesn't contain any systemd package.
       # systemd is responsible for setting up the machine ID files we use for
