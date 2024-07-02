@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1719810011319,
+  "lastUpdate": 1719916959221,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "9195d42ab1e7f09b2933eb17f5072664f35106ee",
-          "message": "chore(deps): update taiki-e/install-action digest to c2927f0",
-          "timestamp": "2024-05-13T00:18:53Z",
-          "tree_id": "538906e012290e95acca49169707f5668305c610",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9195d42ab1e7f09b2933eb17f5072664f35106ee"
-        },
-        "date": 1715572339615,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10099605,
-            "range": "± 527992",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 131424876,
-            "range": "± 1691972",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2684528711,
-            "range": "± 65567410",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 780437203,
-            "range": "± 3380076",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 608560863,
             "range": "± 2900250",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "6ad79f629d2d7d79646044e6817888db4aec78d0",
+          "message": "ci: bring back GitHub Actions cache for Windows\n\nAccording to all known laws of informatics, sccache should work well on\nWindows. But for some reason in our environment Windows builds with the\nMinGW toolchain get so slow due to sccache overheads, even though our\ncurrent sccache approach with a Redis database storing compilation\naritfacts is overall a net improvement for the remaining targets. So\nlet's fall back to the older cache method for Windows to continue\ncutting down on CI time.",
+          "timestamp": "2024-07-02T12:11:03+02:00",
+          "tree_id": "1543deaccc8d22ae010e2e018ba0256468091b82",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/6ad79f629d2d7d79646044e6817888db4aec78d0"
+        },
+        "date": 1719916958722,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9623940,
+            "range": "± 1481301",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 143312455,
+            "range": "± 2715269",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2758846887,
+            "range": "± 29182899",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 608325546,
+            "range": "± 2167146",
             "unit": "ns/iter"
           }
         ]
