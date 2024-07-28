@@ -35,18 +35,37 @@ jobs:
           toolchain: nightly
           components: rustfmt, clippy
 
-      - name: 🔍 Clippy check
-        uses: giraffate/clippy-action@13b9d32482f25d29ead141b79e7e04e7900281e0 # v1
+      - name: 🧰 Install clippy-sarif
+        uses: taiki-e/install-action@3e71e7135de310b70bc22dccb4d275acde8e055a # v2
         with:
-          clippy_flags: --all-targets -D warnings
-          reporter: github-check
-          fail_on_error: true
+          tool: clippy-sarif
+
+      - name: 🧰 Install sarif-fmt
+        uses: taiki-e/install-action@3e71e7135de310b70bc22dccb4d275acde8e055a # v2
+        with:
+          tool: sarif-fmt
+
+      - name: 🔍 Clippy check
+        shell: bash
+        run: >
+          cargo clippy --no-deps --all-targets --message-format=json -- -D warnings
+          | clippy-sarif
+          | tee clippy-results.sarif
+          | sarif-fmt
 
       - name: 🔍 Cargo deny check
         uses: EmbarkStudios/cargo-deny-action@3f4a782664881cf5725d0ffd23969fcce89fd868 # v1
 
       - name: 🔍 Check Rust source code format
         run: cargo fmt --all --check
+
+      - name: 📤 Upload analysis results to GitHub
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true
+        with:
+          sarif_file: clippy-results.sarif
+          category: clippy
 
   build:
     name: Build
