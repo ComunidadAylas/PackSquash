@@ -158,7 +158,7 @@ jobs:
           components: rust-src
 
       - name: 💨 Set up sccache
-        if: ${{ !endsWith(matrix.target, '-pc-windows-gnu') }} # See comment above on sccache for Windows
+        if: ${{ !endsWith(matrix.target, '-pc-windows-gnu') }}
         uses: mozilla-actions/sccache-action@89e9040de88b577a072e3760aaf59f585da083af # v0.0.5
 
       - name: ⚙️ Prime sccache cache backend
@@ -174,7 +174,7 @@ jobs:
           echo 'RUSTC_WRAPPER=sccache' >> "$GITHUB_ENV"
 
       - name: 💨 Cache Rust artifacts (Windows)
-        if: endsWith(matrix.target, '-pc-windows-gnu')
+        if: endsWith(matrix.target, '-pc-windows-gnu') # sccache with Windows GNU compilers is slower than trivial GHA caching
         uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
 
       - name: 🧰 Install nextest
