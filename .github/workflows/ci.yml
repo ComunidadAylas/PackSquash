@@ -36,12 +36,12 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@3e71e7135de310b70bc22dccb4d275acde8e055a # v2
+        uses: taiki-e/install-action@7277a40b4d8760cc11399bd3f8314c3294e270f5 # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@3e71e7135de310b70bc22dccb4d275acde8e055a # v2
+        uses: taiki-e/install-action@7277a40b4d8760cc11399bd3f8314c3294e270f5 # v2
         with:
           tool: sarif-fmt
 
@@ -61,7 +61,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@afb54ba388a7dca6ecae48f608c4ff05ff4cc77a # v3
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
@@ -353,7 +353,7 @@ jobs:
 
       - name: 🔍 Check workflow package write permission
         id: check_write_permission
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         with:
           result-encoding: string
           script: |
