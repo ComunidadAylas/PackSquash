@@ -946,7 +946,7 @@ async fn read_previous_zip_contents<F: AsyncRead + AsyncSeek + Unpin>(
 			previous_zip.read_exact(&mut filename_buf).await?;
 
 			// Normalize directories
-			if filename_buf.ends_with(&[b'/']) {
+			if filename_buf.ends_with(b"/") {
 				filename_buf.pop();
 			}
 
