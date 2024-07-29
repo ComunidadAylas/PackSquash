@@ -6,6 +6,9 @@ on:
     types:
       - opened
       - synchronize
+  merge_group:
+    types:
+      - checks_requested
   release:
     types:
       - published
