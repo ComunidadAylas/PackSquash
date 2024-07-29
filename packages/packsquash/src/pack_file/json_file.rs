@@ -74,7 +74,7 @@ impl Decoder for OptimizerDecoder {
 		}
 		self.reached_eof = true;
 
-		// Parse the JSON so we know how to serialize it again in a compact manner, and whether
+		// Parse the JSON, so we know how to serialize it again in a compact manner, and whether
 		// it's valid. Check whether we should parse and discard comments, too
 		let mut json_value: Value = if self.optimization_settings.always_allow_comments
 			|| asset_type_has_comments_extension(self.asset_type)

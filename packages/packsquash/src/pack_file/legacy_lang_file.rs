@@ -30,7 +30,7 @@ static FORMAT_SPECIFIER_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 	// The list of valid flags and conversions was deduced from:
 	// https://github.com/AdoptOpenJDK/openjdk-jdk11/blob/19fb8f93c59dfd791f62d41f332db9e306bc1422/src/java.base/share/classes/java/util/Formatter.java#L4553-L4806
 	//
-	// Note that this regex is not context sensitive: it can't check whether the objects to be formatted
+	// Note that this regex is not context-sensitive: it can't check whether the objects to be formatted
 	// are compatible with the conversion, and it doesn't check that the flags, width, precision and
 	// argument index make sense according to the objects to format and the conversion. It's only meant
 	// to catch blatantly invalid specifiers

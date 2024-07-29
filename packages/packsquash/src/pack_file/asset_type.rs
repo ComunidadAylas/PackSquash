@@ -1,4 +1,4 @@
-//! Contains code to identify the asset type of a pack file, which is used to define and enhance the
+//! Contains code to identify a pack file's asset type, which is used to define and enhance the
 //! optimizations that can be done to a file.
 
 use std::{borrow::Cow, fmt::Debug};
@@ -114,10 +114,10 @@ pub enum PackFileAssetType {
 	/// A banner or shield layer texture, with `.png` extension. This asset type is relevant
 	/// due to a quirk on how older Minecraft versions (<= 1.12.2) processed them.
 	BannerLayer,
-	/// A Enderman, Ender Dragon, Phantom or spider eye layer texture, with `.png` extension.
+	/// An Enderman, Ender Dragon, Phantom or spider eye layer texture, with `.png` extension.
 	/// These textures are rendered by the eyes render type, which by default has some problems
 	/// with alpha blending that are exacerbated with the optimizations PackSquash does. As of
-	/// 15th November, 2021, all released Minecraft versions are affected by these problems.
+	/// 15th November 2021, all released Minecraft versions are affected by these problems.
 	EyeLayer,
 	/// A texture that may be used as an input render target in a shader program via a sampler
 	/// uniform.
@@ -368,7 +368,7 @@ impl PackFileAssetType {
 			// Current Minecraft versions are only able to read shaders from the Minecraft
 			// namespace. However, this is likely to change in the future, and there might
 			// be mods that add shaders in other namespaces. To support such mods as long
-			// as they put their shaders in the core and program subdirectories, and future
+			// as they put their shaders in the core and program subdirectories, and future-
 			// proof our patterns, accept any namespace. It is also worth noting that, to
 			// compute the resource location the shader, render program and pipeline
 			// definition files are read from, Minecraft performs a simple string
@@ -491,7 +491,7 @@ impl PackFileAssetType {
 	}
 }
 
-/// A matcher that can be used to determine the asset type of a pack file, given its [`RelativePath`].
+/// A matcher that can be used to determine pack file's asset type, given its [`RelativePath`].
 /// In turn, the asset type determines how that pack file should be optimized according to some
 /// settings.
 pub struct PackFileAssetTypeMatcher {
@@ -500,7 +500,7 @@ pub struct PackFileAssetTypeMatcher {
 }
 
 impl PackFileAssetTypeMatcher {
-	/// Returns a new matcher that can be used to determine the asset type of a pack file, given its
+	/// Returns a new matcher that can be used to determine the pack file's asset type, given its
 	/// [`RelativePath`]. A mask is used to limit what asset types can match. If the mask contains
 	/// the custom asset type, [PackFileAssetType::Custom], it will be silently excluded from the mask.
 	pub fn new(asset_types_mask: EnumSet<PackFileAssetType>) -> Self {

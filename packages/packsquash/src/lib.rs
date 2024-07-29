@@ -76,7 +76,7 @@ impl PackSquasher {
 	/// parameter. Status updates of the squash operation will be sent to this channel, which the
 	/// client code can use as it deems fit.
 	///
-	/// If this function returns successfully, it is guaranteed that a output ZIP file has been
+	/// If this function returns successfully, it is guaranteed that an output ZIP file has been
 	/// generated. If it does not, it should be noted that the caller may get more information about
 	/// errors while processing particular pack files via the status updates channel, should they
 	/// happen and that information be desired.
@@ -117,7 +117,7 @@ impl PackSquasher {
 		}
 
 		// On Windows and Linux (and probably most other POSIX OSes), writing to a directory
-		// is an error, and we would try to do so after a maybe time consuming optimization
+		// is an error, and we would try to do so after a maybe time-consuming optimization
 		// process. Reading from a directory, at least on those platforms, is like reading from
 		// an empty file, and we would try to do that if the previous ZIP file is to be reused.
 		// Again, to avoid useless computation and help the user out, bail out early with
@@ -324,7 +324,7 @@ impl PackSquasher {
 
 			// To shield ourselves against pack file tasks that may panic, even if they shouldn't
 			// do so, install a temporary panic hook that will register the pack file optimization
-			// as failed and then invoke the already registered hook. This will "leak" two Arc's
+			// as failed and then invoke the already registered hook. This will "leak" two `Arc`s
 			// in case we don't get to restore the previous panic hook, but if that's the case
 			// then we will propagate the panic to the caller, which will probably not care about
 			// this anyway. This "leak" lasts until the hook is set again, because the reference
@@ -501,7 +501,7 @@ impl PackSquasher {
 			// Do not try to finish the ZIP file if something went wrong. We can't rely
 			// on a local variable that indicates whether the loop exited early because
 			// it may be finished by the time this is set to true, so do the atomic
-			// access. The ordering can't be relaxed because awaiting for a join handle
+			// access. The ordering can't be relaxed because awaiting a join handle
 			// is not documented to guarantee any synchronization (maybe the thread that
 			// ran the task is still alive in the pool)
 			if pack_file_optimization_failed.load(Ordering::Acquire) {
@@ -651,7 +651,7 @@ impl PackFileStatus {
 
 	/// Gets the error that occurred while optimizing this file. If an error
 	/// did not happen, this returns `None`. Like the string returned by the
-	/// `optimization_strategy` method, it is user-friendly and it may change
+	/// `optimization_strategy` method, it is user-friendly, and it may change
 	/// between versions.
 	pub fn optimization_error(&self) -> Option<&str> {
 		self.optimization_error.as_deref()

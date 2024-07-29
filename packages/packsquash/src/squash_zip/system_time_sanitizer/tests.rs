@@ -4,8 +4,8 @@ use super::*;
 
 static TWEAK: &[u8; 4] = &[1, 2, 3, 4];
 
-/// Checks that sanitizing a [SystemTime] and then desanitizing it back
-/// yields back the closest representable [SystemTime].
+/// Checks that sanitizing a [SystemTime] and then desanitizing it yields
+/// back the closest representable [SystemTime].
 fn successful_sanitize_desanitize_cycle_test(time: &SystemTime) {
 	let sanitizer = SystemTimeSanitizer::new();
 
@@ -42,7 +42,7 @@ fn sanitization_is_reversible() {
 }
 
 #[test]
-fn sanitization_accomodates_future_dates() {
+fn sanitization_accommodates_future_dates() {
 	successful_sanitize_desanitize_cycle_test(
 		// Approximately ten years into the future
 		&(SystemTime::now() + Duration::from_secs(86400 * 365 * 10))

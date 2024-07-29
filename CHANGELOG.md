@@ -217,7 +217,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
     author claims about 10x faster) and allows to accept files containing
     preprocessor directives outside of external declaration position by
     expanding them before parsing.
-  - `minify_shader` has been superseeded by a new
+  - `minify_shader` has been superseded by a new
     `shader_source_transformation_strategy` option, which now also allows
     prettifying shader source code.
   - Include shaders (i.e., shaders with a `.glsl` extension) can now be
@@ -305,9 +305,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The following options were removed from options files:
   - `open_files_limit`
-  - `minimum_bitrate` (superseeded by `target_bitrate_control_metric`)
-  - `maximum_bitrate` (superseeded by `target_bitrate_control_metric`)
-  - `minify_shader` (superseeded by `shader_source_transformation_strategy`)
+  - `minimum_bitrate` (superseded by `target_bitrate_control_metric`)
+  - `maximum_bitrate` (superseded by `target_bitrate_control_metric`)
+  - `minify_shader` (superseded by `shader_source_transformation_strategy`)
 - The following options were added to options files:
   - `two_pass_vorbis_optimization_and_validation`
   - `empty_audio_optimization`
@@ -326,7 +326,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The `open_files_limit` option has been removed because it was hard to use
   properly. PackSquash will instead automatically try to increase the open files
-  limit when needed, and fall back to using less threads if the maximum
+  limit when needed, and fall back to using fewer threads if the maximum
   attainable limit would not support the desired level of concurrency.
 
 #### Internal

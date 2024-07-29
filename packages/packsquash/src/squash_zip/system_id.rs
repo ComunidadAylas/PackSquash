@@ -81,7 +81,7 @@ impl Ord for SystemId {
 		//   discount quite a bit of entropy for volatile IDs, so we only use them if they have
 		//   substantially more entropy than persistent IDs.
 		// - If entropies are equal, or some weird floating point numbers for which comparison
-		//   is not well defined, consider self greater than other if it is not volatile.
+		//   is not well-defined, consider self greater than other if it is not volatile.
 		// - If entropies and volatilenesses are equal, prefer the ID with higher priority value.
 		let self_volatile_penalization = self.is_volatile as u16 as f32 * 0.05;
 		let other_volatile_penalization = other.is_volatile as u16 as f32 * 0.05;

@@ -435,7 +435,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	///
 	/// A [`SquashZipError::NoSuchPreviousFile`] error is returned if the specified file path
 	/// was not present in the previous ZIP file. In this case it is guaranteed that no bad
-	/// state was introduced in the result output ZIP file, and the instance can still used
+	/// state was introduced in the result output ZIP file, and the instance can still be used
 	/// normally.
 	pub async fn add_previous_file(
 		&self,
@@ -709,7 +709,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	) -> Result<(LocalFileHeader<'a>, BufferedAsyncSpooledTempFile), SquashZipError> {
 		// Get the Squash Time right now, so it is as close as possible to the time when
 		// we saw whether it was modified or not, which is a good thing. Instantiate the
-		// local file header now so we validate the path as early as possible
+		// local file header now, so we validate the path as early as possible
 		let squash_time = self.settings.store_squash_time.then(SystemTime::now);
 		let mut local_file_header = LocalFileHeader::new(Cow::Borrowed(path));
 
@@ -913,7 +913,7 @@ async fn read_previous_zip_contents<F: AsyncRead + AsyncSeek + Unpin>(
 		}
 
 		// SquashZip either generates no extra fields or a single ZIP64 data field
-		// with a extended local header offset (2 + 2 + 8 = 12 bytes)
+		// with an extended local header offset (2 + 2 + 8 = 12 bytes)
 		if extra_field_length != 0 && extra_field_length != 12 {
 			return Err(PreviousZipParseError::Invalid(
 				"Unexpected extra fields size in CDH"
@@ -939,7 +939,7 @@ async fn read_previous_zip_contents<F: AsyncRead + AsyncSeek + Unpin>(
 		// Now get the relative path
 		let relative_path = {
 			// The filename may not only be larger than our stack-allocated buffer,
-			// but we also need a owned string because that buffer is dropped when
+			// but we also need an owned string because that buffer is dropped when
 			// this function ends
 			let mut filename_buf = vec![0; file_name_length];
 

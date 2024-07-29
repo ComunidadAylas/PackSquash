@@ -121,7 +121,7 @@ pub struct GlobalOptions {
 	/// is stored or not depends on the value of `zip_spec_conformance`.
 	///
 	/// You might want to set this to `true` if you are concerned about the presence of encrypted
-	/// metadata in the generated ZIP files and don't care about potential speed ups in later runs.
+	/// metadata in the generated ZIP files and don't care about potential speed-ups in later runs.
 	/// In fact, if you won't run PackSquash anymore on this pack, for example because you will
 	/// distribute it to players after this run, it is recommended to set this to `true`, as this
 	/// improves compressibility a bit and removes the now unnecessary metadata.
@@ -578,7 +578,7 @@ impl FileOptions {
 	}
 }
 
-/// Parameters that influence how a audio file is optimized.
+/// Parameters that influence how an audio file is optimized.
 #[derive(Deserialize, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
@@ -631,7 +631,7 @@ pub struct AudioFileOptions {
 	/// **Default value**: `0.25` for stereo audio (interpreted as a quality factor, ≈68 kbit/s for
 	/// stereo, 44.1 kHz audio) and `0.0` for mono audio, interpreted as quality factors
 	pub target_bitrate_control_metric: Option<f32>,
-	/// The sampling frequency that the audio will be resampled to, in Hz. Downsampling helps saving
+	/// The sampling frequency that the audio will be resampled to, in Hz. Downsampling helps to save
 	/// space, at the cost of potentially introducing aliasing artifacts if the input audio contains
 	/// frequencies higher than half the new sampling rate and narrowing margins for filters and
 	/// further signal processing work. If the specified sampling frequency is higher than the
@@ -644,7 +644,7 @@ pub struct AudioFileOptions {
 	/// commands like `/playsound`.
 	///
 	/// This option is mainly useful to make sound ripping harder. If you're just looking into
-	/// saving space by making the audio faster (as it has less samples and is shorter) and
+	/// saving space by making the audio faster (as it has fewer samples and is shorter) and
 	/// then speeding it up in Minecraft, it's better to just change the sampling frequency,
 	/// which results in homologous quality and space tradeoffs.
 	///
@@ -714,7 +714,7 @@ pub enum AudioBitrateControlMode {
 	///
 	/// Some advantages of this bitrate control mode include:
 	/// - It adapts well to different sampling frequencies and channel counts: the encoder knows
-	///   that it requires less bits to encode mono signals than stereo signals at the same quality
+	///   that it requires fewer bits to encode mono signals than stereo signals at the same quality
 	///   level, for example.
 	/// - Unlike with bitrates, it's not possible to ask for too high or low quality levels.
 	/// - Easy to encode audio segments are stored in minimal space, with consistent quality: there
@@ -831,7 +831,7 @@ pub struct JsonFileOptions {
 	#[serde(rename = "delete_bloat_keys")]
 	pub delete_bloat: bool,
 	/// If `true`, PackSquash will allow comments in JSON files whose usual extension does not end
-	/// with an extra `c` letter, which explicitly marks the file as following a extended JSON
+	/// with an extra `c` letter, which explicitly marks the file as following an extended JSON
 	/// format that can contain comments. If `false`, comments will only be allowed in JSON files
 	/// with those specific extensions.
 	///
@@ -864,8 +864,8 @@ pub struct PngFileOptions {
 	/// different parameters better suited for image compression.
 	///
 	/// When the number of compression iterations drops to zero, which happens when this option
-	/// is set to zero or the texture is pretty big, a much more faster DEFLATE compression
-	/// algorithm is used instead of Zopfli. This extra performance may come at the cost of file
+	/// is set to zero or the texture is pretty big, a much faster DEFLATE compression algorithm
+	/// is used instead of Zopfli. This extra performance may come at the cost of file
 	/// size. On the other side, the number of iterations is limited to a maximum of 15. Values
 	/// greater than 15 are still useful for this setting, because they change the threshold
 	/// where iterations start being reduced in order to keep acceptable performance levels.
@@ -901,7 +901,7 @@ pub struct PngFileOptions {
 	/// **Default value**: `0.85`
 	pub color_quantization_dithering_level: UnitIntervalFloat,
 	/// The maximum width and height of the images that will be accepted. This parameter
-	/// sets a high bound of memory usage by PackSquash and helps authoring packs with
+	/// sets a high bound of memory usage by PackSquash and helps to author packs with
 	/// reasonable texture sizes.
 	///
 	/// **Default value**: 8192
@@ -1178,7 +1178,7 @@ impl Default for CommandFunctionFileOptions {
 /// Parameters that influence how a properties file is optimized.
 ///
 /// These files are only supported if PackSquash was compiled with OptiFine mod support. Otherwise,
-/// these parameters are read and parsed but ignored afterwards.
+/// these parameters are read and parsed but ignored afterward.
 #[derive(Deserialize, Clone, Copy)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]

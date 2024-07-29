@@ -71,7 +71,7 @@ impl ZipFeature {
 fn version_needed_to_extract(zip_features: &EnumSet<ZipFeature>) -> u16 {
 	zip_features
 		.iter()
-		.next() // Feature with highest version needed to extract
+		.next() // Feature with the highest version needed to extract
 		.unwrap_or(ZipFeature::BasicFeatures) // Default to basic feature set
 		.to_version_needed_to_extract()
 }
@@ -396,7 +396,7 @@ const ZIP64_END_OF_CENTRAL_DIRECTORY_SIGNATURE: [u8; 4] = 0x06064B50_u32.to_le_b
 const ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE: [u8; 4] = 0x07064B50_u32.to_le_bytes();
 
 /// Magic bytes defined in the ZIP specification whose purpose is signalling
-/// the beginning of a end of central directory header record.
+/// the beginning of an end of central directory header record.
 const END_OF_CENTRAL_DIRECTORY_SIGNATURE: [u8; 4] = 0x06054B50_u32.to_le_bytes();
 
 impl EndOfCentralDirectory {

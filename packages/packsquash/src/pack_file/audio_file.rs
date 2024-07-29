@@ -170,7 +170,7 @@ impl Decoder for OptimizerDecoder {
 
 		// Second pass: run OptiVorbis on the input file, which may be transcoded by now. This
 		// is a lossless, two-pass lossless optimization step that completes pretty quickly
-		// (think on OxiPNG, but much, much faster and less quirkier)
+		// (think on OxiPNG, but much, much faster and less quirky)
 		let transcoded_and_optimized_file = if do_two_pass_optimization_and_validation {
 			ByteBuffer::CowSlice(
 				validate_and_optimize(Cursor::new(transcoded_file.as_ref()), do_ogg_obfuscation)?
@@ -240,7 +240,7 @@ fn process_and_transcode(
 			channel_mixing_done = input_channel_count != output_channel_count;
 
 			// Resampling to a frequency higher than the input one is a bad idea at
-			// this point: it doesn't add meaningful audio information or helps using
+			// this point: it doesn't add meaningful audio information or helps to use
 			// different signal processing filters, but it definitely increases space
 			// costs. Let's not do that
 			let output_sampling_frequency = cmp::min(

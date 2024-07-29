@@ -105,7 +105,7 @@ trait PackFile {
 	}
 }
 
-/// Factory trait for a [`PackFile`] that allows it to be instantiated in an standard way. It is separated
+/// Factory trait for a [`PackFile`] that allows it to be instantiated in a standard way. It is separated
 /// from that trait because it can only be implemented in a sized type, and that constraint would make the
 /// [`PackFile`] trait not object-safe, which may limit the usage of the pack file by client code.
 ///
@@ -121,7 +121,7 @@ trait PackFileConstructor<R: AsyncRead + Unpin + 'static>: PackFile + Sized {
 	/// This operation will not yield a pack file instance if the pack file should be skipped, or if the
 	/// read struct producer function returns `None`. It is the responsibility of the caller to deal with
 	/// any I/O error that may happen during the execution of this producer function. If these conditions
-	/// do not apply, this method is guaranteed to suceed and return `Some`.
+	/// do not apply, this method is guaranteed to succeed and return `Some`.
 	fn new(
 		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<R>>,
 		asset_type: PackFileAssetType,

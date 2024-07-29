@@ -51,7 +51,7 @@ pub fn strip_unnecessary_chunks(
 	// The format of PNG files is dead simple: just a signature in the beginning
 	// followed by as many chunks as desired. OxiPNG supports stripping chunks,
 	// but it's amazing that implementing this ourselves takes barely the same
-	// LOC than calling OxiPNG with the suitable options, and that there is no
+	// LOC as calling OxiPNG with the suitable options, and that there is no
 	// nice library at crates.io to do this simple optimization. OxiPNG is also
 	// not really meant to do this single thing as fast as possible. So do it
 	// ourselves and strip every chunk that we know won't be of any use.

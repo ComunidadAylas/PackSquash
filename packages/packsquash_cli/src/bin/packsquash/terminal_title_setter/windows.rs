@@ -45,7 +45,7 @@ impl<'title> TerminalTitleSetterTrait<'title> for WindowsTerminalTitleSetter {
 			Some("dumb" | "unknown" | "cygwin")
 		);
 
-		// We know with more certainty that ANSI escape codes are supported if we're using an Unix-like
+		// We know with more certainty that ANSI escape codes are supported if we're using a Unix-like
 		// terminal emulator that's not known to lack support for them, or Windows Terminal
 		let terminal_emulator_supports_ansi_escape_codes =
 			terminal_emulator_might_support_ansi_escape_codes
@@ -159,7 +159,7 @@ impl<'title> From<&'title str> for WindowsTerminalTitleString<'title> {
 	}
 }
 
-/// Enables virtual terminal proccessing (i.e. ANSI escape sequence support) for
+/// Enables virtual terminal processing (i.e. ANSI escape sequence support) for
 /// the specified console. `Some(())` is returned if the VT processing mode
 /// could be enabled; otherwise, `None` is returned.
 fn enable_vt_processing(mut console: Console) -> Option<()> {

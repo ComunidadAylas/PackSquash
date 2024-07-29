@@ -88,7 +88,7 @@ impl<C: BlockCipher + BlockEncrypt + Clone> SystemTimeSanitizer<C> {
 		tweak: &[u8]
 	) -> Result<[u8; 4], SystemTimeSanitizationError> {
 		// Squash Time is defined as the count of half-seconds since Monday, 22 December 2014
-		// 0:00:00 (UTC), as adjustements to the Unix time, following the formula
+		// 0:00:00 (UTC), as adjustments to the Unix time, following the formula
 		// squash_time = (ms_unix_time - squash_epoch) / 500.
 		// With 31 bits to store the magnitude, timestamps up to Wednesday, 30 December 2048
 		// 13:37:03 (UTC) can be represented, which is better than 32-bit, second-precision
@@ -148,7 +148,7 @@ impl<C: BlockCipher + BlockEncrypt + Clone> SystemTimeSanitizer<C> {
 		}
 
 		// Convert Squash Time back to Unix time, in ms. The result value
-		// needs at most 42 bits, so it fits nicely in a 64 bit integer
+		// needs at most 42 bits, so it fits nicely in a 64-bit integer
 		let ms_unix_time = 500 * squash_time as u64 + 1419206400000;
 
 		Ok(SystemTime::UNIX_EPOCH + Duration::from_millis(ms_unix_time))

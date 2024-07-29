@@ -175,7 +175,7 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 			false,
 			150
 		),
-		// An error occurred, or we got something that is not an UUID
+		// An error occurred, or we got something that is not a UUID
 		_ => None
 	}
 }
@@ -264,7 +264,7 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 	// Apple "thinks different", so the format of this serial number is not specified,
 	// because they are not happy with just making you pay exorbitant prices. It may
 	// be any string. Truncate it if it is big, pad it if it is short, and just use
-	// its raw byte values to construct a u128 to return
+	// its raw byte values to construct a `u128` to return
 	let serial_number_string =
 		unsafe { CFString::wrap_under_create_rule(serial_number_cf_string_ref as CFStringRef) }
 			.to_string();
@@ -293,7 +293,7 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 /// Uses the POSIX `gethostid` system call to get a host identifier. Although portable,
 /// reliable and usually persistent across boots, the returned ID is only 32-bits, which
 /// is weak for our purposes, and the exact way this ID is generated is system-dependent.
-/// It usually is generated from a proper machine UUID in some BSDs (best case scenario),
+/// It is usually generated from a proper machine UUID in some BSDs (best case scenario),
 /// from the network configuration (worst case scenario) or read from /etc/hostid.
 ///
 /// Further reading:

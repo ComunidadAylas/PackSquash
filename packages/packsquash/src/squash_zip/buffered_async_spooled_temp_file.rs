@@ -28,11 +28,11 @@ mod tests;
 /// delegating to the underlying data store in use. However, to help using this struct
 /// inside asynchronous tasks, [`AsyncRead`], [`AsyncWrite`] and [`AsyncSeek`]
 /// implementations are provided. These implementations will always yield results
-/// inmediately, but, to avoid starving other asynchronous tasks, if blocking would
+/// immediately, but, to avoid starving other asynchronous tasks, if blocking would
 /// occur, the current task is blocked in place, so it momentarily becomes a blocking
 /// task in the Tokio runtime. Due to how Tokio is designed, these asynchronous traits
 /// will panic when used in the context of a current thread runtime, but it is fine to
-/// use them in multithreaded runtimes or outside of any runtime.
+/// use them in multithreaded runtimes or outside any runtime.
 // FIXME: it'd be nice to make this struct async-first. However, async read, write and
 // seek traits are pretty low level, and implementing those on top of similarly low
 // level operations of other data sources (because Tokio ext traits which provide

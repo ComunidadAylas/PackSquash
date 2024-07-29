@@ -84,7 +84,7 @@ async fn async_io_works() {
 	let mut spooled_file = BufferedAsyncSpooledTempFile::new(10);
 
 	// Here we do more "light" tests because we already test the sync
-	// primitives used by async code more throughly in other test
+	// primitives used by async code more thoroughly in other test
 
 	AsyncWriteExt::write_all(&mut spooled_file, &[0, 1, 2, 3, 4])
 		.await

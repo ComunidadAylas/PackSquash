@@ -12,7 +12,7 @@ pub mod os_fs;
 /// Defines the contract that any virtual file system must implement.
 pub trait VirtualFileSystem: Send + Sync {
 	/// The type of the byte source that this virtual file system yields
-	/// when successfully opening files. It reading bytes from this source
+	/// when successfully opening files. If reading bytes from this source
 	/// is costly, it is recommended to introduce some buffering for maximum
 	/// performance.
 	type FileRead: AsyncRead + Unpin + Send + 'static;
@@ -52,7 +52,7 @@ pub struct IteratorTraversalOptions {
 	pub ignore_system_and_hidden_files: bool
 }
 
-/// A entry in a virtual filesystem directory that represents a possible pack file,
+/// An entry in a virtual filesystem directory that represents a possible pack file,
 /// obtained via a virtual filesystem directory file iterator.
 pub struct VfsPackFileIterEntry {
 	/// The relative path of the pack file represented by this entry to the root of the pack.

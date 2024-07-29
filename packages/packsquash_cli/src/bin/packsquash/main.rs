@@ -443,7 +443,7 @@ fn print_version_information(verbose: bool) {
 	}
 }
 
-/// Initializes the logging of the application, responsible of showing to the user relevant
+/// Initializes the logging of the application, responsible for showing to the user relevant
 /// application operation information.
 fn init_logger(enable_emoji: bool, enable_colors: bool) {
 	let mut logger_builder = Builder::new();
