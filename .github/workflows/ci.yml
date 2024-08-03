@@ -147,11 +147,6 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
-      - name: 📥 Checkout source
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-        with:
-          fetch-depth: 0 # Keep the commit history for proper version information
-
       - name: 🧰 Install Linux toolchain packages
         if: contains(matrix.target, '-linux-')
         run: |
@@ -167,6 +162,12 @@ jobs:
           apt-get install -yq build-essential git curl \
                               musl-tools musl-dev:${{ matrix.apt-arch }} \
                               markdown html2text
+
+      # This must go after the previous step so that a Git repository is checked out
+      - name: 📥 Checkout source
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        with:
+          fetch-depth: 0 # Keep the commit history for proper version information
 
       - name: 🧰 Install Linux ARM64 cross-compilation toolchain
         if: startsWith(matrix.target, 'aarch64-unknown-linux')
