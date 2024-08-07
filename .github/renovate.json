@@ -23,11 +23,6 @@
 		{
 			"matchCategories": ["ci"],
 			"groupName": "CI dependencies"
-		},
-		{
-			"matchManagers": ["github-actions"],
-			"matchPackageNames": ["slsa-framework/slsa-github-generator"],
-			"pinDigests": false
 		}
 	]
 }
