@@ -410,8 +410,11 @@ jobs:
     # the repository). First-time would-be contributors need to have their workflows approved
     # anyway, but at best it might be confusing to see commits of PRs mixed with the mainline.
     # Workflows triggered by PRs don't have access to secrets either. We also ignore temporary
-    # Renovate branches to reduce noise
-    if: success() && github.event_name != 'pull_request' && !startsWith(github.ref_name, 'renovate/')
+    # Renovate branches and merge groups to reduce noise
+    if: success() &&
+      github.event_name != 'pull_request' &&
+      github.event_name != 'merge_group' &&
+      !startsWith(github.ref_name, 'renovate/')
 
     env:
       # Use sccache to speed up Rust compilation
