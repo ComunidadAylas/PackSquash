@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1723058571391,
+  "lastUpdate": 1723059215630,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "d0c14820a1a9918995ef6f357a1cd6ece43ccbdc",
-          "message": "chore: move Rust toolchain lint configurations to workspace manifest\n\nThis centralizes the lint configuration in a better place.",
-          "timestamp": "2024-06-30T00:48:49+02:00",
-          "tree_id": "2c6ae2a1cef9062e82430dac1db991225d0ac687",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d0c14820a1a9918995ef6f357a1cd6ece43ccbdc"
-        },
-        "date": 1719704378124,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9578947,
-            "range": "± 73126",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 142924694,
-            "range": "± 2516601",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2751693526,
-            "range": "± 65942978",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 607498374,
-            "range": "± 3670989",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 662815948,
             "range": "± 1725640",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "580a8c524b900c453faa15e90b9e19bed515bb8a",
+          "message": "chore(deps): update taiki-e/install-action digest to ada21a8 (#316)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-07T19:04:16Z",
+          "tree_id": "b3c7f43449148b82e8eba8ffe7266fe4899e8c52",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/580a8c524b900c453faa15e90b9e19bed515bb8a"
+        },
+        "date": 1723059214530,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9628608,
+            "range": "± 41588",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 121380005,
+            "range": "± 3037166",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2627205493,
+            "range": "± 24617538",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 665604488,
+            "range": "± 2832339",
             "unit": "ns/iter"
           }
         ]
