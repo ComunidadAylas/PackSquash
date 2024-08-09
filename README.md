@@ -40,13 +40,13 @@ can apply the following specific techniques:
   libraries.
 - For Ogg (.ogg and .oga), MP3, M4A, FLAC, and WAV files: channel mixing,
   downsampling, transcoding with a state-of-the-art Vorbis encoder, pitch
-  shifting, tag removal, and two-pass optimization and validation with
-  [OptiVorbis](https://github.com/OptiVorbis/OptiVorbis). The default settings
-  are meant to be good enough for in-game music, such that most listeners will
-  think that the quality is good and not distracting. Because channel mixing may
-  change how the Minecraft sound engine computes positional effects (see
-  [MC-146721](https://bugs.mojang.com/browse/MC-146721)), PackSquash won't do it
-  by default.
+  shifting, tag removal, silence truncation, and two-pass optimization and
+  validation with [OptiVorbis](https://github.com/OptiVorbis/OptiVorbis). The
+  default settings are meant to be good enough for in-game music, such that most
+  listeners will think that the quality is good and not distracting. Because
+  channel mixing may change how the Minecraft sound engine computes positional
+  effects (see [MC-146721](https://bugs.mojang.com/browse/MC-146721)),
+  PackSquash won't do it by default.
 - For JSON files (.json, .jsonc, .mcmeta and .mcmetac; if OptiFine mod support
   is enabled, also .jem, .jemc, .jpm and .jpmc): minification, by removing
   unneeded whitespace. As a side bonus, because minification requires parsing
