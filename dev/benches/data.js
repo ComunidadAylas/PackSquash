@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1723309366606,
+  "lastUpdate": 1723310146322,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "be81c5845491980fd6349007699b14c37db7df4f",
-          "message": "chore(deps): update debian:bullseye-slim docker digest to 34b63f5",
-          "timestamp": "2024-07-04T01:03:36Z",
-          "tree_id": "91652c5d50c76d5adc055f280628c660f1acf8d8",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/be81c5845491980fd6349007699b14c37db7df4f"
-        },
-        "date": 1720068850526,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9573502,
-            "range": "± 359887",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 142463883,
-            "range": "± 5465531",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2728355689,
-            "range": "± 21208021",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 603626659,
-            "range": "± 3572739",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 660527032,
             "range": "± 4098242",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "3c8059072e7ca50b9c2da95d0c46d27a6645ed0b",
+          "message": "fix(deps): update rust dependencies (#311)\n\n* fix(deps): update rust dependencies\n\n* Fixup dependency updates\n\n`sysinfo` did some breaking changes that required enabling a feature of\nits crate.\n\n---------\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>\nCo-authored-by: Alejandro González <me@alegon.dev>",
+          "timestamp": "2024-08-10T16:39:47Z",
+          "tree_id": "67d29119f16eed4571e92eceb9caa495f3fcf485",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3c8059072e7ca50b9c2da95d0c46d27a6645ed0b"
+        },
+        "date": 1723310145830,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9586220,
+            "range": "± 230830",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 122001166,
+            "range": "± 3962707",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2646669436,
+            "range": "± 33034830",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 663032622,
+            "range": "± 4196592",
             "unit": "ns/iter"
           }
         ]
