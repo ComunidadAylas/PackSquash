@@ -75,7 +75,7 @@ winreg = "0.52.0"
 wmi = { version = "0.13.3", default-features = false }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-core-foundation = "0.9.4"
+core-foundation = "0.10.0"
 mach2 = "0.4.2"
 
 [dev-dependencies]
