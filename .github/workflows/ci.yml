@@ -64,7 +64,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@eb055d739abdc2e8de2e5f4ba1a8b246daa779aa # v3
+        uses: github/codeql-action/upload-sarif@29d86d22a34ea372b1bbf3b2dced2e25ca6b3384 # v3
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
