@@ -39,12 +39,12 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@8efaa9bb37d22aefc9d331dfbd45e2d230acfc33 # v2
+        uses: taiki-e/install-action@7f737c1056bae14d45b3daec1a2d26ad480e50f7 # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@8efaa9bb37d22aefc9d331dfbd45e2d230acfc33 # v2
+        uses: taiki-e/install-action@7f737c1056bae14d45b3daec1a2d26ad480e50f7 # v2
         with:
           tool: sarif-fmt
 
@@ -202,13 +202,13 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@8efaa9bb37d22aefc9d331dfbd45e2d230acfc33 # v2
+        uses: taiki-e/install-action@7f737c1056bae14d45b3daec1a2d26ad480e50f7 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@8efaa9bb37d22aefc9d331dfbd45e2d230acfc33 # v2
+        uses: taiki-e/install-action@7f737c1056bae14d45b3daec1a2d26ad480e50f7 # v2
         with:
           tool: cargo-deb
 
@@ -392,7 +392,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim@sha256:b257e5e831aa9949737638f6d323cd563347b2a5571d98b9b15eef0c7cd80b68
+    container: debian:bullseye-slim@sha256:9058862a1be84689bd13292549ba981364f85ff99e50a612f94b188ac69db137
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
