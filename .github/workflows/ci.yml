@@ -18,6 +18,10 @@ env:
 
   CONST_RANDOM_SEED: ${{ secrets.CONST_RANDOM_SEED }}
 
+  # Disable quickinstall telemetry reporting to cut down on external HTTP requests
+  # a little. See: https://github.com/cargo-bins/cargo-binstall/issues/1884
+  BINSTALL_DISABLE_TELEMETRY: true
+
 jobs:
   static-analysis:
     name: Static analysis
