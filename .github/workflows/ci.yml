@@ -398,6 +398,8 @@ jobs:
 
   benchmark:
 
+    name: Run and upload benchmarks
+
     runs-on: ubuntu-latest
 
     container: debian:bullseye-slim@sha256:9058862a1be84689bd13292549ba981364f85ff99e50a612f94b188ac69db137
