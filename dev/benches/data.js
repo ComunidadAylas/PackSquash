@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1723988911105,
+  "lastUpdate": 1723989121874,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "24ef938f41e274954d138a6fd5586700c327ef0a",
-          "message": "ci: use stable Debian images for some targets\n\nThe testing Debian release is unstable and may have broken packages from\ntime to time, but most importantly, we don't really need it nowadays as\nthe latest Debian stable release has all the packages we need in their\nright versions.",
-          "timestamp": "2024-07-28T14:31:35+02:00",
-          "tree_id": "f6d260b3d669b6206acbe9027fc122e1f4ad333c",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/24ef938f41e274954d138a6fd5586700c327ef0a"
-        },
-        "date": 1722171213308,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9573347,
-            "range": "± 398903",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 120034398,
-            "range": "± 2817025",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2728457868,
-            "range": "± 79175362",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 676774081,
-            "range": "± 2874138",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 665437988,
             "range": "± 3707336",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4752d7bf45540bcdb4a765a474cd9289d0aa79b9",
+          "message": "chore(deps): update dependency soupsieve to v2.6 (#322)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-18T13:01:05Z",
+          "tree_id": "371d5bc35a72e200875a8a6856db4292e48904aa",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/4752d7bf45540bcdb4a765a474cd9289d0aa79b9"
+        },
+        "date": 1723989121160,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9687940,
+            "range": "± 80121",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 120494556,
+            "range": "± 3343634",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2607616855,
+            "range": "± 27656257",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 666198587,
+            "range": "± 3186072",
             "unit": "ns/iter"
           }
         ]
