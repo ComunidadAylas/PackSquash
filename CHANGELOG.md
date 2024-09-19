@@ -53,8 +53,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - Because they use statically-linked binaries, the PackSquash GitHub
     Action and Docker container also saw performance improvements. (Thanks
     _@xMikux_ for reporting the performance differences!)
-- Updated `libspng` to v0.7.4, bringing decoding speed improvements for ARM CPUs
-  that support NEON extensions.
+- Updated `libspng` to v0.7.4, bringing decoding speed and stability
+  improvements for ARM CPUs that support NEON extensions.
 
 #### Protection
 
