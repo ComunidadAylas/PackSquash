@@ -55,11 +55,11 @@ mod squash_zip;
 mod zopfli_iterations_time_model;
 
 /// A struct that represents a resource or data pack optimization operation with configuration
-/// parameters known beforehand, which generates an output ZIP file. This is a good starting
-/// point for reading the API documentation.
+/// parameters known beforehand, which generates an output ZIP file.
 ///
-/// Once constructed, this struct can be used to run one or several optimization operations
-/// with the same configuration on any pack, in an efficient manner.
+/// This is a good starting  point for reading the API documentation. Once constructed, this
+/// struct can be used to run one or several optimization operations  with the same configuration
+/// on any pack, in an efficient manner.
 pub struct PackSquasher;
 
 impl PackSquasher {

@@ -12,9 +12,11 @@ use sysinfo::{MemoryRefreshKind, RefreshKind, System};
 
 use crate::squash_zip::SquashZipSettings;
 
-/// Contains all the options that configure a `PackSquasher` operation. This is the
-/// root level configuration struct for PackSquash, so it is a good starting point
-/// to read the API documentation, after the `PackSquasher` struct.
+/// Contains all the options that configure a `PackSquasher` operation.
+///
+/// This is the root level configuration struct for PackSquash, so it is a
+/// good starting point  to read the API documentation, after the `PackSquasher`
+/// struct.
 #[derive(Clone, Deserialize)]
 pub struct SquashOptions {
 	/// The directory where the pack that will be processed resides.
@@ -54,10 +56,11 @@ impl TryFrom<SquashOptions> for ProcessedSquashOptions {
 	}
 }
 
-/// Global options that affect how the entire pack is processed. The default values for
-/// these options are meant to be the most reasonable that achieve good compression for
-/// a wide range of use cases without using protection, compression or compressibility-improving
-/// techniques that may pose interoperability problems.
+/// Global options that affect how the entire pack is processed.
+///
+/// The default values for  these options are meant to be the most reasonable that achieve good
+/// compression for  a wide range of use cases without using protection, compression or
+/// compressibility-improving techniques that may pose interoperability problems.
 #[derive(Clone, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 #[non_exhaustive]
