@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1724614085684,
+  "lastUpdate": 1726780357758,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "fdffe69d488099230ce2131c21779fdd740db495",
-          "message": "chore(deps): bump dependencies to get rid of janked crate",
-          "timestamp": "2024-07-31T10:12:53+02:00",
-          "tree_id": "fee25d6f1903b137b4390cbcfe17264de01a77c9",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/fdffe69d488099230ce2131c21779fdd740db495"
-        },
-        "date": 1722415020142,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9760252,
-            "range": "± 1224452",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 125854159,
-            "range": "± 3943657",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2772541975,
-            "range": "± 65030495",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 677338269,
-            "range": "± 5528468",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 656707195,
             "range": "± 4016604",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "fec1be27b2aa0d5211a641cf6ec3f56b28135a1a",
+          "message": "chore: update `glsl-lang` fork\n\nThis drops a build-time dependency on `syn` v1, which is expected to\nhelp out with build times a little.",
+          "timestamp": "2024-09-19T22:48:43+02:00",
+          "tree_id": "680dbf52f47ffb9c81c059ae7d08a83d2faee46d",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/fec1be27b2aa0d5211a641cf6ec3f56b28135a1a"
+        },
+        "date": 1726780357195,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9754752,
+            "range": "± 69143",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 134379399,
+            "range": "± 3167980",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2608928094,
+            "range": "± 58742309",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 689276763,
+            "range": "± 2521248",
             "unit": "ns/iter"
           }
         ]
