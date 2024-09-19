@@ -87,13 +87,6 @@ ignore = true
 [bans]
 multiple-versions = "warn"
 highlight = "all"
-skip = [
-	# This older version is pulled by the GLSL macro machinery on build-time.
-	# It should not affect final executables
-	{ name = "darling", version = "=0.14.4" },
-	{ name = "darling_macro", version = "=0.14.4" },
-	{ name = "darling_core", version = "=0.14.4" }
-]
 skip-tree = [
 	# An ancient nom is pulled by the development dependency for
 	# benchmarking perfcnt. Let's ignore that for now. It doesn't
