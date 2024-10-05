@@ -19,7 +19,7 @@ thiserror = "1.0.63"
 ahash = "0.8.11"
 patricia_tree = "0.8.0"
 
-sysinfo = { version = "0.31.4", default-features = false, features = ["system"] }
+sysinfo = { version = "0.32.0", default-features = false, features = ["system"] }
 walkdir = "2.5.0"
 
 tokio = { version = "1.40.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
@@ -45,7 +45,7 @@ dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
 dasp_ring_buffer = "0.11.0"
 dasp_frame = "0.11.0"
 dasp_sample = "0.11.0"
-rubato = "0.15.0"
+rubato = "0.16.0"
 optivorbis = "0.2.0"
 
 glsl-lang = { version = "0.6.0", features = ["lexer-v2-full", "lexer-v2-min"] }
