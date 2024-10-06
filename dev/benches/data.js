@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1727303360028,
+  "lastUpdate": 1728252051603,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "e039bcc221fbca67e51c0a5132e90416bea9d862",
-          "message": "chore(deps): update taiki-e/install-action digest to c4b9b42 (#313)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
-          "timestamp": "2024-08-04T09:31:22Z",
-          "tree_id": "68ce4125fc89e9a874db7a427d9273f7cc3adb9e",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/e039bcc221fbca67e51c0a5132e90416bea9d862"
-        },
-        "date": 1722765532803,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9488273,
-            "range": "± 224150",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 129309683,
-            "range": "± 2931978",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2669562460,
-            "range": "± 61685471",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 664122756,
-            "range": "± 3765151",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 683753076,
             "range": "± 2476462",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "369252bddc2135c8f0735cd1a867ee1449020d6f",
+          "message": "chore: ignore broken `clippy::needless_return` lint in latest nightlies\n\nOur problem was already reported and is being tracked upstream at\nhttps://github.com/rust-lang/rust-clippy/issues/13458.",
+          "timestamp": "2024-10-06T23:37:37+02:00",
+          "tree_id": "75ec35e951974f7da6f24acc2b347e4c84074037",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/369252bddc2135c8f0735cd1a867ee1449020d6f"
+        },
+        "date": 1728252050457,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9579413,
+            "range": "± 327869",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 132009766,
+            "range": "± 3819566",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2601825969,
+            "range": "± 36493356",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 673739684,
+            "range": "± 5237375",
             "unit": "ns/iter"
           }
         ]
