@@ -43,17 +43,17 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@58a3efb22c892c0e7d722787ab604b97b62ac694 # v2
+        uses: taiki-e/install-action@6d49eff78fe8ad9f571fb25522747f2d9e84be6b # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@58a3efb22c892c0e7d722787ab604b97b62ac694 # v2
+        uses: taiki-e/install-action@6d49eff78fe8ad9f571fb25522747f2d9e84be6b # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@58a3efb22c892c0e7d722787ab604b97b62ac694 # v2
+        uses: taiki-e/install-action@6d49eff78fe8ad9f571fb25522747f2d9e84be6b # v2
         with:
           tool: cargo-deny
 
@@ -73,7 +73,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@461ef6c76dfe95d5c364de2f431ddbd31a417628 # v3
+        uses: github/codeql-action/upload-sarif@6db8d6351fd0be61f9ed8ebd12ccd35dcec51fea # v3
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
@@ -191,7 +191,7 @@ jobs:
 
       - name: 💨 Set up sccache
         if: ${{ !endsWith(matrix.target, '-pc-windows-gnu') }}
-        uses: mozilla-actions/sccache-action@89e9040de88b577a072e3760aaf59f585da083af # v0.0.5
+        uses: mozilla-actions/sccache-action@9e326ebed976843c9932b3aa0e021c6f50310eb4 # v0.0.6
 
       - name: ⚙️ Prime sccache cache backend
         if: ${{ !endsWith(matrix.target, '-pc-windows-gnu') }}
@@ -211,7 +211,7 @@ jobs:
 
       - name: 🧰 Install nextest
         if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
-        uses: taiki-e/install-action@58a3efb22c892c0e7d722787ab604b97b62ac694 # v2
+        uses: taiki-e/install-action@6d49eff78fe8ad9f571fb25522747f2d9e84be6b # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -219,7 +219,7 @@ jobs:
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@58a3efb22c892c0e7d722787ab604b97b62ac694 # v2
+        uses: taiki-e/install-action@6d49eff78fe8ad9f571fb25522747f2d9e84be6b # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -334,7 +334,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: 🧰 Set up Docker Buildx
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3
 
       - name: ⚙️ Generate Docker image metadata
         id: meta
@@ -407,7 +407,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim@sha256:00558f781b91e90469812bad32002f311ab26ef241b4a1996f6600680ec82f5c
+    container: debian:bullseye-slim@sha256:3f9e53602537cc817d96f0ebb131a39bdb16fa8b422137659a9a597e7e3853c1
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
@@ -457,7 +457,7 @@ jobs:
           toolchain: nightly
 
       - name: 💨 Set up sccache
-        uses: mozilla-actions/sccache-action@89e9040de88b577a072e3760aaf59f585da083af # v0.0.5
+        uses: mozilla-actions/sccache-action@9e326ebed976843c9932b3aa0e021c6f50310eb4 # v0.0.6
 
       - name: ⚙️ Prime sccache cache backend
         shell: bash
