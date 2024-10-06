@@ -13,19 +13,19 @@ edition = "2021"
 bytes = "1.7.2"
 globset = { version = "0.4.15", default-features = false }
 enumset = { version = "1.1.5", features = ["serde"] }
-indexmap = { version = "2.5.0", features = ["serde"] }
+indexmap = { version = "2.6.0", features = ["serde"] }
 itertools = "0.13.0"
-thiserror = "1.0.63"
+thiserror = "1.0.64"
 ahash = "0.8.11"
 patricia_tree = "0.8.0"
 
-sysinfo = { version = "0.31.4", default-features = false, features = ["system"] }
+sysinfo = { version = "0.32.0", default-features = false, features = ["system"] }
 walkdir = "2.5.0"
 
 tokio = { version = "1.40.0", default-features = false, features = ["rt-multi-thread", "macros", "io-util", "fs", "sync", "parking_lot"] }
 tokio-util = { version = "0.7.12", default-features = false, features = ["codec", "io"] }
 tokio-stream = { version = "0.1.16", default-features = false }
-futures = { version = "0.3.30", default-features = false }
+futures = { version = "0.3.31", default-features = false }
 
 serde = { version = "1.0.210", features = ["derive"] }
 
@@ -45,16 +45,16 @@ dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
 dasp_ring_buffer = "0.11.0"
 dasp_frame = "0.11.0"
 dasp_sample = "0.11.0"
-rubato = "0.15.0"
+rubato = "0.16.0"
 optivorbis = "0.2.0"
 
-glsl-lang = { version = "0.6.0", features = ["lexer-v2-full", "lexer-v2-min"] }
-glsl-lang-lexer = "0.6.0"
-glsl-lang-pp = "0.6.0"
+glsl-lang = { version = "0.6.1", features = ["lexer-v2-full", "lexer-v2-min"] }
+glsl-lang-lexer = "0.6.1"
+glsl-lang-pp = "0.6.1"
 
 java-properties = { version = "2.0.0", optional = true }
 
-tempfile = "3.12.0"
+tempfile = "3.13.0"
 crc32fast = { version = "1.4.2", features = ["nightly"] }
 zopfli = { version = "0.8.1", default-features = false, features = ["std", "nightly"] }
 
@@ -64,7 +64,7 @@ fpe = "0.6.1"
 uuid = "1.10.0"
 entropy = "0.4.2"
 rand_xoshiro = "0.6.0"
-regex = "1.10.6"
+regex = "1.11.0"
 aho-corasick = "1.1.3"
 
 [target.'cfg(unix)'.dependencies]
@@ -83,7 +83,7 @@ tokio-test = "0.4.4"
 pretty_assertions = "1.4.1"
 
 criterion = { version = "0.5.1", features = ["html_reports"] }
-tar = { version = "0.4.41", default-features = false }
+tar = { version = "0.4.42", default-features = false }
 xz2 = "0.1.7"
 
 # criterion-perf-events depends on perfcnt, and perfcnt is so tightly coupled with
