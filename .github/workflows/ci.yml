@@ -128,7 +128,7 @@ jobs:
             runner: macos-latest
 
           - target: aarch64-apple-darwin
-            host-target: x86_64-apple-darwin
+            host-target: aarch64-apple-darwin
             runner: macos-latest
 
     runs-on: ${{ matrix.runner }}
@@ -210,7 +210,6 @@ jobs:
         uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
 
       - name: 🧰 Install nextest
-        if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
         uses: taiki-e/install-action@e29814c376696105d80cec9e9efaa98bae8e7347 # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
@@ -240,7 +239,6 @@ jobs:
           echo "PACKSQUASH_BUILD_DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
 
       - name: ✔️ Run tests
-        if: startsWith(matrix.target, 'x86_64-') || contains(matrix.target, '-linux-')
         run: |
           cargo nextest run --workspace --status-level all --release
           cargo test --doc --workspace --release
