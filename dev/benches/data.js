@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1728338796086,
+  "lastUpdate": 1728507131162,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "580a8c524b900c453faa15e90b9e19bed515bb8a",
-          "message": "chore(deps): update taiki-e/install-action digest to ada21a8 (#316)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
-          "timestamp": "2024-08-07T19:04:16Z",
-          "tree_id": "b3c7f43449148b82e8eba8ffe7266fe4899e8c52",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/580a8c524b900c453faa15e90b9e19bed515bb8a"
-        },
-        "date": 1723059214530,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9628608,
-            "range": "± 41588",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 121380005,
-            "range": "± 3037166",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2627205493,
-            "range": "± 24617538",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 665604488,
-            "range": "± 2832339",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 689206153,
             "range": "± 3802303",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "d61d49ff00e173ac755b4f82a9cf4a264b6d0e97",
+          "message": "ci: run tests for AArch64 macOS targets\n\nNow that macOS ARM GitHub Actions runners are first-class ecosystem\ncitizens we can run tests for both macOS targets.",
+          "timestamp": "2024-10-09T22:23:07+02:00",
+          "tree_id": "35b7a093c8c8d09d71479eaee4a9197e4fc4180d",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d61d49ff00e173ac755b4f82a9cf4a264b6d0e97"
+        },
+        "date": 1728507130365,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9823067,
+            "range": "± 88564",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 121249679,
+            "range": "± 4084797",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2753935360,
+            "range": "± 36865008",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 672065123,
+            "range": "± 3246555",
             "unit": "ns/iter"
           }
         ]
