@@ -39,9 +39,8 @@ fn main() {
 	let build_year =
 		option_env!("PACKSQUASH_BUILD_DATE").and_then(|build_date| build_date.split('-').next());
 	println!(
-		"cargo:rustc-env=PACKSQUASH_COPYRIGHT_BUILD_YEAR_SUFFIX={}{}",
-		if build_year.is_some() { " " } else { "" },
-		build_year.unwrap_or_default()
+		"cargo:rustc-env=PACKSQUASH_COPYRIGHT_BUILD_YEAR={}",
+		build_year.unwrap_or("current year")
 	);
 
 	// Add platform-specific metadata to the executable

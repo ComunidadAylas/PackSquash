@@ -275,8 +275,7 @@ fn squash(
 	// the title on a single thread: updating the display
 	let runtime = runtime::Builder::new_current_thread()
 		.enable_time()
-		.build()
-		.unwrap();
+		.build()?;
 
 	let cli_update_task = runtime.spawn(async move {
 		/// The maximum interval of time between two progress ticks of the title. Used to assure
@@ -418,8 +417,8 @@ fn print_version_information(verbose: bool) {
 
 	if verbose {
 		println!(
-			"Copyright (C){} {}",
-			env!("PACKSQUASH_COPYRIGHT_BUILD_YEAR_SUFFIX"),
+			"Copyright (C) {} {}",
+			env!("PACKSQUASH_COPYRIGHT_BUILD_YEAR"),
 			env!("CARGO_PKG_AUTHORS")
 		);
 		println!();
