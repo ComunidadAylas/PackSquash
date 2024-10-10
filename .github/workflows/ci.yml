@@ -252,7 +252,7 @@ jobs:
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
-        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
           path: |
@@ -261,7 +261,7 @@ jobs:
 
       - name: 📤 Upload CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
@@ -303,7 +303,7 @@ jobs:
         run: lipo -create -output packsquash packsquash-x64/packsquash packsquash-aarch64/packsquash
 
       - name: 📤 Upload universal CLI binary
-        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
           name: PackSquash CLI executable (universal-apple-darwin)
           path: packsquash
