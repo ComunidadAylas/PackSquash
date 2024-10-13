@@ -8,6 +8,7 @@ body:
         ## Thanks for taking the time to fill out this bug report!
 
         Before submitting, please make sure that:
+          - The topic does **not** involve a security vulnerability or a method to bypass the pack protection feature. The process for reporting such matters is covered under our [security policy](https://github.com/ComunidadAylas/PackSquash/security/policy), and it **never** involves initial disclosure on a public GitHub issue.
           - The problem is not related to PackSquash not being installed as described in the [installation guide](https://github.com/ComunidadAylas/PackSquash/wiki/Installation-guide).
           - If you are trying to use a pack in a Minecraft server, the pack works fine in singleplayer. If it works in singleplayer, a network or server misconfiguration may be the cause of the problem.
           - You can answer any issue-related questions that may be asked in the comments in a reasonable timeframe. Issues with missing information for developers tend to be unactionable, eventually closed, and a waste of time for everyone involved!
@@ -26,7 +27,7 @@ body:
         - Linux x64 APT package
         - Linux ARM64/AArch64 executable
         - Linux ARM64/AArch64 APT package
-        - macOS x64 executable
+        - Universal macOS executable
         - GitHub action
         - Unstable or custom build (please describe in the "Additional context" section)
         - Other (please describe in the "Additional context" section)
