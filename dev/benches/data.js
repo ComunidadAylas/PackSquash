@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1728790298059,
+  "lastUpdate": 1728790976675,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "3c8059072e7ca50b9c2da95d0c46d27a6645ed0b",
-          "message": "fix(deps): update rust dependencies (#311)\n\n* fix(deps): update rust dependencies\n\n* Fixup dependency updates\n\n`sysinfo` did some breaking changes that required enabling a feature of\nits crate.\n\n---------\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>\nCo-authored-by: Alejandro González <me@alegon.dev>",
-          "timestamp": "2024-08-10T16:39:47Z",
-          "tree_id": "67d29119f16eed4571e92eceb9caa495f3fcf485",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/3c8059072e7ca50b9c2da95d0c46d27a6645ed0b"
-        },
-        "date": 1723309366108,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9568347,
-            "range": "± 357846",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 121171815,
-            "range": "± 6532310",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2637754734,
-            "range": "± 28529076",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 660527032,
-            "range": "± 4098242",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 673587980,
             "range": "± 3598639",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "800f727d04b983b3d9b438a72722ad418a14226d",
+          "message": "chore(deps): update ci dependencies (#330)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2024-10-13T03:23:30Z",
+          "tree_id": "666f346bee91e0e090c16db4f27c2f6818152071",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/800f727d04b983b3d9b438a72722ad418a14226d"
+        },
+        "date": 1728790975883,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9978443,
+            "range": "± 72358",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 121811493,
+            "range": "± 3067753",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2719372985,
+            "range": "± 51879786",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 674556367,
+            "range": "± 3642551",
             "unit": "ns/iter"
           }
         ]
