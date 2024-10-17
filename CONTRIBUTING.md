@@ -281,7 +281,7 @@ to produce a working debug executable. In reality, however, that will not work
 out of the box due to C libraries that depend on a properly configured platform
 C toolchain and development files. The best way to get these set up is to look
 at the [CI build
-workflow](https://github.com/ComunidadAylas/PackSquash/blob/master/.github/workflows/build.yml)
+workflow](https://github.com/ComunidadAylas/PackSquash/blob/master/.github/workflows/ci.yml)
 and replicate its steps on your machine.
 
 A corollary of the previously stated complications with C libraries is that your
