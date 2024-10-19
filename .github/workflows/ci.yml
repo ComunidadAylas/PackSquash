@@ -43,17 +43,17 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@d981a0b18f547466e6b058fafcfc3522c6ee3dee # v2
+        uses: taiki-e/install-action@939f4af9602e15ef93b3329722569cb907a004ff # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@d981a0b18f547466e6b058fafcfc3522c6ee3dee # v2
+        uses: taiki-e/install-action@939f4af9602e15ef93b3329722569cb907a004ff # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@d981a0b18f547466e6b058fafcfc3522c6ee3dee # v2
+        uses: taiki-e/install-action@939f4af9602e15ef93b3329722569cb907a004ff # v2
         with:
           tool: cargo-deny
 
@@ -210,7 +210,7 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@d981a0b18f547466e6b058fafcfc3522c6ee3dee # v2
+        uses: taiki-e/install-action@939f4af9602e15ef93b3329722569cb907a004ff # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -218,7 +218,7 @@ jobs:
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@d981a0b18f547466e6b058fafcfc3522c6ee3dee # v2
+        uses: taiki-e/install-action@939f4af9602e15ef93b3329722569cb907a004ff # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -405,7 +405,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim@sha256:3f9e53602537cc817d96f0ebb131a39bdb16fa8b422137659a9a597e7e3853c1
+    container: debian:bullseye-slim@sha256:610b4c7ad241e66f6e2f9791e3abdf0cc107a69238ab21bf9b4695d51fd6366a
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
