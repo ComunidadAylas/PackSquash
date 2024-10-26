@@ -97,7 +97,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   with mismatched encodings may cause mojibake.
 - Processing input PNG files with colors in palette format should no longer
   sometimes cause ARM binaries to crash on CPUs that support NEON extensions.
-  (Thanks @lucian929 for reporting the issue!)
+  (Thanks _@lucian929_ for reporting the issue!)
 
 #### User experience
 
@@ -121,7 +121,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Added a single-color texture downsizing optimization to make textures composed
   of pixels of a single color as small as possible while maintaining their
-  maximum mipmap level. (Thanks to @alumina6767 for bringing this idea to my
+  maximum mipmap level. (Thanks to _@alumina6767_ for bringing this idea to my
   attention!)
   - A new `downsize_if_single_color` file-specific option has been added to
     control whether this optimization is applied or not.
@@ -146,7 +146,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
     change, as the universal binaries still contain optimized x86 code.
 - Published PackSquash Docker images at the GitHub Container Registry.
   ([#111](https://github.com/ComunidadAylas/PackSquash/pull/111), thanks
-  @realkarmakun for your PR!)
+  _@realkarmakun_ for your PR!)
 
 #### Protection
 
@@ -275,7 +275,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 #### Documentation
 
 - The PackSquash logo has been redesigned to give it a more modern, cleaner
-  look. (Thanks to @MiguelDreamer for your work on this!)
+  look. (Thanks to _@MiguelDreamer_ for your work on this!)
 - The repository README and other pieces of documentation have been updated and
   proofread.
   - This included updating the Discord username of the main PackSquash author,
