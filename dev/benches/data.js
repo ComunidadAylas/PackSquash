@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1729831427126,
+  "lastUpdate": 1729946036942,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "889fcb87eaed66fea6e1a4675999fd45fec1670d",
-          "message": "chore(deps): update dependency soupsieve to v2.6 (#322)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
-          "timestamp": "2024-08-18T13:01:05Z",
-          "tree_id": "82670836591e623b682cf855e632eb260d0d4079",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/889fcb87eaed66fea6e1a4675999fd45fec1670d"
-        },
-        "date": 1723987878054,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9580956,
-            "range": "± 5391468",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 120870240,
-            "range": "± 2626460",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2628194321,
-            "range": "± 37108319",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 665512987,
-            "range": "± 3103829",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 662493668,
             "range": "± 4714001",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "f973bd385489897fdcbe0f764d4e19a9531404a0",
+          "message": "Revert \"chore: ignore broken `clippy::needless_return` lint in latest nightlies\"\n\nThis reverts commit 369252bddc2135c8f0735cd1a867ee1449020d6f.\n\nThe underlying issue was fixed upstream.",
+          "timestamp": "2024-10-26T14:03:39+02:00",
+          "tree_id": "34b314a21ba67d032d8ab000459ebda9c49804c5",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f973bd385489897fdcbe0f764d4e19a9531404a0"
+        },
+        "date": 1729946036446,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9474564,
+            "range": "± 63849",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 119657116,
+            "range": "± 2847048",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2659097879,
+            "range": "± 50096011",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 662648642,
+            "range": "± 4214350",
             "unit": "ns/iter"
           }
         ]
