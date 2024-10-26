@@ -69,6 +69,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 #### Fixed
 
+- Packs generated with the `zip_spec_conformance_level` option set to
+  `disregard` now reliably work on Minecraft clients running Java 22 or newer.
+  (Thanks _@mrkinau_ and _@mihannnik_ for reporting the issue!)
 - Shaders that depend on `#moj_import`ed or parent-defined preprocessor
   variables to be syntactically correct or expand to the intended source code
   will no longer cause PackSquash to fail or change their semantics.

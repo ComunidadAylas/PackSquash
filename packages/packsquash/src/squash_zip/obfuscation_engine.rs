@@ -206,12 +206,12 @@ impl ObfuscationEngine {
 						4096 + central_directory_header.compressed_size % 4096;
 				}
 				central_directory_header.local_header_disk_number =
-					(random_u32(seed) % 32768) as u16 + 32768;
+					(random_u32(seed) % 32768) as u16 + 32767;
 			} else {
 				if obfuscate_uncompressed_size {
 					central_directory_header.uncompressed_size = 0xFFFFFF7F;
 				}
-				central_directory_header.local_header_disk_number = u16::MAX;
+				central_directory_header.local_header_disk_number = u16::MAX - 1;
 			}
 
 			if let SizeIncreasingObfuscation::Enabled {
