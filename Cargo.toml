@@ -36,8 +36,6 @@ unsafe_op_in_unsafe_fn = "deny"
 #pedantic = "warn" # TODO too pedantic for now, fix the warnings and re-enable this sooner than later
 cargo = { level = "warn", priority = -1 }
 multiple_crate_versions = "allow" # Introduces much noise, not better than cargo deny
-# Workaround for a recent nightly Clippy regression: https://github.com/rust-lang/rust-clippy/issues/13458
-needless_return = "allow"
 
 [workspace.lints.rustdoc]
 invalid_html_tags = "deny"
