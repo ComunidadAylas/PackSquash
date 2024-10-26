@@ -46,8 +46,6 @@ const CRC32_KEY: u32 = {
 	}
 };
 
-thread_local!(static RNG: Cell<Option<Xoshiro128Plus>> = const { Cell::new(None) });
-
 enum SizeIncreasingObfuscation {
 	Disabled,
 	Enabled {
@@ -297,6 +295,8 @@ impl ObfuscationEngine {
 }
 
 fn random_u32(seed: u64) -> u32 {
+	thread_local!(static RNG: Cell<Option<Xoshiro128Plus>> = const { Cell::new(None) });
+
 	RNG.with(|rng_cell| {
 		let mut rng = rng_cell
 			.take()
