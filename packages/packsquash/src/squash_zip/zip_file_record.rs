@@ -258,7 +258,7 @@ pub(super) struct CentralDirectoryHeader<'a> {
 /// the beginning of a central directory header record.
 const CENTRAL_DIRECTORY_HEADER_SIGNATURE: [u8; 4] = 0x02014B50_u32.to_le_bytes();
 
-impl<'a> CentralDirectoryHeader<'a> {
+impl CentralDirectoryHeader<'_> {
 	/// Returns whether this central directory header record requires ZIP64 extensions
 	/// to be stored correctly.
 	const fn requires_zip64_extensions(&self) -> bool {
