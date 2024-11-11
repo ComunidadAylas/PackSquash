@@ -413,7 +413,9 @@ impl PackFileAssetType {
 				compile_hardcoded_pack_file_glob_pattern("assets/*/lang/**/?*.lang")
 			}
 
-			Self::TrueTypeOrOpenTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.{ttf,otf,otc,ttc}"),
+			Self::TrueTypeOrOpenTypeFont => {
+				compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.{ttf,otf,otc,ttc}")
+			}
 			Self::TrueTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.ttf"),
 			Self::ZippedUnifontHex => compile_hardcoded_pack_file_glob_pattern("assets/*/**/?*.zip"),
 			Self::LegacyUnicodeFontCharacterSizes => {
