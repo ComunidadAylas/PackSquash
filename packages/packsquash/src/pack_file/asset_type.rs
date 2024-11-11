@@ -153,7 +153,14 @@ pub enum PackFileAssetType {
 	/// `.lang` extension.
 	LegacyLanguageFile,
 
-	/// A font in TrueType format, with `.ttf` extension.
+	/// A font in OpenType or TrueType format, with `.ttf`, `.otf`, `.otc`, or `.ttc` extension.
+	/// Minecraft is able to parse the OpenType extensions to the TrueType format since snapshot
+	/// 17w43a (Minecraft 1.13), when LWJGL 3.1.2, which updated its bundled `stb_truetype` library
+	/// to version 1.13, was made a requirement in its `client.json` file. Later Minecraft versions
+	/// switched to using FreeType for font rendering.
+	TrueTypeOrOpenTypeFont,
+	/// A font in TrueType format, with `.ttf` extension. This is the only accepted font format before
+	/// snapshot 17w43a (Minecraft 1.13).
 	TrueTypeFont,
 	/// A binary file that describes the start and end positions of individual characters in
 	/// legacy Unicode fonts, with `.bin` extension.
@@ -401,6 +408,7 @@ impl PackFileAssetType {
 				compile_hardcoded_pack_file_glob_pattern("assets/*/lang/**/?*.lang")
 			}
 
+			Self::TrueTypeOrOpenTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.{ttf,otf,otc,ttc}"),
 			Self::TrueTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.ttf"),
 			Self::FontCharacterSizes => {
 				compile_hardcoded_pack_file_glob_pattern("assets/*/**/?*.bin")
@@ -481,7 +489,7 @@ impl PackFileAssetType {
 			Self::FragmentShader => None,
 			Self::TranslationUnitSegment => None,
 			Self::LegacyLanguageFile => None,
-			Self::TrueTypeFont => None,
+			Self::TrueTypeOrOpenTypeFont | Self::TrueTypeFont => None,
 			Self::FontCharacterSizes => None,
 			Self::Text | Self::LegacyTextCredits => None,
 			Self::NbtStructure => None,
@@ -798,7 +806,8 @@ impl PackFileAssetTypeMatches {
 				{
 					return_pack_file_to_process_data!(CommandFunctionFile, optimization_settings)
 				}
-				PackFileAssetType::TrueTypeFont
+				PackFileAssetType::TrueTypeOrOpenTypeFont
+				| PackFileAssetType::TrueTypeFont
 				| PackFileAssetType::FontCharacterSizes
 				| PackFileAssetType::Text
 				| PackFileAssetType::LegacyTextCredits

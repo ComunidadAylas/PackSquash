@@ -190,6 +190,7 @@ impl PackMeta {
 
 		if self.pack_format_version >= PACK_FORMAT_VERSION_1_13 {
 			asset_type_mask -= PackFileAssetType::LegacyLanguageFile;
+			asset_type_mask -= PackFileAssetType::TrueTypeFont;
 		}
 
 		if self.pack_format_version >= PACK_FORMAT_VERSION_1_17 {

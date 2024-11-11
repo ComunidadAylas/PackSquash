@@ -72,12 +72,14 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for Passthrou
 		_: Self::OptimizationSettings
 	) -> Option<Self> {
 		match asset_type {
-			PackFileAssetType::TrueTypeFont => file_read_producer().map(|(read, _)| Self {
-				read,
-				optimization_strategy_message: "Copied, but might be optimized manually. \
+			PackFileAssetType::TrueTypeOrOpenTypeFont | PackFileAssetType::TrueTypeFont => {
+				file_read_producer().map(|(read, _)| Self {
+					read,
+					optimization_strategy_message: "Copied, but might be optimized manually. \
 					More information: <https://packsquash.page.link/Optimizing-TTF-fonts>",
-				is_compressed: false
-			}),
+					is_compressed: false
+				})
+			}
 			PackFileAssetType::FontCharacterSizes => file_read_producer().map(|(read, _)| Self {
 				read,
 				optimization_strategy_message: "Copied",

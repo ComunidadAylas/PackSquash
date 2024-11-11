@@ -101,6 +101,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Processing input PNG files with colors in palette format should no longer
   sometimes cause ARM binaries to crash on CPUs that support NEON extensions.
   (Thanks _@lucian929_ for reporting the issue!)
+- Font files for the `ttf` font provider may now have extensions other than
+  `.ttf`, namely `.otf`, `.ttc`, and `.otc`, for Minecraft 1.13 onwards, when
+  support for OpenType format extensions was added.
 
 #### User experience
 
