@@ -388,20 +388,17 @@ impl PackFileAssetType {
 					sky/world[0-9]*/moon_phases.properties}"
 			),
 
-			// Current Minecraft versions are only able to read shaders from the Minecraft
-			// namespace. However, this is likely to change in the future, and there might
-			// be mods that add shaders in other namespaces. To support such mods as long
-			// as they put their shaders in the core and program subdirectories, and future-
-			// proof our patterns, accept any namespace. It is also worth noting that, to
-			// compute the resource location the shader, render program and pipeline
-			// definition files are read from, Minecraft performs a simple string
-			// concatenation of a prefix path, the file name and the extension. Therefore,
-			// subdirectories are possible
+			// Older Minecraft versions were only able to read shaders from the Minecraft namespace,
+			// but versions since 24w34a (1.21.2) can read shaders from any namespace. That version
+			// also allowed shaders to be within any subdirectory of the "shaders" directory. While
+			// older Minecraft versions didn't have this flexibility, we're not enforcing that here
+			// to extend compatibility with hypothetical mods that might have added this feature before
+			// it was officially supported
 			Self::VertexShader => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/{core,program}/**/?*.vsh")
+				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/**/?*.vsh")
 			}
 			Self::FragmentShader => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/{core,program}/**/?*.fsh")
+				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/**/?*.fsh")
 			}
 			Self::TranslationUnitSegment => {
 				// Even though such possibility is not used in the vanilla resource pack,
@@ -414,10 +411,10 @@ impl PackFileAssetType {
 				// "post-processing shaders") can't import translation unit segments as of
 				// 1.17.1: it's simply just not implemented. We're not sure why Mojang did
 				// not just reuse the same code for both types of shaders, as the importing
-				// preprocessor code looks generic enough to handle both types just fine
-				compile_hardcoded_pack_file_glob_pattern(
-					"assets/*/shaders/{core,program,include}/**/?*.glsl"
-				)
+				// preprocessor code looks generic enough to handle both types just fine.
+				// This stopped being a quirk in 24w34a at the latest, the snapshot when the
+				// same GLSL preprocessor code for resolving imports was used for all shaders
+				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/**/?*.glsl")
 			}
 
 			Self::LegacyLanguageFile => {

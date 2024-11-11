@@ -98,6 +98,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Include shaders consisting of a list of statements no longer have only their
   first instruction transformed when minifying or prettifying, which broke the
   semantics of the shader code.
+- Fragment, vertex, and include shaders located outside
+  `assets/minecraft/shaders/core` and `assets/minecraft/shaders/program` are now
+  processed, enhancing compatibility with resource packs targeting Minecraft
+  24w34a (1.21.2) or newer. (Thanks _@swrds_ for reporting this issue!)
 - The UTF-8 BOM is no longer automatically stripped from properties files, as
   they should not be encoded in UTF-8 to begin with, and carrying on processing
   with mismatched encodings may cause mojibake.
