@@ -90,12 +90,13 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for Passthrou
 					is_compressed: false
 				})
 			}
-			PackFileAssetType::Text | PackFileAssetType::LegacyTextCredits => file_read_producer()
-				.map(|(read, _)| Self {
-					read,
-					optimization_strategy_message: "Copied",
-					is_compressed: false
-				}),
+			PackFileAssetType::Text
+			| PackFileAssetType::ClosingCreditsText
+			| PackFileAssetType::LegacyTextCredits => file_read_producer().map(|(read, _)| Self {
+				read,
+				optimization_strategy_message: "Copied",
+				is_compressed: false
+			}),
 			// FIXME: this should have file-specific optimizations, and this is not difficult
 			// to do. This is a temporary solution for PackSquash to work with data packs
 			PackFileAssetType::NbtStructure => file_read_producer().map(|(read, _)| Self {

@@ -107,6 +107,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - ZIP files containing `.hex` files for `unihex` font providers, introduced in
   snapshot 23w17a (Minecraft 1.20), are now copied over by default for resource
   packs targeting supporting client versions.
+- The `postcredits.txt` file at `assets/minecraft/texts` is now correctly
+  processed as a credits text file for packs targeting 1.18-pre2 or later.
+  ([#333](https://github.com/ComunidadAylas/PackSquash/issues/333))
 
 #### User experience
 

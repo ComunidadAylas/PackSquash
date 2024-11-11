@@ -173,6 +173,9 @@ pub enum PackFileAssetType {
 	/// A UTF-8 plain text file that is shown in-game in some form, with `.txt` extension.
 	/// These texts are currently used for the End Poem and splash texts.
 	Text,
+	/// A UTF-8 plain text file containing the text shown in the end of the game credits when
+	/// the Poem is shown, with `.txt` extension. This file was introduced in Minecraft 1.18-pre2.
+	ClosingCreditsText,
 	/// A UTF-8 plain text file with the game credits, and `.txt` extension. This file was used
 	/// in Minecraft versions before 1.17.
 	LegacyTextCredits,
@@ -429,6 +432,9 @@ impl PackFileAssetType {
 				// the new plain text data exchange format adequate for any purpose ;)
 				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/texts/{end,splashes}.txt")
 			}
+			Self::ClosingCreditsText => {
+				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/texts/postcredits.txt")
+			}
 			Self::LegacyTextCredits => {
 				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/texts/credits.txt")
 			}
@@ -500,7 +506,7 @@ impl PackFileAssetType {
 			Self::TrueTypeOrOpenTypeFont | Self::TrueTypeFont => None,
 			Self::ZippedUnifontHex => None,
 			Self::LegacyUnicodeFontCharacterSizes => None,
-			Self::Text | Self::LegacyTextCredits => None,
+			Self::Text | Self::ClosingCreditsText | Self::LegacyTextCredits => None,
 			Self::NbtStructure => None,
 			Self::CommandFunction => None,
 			Self::Custom => None
@@ -820,6 +826,7 @@ impl PackFileAssetTypeMatches {
 				| PackFileAssetType::ZippedUnifontHex
 				| PackFileAssetType::LegacyUnicodeFontCharacterSizes
 				| PackFileAssetType::Text
+				| PackFileAssetType::ClosingCreditsText
 				| PackFileAssetType::LegacyTextCredits
 				| PackFileAssetType::NbtStructure
 					if file_options.is_none() =>

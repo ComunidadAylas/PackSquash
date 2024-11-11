@@ -25,6 +25,9 @@ pub const PACK_FORMAT_VERSION_1_15: i32 = 5;
 pub const PACK_FORMAT_VERSION_1_17: i32 = 7;
 /// The pack format version used in Minecraft versions from 23w17a to 1.20.1.
 pub const PACK_FORMAT_RESOURCE_PACK_VERSION_23W_17A: i32 = 15;
+/// The pack format version used in Minecraft versions from 21w39a (1.18 snapshot)
+/// to 1.18.2.
+pub const PACK_FORMAT_VERSION_1_18: i32 = 8;
 
 /// Metadata for a resource or data pack, contained in the `pack.mcmeta` or
 /// `pack.mcmetac` file in the root folder of a pack.
@@ -199,6 +202,10 @@ impl PackMeta {
 			asset_type_mask -= PackFileAssetType::LegacyTextCredits;
 		} else {
 			asset_type_mask -= PackFileAssetType::TranslationUnitSegment;
+		}
+
+		if self.pack_format_version < PACK_FORMAT_VERSION_1_18 {
+			asset_type_mask -= PackFileAssetType::ClosingCreditsText;
 		}
 
 		if self.pack_format_version >= PACK_FORMAT_RESOURCE_PACK_VERSION_23W_17A {
