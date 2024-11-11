@@ -23,11 +23,14 @@ pub const PACK_FORMAT_VERSION_1_13: i32 = 4;
 pub const PACK_FORMAT_VERSION_1_15: i32 = 5;
 /// The pack format version used in Minecraft versions from 1.17 to 1.17.1.
 pub const PACK_FORMAT_VERSION_1_17: i32 = 7;
-/// The pack format version used in Minecraft versions from 23w17a to 1.20.1.
+/// The resource pack format version used in Minecraft versions from 23w17a to 1.20.1.
 pub const PACK_FORMAT_RESOURCE_PACK_VERSION_23W_17A: i32 = 15;
-/// The pack format version used in Minecraft versions from 21w39a (1.18 snapshot)
+/// The resource pack format version used in Minecraft versions from 21w39a (1.18 snapshot)
 /// to 1.18.2.
-pub const PACK_FORMAT_VERSION_1_18: i32 = 8;
+pub const PACK_FORMAT_RESOURCE_PACK_VERSION_1_18: i32 = 8;
+/// The data pack format version used in Minecraft versions from 24w21a (1.21 snapshot)
+/// to 1.21-pre1.
+pub const PACK_FORMAT_DATA_PACK_VERSION_24W_21A: i32 = 45;
 
 /// Metadata for a resource or data pack, contained in the `pack.mcmeta` or
 /// `pack.mcmetac` file in the root folder of a pack.
@@ -204,12 +207,17 @@ impl PackMeta {
 			asset_type_mask -= PackFileAssetType::TranslationUnitSegment;
 		}
 
-		if self.pack_format_version < PACK_FORMAT_VERSION_1_18 {
+		if self.pack_format_version < PACK_FORMAT_RESOURCE_PACK_VERSION_1_18 {
 			asset_type_mask -= PackFileAssetType::ClosingCreditsText;
 		}
 
 		if self.pack_format_version >= PACK_FORMAT_RESOURCE_PACK_VERSION_23W_17A {
 			asset_type_mask -= PackFileAssetType::LegacyUnicodeFontCharacterSizes;
+		}
+
+		if self.pack_format_version >= PACK_FORMAT_DATA_PACK_VERSION_24W_21A {
+			asset_type_mask -= PackFileAssetType::LegacyNbtStructure;
+			asset_type_mask -= PackFileAssetType::LegacyCommandFunction;
 		}
 
 		asset_type_mask

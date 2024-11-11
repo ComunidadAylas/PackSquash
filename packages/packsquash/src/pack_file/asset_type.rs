@@ -181,9 +181,17 @@ pub enum PackFileAssetType {
 	LegacyTextCredits,
 	/// A structure file in NBT format, compressed with gzip. Used by data packs. Its extension
 	/// is `.nbt`.
+	LegacyNbtStructure,
+	/// Like `LegacyNbtStructure`, but located under directories that match the registry name
+	/// of such structure definitions. This placement change was implemented in snapshot 24w21a
+	/// (Minecraft 1.21).
 	NbtStructure,
 	/// A vanilla Minecraft data pack command function, which contains a list of commands that
 	/// can be executed and referred to as a whole. Its extension is `.mcfunction`.
+	LegacyCommandFunction,
+	/// Like `LegacyCommandFunction`, but located under directories that match the registry name
+	/// of such function definitions. This placement change was implemented in snapshot 24w21a
+	/// (Minecraft 1.21).
 	CommandFunction,
 
 	/// A custom asset type, defined by the end user, whose contents are opaque to PackSquash and
@@ -438,11 +446,17 @@ impl PackFileAssetType {
 			Self::LegacyTextCredits => {
 				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/texts/credits.txt")
 			}
-			Self::NbtStructure => {
+			Self::LegacyNbtStructure => {
 				compile_hardcoded_pack_file_glob_pattern("data/*/structures/**/?*.nbt")
 			}
-			Self::CommandFunction => {
+			Self::NbtStructure => {
+				compile_hardcoded_pack_file_glob_pattern("data/*/structure/**/?*.nbt")
+			}
+			Self::LegacyCommandFunction => {
 				compile_hardcoded_pack_file_glob_pattern("data/*/functions/**/?*.mcfunction")
+			}
+			Self::CommandFunction => {
+				compile_hardcoded_pack_file_glob_pattern("data/*/function/**/?*.mcfunction")
 			}
 
 			Self::Custom => unreachable!()
@@ -507,8 +521,8 @@ impl PackFileAssetType {
 			Self::ZippedUnifontHex => None,
 			Self::LegacyUnicodeFontCharacterSizes => None,
 			Self::Text | Self::ClosingCreditsText | Self::LegacyTextCredits => None,
-			Self::NbtStructure => None,
-			Self::CommandFunction => None,
+			Self::LegacyNbtStructure | Self::NbtStructure => None,
+			Self::LegacyCommandFunction | Self::CommandFunction => None,
 			Self::Custom => None
 		}
 	}
@@ -815,7 +829,7 @@ impl PackFileAssetTypeMatches {
 				{
 					return_pack_file_to_process_data!(LegacyLanguageFile, optimization_settings)
 				}
-				PackFileAssetType::CommandFunction
+				PackFileAssetType::LegacyCommandFunction | PackFileAssetType::CommandFunction
 					if let Some(FileOptions::CommandFunctionFileOptions(optimization_settings)) =
 						file_options =>
 				{
@@ -828,6 +842,7 @@ impl PackFileAssetTypeMatches {
 				| PackFileAssetType::Text
 				| PackFileAssetType::ClosingCreditsText
 				| PackFileAssetType::LegacyTextCredits
+				| PackFileAssetType::LegacyNbtStructure
 				| PackFileAssetType::NbtStructure
 					if file_options.is_none() =>
 				{

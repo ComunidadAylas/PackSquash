@@ -72,6 +72,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Packs generated with the `zip_spec_conformance_level` option set to
   `disregard` now reliably work on Minecraft clients running Java 22 or newer.
   (Thanks _@mrkinau_ and _@mihannnik_ for reporting the issue!)
+- Data packs targeting Minecraft 24w14a (1.21) or newer no longer have their
+  functions and structure `.nbt` files skipped by default.
+  ([#327](https://github.com/ComunidadAylas/PackSquash/issues/327))
 - Shaders that depend on `#moj_import`ed or parent-defined preprocessor
   variables to be syntactically correct or expand to the intended source code
   will no longer cause PackSquash to fail or change their semantics.
