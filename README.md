@@ -95,7 +95,7 @@ user:
 - Deduplicating identical files within the generated ZIP file: the contents of
   files repeated several times over will be stored only once.
 - Protecting the generated ZIP files, making them harder to read by most ZIP
-  manipulation programs.
+  manipulation programs, and some of the files stored inside such ZIP files.
 
 ## 🔗 Download and usage
 
