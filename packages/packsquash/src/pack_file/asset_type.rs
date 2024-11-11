@@ -162,9 +162,14 @@ pub enum PackFileAssetType {
 	/// A font in TrueType format, with `.ttf` extension. This is the only accepted font format before
 	/// snapshot 17w43a (Minecraft 1.13).
 	TrueTypeFont,
+	/// A font in Unifont's `.hex` format, wrapped in a ZIP file container, of which the game only reads
+	/// file entries with a `.hex` extension. This asset type was added as a part of the `unihex` font
+	/// provider in snapshot 23w17a (Minecraft 1.20).
+	ZippedUnifontHex,
 	/// A binary file that describes the start and end positions of individual characters in
-	/// legacy Unicode fonts, with `.bin` extension.
-	FontCharacterSizes,
+	/// legacy Unicode fonts, with `.bin` extension. Removed in snapshot 23w17a (Minecraft 1.20) in
+	/// favor of standard Unifont `.hex` files in a new `unihex` provider.
+	LegacyUnicodeFontCharacterSizes,
 	/// A UTF-8 plain text file that is shown in-game in some form, with `.txt` extension.
 	/// These texts are currently used for the End Poem and splash texts.
 	Text,
@@ -410,7 +415,8 @@ impl PackFileAssetType {
 
 			Self::TrueTypeOrOpenTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.{ttf,otf,otc,ttc}"),
 			Self::TrueTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.ttf"),
-			Self::FontCharacterSizes => {
+			Self::ZippedUnifontHex => compile_hardcoded_pack_file_glob_pattern("assets/*/**/?*.zip"),
+			Self::LegacyUnicodeFontCharacterSizes => {
 				compile_hardcoded_pack_file_glob_pattern("assets/*/**/?*.bin")
 			}
 			Self::Text => {
@@ -490,7 +496,8 @@ impl PackFileAssetType {
 			Self::TranslationUnitSegment => None,
 			Self::LegacyLanguageFile => None,
 			Self::TrueTypeOrOpenTypeFont | Self::TrueTypeFont => None,
-			Self::FontCharacterSizes => None,
+			Self::ZippedUnifontHex => None,
+			Self::LegacyUnicodeFontCharacterSizes => None,
 			Self::Text | Self::LegacyTextCredits => None,
 			Self::NbtStructure => None,
 			Self::CommandFunction => None,
@@ -808,7 +815,8 @@ impl PackFileAssetTypeMatches {
 				}
 				PackFileAssetType::TrueTypeOrOpenTypeFont
 				| PackFileAssetType::TrueTypeFont
-				| PackFileAssetType::FontCharacterSizes
+				| PackFileAssetType::ZippedUnifontHex
+				| PackFileAssetType::LegacyUnicodeFontCharacterSizes
 				| PackFileAssetType::Text
 				| PackFileAssetType::LegacyTextCredits
 				| PackFileAssetType::NbtStructure

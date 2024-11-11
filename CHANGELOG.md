@@ -104,6 +104,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Font files for the `ttf` font provider may now have extensions other than
   `.ttf`, namely `.otf`, `.ttc`, and `.otc`, for Minecraft 1.13 onwards, when
   support for OpenType format extensions was added.
+- ZIP files containing `.hex` files for `unihex` font providers, introduced in
+  snapshot 23w17a (Minecraft 1.20), are now copied over by default for resource
+  packs targeting supporting client versions.
 
 #### User experience
 

@@ -80,11 +80,16 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for Passthrou
 					is_compressed: false
 				})
 			}
-			PackFileAssetType::FontCharacterSizes => file_read_producer().map(|(read, _)| Self {
-				read,
-				optimization_strategy_message: "Copied",
-				is_compressed: false
-			}),
+			// TODO: ZippedUnifontHex could be optimized by dropping any non-`.hex` file inside it
+			//       and recompressing the remaining `.hex` files with our efficient Zopfli algorithm
+			PackFileAssetType::ZippedUnifontHex
+			| PackFileAssetType::LegacyUnicodeFontCharacterSizes => {
+				file_read_producer().map(|(read, _)| Self {
+					read,
+					optimization_strategy_message: "Copied",
+					is_compressed: false
+				})
+			}
 			PackFileAssetType::Text | PackFileAssetType::LegacyTextCredits => file_read_producer()
 				.map(|(read, _)| Self {
 					read,
