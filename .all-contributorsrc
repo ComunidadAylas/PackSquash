@@ -258,6 +258,17 @@
         "ideas",
         "doc"
       ]
+    },
+    {
+      "login": "MrKinau",
+      "name": "David Lüdtke",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13185260?v=4",
+      "profile": "https://luedt.ke/",
+      "contributions": [
+        "bug",
+        "ideas",
+        "userTesting"
+      ]
     }
   ],
   "contributorsPerLine": 7,
