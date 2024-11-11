@@ -66,6 +66,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
     `may_be_atlas_texture` PNG-specific option, but it is advised that you only
     do this if you have detailed knowledge of how the game processes textures,
     as otherwise the game may not load the pack correctly.
+- The `ogg_obfuscation_incompatibility` quirk now applies by default to resource
+  packs targeting all Minecraft versions from snapshot 24w13a (1.20.5) onward.
+  This is due to an internal change introduced in Minecraft 1.20.5-pre1 which
+  broke compatibility with files generated using the feature. As a result, the
+  `ogg_obfuscation` option no longer has any effect for most packs that target
+  up-to-date game versions. (Thanks _@pau101_ and _@mrkinau_ for bringing this
+  topic to my attention!)
+  - Any packs containing affected audio files that need to work with Minecraft
+    1.20.5-pre1 or later should be reprocessed to remove this protection, as the
+    latest game versions can no longer play these files.
 
 #### Fixed
 

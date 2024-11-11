@@ -458,16 +458,17 @@ pub enum MinecraftQuirk {
 	/// ZIP specification conformance level is not used, or if the Minecraft client is run
 	/// using newer Java versions.
 	Java8ZipParsing,
-	/// The audio decoding code of the latest Minecraft versions, from 1.14 onwards, was
-	/// refactored in such a way that the PackSquash Ogg Vorbis obfuscation techniques were
-	/// made possible. Older Minecraft versions do not support these obfuscated files, showing
-	/// errors in the console and freezing the game when they are played.
+	/// The audio decoding code of a range of Minecraft versions, from 1.14 to 24w14a (1.20.5
+	/// snapshot), both inclusive, made possible the PackSquash Ogg Vorbis obfuscation techniques.
+	/// Older and newer Minecraft versions do not support these obfuscated files, showing errors
+	/// in the console and even freezing the game when they are played.
 	///
 	/// This workaround ensures that no obfuscation is done to any Ogg Vorbis file generated
 	/// by PackSquash, so at least the pack will work. Keep in mind that, due to 1.13 and
 	/// 1.14 sharing the same pack format version, the autodetection code for this quirk will
 	/// err on the safe side and only consider Minecraft versions starting from 1.15 to be
-	/// compatible.
+	/// compatible. Likewise, the quirk will also be applied to Minecraft versions beginning from
+	/// 24w13a, two snapshots before the incompatibility was really introduced.
 	OggObfuscationIncompatibility
 }
 

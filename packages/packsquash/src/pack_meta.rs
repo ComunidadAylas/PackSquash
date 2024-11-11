@@ -28,6 +28,9 @@ pub const PACK_FORMAT_RESOURCE_PACK_VERSION_23W_17A: i32 = 15;
 /// The resource pack format version used in Minecraft versions from 21w39a (1.18 snapshot)
 /// to 1.18.2.
 pub const PACK_FORMAT_RESOURCE_PACK_VERSION_1_18: i32 = 8;
+/// The resource pack format version used in Minecraft versions from 24w13a (1.20.5 snapshot)
+/// to 1.20.5-pre3.
+pub const PACK_FORMAT_RESOURCE_PACK_VERSION_24W_13A: i32 = 31;
 /// The data pack format version used in Minecraft versions from 24w21a (1.21 snapshot)
 /// to 1.21-pre1.
 pub const PACK_FORMAT_DATA_PACK_VERSION_24W_21A: i32 = 45;
@@ -166,10 +169,13 @@ impl PackMeta {
 			quirks |= MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck;
 		}
 
-		if self.pack_format_version < PACK_FORMAT_VERSION_1_15 {
+		if self.pack_format_version < PACK_FORMAT_VERSION_1_15
+			|| self.pack_format_version >= PACK_FORMAT_RESOURCE_PACK_VERSION_24W_13A
+		{
 			// Minecraft 1.14 is compatible with this feature, but we can't tell
 			// it apart from 1.13 due to it sharing the same version number, so
-			// err on the safe side
+			// err on the safe side. For the time being, 24w14a is the last version
+			// to support this feature, but it shares a version number with 24w13a
 			quirks |= MinecraftQuirk::OggObfuscationIncompatibility;
 		}
 
