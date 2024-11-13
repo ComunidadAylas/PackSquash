@@ -269,6 +269,16 @@
         "ideas",
         "userTesting"
       ]
+    },
+    {
+      "login": "",
+      "name": "ManaCube",
+      "avatar_url": "https://i.imgur.com/D9gJEr6.png",
+      "profile": "https://manacube.com/",
+      "contributions": [
+        "financial",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
