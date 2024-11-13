@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1731483307688,
+  "lastUpdate": 1731504733754,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "ce8aa8435ac3951d881a234fb647632a95a45d61",
-          "message": "chore(deps): update rust crate tar to v0.4.42",
-          "timestamp": "2024-09-25T04:09:04Z",
-          "tree_id": "e8b7eb797f98d9b665f0b4ab52baf3a9d6f45078",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ce8aa8435ac3951d881a234fb647632a95a45d61"
-        },
-        "date": 1727245805045,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10347070,
-            "range": "± 113300",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 133981587,
-            "range": "± 3393328",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2596424382,
-            "range": "± 30995218",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 683951272,
-            "range": "± 2420244",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 671502475,
             "range": "± 6435608",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "7fc4cf034bcfe2379c12b015a99d506bf285a01c",
+          "message": "docs(README): add ManaCube as contributor",
+          "timestamp": "2024-11-13T12:36:10+01:00",
+          "tree_id": "10a0608e1387e0603bf0c04348b6bfd0474bad53",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7fc4cf034bcfe2379c12b015a99d506bf285a01c"
+        },
+        "date": 1731504732476,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9612272,
+            "range": "± 662596",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 118297658,
+            "range": "± 5189241",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2719625445,
+            "range": "± 27927090",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 670874943,
+            "range": "± 7394773",
             "unit": "ns/iter"
           }
         ]
