@@ -43,17 +43,17 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@c6dc131d2c4291552cafb840290190a53b2cd937 # v2
+        uses: taiki-e/install-action@9c04113bd63f9659d7a53908386758275ab35630 # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@c6dc131d2c4291552cafb840290190a53b2cd937 # v2
+        uses: taiki-e/install-action@9c04113bd63f9659d7a53908386758275ab35630 # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@c6dc131d2c4291552cafb840290190a53b2cd937 # v2
+        uses: taiki-e/install-action@9c04113bd63f9659d7a53908386758275ab35630 # v2
         with:
           tool: cargo-deny
 
@@ -73,7 +73,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@4f3212b61783c3c68e8309a0f18a699764811cda # v3
+        uses: github/codeql-action/upload-sarif@396bb3e45325a47dd9ef434068033c6d5bb0d11a # v3
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
@@ -210,7 +210,7 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@c6dc131d2c4291552cafb840290190a53b2cd937 # v2
+        uses: taiki-e/install-action@9c04113bd63f9659d7a53908386758275ab35630 # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -218,7 +218,7 @@ jobs:
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@c6dc131d2c4291552cafb840290190a53b2cd937 # v2
+        uses: taiki-e/install-action@9c04113bd63f9659d7a53908386758275ab35630 # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -405,7 +405,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bullseye-slim@sha256:610b4c7ad241e66f6e2f9791e3abdf0cc107a69238ab21bf9b4695d51fd6366a
+    container: debian:bullseye-slim@sha256:60a596681410bd31a48e5975806a24cd78328f3fd6b9ee5bc64dca6d46a51f29
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
