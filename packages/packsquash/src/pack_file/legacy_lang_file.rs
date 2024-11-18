@@ -157,7 +157,7 @@ fn process_line<L: Into<String>>(
 	// work than Mojang ;). This might break packs that dealt with the BOM by
 	// including it in the key references elsewhere, so only do it if the option
 	// is enabled
-	if line_number.is_first() && strip_bom && line.chars().next().map_or(false, |c| c == BOM) {
+	if line_number.is_first() && strip_bom && line.starts_with(BOM) {
 		line.remove(0);
 	}
 
