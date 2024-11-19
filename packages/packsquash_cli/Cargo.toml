@@ -20,11 +20,15 @@ tokio = { version = "1.41.1", default-features = false, features = ["time"] }
 serde_path_to_error = "0.1.16"
 
 log = "0.4.22"
-env_logger = { version = "0.11.5", default-features = false, features = ["color"] }
+env_logger = { version = "0.11.5", default-features = false, features = [
+  "color",
+] }
 anstyle = "1.0.10"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.9", default-features = false, features = ["consoleapi"] }
+winapi = { version = "0.3.9", default-features = false, features = [
+  "consoleapi",
+] }
 winapi-util = "0.1.9"
 
 [target.'cfg(all(target_os = "linux", target_env = "musl"))'.dependencies]
@@ -34,7 +38,9 @@ winapi-util = "0.1.9"
 # We are interested in overriding malloc because we depend on C libraries, and doing
 # so buys us a safety net against mismatching memory managed by different allocators,
 # in addition to keep binary sizes down
-mimalloc = { version = "0.1.43", default-features = false, features = ["override"] }
+mimalloc = { version = "0.1.43", default-features = false, features = [
+  "override",
+] }
 
 [target.'cfg(windows)'.build-dependencies]
 winresource = "0.1.17"
@@ -50,8 +56,16 @@ copyright = "PackSquash developers"
 license-file = ["../../LICENSE", "0"]
 extended-description-file = "target/debian/extended_package_description.txt"
 assets = [
-	["target/release/packsquash", "usr/bin/packsquash", "755"],
-	["../../README.md", "usr/share/doc/packsquash/README.md", "644"]
+  [
+    "target/release/packsquash",
+    "usr/bin/packsquash",
+    "755",
+  ],
+  [
+    "../../README.md",
+    "usr/share/doc/packsquash/README.md",
+    "644",
+  ],
 ]
 section = "utils"
 # For each release with the same version number (shouldn't be too many),

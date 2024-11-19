@@ -35,7 +35,7 @@ unsafe_op_in_unsafe_fn = "deny"
 [workspace.lints.clippy]
 #pedantic = "warn" # TODO too pedantic for now, fix the warnings and re-enable this sooner than later
 cargo = { level = "warn", priority = -1 }
-multiple_crate_versions = "allow" # Introduces much noise, not better than cargo deny
+multiple_crate_versions = "allow"         # Introduces much noise, not better than cargo deny
 
 [workspace.lints.rustdoc]
 invalid_html_tags = "deny"

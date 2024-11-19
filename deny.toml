@@ -3,11 +3,11 @@
 
 [graph]
 targets = [
-	{ triple = "x86_64-unknown-linux-gnu" },
-	{ triple = "aarch64-unknown-linux-gnu" },
-	{ triple = "x86_64-pc-windows-gnu" },
-	{ triple = "x86_64-apple-darwin" },
-	{ triple = "aarch64-apple-darwin" },
+  { triple = "x86_64-unknown-linux-gnu" },
+  { triple = "aarch64-unknown-linux-gnu" },
+  { triple = "x86_64-pc-windows-gnu" },
+  { triple = "x86_64-apple-darwin" },
+  { triple = "aarch64-apple-darwin" },
 ]
 
 [advisories]
@@ -17,64 +17,64 @@ yanked = "deny"
 [licenses]
 version = 2
 allow = [
-	# Free software licenses compatible with (A)GPL.
-	# List extracted from: https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses
-	"GPL-3.0",
-	"GPL-2.0",
-	"LGPL-3.0",
-	"LGPL-2.1",
-	"AGPL-3.0",
-	"FSFAP",
-	"Apache-2.0",
-	"Artistic-2.0",
-	"ClArtistic",
-	"Sleepycat",
-	"BSL-1.0",
-	"BSD-3-Clause",
-	"CECILL-2.0",
-	"BSD-3-Clause-Clear",
-	"ECL-2.0",
-	"EFL-2.0",
-	"EUDatagrid",
-	"MIT",
-	"BSD-2-Clause",
-	"FTL",
-	"HPND",
-	"iMatix",
-	"Imlib2",
-	"IJG",
-	"Intel",
-	"ISC",
-	"MPL-2.0",
-	"NCSA",
-	"OLDAP-2.7",
-	"NIST-PD",
-	"CC-PDDC",
-	"CC0-1.0",
-	"Python-2.0",
-	"Ruby",
-	"SGI-B-2.0",
-	"SMLNJ",
-	"UPL-1.0",
-	"Unlicense",
-	"Vim",
-	"W3C",
-	"WTFPL",
-	"X11",
-	"XFree86-1.1",
-	"Zlib",
-	"zlib-acknowledgement",
-	"ZPL-2.0",
-	"ZPL-2.1",
-	# Not expressely listed as (A)GPL compatible in the page above, but
-	# according to https://opensource.org/licenses/0BSD it is a modification
-	# of the ISC license, which is compatible. Its text is also extremely
-	# simple and allows using the code for any purpose
-	"0BSD",
-	# Permissive license used by the Unicode consortium, similar in spirit
-	# to other permissive licenses:
-	# https://spdx.org/licenses/Unicode-DFS-2016.html
-	"Unicode-DFS-2016"
+  # Free software licenses compatible with (A)GPL.
+  # List extracted from: https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses
+  "GPL-3.0",
+  "GPL-2.0",
+  "LGPL-3.0",
+  "LGPL-2.1",
+  "AGPL-3.0",
+  "FSFAP",
+  "Apache-2.0",
+  "Artistic-2.0",
+  "ClArtistic",
+  "Sleepycat",
+  "BSL-1.0",
+  "BSD-3-Clause",
+  "CECILL-2.0",
+  "BSD-3-Clause-Clear",
+  "ECL-2.0",
+  "EFL-2.0",
+  "EUDatagrid",
+  "MIT",
+  "BSD-2-Clause",
+  "FTL",
+  "HPND",
+  "iMatix",
+  "Imlib2",
+  "IJG",
+  "Intel",
+  "ISC",
+  "MPL-2.0",
+  "NCSA",
+  "OLDAP-2.7",
+  "NIST-PD",
+  "CC-PDDC",
+  "CC0-1.0",
+  "Python-2.0",
+  "Ruby",
+  "SGI-B-2.0",
+  "SMLNJ",
+  "UPL-1.0",
+  "Unlicense",
+  "Vim",
+  "W3C",
+  "WTFPL",
+  "X11",
+  "XFree86-1.1",
+  "Zlib",
+  "zlib-acknowledgement",
+  "ZPL-2.0",
+  "ZPL-2.1",
+  # Not expressely listed as (A)GPL compatible in the page above, but
+  # according to https://opensource.org/licenses/0BSD it is a modification
+  # of the ISC license, which is compatible. Its text is also extremely
+  # simple and allows using the code for any purpose
+  "0BSD",
+  # Permissive license used by the Unicode consortium, similar in spirit
+  # to other permissive licenses:
+  # https://spdx.org/licenses/Unicode-DFS-2016.html
+  "Unicode-DFS-2016",
 ]
 unused-allowed-license = "allow"
 
@@ -88,15 +88,15 @@ ignore = true
 multiple-versions = "warn"
 highlight = "all"
 skip-tree = [
-	# An ancient nom is pulled by the development dependency for
-	# benchmarking perfcnt. Let's ignore that for now. It doesn't
-	# affect the final user executables at all
-	{ name = "perfcnt" },
-	# Criterion itself also pulls some older dependencies
-	{ name = "criterion" },
-	# The build-time winresource dependency pulls slightly older toml
-	# crate versions. They don't affect final executables
-	{ name = "winresource" }
+  # An ancient nom is pulled by the development dependency for
+  # benchmarking perfcnt. Let's ignore that for now. It doesn't
+  # affect the final user executables at all
+  { name = "perfcnt" },
+  # Criterion itself also pulls some older dependencies
+  { name = "criterion" },
+  # The build-time winresource dependency pulls slightly older toml
+  # crate versions. They don't affect final executables
+  { name = "winresource" },
 ]
 
 [sources]
