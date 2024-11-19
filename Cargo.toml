@@ -15,6 +15,10 @@ glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 # Related PR: https://github.com/rbranson/rust-mmap/pull/13
 mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
 
+# Use an Oxipng PR that significantly reduces build dependencies and time in our use case:
+# https://github.com/shssoichiro/oxipng/pull/645
+oxipng = { git = "https://github.com/shssoichiro/oxipng", branch = "refactor/mangen-xtask" }
+
 [profile.release]
 opt-level = 3
 lto = "fat"
