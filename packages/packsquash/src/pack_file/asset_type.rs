@@ -115,9 +115,10 @@ pub enum PackFileAssetType {
 	/// due to a quirk on how older Minecraft versions (<= 1.12.2) processed them.
 	BannerLayer,
 	/// An Enderman, Ender Dragon, Phantom or spider eye layer texture, with `.png` extension.
-	/// These textures are rendered by the eyes render type, which by default has some problems
-	/// with alpha blending that are exacerbated with the optimizations PackSquash does. As of
-	/// 15th November 2021, all released Minecraft versions are affected by these problems.
+	/// These textures are rendered by the eyes render type, which by default may have some
+	/// problems with alpha blending that are exacerbated with the optimizations PackSquash does.
+	/// As of November 20th, 2024, only Minecraft version 24w39a (Minecraft 1.21.2) and newer
+	/// are not affected by these problems.
 	EyeLayer,
 	/// A texture that may be used as an input render target in a shader program via a sampler
 	/// uniform.

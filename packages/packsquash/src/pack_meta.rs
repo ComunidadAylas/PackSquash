@@ -31,6 +31,8 @@ pub const PACK_FORMAT_RESOURCE_PACK_VERSION_1_18: i32 = 8;
 /// The resource pack format version used in Minecraft versions from 24w13a (1.20.5 snapshot)
 /// to 1.20.5-pre3.
 pub const PACK_FORMAT_RESOURCE_PACK_VERSION_24W_13A: i32 = 31;
+/// The resource pack format version used in Minecraft version 24w40a (1.21.2 snapshot).
+pub const PACK_FORMAT_RESOURCE_PACK_VERSION_24W_40A: i32 = 40;
 /// The data pack format version used in Minecraft versions from 24w21a (1.21 snapshot)
 /// to 1.21-pre1.
 pub const PACK_FORMAT_DATA_PACK_VERSION_24W_21A: i32 = 45;
@@ -183,8 +185,12 @@ impl PackMeta {
 			quirks |= MinecraftQuirk::Java8ZipParsing;
 		}
 
-		// All known Minecraft versions are affected by this quirk
-		quirks |= MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending;
+		if self.pack_format_version < PACK_FORMAT_RESOURCE_PACK_VERSION_24W_40A {
+			// 24w39a is the first snapshot to have this fixed, but we can't tell it
+			// apart from 24w38a due to it sharing the same pack format version number,
+			// so err on the safe side
+			quirks |= MinecraftQuirk::BadEntityEyeLayerTextureTransparencyBlending;
+		}
 
 		quirks
 	}

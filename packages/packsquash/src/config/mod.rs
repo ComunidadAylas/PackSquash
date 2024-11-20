@@ -434,11 +434,11 @@ pub enum MinecraftQuirk {
 	/// textures to a palette, which includes color quantization, as it is used to generate
 	/// a palette. This incurs some space costs.
 	RestrictiveBannerLayerTextureFormatCheck,
-	/// All currently known Minecraft versions overlay entity layer textures in a way that
-	/// does not account for transparency properly, by taking into account their color and
-	/// not only their transparency values as blending coefficients to use for overlying
-	/// that texture. PackSquash can change the color of transparent pixels, and as such it
-	/// can trigger this behavior.
+	/// All known Minecraft versions before snapshot 24w39a (1.12.2) overlay entity layer
+	/// textures in a way that  does not account for transparency properly, by taking into
+	/// account their color and not only their transparency values as blending coefficients
+	/// to use for overlying that texture. PackSquash can change the color of transparent
+	/// pixels, and as such it can trigger this behavior.
 	///
 	/// This workaround stops PackSquash from changing the color of transparent pixels and
 	/// quantizing the pixels to a palette to reduce texture file size, as both optimizations

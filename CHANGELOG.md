@@ -16,8 +16,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   disabled by default until the necessary features to better automatically
   determine its default value are implemented, as it caused issues with e.g.
   more common than expected single-color font textures.
-- Updated OxiPNG, bringing image compression improvements at the cost of
-  slightly slower execution times.
+- The `bad_entity_eye_layer_texture_transparency_blending` quirk is no longer
+  enabled by default for packs targeting Minecraft 24w40a (1.20.2) or newer, as
+  the [related bug](https://bugs.mojang.com/browse/MC-235953) has been fixed in
+  newer versions. (While the bug was technically resolved in 24w39a, that
+  snapshot shares its resource pack format version with earlier snapshots, so
+  PackSquash can't distinguish between them.)
+- Updated OxiPNG, bringing the image compression improvements made upstream.
 
 #### Distribution
 
