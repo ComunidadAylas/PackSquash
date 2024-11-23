@@ -14,6 +14,7 @@ packsquash = { path = "../packsquash", version = "0.4.0" }
 
 getopts = "0.2.21"
 toml = { version = "0.8.19", default-features = false, features = ["parse"] }
+tz-rs = { version = "0.7.0", default-features = false }
 
 tokio = { version = "1.41.1", default-features = false, features = ["time"] }
 

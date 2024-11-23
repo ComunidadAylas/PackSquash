@@ -14,14 +14,14 @@ use std::{
 use env_logger::{Builder, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
 use log::{debug, error, info, trace, warn, Level, LevelFilter};
-use tokio::{runtime, select, sync::mpsc::channel, time::sleep};
-
 use packsquash::{
 	config::SquashOptions, vfs::os_fs::OsFilesystem, PackSquasher, PackSquasherError,
 	PackSquasherStatus, PackSquasherWarning
 };
 use terminal_style::{environment_allows_color, environment_allows_emoji};
 use terminal_title_controller::TerminalTitleController;
+use tokio::{runtime, select, sync::mpsc::channel, time::sleep};
+use tz::UtcDateTime;
 
 mod terminal_style;
 mod terminal_title_controller;
@@ -405,22 +405,26 @@ fn squash(
 
 /// Prints `PackSquash` version information to the standard output stream.
 fn print_version_information(verbose: bool) {
+	let build_date_time =
+		UtcDateTime::from_timespec(env!("PACKSQUASH_BUILD_TIMESTAMP").parse().unwrap(), 0).unwrap();
+
 	println!(
 		"PackSquash {} ({}, {}) for {}",
 		env!("PACKSQUASH_BUILD_VERSION"),
 		env!("CARGO_PROFILE"),
-		env!("PACKSQUASH_BUILD_DATE"),
+		format_args!(
+			"{}-{}-{}",
+			build_date_time.year(),
+			build_date_time.month(),
+			build_date_time.month_day()
+		),
 		env!("CARGO_TARGET_TRIPLE")
 	);
 	println!("{}", env!("CARGO_PKG_DESCRIPTION"));
 	println!();
 
 	if verbose {
-		println!(
-			"Copyright (C) {} {}",
-			env!("PACKSQUASH_COPYRIGHT_BUILD_YEAR"),
-			env!("CARGO_PKG_AUTHORS")
-		);
+		println!("Copyright (C) {}", env!("CARGO_PKG_AUTHORS"));
 		println!();
 		println!("This program is free software: you can redistribute it and/or modify");
 		println!("it under the terms of the GNU Affero General Public License as");

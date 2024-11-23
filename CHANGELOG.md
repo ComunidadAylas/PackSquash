@@ -144,8 +144,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 #### Internal
 
 - Dropped build-time dependencies on `time` and `git2` in favor of gathering
-  version metadata during CI workflows, and falling back to Cargo-defined
-  metadata for local builds.
+  version metadata with more lightweight methods.
 
 ## [0.4.0] - 2023-06-25
 

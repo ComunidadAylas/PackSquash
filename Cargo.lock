@@ -1618,6 +1618,7 @@ dependencies = [
  "serde_path_to_error",
  "tokio",
  "toml 0.8.19",
+ "tz-rs",
  "winapi-util",
  "windows-sys 0.59.0",
  "winresource",
@@ -2666,6 +2667,12 @@ name = "typenum"
 version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
+
+[[package]]
+name = "tz-rs"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1450bf2b99397e72070e7935c89facaa80092ac812502200375f1f7d33c71a1"
 
 [[package]]
 name = "unicode-ident"
