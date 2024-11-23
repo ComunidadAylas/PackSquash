@@ -1618,8 +1618,8 @@ dependencies = [
  "serde_path_to_error",
  "tokio",
  "toml 0.8.19",
- "winapi",
  "winapi-util",
+ "windows-sys 0.59.0",
  "winresource",
 ]
 
