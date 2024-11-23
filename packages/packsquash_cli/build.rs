@@ -1,6 +1,7 @@
 //! Build helper for the `PackSquash` CLI.
 
 use std::env;
+use winresource::WindowsResource;
 
 /// Initializes environment variables that will be accessible in the source
 /// code via the env! macro, and takes care of build-time metadata.
@@ -47,9 +48,14 @@ fn main() {
 	add_executable_metadata();
 }
 
-#[cfg(windows)]
 fn add_executable_metadata() {
-	let mut windows_resource = winresource::WindowsResource::new();
+	// Build scripts are always compiled for the host target, so to make sure metadata is
+	// added when cross-compiling to Windows, we need to check the target OS during runtime
+	if env::var_os("CARGO_CFG_WINDOWS").is_none() {
+		return;
+	}
+
+	let mut windows_resource = WindowsResource::new();
 	windows_resource.set("LegalCopyright", env!("CARGO_PKG_AUTHORS"));
 	windows_resource.set(
 		"FileDescription",
@@ -63,6 +69,3 @@ fn add_executable_metadata() {
 		.compile()
 		.expect("Windows executable resource build failure");
 }
-
-#[cfg(not(windows))]
-fn add_executable_metadata() {}
