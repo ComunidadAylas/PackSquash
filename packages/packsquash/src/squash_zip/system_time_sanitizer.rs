@@ -8,9 +8,9 @@ use aes::{
 	cipher::{BlockCipher, BlockEncrypt, KeyInit},
 	Aes128, Block
 };
-use const_random::const_random;
 
 use fpe::ff1::{BinaryNumeralString, FF1};
+use obfstr::random;
 use thiserror::Error;
 
 use super::system_id::get_or_compute_system_id;
@@ -48,14 +48,15 @@ pub(super) struct SystemTimeSanitizer<C: BlockCipher + BlockEncrypt + Clone> {
 
 /// An application-wide salt that is used for time sanitization.
 ///
-/// This salt may be deterministically generated via the `CONST_RANDOM_SEED`
+/// This salt may be deterministically generated via the `OBFSTR_SEED`
 /// environment variable on build time. A good way to generate a 512-bit
 /// seed on a Linux system with GNU Coreutils is:
 ///
 /// ```bash
 /// $ dd if=/dev/urandom bs=1 count=64 2>/dev/null | base64 -w 0
 /// ```
-const TIME_SANITIZATION_SALT: [u8; 16] = const_random!(u128).to_le_bytes();
+const TIME_SANITIZATION_SALT: [u8; 16] =
+	((random!(u64) as u128) << 64 | random!(u64) as u128).to_le_bytes();
 
 /// A 32-bit unsigned integer with the MSB set.
 const STICK_PARITY_BIT_MASK: u32 = 1 << 31;

@@ -8,18 +8,17 @@
 // better world, not just for bragging, ripping off the work of others or other
 // questionable means.
 
+use obfstr::random;
+use rand_xoshiro::{
+	rand_core::{RngCore, SeedableRng},
+	Xoshiro128Plus
+};
 use std::{
 	borrow::Cow,
 	cell::Cell,
 	char::{ToLowercase, ToUppercase},
 	io,
 	iter::{self, Once}
-};
-
-use const_random::const_random;
-use rand_xoshiro::{
-	rand_core::{RngCore, SeedableRng},
-	Xoshiro128Plus
 };
 use tokio::io::{AsyncWrite, AsyncWriteExt};
 
@@ -37,7 +36,7 @@ use super::{
 mod pseudodir_concealment;
 
 const CRC32_KEY: u32 = {
-	let k = const_random!(u32);
+	let k = random!(u32);
 
 	if k == 0 {
 		0xDEADBEEF
