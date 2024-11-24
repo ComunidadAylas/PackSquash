@@ -75,6 +75,10 @@ allow = [
   # to other permissive licenses:
   # https://spdx.org/licenses/Unicode-DFS-2016.html
   "Unicode-DFS-2016",
+  # Permissive license used by the Unicode consortium, similar in spirit
+  # to other permissive licenses:
+  # https://spdx.org/licenses/Unicode-3.0.html
+  "Unicode-3.0",
 ]
 unused-allowed-license = "allow"
 
