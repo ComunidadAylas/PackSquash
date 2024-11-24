@@ -101,6 +101,7 @@ core-foundation = "0.10.0"
 mach2 = "0.4.2"
 
 [dev-dependencies]
+futures = { version = "0.3.31", default-features = false, features = ["std"] }
 tokio-test = "0.4.4"
 pretty_assertions = "1.4.1"
 

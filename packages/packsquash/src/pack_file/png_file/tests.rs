@@ -1,7 +1,8 @@
+use futures::FutureExt;
 use rgb::FromSlice;
-use spng::{DecodeFlags, Format};
+use spng::{ContextFlags, CrcAction, DecodeFlags, Format};
+use std::panic::AssertUnwindSafe;
 use std::{env, fs};
-
 use tokio_stream::StreamExt;
 use tokio_test::io::Builder;
 
@@ -26,6 +27,7 @@ async fn successful_process_test(
 	expect_smaller_file_size: bool,
 	expect_same_color_type: bool,
 	expected_resolution: Option<(u32, u32)>,
+	lenient_decode: bool,
 	asset_type: PackFileAssetType,
 	test_name: &str
 ) {
@@ -68,9 +70,17 @@ async fn successful_process_test(
 			.expect("No error should happen while writing a test result to disk")
 		}
 
-		let mut png_reader = spng::Decoder::new(&*data)
+		let mut png_decoder = spng::Decoder::new(&*data)
 			.with_decode_flags(DecodeFlags::TRANSPARENCY)
-			.with_output_format(Format::Rgba8)
+			.with_output_format(Format::Rgba8);
+
+		if lenient_decode {
+			png_decoder = png_decoder
+				.with_context_flags(ContextFlags::IGNORE_ADLER32)
+				.with_crc_actions(CrcAction::Use, CrcAction::Use);
+		}
+
+		let mut png_reader = png_decoder
 			.read_info()
 			.expect("No error should happen while decoding processed PNG");
 		let image_info = png_reader.info();
@@ -144,6 +154,7 @@ async fn lossless_optimization_works() {
 		true,           // Smaller size
 		false,          // Not necessarily the same color type
 		Some((16, 16)), // Same resolution
+		false,          // The PNG datastream should be standards-compliant
 		PackFileAssetType::GenericTexture,
 		"lossless_optimization_works"
 	)
@@ -162,6 +173,7 @@ async fn lossy_optimization_works() {
 		true,           // Smaller size
 		false,          // Not necessarily the same color type
 		Some((16, 16)), // Same resolution
+		false,          // The PNG datastream should be standards-compliant
 		PackFileAssetType::GenericTexture,
 		"lossy_optimization_works"
 	)
@@ -181,6 +193,7 @@ async fn entity_eye_blending_workaround_works() {
 		false,          // Not necessarily smaller
 		false,          // Not necessarily the same color type
 		Some((64, 32)), // Same resolution
+		false,          // The PNG datastream should be standards-compliant
 		PackFileAssetType::EyeLayer,
 		"entity_eye_blending_workaround_works"
 	)
@@ -200,6 +213,7 @@ async fn banner_layer_check_workaround_works() {
 		false,          // Not necessarily smaller
 		true,           // Same color type
 		Some((16, 16)), // Same resolution
+		false,          // The PNG datastream should be standards-compliant
 		PackFileAssetType::BannerLayer,
 		"banner_layer_check_workaround_works"
 	)
@@ -223,6 +237,7 @@ async fn ditherbomb_does_not_get_bigger() {
 		true,               // The first pass strips some non-critical chunks
 		true,               // Should fall back to the first pass result
 		Some((4395, 6598)), // Same resolution
+		false,              // The PNG datastream should be standards-compliant
 		PackFileAssetType::GenericTexture,
 		"ditherbomb_does_not_get_bigger"
 	)
@@ -246,6 +261,7 @@ async fn ditherbomb_can_be_defused() {
 		true,               // No dithering is enough to make the optimizations work as expected
 		false,              // Not necessarily the same color type
 		Some((4395, 6598)), // Same resolution
+		false,              // The PNG datastream should be standards-compliant
 		PackFileAssetType::GenericTexture,
 		"ditherbomb_can_be_defused"
 	)
@@ -264,6 +280,7 @@ async fn single_color_image_is_downsized() {
 		true,         // Smaller file size
 		false,        // Maybe different color type
 		Some((1, 1)), // Not a power of two, so vanilla Minecraft doesn't do mipmaps
+		false,        // The PNG datastream should be standards-compliant
 		PackFileAssetType::GenericTexture,
 		"single_color_image_is_downsized"
 	)
@@ -302,8 +319,58 @@ async fn png_data_with_trailing_bytes_is_handled() {
 		true,           // Smaller size
 		false,          // Not necessarily the same color type
 		Some((16, 16)), // Same resolution
+		false,          // The PNG datastream should be standards-compliant
 		PackFileAssetType::GenericTexture,
 		"png_data_with_trailing_bytes_is_handled"
+	)
+	.await
+}
+
+#[tokio::test]
+async fn png_obfuscation_works() {
+	// AssertUnwindSafe can be used because catch_unwind will not witness any invalid
+	// state at the expected panic points
+	let conforming_decoder_test_result = AssertUnwindSafe(successful_process_test(
+		PNG_DATA,
+		PngFileOptions {
+			image_data_compression_iterations: 0,
+			color_quantization_target: ColorQuantizationTarget::None,
+			skip_alpha_optimizations: true,
+			png_obfuscation: true,
+			..Default::default()
+		},
+		true,           // Same pixels
+		false,          // Non necessarily smaller
+		false,          // Not necessarily the same color type
+		Some((16, 16)), // Same resolution
+		false,          // Decode strictly
+		PackFileAssetType::GenericTexture,
+		"png_obfuscation_works"
+	))
+	.catch_unwind()
+	.await;
+
+	assert!(
+		conforming_decoder_test_result.is_err(),
+		"Decoding an obfuscated PNG datastream with a conforming decoder should fail"
+	);
+
+	successful_process_test(
+		PNG_DATA,
+		PngFileOptions {
+			image_data_compression_iterations: 0,
+			color_quantization_target: ColorQuantizationTarget::None,
+			skip_alpha_optimizations: true,
+			png_obfuscation: true,
+			..Default::default()
+		},
+		true,           // Same pixels
+		false,          // Non necessarily smaller
+		false,          // Not necessarily the same color type
+		Some((16, 16)), // Same resolution
+		true,           // Decode leniently
+		PackFileAssetType::GenericTexture,
+		"png_obfuscation_works"
 	)
 	.await
 }

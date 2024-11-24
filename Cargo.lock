@@ -2189,8 +2189,7 @@ dependencies = [
 [[package]]
 name = "spng"
 version = "0.2.0-alpha.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a748d4d67cc6343665fc4491870320c0e2278354e6783d053c4c6cd8b752dcd5"
+source = "git+https://github.com/ComunidadAylas/spng-rs?branch=feat%2Fdecoder-crc-action#51b46a8f9168afb5de3e4ad53ad9c78d8025128b"
 dependencies = [
  "bitflags 2.6.0",
  "libc",
@@ -2200,8 +2199,7 @@ dependencies = [
 [[package]]
 name = "spng-sys"
 version = "0.2.0-alpha.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3935dd2f897bd3b30eaf8eee44e3f6c07b71c17f8db9d8d6ed9c8faf7eefc8a2"
+source = "git+https://github.com/ComunidadAylas/spng-rs?branch=feat%2Fdecoder-crc-action#51b46a8f9168afb5de3e4ad53ad9c78d8025128b"
 dependencies = [
  "cc",
  "libc",

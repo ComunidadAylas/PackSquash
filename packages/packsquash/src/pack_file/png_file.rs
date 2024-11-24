@@ -113,7 +113,7 @@ impl Decoder for OptimizerDecoder {
 		// do both downsizing and quantization: there are no colors to quantize when downsizing
 		// is successful, and quantizing is only useful when the image has many colors. Note that
 		// both of these operations may change the color type (i.e., turn an indexed image to RGBA,
-		// or vice-versa)
+		// or vice versa)
 		let second_pass_image = match (can_change_color_type
 			&& self.optimization_settings.downsize_if_single_color)
 			.then(|| {
@@ -180,7 +180,7 @@ impl Decoder for OptimizerDecoder {
 		//   dithering. This is relevant when the second pass is used as input for the third
 		//   pass.
 		// - Downsizing yields smaller files except in some extreme edge cases due to the
-		//   heuristics used by the optimized in the third pass being inappropriate. This may be
+		//   heuristics used by the optimizer in the third pass being inappropriate. This may be
 		//   the case in grayscale images, for example.
 		//
 		// We can't do much about the first point, but the second point may be handled by
@@ -196,7 +196,7 @@ impl Decoder for OptimizerDecoder {
 		// size when quantization is not forced and executing each pass a single time, explicit
 		// user configuration of the quantization parameters may be needed to achieve the most
 		// optimal PNG we are capable of. Luckily, the points above are fairly rare
-		let (optimized_png, optimization_strategy_message) =
+		let (mut optimized_png, optimization_strategy_message) =
 			if !must_use_second_pass_result && first_pass_png.len() < third_pass_png.len() {
 				(
 					first_pass_png,
@@ -221,6 +221,15 @@ impl Decoder for OptimizerDecoder {
 					}
 				)
 			};
+
+		// Final pass: apply obfuscation to the optimized result if possible and desired
+		if self
+			.optimization_settings
+			.minecraft_version_supports_png_obfuscation
+			&& self.optimization_settings.png_obfuscation
+		{
+			image_processor::obfuscate_png(&mut optimized_png);
+		}
 
 		Ok(Some((optimization_strategy_message, optimized_png)))
 	}

@@ -63,6 +63,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 #### Protection
 
+- Texture files can now be protected to make them harder to view outside of
+  Minecraft via the new file-specific `png_obfuscation` option. This protection
+  is independent of the already available ZIP layer protection, so it can be
+  used alongside it or not, and can be applied to a subset of pack files.
+  - This protection will not work for resource packs targeting Minecraft 1.12.2
+    or older. By default, PackSquash will force it to be disabled for such
+    versions via the new `png_obfuscation_incompatibility` quirk.
 - PackSquash now adds an extra layer of protection when
   `size_increasing_zip_obfuscation` is enabled on a small subset of pack files,
   as far as it safe to do so due to the inner workings of Minecraft. (Thanks to
