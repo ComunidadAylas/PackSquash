@@ -4,8 +4,8 @@ use std::io::IsTerminal;
 use std::os::windows::ffi::OsStrExt;
 use std::{env, io};
 
-use windows_sys::Win32::System::Console::SetConsoleTitleW;
 use winapi_util::console::Console;
+use windows_sys::Win32::System::Console::SetConsoleTitleW;
 
 use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};
 
