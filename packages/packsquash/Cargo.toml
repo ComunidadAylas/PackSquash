@@ -10,7 +10,7 @@ publish = false
 edition = "2021"
 
 [dependencies]
-bytes = "1.8.0"
+bytes = "1.9.0"
 globset = { version = "0.4.15", default-features = false }
 enumset = { version = "1.1.5", features = ["serde"] }
 indexmap = { version = "2.6.0", features = ["serde"] }
@@ -19,7 +19,7 @@ thiserror = "2.0.3"
 ahash = "0.8.11"
 patricia_tree = "0.8.0"
 
-sysinfo = { version = "0.32.0", default-features = false, features = [
+sysinfo = { version = "0.32.1", default-features = false, features = [
   "system",
 ] }
 walkdir = "2.5.0"
@@ -41,7 +41,7 @@ futures = { version = "0.3.31", default-features = false }
 
 serde = { version = "1.0.215", features = ["derive"] }
 
-serde_json = "1.0.132"
+serde_json = "1.0.133"
 json_comments = "0.2.2"
 jsonpath_lib = "0.3.0"
 
@@ -67,9 +67,9 @@ dasp_sample = "0.11.0"
 rubato = "0.16.1"
 optivorbis = "0.2.0"
 
-glsl-lang = { version = "0.7.1", features = ["lexer-v2-full", "lexer-v2-min"] }
-glsl-lang-lexer = "0.7.1"
-glsl-lang-pp = "0.7.1"
+glsl-lang = { version = "0.7.2", features = ["lexer-v2-full", "lexer-v2-min"] }
+glsl-lang-lexer = "0.7.2"
+glsl-lang-pp = "0.7.2"
 
 java-properties = { version = "2.0.0", optional = true }
 
@@ -94,7 +94,7 @@ rlimit = "0.10.2"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.52.0"
-wmi = { version = "0.14.0", default-features = false }
+wmi = { version = "0.14.1", default-features = false }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.10.0"

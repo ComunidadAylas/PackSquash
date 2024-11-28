@@ -250,9 +250,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "bytes"
-version = "1.8.0"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ac0150caa2ae65ca5bd83f25c7de183dea78d4d366469f148435e2acfbad0da"
+checksum = "325918d6fe32f23b19878fe4b34794ae41fc19ddbe53b10571a4874d44ffd39b"
 
 [[package]]
 name = "cast"
@@ -728,12 +728,12 @@ checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
 
 [[package]]
 name = "errno"
-version = "0.3.9"
+version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "534c5cf6194dfab3db3242765c03bbe257cf92f22b38f6bc0c58d59108a820ba"
+checksum = "33d852cb9b869c2a9b3df2f71a3074817f01e1844f839a144f5fcef059a4eb5d"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -931,8 +931,8 @@ dependencies = [
 
 [[package]]
 name = "glsl-lang"
-version = "0.7.1"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#6da345bf488b5636c9767a50b614c16dbc29fb47"
+version = "0.7.2"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#540ef3bf7925f5f6bd17f240693ec112dce15472"
 dependencies = [
  "glsl-lang-lexer",
  "glsl-lang-types",
@@ -940,25 +940,25 @@ dependencies = [
  "lalrpop-util",
  "lang-util",
  "once_cell",
- "thiserror 1.0.69",
+ "thiserror 2.0.3",
 ]
 
 [[package]]
 name = "glsl-lang-lexer"
-version = "0.7.1"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#6da345bf488b5636c9767a50b614c16dbc29fb47"
+version = "0.7.2"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#540ef3bf7925f5f6bd17f240693ec112dce15472"
 dependencies = [
  "glsl-lang-pp",
  "glsl-lang-types",
  "lalrpop-util",
  "lang-util",
- "thiserror 1.0.69",
+ "thiserror 2.0.3",
 ]
 
 [[package]]
 name = "glsl-lang-pp"
-version = "0.7.1"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#6da345bf488b5636c9767a50b614c16dbc29fb47"
+version = "0.7.2"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#540ef3bf7925f5f6bd17f240693ec112dce15472"
 dependencies = [
  "arrayvec",
  "bimap",
@@ -971,16 +971,16 @@ dependencies = [
  "static_assertions",
  "string_cache",
  "string_cache_codegen",
- "thiserror 1.0.69",
+ "thiserror 2.0.3",
 ]
 
 [[package]]
 name = "glsl-lang-types"
-version = "0.7.1"
-source = "git+https://github.com/ComunidadAylas/glsl-lang#6da345bf488b5636c9767a50b614c16dbc29fb47"
+version = "0.7.2"
+source = "git+https://github.com/ComunidadAylas/glsl-lang#540ef3bf7925f5f6bd17f240693ec112dce15472"
 dependencies = [
  "lang-util",
- "thiserror 1.0.69",
+ "thiserror 2.0.3",
 ]
 
 [[package]]
@@ -1001,9 +1001,9 @@ checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
 
 [[package]]
 name = "hashbrown"
-version = "0.15.1"
+version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a9bfc1af68b1726ea47d3d5109de126281def866b33970e10fbab11b5dafab3"
+checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 
 [[package]]
 name = "heck"
@@ -1041,7 +1041,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "707907fe3c25f5424cce2cb7e1cbcafee6bdbe735ca90ef77c29e84591e5b9da"
 dependencies = [
  "equivalent",
- "hashbrown 0.15.1",
+ "hashbrown 0.15.2",
  "serde",
 ]
 
@@ -1109,9 +1109,9 @@ dependencies = [
 
 [[package]]
 name = "itoa"
-version = "1.0.13"
+version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "540654e97a3f4470a492cd30ff187bc95d89557a903a2bbf112e2fae98104ef2"
+checksum = "d75a2a4b1b190afb6f5425f10f6a8f959d2ea0b9c2b1d79553551850539e4674"
 
 [[package]]
 name = "java-properties"
@@ -1183,9 +1183,9 @@ dependencies = [
 
 [[package]]
 name = "lang-util"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e079c573bd484aa5e5feff396642f10b11184bf56e2e39f9b9da9c5154188770"
+checksum = "56696a120465502161fe2c62cd784ee4a338f2460019339a504a0862ab31475a"
 dependencies = [
  "derive_more",
  "lalrpop-util",
@@ -1197,9 +1197,9 @@ dependencies = [
 
 [[package]]
 name = "lang-util-derive"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9626b200d46c2088152252fafd5e08ee1b2e609fa0cf89a747f8c6d3c7d6b21"
+checksum = "77522b4885ddae41b7c4134a2c33e22a7b09be0bd4c4ce1bee125a372f2f6984"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -1215,9 +1215,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.164"
+version = "0.2.166"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "433bfe06b8c75da9b2e3fbea6e5329ff87748f0b144ef75306e674c3f6f7c13f"
+checksum = "c2ccc108bbc0b1331bd061864e7cd823c0cab660bbe6970e66e2c0614decde36"
 
 [[package]]
 name = "libdeflate-sys"
@@ -1603,7 +1603,7 @@ dependencies = [
  "packsquash",
  "serde_path_to_error",
  "tokio",
- "toml 0.8.19",
+ "toml",
  "tz-rs",
  "winapi-util",
  "windows-sys 0.59.0",
@@ -2189,7 +2189,7 @@ dependencies = [
 [[package]]
 name = "spng"
 version = "0.2.0-alpha.3"
-source = "git+https://github.com/ComunidadAylas/spng-rs?branch=feat%2Fdecoder-crc-action#51b46a8f9168afb5de3e4ad53ad9c78d8025128b"
+source = "git+https://github.com/aloucks/spng-rs?rev=d3f69ff#d3f69ff2c5e5a0abcd3bb5f7b32d7eae7e8c99a2"
 dependencies = [
  "bitflags 2.6.0",
  "libc",
@@ -2199,7 +2199,7 @@ dependencies = [
 [[package]]
 name = "spng-sys"
 version = "0.2.0-alpha.3"
-source = "git+https://github.com/ComunidadAylas/spng-rs?branch=feat%2Fdecoder-crc-action#51b46a8f9168afb5de3e4ad53ad9c78d8025128b"
+source = "git+https://github.com/aloucks/spng-rs?rev=d3f69ff#d3f69ff2c5e5a0abcd3bb5f7b32d7eae7e8c99a2"
 dependencies = [
  "cc",
  "libc",
@@ -2385,9 +2385,9 @@ dependencies = [
 
 [[package]]
 name = "sysinfo"
-version = "0.32.0"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3b5ae3f4f7d64646c46c4cae4e3f01d1c5d255c7406fdd7c7f999a94e488791"
+checksum = "4c33cd241af0f2e9e3b5c32163b873b29956890b5342e6745b917ce9d490f4af"
 dependencies = [
  "core-foundation-sys",
  "libc",
@@ -2579,18 +2579,6 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "0.7.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd79e69d3b627db300ff956027cc6c3798cef26d22526befdfcd12feeb6d2257"
-dependencies = [
- "serde",
- "serde_spanned",
- "toml_datetime",
- "toml_edit 0.19.15",
-]
-
-[[package]]
-name = "toml"
 version = "0.8.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1ed1f98e3fdc28d6d910e6737ae6ab1a93bf1985935a1193e68f93eeb68d24e"
@@ -2598,7 +2586,7 @@ dependencies = [
  "serde",
  "serde_spanned",
  "toml_datetime",
- "toml_edit 0.22.22",
+ "toml_edit",
 ]
 
 [[package]]
@@ -2612,19 +2600,6 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.19.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b5bb770da30e5cbfde35a2d7b9b8a2c4b8ef89548a7a6aeab5c9a576e3e7421"
-dependencies = [
- "indexmap",
- "serde",
- "serde_spanned",
- "toml_datetime",
- "winnow 0.5.40",
-]
-
-[[package]]
-name = "toml_edit"
 version = "0.22.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ae48d6208a266e853d946088ed816055e556cc6028c5e8e2b84d9fa5dd7c7f5"
@@ -2633,7 +2608,7 @@ dependencies = [
  "serde",
  "serde_spanned",
  "toml_datetime",
- "winnow 0.6.20",
+ "winnow",
 ]
 
 [[package]]
@@ -3104,15 +3079,6 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 
 [[package]]
 name = "winnow"
-version = "0.5.40"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f593a95398737aeed53e489c785df13f3618e41dbcd6718c6addbf1395aa6876"
-dependencies = [
- "memchr",
-]
-
-[[package]]
-name = "winnow"
 version = "0.6.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36c1fec1a2bb5866f07c25f68c26e565c4c200aebb96d7e55710c19d3e8ac49b"
@@ -3132,19 +3098,19 @@ dependencies = [
 
 [[package]]
 name = "winresource"
-version = "0.1.17"
+version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77e2aaaf8cfa92078c0c0375423d631f82f2f57979c2884fdd5f604a11e45329"
+checksum = "7276691b353ad4547af8c3268488d1311f4be791ffdc0c65b8cfa8f41eed693b"
 dependencies = [
- "toml 0.7.8",
+ "toml",
  "version_check 0.9.5",
 ]
 
 [[package]]
 name = "wmi"
-version = "0.14.0"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbdda506bdee26ba617bd814538b690e14f59e8185345344cff113a8be21c005"
+checksum = "70df482bbec7017ce4132154233642de658000b24b805345572036782a66ad55"
 dependencies = [
  "futures",
  "log",
