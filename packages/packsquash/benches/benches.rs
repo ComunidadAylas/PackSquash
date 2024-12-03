@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::time::Duration;
 
-use criterion::{measurement::Measurement, BatchSize, BenchmarkGroup, Criterion, SamplingMode};
+use criterion::{BatchSize, BenchmarkGroup, Criterion, SamplingMode, measurement::Measurement};
 #[cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))]
 use criterion_perf_events::Perf;
 use enumset::EnumSet;
@@ -16,9 +16,9 @@ use tempfile::NamedTempFile;
 
 use pack_dataset::PackDataset;
 use packsquash::{
+	PackSquasher,
 	config::{FileOptions, GlobalOptions, ProcessedSquashOptions, SquashOptions},
-	vfs::os_fs::OsFilesystem,
-	PackSquasher
+	vfs::os_fs::OsFilesystem
 };
 
 mod pack_dataset;

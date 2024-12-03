@@ -1,4 +1,4 @@
-use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};
+use super::{TerminalTitleSetterTrait, write_ansi_set_window_title_escape_sequence};
 use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
 use std::{
@@ -83,7 +83,8 @@ fn controlling_terminal() -> Option<PathBuf> {
 	use std::ffi::CStr;
 	use std::os::raw::c_char;
 
-	extern "C" {
+	#[allow(unsafe_code)]
+	unsafe extern "C" {
 		/// `char* ctermid(char* s)`, from `#include <stdio.h>`.
 		///
 		/// Documentation: <https://pubs.opengroup.org/onlinepubs/9699919799/functions/ctermid.html>

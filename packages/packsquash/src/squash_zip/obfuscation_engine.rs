@@ -10,8 +10,8 @@
 
 use obfstr::random;
 use rand_xoshiro::{
-	rand_core::{RngCore, SeedableRng},
-	Xoshiro128Plus
+	Xoshiro128Plus,
+	rand_core::{RngCore, SeedableRng}
 };
 use std::{
 	borrow::Cow,
@@ -24,13 +24,13 @@ use tokio::io::{AsyncWrite, AsyncWriteExt};
 
 pub use self::pseudodir_concealment::FileListingCircumstances;
 use self::pseudodir_concealment::PseudodirConcealer;
-use crate::{config::PercentageInteger, RelativePath};
+use crate::{RelativePath, config::PercentageInteger};
 
 use super::{
+	SquashZipSettings,
 	zip_file_record::{
 		CentralDirectoryHeader, CompressionMethod, EndOfCentralDirectory, LocalFileHeader
-	},
-	SquashZipSettings
+	}
 };
 
 mod pseudodir_concealment;
@@ -38,11 +38,7 @@ mod pseudodir_concealment;
 const CRC32_KEY: u32 = {
 	let k = random!(u32);
 
-	if k == 0 {
-		0xDEADBEEF
-	} else {
-		k
-	}
+	if k == 0 { 0xDEADBEEF } else { k }
 };
 
 enum SizeIncreasingObfuscation {

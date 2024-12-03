@@ -1,4 +1,4 @@
-use crate::{config::compile_pack_file_glob_pattern, RelativePath};
+use crate::{RelativePath, config::compile_pack_file_glob_pattern};
 use globset::{GlobSet, GlobSetBuilder};
 
 static KNOWN_LISTED_RESOURCE_PATTERNS: &[&str] = &[

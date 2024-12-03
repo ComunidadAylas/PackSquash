@@ -110,7 +110,7 @@ impl PackMeta {
 							_ => {
 								return Err(PackMetaError::MalformedMeta(
 									PACK_FORMAT_VERSION_IS_NOT_INTEGER
-								))
+								));
 							}
 						};
 
@@ -125,26 +125,26 @@ impl PackMeta {
 							Some(_) => {
 								return Err(PackMetaError::MalformedMeta(
 									"The \"description\" key value is not a text component"
-								))
+								));
 							}
 							None => {
 								return Err(PackMetaError::MalformedMeta(
 									"Missing \"description\" key in pack metadata object"
-								))
+								));
 							}
 						};
 					}
 					_ => {
 						return Err(PackMetaError::MalformedMeta(
 							"The \"pack\" key value is not a JSON object"
-						))
+						));
 					}
 				}
 			}
 			_ => {
 				return Err(PackMetaError::MalformedMeta(
 					"The JSON value is not an object"
-				))
+				));
 			}
 		};
 

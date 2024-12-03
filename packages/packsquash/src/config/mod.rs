@@ -1,6 +1,6 @@
 //! Contains the configuration options needed to create a `PackSquasher` run.
 
-use std::num::{NonZeroU16, NonZeroU32, NonZeroU8};
+use std::num::{NonZeroU8, NonZeroU16, NonZeroU32};
 use std::thread::available_parallelism;
 use std::{num::NonZeroUsize, path::PathBuf};
 

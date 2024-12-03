@@ -198,7 +198,7 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 #[allow(unsafe_code, non_camel_case_types)]
 pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 	use core_foundation::{
-		base::{kCFAllocatorDefault, mach_port_t, CFAllocatorRef, CFTypeRef, TCFType},
+		base::{CFAllocatorRef, CFTypeRef, TCFType, kCFAllocatorDefault, mach_port_t},
 		dictionary::{CFDictionaryRef, CFMutableDictionaryRef},
 		string::{CFString, CFStringRef}
 	};
@@ -305,7 +305,8 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 pub(super) fn get_host_id() -> Option<SystemId> {
 	use std::os::raw::c_long;
 
-	extern "C" {
+	#[allow(unsafe_code)]
+	unsafe extern "C" {
 		/// `long gethostid()`, from `#include <unistd.h>`.
 		///
 		/// Documentation: <https://pubs.opengroup.org/onlinepubs/9699919799/functions/gethostid.html>
@@ -323,7 +324,7 @@ pub(super) fn get_host_id() -> Option<SystemId> {
 #[cfg(windows)]
 pub(super) fn get_machine_id() -> Option<SystemId> {
 	use uuid::Uuid;
-	use winreg::{enums::HKEY_LOCAL_MACHINE, RegKey};
+	use winreg::{RegKey, enums::HKEY_LOCAL_MACHINE};
 
 	let machine_guid: String = RegKey::predef(HKEY_LOCAL_MACHINE)
 		.open_subkey("SOFTWARE\\Microsoft\\Cryptography")
@@ -370,7 +371,7 @@ pub(super) fn get_product_id() -> Option<SystemId> {
 /// and, because it is 32-bit long, it is pretty weak. Use as a last-resort fallback.
 #[cfg(windows)]
 pub(super) fn get_install_date() -> Option<SystemId> {
-	use winreg::{enums::HKEY_LOCAL_MACHINE, RegKey};
+	use winreg::{RegKey, enums::HKEY_LOCAL_MACHINE};
 
 	let install_date: u32 = RegKey::predef(HKEY_LOCAL_MACHINE)
 		.open_subkey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion")

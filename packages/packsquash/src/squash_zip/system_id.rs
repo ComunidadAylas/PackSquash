@@ -26,8 +26,7 @@ mod os;
 mod tests;
 
 /// The panic error message to show in case a system ID could not be found.
-static ERROR_MESSAGE: &str =
-	"Couldn't get a suitable system ID for ZIP field obfuscation. Aborting execution for safety. \
+static ERROR_MESSAGE: &str = "Couldn't get a suitable system ID for ZIP field obfuscation. Aborting execution for safety. \
 	Please review your system configuration or report a bug.";
 
 /// A struct that contains a system ID and some of its most relevant characteristics.

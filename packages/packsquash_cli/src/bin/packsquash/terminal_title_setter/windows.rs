@@ -7,7 +7,7 @@ use std::{env, io};
 use winapi_util::console::Console;
 use windows_sys::Win32::System::Console::SetConsoleTitleW;
 
-use super::{write_ansi_set_window_title_escape_sequence, TerminalTitleSetterTrait};
+use super::{TerminalTitleSetterTrait, write_ansi_set_window_title_escape_sequence};
 
 /// A terminal output stream.
 enum TerminalStream {

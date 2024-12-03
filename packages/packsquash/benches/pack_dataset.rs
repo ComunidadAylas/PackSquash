@@ -1,12 +1,12 @@
 //! Contains the definition of the pack dataset struct.
 
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::{HashMap, hash_map::Entry};
 use std::fs::File;
 use std::io;
 use std::path::Path;
 
 use tar::Archive;
-use tempfile::{tempdir, TempDir};
+use tempfile::{TempDir, tempdir};
 use xz2::read::XzDecoder;
 
 /// Represents a pack dataset, which provides access to packs in the dataset.

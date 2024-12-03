@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use futures::{future, StreamExt};
+use futures::{StreamExt, future};
 use patricia_tree::PatriciaSet;
 use regex::Regex;
 use thiserror::Error;
@@ -9,9 +9,9 @@ use tokio_stream::Stream;
 use tokio_util::codec::{FramedRead, LinesCodec, LinesCodecError};
 
 use crate::config::LegacyLanguageFileOptions;
-use crate::pack_file::asset_type::PackFileAssetType;
-use crate::pack_file::util::{prepare_line_for_output, LineNumber, MarkLastDecorator, BOM};
 use crate::pack_file::AsyncReadAndSizeHint;
+use crate::pack_file::asset_type::PackFileAssetType;
+use crate::pack_file::util::{BOM, LineNumber, MarkLastDecorator, prepare_line_for_output};
 
 use super::{OptimizedBytesChunk, PackFile, PackFileConstructor};
 

@@ -17,8 +17,8 @@ use tokio_util::codec::{Decoder, FramedRead};
 use vorbis_rs::{VorbisBitrateManagementStrategy, VorbisEncoderBuilder};
 
 use crate::config::{AudioBitrateControlMode, AudioFileOptions, ChannelMixingOption};
-use crate::pack_file::asset_type::PackFileAssetType;
 use crate::pack_file::AsyncReadAndSizeHint;
+use crate::pack_file::asset_type::PackFileAssetType;
 use signal_processor::decode_and_process_sample_blocks;
 use vorbis_stream_mangler::ValidatingAndObfuscatingOggVorbisStreamMangler;
 
@@ -80,15 +80,21 @@ pub enum OptimizationError {
 	Symphonia(#[from] symphonia::core::errors::Error),
 	#[error("Vorbis error: {0}")]
 	Vorbis(#[from] vorbis_rs::VorbisError),
-	#[error("Could not find a decodable audio track. Is this file in a supported format, and its extension correct?")]
+	#[error(
+		"Could not find a decodable audio track. Is this file in a supported format, and its extension correct?"
+	)]
 	NoAudioTrack,
 	#[error("Unknown or invalid channel count. Minecraft only supports mono and stereo sounds")]
 	UnsupportedChannelCount,
 	#[error("Unknown sampling frequency. Is this file corrupt?")]
 	UnknownSamplingFrequency,
-	#[error("Tried to resample from {sampling_frequency} Hz, but that frequency is too high. Please lower it")]
+	#[error(
+		"Tried to resample from {sampling_frequency} Hz, but that frequency is too high. Please lower it"
+	)]
 	InvalidSourceSamplingFrequency { sampling_frequency: NonZeroU32 },
-	#[error("Tried to resample to {sampling_frequency} Hz, but that frequency is too high. Please lower it")]
+	#[error(
+		"Tried to resample to {sampling_frequency} Hz, but that frequency is too high. Please lower it"
+	)]
 	InvalidTargetSamplingFrequency { sampling_frequency: NonZeroU32 },
 	#[error("An invalid target bitrate was specified in the options")]
 	InvalidTargetBitrate,
@@ -96,7 +102,9 @@ pub enum OptimizationError {
 	ResamplingFailure(#[from] ResampleError),
 	#[error("{0}")]
 	TwoPassOptimization(#[from] ogg_to_ogg::RemuxError),
-	#[error("The Minecraft sample count limit for audio files was exceeded. Please reduce the sampling frequency or duration")]
+	#[error(
+		"The Minecraft sample count limit for audio files was exceeded. Please reduce the sampling frequency or duration"
+	)]
 	TooLongForMinecraft,
 	#[error("I/O error: {0}")]
 	Io(#[from] std::io::Error)

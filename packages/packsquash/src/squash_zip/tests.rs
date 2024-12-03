@@ -58,19 +58,16 @@ async fn add_files_finish_and_read_back_test(
 	spool_buffer_size: Option<usize>
 ) -> PathBuf {
 	let squash_zip = squash_zip.unwrap_or(
-		SquashZip::new(
-			None,
-			SquashZipSettings {
-				zopfli_iterations: 20,
-				store_squash_time: true,
-				enable_obfuscation: false,
-				enable_deduplication,
-				enable_size_increasing_obfuscation: false,
-				percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
-				workaround_old_java_obfuscation_quirks: false,
-				spool_buffer_size: spool_buffer_size.unwrap_or(DEFAULT_SPOOL_BUFFER_SIZE)
-			}
-		)
+		SquashZip::new(None, SquashZipSettings {
+			zopfli_iterations: 20,
+			store_squash_time: true,
+			enable_obfuscation: false,
+			enable_deduplication,
+			enable_size_increasing_obfuscation: false,
+			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
+			workaround_old_java_obfuscation_quirks: false,
+			spool_buffer_size: spool_buffer_size.unwrap_or(DEFAULT_SPOOL_BUFFER_SIZE)
+		})
 		.await
 		.map_err(|(err, _)| err)
 		.expect(INSTANTIATION_FAILURE)
@@ -396,19 +393,16 @@ async fn add_several_finish_then_reuse_and_add_works() {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn several_files_with_same_path_are_handled_properly() {
-	let squash_zip = SquashZip::new(
-		None::<File>,
-		SquashZipSettings {
-			zopfli_iterations: 0,
-			store_squash_time: false,
-			enable_obfuscation: false,
-			enable_deduplication: false,
-			enable_size_increasing_obfuscation: false,
-			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
-			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE
-		}
-	)
+	let squash_zip = SquashZip::new(None::<File>, SquashZipSettings {
+		zopfli_iterations: 0,
+		store_squash_time: false,
+		enable_obfuscation: false,
+		enable_deduplication: false,
+		enable_size_increasing_obfuscation: false,
+		percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
+		workaround_old_java_obfuscation_quirks: false,
+		spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE
+	})
 	.await
 	.map_err(|(err, _)| err)
 	.expect(INSTANTIATION_FAILURE);

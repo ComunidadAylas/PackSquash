@@ -1,13 +1,13 @@
 [package]
 name = "packsquash_cli"
 description = "Minecraft resource and data pack optimizer (CLI)"
-version = "0.4.0"
+version.workspace = true
 authors = ["Alejandro \"AlexTMjugador\" González"]
-repository = "https://github.com/ComunidadAylas/PackSquash"
-license = "AGPL-3.0-or-later"
+repository.workspace = true
+license.workspace = true
 readme = "../../README.md"
 publish = false
-edition = "2021"
+edition.workspace = true
 
 [dependencies]
 packsquash = { path = "../packsquash", version = "0.4.0" }

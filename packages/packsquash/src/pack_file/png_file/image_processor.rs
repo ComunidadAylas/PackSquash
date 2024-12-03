@@ -3,14 +3,14 @@
 use crate::config::ColorQuantizationTarget;
 use crate::zopfli_iterations_time_model::ZopfliIterationsTimeModel;
 use bytes::BytesMut;
-use imagequant::{liq_error, Attributes};
+use imagequant::{Attributes, liq_error};
 use itertools::Itertools;
 use obfstr::random;
-use oxipng::{indexset, BitDepth, ColorType, Deflaters, Options, RowFilter, StripChunks};
+use oxipng::{BitDepth, ColorType, Deflaters, Options, RowFilter, StripChunks, indexset};
 use rgb::{AsPixels, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
 use std::io::Read;
-use std::num::{NonZeroU16, NonZeroU8};
+use std::num::{NonZeroU8, NonZeroU16};
 use std::time::Duration;
 use std::{cmp, iter};
 use thiserror::Error;
@@ -131,20 +131,12 @@ pub fn obfuscate_png(png: &mut [u8]) {
 	const CRC32_KEY: u32 = {
 		let k = random!(u32);
 
-		if k == 0 {
-			0xCAFEBABE
-		} else {
-			k
-		}
+		if k == 0 { 0xCAFEBABE } else { k }
 	};
 	const ADLER32_KEY: u32 = {
 		let k = random!(u32);
 
-		if k == 0 {
-			0xCAFEBABE
-		} else {
-			k
-		}
+		if k == 0 { 0xCAFEBABE } else { k }
 	};
 
 	let mut i = 8;

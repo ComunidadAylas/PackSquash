@@ -5,8 +5,8 @@ use std::time::{Duration, SystemTime, SystemTimeError};
 
 use aes::cipher::generic_array::GenericArray;
 use aes::{
-	cipher::{BlockCipher, BlockEncrypt, KeyInit},
-	Aes128, Block
+	Aes128, Block,
+	cipher::{BlockCipher, BlockEncrypt, KeyInit}
 };
 
 use fpe::ff1::{BinaryNumeralString, FF1};

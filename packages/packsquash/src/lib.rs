@@ -13,18 +13,18 @@ use std::convert::Infallible;
 use std::io::ErrorKind;
 use std::panic;
 use std::pin::Pin;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::{io, time::SystemTime};
 
 use enumset::EnumSet;
-use futures::future;
 use futures::StreamExt;
+use futures::future;
 use thiserror::Error;
 use tokio::io::AsyncSeek;
 use tokio::io::BufReader;
-use tokio::sync::mpsc::Sender;
 use tokio::sync::Semaphore;
+use tokio::sync::mpsc::Sender;
 use tokio::{fs::File, io::AsyncRead, runtime::Builder};
 
 use config::ProcessedSquashOptions;
@@ -38,12 +38,12 @@ use crate::config::{
 	CommandFunctionFileOptions, FileOptions, JsonFileOptions, LegacyLanguageFileOptions,
 	PngFileOptions, ShaderFileOptions, SquashOptions
 };
-use crate::pack_file::asset_type::{
-	tweak_asset_types_mask_from_global_options, PackFileAssetTypeMatcher, PackFileAssetTypeMatches
-};
 use crate::pack_file::PackFileProcessData;
+use crate::pack_file::asset_type::{
+	PackFileAssetTypeMatcher, PackFileAssetTypeMatches, tweak_asset_types_mask_from_global_options
+};
 pub use crate::squash_zip::relative_path::RelativePath;
-use crate::squash_zip::{system_id, PreviousZipParseError};
+use crate::squash_zip::{PreviousZipParseError, system_id};
 use crate::vfs::{IteratorTraversalOptions, VfsPackFileIterEntry, VirtualFileSystem};
 
 pub mod config;

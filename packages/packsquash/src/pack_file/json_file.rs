@@ -10,10 +10,10 @@ use tokio::io::AsyncRead;
 use tokio_util::codec::{Decoder, FramedRead};
 
 use crate::config::JsonFileOptions;
-use crate::pack_file::asset_type::PackFileAssetType;
 use crate::pack_file::AsyncReadAndSizeHint;
+use crate::pack_file::asset_type::PackFileAssetType;
 
-use super::{util::strip_utf8_bom, PackFile, PackFileConstructor};
+use super::{PackFile, PackFileConstructor, util::strip_utf8_bom};
 
 use self::debloater::Debloater;
 

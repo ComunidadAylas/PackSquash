@@ -13,7 +13,7 @@ use std::{
 
 use aes::Aes128;
 use ahash::AHashMap;
-use futures::{future, StreamExt, TryStreamExt};
+use futures::{StreamExt, TryStreamExt, future};
 use thiserror::Error;
 use tokio::{
 	fs::File,
@@ -25,7 +25,7 @@ use tokio_util::io::ReaderStream;
 use zopfli::Format;
 
 use crate::{
-	config::PercentageInteger, zopfli_iterations_time_model::ZopfliIterationsTimeModel, RelativePath
+	RelativePath, config::PercentageInteger, zopfli_iterations_time_model::ZopfliIterationsTimeModel
 };
 
 use self::{
@@ -1015,17 +1015,14 @@ async fn read_previous_zip_contents<F: AsyncRead + AsyncSeek + Unpin>(
 		}
 
 		// After all this work, we can finally insert the file data in the map :)
-		previous_zip_contents.insert(
-			relative_path,
-			PreviousFile {
-				squash_time,
-				data_offset: local_file_header_offset + 30 + local_header_file_name_length,
-				crc32: crc,
-				compression_method,
-				uncompressed_size,
-				compressed_size
-			}
-		);
+		previous_zip_contents.insert(relative_path, PreviousFile {
+			squash_time,
+			data_offset: local_file_header_offset + 30 + local_header_file_name_length,
+			crc32: crc,
+			compression_method,
+			uncompressed_size,
+			compressed_size
+		});
 
 		// Make sure the seek position points to the next central directory header for the
 		// next iteration

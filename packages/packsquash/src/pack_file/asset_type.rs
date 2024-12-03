@@ -20,8 +20,8 @@ use crate::pack_file::properties_file::PropertiesFile;
 use crate::pack_file::shader_file::ShaderFile;
 use crate::squash_zip::FileListingCircumstances;
 use crate::{
-	config::{compile_pack_file_glob_pattern, CustomFileOptions, FileOptions},
-	RelativePath
+	RelativePath,
+	config::{CustomFileOptions, FileOptions, compile_pack_file_glob_pattern}
 };
 
 use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor, PackFileProcessData};

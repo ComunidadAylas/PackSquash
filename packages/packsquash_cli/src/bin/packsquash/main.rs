@@ -13,10 +13,10 @@ use std::{
 
 use env_logger::{Builder, Target, WriteStyle};
 use getopts::{Options, ParsingStyle};
-use log::{debug, error, info, trace, warn, Level, LevelFilter};
+use log::{Level, LevelFilter, debug, error, info, trace, warn};
 use packsquash::{
-	config::SquashOptions, vfs::os_fs::OsFilesystem, PackSquasher, PackSquasherError,
-	PackSquasherStatus, PackSquasherWarning
+	PackSquasher, PackSquasherError, PackSquasherStatus, PackSquasherWarning, config::SquashOptions,
+	vfs::os_fs::OsFilesystem
 };
 use terminal_style::{environment_allows_color, environment_allows_emoji};
 use terminal_title_controller::TerminalTitleController;

@@ -50,12 +50,9 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for PassthroughFile<T> {
 	type OptimizedByteChunksStream = FramedRead<T, PassthroughDecoder>;
 
 	fn process(self) -> FramedRead<T, PassthroughDecoder> {
-		FramedRead::new(
-			self.read,
-			PassthroughDecoder {
-				optimization_strategy_message: self.optimization_strategy_message
-			}
-		)
+		FramedRead::new(self.read, PassthroughDecoder {
+			optimization_strategy_message: self.optimization_strategy_message
+		})
 	}
 
 	fn is_compressed(&self) -> bool {

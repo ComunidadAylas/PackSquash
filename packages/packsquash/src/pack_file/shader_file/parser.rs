@@ -7,9 +7,9 @@ use glsl_lang::ast::{
 };
 use glsl_lang::parse::{Extractable, Parse};
 use glsl_lang::transpiler::glsl::{FormattingSettings, FormattingState};
-use glsl_lang_lexer::v2_full::fs::PreprocessorExt;
-use glsl_lang_lexer::v2_full::LexicalError;
 use glsl_lang_lexer::ParseOptions;
+use glsl_lang_lexer::v2_full::LexicalError;
+use glsl_lang_lexer::v2_full::fs::PreprocessorExt;
 use glsl_lang_pp::processor::fs::{FileSystem, Processor};
 use regex::Regex;
 use std::any::TypeId;

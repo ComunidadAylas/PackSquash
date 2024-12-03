@@ -1,6 +1,13 @@
 [workspace]
 members = ["packages/*"]
-resolver = "2"
+resolver = "3"
+
+[workspace.package]
+version = "0.4.0"
+repository = "https://github.com/ComunidadAylas/PackSquash"
+license = "AGPL-3.0-or-later"
+edition = "2024"
+publish = false
 
 [patch.crates-io]
 # Use our fork of glsl-lang that allows it to parse #moj_import directives
