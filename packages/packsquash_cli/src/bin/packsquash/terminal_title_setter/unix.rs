@@ -83,7 +83,7 @@ fn controlling_terminal() -> Option<PathBuf> {
 	use std::ffi::CStr;
 	use std::os::raw::c_char;
 
-	#[allow(unsafe_code)]
+	#[allow(unsafe_code)] // SAFETY: the system call definition is correct
 	unsafe extern "C" {
 		/// `char* ctermid(char* s)`, from `#include <stdio.h>`.
 		///

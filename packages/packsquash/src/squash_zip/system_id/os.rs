@@ -74,7 +74,8 @@ pub(super) fn get_kernel_host_id() -> Option<SystemId> {
 	use std::ptr;
 	use uuid::Uuid;
 
-	extern "C" {
+	#[allow(unsafe_code)] // SAFETY: the system call definition is correct
+	unsafe extern "C" {
 		/// `int sysctlbyname(const char* name, void* oldp, size_t* oldlenp, void* newp, size_t newlen)`, from `#include <sys/sysctl.h>`.
 		///
 		/// Documentation: <https://www.freebsd.org/cgi/man.cgi?query=sysctlbyname&apropos=0&sektion=0&manpath=FreeBSD+14.0-current&arch=default&format=html>
@@ -133,7 +134,8 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 	use std::os::raw::{c_char, c_int};
 	use uuid::Uuid;
 
-	extern "C" {
+	#[allow(unsafe_code)] // SAFETY: the system call definition is correct
+	unsafe extern "C" {
 		/// `int kenv(int action, const char* name, char* value, int len)`, from `#include <kenv.h>`.
 		///
 		/// Documentation: <https://www.freebsd.org/cgi/man.cgi?query=kenv&sektion=2&format=html>
@@ -210,8 +212,9 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 	type io_service_t = io_object_t;
 	type IOOptionBits = u32;
 
+	#[allow(unsafe_code)] // SAFETY: the system call definition is correct
 	#[link(name = "IOKit", kind = "framework")]
-	extern "C" {
+	unsafe extern "C" {
 		static kIOMasterPortDefault: mach_port_t;
 
 		/// Documentation: <https://developer.apple.com/documentation/iokit/1514687-ioservicematching?language=objc>
@@ -305,7 +308,7 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 pub(super) fn get_host_id() -> Option<SystemId> {
 	use std::os::raw::c_long;
 
-	#[allow(unsafe_code)]
+	#[allow(unsafe_code)] // SAFETY: the system call definition is correct
 	unsafe extern "C" {
 		/// `long gethostid()`, from `#include <unistd.h>`.
 		///
