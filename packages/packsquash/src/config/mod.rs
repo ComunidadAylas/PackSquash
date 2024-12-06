@@ -256,7 +256,7 @@ pub struct GlobalOptions {
 impl Default for GlobalOptions {
 	fn default() -> Self {
 		let available_memory = System::new_with_specifics(
-			RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram())
+			RefreshKind::nothing().with_memory(MemoryRefreshKind::nothing().with_ram())
 		)
 		.available_memory();
 
