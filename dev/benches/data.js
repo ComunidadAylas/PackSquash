@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1733549094645,
+  "lastUpdate": 1733556767091,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "cbe9563f5c5157ec4bd51fc451eb263b17794e33",
-          "message": "fix: support Java 22 and newer clients for packs that disregard ZIP spec\n\nThese changes were tested to work well up to Java 24 and should not\nimpact older Java versions.\n\nFixes #294.",
-          "timestamp": "2024-10-26T15:59:57+02:00",
-          "tree_id": "aea00fcf399da3be8994a153fafe1ffe5edec09a",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/cbe9563f5c5157ec4bd51fc451eb263b17794e33"
-        },
-        "date": 1729952785067,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9560739,
-            "range": "± 120381",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 118915408,
-            "range": "± 3008931",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2706735171,
-            "range": "± 34991405",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 672399096,
-            "range": "± 4100512",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 662460905,
             "range": "± 6781682",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "710c8dd1892c45a563390a84613b5183a74d9a6e",
+          "message": "chore(deps): update taiki-e/install-action digest to acf70b3",
+          "timestamp": "2024-12-07T04:56:03Z",
+          "tree_id": "ccd4943ff1bc3f07429d9a5108144654fdbf4fe0",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/710c8dd1892c45a563390a84613b5183a74d9a6e"
+        },
+        "date": 1733556766384,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9453462,
+            "range": "± 42077",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 118656413,
+            "range": "± 3274125",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2711188599,
+            "range": "± 47544633",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 658118641,
+            "range": "± 1951386",
             "unit": "ns/iter"
           }
         ]
