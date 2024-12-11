@@ -39,17 +39,17 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@acf70b3a1ed953bccebc8c5d80cfdb16ec8ccc36 # v2
+        uses: taiki-e/install-action@8cf90305168a5e4e014d1f8eb7f12eaee6993ffe # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@acf70b3a1ed953bccebc8c5d80cfdb16ec8ccc36 # v2
+        uses: taiki-e/install-action@8cf90305168a5e4e014d1f8eb7f12eaee6993ffe # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@acf70b3a1ed953bccebc8c5d80cfdb16ec8ccc36 # v2
+        uses: taiki-e/install-action@8cf90305168a5e4e014d1f8eb7f12eaee6993ffe # v2
         with:
           tool: cargo-deny
 
@@ -69,7 +69,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@aa578102511db1f4524ed59b8cc2bae4f6e88195 # v3
+        uses: github/codeql-action/upload-sarif@babb554ede22fd5605947329c4d04d8e7a0b8155 # v3
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
@@ -206,7 +206,7 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@acf70b3a1ed953bccebc8c5d80cfdb16ec8ccc36 # v2
+        uses: taiki-e/install-action@8cf90305168a5e4e014d1f8eb7f12eaee6993ffe # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -214,7 +214,7 @@ jobs:
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@acf70b3a1ed953bccebc8c5d80cfdb16ec8ccc36 # v2
+        uses: taiki-e/install-action@8cf90305168a5e4e014d1f8eb7f12eaee6993ffe # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
