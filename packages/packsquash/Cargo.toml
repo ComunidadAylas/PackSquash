@@ -15,7 +15,7 @@ globset = { version = "0.4.15", default-features = false }
 enumset = { version = "1.1.5", features = ["serde"] }
 indexmap = { version = "2.7.0", features = ["serde"] }
 itertools = "0.13.0"
-thiserror = "2.0.4"
+thiserror = "2.0.6"
 ahash = "0.8.11"
 patricia_tree = "0.8.0"
 
@@ -39,7 +39,7 @@ tokio-util = { version = "0.7.13", default-features = false, features = [
 tokio-stream = { version = "0.1.17", default-features = false }
 futures = { version = "0.3.31", default-features = false }
 
-serde = { version = "1.0.215", features = ["derive"] }
+serde = { version = "1.0.216", features = ["derive"] }
 
 serde_json = "1.0.133"
 json_comments = "0.2.2"
@@ -58,7 +58,7 @@ symphonia = { version = "0.5.4", default-features = false, features = [
   "mp3",
   "aac",
 ] }
-vorbis_rs = { version = "0.5.4", default-features = false }
+vorbis_rs = { version = "0.5.5", default-features = false }
 dasp_signal = { version = "0.11.0", default-features = false }
 dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
 dasp_ring_buffer = "0.11.0"
