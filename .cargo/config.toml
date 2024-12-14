@@ -2,13 +2,21 @@
 # Reference: https://doc.rust-lang.org/cargo/reference/config.html
 # This file is primarily useful for specifying custom rustflags
 
+# Reduce Linux binary sizes by using the DT_RELR format for relative
+# relocations in generated ELF files, which is implemented from glibc 2.36
+# onwards. References:
+# https://maskray.me/blog/2021-10-31-relative-relocations-and-relr
+# https://rfc.archlinux.page/0023-pack-relative-relocs/
+[target.'cfg(target_os = "linux")']
+rustflags = ["-Clink-arg=-Wl,-z,pack-relative-relocs"]
+
 # Generate code for the x64 microarchitecture level 2 for x64 targets.
 # This is broadly compatible (virtually any CPU manufactured after
 # 2009 is compatible) and provides some nice speedups. CPUs that
 # don't support it probably are too slow for PackSquash anyway. See:
 # https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels
 [target.'cfg(target_arch = "x86_64")']
-rustflags = ["-C", "target-cpu=x86-64-v2"]
+rustflags = ["-Ctarget-cpu=x86-64-v2"]
 
 [target.'cfg(all(target_os = "linux", target_arch = "aarch64"))']
 linker = "aarch64-linux-gnu-gcc"
