@@ -22,7 +22,7 @@ jobs:
   static-analysis:
     name: Static analysis
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     # Exclude in-repo PRs from running this job
@@ -94,7 +94,7 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: debian:bullseye-slim
+            container: debian:bookworm-slim
             apt-arch: amd64
 
           - target: x86_64-unknown-linux-musl
@@ -106,7 +106,7 @@ jobs:
           - target: aarch64-unknown-linux-gnu
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
-            container: debian:bullseye-slim
+            container: debian:bookworm-slim
             apt-arch: arm64
 
           - target: aarch64-unknown-linux-musl
