@@ -4,10 +4,12 @@
 
 # Reduce Linux binary sizes by using the DT_RELR format for relative
 # relocations in generated ELF files, which is implemented from glibc 2.36
-# onwards. References:
-# https://maskray.me/blog/2021-10-31-relative-relocations-and-relr
+# onwards. musl targets don't get this because we've seen x64 musl binaries
+# SIGSEGV on launch, and apparently that format may have some additional
+# linker magic that's not fully supported by musl. References:
 # https://rfc.archlinux.page/0023-pack-relative-relocs/
-[target.'cfg(target_os = "linux")']
+# https://sourceware.org/bugzilla/show_bug.cgi?id=30917
+[target.'cfg(all(target_os = "linux", not(target_env = "musl")))']
 rustflags = ["-Clink-arg=-Wl,-z,pack-relative-relocs"]
 
 # Generate code for the x64 microarchitecture level 2 for x64 targets.
