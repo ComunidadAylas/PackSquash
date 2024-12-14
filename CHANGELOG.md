@@ -29,6 +29,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - The official binaries have been slimmed down by not including code to show
   stack backtraces on panic, which never worked because such binaries don't
   contain the necessary debug symbol data.
+- The official Linux binaries that rely on system `glibc` now use the more
+  efficient [`DT_RELR` relocation
+  format](https://rfc.archlinux.page/0023-pack-relative-relocs/), reducing their
+  size by approximately 5%, with no drawbacks aside from requiring `glibc`
+  version 2.36 or later.
 - [SLSA](https://slsa.dev/) v1.0 attestations conforming to at least the level 2
   of the build track are now generated for the official PackSquash binary
   artifacts.
