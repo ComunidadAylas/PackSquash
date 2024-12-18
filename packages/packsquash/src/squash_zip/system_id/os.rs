@@ -199,7 +199,7 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 		.map(|uuid| SystemId::new(uuid.into_bytes(), false))
 }
 
-/// Gets a system identifier that aggregates several DMI serial numbers collected by
+/// Gets a system identifier that aggregates the DMI serial numbers collected by
 /// the udev database, provided by the BIOS. Unlike directly reading the DMI product
 /// ID from sysfs, this method does not require root privileges, and takes into account
 /// more serial numbers, but assumes that a suitable udev daemon with a compatible
@@ -212,10 +212,12 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 /// - <https://man7.org/linux/man-pages/man8/systemd-udevd.service.8.html>
 #[cfg(target_os = "linux")]
 pub(super) fn get_aggregated_dmi_serial_numbers_id() -> Option<SystemId> {
+	use sha2::{
+		Digest, Sha224,
+		digest::{OutputSizeUser, typenum::Unsigned}
+	};
 	use std::fs::File;
 	use std::io::{BufRead, BufReader};
-
-	const MAX_SERIAL_AGGREGATION_LENGTH: usize = 64;
 
 	let mut aggregated_serials = String::new();
 
@@ -244,14 +246,10 @@ pub(super) fn get_aggregated_dmi_serial_numbers_id() -> Option<SystemId> {
 		);
 	}
 
-	let mut aggregated_serials = aggregated_serials.into_bytes();
-	aggregated_serials.resize(MAX_SERIAL_AGGREGATION_LENGTH, 0);
-
 	Some(SystemId::new(
-		<[u8; MAX_SERIAL_AGGREGATION_LENGTH]>::try_from(
-			&aggregated_serials[..MAX_SERIAL_AGGREGATION_LENGTH]
-		)
-		.unwrap(),
+		<[u8; <Sha224 as OutputSizeUser>::OutputSize::USIZE]>::from(Sha224::digest(
+			aggregated_serials
+		)),
 		false
 	))
 }
