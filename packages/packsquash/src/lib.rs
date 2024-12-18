@@ -6,6 +6,7 @@
 #![feature(if_let_guard)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(generic_const_exprs)]
+#![feature(lazy_get)]
 
 use itertools::Itertools;
 use std::borrow::Cow;
@@ -13,8 +14,8 @@ use std::convert::Infallible;
 use std::io::ErrorKind;
 use std::panic;
 use std::pin::Pin;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, LazyLock};
 use std::{io, time::SystemTime};
 
 use enumset::EnumSet;
@@ -42,8 +43,8 @@ use crate::pack_file::PackFileProcessData;
 use crate::pack_file::asset_type::{
 	PackFileAssetTypeMatcher, PackFileAssetTypeMatches, tweak_asset_types_mask_from_global_options
 };
+use crate::squash_zip::PreviousZipParseError;
 pub use crate::squash_zip::relative_path::RelativePath;
-use crate::squash_zip::{PreviousZipParseError, system_id};
 use crate::vfs::{IteratorTraversalOptions, VfsPackFileIterEntry, VirtualFileSystem};
 
 pub mod config;
@@ -527,18 +528,19 @@ impl PackSquasher {
 
 			// Finally, send warnings about relevant conditions
 			if let Some(tx) = pack_file_status_sender {
-				if let Some(system_id) = system_id::get_system_id() {
-					if system_id.has_low_entropy {
+				if let Some(system_time_sanitizer) = LazyLock::get(&squash_zip::SYSTEM_TIME_SANITIZER)
+				{
+					if system_time_sanitizer.using_predictable_key() {
 						tx.send(PackSquasherStatus::Warning(
-							PackSquasherWarning::LowEntropySystemId
+							PackSquasherWarning::PredictableSystemTimeSanitizationKey
 						))
 						.await
 						.ok();
 					}
 
-					if system_id.is_volatile {
+					if system_time_sanitizer.using_volatile_key() {
 						tx.send(PackSquasherStatus::Warning(
-							PackSquasherWarning::VolatileSystemId
+							PackSquasherWarning::VolatileSystemTimeSanitizationKey
 						))
 						.await
 						.ok();
@@ -599,12 +601,12 @@ pub enum PackSquasherWarning {
 	/// are usually caused due to the system identifier changing, a previously
 	/// failed optimization process, or using different PackSquash versions.
 	UnusablePreviousZip(PreviousZipParseError),
-	/// A system identifier with low entropy was used to encrypt data, which
-	/// may render that data easier to decrypt.
-	LowEntropySystemId,
-	/// A system identifier that may change even if no targeted action by the
-	/// user to explicitly change it was done was used.
-	VolatileSystemId,
+	/// A predictable key was used to encrypt system time data, which can render
+	/// that data easier to decrypt.
+	PredictableSystemTimeSanitizationKey,
+	/// The key used to encrypt system time data may change in the future even if
+	/// no targeted action by the user to explicitly change it is done.
+	VolatileSystemTimeSanitizationKey,
 	/// The number of parallel tasks used to process pack files was limited
 	/// due to limits on the number of concurrent open file descriptors.
 	#[cfg(unix)]

@@ -6,16 +6,9 @@ use super::*;
 
 #[test]
 fn works() {
-	let system_id = get_or_compute_system_id();
+	let system_id = get_or_compute_system_ids();
 
 	eprintln!("System ID: {system_id:?}");
-
-	// The platform serial number in macOS may have a bit low entropy
-	#[cfg(not(target_os = "macos"))]
-	assert!(
-		!system_id.has_low_entropy,
-		"Expected a high entropy system ID in test environments"
-	)
 }
 
 #[test]
@@ -26,6 +19,31 @@ fn dbus_machine_id_works() {
 	eprintln!(
 		"dbus_machine_id: {:?}",
 		get_dbus_machine_id()
+			.expect("Assuming an appropriate environment, this should return a system ID")
+	)
+}
+
+#[test]
+#[ignore = "Requires (possibly fake) root permissions to work"]
+#[cfg(target_os = "linux")]
+fn get_dmi_product_id() {
+	use super::os::get_dmi_product_id;
+
+	eprintln!(
+		"dmi_product_id: {:?}",
+		get_dmi_product_id()
+			.expect("Assuming an appropriate environment, this should return a system ID")
+	)
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn get_aggregated_dmi_serial_numbers_id() {
+	use super::os::get_aggregated_dmi_serial_numbers_id;
+
+	eprintln!(
+		"aggregated_dmi_serial_numbers_id: {:?}",
+		get_aggregated_dmi_serial_numbers_id()
 			.expect("Assuming an appropriate environment, this should return a system ID")
 	)
 }
@@ -58,22 +76,9 @@ fn platform_serial_number_works() {
 fn host_id_works() {
 	use super::os::get_host_id;
 
-	let host_id = get_host_id();
-
 	eprintln!(
 		"host_id: {:?}",
-		if cfg!(any(target_os = "macos", target_env = "musl")) {
-			// gethostid() is known to be buggy on macOS and return all zeros sometimes, so this can fail.
-			// See: https://bug-coreutils.gnu.narkive.com/4cnKKtfD/workaround-for-hostid-on-darwin-8-macppc
-			// musl has a stub implementation of gethostid() that returns zero, so this may also fail when
-			// targeting musl. See:
-			// https://github.com/AssemblyScript/musl/blob/aad50fcd791e009961621ddfbe3d4c245fd689a3/src/misc/gethostid.c#L3-L6
-			host_id
-		} else {
-			Some(
-				host_id.expect("Assuming an appropriate environment, this should return a system ID")
-			)
-		}
+		get_host_id().expect("Assuming an appropriate environment, this should return a system ID")
 	)
 }
 

@@ -151,6 +151,21 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   aware of the context in which they appear to suggest likely helpful corrective
   actions.
 
+#### Security
+
+- PackSquash now sanitizes file modification times for storage as Squash Times
+  in the generated ZIP files with a stronger AES-256 encryption algorithm.
+- The encryption key length has been increased from 128 bits to 256 bits. This
+  key is now derived using the HKDF-SHA256 algorithm applied to all collected
+  non-volatile system IDs, unless a specific system ID is set via the
+  `PACKSQUASH_SYSTEM_ID` environment variable. If only volatile system IDs are
+  available, the key is derived from those instead. This updated scheme aligns
+  more closely with documented modern best practices for entropy-based key
+  derivation.
+- On Linux targets, DMI product UUIDs and serial numbers are now included in the
+  candidate system IDs, potentially bringing the entropy of the derived
+  encryption keys to parity with Windows.
+
 ### Removed
 
 #### Internal

@@ -347,13 +347,13 @@ fn squash(
 									Was the file last modified by PackSquash? Cause: {}",
 								err
 							),
-							PackSquasherWarning::LowEntropySystemId => warn!(
-								"Used a low entropy system ID. The dates embedded in the result ZIP file, \
+							PackSquasherWarning::PredictableSystemTimeSanitizationKey => warn!(
+								"Used predictable system IDs to build encryption keys. The dates embedded in the result ZIP file, \
 									which reveal when it was generated, may be easier to decrypt. For more information \
 									about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"
 							),
-							PackSquasherWarning::VolatileSystemId => warn!(
-								"Used a volatile system ID. You maybe should not reuse the result ZIP file, \
+							PackSquasherWarning::VolatileSystemTimeSanitizationKey => warn!(
+								"Used a volatile system IDs to build encryption keys. You maybe should not reuse the result ZIP file, \
 									as unexpected results can occur after you use your device as usual. For more information \
 									about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"
 							),

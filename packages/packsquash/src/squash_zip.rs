@@ -11,7 +11,7 @@ use std::{
 	time::SystemTime
 };
 
-use aes::Aes128;
+use aes::Aes256;
 use ahash::AHashMap;
 use futures::{StreamExt, TryStreamExt, future};
 use thiserror::Error;
@@ -42,7 +42,7 @@ pub use self::obfuscation_engine::FileListingCircumstances;
 mod buffered_async_spooled_temp_file;
 mod obfuscation_engine;
 pub mod relative_path;
-pub mod system_id;
+mod system_id;
 pub mod system_time_sanitizer;
 mod zip_file_record;
 
@@ -194,7 +194,7 @@ struct MutableSquashZipState<F: AsyncRead + AsyncSeek + Unpin> {
 
 /// The system time sanitizer that SquashZip will use for sanitizing and
 /// desanitizing dates to and from ZIP files, respectively.
-static SYSTEM_TIME_SANITIZER: LazyLock<SystemTimeSanitizer<Aes128>> =
+pub static SYSTEM_TIME_SANITIZER: LazyLock<SystemTimeSanitizer<Aes256>> =
 	LazyLock::new(SystemTimeSanitizer::new);
 
 impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
