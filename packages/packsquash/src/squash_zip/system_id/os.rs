@@ -277,6 +277,10 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 		string::{CFString, CFStringRef}
 	};
 	use mach2::kern_return::kern_return_t;
+	use sha2::{
+		Digest, Sha224,
+		digest::{OutputSizeUser, typenum::Unsigned}
+	};
 	use std::{ffi::CString, os::raw::c_char};
 
 	type io_object_t = mach_port_t;
@@ -342,9 +346,13 @@ pub(super) fn get_platform_serial_number() -> Option<SystemId> {
 	let serial_number_string =
 		unsafe { CFString::wrap_under_create_rule(serial_number_cf_string_ref as CFStringRef) }
 			.to_string();
-	let mut serial_number_bytes = serial_number_string.as_bytes();
 
-	let result = SystemId::new(serial_number_bytes, false);
+	let result = SystemId::new(
+		<[u8; <Sha224 as OutputSizeUser>::OutputSize::USIZE]>::from(Sha224::digest(
+			serial_number_string
+		)),
+		false
+	);
 
 	release_objects();
 
