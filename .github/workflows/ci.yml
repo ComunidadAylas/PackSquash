@@ -39,17 +39,17 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@ed8c79bccf0b1cb1544a358f81684d3acaa5133f # v2
+        uses: taiki-e/install-action@2c3c8dfabf5933531aca0613c6b0c173fa51745e # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@ed8c79bccf0b1cb1544a358f81684d3acaa5133f # v2
+        uses: taiki-e/install-action@2c3c8dfabf5933531aca0613c6b0c173fa51745e # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@ed8c79bccf0b1cb1544a358f81684d3acaa5133f # v2
+        uses: taiki-e/install-action@2c3c8dfabf5933531aca0613c6b0c173fa51745e # v2
         with:
           tool: cargo-deny
 
@@ -206,7 +206,7 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@ed8c79bccf0b1cb1544a358f81684d3acaa5133f # v2
+        uses: taiki-e/install-action@2c3c8dfabf5933531aca0613c6b0c173fa51745e # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -214,7 +214,7 @@ jobs:
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@ed8c79bccf0b1cb1544a358f81684d3acaa5133f # v2
+        uses: taiki-e/install-action@2c3c8dfabf5933531aca0613c6b0c173fa51745e # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -241,7 +241,7 @@ jobs:
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
           path: |
@@ -250,7 +250,7 @@ jobs:
 
       - name: 📤 Upload CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
         with:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
           path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
@@ -292,7 +292,7 @@ jobs:
         run: lipo -create -output packsquash packsquash-x64/packsquash packsquash-aarch64/packsquash
 
       - name: 📤 Upload universal CLI binary
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
         with:
           name: PackSquash CLI executable (universal-apple-darwin)
           path: packsquash
