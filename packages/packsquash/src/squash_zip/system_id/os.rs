@@ -216,40 +216,54 @@ pub(super) fn get_aggregated_dmi_serial_numbers_id() -> Option<SystemId> {
 		Digest, Sha224,
 		digest::{OutputSizeUser, typenum::Unsigned}
 	};
+	use std::collections::BinaryHeap;
 	use std::fs::File;
-	use std::io::{BufRead, BufReader};
+	use std::io::{BufRead, BufReader, Read};
 
-	let mut aggregated_serials = String::new();
+	let mut aggregated_serials = BinaryHeap::new();
 
-	let udev_dmi_id_db = BufReader::new(File::open("/run/udev/data/+dmi:id").ok()?);
-	for udev_dmi_id in udev_dmi_id_db.lines() {
-		let udev_dmi_id = udev_dmi_id.ok()?;
-
-		let (entry_prefix, attribute_name_and_value) =
-			udev_dmi_id.split_once(':').unwrap_or(("", &udev_dmi_id));
+	for udev_dmi_id in BufReader::new(File::open("/run/udev/data/+dmi:id").ok()?)
+		.take(16384) // Defensively handle files with too long lines
+		.lines()
+	{
+		let mut udev_dmi_id = udev_dmi_id.ok()?;
 
 		// See https://www.man7.org/linux/man-pages/man8/udevadm.8.html, Table 1, for
 		// docs. E means that this is a device property entry
-		if entry_prefix != "E" {
+		let Some((_entry_prefix @ "E", attribute_name_and_value)) = udev_dmi_id.split_once(':')
+		else {
+			continue;
+		};
+
+		let Some((attribute_name, attribute_value)) = attribute_name_and_value.split_once('=') else {
+			continue;
+		};
+
+		if !attribute_name.ends_with("_SERIAL_NUMBER") {
 			continue;
 		}
 
-		aggregated_serials.extend(
-			attribute_name_and_value
-				.split_once('=')
-				.into_iter()
-				.filter_map(|(attribute_name, attribute_value)| {
-					attribute_name
-						.ends_with("_SERIAL_NUMBER")
-						.then_some(attribute_value)
-				})
-		);
+		// In-place truncation of the udev_dmi_id string to only hold the attribute value.
+		// This works because attribute_value points to a substring within the udev_dmi_id string
+		// allocation, and ranges are expressed in byte indices
+		udev_dmi_id.drain(0..attribute_value.as_ptr() as usize - udev_dmi_id.as_ptr() as usize);
+		let attribute_value = udev_dmi_id;
+
+		aggregated_serials.push(attribute_value);
+	}
+
+	// The ordering of the serial numbers may vary between invocations due to firmware quirks,
+	// udev changes, and physical tampering, so sort them before fingerprinting to reduce
+	// volatility. Doing heapsort through a binary heap instead of a plain Vec and introsort has
+	// the advantage of lower code size overhead for smaller collections and better interleaving
+	// of the per-element sorting and hashing operations, which may lead to better codegen here
+	let mut serial_numbers_digest = Sha224::new();
+	while let Some(serial_number) = aggregated_serials.pop() {
+		serial_numbers_digest.update(serial_number);
 	}
 
 	Some(SystemId::new(
-		<[u8; <Sha224 as OutputSizeUser>::OutputSize::USIZE]>::from(Sha224::digest(
-			aggregated_serials
-		)),
+		<[u8; <Sha224 as OutputSizeUser>::OutputSize::USIZE]>::from(serial_numbers_digest.finalize()),
 		false
 	))
 }
