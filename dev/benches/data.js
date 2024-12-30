@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1735389039882,
+  "lastUpdate": 1735520891909,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "ec2698734c6559d1d47e14e2e825bd7d5b55880a",
-          "message": "fix: support new 24w34a (MC 1.21.2) shader directory layout expectations",
-          "timestamp": "2024-11-11T20:20:33+01:00",
-          "tree_id": "47fa4cbcd941db240cc6140ce369c09a68f157d3",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ec2698734c6559d1d47e14e2e825bd7d5b55880a"
-        },
-        "date": 1731354871394,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9746747,
-            "range": "± 72163",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 121210531,
-            "range": "± 4189068",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2758844421,
-            "range": "± 50193910",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 673534784,
-            "range": "± 4428552",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 661038406,
             "range": "± 2579433",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "d3f48e103534dcb7c3ec87f72770b7b9cd7d83fc",
+          "message": "tweak(system_id/linux): more robust aggregated DMI serials ID result\n\nBy sorting serial numbers before hashing them the code can isolate\nitself from unimportant ordering differences in the retrieved serial\nnumbers, which can be caused by both software quirks and hardware\nmodifications.",
+          "timestamp": "2024-12-30T01:31:03+01:00",
+          "tree_id": "7bb105a81f969d4935e8c7c3bbdfcfe553ec6aed",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d3f48e103534dcb7c3ec87f72770b7b9cd7d83fc"
+        },
+        "date": 1735520890731,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9657874,
+            "range": "± 70935",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 116655817,
+            "range": "± 3880899",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2669247767,
+            "range": "± 51345038",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 663828935,
+            "range": "± 6341957",
             "unit": "ns/iter"
           }
         ]
