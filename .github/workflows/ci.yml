@@ -203,7 +203,7 @@ jobs:
 
       - name: 💨 Cache Rust artifacts (Windows)
         if: endsWith(matrix.target, '-pc-windows-gnu') # sccache with Windows GNU compilers is slower than trivial GHA caching
-        uses: Swatinem/rust-cache@720f7e45ccee46c12a7b1d7bed2ab733be9be5a1 # v2
+        uses: Swatinem/rust-cache@f0deed1e0edfc6a9be95417288c0e1099b1eeec3 # v2
 
       - name: 🧰 Install nextest
         uses: taiki-e/install-action@acd25891978b4cdaebd139d3efef606d26513b14 # v2
