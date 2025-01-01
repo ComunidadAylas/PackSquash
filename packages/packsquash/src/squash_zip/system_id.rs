@@ -134,6 +134,7 @@ fn compute_system_ids() -> SytemIdVec {
 	get_machine_id()
 		.into_iter()
 		.chain(get_dmi_product_id())
+		.chain(get_system_root_volume_id())
 		.chain(get_install_date())
 		.collect()
 }

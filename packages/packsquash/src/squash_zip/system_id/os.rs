@@ -454,6 +454,32 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 	))
 }
 
+/// Returns the serial number of the filesystem volume that contains the Windows system root
+/// directory, which is usually accessible at `C:\Windows`.
+///
+/// The Windows system root directory is robustly and efficiently resolved by using a well-known
+/// UNC path with a Win32 API namespace selector that points to the `SystemRoot` object provided
+/// by the [Windows Executive] [Object Manager] subsystem at the root namespace, which itself
+/// is a symlink to the actual system root directory under a disk device.
+///
+/// Further reading:
+/// - <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/62e862f4-2a51-452e-8eeb-dc4ff5ee33cc>
+/// - <https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file>
+/// - <https://stackoverflow.com/questions/25090101/is-there-a-difference-between-and-paths>
+/// - <https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html>
+///
+/// [Windows Executive]: https://en.wikipedia.org/wiki/Architecture_of_Windows_NT#Executive
+/// [Object Manager]: https://en.wikipedia.org/wiki/Object_Manager
+#[cfg(windows)]
+pub(super) fn get_system_root_volume_id() -> Option<SystemId> {
+	use std::{fs, os::windows::fs::MetadataExt};
+
+	fs::metadata(r"\\?\GLOBALROOT\SystemRoot")
+		.ok()
+		.and_then(|metadata| metadata.volume_serial_number())
+		.map(|volume_serial_number| SystemId::new(volume_serial_number, false))
+}
+
 /// Returns the Windows install date. This install date may be changed after some updates
 /// and, because it is 32-bit long, it is pretty weak as cryptographic material.
 #[cfg(windows)]

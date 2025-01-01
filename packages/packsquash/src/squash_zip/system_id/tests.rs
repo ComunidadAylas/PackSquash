@@ -109,6 +109,18 @@ fn product_id_works() {
 
 #[test]
 #[cfg(windows)]
+fn system_root_volume_id_works() {
+	use super::os::get_system_root_volume_id;
+
+	eprintln!(
+		"system_root_volume_id: {:?}",
+		get_system_root_volume_id()
+			.expect("Assuming an appropriate environment, this should return a system ID")
+	)
+}
+
+#[test]
+#[cfg(windows)]
 fn install_date_works() {
 	use super::os::get_install_date;
 

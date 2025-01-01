@@ -7,6 +7,7 @@
 #![feature(impl_trait_in_assoc_type)]
 #![feature(generic_const_exprs)]
 #![feature(lazy_get)]
+#![cfg_attr(windows, feature(windows_by_handle))]
 
 use itertools::Itertools;
 use std::borrow::Cow;
