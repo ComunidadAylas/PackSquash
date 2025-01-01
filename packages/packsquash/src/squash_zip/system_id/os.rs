@@ -222,15 +222,15 @@ pub(super) fn get_aggregated_dmi_serial_numbers_id() -> Option<SystemId> {
 
 	let mut aggregated_serials = BinaryHeap::new();
 
-	for udev_dmi_id in BufReader::new(File::open("/run/udev/data/+dmi:id").ok()?)
+	for udev_dmi_db_line in BufReader::new(File::open("/run/udev/data/+dmi:id").ok()?)
 		.take(16384) // Defensively handle files with too long lines
 		.lines()
 	{
-		let mut udev_dmi_id = udev_dmi_id.ok()?;
+		let mut udev_db_line = udev_dmi_db_line.ok()?;
 
 		// See https://www.man7.org/linux/man-pages/man8/udevadm.8.html, Table 1, for
 		// docs. E means that this is a device property entry
-		let Some((_entry_prefix @ "E", attribute_name_and_value)) = udev_dmi_id.split_once(':')
+		let Some((_entry_prefix @ "E", attribute_name_and_value)) = udev_db_line.split_once(':')
 		else {
 			continue;
 		};
@@ -243,11 +243,11 @@ pub(super) fn get_aggregated_dmi_serial_numbers_id() -> Option<SystemId> {
 			continue;
 		}
 
-		// In-place truncation of the udev_dmi_id string to only hold the attribute value.
-		// This works because attribute_value points to a substring within the udev_dmi_id string
+		// In-place truncation of the udev_db_line string to only hold the attribute value.
+		// This works because attribute_value points to a substring within the udev_db_line string
 		// allocation, and ranges are expressed in byte indices
-		udev_dmi_id.drain(0..attribute_value.as_ptr() as usize - udev_dmi_id.as_ptr() as usize);
-		let attribute_value = udev_dmi_id;
+		udev_db_line.drain(0..attribute_value.as_ptr() as usize - udev_db_line.as_ptr() as usize);
+		let attribute_value = udev_db_line;
 
 		aggregated_serials.push(attribute_value);
 	}
