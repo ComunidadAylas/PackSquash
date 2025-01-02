@@ -129,7 +129,7 @@ fn compute_system_ids() -> SytemIdVec {
 
 #[cfg(target_os = "windows")]
 fn compute_system_ids() -> SytemIdVec {
-	use self::os::{get_dmi_product_id, get_install_date, get_machine_id};
+	use self::os::{get_dmi_product_id, get_install_date, get_machine_id, get_system_root_volume_id};
 
 	get_machine_id()
 		.into_iter()
