@@ -227,6 +227,11 @@ jobs:
         if: startsWith(matrix.runner, 'ubuntu')
         run: cat /proc/sys/kernel/random/uuid | tr -d '-' > /run/machine-id
 
+      # Required for the build script to be able to gather version information from Git
+      - name: 📏 Allow Git commands to run in the container directory
+        shell: bash
+        run: git config --global --add safe.directory "$PWD"
+
       - name: ✔️ Run tests
         run: |
           cargo nextest run --workspace --status-level all --release

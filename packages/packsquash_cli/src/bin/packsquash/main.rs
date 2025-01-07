@@ -413,7 +413,7 @@ fn print_version_information(verbose: bool) {
 		env!("PACKSQUASH_BUILD_VERSION"),
 		env!("CARGO_PROFILE"),
 		format_args!(
-			"{}-{}-{}",
+			"{:04}-{:02}-{:02}",
 			build_date_time.year(),
 			build_date_time.month(),
 			build_date_time.month_day()
