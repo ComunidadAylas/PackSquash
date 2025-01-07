@@ -39,17 +39,17 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@dbc32cd89278f24bd864023c3340ac21971f0bec # v2
+        uses: taiki-e/install-action@a86da1a3cb51967612c80d6dc98c5cac03a73025 # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@dbc32cd89278f24bd864023c3340ac21971f0bec # v2
+        uses: taiki-e/install-action@a86da1a3cb51967612c80d6dc98c5cac03a73025 # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@dbc32cd89278f24bd864023c3340ac21971f0bec # v2
+        uses: taiki-e/install-action@a86da1a3cb51967612c80d6dc98c5cac03a73025 # v2
         with:
           tool: cargo-deny
 
@@ -206,7 +206,7 @@ jobs:
         uses: Swatinem/rust-cache@f0deed1e0edfc6a9be95417288c0e1099b1eeec3 # v2
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@dbc32cd89278f24bd864023c3340ac21971f0bec # v2
+        uses: taiki-e/install-action@a86da1a3cb51967612c80d6dc98c5cac03a73025 # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
@@ -214,7 +214,7 @@ jobs:
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@dbc32cd89278f24bd864023c3340ac21971f0bec # v2
+        uses: taiki-e/install-action@a86da1a3cb51967612c80d6dc98c5cac03a73025 # v2
         env:
           CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
