@@ -363,6 +363,7 @@ fn validate_and_optimize<T: Read + Seek>(
 			// Beginning sample truncation is not supported by the Minecraft Vorbis decoder
 			ignore_start_sample_offset: true,
 			error_on_no_vorbis_streams: true,
+			verify_ogg_page_checksums: true,
 			vorbis_stream_mangler: ValidatingAndObfuscatingOggVorbisStreamMangler::new(
 				obfuscate,
 				&mut too_long_for_minecraft
