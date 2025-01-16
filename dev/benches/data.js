@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1737023053447,
+  "lastUpdate": 1737064958072,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "fd9af95a9ff0da5ce85dab84bb6fdd5ffb14ddd1",
-          "message": "fix: don't enable eye layer texture blending issue workaround quirk for 24w40a+\n\nMinecraft has finally fixed the bug I reported by accident, seemingly\nwhile reworking the entity eye rendering to fix unrelated issues. In the\nprocess, another issue reported by an unrelated third-party about eyes\nno longer being semitransparent on the affected invisible entities has\nappeared, but is duplicated by another issue which was resolved as\n\"working as intended\", so... This is indeed a fix overall?\n\nIn either case, it's no longer a reason for PackSquash to do less\noptimizations, so I'm happy.\n\nRelated: #39",
-          "timestamp": "2024-11-20T21:58:00+01:00",
-          "tree_id": "45c968117d260b4161ccffa1fab29d620b25d9b3",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/fd9af95a9ff0da5ce85dab84bb6fdd5ffb14ddd1"
-        },
-        "date": 1732138807711,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9800043,
-            "range": "± 87139",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 121268561,
-            "range": "± 3548218",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2682930186,
-            "range": "± 48086595",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 672921473,
-            "range": "± 5487754",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 680625904,
             "range": "± 7622321",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "ff5d63e9586dba55b0aae15a44efca5f4c7fc630",
+          "message": "chore(deps): update taiki-e/install-action digest to d125c0a",
+          "timestamp": "2025-01-16T17:10:28Z",
+          "tree_id": "405bf53c5ba2ca6e33b80480b9f706aacd4b8732",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/ff5d63e9586dba55b0aae15a44efca5f4c7fc630"
+        },
+        "date": 1737064957243,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9975458,
+            "range": "± 1335564",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 130806487,
+            "range": "± 2091155",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2757632581,
+            "range": "± 105417620",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 682958983,
+            "range": "± 4623582",
             "unit": "ns/iter"
           }
         ]
