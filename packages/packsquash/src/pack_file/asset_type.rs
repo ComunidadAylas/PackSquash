@@ -923,8 +923,8 @@ fn pack_file_to_process_data(
 		is_compressed: pack_file.is_compressed(),
 		canonical_extension: asset_type.canonical_extension(),
 		listing_circumstances: FileListingCircumstances {
-			is_directory_listed_atlas_texture_sprite: pack_file
-				.may_be_directory_listed_atlas_texture_sprite()
+			may_be_read_and_provided_by_mods: pack_file.may_be_read_and_provided_by_mods(),
+			is_force_included: pack_file.is_force_included()
 		},
 		optimized_byte_chunks_stream: Box::new(pack_file.process().map(|byte_chunk_result| {
 			match byte_chunk_result {

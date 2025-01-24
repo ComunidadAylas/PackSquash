@@ -156,15 +156,37 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for JsonFile<T> {
 		false
 	}
 
-	fn may_be_directory_listed_atlas_texture_sprite(&self) -> bool {
-		// FIXME only return true if both the asset types match and the
-		//       corresponding texture has the may_be_directory_listed_atlas_texture
-		//       option set to true. This cannot be done elegantly with the current
-		//       iterator design though
+	fn may_be_read_and_provided_by_mods(&self) -> bool {
+		#[cfg(feature = "optifine")]
+		if matches!(
+			self.asset_type,
+			PackFileAssetType::OptifineCustomEntityModel
+				| PackFileAssetType::OptifineCustomEntityModelWithComments
+				| PackFileAssetType::OptifineCustomEntityModelPart
+				| PackFileAssetType::OptifineCustomEntityModelPartWithComments
+				| PackFileAssetType::OptifineVanillaItemModel
+				| PackFileAssetType::OptifineVanillaItemModelWithComments
+				| PackFileAssetType::OptifineVanillaTextureMetadata
+				| PackFileAssetType::OptifineVanillaTextureMetadataWithComments
+		) {
+			return true;
+		}
+
+		#[cfg(feature = "mtr3")]
+		if matches!(
+			self.asset_type,
+			PackFileAssetType::Mtr3CustomTrainModel
+				| PackFileAssetType::Mtr3CustomTrainModelWithComments
+		) {
+			return true;
+		}
+
 		matches!(
 			self.asset_type,
 			PackFileAssetType::MinecraftTextureMetadata
 				| PackFileAssetType::MinecraftTextureMetadataWithComments
+				| PackFileAssetType::GenericJson
+				| PackFileAssetType::GenericJsonWithComments
 		)
 	}
 }

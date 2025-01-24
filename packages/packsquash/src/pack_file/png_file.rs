@@ -256,9 +256,18 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for PngFile<T> {
 		true
 	}
 
-	fn may_be_directory_listed_atlas_texture_sprite(&self) -> bool {
-		self.optimization_settings
-			.may_be_directory_listed_atlas_sprite
+	fn may_be_read_and_provided_by_mods(&self) -> bool {
+		#[cfg(feature = "optifine")]
+		if matches!(self.asset_type, PackFileAssetType::OptifineTexture) {
+			return true;
+		}
+
+		#[cfg(feature = "mtr3")]
+		if matches!(self.asset_type, PackFileAssetType::Mtr3CustomGenericTexture) {
+			return true;
+		}
+
+		matches!(self.asset_type, PackFileAssetType::GenericTexture)
 	}
 }
 

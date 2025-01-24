@@ -135,6 +135,10 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for PropertiesFile<T> {
 	fn is_compressed(&self) -> bool {
 		false
 	}
+
+	fn may_be_read_and_provided_by_mods(&self) -> bool {
+		true
+	}
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for PropertiesFile<T> {

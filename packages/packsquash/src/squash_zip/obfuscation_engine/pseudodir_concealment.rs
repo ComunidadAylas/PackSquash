@@ -7,8 +7,11 @@ static KNOWN_LISTED_RESOURCE_PATTERNS: &[&str] = &[
 	"assets/*/blockstates/**/*.json",
 	"assets/*/sounds/**/*.ogg",
 	"assets/*/font/**/*.json",
-	"assets/*/shaders/**/*.{json,fsh,vsh,glsl}",
+	"assets/*/{shaders,post_effect}/**/*.{json,fsh,vsh,glsl}",
 	"assets/*/particles/**/*.json",
+	"assets/*/atlases/**/*.json",
+	"assets/*/equipment/**/*.json",
+	"assets/*/items/**/*.json",
 	// Valid precise globs as of 1.20.2. Use more generic glob for forwards compatibility.
 	// The following precise globs match most of the possible datapack contents:
 	// "data/*/dimension_type/**/*.json",
@@ -45,7 +48,8 @@ static KNOWN_LISTED_RESOURCE_PATTERNS: &[&str] = &[
 
 #[derive(Copy, Clone)]
 pub struct FileListingCircumstances {
-	pub is_directory_listed_atlas_texture_sprite: bool
+	pub may_be_read_and_provided_by_mods: bool,
+	pub is_force_included: bool
 }
 
 pub struct PseudodirConcealer {
@@ -70,7 +74,8 @@ impl PseudodirConcealer {
 	}
 
 	fn is_concealable(&self, path: &RelativePath, circumstances: FileListingCircumstances) -> bool {
-		!circumstances.is_directory_listed_atlas_texture_sprite
+		!circumstances.is_force_included
+			&& !circumstances.may_be_read_and_provided_by_mods
 			&& !self.known_listed_resources.is_match(path)
 	}
 }

@@ -440,6 +440,10 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for AudioFile<T> {
 	fn is_compressed(&self) -> bool {
 		true
 	}
+
+	fn may_be_read_and_provided_by_mods(&self) -> bool {
+		true
+	}
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for AudioFile<T> {
