@@ -12,7 +12,8 @@ async fn successful_process_test(input_data: &[u8]) {
 	let data_stream = PassthroughFile {
 		read: Builder::new().read(input_data).build(),
 		is_compressed: false,
-		optimization_strategy_message: "Copied"
+		optimization_strategy_message: "Copied",
+		is_force_included: false
 	}
 	.process();
 
