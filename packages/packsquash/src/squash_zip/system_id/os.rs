@@ -504,7 +504,7 @@ pub(super) fn get_install_date() -> Option<SystemId> {
 /// like `read_to_string`, this limits the maximum number of bytes read,
 /// so we discard invalid big files pretty fast and while consuming little
 /// memory.
-fn read_uuid_file<P: AsRef<Path>>(path: P) -> io::Result<String> {
+fn read_uuid_file(path: impl AsRef<Path>) -> io::Result<String> {
 	use std::io::Read;
 
 	/// The maximum size of a UUID, assuming its hyphenated representation.

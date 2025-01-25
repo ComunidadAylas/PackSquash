@@ -61,9 +61,9 @@ pub enum PackMetaError {
 
 impl PackMeta {
 	/// Creates a new pack metadata struct from a virtual filesystem and its root path.
-	pub async fn new<F: VirtualFileSystem, P: AsRef<Path>>(
-		vfs: &F,
-		root_path: P
+	pub async fn new(
+		vfs: &impl VirtualFileSystem,
+		root_path: impl AsRef<Path>
 	) -> Result<Self, PackMetaError> {
 		const PACK_FORMAT_VERSION_IS_NOT_INTEGER: &str =
 			"\"pack_format\" version is not a Java integer";

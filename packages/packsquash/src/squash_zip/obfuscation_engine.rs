@@ -83,9 +83,9 @@ impl ObfuscationEngine {
 		})
 	}
 
-	pub async fn obfuscating_header<T: AsyncWrite + Unpin>(
+	pub async fn obfuscating_header(
 		&self,
-		mut output_zip: T,
+		mut output_zip: impl AsyncWrite + Unpin,
 		seed: u64
 	) -> io::Result<()> {
 		if let SealedObfuscationEngine::Obfuscation {

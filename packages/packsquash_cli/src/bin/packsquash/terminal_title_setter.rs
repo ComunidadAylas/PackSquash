@@ -36,7 +36,7 @@ pub trait TerminalTitleSetterTrait<'title> {
 /// Writes the ANSI escape sequence that sets the terminal title to the provided string to
 /// some byte sink that represents a terminal. More precisely, it is an Operating System
 /// Control sequence introduced by xterm, which most terminal emulators emulate nowadays.
-fn write_ansi_set_window_title_escape_sequence<W: Write>(mut w: W, string: &str) {
+fn write_ansi_set_window_title_escape_sequence(mut w: impl Write, string: &str) {
 	// OSC = ESC ]
 	// Ps = 2 = Change Window Title to Pt
 	// OSC Ps ; Pt BEL

@@ -119,25 +119,25 @@ pub fn decode_and_process_sample_blocks(
 	}
 
 	let is_silent = match (input_channels.get(), output_channels.get()) {
-		(1, 1) => execute_dasp_pipeline::<1, 1, _>(
+		(1, 1) => execute_dasp_pipeline::<1, 1>(
 			input_signal!(),
 			target_pitch,
 			resampler,
 			processed_sample_block_consumer
 		)?,
-		(1, 2) => execute_dasp_pipeline::<1, 2, _>(
+		(1, 2) => execute_dasp_pipeline::<1, 2>(
 			input_signal!(),
 			target_pitch,
 			resampler,
 			processed_sample_block_consumer
 		)?,
-		(2, 2) => execute_dasp_pipeline::<2, 2, _>(
+		(2, 2) => execute_dasp_pipeline::<2, 2>(
 			input_signal!(),
 			target_pitch,
 			resampler,
 			processed_sample_block_consumer
 		)?,
-		(2, 1) => execute_dasp_pipeline::<2, 1, _>(
+		(2, 1) => execute_dasp_pipeline::<2, 1>(
 			input_signal!(),
 			target_pitch,
 			resampler,
@@ -163,12 +163,8 @@ pub fn decode_and_process_sample_blocks(
 /// signal, applying resampling, channel mixing and pitch shifting as specified. The raw,
 /// processed samples are then yielded in blocks to the specified consumer. The returned
 /// boolean indicates whether the input audio signal was full of silence samples.
-fn execute_dasp_pipeline<
-	const INPUT_CHANNELS: usize,
-	const OUTPUT_CHANNELS: usize,
-	S: Signal<Frame = [f32; INPUT_CHANNELS]>
->(
-	input_signal: S,
+fn execute_dasp_pipeline<const INPUT_CHANNELS: usize, const OUTPUT_CHANNELS: usize>(
+	input_signal: impl Signal<Frame = [f32; INPUT_CHANNELS]>,
 	target_pitch: f32,
 	resampler: Option<FftFixedIn<f32>>,
 	mut processed_sample_block_consumer: impl FnMut(&[Vec<f32>]) -> Result<(), OptimizationError>
@@ -377,10 +373,10 @@ where
 
 /// Resamples the samples at the specified input buffer to the given output buffer.
 /// This function assumes that the number of channels for both buffers match.
-fn resample_buffer<T: rubato::Sample, R: Resampler<T>>(
+fn resample_buffer<T: rubato::Sample>(
 	input_buf: &[Vec<T>],
 	output_buf: &mut [Vec<T>],
-	resampler: &mut R
+	resampler: &mut impl Resampler<T>
 ) -> Result<(), OptimizationError> {
 	// Ensure that the buffer of samples for each channel has enough length for the
 	// resampler to work (we truncate excess samples below, so the length might not

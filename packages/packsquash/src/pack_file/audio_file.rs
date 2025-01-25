@@ -347,8 +347,8 @@ fn process_and_transcode(
 }
 
 /// Validates and optimizes the specified Ogg Vorbis file in two passes, using OptiVorbis.
-fn validate_and_optimize<T: Read + Seek>(
-	input_file: T,
+fn validate_and_optimize(
+	input_file: impl Read + Seek,
 	obfuscate: bool
 ) -> Result<Vec<u8>, OptimizationError> {
 	let mut too_long_for_minecraft = false;

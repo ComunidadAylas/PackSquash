@@ -165,7 +165,7 @@ impl<'a> LocalFileHeader<'a> {
 	/// - `uncompressed_size` (by default it is 0)
 	/// - `squash_time` (by default it is a dummy value)
 	/// - `zero_out_version_needed_to_extract` (by default is `false`)
-	pub fn new<T: Into<Cow<'a, RelativePath<'a>>>>(file_name: T) -> Self {
+	pub fn new(file_name: impl Into<Cow<'a, RelativePath<'a>>>) -> Self {
 		let file_name = file_name.into();
 
 		Self {
@@ -181,9 +181,9 @@ impl<'a> LocalFileHeader<'a> {
 
 	/// Writes this ZIP file record to the specified output ZIP file. For top performance,
 	/// it is recommended to use a buffered sink.
-	pub async fn write<W: AsyncWrite + Unpin + ?Sized>(
+	pub async fn write(
 		&self,
-		output_zip: &mut W
+		output_zip: &mut (impl AsyncWrite + Unpin + ?Sized)
 	) -> Result<(), Error> {
 		let mut buf = [0; 30];
 		let mut cursor = Cursor::new(&mut buf[..]);
@@ -286,9 +286,9 @@ impl CentralDirectoryHeader<'_> {
 
 	/// Writes this ZIP file record to the specified output ZIP file. For top performance,
 	/// it is recommended to use a buffered sink.
-	pub async fn write<W: AsyncWrite + Unpin + ?Sized>(
+	pub async fn write(
 		&self,
-		output_zip: &mut W
+		output_zip: &mut (impl AsyncWrite + Unpin + ?Sized)
 	) -> Result<(), Error> {
 		let mut buf = [0; 46];
 		let mut cursor = Cursor::new(&mut buf[..]);
@@ -439,9 +439,9 @@ impl EndOfCentralDirectory {
 
 	/// Writes this ZIP file record to the specified output ZIP file. For top performance,
 	/// it is recommended to use a buffered sink.
-	pub async fn write<W: AsyncWrite + Unpin + ?Sized>(
+	pub async fn write(
 		&self,
-		output_zip: &mut W
+		output_zip: &mut (impl AsyncWrite + Unpin + ?Sized)
 	) -> Result<(), Error> {
 		// If ZIP64 extensions are required, we must generate a ZIP64 end of central directory
 		// record, with its corresponding locator

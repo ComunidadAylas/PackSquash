@@ -28,8 +28,7 @@ fn successful_sanitize_desanitize_cycle_test(time: &SystemTime) {
 		.as_millis();
 
 	assert_eq!(
-		// Because we actually sanitize the Squash Time, we only have
-		// half-second precision
+		// Sanitized Squash Times only have half-second precision
 		unix_timestamp - unix_timestamp % 500,
 		desanitized_unix_timestamp,
 		"The sanitization is not reversible"

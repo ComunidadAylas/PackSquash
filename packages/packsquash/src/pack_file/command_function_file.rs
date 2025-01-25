@@ -98,8 +98,8 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for CommandFu
 /// Processes the specified line of text, returning an optimized bytes chunk with its optimized
 /// representation. `None` is returned to signal that the line should not be copied to the output
 /// file at all.
-fn process_line<L: Into<String>>(
-	line: L,
+fn process_line(
+	line: impl Into<String>,
 	is_last: bool,
 	line_number: LineNumber,
 	minify: bool

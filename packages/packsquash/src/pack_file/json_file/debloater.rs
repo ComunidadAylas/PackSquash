@@ -101,10 +101,10 @@ impl Debloater {
 /// used to restore the inner mutability needed by the JSONPath library. The JSONPath
 /// selectors may be stored in anything that can be reference converted to a mutable
 /// slice of them.
-fn debloat_value<T: AsMut<[SelectorMut]> + Default, F: FnOnce() -> Cell<T>>(
+fn debloat_value<T: AsMut<[SelectorMut]> + Default>(
 	value: &mut Value,
 	bloat_value_selectors_cell: &OnceCell<Cell<T>>,
-	bloat_value_selectors_cell_init: F
+	bloat_value_selectors_cell_init: impl FnOnce() -> Cell<T>
 ) {
 	let bloat_value_selectors_inner_cell =
 		bloat_value_selectors_cell.get_or_init(bloat_value_selectors_cell_init);

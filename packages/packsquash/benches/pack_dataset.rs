@@ -34,9 +34,9 @@ impl<'path> PackDataset<'path> {
 	/// ```
 	/// $ tar -cJf packages/packsquash/benches/data/packs/pack.tar.xz --exclude-vcs -C /tmp/pack .
 	/// ```
-	pub fn get<P: AsRef<Path> + ?Sized>(
+	pub fn get(
 		&mut self,
-		relative_path: &'path P
+		relative_path: &'path (impl AsRef<Path> + ?Sized)
 	) -> Result<&TempDir, io::Error> {
 		match self.extracted_packs.entry(relative_path.as_ref()) {
 			Entry::Occupied(entry) => Ok(entry.into_mut()),

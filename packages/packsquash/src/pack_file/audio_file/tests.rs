@@ -99,8 +99,8 @@ async fn successful_process_test(
 
 /// Processes the given input data as a [AudioFile], using the provided settings,
 /// expecting an error on the first stream result.
-async fn error_process_test<T: AsyncRead + Unpin + Send + 'static>(
-	read: T,
+async fn error_process_test(
+	read: impl AsyncRead + Unpin + Send + 'static,
 	is_ogg: bool,
 	settings: AudioFileOptions
 ) {

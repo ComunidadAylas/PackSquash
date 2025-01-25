@@ -91,9 +91,9 @@ impl PackSquasher {
 	///
 	/// Therefore, to guarantee that this method produces the expected results, the panic hook
 	/// should not be modified in any way while this method is executing.
-	pub fn run<F: VirtualFileSystem + 'static, O: TryInto<ProcessedSquashOptions>>(
+	pub fn run<O: TryInto<ProcessedSquashOptions>>(
 		&self,
-		vfs: F,
+		vfs: impl VirtualFileSystem + 'static,
 		squash_options: O,
 		pack_file_status_sender: Option<Sender<PackSquasherStatus>>
 	) -> Result<(), PackSquasherError>
@@ -677,10 +677,10 @@ impl PackFileStatus {
 /// that either the file was processed or an error occurred, so there's nothing else to do with
 /// this file for now.
 #[allow(clippy::too_many_arguments)] // Alternatives are not really more readable
-async fn match_and_process_pack_file<R: AsyncRead + AsyncSeek + Unpin>(
+async fn match_and_process_pack_file(
 	squash_options: &SquashOptions,
 	file_options: Option<FileOptions>,
-	squash_zip: &SquashZip<R>,
+	squash_zip: &SquashZip<impl AsyncRead + AsyncSeek + Unpin>,
 	vfs: &impl VirtualFileSystem,
 	asset_type_matches: &PackFileAssetTypeMatches,
 	pack_file_data: &VfsPackFileIterEntry,
@@ -749,12 +749,12 @@ async fn match_and_process_pack_file<R: AsyncRead + AsyncSeek + Unpin>(
 /// should be processed and added to it.
 ///
 /// The return value is `true` if no error occurred, and `false` if some error happened.
-async fn process_pack_file<F: AsyncRead + AsyncSeek + Unpin>(
+async fn process_pack_file(
 	pack_file_process_data: PackFileProcessData,
 	relative_path: RelativePath<'static>,
 	edit_time: Option<SystemTime>,
 	file_size_hint: u64,
-	squash_zip: &SquashZip<F>,
+	squash_zip: &SquashZip<impl AsyncRead + AsyncSeek + Unpin>,
 	pack_file_status_sender: Option<&Sender<PackSquasherStatus>>,
 	compress_already_compressed: bool
 ) -> bool {

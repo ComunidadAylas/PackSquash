@@ -32,7 +32,7 @@ pub fn strip_utf8_bom(buf: &[u8]) -> &[u8] {
 
 /// Checks whether the specified byte buffer begins with a byte order mark
 /// character.
-pub fn starts_with_bom<T: AsRef<[u8]>>(buf: T) -> bool {
+pub fn starts_with_bom(buf: impl AsRef<[u8]>) -> bool {
 	let buf = buf.as_ref();
 
 	buf.len() >= BOM_UTF8.len() && buf[..BOM_UTF8.len()] == BOM_UTF8

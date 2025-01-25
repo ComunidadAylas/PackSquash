@@ -275,10 +275,10 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// The result ZIP file may be left in an inconsistent state if this method returns
 	/// an error. The caller probably should discard the ZIP file if this happens, by
 	/// not calling any further methods on this instance.
-	pub async fn add_file<T: AsRef<[u8]>, S: Stream<Item = T> + Unpin>(
+	pub async fn add_file<T: AsRef<[u8]>>(
 		&self,
 		path: &RelativePath<'_>,
-		processed_data: S,
+		processed_data: impl Stream<Item = T> + Unpin,
 		skip_compression: bool,
 		file_size_hint: usize,
 		listing_circumstances: FileListingCircumstances
@@ -635,7 +635,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	///
 	/// This operation ends the lifecycle of this SquashZip instance, consuming it, so no
 	/// further operations can be done on the ZIP file after this method returns.
-	pub async fn finish<P: AsRef<Path>>(self, path: P) -> Result<(), SquashZipError> {
+	pub async fn finish(self, path: impl AsRef<Path>) -> Result<(), SquashZipError> {
 		let state = self.state.into_inner();
 		let central_directory_data = state.central_directory_data;
 		let mut output_zip = state.output_zip;
@@ -700,10 +700,10 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 	/// local file header and a scratch data file that contains its most efficient representation in
 	/// terms of size. The scratch data file stream position is just after the compressed contents, so
 	/// to read the compressed data back client code may need to rewind the file first.
-	async fn compress_and_generate_local_header<'a, T: AsRef<[u8]>, S: Stream<Item = T> + Unpin>(
+	async fn compress_and_generate_local_header<'a, T: AsRef<[u8]>>(
 		&self,
 		path: &'a RelativePath<'a>,
-		mut processed_data: S,
+		mut processed_data: impl Stream<Item = T> + Unpin,
 		skip_compression: bool,
 		file_size_hint: usize
 	) -> Result<(LocalFileHeader<'a>, BufferedAsyncSpooledTempFile), SquashZipError> {
@@ -727,7 +727,6 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 		// Compute its hash and size
 		let mut crc32_hasher = crc32fast::Hasher::new();
 		let mut processed_data_size = 0u32;
-
 		while let Some(data) = processed_data.next().await {
 			let data = data.as_ref();
 
@@ -803,8 +802,8 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 
 /// Reads the relevant previous ZIP contents to a map, ready to be used to efficiently process
 /// files that were already present in the previous version of the ZIP file.
-async fn read_previous_zip_contents<F: AsyncRead + AsyncSeek + Unpin>(
-	mut previous_zip: F,
+async fn read_previous_zip_contents(
+	mut previous_zip: impl AsyncRead + AsyncSeek + Unpin,
 	obfuscation_engine: &ObfuscationEngine
 ) -> Result<AHashMap<RelativePath<'static>, PreviousFile>, PreviousZipParseError> {
 	let mut buffer = [0u8; 52];

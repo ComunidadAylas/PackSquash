@@ -219,9 +219,9 @@ fn squash_pack(squash_options: ProcessedSquashOptions) {
 /// Returns the [`SquashOptions`] to use for optimizing a pack identified by its path,
 /// initialized using the specified global and file options. The output file path will
 /// be set to point to the temporary files directory.
-fn squash_options<'dataset, P: AsRef<Path> + ?Sized>(
+fn squash_options<'dataset>(
 	pack_dataset: &mut PackDataset<'dataset>,
-	relative_pack_path: &'dataset P,
+	relative_pack_path: &'dataset (impl AsRef<Path> + ?Sized),
 	mut global_options: GlobalOptions,
 	file_options: IndexMap<String, FileOptions>
 ) -> ProcessedSquashOptions {

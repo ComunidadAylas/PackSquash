@@ -59,9 +59,9 @@ impl<'a> RelativePath<'a> {
 	/// or symlink resolving is performed, as those may expose the physical
 	/// structure, which may be different from the logical, expected directory
 	/// structure.
-	pub(crate) fn new<P1: AsRef<Path> + ?Sized, P2: AsRef<Path> + ?Sized>(
-		ancestor_path: &P1,
-		descendant_path: &'a P2
+	pub(crate) fn new(
+		ancestor_path: &(impl AsRef<Path> + ?Sized),
+		descendant_path: &'a (impl AsRef<Path> + ?Sized)
 	) -> Result<Self, InvalidPathError<'a>> {
 		let mut descendant_path_components = descendant_path.as_ref().components();
 
@@ -150,7 +150,7 @@ impl<'a> RelativePath<'a> {
 	/// of this struct; namely, that the string is a normalized, relative path that
 	/// always uses the forward slash (/) as a component separator, and does not
 	/// exceed 65535 bytes.
-	pub(crate) fn from_inner<T: Into<Cow<'a, str>>>(string: T) -> Self {
+	pub(crate) fn from_inner(string: impl Into<Cow<'a, str>>) -> Self {
 		Self(string.into())
 	}
 }
