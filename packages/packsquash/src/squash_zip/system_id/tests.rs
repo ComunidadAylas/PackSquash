@@ -97,12 +97,12 @@ fn machine_id_works() {
 
 #[test]
 #[cfg(windows)]
-fn product_id_works() {
-	use super::os::get_product_id;
+fn dmi_product_id_works() {
+	use super::os::get_dmi_product_id;
 
 	eprintln!(
-		"product_id: {:?}",
-		get_product_id()
+		"dmi_product_id: {:?}",
+		get_dmi_product_id()
 			.expect("Assuming an appropriate environment, this should return a system ID")
 	)
 }
