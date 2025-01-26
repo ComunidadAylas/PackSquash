@@ -38,11 +38,11 @@ static KNOWN_LISTED_RESOURCE_PATTERNS: &[&str] = &[
 	// "data/*/predicates/*/**.json",
 	// "data/*/item_modifiers/*/**.json",
 	// "data/*/loot_tables/*/**.json",
-	// "data/*/structures/**/*.nbt",
 	// "data/*/recipes/**/*.json",
 	// "data/*/advancements/**/*.json",
 	// "data/*/tags/**/*.json"
 	"data/*/**/*.json",
+	"data/*/{structure,structures}/**/*.nbt",
 	"data/*/functions/**/*.mcfunction"
 ];
 
