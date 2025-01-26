@@ -164,7 +164,7 @@ jobs:
           # and the arch-specific musl-dev package is required to build binaries for
           # a target architecture when cross-compiling
           # markdown and html2text are required to generate the Debian package only
-          apt-get install -yq build-essential git curl \
+          apt-get install -yq build-essential cmake git curl \
                               musl-tools musl-dev:${{ matrix.apt-arch }} \
                               markdown html2text
 
