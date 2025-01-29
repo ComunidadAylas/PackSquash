@@ -9,7 +9,7 @@
 //! Mathematically, the model is defined as follows. Let `A` be the slope of a linear regression function
 //! that is meant to estimate the relative time that it takes to compress 64 KiB of somewhat difficult to
 //! compress data with a single Zopfli compression iteration. Let `B` be the intercept of such function.
-//! The relative time `T` it takes to compress S 64 KiB blocks of data with `I` Zopfli compression
+//! The relative time `T` it takes to compress `S` 64 KiB blocks of data with `I` Zopfli compression
 //! iterations is `T = (A * I + B) * S`.
 
 /// Slope of the linear regression function that estimates the Zopfli compression
