@@ -555,6 +555,9 @@ pub enum FileOptions {
 	/// Options that influence how command function files are converted to a more
 	/// distribution-friendly representation.
 	CommandFunctionFileOptions(CommandFunctionFileOptions),
+	/// Options that influence how compressed compound NBT tag files are converted to a more
+	/// distribution-friendly representation.
+	CompressedCompoundNbtTagFileOptions(CompressedCompoundNbtTagFileOptions),
 	/// Options that influence how custom files that the user explicitly wants to include in the
 	/// pack are processed.
 	// For better style, keep this variant last
@@ -1182,6 +1185,35 @@ pub struct CommandFunctionFileOptions {
 impl Default for CommandFunctionFileOptions {
 	fn default() -> Self {
 		Self { minify: true }
+	}
+}
+
+/// Parameters that influence how a compressed compound NBT tag file is optimized.
+#[derive(Deserialize, Clone, Copy)]
+#[serde(default, deny_unknown_fields)]
+#[non_exhaustive]
+pub struct CompressedCompoundNbtTagFileOptions {
+	/// The number of Zopfli compression iterations that PackSquash will do to compress raw NBT data
+	/// that amounts to a magnitude of 1 MiB. This option is similar to `zip_compression_iterations`,
+	/// and is used to feed the same linear model, but with different parameters better suited for
+	/// NBT data compression.
+	///
+	/// When the number of compression iterations drops to zero, which happens when this option is
+	/// set to zero or the NBT file is pretty big, a faster Gzip compression algorithm that is likely
+	/// to generate bigger files will be used. On the other side, the number of iterations is limited
+	/// to a maximum of 20. Values greater than 20 are still useful for this setting, because they
+	/// change the threshold where iterations start being reduced in order to keep acceptable
+	/// performance levels.
+	///
+	/// **Default value**: `15`
+	pub nbt_compression_iterations: u8
+}
+
+impl Default for CompressedCompoundNbtTagFileOptions {
+	fn default() -> Self {
+		Self {
+			nbt_compression_iterations: 15
+		}
 	}
 }
 

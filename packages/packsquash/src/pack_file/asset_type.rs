@@ -8,9 +8,11 @@ use futures::StreamExt;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use tokio::io::AsyncRead;
 
+use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor, PackFileProcessData};
 use crate::config::GlobalOptions;
 use crate::pack_file::audio_file::AudioFile;
 use crate::pack_file::command_function_file::CommandFunctionFile;
+use crate::pack_file::compressed_compound_nbt_tag_file::CompressedCompoundNbtTagFile;
 use crate::pack_file::json_file::JsonFile;
 use crate::pack_file::legacy_lang_file::LegacyLanguageFile;
 use crate::pack_file::passthrough_file::PassthroughFile;
@@ -23,8 +25,6 @@ use crate::{
 	RelativePath,
 	config::{CustomFileOptions, FileOptions, compile_pack_file_glob_pattern}
 };
-
-use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor, PackFileProcessData};
 
 /// Represents a relevant pack file asset type, stored in a pack file. A [`PackFile`] can
 /// represent assets of several types. An asset type adds constraints on the data format
@@ -833,6 +833,16 @@ impl PackFileAssetTypeMatches {
 				{
 					return_pack_file_to_process_data!(CommandFunctionFile, optimization_settings)
 				}
+				PackFileAssetType::LegacyNbtStructure | PackFileAssetType::NbtStructure
+					if let Some(FileOptions::CompressedCompoundNbtTagFileOptions(
+						optimization_settings
+					)) = file_options =>
+				{
+					return_pack_file_to_process_data!(
+						CompressedCompoundNbtTagFile,
+						optimization_settings
+					)
+				}
 				PackFileAssetType::TrueTypeOrOpenTypeFont
 				| PackFileAssetType::TrueTypeFont
 				| PackFileAssetType::ZippedUnifontHex
@@ -840,8 +850,6 @@ impl PackFileAssetTypeMatches {
 				| PackFileAssetType::Text
 				| PackFileAssetType::ClosingCreditsText
 				| PackFileAssetType::LegacyTextCredits
-				| PackFileAssetType::LegacyNbtStructure
-				| PackFileAssetType::NbtStructure
 					if file_options.is_none() =>
 				{
 					return_pack_file_to_process_data!(PassthroughFile, ())

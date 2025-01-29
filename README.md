@@ -62,6 +62,8 @@ can apply the following specific techniques:
   require
   tweaking](https://github.com/ComunidadAylas/PackSquash/issues/187#issuecomment-1499365532).
   These limitations will be addressed in the future.
+- For structure files (.nbt): recompression with Zopfli, Gzip member
+  concatenation, and metadata removal.
 - For legacy language files (.lang; used in Minecraft 1.12.2 and lower):
   minification, removing blank lines and comments. Duplicate keys and non-blank
   lines that are not comments and do not contain a key-value separator are

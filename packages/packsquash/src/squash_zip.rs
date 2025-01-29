@@ -24,22 +24,20 @@ use tokio_stream::Stream;
 use tokio_util::io::ReaderStream;
 use zopfli::Format;
 
-use crate::{
-	RelativePath, config::PercentageInteger, zopfli_iterations_time_model::ZopfliIterationsTimeModel
-};
-
 use self::{
-	buffered_async_spooled_temp_file::BufferedAsyncSpooledTempFile,
 	obfuscation_engine::ObfuscationEngine,
 	system_time_sanitizer::{SystemTimeSanitizationError, SystemTimeSanitizer},
 	zip_file_record::{
 		CentralDirectoryHeader, CompressionMethod, EndOfCentralDirectory, LocalFileHeader
 	}
 };
+use crate::{
+	RelativePath, buffered_async_spooled_temp_file::BufferedAsyncSpooledTempFile,
+	config::PercentageInteger, zopfli_iterations_time_model::ZopfliIterationsTimeModel
+};
 
 pub use self::obfuscation_engine::FileListingCircumstances;
 
-mod buffered_async_spooled_temp_file;
 mod obfuscation_engine;
 pub mod relative_path;
 mod system_id;

@@ -33,12 +33,11 @@ use config::ProcessedSquashOptions;
 use pack_meta::{PackMeta, PackMetaError};
 use squash_zip::{SquashZip, SquashZipError};
 
-use crate::config::AudioFileOptions;
 #[cfg(feature = "optifine")]
 use crate::config::PropertiesFileOptions;
 use crate::config::{
-	CommandFunctionFileOptions, FileOptions, JsonFileOptions, LegacyLanguageFileOptions,
-	PngFileOptions, ShaderFileOptions, SquashOptions
+	AudioFileOptions, CommandFunctionFileOptions, CompressedCompoundNbtTagFileOptions, FileOptions,
+	JsonFileOptions, LegacyLanguageFileOptions, PngFileOptions, ShaderFileOptions, SquashOptions
 };
 use crate::pack_file::PackFileProcessData;
 use crate::pack_file::asset_type::{
@@ -51,6 +50,7 @@ use crate::vfs::{IteratorTraversalOptions, VfsPackFileIterEntry, VirtualFileSyst
 pub mod config;
 pub mod vfs;
 
+mod buffered_async_spooled_temp_file;
 mod pack_file;
 mod pack_meta;
 mod squash_zip;
@@ -458,6 +458,9 @@ impl PackSquasher {
 							)),
 							Some(FileOptions::CommandFunctionFileOptions(
 								CommandFunctionFileOptions::default()
+							)),
+							Some(FileOptions::CompressedCompoundNbtTagFileOptions(
+								CompressedCompoundNbtTagFileOptions::default()
 							)),
 							None
 						] {

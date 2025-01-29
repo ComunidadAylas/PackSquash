@@ -8,6 +8,20 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+#### Compression
+
+- PackSquash now features a dedicated optimization algorithm for compressed
+  compound NBT tag files, such as structures found in data packs, that may
+  slightly reduce their sizes.
+  - Compressed NBT data is recompressed using Zopfli. If the result is larger
+    than the original, PackSquash will automatically fall back to a
+    metadata-removing Gzip structure rebuilding algorithm, which offers minimal
+    space savings while ensuring that file sizes never increase.
+  - A new file-specific option, `nbt_compression_iterations`, allows controlling
+    the number of compression iterations.
+
 ### Changed
 
 #### Compression

@@ -2,6 +2,8 @@
 
 use std::borrow::Cow;
 use std::fmt::{Debug, Display, Formatter};
+use std::io;
+use std::io::Read;
 use std::num::NonZeroUsize;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -161,4 +163,31 @@ pub fn prepare_line_for_output<
 	}
 
 	Ok((description.into(), line.into_bytes()))
+}
+
+/// A read adapter that counts the total number of bytes read from the underlying reader to
+/// the specified mutable counter reference.
+pub struct AccountingRead<'count, R: Read> {
+	inner: R,
+	read_bytes: &'count mut u64
+}
+
+impl<'count, R: Read> AccountingRead<'count, R> {
+	/// Creates a new instance of this accounting read adapter.
+	pub fn new(inner: R, read_bytes: &'count mut u64) -> Self {
+		Self { inner, read_bytes }
+	}
+}
+
+impl<R: Read> Read for AccountingRead<'_, R> {
+	fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+		let read_bytes = self.inner.read(buf)?;
+
+		*self.read_bytes = self
+			.read_bytes
+			.checked_add(read_bytes as u64)
+			.ok_or(io::Error::other("Read byte count overflow"))?;
+
+		Ok(read_bytes)
+	}
 }

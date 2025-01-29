@@ -102,16 +102,6 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for Passthrou
 				is_compressed: false,
 				is_force_included: false
 			}),
-			// FIXME: these should have file-specific optimizations, and this is not difficult
-			// to do. This is a temporary solution for PackSquash to work with data packs
-			PackFileAssetType::LegacyNbtStructure | PackFileAssetType::NbtStructure => {
-				file_read_producer().map(|(read, _)| Self {
-					read,
-					optimization_strategy_message: "Copied",
-					is_compressed: true,
-					is_force_included: false
-				})
-			}
 			PackFileAssetType::Custom => file_read_producer().map(|(read, _)| Self {
 				read,
 				optimization_strategy_message: "Copied (custom asset)",

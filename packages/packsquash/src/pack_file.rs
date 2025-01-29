@@ -22,6 +22,7 @@ mod util;
 
 mod audio_file;
 mod command_function_file;
+mod compressed_compound_nbt_tag_file;
 mod json_file;
 mod legacy_lang_file;
 mod passthrough_file;
@@ -45,6 +46,7 @@ pub enum OptimizationError {
 	ShaderFile(#[from] shader_file::OptimizationError),
 	LegacyLanguageFile(#[from] legacy_lang_file::OptimizationError),
 	CommandFunctionFile(#[from] command_function_file::OptimizationError),
+	CompressedCompoundNbtTagFile(#[from] compressed_compound_nbt_tag_file::OptimizationError),
 	IoError(#[from] io::Error)
 }
 
