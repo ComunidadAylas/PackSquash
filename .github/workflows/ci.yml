@@ -119,11 +119,7 @@ jobs:
             host-target: x86_64-pc-windows-gnu
             runner: windows-latest
 
-          - target: x86_64-apple-darwin
-            host-target: x86_64-apple-darwin
-            runner: macos-latest
-
-          - target: aarch64-apple-darwin
+          - target: universal2-apple-darwin
             host-target: aarch64-apple-darwin
             runner: macos-latest
 
@@ -137,7 +133,6 @@ jobs:
       attestations: write
 
     env:
-      CARGO_BUILD_TARGET: ${{ matrix.target }}
       # nextext requires this on Windows to pick the intended GNU toolchain
       RUSTUP_TOOLCHAIN: nightly-${{ matrix.host-target }}
 
@@ -182,7 +177,7 @@ jobs:
         uses: dtolnay/rust-toolchain@a54c7afa936fefeb4456b2dd8068152669aa8203 # v1
         with:
           toolchain: nightly-${{ matrix.host-target }}
-          targets: ${{ env.CARGO_BUILD_TARGET }}
+          targets: ${{ matrix.target == 'universal2-apple-darwin' && 'x86_64-apple-darwin,aarch64-apple-darwin' || matrix.target }}
           components: rust-src
 
       - name: 💨 Set up sccache
@@ -207,16 +202,12 @@ jobs:
 
       - name: 🧰 Install nextest
         uses: taiki-e/install-action@65835784ace7c5a78745b6dbeb9bf85346430497 # v2
-        env:
-          CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
         uses: taiki-e/install-action@65835784ace7c5a78745b6dbeb9bf85346430497 # v2
-        env:
-          CARGO_BUILD_TARGET: ${{ matrix.host-target }}
         with:
           tool: cargo-deb
 
@@ -233,16 +224,29 @@ jobs:
         run: git config --global --add safe.directory "$PWD"
 
       - name: ✔️ Run tests
+        env:
+          CARGO_BUILD_TARGET: ${{ matrix.target == 'universal2-apple-darwin' && 'aarch64-apple-darwin' || matrix.target }}
         run: |
           cargo nextest run --workspace --status-level all --release
           cargo test --doc --workspace --release
 
       - name: 🔨 Build with optimized standard library
-        run: cargo build --target ${{ env.CARGO_BUILD_TARGET }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
+        env:
+          # Simulate universal2-apple-darwin target through Cargo's native simultaneous multi-target support
+          CARGO_BUILD_TARGET_PARAMS: ${{ matrix.target == 'universal2-apple-darwin' &&
+            '--target x86_64-apple-darwin --target aarch64-apple-darwin' || format('--target {0}', matrix.target) }}
+        run: cargo build ${{ env.CARGO_BUILD_TARGET_PARAMS }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
+
+      - name: 🔨 Assemble universal macOS binary
+        if: matrix.target == 'universal2-apple-darwin'
+        run: |
+          mkdir -p target/${{ matrix.target }}/release
+          lipo -create -output target/${{ matrix.target }}/release/packsquash \
+            target/x86_64-apple-darwin/release/packsquash target/aarch64-apple-darwin/release/packsquash
 
       - name: 🔨 Generate CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        run: scripts/build_deb.sh --target ${{ env.CARGO_BUILD_TARGET }} -p packsquash_cli -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
+        run: scripts/build_deb.sh --target ${{ matrix.target }} -p packsquash_cli -- ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
@@ -250,62 +254,23 @@ jobs:
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
           path: |
-            target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash*
-            !target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.d
+            target/${{ matrix.target }}/release/packsquash*
+            !target/${{ matrix.target }}/release/packsquash.d
 
       - name: 📤 Upload CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
           name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
-          path: target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
+          path: target/${{ matrix.target }}/debian/packsquash_*.deb
 
       - name: ✒️ Generate SLSA attestation subject data for binaries
         uses: actions/attest-build-provenance@ef244123eb79f2f7a7e75d99086184180e6d0018 # v1
         with:
           subject-path: |
-            target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash
-            target/${{ env.CARGO_BUILD_TARGET }}/release/packsquash.exe
-            target/${{ env.CARGO_BUILD_TARGET }}/debian/packsquash_*.deb
-
-  build-universal-macos-binaries:
-
-    name: Build universal macOS binaries
-
-    runs-on: macos-latest
-
-    needs: build
-
-    permissions:
-      id-token: write
-      attestations: write
-
-    steps:
-      - name: 📥 Download PackSquash CLI x64 macOS executable
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
-        with:
-          name: PackSquash CLI executable (x86_64-apple-darwin)
-          path: packsquash-x64
-
-      - name: 📥 Download PackSquash CLI ARM64 macOS executable
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
-        with:
-          name: PackSquash CLI executable (aarch64-apple-darwin)
-          path: packsquash-aarch64
-
-      - name: 🔨 Generate universal CLI binary
-        run: lipo -create -output packsquash packsquash-x64/packsquash packsquash-aarch64/packsquash
-
-      - name: 📤 Upload universal CLI binary
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
-        with:
-          name: PackSquash CLI executable (universal-apple-darwin)
-          path: packsquash
-
-      - name: ✒️ Generate SLSA attestation subject data for binary
-        uses: actions/attest-build-provenance@ef244123eb79f2f7a7e75d99086184180e6d0018 # v1
-        with:
-          subject-path: packsquash
+            target/${{ matrix.target }}/release/packsquash
+            target/${{ matrix.target }}/release/packsquash.exe
+            target/${{ matrix.target }}/debian/packsquash_*.deb
 
   build-docker-images:
 
