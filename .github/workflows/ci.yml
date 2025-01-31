@@ -232,9 +232,9 @@ jobs:
       - name: 🔨 Build with optimized standard library
         env:
           # Simulate universal2-apple-darwin target through Cargo's native simultaneous multi-target support
-          CARGO_BUILD_TARGET_PARAMS: ${{ matrix.target == 'universal2-apple-darwin' &&
+          TARGET_PARAMS: ${{ matrix.target == 'universal2-apple-darwin' &&
             '--target x86_64-apple-darwin --target aarch64-apple-darwin' || format('--target {0}', matrix.target) }}
-        run: cargo build ${{ env.CARGO_BUILD_TARGET_PARAMS }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
+        run: cargo build ${{ env.TARGET_PARAMS }} --release ${{ env.OPTIMIZED_RELEASE_BUILD_FLAGS }}
 
       - name: 🔨 Assemble universal macOS binary
         if: matrix.target == 'universal2-apple-darwin'
