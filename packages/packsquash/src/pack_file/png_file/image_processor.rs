@@ -9,10 +9,10 @@ use obfstr::random;
 use oxipng::{BitDepth, ColorType, Deflaters, Options, RowFilter, StripChunks, indexset};
 use rgb::{AsPixels, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
+use std::cmp;
 use std::io::Read;
 use std::num::{NonZeroU8, NonZeroU16};
 use std::time::Duration;
-use std::{cmp, iter};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -408,13 +408,13 @@ impl<R: Read> ProcessedImage<R> {
 				PixelArray {
 					width: minimum_mipmap_level_keeping_dimension,
 					height: minimum_mipmap_level_keeping_dimension,
-					buf: iter::repeat(pixels[0])
-						.take(
-							minimum_mipmap_level_keeping_dimension.get() as usize
-								* minimum_mipmap_level_keeping_dimension.get() as usize
-						)
-						.flat_map(|pixel| <RGBA8 as Into<[u8; 4]>>::into(pixel).into_iter())
-						.collect()
+					buf: std::iter::repeat_n(
+						pixels[0],
+						minimum_mipmap_level_keeping_dimension.get() as usize
+							* minimum_mipmap_level_keeping_dimension.get() as usize
+					)
+					.flat_map(|pixel| <RGBA8 as Into<[u8; 4]>>::into(pixel).into_iter())
+					.collect()
 				}
 				.into()
 			})

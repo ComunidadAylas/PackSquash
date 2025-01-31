@@ -86,7 +86,7 @@ async fn add_files_finish_and_read_back_test(
 					))
 				)
 				.expect(RELATIVE_PATH_INSTANTIATION_FAILURE),
-				&mut tokio_stream::iter(std::iter::repeat(&[file_byte(i)][..]).take(file_size)),
+				&mut tokio_stream::iter(std::iter::repeat_n(&[file_byte(i)][..], file_size)),
 				skip_compression(i),
 				file_size,
 				FileListingCircumstances {
