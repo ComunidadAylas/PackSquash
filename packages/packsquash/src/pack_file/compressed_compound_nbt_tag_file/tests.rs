@@ -65,12 +65,12 @@ fn parse_compressed_nbt(compressed_nbt: &[u8]) -> fastnbt::Value {
 	fastnbt::from_bytes::<fastnbt::Value>(&decompressed_nbt).expect("Failed to parse NBT file")
 }
 
-#[tokio::test(flavor = "multi_thread")]
+#[tokio::test]
 async fn minifying_works() {
 	successful_process_test(OPTIMIZED_REAL_STRUCTURE_FILE, false).await
 }
 
-#[tokio::test(flavor = "multi_thread")]
+#[tokio::test]
 async fn minifying_several_gzip_members_works() {
 	successful_process_test(
 		OPTIMIZED_REAL_STRUCTURE_FILE_SPLITTED_IN_TWO_GZIP_MEMBERS,
