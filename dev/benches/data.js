@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1738354261256,
+  "lastUpdate": 1738367392808,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "d605784164b70aae042102abf2b39f247e4ed698",
-          "message": "fix: downgrade to Cargo resolver version 2\n\nThis is needed to get `cargo-deb` working until\nhttps://github.com/kornelski/cargo-deb/issues/154 is sorted out.",
-          "timestamp": "2024-12-03T22:56:31+01:00",
-          "tree_id": "a0e3527ff717c2ba1b4c1cffa6f6a54b480724c2",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d605784164b70aae042102abf2b39f247e4ed698"
-        },
-        "date": 1733264876405,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9438570,
-            "range": "± 32555",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 118087730,
-            "range": "± 2632609",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2734564565,
-            "range": "± 40889350",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 661977339,
-            "range": "± 7408578",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 613619758,
             "range": "± 1359111",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "1bcd6274bf15cf207869cd4d1c356ebe95f1c6b3",
+          "message": "ci: workaround Cargo issue with environment variable config parsing\n\nSee: https://github.com/rust-lang/cargo/issues/7709",
+          "timestamp": "2025-01-31T22:45:28+01:00",
+          "tree_id": "e47baddc57729948b704ed5e8e113938c3e80790",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/1bcd6274bf15cf207869cd4d1c356ebe95f1c6b3"
+        },
+        "date": 1738367392264,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10238663,
+            "range": "± 124256",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 121339229,
+            "range": "± 3563966",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2942846102,
+            "range": "± 27715635",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 613972526,
+            "range": "± 3705992",
             "unit": "ns/iter"
           }
         ]
