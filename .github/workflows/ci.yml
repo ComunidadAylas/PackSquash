@@ -130,6 +130,7 @@ jobs:
     permissions:
       id-token: write
       attestations: write
+      contents: write
 
     env:
       # nextext requires this on Windows to pick the intended GNU toolchain
@@ -270,6 +271,94 @@ jobs:
             target/${{ matrix.target }}/release/packsquash
             target/${{ matrix.target }}/release/packsquash.exe
             target/${{ matrix.target }}/debian/packsquash_*.deb
+
+      - name: 🧰 Install release asset upload dependencies
+        if: github.event_name == 'release' && matrix.container
+        continue-on-error: true
+        run: |
+          apt-get install -yq npm
+          npm install archiver@'>=7.0.0 <8.0.0'
+
+      - name: 📤 Upload release assets
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        if: github.event_name == 'release'
+        continue-on-error: true
+        with:
+          retries: 3
+          script: |
+            const { readFile } = require("node:fs/promises");
+            const { createWriteStream } = require("node:fs");
+            const { basename } = require("node:path");
+            const archiver = require("archiver");
+
+            const target = "${{ matrix.target }}";
+            const targetAptArch = "${{ matrix.apt-arch }}";
+
+            const firstGlobMatch = async (expr) =>
+              (await (await glob.create(expr)).glob())[0];
+
+            const artifacts = [
+              [
+                `PackSquash CLI executable (${target})`,
+                true,
+                await firstGlobMatch(
+                  [
+                    `target/${target}/release/packsquash*`,
+                    `!target/${target}/release/packsquash.d`,
+                  ].join("\n")
+                ),
+              ],
+            ].concat([
+              [
+                `PackSquash CLI Debian package (${targetAptArch})`,
+                false,
+                await firstGlobMatch(`target/${target}/debian/packsquash_*.deb`),
+              ],
+            ]);
+
+            for (const [artifactLabel, wrapInZip, artifactPath] of artifacts) {
+              if (!artifactPath) {
+                continue;
+              }
+
+              let assetName, assetPath;
+              if (wrapInZip) {
+                assetName = assetPath = `${basename(artifactPath)}-${target}.zip`;
+
+                const assetArchive = archiver("zip", {
+                  comment:
+                    "Thank you for downloading PackSquash!\n\nIf you liked it, please consider supporting the project at https://packsquash.aylas.org",
+                  zlib: { level: 9 },
+                });
+                assetArchive.pipe(createWriteStream(assetName, "binary"));
+                assetArchive.file(artifactPath, { name: basename(artifactPath) });
+                await assetArchive.finalize();
+              } else {
+                assetName = basename(artifactPath);
+                assetPath = artifactPath;
+              }
+
+              await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: (
+                  await github.rest.repos.getReleaseByTag({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    tag: context.ref.replace(/^refs\/tags\//, ""),
+                  })
+                ).data.id,
+                // The name must be unique among assets within a release, and sets the file name of the asset
+                // when downloaded (the unique name requirement is why we wrap executables in ZIP files, as
+                // otherwise we'd have several assets named "packsquash", which is not possible)
+                name: assetName,
+                // GitHub displays this as the user-friendly name for the release asset in the web UI. It can
+                // be non-unique or missing. If missing, GitHub shows the asset name as a label
+                label: artifactLabel,
+                // Using a file buffer in here works: https://github.com/octokit/octokit.js/discussions/2087
+                data: await readFile(assetPath),
+              });
+            }
 
   build-docker-images:
 
