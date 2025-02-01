@@ -154,9 +154,12 @@ mod tests {
 			File::create(file3_path).expect("I/O operations are assumed not to fail during tests");
 		}
 
-		let file_iter = OsFilesystem.file_iterator(root_dir.path(), IteratorTraversalOptions {
-			ignore_system_and_hidden_files: true
-		});
+		let file_iter = OsFilesystem.file_iterator(
+			root_dir.path(),
+			IteratorTraversalOptions {
+				ignore_system_and_hidden_files: true
+			}
+		);
 
 		const RELATIVE_PATHS: &[&str] = &["hello/world.txt", "bye/bye/now.txt"];
 
@@ -183,9 +186,12 @@ mod tests {
 
 	#[test]
 	fn single_component_dot_relative_path_works() {
-		let mut file_iter = OsFilesystem.file_iterator(Path::new("."), IteratorTraversalOptions {
-			ignore_system_and_hidden_files: true
-		});
+		let mut file_iter = OsFilesystem.file_iterator(
+			Path::new("."),
+			IteratorTraversalOptions {
+				ignore_system_and_hidden_files: true
+			}
+		);
 
 		assert!(
 			file_iter.next().is_some(),
@@ -195,9 +201,12 @@ mod tests {
 
 	#[test]
 	fn single_component_double_dot_relative_path_works() {
-		let mut file_iter = OsFilesystem.file_iterator(Path::new(".."), IteratorTraversalOptions {
-			ignore_system_and_hidden_files: true
-		});
+		let mut file_iter = OsFilesystem.file_iterator(
+			Path::new(".."),
+			IteratorTraversalOptions {
+				ignore_system_and_hidden_files: true
+			}
+		);
 
 		assert!(
 			file_iter.next().is_some(),
@@ -215,9 +224,12 @@ mod tests {
 		let file_path = root_dir.path().join("file.bin");
 		File::create(file_path).expect("I/O operations are assumed not to fail during tests");
 
-		let file_iter = OsFilesystem.file_iterator(root_dir.path(), IteratorTraversalOptions {
-			ignore_system_and_hidden_files: true
-		});
+		let file_iter = OsFilesystem.file_iterator(
+			root_dir.path(),
+			IteratorTraversalOptions {
+				ignore_system_and_hidden_files: true
+			}
+		);
 
 		assert_eq!(
 			file_iter.count(),

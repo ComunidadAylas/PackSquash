@@ -1012,14 +1012,17 @@ async fn read_previous_zip_contents(
 		}
 
 		// After all this work, we can finally insert the file data in the map :)
-		previous_zip_contents.insert(relative_path, PreviousFile {
-			squash_time,
-			data_offset: local_file_header_offset + 30 + local_header_file_name_length,
-			crc32: crc,
-			compression_method,
-			uncompressed_size,
-			compressed_size
-		});
+		previous_zip_contents.insert(
+			relative_path,
+			PreviousFile {
+				squash_time,
+				data_offset: local_file_header_offset + 30 + local_header_file_name_length,
+				crc32: crc,
+				compression_method,
+				uncompressed_size,
+				compressed_size
+			}
+		);
 
 		// Make sure the seek position points to the next central directory header for the
 		// next iteration
