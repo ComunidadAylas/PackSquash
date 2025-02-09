@@ -36,6 +36,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   newer versions. (While the bug was technically resolved in 24w39a, that
   snapshot shares its resource pack format version with earlier snapshots, so
   PackSquash can't distinguish between them.)
+- Very large textures are now slightly less aggressively compressed by default
+  when falling back to non-Zopfli compression. This adjustment improves
+  execution time by 30% while increasing pack size by only 1%, based on tests
+  with a small pack corpus, offering a more sensible default tradeoff.
+  - In most cases, it is still possible to achieve the previous behavior by
+    increasing `image_data_compression_iterations` to a value that maintains the
+    same non-Zopfli compression level, while preventing Zopfli from being used.
 - Updated OxiPNG, bringing the image compression improvements made upstream.
 
 #### Distribution

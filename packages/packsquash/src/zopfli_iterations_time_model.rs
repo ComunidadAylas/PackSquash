@@ -48,13 +48,13 @@ impl ZopfliIterationsTimeModel {
 	pub(crate) fn iterations_for_data_size(
 		&self,
 		size: u32,
-		min_iterations: u8,
+		min_iterations: i8,
 		max_iterations: u8
-	) -> u8 {
+	) -> i16 {
 		let data_magnitude = (size as f64 / 65536.0).powf(self.magnitude_power as f64) as f32;
 
 		((self.target_compression_time - B * data_magnitude) / (A * data_magnitude))
 			.clamp(min_iterations as f32, max_iterations as f32)
-			.round() as u8
+			.round() as i16
 	}
 }

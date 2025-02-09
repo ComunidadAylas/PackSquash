@@ -460,15 +460,22 @@ impl<R: Read> ProcessedImage<R> {
 			// a run per filter with a faster compressor than Zopfli to evaluate the best
 			// filtering strategy per image, but that still takes a significant amount of
 			// time
-			deflate: match zopfli_iterations_model.iterations_for_data_size(pixel_count, 0, 15) {
-				0 => Deflaters::Libdeflater {
-					// Use the maximum compression level for the best compression.
-					// This is still acceptably fast for bigger images of realistic
-					// sizes
-					compression: 12
+			deflate: match zopfli_iterations_model.iterations_for_data_size(pixel_count, -1, 15) {
+				libdeflater_iterations @ ..=0 => Deflaters::Libdeflater {
+					// Use libdeflate's near-optimal compressor (compression levels 10 to 12), which
+					// is acceptably fast for bigger images of realistic sizes, but let its aggressiveness
+					// be determined by how much we miss the Zopfli usage threshold. This may provide a
+					// significant speedup for big textures with little size cost; for example, 5 textures
+					// bigger than 1024x1024 pixels were optimized in 1.9 s vs. 2.5 s when dropping from 12
+					// iterations to 11 (~30% improvement), while the pack size only increased from
+					// 2.267 MiB to 2.299 MiB (~1.4%).
+					//
+					// See the libdeflate_alloc_compressor_ex function in lib/deflate_compress.c for
+					// precise details about the difference between libdeflate compression levels
+					compression: 12 - (-libdeflater_iterations as u8)
 				},
 				zopfli_iterations => Deflaters::Zopfli {
-					iterations: NonZeroU8::new(zopfli_iterations).unwrap()
+					iterations: NonZeroU8::new(zopfli_iterations as u8).unwrap()
 				}
 			},
 			filter: filter_strategies,
