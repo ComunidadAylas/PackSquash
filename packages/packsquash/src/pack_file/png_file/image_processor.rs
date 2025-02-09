@@ -128,16 +128,18 @@ pub fn strip_unnecessary_chunks(
 /// This function assumes that the input PNG datastream is valid and may panic if the PNG data is
 /// malformed.
 pub fn obfuscate_png(png: &mut [u8]) {
-	const CRC32_KEY: u32 = {
+	const CRC32_KEY: [u8; 4] = {
 		let k = random!(u32);
 
 		if k == 0 { 0xCAFEBABE } else { k }
-	};
-	const ADLER32_KEY: u32 = {
+	}
+	.to_le_bytes();
+	const ADLER32_KEY: [u8; 4] = {
 		let k = random!(u32);
 
 		if k == 0 { 0xCAFEBABE } else { k }
-	};
+	}
+	.to_le_bytes();
 
 	let mut i = 8;
 	while i < png.len() {
@@ -147,15 +149,12 @@ pub fn obfuscate_png(png: &mut [u8]) {
 
 		if chunk_type == b"IDAT" {
 			// The chunk data is a Zlib stream
-			for (adler32_byte, key_byte) in png[chunk_crc - 4..]
-				.iter_mut()
-				.zip(ADLER32_KEY.to_le_bytes())
-			{
+			for (adler32_byte, key_byte) in png[chunk_crc - 4..].iter_mut().zip(ADLER32_KEY) {
 				*adler32_byte ^= key_byte;
 			}
 		}
 
-		for (crc32_byte, key_byte) in png[chunk_crc..].iter_mut().zip(CRC32_KEY.to_le_bytes()) {
+		for (crc32_byte, key_byte) in png[chunk_crc..].iter_mut().zip(CRC32_KEY) {
 			*crc32_byte ^= key_byte;
 		}
 
