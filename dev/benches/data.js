@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1739433985392,
+  "lastUpdate": 1739475405274,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "aaf817a1bd341ef1855a476f1394d5417e87b105",
-          "message": "chore(cargo/deps): update all, dogfooding our new `vorbis_rs` version",
-          "timestamp": "2024-12-13T20:07:10+01:00",
-          "tree_id": "c711a807de79f78013c8b3631de8d216d7556702",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/aaf817a1bd341ef1855a476f1394d5417e87b105"
-        },
-        "date": 1734118864668,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9742242,
-            "range": "± 153339",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 118353530,
-            "range": "± 2667151",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2680209771,
-            "range": "± 47527900",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 663808266,
-            "range": "± 2765822",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 606628015,
             "range": "± 3000501",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "d874062cb820e5cde72e8576bde4ac563c12f02e",
+          "message": "chore(deps/renovate): do not pin dev dependencies\n\nThis sort of pinning is exactly what `Cargo.lock` is for...",
+          "timestamp": "2025-02-13T20:10:43+01:00",
+          "tree_id": "47cf26c90fc441fb13ec203a537b35379464a20a",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d874062cb820e5cde72e8576bde4ac563c12f02e"
+        },
+        "date": 1739475403972,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9847307,
+            "range": "± 56291",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 120894994,
+            "range": "± 2716652",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2978750084,
+            "range": "± 25817017",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 607313995,
+            "range": "± 1636347",
             "unit": "ns/iter"
           }
         ]
