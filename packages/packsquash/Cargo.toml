@@ -111,21 +111,21 @@ core-foundation = "0.10.0"
 mach2 = "0.4.2"
 
 [dev-dependencies]
-futures = { version = "0.3.31", default-features = false, features = ["std"] }
-tokio-test = "0.4.4"
-pretty_assertions = "1.4.1"
+futures = { version = "=0.3.31", default-features = false, features = ["std"] }
+tokio-test = "=0.4.4"
+pretty_assertions = "=1.4.1"
 
-criterion = { version = "0.5.1", features = ["html_reports"] }
-tar = { version = "0.4.43", default-features = false }
-xz2 = "0.1.7"
+criterion = { version = "=0.5.1", features = ["html_reports"] }
+tar = { version = "=0.4.43", default-features = false }
+xz2 = "=0.1.7"
 
 # criterion-perf-events depends on perfcnt, and perfcnt is so tightly coupled with
 # the x86 architecture that it needs to execute x86-specific instructions. The perf
 # framework is Linux-only, too, so benchmarks based on criterion-perf-events can only
 # run on x86 Linux systems
 [target.'cfg(all(target_os = "linux", any(target_arch = "x86", target_arch = "x86_64")))'.dev-dependencies]
-criterion-perf-events = "0.4.0"
-perfcnt = "0.8.0"
+criterion-perf-events = "=0.4.0"
+perfcnt = "=0.8.0"
 
 [features]
 # Support all kinds of files added by modifications by default
