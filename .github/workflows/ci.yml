@@ -94,25 +94,21 @@ jobs:
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
             container: debian:bookworm-slim
-            apt-arch: amd64
 
           - target: x86_64-unknown-linux-musl
             host-target: x86_64-unknown-linux-gnu
             runner: ubuntu-latest
             container: debian:bookworm-slim
-            apt-arch: amd64
 
           - target: aarch64-unknown-linux-gnu
-            host-target: x86_64-unknown-linux-gnu
-            runner: ubuntu-latest
+            host-target: aarch64-unknown-linux-gnu
+            runner: ubuntu-24.04-arm
             container: debian:bookworm-slim
-            apt-arch: arm64
 
           - target: aarch64-unknown-linux-musl
-            host-target: x86_64-unknown-linux-gnu
-            runner: ubuntu-latest
+            host-target: aarch64-unknown-linux-gnu
+            runner: ubuntu-24.04-arm
             container: debian:bookworm-slim
-            apt-arch: arm64
 
           - target: x86_64-pc-windows-gnu
             host-target: x86_64-pc-windows-gnu
@@ -150,17 +146,12 @@ jobs:
       - name: 🧰 Install Linux toolchain packages
         if: contains(matrix.target, '-linux-')
         run: |
-          if [ "$(dpkg --print-architecture)" != '${{ matrix.apt-arch }}' ]; then
-            dpkg --add-architecture '${{ matrix.apt-arch }}'
-          fi
           apt-get update
           # curl is required by rustup.
-          # musl-tools is required to build musl binaries for the host architecture,
-          # and the arch-specific musl-dev package is required to build binaries for
-          # a target architecture when cross-compiling
+          # musl-tools is required to build musl binaries for the native architecture
           # markdown and html2text are required to generate the Debian package only
           apt-get install -yq build-essential cmake git curl \
-                              musl-tools musl-dev:${{ matrix.apt-arch }} \
+                              musl-tools \
                               markdown html2text
 
       # This must go after the previous step so that a Git repository is checked out
@@ -168,10 +159,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0 # Keep the commit history for proper version information
-
-      - name: 🧰 Install Linux ARM64 cross-compilation toolchain
-        if: startsWith(matrix.target, 'aarch64-unknown-linux')
-        run: apt-get install -yq gcc-aarch64-linux-gnu qemu-user libc6:arm64
 
       - name: 🧰 Install Rust toolchain
         uses: dtolnay/rust-toolchain@a54c7afa936fefeb4456b2dd8068152669aa8203 # v1
@@ -261,7 +248,7 @@ jobs:
         if: endsWith(matrix.target, '-linux-gnu')
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
-          name: PackSquash CLI Debian package (${{ matrix.apt-arch }})
+          name: PackSquash CLI Debian package (${{ matrix.target }})
           path: target/${{ matrix.target }}/debian/packsquash_*.deb
 
       - name: ✒️ Generate SLSA attestation subject data for binaries

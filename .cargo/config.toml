@@ -19,34 +19,3 @@ rustflags = ["-Clink-arg=-Wl,-z,pack-relative-relocs"]
 # https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels
 [target.'cfg(target_arch = "x86_64")']
 rustflags = ["-Ctarget-cpu=x86-64-v2"]
-
-[target.'cfg(all(target_os = "linux", target_arch = "aarch64"))']
-linker = "aarch64-linux-gnu-gcc"
-runner = "qemu-aarch64"
-
-[target.aarch64-unknown-linux-musl]
-# When cross-compiling to aarch64-unknown-linux-musl, we need to handle
-# two different but related compiler errors:
-# - First, errors along the lines of "undefined reference to `__addtf3'",
-#   because we don't build std with the usual compiler-builtins-c feature,
-#   as the pre-built binaries do. This error has a related Rust issue, and
-#   the easy workaround is to link with libgcc, which is done statically:
-#   https://github.com/rust-lang/rust/issues/46651#issuecomment-641172562
-#   https://github.com/rust-lang/rust/issues/46651#issuecomment-1847872105
-#   Only this error happens when using -Z build-std.
-#   The cause of this error is that mimalloc pulls linking dependencies on
-#   standard printf-like C functions that require long double support.
-# - Second, errors along the lines of "undefined reference to `getauxval'"
-#   happen when not using -Z build-std for reasons explained in:
-#   https://github.com/rust-lang/rust/issues/89626#issuecomment-1642423512
-#   https://github.com/rust-lang/rust/issues/89626#issuecomment-1686073426
-#   https://github.com/rust-lang/rust/issues/89626#issuecomment-1847764299
-#   Linking again to libc is a hack that fixes the issue, but a more effective
-#   hack that also has the nice side effect of speeding up builds when mold
-#   is not used is to use the LLVM LLD linker included with the Rust toolchain.
-#   Sadly, using the aarch64-linux-musl-gcc and not aarch64-linux-gnu-gcc linker
-#   is necessary for the generated binaries to work correctly, and using that
-#   linker in combination with LLVM LLD does not work, so we have to resort
-#   to the libc workaround
-linker = "aarch64-linux-musl-gcc"
-rustflags = ["-Clink-args=-lgcc -lc"]
