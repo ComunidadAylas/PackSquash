@@ -39,17 +39,17 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@7afac3d3beca852dc6b16b0a27ca2511270e3dc5 # v2
+        uses: taiki-e/install-action@6a4015d72292204ce9e409f917f9a07ee5ba2173 # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@7afac3d3beca852dc6b16b0a27ca2511270e3dc5 # v2
+        uses: taiki-e/install-action@6a4015d72292204ce9e409f917f9a07ee5ba2173 # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@7afac3d3beca852dc6b16b0a27ca2511270e3dc5 # v2
+        uses: taiki-e/install-action@6a4015d72292204ce9e409f917f9a07ee5ba2173 # v2
         with:
           tool: cargo-deny
 
@@ -69,7 +69,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0 # v3
+        uses: github/codeql-action/upload-sarif@b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d # v3
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
@@ -188,13 +188,13 @@ jobs:
         uses: Swatinem/rust-cache@f0deed1e0edfc6a9be95417288c0e1099b1eeec3 # v2
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@7afac3d3beca852dc6b16b0a27ca2511270e3dc5 # v2
+        uses: taiki-e/install-action@6a4015d72292204ce9e409f917f9a07ee5ba2173 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@7afac3d3beca852dc6b16b0a27ca2511270e3dc5 # v2
+        uses: taiki-e/install-action@6a4015d72292204ce9e409f917f9a07ee5ba2173 # v2
         with:
           tool: cargo-deb
 
@@ -237,7 +237,7 @@ jobs:
 
       - name: 📤 Upload CLI binary
         if: ${{ !contains(matrix.target, '-linux-') || endsWith(matrix.target, '-linux-musl') }}
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:
           name: PackSquash CLI executable (${{ matrix.target }})
           path: |
@@ -246,7 +246,7 @@ jobs:
 
       - name: 📤 Upload CLI Debian package
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:
           name: PackSquash CLI Debian package (${{ matrix.target }})
           path: target/${{ matrix.target }}/debian/packsquash_*.deb
