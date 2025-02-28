@@ -39,17 +39,17 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@019e22100565643c6890fe3f00da0b63017c1672 # v2
+        uses: taiki-e/install-action@ada1a57be87ab19feb601af3b3e0d2d31972f057 # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@019e22100565643c6890fe3f00da0b63017c1672 # v2
+        uses: taiki-e/install-action@ada1a57be87ab19feb601af3b3e0d2d31972f057 # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@019e22100565643c6890fe3f00da0b63017c1672 # v2
+        uses: taiki-e/install-action@ada1a57be87ab19feb601af3b3e0d2d31972f057 # v2
         with:
           tool: cargo-deny
 
@@ -188,13 +188,13 @@ jobs:
         uses: Swatinem/rust-cache@f0deed1e0edfc6a9be95417288c0e1099b1eeec3 # v2
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@019e22100565643c6890fe3f00da0b63017c1672 # v2
+        uses: taiki-e/install-action@ada1a57be87ab19feb601af3b3e0d2d31972f057 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@019e22100565643c6890fe3f00da0b63017c1672 # v2
+        uses: taiki-e/install-action@ada1a57be87ab19feb601af3b3e0d2d31972f057 # v2
         with:
           tool: cargo-deb
 
@@ -366,11 +366,11 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: 🧰 Set up Docker Buildx
-        uses: docker/setup-buildx-action@f7ce87c1d6bead3e36075b2ce75da1f6cc28aaca # v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
 
       - name: ⚙️ Generate Docker image metadata
         id: meta
-        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 # v5
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # Tag the image as "edge" for every commit on master.
@@ -385,7 +385,7 @@ jobs:
             org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
       - name: 📥 Download PackSquash CLI x64 musl executable
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         with:
           name: PackSquash CLI executable (x86_64-unknown-linux-musl)
 
@@ -393,7 +393,7 @@ jobs:
         run: mv packsquash packsquash-amd64
 
       - name: 📥 Download PackSquash CLI ARM64 musl executable
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         with:
           name: PackSquash CLI executable (aarch64-unknown-linux-musl)
 
