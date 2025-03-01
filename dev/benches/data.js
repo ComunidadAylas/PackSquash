@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1740787339927,
+  "lastUpdate": 1740797930923,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "d3f48e103534dcb7c3ec87f72770b7b9cd7d83fc",
-          "message": "tweak(system_id/linux): more robust aggregated DMI serials ID result\n\nBy sorting serial numbers before hashing them the code can isolate\nitself from unimportant ordering differences in the retrieved serial\nnumbers, which can be caused by both software quirks and hardware\nmodifications.",
-          "timestamp": "2024-12-30T01:31:03+01:00",
-          "tree_id": "7bb105a81f969d4935e8c7c3bbdfcfe553ec6aed",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d3f48e103534dcb7c3ec87f72770b7b9cd7d83fc"
-        },
-        "date": 1735520890731,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9657874,
-            "range": "± 70935",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 116655817,
-            "range": "± 3880899",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2669247767,
-            "range": "± 51345038",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 663828935,
-            "range": "± 6341957",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 864882818,
             "range": "± 3198489",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "29139614+renovate[bot]@users.noreply.github.com",
+            "name": "renovate[bot]",
+            "username": "renovate[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0a971803cc5c16d2ef634b6748a89d1ef21f379c",
+          "message": "fix(deps): update rust crate uuid to v1.15.1",
+          "timestamp": "2025-02-28T23:41:44Z",
+          "tree_id": "8725c8071ba0c1b44d69d7f95b8595ca6d7ed5c6",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/0a971803cc5c16d2ef634b6748a89d1ef21f379c"
+        },
+        "date": 1740797930368,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10125144,
+            "range": "± 258027",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 119003384,
+            "range": "± 3411504",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 2692641233,
+            "range": "± 52735337",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 867223756,
+            "range": "± 2979920",
             "unit": "ns/iter"
           }
         ]
