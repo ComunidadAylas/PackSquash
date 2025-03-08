@@ -22,6 +22,7 @@ use tokio::{
 };
 use tokio_stream::Stream;
 use tokio_util::io::ReaderStream;
+use zip_archive_comment_string::ZipArchiveCommentString;
 use zopfli::Format;
 
 use self::{
@@ -42,6 +43,7 @@ mod obfuscation_engine;
 pub mod relative_path;
 mod system_id;
 pub mod system_time_sanitizer;
+mod zip_archive_comment_string;
 mod zip_file_record;
 
 #[cfg(test)]
@@ -677,7 +679,8 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			current_file_offset: central_directory_end_offset,
 			zip64_record_size_offset: 0,
 			spoof_version_made_by: false,
-			zero_out_unused_zip64_fields: false
+			zero_out_unused_zip64_fields: false,
+			archive_comment: ZipArchiveCommentString::new("").unwrap() // TODO make this configurable
 		};
 
 		self.obfuscation_engine

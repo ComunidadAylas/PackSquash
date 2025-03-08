@@ -1647,6 +1647,7 @@ dependencies = [
  "json_comments",
  "jsonpath_lib",
  "mach2",
+ "memchr",
  "obfstr",
  "optivorbis",
  "oxipng",

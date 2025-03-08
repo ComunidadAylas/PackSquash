@@ -1,3 +1,5 @@
+use std::io::Cursor;
+
 use pretty_assertions::assert_eq;
 
 use super::*;
@@ -232,6 +234,8 @@ async fn central_directory_works_test(use_zip64_extensions: bool) {
 /// Tests that the end of central directory is written as expected, no matter if ZIP64
 /// extensions are used or not.
 async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
+	const ARCHIVE_COMMENT: &str = "Lea! Hi!";
+
 	let central_directory_start_offset = if use_zip64_extensions {
 		(u32::MAX as u64) + 1 // This can only be represented using ZIP64 extensions
 	} else {
@@ -239,6 +243,7 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 	};
 
 	let eocd_size = END_OF_CENTRAL_DIRECTORY_SIZE
+		+ ARCHIVE_COMMENT.len()
 		+ (ZIP64_END_OF_CENTRAL_DIRECTORY_SIZE + ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIZE)
 			* use_zip64_extensions as usize;
 
@@ -253,7 +258,8 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 		current_file_offset: 7,
 		zip64_record_size_offset: 8,
 		spoof_version_made_by: true,
-		zero_out_unused_zip64_fields: false
+		zero_out_unused_zip64_fields: false,
+		archive_comment: ZipArchiveCommentString::new(ARCHIVE_COMMENT).unwrap()
 	};
 
 	assert_eq!(
@@ -424,8 +430,14 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 
 		assert_eq!(
 			buf[eocd_header_offset + 20..eocd_header_offset + 22],
-			[0, 0],
+			(ARCHIVE_COMMENT.len() as u16).to_le_bytes(),
 			"Unexpected comment length in end of central directory header"
+		);
+
+		assert_eq!(
+			&buf[eocd_header_offset + 22..eocd_header_offset + 22 + ARCHIVE_COMMENT.len()],
+			ARCHIVE_COMMENT.as_bytes(),
+			"Unexpected comment in end of central directory header"
 		);
 	}
 }
