@@ -26,7 +26,7 @@ sysinfo = { version = "0.33.1", default-features = false, features = [
 ] }
 walkdir = "2.5.0"
 
-tokio = { version = "1.43.0", default-features = false, features = [
+tokio = { version = "1.44.0", default-features = false, features = [
 	"rt-multi-thread",
 	"macros",
 	"io-util",
