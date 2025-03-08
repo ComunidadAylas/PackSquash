@@ -3,6 +3,9 @@
 		"vadimcn.vscode-lldb",
 		"rust-lang.rust-analyzer",
 		"tamasfe.even-better-toml",
-		"serayuzgur.crates"
+		"timonwong.shellcheck",
+		"fill-labs.dependi",
+		"eamodio.gitlens",
+		"github.vscode-github-actions"
 	]
 }

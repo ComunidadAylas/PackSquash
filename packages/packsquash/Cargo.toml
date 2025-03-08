@@ -22,22 +22,22 @@ patricia_tree = "0.9.0"
 tinyvec = "1.8.1"
 
 sysinfo = { version = "0.33.1", default-features = false, features = [
-  "system",
+	"system",
 ] }
 walkdir = "2.5.0"
 
 tokio = { version = "1.43.0", default-features = false, features = [
-  "rt-multi-thread",
-  "macros",
-  "io-util",
-  "fs",
-  "sync",
-  "parking_lot",
+	"rt-multi-thread",
+	"macros",
+	"io-util",
+	"fs",
+	"sync",
+	"parking_lot",
 ] }
 tokio-util = { version = "0.7.13", default-features = false, features = [
-  "codec",
-  "io",
-  "io-util",
+	"codec",
+	"io",
+	"io-util",
 ] }
 tokio-stream = { version = "0.1.17", default-features = false }
 futures = { version = "0.3.31", default-features = false }
@@ -49,19 +49,19 @@ json_comments = "0.2.2"
 jsonpath_lib = "0.3.0"
 
 spng = { version = "0.2.0-alpha.3", default-features = false, features = [
-  "zlib-ng",
+	"zlib-ng",
 ] }
 rgb = "0.8.50"
 imagequant = { version = "4.3.4", default-features = false }
 oxipng = { version = "9.1.3", default-features = false, features = ["zopfli"] }
 
 symphonia = { version = "0.5.4", default-features = false, features = [
-  "wav",
-  "isomp4",
-  "flac",
-  "pcm",
-  "mp3",
-  "aac",
+	"wav",
+	"isomp4",
+	"flac",
+	"pcm",
+	"mp3",
+	"aac",
 ] }
 vorbis_rs = { version = "0.5.5", default-features = false }
 dasp_signal = { version = "0.11.0", default-features = false }
@@ -84,9 +84,9 @@ flate2 = { version = "1.0.35", features = ["zlib-ng-compat"] }
 tempfile = "3.16.0"
 crc32fast = { version = "1.4.2", features = ["nightly"] }
 zopfli = { version = "0.8.1", default-features = false, features = [
-  "std",
-  "nightly",
-  "gzip",
+	"std",
+	"nightly",
+	"gzip",
 ] }
 
 obfstr = "0.4.4"
