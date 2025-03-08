@@ -38,15 +38,12 @@ pub enum InvalidPathError<'a> {
 
 impl From<InvalidPathError<'_>> for io::Error {
 	fn from(error: InvalidPathError<'_>) -> Self {
-		io::Error::new(
-			io::ErrorKind::Other,
-			match error {
-				InvalidPathError::NonUnicode(error_message) => {
-					InvalidPathError::NonUnicode(Cow::Owned(error_message.into_owned()))
-				}
-				InvalidPathError::TooBig => InvalidPathError::TooBig
+		io::Error::other(match error {
+			InvalidPathError::NonUnicode(error_message) => {
+				InvalidPathError::NonUnicode(Cow::Owned(error_message.into_owned()))
 			}
-		)
+			InvalidPathError::TooBig => InvalidPathError::TooBig
+		})
 	}
 }
 

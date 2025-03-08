@@ -4,11 +4,10 @@
 use std::{
 	cmp,
 	fs::File,
-	io::{self, BufReader, BufWriter, Cursor, Read, Seek, SeekFrom, Write},
+	io::{self, BufRead, BufReader, BufWriter, Cursor, Read, Seek, SeekFrom, Write},
 	pin::Pin,
 	task::{Context, Poll}
 };
-
 use tempfile::tempfile;
 use tokio::{
 	io::{AsyncRead, AsyncSeek, AsyncWrite, ReadBuf},
@@ -131,6 +130,22 @@ impl Seek for BufferedAsyncSpooledTempFile {
 				// refer to the same underlying file, we only need to do the seek once
 				file_reader.seek(pos)
 			}
+		}
+	}
+}
+
+impl BufRead for BufferedAsyncSpooledTempFile {
+	fn fill_buf(&mut self) -> io::Result<&[u8]> {
+		match self {
+			Self::InMemory(_, cursor) => cursor.fill_buf(),
+			Self::OnDisk(file_reader, _) => file_reader.fill_buf()
+		}
+	}
+
+	fn consume(&mut self, amt: usize) {
+		match self {
+			Self::InMemory(_, cursor) => cursor.consume(amt),
+			Self::OnDisk(file_reader, _) => file_reader.consume(amt)
 		}
 	}
 }

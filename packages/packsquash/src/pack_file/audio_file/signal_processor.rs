@@ -143,7 +143,7 @@ pub fn decode_and_process_sample_blocks(
 			resampler,
 			processed_sample_block_consumer
 		)?,
-		_ => unreachable!("Unexpected channel count: {}", input_channels)
+		_ => unreachable!("Unexpected channel count: {input_channels}")
 	};
 
 	if let Some(vorbis_error) = last_vorbis_error {
@@ -397,6 +397,9 @@ fn resample_buffer<T: rubato::Sample>(
 
 /// Helper enum to treat two different signal decoder types as if they were of
 /// a single type for the purposes of this module.
+// It's okay for the VorbisDecoder variant to be pretty big, it's the most common
+// one and it's not moved around stack frames much anyway
+#[allow(clippy::large_enum_variant)]
 enum SignalDecoder<R: Read> {
 	Vorbis(VorbisDecoder<R>),
 	Symphonia(SymphoniaDecoder)

@@ -4,7 +4,7 @@
 use std::borrow::Cow;
 use std::{
 	fs::{self, File, FileType},
-	io::{self, ErrorKind},
+	io,
 	path::Path
 };
 
@@ -42,7 +42,7 @@ impl VirtualFileSystem for OsFilesystem {
 
 		entry_iter.filter_map(|entry_result| {
 			entry_result.map_or_else(
-				|err| Some(Err(io::Error::new(ErrorKind::Other, err))),
+				|err| Some(Err(io::Error::other(err))),
 				|entry| {
 					// Do not yield directories. We are interested in the directory tree leaves only
 					(!entry.file_type().is_dir()).then(|| {

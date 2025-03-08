@@ -1,0 +1,4 @@
+# Our shader parsing code has a ~200 byte big error type that is not
+# much above the default threshold, and it's not worth it to move it
+# to the heap
+large-error-threshold = 256
