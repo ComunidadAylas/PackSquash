@@ -29,13 +29,13 @@ can apply the following specific techniques:
   libraries.
 - For Ogg (.ogg and .oga), MP3, M4A, FLAC, and WAV files: channel mixing,
   downsampling, transcoding with a state-of-the-art Vorbis encoder, pitch
-  shifting, tag removal, and two-pass optimization and validation with
-  [OptiVorbis](https://github.com/OptiVorbis/OptiVorbis). The default settings
-  are meant to be good enough for in-game music, such that most listeners will
-  think that the quality is good and not distracting. Because channel mixing may
-  change how the Minecraft sound engine computes positional effects (see
-  [MC-146721](https://bugs.mojang.com/browse/MC-146721)), PackSquash won't do it
-  by default.
+  shifting, tag removal, silence truncation, and two-pass optimization and
+  validation with [OptiVorbis](https://github.com/OptiVorbis/OptiVorbis). The
+  default settings are meant to be good enough for in-game music, such that most
+  listeners will think that the quality is good and not distracting. Because
+  channel mixing may change how the Minecraft sound engine computes positional
+  effects (see [MC-146721](https://bugs.mojang.com/browse/MC-146721)),
+  PackSquash won't do it by default.
 - For JSON files (.json, .jsonc, .mcmeta and .mcmetac; if OptiFine mod support
   is enabled, also .jem, .jemc, .jpm and .jpmc): minification, by removing
   unneeded whitespace. As a side bonus, because minification requires parsing
@@ -51,6 +51,8 @@ can apply the following specific techniques:
   require
   tweaking](https://github.com/ComunidadAylas/PackSquash/issues/187#issuecomment-1499365532).
   These limitations will be addressed in the future.
+- For structure files (.nbt): recompression with Zopfli, Gzip member
+  concatenation, and metadata removal.
 - For legacy language files (.lang; used in Minecraft 1.12.2 and lower):
   minification, removing blank lines and comments. Duplicate keys and non-blank
   lines that are not comments and do not contain a key-value separator are
@@ -84,7 +86,7 @@ user:
 - Deduplicating identical files within the generated ZIP file: the contents of
   files repeated several times over will be stored only once.
 - Protecting the generated ZIP files, making them harder to read by most ZIP
-  manipulation programs.
+  manipulation programs, and some of the files stored inside such ZIP files.
 
 ## 🔗 Download and usage
 
