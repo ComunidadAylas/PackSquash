@@ -1,6 +1,12 @@
-use std::io::Cursor;
+use std::{
+	io::Cursor,
+	iter,
+	pin::{Pin, pin},
+	task::{Context, Poll}
+};
 
 use pretty_assertions::assert_eq;
+use tokio_test::io::Mock;
 
 use super::*;
 
@@ -31,6 +37,9 @@ const ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIZE: usize = 20;
 /// The size of the end of central directory record, assuming no
 /// comments.
 const END_OF_CENTRAL_DIRECTORY_SIZE: usize = 22;
+
+/// Data for a valid ZIP file that only contains a small `pack.mcmeta` file.
+static TINY_PACK_ZIP: &[u8] = include_bytes!("tiny_pack.zip");
 
 /// Tests that central directory headers are written as expected, no matter if ZIP64
 /// extensions are used or not.
@@ -87,7 +96,7 @@ async fn central_directory_works_test(use_zip64_extensions: bool) {
 
 		assert_eq!(
 			buf[..4],
-			[0x50, 0x4B, 0x01, 0x02],
+			CentralDirectoryHeader::SIGNATURE,
 			"Unexpected central directory header signature"
 		);
 
@@ -291,7 +300,7 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 			// Check ZIP64 end of central directory fields
 			assert_eq!(
 				buf[..4],
-				[0x50, 0x4B, 0x06, 0x06],
+				EndOfCentralDirectory::ZIP64_SIGNATURE,
 				"Unexpected ZIP64 end of central directory signature"
 			);
 
@@ -356,7 +365,7 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 			// Check ZIP64 end of central directory locator
 			assert_eq!(
 				buf[56..60],
-				[0x50, 0x4B, 0x06, 0x07],
+				EndOfCentralDirectory::ZIP64_LOCATOR_SIGNATURE,
 				"Unexpected ZIP64 end of central directory locator signature"
 			);
 
@@ -383,7 +392,7 @@ async fn end_of_central_directory_works_test(use_zip64_extensions: bool) {
 
 		assert_eq!(
 			buf[eocd_header_offset..eocd_header_offset + 4],
-			[0x50, 0x4B, 0x05, 0x06],
+			EndOfCentralDirectory::SIGNATURE,
 			"Unexpected end of central directory header signature"
 		);
 
@@ -475,7 +484,7 @@ async fn local_file_header_works() {
 
 		assert_eq!(
 			buf[..4],
-			[0x50, 0x4B, 0x03, 0x04],
+			LocalFileHeader::SIGNATURE,
 			"Unexpected local file header signature"
 		);
 
@@ -550,4 +559,105 @@ async fn end_of_central_directory_zip32_works() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn end_of_central_directory_zip64_works() {
 	end_of_central_directory_works_test(true).await
+}
+
+#[tokio::test]
+async fn end_of_central_directory_location_works() {
+	assert_eq!(
+		EndOfCentralDirectory::locate(Cursor::new(TINY_PACK_ZIP))
+			.await
+			.expect("The end of central directory should be found"),
+		Some(145)
+	);
+}
+
+#[tokio::test]
+async fn end_of_central_directory_location_with_big_zip_works() {
+	assert_eq!(
+		EndOfCentralDirectory::locate(Cursor::new(
+			iter::repeat_n(TINY_PACK_ZIP, 15000) /* ~2 MiB */
+				.flatten()
+				.copied()
+				.collect::<Vec<_>>()
+		))
+		.await
+		.expect("The end of central directory should be found"),
+		Some(2504978)
+	);
+}
+
+#[tokio::test]
+async fn end_of_central_directory_location_with_big_zip_and_comment_works() {
+	assert_eq!(
+		EndOfCentralDirectory::locate(Cursor::new(
+			iter::repeat_n(TINY_PACK_ZIP, 15000) /* ~2 MiB */
+				.flatten()
+				.copied()
+				.chain(b"LEAHI".iter().cycle().take(u16::MAX as usize).copied())
+				.collect::<Vec<_>>()
+		))
+		.await
+		.expect("The end of central directory should be found"),
+		Some(2504978)
+	);
+}
+
+#[tokio::test]
+async fn end_of_central_directory_location_with_partial_reads_works() {
+	/// A [`Mock`] that can returns an error when seeking for the first time
+	/// to a position relative to the end of the file, success when seeking
+	/// to the file start a second time, and panics for any other seek
+	/// operation that locating an end of central directory record should
+	/// not require.
+	struct ScriptedSeekMock {
+		mock: Mock,
+		seek_count: usize
+	}
+
+	impl AsyncRead for ScriptedSeekMock {
+		fn poll_read(
+			mut self: Pin<&mut Self>,
+			cx: &mut Context<'_>,
+			buf: &mut tokio::io::ReadBuf<'_>
+		) -> Poll<io::Result<()>> {
+			pin!(&mut self.mock).poll_read(cx, buf)
+		}
+	}
+
+	impl AsyncSeek for ScriptedSeekMock {
+		fn start_seek(mut self: Pin<&mut Self>, position: SeekFrom) -> io::Result<()> {
+			self.seek_count += 1;
+
+			match position {
+				SeekFrom::Start(0) if self.seek_count == 2 => Ok(()),
+				SeekFrom::End(_) if self.seek_count == 1 => {
+					Err(io::Error::other("Unsupported seek position"))
+				}
+				_ => panic!("Unexpected seek operation")
+			}
+		}
+
+		fn poll_complete(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<io::Result<u64>> {
+			Poll::Ready(Ok(0))
+		}
+	}
+
+	let mock_file = {
+		let mut mock_file_builder = tokio_test::io::Builder::new();
+		for byte in TINY_PACK_ZIP.chunks_exact(1) {
+			mock_file_builder.read(byte); // Yield ZIP file bytes one at a time
+		}
+
+		ScriptedSeekMock {
+			mock: mock_file_builder.build(),
+			seek_count: 0
+		}
+	};
+
+	assert_eq!(
+		EndOfCentralDirectory::locate(mock_file)
+			.await
+			.expect("The end of central directory should be found"),
+		Some(145)
+	);
 }

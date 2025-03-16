@@ -3,7 +3,7 @@ use std::{borrow::Cow, ops::Deref};
 use memchr::memmem;
 use thiserror::Error;
 
-use super::zip_file_record::END_OF_CENTRAL_DIRECTORY_SIGNATURE;
+use super::zip_file_record::EndOfCentralDirectory;
 
 /// Represents a string that can be used as a ZIP file comment, which is limited
 /// to 65535 bytes in size, doesn't contain the end of central directory
@@ -56,15 +56,15 @@ impl<'str> ZipArchiveCommentString<'str> {
 			));
 		}
 
-		// The end of central directory signture bytes are technically valid ASCII, but they will
+		// The end of central directory signature bytes are technically valid ASCII, but they will
 		// cause confusion on programs that attempt to locate the EOCD structure by searching for
-		// ocurrences of its signature, which is the only practical general method for seek-enabled
+		// occurrences of its signature, which is the only practical general method for seek-enabled
 		// ZIP file parsing with arbitrary padding and comments. Therefore, prevent failure modes
 		// by ensuring the comment lacks such a signature. (Even though the comment string could
 		// technically contain other ZIP header signatures, the enforced lack of a EOCD would render
 		// those signatures inert for both streaming and seeking ZIP parsers.)
 		if let Some(eocd_signature_position) =
-			memmem::find(comment.as_bytes(), &END_OF_CENTRAL_DIRECTORY_SIGNATURE)
+			memmem::find(comment.as_bytes(), &EndOfCentralDirectory::SIGNATURE)
 		{
 			return Err(InvalidFileCommentStringError::ContainsEocdSignature(
 				eocd_signature_position

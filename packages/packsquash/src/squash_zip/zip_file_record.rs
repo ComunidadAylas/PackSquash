@@ -2,12 +2,14 @@
 
 use std::{
 	borrow::Cow,
-	io::{Error, IoSlice}
+	cmp,
+	io::{self, Error, IoSlice, SeekFrom}
 };
 
 use enumset::{EnumSet, EnumSetType};
 
-use tokio::io::AsyncWrite;
+use memchr::memmem;
+use tokio::io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt, AsyncWrite};
 
 use crate::RelativePath;
 
@@ -154,11 +156,11 @@ pub(super) struct LocalFileHeader<'a> {
 	pub file_name: Cow<'a, RelativePath<'a>>
 }
 
-/// Magic bytes defined in the ZIP specification whose purpose is signalling
-/// the beginning of a local file header record.
-const LOCAL_FILE_HEADER_SIGNATURE: [u8; 4] = 0x04034B50_u32.to_le_bytes();
-
 impl<'a> LocalFileHeader<'a> {
+	/// Magic bytes defined in the ZIP specification whose purpose is signalling
+	/// the beginning of a local file header record.
+	pub(super) const SIGNATURE: [u8; 4] = 0x04_03_4B_50_u32.to_le_bytes();
+
 	/// Creates a new local file header record. The caller must make sure that the
 	/// following fields end up being initialized to an appropriate value before
 	/// writing the header:
@@ -218,7 +220,7 @@ impl<'a> LocalFileHeader<'a> {
 
 		output_zip
 			.write_all_vectored(&mut [
-				IoSlice::new(&LOCAL_FILE_HEADER_SIGNATURE),
+				IoSlice::new(&Self::SIGNATURE),
 				IoSlice::new(&version_needed_to_extract.to_le_bytes()),
 				IoSlice::new(&general_purpose_bit_flag.to_le_bytes()),
 				IoSlice::new(&compression_method.to_le_bytes()),
@@ -255,11 +257,11 @@ pub(super) struct CentralDirectoryHeader<'a> {
 	pub spoof_version_made_by: bool
 }
 
-/// Magic bytes defined in the ZIP specification whose purpose is signalling
-/// the beginning of a central directory header record.
-const CENTRAL_DIRECTORY_HEADER_SIGNATURE: [u8; 4] = 0x02014B50_u32.to_le_bytes();
-
 impl CentralDirectoryHeader<'_> {
+	/// Magic bytes defined in the ZIP specification whose purpose is signalling
+	/// the beginning of a central directory header record.
+	pub(super) const SIGNATURE: [u8; 4] = 0x02_01_4B_50_u32.to_le_bytes();
+
 	/// Returns whether this central directory header record requires ZIP64 extensions
 	/// to be stored correctly.
 	const fn requires_zip64_extensions(&self) -> bool {
@@ -313,7 +315,7 @@ impl CentralDirectoryHeader<'_> {
 
 		output_zip
 			.write_all_vectored(&mut [
-				IoSlice::new(&CENTRAL_DIRECTORY_HEADER_SIGNATURE),
+				IoSlice::new(&Self::SIGNATURE),
 				IoSlice::new(&get_version_made_by(self.spoof_version_made_by)),
 				// Same operations as local file header
 				IoSlice::new(&version_needed_to_extract.to_le_bytes()),
@@ -386,19 +388,23 @@ pub(super) struct EndOfCentralDirectory<'a> {
 	pub archive_comment: ZipArchiveCommentString<'a>
 }
 
-/// Magic bytes defined in the ZIP specification whose purpose is signalling
-/// the beginning of a ZIP64 end of central directory header record.
-const ZIP64_END_OF_CENTRAL_DIRECTORY_SIGNATURE: [u8; 4] = 0x06064B50_u32.to_le_bytes();
-
-/// Magic bytes defined in the ZIP specification whose purpose is signalling
-/// the beginning of a ZIP64 end of central directory header locator record.
-const ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE: [u8; 4] = 0x07064B50_u32.to_le_bytes();
-
-/// Magic bytes defined in the ZIP specification whose purpose is signalling
-/// the beginning of an end of central directory header record.
-pub(super) const END_OF_CENTRAL_DIRECTORY_SIGNATURE: [u8; 4] = 0x06054B50_u32.to_le_bytes();
-
 impl EndOfCentralDirectory<'_> {
+	/// Magic bytes defined in the ZIP specification whose purpose is signalling
+	/// the beginning of a ZIP64 end of central directory header record.
+	pub(super) const ZIP64_SIGNATURE: [u8; 4] = 0x06_06_4B_50_u32.to_le_bytes();
+
+	/// Magic bytes defined in the ZIP specification whose purpose is signalling
+	/// the beginning of a ZIP64 end of central directory header locator record.
+	pub(super) const ZIP64_LOCATOR_SIGNATURE: [u8; 4] = 0x07_06_4B_50_u32.to_le_bytes();
+
+	/// Magic bytes defined in the ZIP specification whose purpose is signalling
+	/// the beginning of an end of central directory header record.
+	pub(super) const SIGNATURE: [u8; 4] = 0x06_05_4B_50_u32.to_le_bytes();
+
+	/// The maximum size that an end of central directory record can have in a
+	/// ZIP file, in bytes, without taking into account any ZIP64 extensions.
+	const MAX_SIZE: u32 = 22 + u16::MAX as u32;
+
 	/// Returns whether this end of central directory requires ZIP64 extensions to be
 	/// stored correctly.
 	const fn requires_zip64_extensions(&self) -> bool {
@@ -436,6 +442,101 @@ impl EndOfCentralDirectory<'_> {
 		self.central_directory_start_offset > u32::MAX as u64
 	}
 
+	/// Returns the file position of the last (and only) end of central directory record
+	/// in the provided ZIP file, if any, assuming that there is no trailing data after
+	/// such record. Such position is relative to the beginning of the file, and points
+	/// to the first byte of the record's signature.
+	///
+	/// The algorithm implemented by this method is highly optimized for the very common
+	/// case where the end of central directory record is located near the end of the
+	/// file, and a single file read call can fill a scratch buffer large enough to hold
+	/// the region of the file that may hold the record. In this case, the algorithm can
+	/// find the record with a single file read operation and, due to searching for
+	/// signatures in reverse, a few comparisons with the bytes at the end of the file.
+	///
+	/// Should the case occur where the end of central directory record is located far from
+	/// the end of the file, or file read calls yield small amounts of data at a time, the
+	/// algorithm will still be asympotically efficient due to the usage of [two-way searching]
+	/// for searching the end of central directory record signature, but the overheads will
+	/// increase due to the additional read calls and/or the reverse search order doing more
+	/// and more expensive comparisons. No heap allocations are made in either case.
+	///
+	/// [two-way searching]: https://en.wikipedia.org/wiki/Two-way_string-matching_algorithm
+	pub async fn locate(
+		mut zip_file: impl AsyncRead + AsyncSeek + Unpin
+	) -> Result<Option<u64>, io::Error> {
+		/// The maximum length of a partial EOCD signature: its length, minus one byte.
+		const MAX_PARTIAL_EOCD_SIGNATURE_LENGTH: usize = EndOfCentralDirectory::SIGNATURE.len() - 1;
+
+		// Opportunistically seek to the file region where EOCD has to be when no trailing data
+		// comes after it, which notably reduces search time without sacrificing compatibility
+		// with the ZIP files we generate. If that fails, which can be a normal occurrence when
+		// the ZIP file is pretty small (and thus we cannot seek to a negative position),
+		// ensure we are at the beginning of the file, to not miss any records
+		let record_region_start = match zip_file.seek(SeekFrom::End(-(Self::MAX_SIZE as i64))).await {
+			Ok(eocd_region_start) => eocd_region_start,
+			Err(_) => zip_file.seek(SeekFrom::Start(0)).await?
+		};
+
+		let mut last_signature_offset = None;
+
+		let signature_finder = memmem::FinderRev::new(&Self::SIGNATURE);
+		let mut candidate_record_buf =
+			[0; MAX_PARTIAL_EOCD_SIGNATURE_LENGTH + Self::MAX_SIZE as usize];
+
+		let mut total_bytes_read = 0;
+		let mut bytes_carried_over = 0;
+
+		loop {
+			let bytes_read = zip_file
+				.read(&mut candidate_record_buf[MAX_PARTIAL_EOCD_SIGNATURE_LENGTH..])
+				.await?;
+
+			if bytes_read == 0 {
+				// No further bytes read. The bytes carried over from the previous read can be assumed
+				// to not be followed by any more bytes, so we never will find a new signature
+				break;
+			}
+
+			// We either have no bytes from the previous read (if it was the first read), or we have
+			// some. In either case, try to find the signature in the previous bytes (if any) and the
+			// bytes we just read, carrying over at most the last `MAX_PARTIAL_EOCD_SIGNATURE_LENGTH`
+			// bytes for the next read, to handle the case where the EOCD signature gets split between
+			// several reads
+			let bytes_to_carry_over = cmp::min(MAX_PARTIAL_EOCD_SIGNATURE_LENGTH, bytes_read);
+			let (find_start, find_end) = (
+				MAX_PARTIAL_EOCD_SIGNATURE_LENGTH - bytes_carried_over,
+				MAX_PARTIAL_EOCD_SIGNATURE_LENGTH + bytes_read
+			);
+
+			last_signature_offset = signature_finder
+				.rfind(&candidate_record_buf[find_start..find_end])
+				.map(|window_offset| {
+					total_bytes_read + window_offset as u64 - bytes_carried_over as u64
+				})
+				.or(last_signature_offset);
+
+			// Update the sliding window of at most `MAX_PARTIAL_EOCD_SIGNATURE_LENGTH` previous bytes by
+			// discarding its oldest `bytes_to_carry_over` bytes, and then copying the latest bytes read
+			// to the end of such window
+			candidate_record_buf[..MAX_PARTIAL_EOCD_SIGNATURE_LENGTH]
+				.rotate_left(bytes_to_carry_over);
+			candidate_record_buf.copy_within(
+				MAX_PARTIAL_EOCD_SIGNATURE_LENGTH + bytes_read - bytes_to_carry_over
+					..MAX_PARTIAL_EOCD_SIGNATURE_LENGTH + bytes_read,
+				MAX_PARTIAL_EOCD_SIGNATURE_LENGTH - bytes_to_carry_over
+			);
+
+			bytes_carried_over = cmp::min(
+				bytes_carried_over + bytes_to_carry_over,
+				MAX_PARTIAL_EOCD_SIGNATURE_LENGTH
+			);
+			total_bytes_read += bytes_read as u64;
+		}
+
+		Ok(last_signature_offset.map(|offset| record_region_start + offset))
+	}
+
 	/// Writes this ZIP file record to the specified output ZIP file. For top performance,
 	/// it is recommended to use a sink with efficient vectored writes.
 	pub async fn write(
@@ -447,7 +548,7 @@ impl EndOfCentralDirectory<'_> {
 		if self.requires_zip64_extensions() {
 			output_zip
 				.write_all_vectored(&mut [
-					IoSlice::new(&ZIP64_END_OF_CENTRAL_DIRECTORY_SIGNATURE),
+					IoSlice::new(&Self::ZIP64_SIGNATURE),
 					IoSlice::new(&(44 + self.zip64_record_size_offset as i64).to_le_bytes()),
 					IoSlice::new(&get_version_made_by(self.spoof_version_made_by)),
 					// Luckily, ZIP64 is the highest specification version we support, so this is
@@ -515,7 +616,7 @@ impl EndOfCentralDirectory<'_> {
 						.to_le_bytes())
 					),
 					// Now go for the ZIP64 EOCD locator, which is always needed
-					IoSlice::new(&ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE),
+					IoSlice::new(&Self::ZIP64_LOCATOR_SIGNATURE),
 					IoSlice::new(
 						&(if self.zero_out_unused_zip64_fields {
 							0
@@ -533,7 +634,7 @@ impl EndOfCentralDirectory<'_> {
 		// After the ZIP64 EOCD record, if any, goes the traditional EOCD record. Write it
 		output_zip
 			.write_all_vectored(&mut [
-				IoSlice::new(&END_OF_CENTRAL_DIRECTORY_SIGNATURE),
+				IoSlice::new(&Self::SIGNATURE),
 				IoSlice::new(&self.disk_number.to_le_bytes()),
 				IoSlice::new(&self.central_directory_start_disk_number.to_le_bytes()),
 				IoSlice::new(
