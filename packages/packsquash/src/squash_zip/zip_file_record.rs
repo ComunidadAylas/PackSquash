@@ -373,7 +373,7 @@ impl CentralDirectoryHeader<'_> {
 /// record and locator, in addition to the conventional end of central directory record.
 /// These records are defined in sections 4.3.14, 4.3.15 and 4.3.16 of the ZIP file
 /// specification.
-pub(super) struct EndOfCentralDirectory<'a> {
+pub(super) struct EndOfCentralDirectory {
 	pub disk_number: u16,
 	pub central_directory_start_disk_number: u16,
 	pub central_directory_entry_count_current_disk: u64,
@@ -385,10 +385,10 @@ pub(super) struct EndOfCentralDirectory<'a> {
 	pub zip64_record_size_offset: i8,
 	pub spoof_version_made_by: bool,
 	pub zero_out_unused_zip64_fields: bool,
-	pub archive_comment: ZipArchiveCommentString<'a>
+	pub archive_comment: ZipArchiveCommentString
 }
 
-impl EndOfCentralDirectory<'_> {
+impl EndOfCentralDirectory {
 	/// Magic bytes defined in the ZIP specification whose purpose is signalling
 	/// the beginning of a ZIP64 end of central directory header record.
 	pub(super) const ZIP64_SIGNATURE: [u8; 4] = 0x06_06_4B_50_u32.to_le_bytes();

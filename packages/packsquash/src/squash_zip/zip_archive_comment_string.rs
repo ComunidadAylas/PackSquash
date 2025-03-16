@@ -1,16 +1,18 @@
-use std::{borrow::Cow, ops::Deref};
+use std::{borrow::Cow, ops::Deref, sync::Arc};
 
 use memchr::memmem;
+use serde::Deserialize;
 use thiserror::Error;
 
 use super::zip_file_record::EndOfCentralDirectory;
 
-/// Represents a string that can be used as a ZIP file comment, which is limited
-/// to 65535 bytes in size, doesn't contain the end of central directory
-/// signature bytes, and only contains non-extended ASCII characters.
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+/// Represents a cheaply cloneable string that can be used as a ZIP file comment,
+/// which is limited to 65535 bytes in size, doesn't contain the end of central
+/// directory signature bytes, and only contains US-ASCII characters.
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Default, Deserialize)]
+#[serde(try_from = "Cow<'_, str>")]
 #[repr(transparent)]
-pub struct ZipArchiveCommentString<'str>(Cow<'str, str>);
+pub struct ZipArchiveCommentString(Arc<str>);
 
 /// Represents an error that may happen while converting a string to a ZIP file
 /// comment.
@@ -26,14 +28,14 @@ pub enum InvalidFileCommentStringError {
 	TooBig
 }
 
-impl<'str> ZipArchiveCommentString<'str> {
+impl ZipArchiveCommentString {
 	/// Creates a new ZIP file comment from the given string, which is limited
 	/// to 65535 bytes in size, does not contain the end of central directory
-	/// signature bytes, and only contain non-extended ASCII characters.
-	pub(crate) fn new(
+	/// signature bytes, and only contains US-ASCII characters.
+	pub fn new<'str>(
 		comment: impl Into<Cow<'str, str>>
 	) -> Result<Self, InvalidFileCommentStringError> {
-		let comment = comment.into();
+		let comment = Arc::<str>::from(comment.into());
 
 		if comment.len() > u16::MAX as usize {
 			return Err(InvalidFileCommentStringError::TooBig);
@@ -45,8 +47,8 @@ impl<'str> ZipArchiveCommentString<'str> {
 		// Aho-Corasick, which has much higher overhead due to the initial automaton construction
 
 		// The ZIP specification does not specify a character encoding for ZIP file comments,
-		// so play it safe and only accept non-extended ASCII characters, which are interoperable
-		// with extended ASCII codepages and UTF-8
+		// so play it safe and only accept US-ASCII characters, which are interoperable with
+		// extended ASCII codepages and UTF-8
 		if let Some(non_ascii_char_position) = comment
 			.char_indices()
 			.find_map(|(i, c)| (!c.is_ascii()).then_some(i))
@@ -75,16 +77,24 @@ impl<'str> ZipArchiveCommentString<'str> {
 	}
 }
 
-impl AsRef<str> for ZipArchiveCommentString<'_> {
+impl AsRef<str> for ZipArchiveCommentString {
 	fn as_ref(&self) -> &str {
 		&self.0
 	}
 }
 
-impl Deref for ZipArchiveCommentString<'_> {
+impl Deref for ZipArchiveCommentString {
 	type Target = str;
 
 	fn deref(&self) -> &Self::Target {
 		&self.0
+	}
+}
+
+impl TryFrom<Cow<'_, str>> for ZipArchiveCommentString {
+	type Error = InvalidFileCommentStringError;
+
+	fn try_from(value: Cow<'_, str>) -> Result<Self, Self::Error> {
+		Self::new(value)
 	}
 }

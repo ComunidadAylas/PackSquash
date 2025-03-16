@@ -68,7 +68,9 @@ async fn add_files_finish_and_read_back_test(
 				enable_size_increasing_obfuscation: false,
 				percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 				workaround_old_java_obfuscation_quirks: false,
-				spool_buffer_size: spool_buffer_size.unwrap_or(DEFAULT_SPOOL_BUFFER_SIZE)
+				spool_buffer_size: spool_buffer_size.unwrap_or(DEFAULT_SPOOL_BUFFER_SIZE),
+				zip_comment: ZipArchiveCommentString::new("Test comment")
+					.expect("The archive comment is assumed to be valid")
 			}
 		)
 		.await
@@ -116,7 +118,8 @@ async fn add_files_finish_and_read_back_test(
 			enable_size_increasing_obfuscation: false,
 			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: spool_buffer_size.unwrap_or(DEFAULT_SPOOL_BUFFER_SIZE)
+			spool_buffer_size: spool_buffer_size.unwrap_or(DEFAULT_SPOOL_BUFFER_SIZE),
+			zip_comment: ZipArchiveCommentString::default()
 		}
 	)
 	.await
@@ -330,7 +333,8 @@ async fn add_several_finish_then_reuse_and_add_works() {
 			enable_size_increasing_obfuscation: false,
 			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE
+			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE,
+			zip_comment: ZipArchiveCommentString::default()
 		}
 	)
 	.await
@@ -378,7 +382,8 @@ async fn add_several_finish_then_reuse_and_add_works() {
 			enable_size_increasing_obfuscation: false,
 			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE
+			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE,
+			zip_comment: ZipArchiveCommentString::default()
 		}
 	)
 	.await
@@ -408,7 +413,8 @@ async fn several_files_with_same_path_are_handled_properly() {
 			enable_size_increasing_obfuscation: false,
 			percentage_of_records_tuned_for_obfuscation_discretion: 0.try_into().unwrap(),
 			workaround_old_java_obfuscation_quirks: false,
-			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE
+			spool_buffer_size: DEFAULT_SPOOL_BUFFER_SIZE,
+			zip_comment: ZipArchiveCommentString::default()
 		}
 	)
 	.await

@@ -12,6 +12,18 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 #### Compression
 
+- The generated ZIP files may now include a customizable comment string via the
+  new `zip_comment` option. This comment is limited to 65535 US-ASCII characters
+  and must not contain some special character sequences used internally by the
+  ZIP format for delimitation purposes. Also, it is guaranteed to be placed at
+  the end of the ZIP file. (_Thanks to a Discord user who suggested this idea a
+  long time ago!_)
+  - While it is also possible to attach text notes to a ZIP file by adding a
+    file with a well-known name to it (and that is required for non-text data,
+    or content exceeding 65535 characters), comment strings are typically
+    displayed more prominently in user interfaces, and easier for programs to
+    access. This makes them potentially more suitable for important user-facing
+    notices and file tracking metadata.
 - PackSquash now features a dedicated optimization algorithm for compressed
   compound NBT tag files, such as structures found in data packs, that may
   slightly reduce their sizes.

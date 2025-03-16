@@ -22,7 +22,6 @@ use tokio::{
 };
 use tokio_stream::Stream;
 use tokio_util::io::ReaderStream;
-use zip_archive_comment_string::ZipArchiveCommentString;
 use zopfli::Format;
 
 use self::{
@@ -38,6 +37,7 @@ use crate::{
 };
 
 pub use self::obfuscation_engine::FileListingCircumstances;
+pub use self::zip_archive_comment_string::ZipArchiveCommentString;
 
 mod obfuscation_engine;
 pub mod relative_path;
@@ -169,7 +169,9 @@ pub struct SquashZipSettings {
 	/// of the input files, in bytes. The temporary files that hold data from input files
 	/// are extremely temporary, being only valid during a call to `add_file`, and each of
 	/// them will have a buffer `spool_buffer_size / 2` bytes big.
-	pub spool_buffer_size: usize
+	pub spool_buffer_size: usize,
+	/// The comment that will be attached to the output ZIP file.
+	pub zip_comment: ZipArchiveCommentString
 }
 
 /// A custom, minimalistic ZIP compressor, which exploits its great control
@@ -680,7 +682,7 @@ impl<F: AsyncRead + AsyncSeek + Unpin> SquashZip<F> {
 			zip64_record_size_offset: 0,
 			spoof_version_made_by: false,
 			zero_out_unused_zip64_fields: false,
-			archive_comment: ZipArchiveCommentString::new("").unwrap() // TODO make this configurable
+			archive_comment: self.settings.zip_comment
 		};
 
 		self.obfuscation_engine

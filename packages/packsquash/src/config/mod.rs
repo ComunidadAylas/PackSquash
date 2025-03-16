@@ -10,7 +10,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sysinfo::{MemoryRefreshKind, RefreshKind, System};
 
-use crate::squash_zip::SquashZipSettings;
+use crate::squash_zip::{SquashZipSettings, ZipArchiveCommentString};
 
 /// Contains all the options that configure a `PackSquasher` operation.
 ///
@@ -250,7 +250,21 @@ pub struct GlobalOptions {
 	/// spooling buffer for the output ZIP file.
 	///
 	/// **Default value**: `half of the available memory reported by the OS / (number of CPU hardware threads + 1)`
-	pub spooling_buffers_size: usize
+	pub spooling_buffers_size: usize,
+	/// The comment string that will be attached to the output ZIP file, which is displayed by some
+	/// ZIP file manipulation programs when examining the archive. This string is limited to 65535
+	/// US-ASCII characters in size, must not contain some special character sequences that are
+	/// internally used by the ZIP format to delimit its structures, and is guaranteed to be placed
+	/// at the end of the output ZIP file.
+	///
+	/// While it is also possible to attach text notes to a ZIP file by adding a file with a well-known
+	/// name to it, and doing so is required for non-text or complex data that takes more than 65535
+	/// characters, comment strings are usually displayed more prominently in user interfaces and more
+	/// convenient for programs to read, rendering them more suitable for purposes like storing
+	/// important user-facing notices and file tracking metadata.
+	///
+	/// **Default value**: empty string (no comment)
+	pub zip_comment: ZipArchiveCommentString
 }
 
 impl Default for GlobalOptions {
@@ -282,7 +296,8 @@ impl Default for GlobalOptions {
 			// In MiB. By default, half of available memory / (hardware threads + 1 for the output ZIP)
 			spooling_buffers_size: (available_memory / 2097152 / (hardware_threads.get() as u64 + 1))
 				.try_into()
-				.unwrap_or(usize::MAX)
+				.unwrap_or(usize::MAX),
+			zip_comment: ZipArchiveCommentString::default()
 		}
 	}
 }
@@ -312,7 +327,8 @@ impl GlobalOptions {
 			workaround_old_java_obfuscation_quirks: self
 				.work_around_minecraft_quirks
 				.contains(MinecraftQuirk::Java8ZipParsing),
-			spool_buffer_size: self.spooling_buffers_size.saturating_mul(1024 * 1024)
+			spool_buffer_size: self.spooling_buffers_size.saturating_mul(1024 * 1024),
+			zip_comment: self.zip_comment.clone()
 		}
 	}
 }
