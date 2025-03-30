@@ -26,6 +26,9 @@ mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
 # mismatch action merged. Related PR: https://github.com/aloucks/spng-rs/pull/16
 spng = { git = "https://github.com/aloucks/spng-rs", rev = "d3f69ff" }
 
+# Use a newer zopfli commit with further performance optimizations
+zopfli = { git = "https://github.com/zopfli-rs/zopfli", rev = "a025ab9" }
+
 [profile.release]
 opt-level = 3
 lto = "fat"
@@ -40,8 +43,6 @@ strip = "none"
 [workspace.lints.rust]
 unsafe_code = "deny"
 missing_docs = "deny"
-# deny instead of forbid is required by the thread_local macro with const initializers
-unsafe_op_in_unsafe_fn = "deny"
 
 [workspace.lints.clippy]
 #pedantic = "warn" # TODO too pedantic for now, fix the warnings and re-enable this sooner than later

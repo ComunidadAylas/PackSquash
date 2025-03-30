@@ -109,4 +109,4 @@ unknown-git = "deny"
 allow-git = ["https://github.com/aloucks/spng-rs"]
 
 [sources.allow-org]
-github = ["ComunidadAylas"]
+github = ["ComunidadAylas", "zopfli-rs"]
