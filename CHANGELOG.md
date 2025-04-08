@@ -96,6 +96,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - Because they use statically-linked binaries, the PackSquash GitHub
     Action and Docker container also saw performance improvements. (Thanks
     _@xMikux_ for reporting the performance differences!)
+- The Zopfli compressor, used for DEFLATE compression of textures and other
+  files in the generated ZIPs, has been significantly optimized.
+  - In tests with the `recompress_compressed_files` option enabled (and all
+    other options set to their default values) on a sample realistic pack,
+    execution time improved by 15%.
 - Updated `libspng` to v0.7.4, bringing decoding speed and stability
   improvements for ARM CPUs that support NEON extensions.
 
