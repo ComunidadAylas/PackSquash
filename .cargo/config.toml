@@ -12,6 +12,19 @@
 [target.'cfg(all(target_os = "linux", not(target_env = "musl")))']
 rustflags = ["-Clink-arg=-Wl,-z,pack-relative-relocs"]
 
+# When using -Z build-std with a the musl target, the compiler may output errors
+# such as `undefined reference to `__popcountdi2'` because std is built without the
+# `compiler-builtins-c` feature pre-built std's have, and that feature implements
+# a few intrinsics that were not translated to Rust yet, which requires a separate
+# download of LLVM builtins C code. libgcc provides an implementation of these
+# intrinsics, so statically link against to it to avoid linking errors while
+# sidestepping the need to deal with LLVM C builtins, with no observable downsides
+# on the resulting binary. As of 2025-04-09, this is needed because `mimalloc`
+# depends on such unimplemented intrinsics on x64 targets. See:
+# https://github.com/rust-lang/rust/issues/46651#issuecomment-1847872105
+[target.'cfg(all(target_os = "linux", target_env = "musl"))']
+rustflags = ["-Clink-args=-lgcc"]
+
 # Generate code for the x64 microarchitecture level 2 for x64 targets.
 # This is broadly compatible (virtually any CPU manufactured after
 # 2009 is compatible) and provides some nice speedups. CPUs that
