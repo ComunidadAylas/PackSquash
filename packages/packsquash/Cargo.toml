@@ -84,7 +84,7 @@ flate2 = { version = "1.1.1", features = ["zlib-ng-compat"] }
 
 tempfile = "3.19.1"
 crc32fast = { version = "1.4.2", features = ["nightly"] }
-zopfli = { version = "0.8.1", default-features = false, features = [
+zopfli = { version = "0.8.2", default-features = false, features = [
 	"std",
 	"nightly",
 	"gzip",
