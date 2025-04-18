@@ -2,10 +2,11 @@
 	"recommendations": [
 		"vadimcn.vscode-lldb",
 		"rust-lang.rust-analyzer",
-		"tamasfe.even-better-toml",
 		"timonwong.shellcheck",
 		"fill-labs.dependi",
 		"eamodio.gitlens",
-		"github.vscode-github-actions"
+		"github.vscode-github-actions",
+		"tombi-toml.tombi",
+		"tekumara.typos-vscode"
 	]
 }
