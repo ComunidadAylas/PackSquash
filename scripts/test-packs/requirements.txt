@@ -1,4 +1,4 @@
-beautifulsoup4==4.13.3
+beautifulsoup4==4.13.4
 certifi==2024.12.14
 charset-normalizer==3.4.1
 filelock==3.18.0
