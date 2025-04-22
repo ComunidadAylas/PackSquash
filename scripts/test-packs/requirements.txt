@@ -7,6 +7,6 @@ idna==3.10
 PySocks==1.7.1
 requests==2.32.3
 six==1.17.0
-soupsieve==2.6
+soupsieve==2.7
 tqdm==4.67.1
 urllib3==2.4.0
