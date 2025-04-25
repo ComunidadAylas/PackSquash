@@ -35,7 +35,7 @@ tokio = { version = "1.44.2", default-features = false, features = [
 	"sync",
 	"parking_lot",
 ] }
-tokio-util = { version = "0.7.14", default-features = false, features = [
+tokio-util = { version = "0.7.15", default-features = false, features = [
 	"codec",
 	"io",
 	"io-util",
@@ -105,7 +105,7 @@ rlimit = "0.10.2"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.55.0"
-wmi = { version = "0.17.0", default-features = false }
+wmi = { version = "0.17.1", default-features = false }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.10.0"
