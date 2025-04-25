@@ -179,10 +179,7 @@ fn read_options_file_and_squash(
 	} {
 		Ok(options_string) => options_string,
 		Err(err) => {
-			error!(
-				"Couldn't read the options file from {}: {}",
-				user_friendly_options_path, err,
-			);
+			error!("Couldn't read the options file from {user_friendly_options_path}: {err}");
 
 			return 2;
 		}
@@ -195,8 +192,7 @@ fn read_options_file_and_squash(
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
 			error!(
-				"An error occurred while parsing the options file from {}: {}",
-				user_friendly_options_path,
+				"An error occurred while parsing the options file from {user_friendly_options_path}: {}",
 				PrettyPathDeserializeErrorDisplay(deserialize_error)
 			);
 
@@ -340,12 +336,11 @@ fn squash(
 								title_controller.show();
 							}
 						}
-						PackSquasherStatus::Notice(notice) => info!("{}", notice),
+						PackSquasherStatus::Notice(notice) => info!("{notice}"),
 						PackSquasherStatus::Warning(warning) => match warning {
 							PackSquasherWarning::UnusablePreviousZip(err) => warn!(
 								"The previous ZIP file could not be read. It will not be used to speed up processing. \
-									Was the file last modified by PackSquash? Cause: {}",
-								err
+									Was the file last modified by PackSquash? Cause: {err}"
 							),
 							PackSquasherWarning::PredictableSystemTimeSanitizationKey => warn!(
 								"Used predictable system IDs to build encryption keys. The dates embedded in the result ZIP file, \
