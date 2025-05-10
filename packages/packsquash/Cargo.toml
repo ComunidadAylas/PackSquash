@@ -11,13 +11,13 @@ edition.workspace = true
 
 [dependencies]
 bytes = "1.10.1"
-bytemuck = "1.22.0"
+bytemuck = "1.23.0"
 globset = { version = "0.4.16", default-features = false }
-enumset = { version = "1.1.5", features = ["serde"] }
+enumset = { version = "1.1.6", features = ["serde"] }
 indexmap = { version = "2.9.0", features = ["serde"] }
 itertools = "0.14.0"
 thiserror = "2.0.12"
-ahash = "0.8.11"
+ahash = "0.8.12"
 patricia_tree = "0.9.0"
 tinyvec = "1.9.0"
 memchr = "2.7.4"
@@ -27,7 +27,7 @@ sysinfo = { version = "0.35.0", default-features = false, features = [
 ] }
 walkdir = "2.5.0"
 
-tokio = { version = "1.44.2", default-features = false, features = [
+tokio = { version = "1.45.0", default-features = false, features = [
 	"rt-multi-thread",
 	"macros",
 	"io-util",
@@ -54,7 +54,7 @@ spng = { version = "0.2.0-alpha.3", default-features = false, features = [
 ] }
 rgb = "0.8.50"
 imagequant = { version = "4.3.4", default-features = false }
-oxipng = { version = "9.1.4", default-features = false, features = ["zopfli"] }
+oxipng = { version = "9.1.5", default-features = false, features = ["zopfli"] }
 
 symphonia = { version = "0.5.4", default-features = false, features = [
 	"wav",
@@ -93,7 +93,7 @@ zopfli = { version = "0.8.2", default-features = false, features = [
 obfstr = "0.4.4"
 aes = "0.8.4"
 hkdf = "0.12.4"
-sha2 = "0.10.8"
+sha2 = "0.10.9"
 fpe = "0.6.1"
 uuid = "1.16.0"
 rand_xoshiro = "0.7.0"
@@ -105,7 +105,7 @@ rlimit = "0.10.2"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.55.0"
-wmi = { version = "0.17.1", default-features = false }
+wmi = { version = "0.17.2", default-features = false }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.10.0"

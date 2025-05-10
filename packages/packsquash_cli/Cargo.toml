@@ -13,10 +13,10 @@ edition.workspace = true
 packsquash = { path = "../packsquash", version = "0.4.0" }
 
 getopts = "0.2.21"
-toml = { version = "0.8.21", default-features = false, features = ["parse"] }
+toml = { version = "0.8.22", default-features = false, features = ["parse"] }
 tz-rs = { version = "0.7.0", default-features = false }
 
-tokio = { version = "1.44.2", default-features = false, features = ["time"] }
+tokio = { version = "1.45.0", default-features = false, features = ["time"] }
 
 serde_path_to_error = "0.1.17"
 
