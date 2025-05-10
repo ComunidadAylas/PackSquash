@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1746905197512,
+  "lastUpdate": 1746905345650,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "9dffa2791dd49f4da030f94944a4a53a58b9dbc9",
-          "message": "chore(deps): update taiki-e/install-action digest to 87b5304",
-          "timestamp": "2025-03-10T18:25:07Z",
-          "tree_id": "291f5e885e487cea9276ffe60556a892bd7e0a12",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9dffa2791dd49f4da030f94944a4a53a58b9dbc9"
-        },
-        "date": 1741649794899,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9630800,
-            "range": "± 814931",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 116296285,
-            "range": "± 977254",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2557716048,
-            "range": "± 44702476",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 847198390,
-            "range": "± 3784325",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 698154098,
             "range": "± 2618681",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "9fdf89ace8c0448131aa932da9e0b0266059fc0e",
+          "message": "fix(json_file): support arrays and objects nested >128 levels deep\n\nic22487's Hypixel Plus resource pack is creatively (ab)using model\noverrides in a way that works with the game, can't be refactored, and is\nnecessary to achieve the functional goals is wants, so let's support it.\nThanks for getting in touch over Discord!",
+          "timestamp": "2025-05-10T21:04:07+02:00",
+          "tree_id": "569f561d677203abcb0fbf86f7ed0012e3115462",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9fdf89ace8c0448131aa932da9e0b0266059fc0e"
+        },
+        "date": 1746905344952,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10207038,
+            "range": "± 449655",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 138966304,
+            "range": "± 2300733",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 889949266,
+            "range": "± 17230667",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 693838210,
+            "range": "± 2660557",
             "unit": "ns/iter"
           }
         ]
