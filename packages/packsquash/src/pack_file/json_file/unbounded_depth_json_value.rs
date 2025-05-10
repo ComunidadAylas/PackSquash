@@ -107,7 +107,6 @@ impl UnboundedDepthJsonValue {
 
 	/// Checks whether the JSON value held by this struct is deeply nested, i.e. whether it
 	/// needs to be handled with an arbitrarily large stack.
-	#[allow(dead_code)] // Will be used in the future
 	pub fn has_deeply_nested_value(&self) -> bool {
 		self.exceeds_recursion_limit
 	}

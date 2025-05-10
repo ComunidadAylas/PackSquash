@@ -115,6 +115,14 @@ impl Decoder for OptimizerDecoder {
 			false
 		};
 
+		// Sort the keys of all JSON objects, if requested and the JSON is not so deep that it could
+		// cause too much memory to be allocated. On a small corpus of 4 resource packs, this provided
+		// ~0.005% space savings at negligible performance cost, in addition to unmeasurable improvements
+		// in human readability and ease of diffing
+		if self.optimization_settings.sort_object_keys && !json_value.has_deeply_nested_value() {
+			json_value.with_safe_stack_mut(|value| value.sort_all_objects());
+		}
+
 		let mut json_writer = src.split_off(0).writer();
 
 		macro_rules! concat_debloated_suffix {

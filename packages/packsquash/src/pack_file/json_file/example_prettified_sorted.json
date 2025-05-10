@@ -1,0 +1,42 @@
+{
+  "__comment": "I like writing comments",
+  "credit": "Example made with love by the Minecraft Wiki editors",
+  "groups": [
+    0,
+    {
+      "_comment": "This is a nice group",
+      "children": [
+        1
+      ],
+      "color": 0,
+      "name": "group",
+      "origin": [
+        8,
+        0.5,
+        8
+      ]
+    }
+  ],
+  "variants": {
+    "snowy=false": [
+      {
+        "model": "block/grass_block"
+      },
+      {
+        "model": "block/grass_block",
+        "y": 90
+      },
+      {
+        "model": "block/grass_block",
+        "y": 180
+      },
+      {
+        "model": "block/grass_block",
+        "y": 270
+      }
+    ],
+    "snowy=true": {
+      "model": "block/grass_block_snow"
+    }
+  }
+}

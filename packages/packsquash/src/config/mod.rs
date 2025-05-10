@@ -871,7 +871,20 @@ pub struct JsonFileOptions {
 	///
 	/// **Default value**: `true` (allow comments in the JSON file, no matter its extension)
 	#[serde(rename = "always_allow_json_comments")]
-	pub always_allow_comments: bool
+	pub always_allow_comments: bool,
+	/// If `true`, PackSquash will recursively sort JSON object keys by their lexicographic order.
+	/// This improves style consistency by ensuring equivalent key sets always appear in the same
+	/// order, and thus also compressibility. If `false`, the original key order is preserved,
+	/// which may be preferable when working with mods that improperly rely on key ordering, or
+	/// in cases where key sorting turns out to be a wrong heuristic for compressibility.
+	///
+	/// Note that PackSquash may still not sort the keys of JSON objects no matter the value of this
+	/// option if it detects that doing so would be inappropriate, due to excessive resource usage
+	/// or other reasons.
+	///
+	/// **Default value**: `true` (sort keys of JSON objects by their lexicographic order)
+	#[serde(rename = "sort_json_object_keys")]
+	pub sort_object_keys: bool
 }
 
 impl Default for JsonFileOptions {
@@ -879,7 +892,8 @@ impl Default for JsonFileOptions {
 		Self {
 			minify: true,
 			delete_bloat: true,
-			always_allow_comments: true
+			always_allow_comments: true,
+			sort_object_keys: true
 		}
 	}
 }

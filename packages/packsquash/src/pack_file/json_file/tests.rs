@@ -9,6 +9,7 @@ static JSON_DATA: &str = include_str!("example.json");
 static MINIFIED_JSON_DATA: &str = include_str!("example_minified.json");
 static MINIFIED_AND_DEBLOATED_JSON_DATA: &str = include_str!("example_minified_and_debloated.json");
 static PRETTIFIED_JSON_DATA: &str = include_str!("example_prettified.json");
+static PRETTIFIED_SORTED_JSON_DATA: &str = include_str!("example_prettified_sorted.json");
 static DEEPLY_NESTED_JSON_DATA: &str = include_str!("deeply_nested.json");
 static MINIFIED_DEEPLY_NESTED_JSON_DATA: &str = include_str!("deeply_nested_minified.json");
 
@@ -78,6 +79,7 @@ async fn minifying_works() {
 		PackFileAssetType::GenericJson,
 		JsonFileOptions {
 			minify: true,
+			sort_object_keys: false,
 			..Default::default()
 		},
 		MINIFIED_JSON_DATA
@@ -95,6 +97,7 @@ async fn minifying_with_bom_works() {
 		PackFileAssetType::GenericJson,
 		JsonFileOptions {
 			minify: true,
+			sort_object_keys: false,
 			..Default::default()
 		},
 		MINIFIED_JSON_DATA
@@ -113,6 +116,7 @@ async fn minifying_with_comments_works() {
 		JsonFileOptions {
 			minify: true,
 			always_allow_comments: true,
+			sort_object_keys: false,
 			..Default::default()
 		},
 		MINIFIED_JSON_DATA
@@ -127,9 +131,25 @@ async fn prettifying_works() {
 		PackFileAssetType::GenericJson,
 		JsonFileOptions {
 			minify: false,
+			sort_object_keys: false,
 			..Default::default()
 		},
 		PRETTIFIED_JSON_DATA
+	)
+	.await
+}
+
+#[tokio::test]
+async fn prettifying_with_key_sorting_works() {
+	successful_process_test(
+		JSON_DATA,
+		PackFileAssetType::GenericJson,
+		JsonFileOptions {
+			minify: false,
+			sort_object_keys: true,
+			..Default::default()
+		},
+		PRETTIFIED_SORTED_JSON_DATA
 	)
 	.await
 }
@@ -141,6 +161,7 @@ async fn minifying_and_debloating_model_works() {
 		PackFileAssetType::MinecraftModel,
 		JsonFileOptions {
 			minify: true,
+			sort_object_keys: false,
 			..Default::default()
 		},
 		MINIFIED_AND_DEBLOATED_JSON_DATA
@@ -160,6 +181,7 @@ async fn comments_are_always_allowed_for_specific_extensions() {
 			minify: true,
 			delete_bloat: false,
 			always_allow_comments: false,
+			sort_object_keys: false,
 			..Default::default()
 		},
 		MINIFIED_JSON_DATA
@@ -233,6 +255,7 @@ async fn deeply_nested_value_works() {
 		JsonFileOptions {
 			minify: true,
 			delete_bloat: true,
+			sort_object_keys: false, // Actually sorting keys in this file is prone to allocation errors
 			..JsonFileOptions::default()
 		},
 		MINIFIED_DEEPLY_NESTED_JSON_DATA

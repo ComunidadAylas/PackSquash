@@ -33,6 +33,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
     space savings while ensuring that file sizes never increase.
   - A new file-specific option, `nbt_compression_iterations`, allows controlling
     the number of compression iterations.
+- Introduced a `sort_json_object_keys` option for JSON files, allowing control
+  over whether JSON object keys are sorted alphabetically.
+  - This option is enabled by default, typically yielding a slight improvement
+    in compression efficiency with a negligible performance impact.
+  - However, in rare cases, sorting keys may be inappropriate: it can negatively
+    affect compressibility, or break compatibility with mods that, contrary to
+    JSON specification recommendations, depend on key ordering.
+  - PackSquash is also capable of detecting some cases where sorting keys could
+    lead to a exceedingly high resource usage, disabling key sorting accordingly
+    no matter the value of this option.
 
 ### Changed
 
