@@ -182,6 +182,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - The `postcredits.txt` file at `assets/minecraft/texts` is now correctly
   processed as a credits text file for packs targeting 1.18-pre2 or later.
   ([#333](https://github.com/ComunidadAylas/PackSquash/issues/333))
+- JSON files with arrays and objects nested beyond 128 levels deep can now be
+  processed. (Thanks _@ic22487_ for reporting this issue!)
+  - While such deeply nested JSON structures pose interoperability problems,
+    they have valid uses when creatively scaling certain vanilla resource pack
+    features, as some game distributions support them.
 
 #### User experience
 

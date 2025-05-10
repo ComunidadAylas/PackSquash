@@ -9,6 +9,8 @@ static JSON_DATA: &str = include_str!("example.json");
 static MINIFIED_JSON_DATA: &str = include_str!("example_minified.json");
 static MINIFIED_AND_DEBLOATED_JSON_DATA: &str = include_str!("example_minified_and_debloated.json");
 static PRETTIFIED_JSON_DATA: &str = include_str!("example_prettified.json");
+static DEEPLY_NESTED_JSON_DATA: &str = include_str!("deeply_nested.json");
+static MINIFIED_DEEPLY_NESTED_JSON_DATA: &str = include_str!("deeply_nested_minified.json");
 
 /// Processes the given input data as a [JsonFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
@@ -219,6 +221,21 @@ async fn strange_value_is_handled_consistently() {
 		PackFileAssetType::GenericJson,
 		Default::default(),
 		"null"
+	)
+	.await;
+}
+
+#[tokio::test]
+async fn deeply_nested_value_works() {
+	successful_process_test(
+		DEEPLY_NESTED_JSON_DATA,
+		PackFileAssetType::MinecraftModel,
+		JsonFileOptions {
+			minify: true,
+			delete_bloat: true,
+			..JsonFileOptions::default()
+		},
+		MINIFIED_DEEPLY_NESTED_JSON_DATA
 	)
 	.await;
 }

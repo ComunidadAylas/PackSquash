@@ -16,8 +16,10 @@ use crate::pack_file::asset_type::PackFileAssetType;
 use super::{PackFile, PackFileConstructor, util::strip_utf8_bom};
 
 use self::debloater::Debloater;
+use self::unbounded_depth_json_value::UnboundedDepthJsonValue;
 
 mod debloater;
+mod unbounded_depth_json_value;
 
 #[cfg(test)]
 mod tests;
@@ -75,19 +77,25 @@ impl Decoder for OptimizerDecoder {
 		self.reached_eof = true;
 
 		// Parse the JSON, so we know how to serialize it again in a compact manner, and whether
-		// it's valid. Check whether we should parse and discard comments, too
-		let mut json_value: Value = if self.optimization_settings.always_allow_comments
+		// it's valid. Check whether we should parse and discard comments, too. We also disable
+		// recursion limits to support complex JSON structures, which may be found in some practical
+		// packs
+		let mut json_value = if self.optimization_settings.always_allow_comments
 			|| asset_type_has_comments_extension(self.asset_type)
 		{
-			serde_json::from_reader(StripComments::new(strip_utf8_bom(src)))?
+			UnboundedDepthJsonValue::deserialize(|| {
+				serde_json::de::IoRead::new(StripComments::new(strip_utf8_bom(src)))
+			})?
 		} else {
-			serde_json::from_slice(strip_utf8_bom(src))?
+			UnboundedDepthJsonValue::deserialize(|| {
+				serde_json::de::SliceRead::new(strip_utf8_bom(src))
+			})?
 		};
 
 		// All concrete asset types start with a JSON object (aka struct, map)
 		if self.asset_type != PackFileAssetType::GenericJson
 			&& self.asset_type != PackFileAssetType::GenericJsonWithComments
-			&& !json_value.is_object()
+			&& !json_value.with_safe_stack(Value::is_object)
 		{
 			return Err(OptimizationError::UnexpectedValue(
 				"The root JSON element must be an object"
@@ -100,7 +108,9 @@ impl Decoder for OptimizerDecoder {
 
 		// Debloat the read value
 		let debloated = if self.optimization_settings.delete_bloat {
-			DEBLOATER.with(|debloater| debloater.debloat(&mut json_value, self.asset_type))
+			DEBLOATER.with(|debloater| {
+				json_value.with_safe_stack_mut(|value| debloater.debloat(value, self.asset_type))
+			})
 		} else {
 			false
 		};
@@ -119,10 +129,10 @@ impl Decoder for OptimizerDecoder {
 
 		// Serialize the JSON value to the buffer and get a nice description string
 		let description = if self.optimization_settings.minify {
-			serde_json::ser::to_writer(&mut json_writer, &json_value)?;
+			json_value.serialize(&mut serde_json::Serializer::new(&mut json_writer))?;
 			concat_debloated_suffix!("Minified")
 		} else {
-			serde_json::ser::to_writer_pretty(&mut json_writer, &json_value)?;
+			json_value.serialize(&mut serde_json::Serializer::pretty(&mut json_writer))?;
 			concat_debloated_suffix!("Prettified")
 		};
 
