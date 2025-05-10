@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1746872296029,
+  "lastUpdate": 1746905197512,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "1e76c45867cbaccf277adfd20e88299afcb20a9a",
-          "message": "fix(deps): update rust dependencies",
-          "timestamp": "2025-03-10T05:55:18Z",
-          "tree_id": "eb84ce4b2208be8f7eb5858050165c6386ee02e7",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/1e76c45867cbaccf277adfd20e88299afcb20a9a"
-        },
-        "date": 1741621285321,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9749669,
-            "range": "± 54194",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 118576603,
-            "range": "± 2265074",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 2578694025,
-            "range": "± 57167763",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 849849195,
-            "range": "± 4243005",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 685639104,
             "range": "± 2853717",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "63a5938e87d5e5a83b8815252b30b17e3da1944d",
+          "message": "fix(json_file): support arrays and objects nested >128 levels deep\n\nic22487's Hypixel Plus resource pack is creatively (ab)using model\noverrides in a way that works with the game, can't be refactored, and is\nnecessary to achieve the functional goals is wants, so let's support it.\nThanks for getting in touch over Discord!",
+          "timestamp": "2025-05-10T21:01:57+02:00",
+          "tree_id": "f9ab4bddb1c64c843d5c99bad88240879c5aeaae",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/63a5938e87d5e5a83b8815252b30b17e3da1944d"
+        },
+        "date": 1746905196691,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10074951,
+            "range": "± 1224759",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 140611260,
+            "range": "± 2715283",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 906254675,
+            "range": "± 10195936",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 698154098,
+            "range": "± 2618681",
             "unit": "ns/iter"
           }
         ]
