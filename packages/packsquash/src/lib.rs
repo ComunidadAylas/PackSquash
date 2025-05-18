@@ -185,18 +185,18 @@ impl PackSquasher {
 						.global_options
 						.work_around_minecraft_quirks = quirks;
 
-					if let Some(pack_file_status_sender) = &pack_file_status_sender {
-						if !quirks.is_empty() {
-							let notice_message = format!(
-								"Working around automatically detected Minecraft quirks: {}",
-								quirks.iter().map(|quirk| quirk.as_str()).join(", ")
-							);
+					if let Some(pack_file_status_sender) = &pack_file_status_sender
+						&& !quirks.is_empty()
+					{
+						let notice_message = format!(
+							"Working around automatically detected Minecraft quirks: {}",
+							quirks.iter().map(|quirk| quirk.as_str()).join(", ")
+						);
 
-							pack_file_status_sender
-								.send(PackSquasherStatus::Notice(Cow::Owned(notice_message)))
-								.await
-								.ok();
-						}
+						pack_file_status_sender
+							.send(PackSquasherStatus::Notice(Cow::Owned(notice_message)))
+							.await
+							.ok();
 					}
 				}
 
@@ -531,24 +531,23 @@ impl PackSquasher {
 			};
 
 			// Finally, send warnings about relevant conditions
-			if let Some(tx) = pack_file_status_sender {
-				if let Some(system_time_sanitizer) = LazyLock::get(&squash_zip::SYSTEM_TIME_SANITIZER)
-				{
-					if system_time_sanitizer.using_predictable_key() {
-						tx.send(PackSquasherStatus::Warning(
-							PackSquasherWarning::PredictableSystemTimeSanitizationKey
-						))
-						.await
-						.ok();
-					}
+			if let Some(tx) = pack_file_status_sender
+				&& let Some(system_time_sanitizer) = LazyLock::get(&squash_zip::SYSTEM_TIME_SANITIZER)
+			{
+				if system_time_sanitizer.using_predictable_key() {
+					tx.send(PackSquasherStatus::Warning(
+						PackSquasherWarning::PredictableSystemTimeSanitizationKey
+					))
+					.await
+					.ok();
+				}
 
-					if system_time_sanitizer.using_volatile_key() {
-						tx.send(PackSquasherStatus::Warning(
-							PackSquasherWarning::VolatileSystemTimeSanitizationKey
-						))
-						.await
-						.ok();
-					}
+				if system_time_sanitizer.using_volatile_key() {
+					tx.send(PackSquasherStatus::Warning(
+						PackSquasherWarning::VolatileSystemTimeSanitizationKey
+					))
+					.await
+					.ok();
 				}
 			}
 
