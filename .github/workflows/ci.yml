@@ -39,17 +39,17 @@ jobs:
           components: rustfmt, clippy
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@941e8a4d9d7cdb696bd4f017cf54aca281f8ffff # v2
+        uses: taiki-e/install-action@52039f232923165906a3c824622a332e84ca4560 # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@941e8a4d9d7cdb696bd4f017cf54aca281f8ffff # v2
+        uses: taiki-e/install-action@52039f232923165906a3c824622a332e84ca4560 # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@941e8a4d9d7cdb696bd4f017cf54aca281f8ffff # v2
+        uses: taiki-e/install-action@52039f232923165906a3c824622a332e84ca4560 # v2
         with:
           tool: cargo-deny
 
@@ -188,13 +188,13 @@ jobs:
         uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@941e8a4d9d7cdb696bd4f017cf54aca281f8ffff # v2
+        uses: taiki-e/install-action@52039f232923165906a3c824622a332e84ca4560 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@941e8a4d9d7cdb696bd4f017cf54aca281f8ffff # v2
+        uses: taiki-e/install-action@52039f232923165906a3c824622a332e84ca4560 # v2
         with:
           tool: cargo-deb
 
@@ -439,7 +439,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bookworm-slim@sha256:4b50eb66f977b4062683ff434ef18ac191da862dbe966961bc11990cf5791a8d
+    container: debian:bookworm-slim@sha256:90522eeb7e5923ee2b871c639059537b30521272f10ca86fdbbbb2b75a8c40cd
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
