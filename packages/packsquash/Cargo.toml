@@ -118,7 +118,7 @@ futures = { version = "0.3.31", default-features = false, features = ["std"] }
 tokio-test = "0.4.4"
 pretty_assertions = "1.4.1"
 
-criterion = { version = "0.5.1", features = ["html_reports"] }
+criterion = { version = "0.6.0", features = ["html_reports"] }
 tar = { version = "0.4.44", default-features = false }
 xz2 = "0.1.7"
 
