@@ -451,10 +451,10 @@ impl PackFileAssetType {
 				compile_hardcoded_pack_file_glob_pattern("data/*/structure/**/?*.nbt")
 			}
 			Self::LegacyCommandFunction => {
-				compile_hardcoded_pack_file_glob_pattern("data/*/functions/**/?*.mcfunction")
+				compile_hardcoded_pack_file_glob_pattern("data/*/functions/**/*.mcfunction")
 			}
 			Self::CommandFunction => {
-				compile_hardcoded_pack_file_glob_pattern("data/*/function/**/?*.mcfunction")
+				compile_hardcoded_pack_file_glob_pattern("data/*/function/**/*.mcfunction")
 			}
 
 			Self::Custom => unreachable!()
