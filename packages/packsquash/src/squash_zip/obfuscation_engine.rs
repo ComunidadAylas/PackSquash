@@ -94,7 +94,7 @@ impl ObfuscationEngine {
 		} = self.0
 		{
 			output_zip
-				.write_all(&if random_u32(seed) % 5 == 0 {
+				.write_all(&if random_u32(seed).is_multiple_of(5) {
 					[0x50, 0x4B, 0x03, 0x04]
 				} else {
 					[0x50, 0x4B, 0x05, 0x06]
