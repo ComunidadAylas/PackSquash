@@ -11,7 +11,7 @@
 	"automerge": true,
 	"automergeType": "branch",
 	"minimumReleaseAge": "2 days",
-	"schedule": ["every 3 day"],
+	"schedule": ["* 0-3 1 * *"],
 	"packageRules": [
 		{
 			"matchUpdateTypes": ["major"],
