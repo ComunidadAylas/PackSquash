@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752424442675,
+  "lastUpdate": 1752424653824,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "8ee98690e7f51d3d66cb2455e22a9b51ced020af",
-          "message": "fix(deps): update rust crate sysinfo to 0.34.0",
-          "timestamp": "2025-03-31T05:36:04Z",
-          "tree_id": "71cf426f897d0b9335a5d313fb56355fc10e0318",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/8ee98690e7f51d3d66cb2455e22a9b51ced020af"
-        },
-        "date": 1743422606795,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10007911,
-            "range": "± 130358",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 115731047,
-            "range": "± 2294755",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 784654353,
-            "range": "± 19416007",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 755758737,
-            "range": "± 2650478",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 761332844,
             "range": "± 3305084",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "f73a83a391722ec44bd7e4a6e3691e42503ac70c",
+          "message": "fix(ci): do not push Docker images for fork PRs where the actor is a maintainer\n\nExternal contributors usually lack permission to push Docker images\nanyway, so not pushing the built Docker images in case they turn out to\nhave such permissions is more consistent. Maintainers can just push to a\nfeature branch instead.",
+          "timestamp": "2025-07-13T18:21:29+02:00",
+          "tree_id": "3bf6a204c029687ade27e1a1c8526dd130ee913c",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f73a83a391722ec44bd7e4a6e3691e42503ac70c"
+        },
+        "date": 1752424653003,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10253524,
+            "range": "± 367957",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 113030538,
+            "range": "± 859898",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 786560374,
+            "range": "± 15008072",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 762500351,
+            "range": "± 4044196",
             "unit": "ns/iter"
           }
         ]
