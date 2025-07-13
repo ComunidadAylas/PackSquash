@@ -395,7 +395,7 @@ jobs:
             return permission == "write" || permission == "admin" ? "1" : "";
 
       # The GitHub token needs the package:write permission for the push to work.
-      # This permission is not given to PRs from forked repositories.
+      # This permission is not given to PRs from forked repositories to external contributors.
       # See: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
       - name: ⚙️ Login to ${{ env.REGISTRY }}
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
@@ -410,7 +410,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: ${{ steps.check_write_permission.outputs.result == '1' }}
+          push: ${{ github.event_name != 'pull_request' && steps.check_write_permission.outputs.result == '1' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
