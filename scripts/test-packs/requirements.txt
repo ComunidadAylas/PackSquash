@@ -5,8 +5,8 @@ filelock==3.18.0
 gdown==5.2.0
 idna==3.10
 PySocks==1.7.1
-requests==2.32.3
+requests==2.32.4
 six==1.17.0
 soupsieve==2.7
 tqdm==4.67.1
-urllib3==2.4.0
+urllib3==2.5.0
