@@ -96,23 +96,24 @@ fn is_system_or_hidden_file(entry: &DirEntry) -> bool {
 	}
 
 	// List based on https://www.toptal.com/developers/gitignore/api/git,windows,linux,macos
-	file_name.starts_with(b".")
-		|| if entry.file_type().is_file() {
-			file_name == b"desktop.ini"
-				|| file_name == b"Desktop.ini"
-				|| file_name == b"Thumbs.db"
-				|| file_name == b"ehthumbs.db"
-				|| file_name == b"ehthumbs_vista.db"
-				|| file_name.ends_with(b".lnk")
-				|| file_name.ends_with(b".orig")
-				|| file_name.ends_with(b".bak")
-				|| file_name.ends_with(b".tmp")
-		} else {
-			file_name == b"Network Trash Folder"
-				|| file_name == b"Temporary Items"
-				|| file_name == b"$RECYCLE.BIN"
-				|| file_name == b"__MACOSX"
-		}
+	if entry.file_type().is_file() {
+		(file_name.starts_with(b".") && !file_name.ends_with(b".mcfunction"))
+			|| file_name == b"desktop.ini"
+			|| file_name == b"Desktop.ini"
+			|| file_name == b"Thumbs.db"
+			|| file_name == b"ehthumbs.db"
+			|| file_name == b"ehthumbs_vista.db"
+			|| file_name.ends_with(b".lnk")
+			|| file_name.ends_with(b".orig")
+			|| file_name.ends_with(b".bak")
+			|| file_name.ends_with(b".tmp")
+	} else {
+		file_name.starts_with(b".")
+			|| file_name == b"Network Trash Folder"
+			|| file_name == b"Temporary Items"
+			|| file_name == b"$RECYCLE.BIN"
+			|| file_name == b"__MACOSX"
+	}
 }
 
 #[cfg(test)]
