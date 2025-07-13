@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752419146019,
+  "lastUpdate": 1752423472761,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "08c2d57ba495a7aa2bf98b393d76776bce44b8a2",
-          "message": "perf: use newer Zopfli commits with performance improvements\n\nIn some preliminary tests with a server resource pack and the\n`recompress_compressed_files` option enabled, this reduced runtime by\n15%.",
-          "timestamp": "2025-03-31T01:49:21+02:00",
-          "tree_id": "690c95bc870fa58a010909b96b2c4b09eb551b84",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/08c2d57ba495a7aa2bf98b393d76776bce44b8a2"
-        },
-        "date": 1743380054433,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9805415,
-            "range": "± 126850",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 115261293,
-            "range": "± 2254309",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 789963467,
-            "range": "± 18152107",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 755962219,
-            "range": "± 3003626",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 758136433,
             "range": "± 4563668",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "c217b36a673308db48390a29cb631054fb040421",
+          "message": "fix(ci): do not run attestation generation step on PRs from forks\n\nSuch workflow runs lack permission to upload attestations anyway, and we\ndon't want them to be attested as coming from the project.",
+          "timestamp": "2025-07-13T18:01:05+02:00",
+          "tree_id": "8e1fa12f724e76329c8b4712939b83952a934ebf",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c217b36a673308db48390a29cb631054fb040421"
+        },
+        "date": 1752423472140,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9866427,
+            "range": "± 95921",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 115618249,
+            "range": "± 1606231",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 773280632,
+            "range": "± 18689280",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 761763962,
+            "range": "± 4376170",
             "unit": "ns/iter"
           }
         ]
