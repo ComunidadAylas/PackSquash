@@ -1,4 +1,5 @@
 ---
+layout: default
 title: Home
 show_download: true
 ---
