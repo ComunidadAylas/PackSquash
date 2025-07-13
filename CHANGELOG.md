@@ -203,6 +203,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Some options file deserialization error messages have been shortened and made
   aware of the context in which they appear to suggest likely helpful corrective
   actions.
+- Migrated embedded help links from Firebase Dynamic Links to the project
+  website under its own domain to ensure continued functionality after Firebase
+  Dynamic Links is discontinued on August 25, 2025.
 
 #### Security
 

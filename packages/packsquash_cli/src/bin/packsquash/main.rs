@@ -161,7 +161,7 @@ fn read_options_file_and_squash(
 			// Newbies are often confused by terms such as "standard input", so try
 			// to point them in the direction of what they probably want to do
 			"\nIf you are not sure what this means, try using an external options file.\
-			 \nPlease check out <https://packsquash.page.link/Options-files> for examples and more information."
+			 \nPlease check out <https://packsquash.aylas.org/links/Options-files> for examples and more information."
 		} else {
 			""
 		}
@@ -210,7 +210,7 @@ fn read_options_file_and_squash(
 			error!(
 				"Pack processing error: {}{}\n\
 				These troubleshooting instructions might be useful: \
-				<https://packsquash.page.link/Troubleshooting-pack-processing-errors>",
+				<https://packsquash.aylas.org/links/Troubleshooting-pack-processing-errors>",
 				err,
 				// We print both informational and error pack file status updates.
 				// If the error was in one of those, hint the user at the status
@@ -345,12 +345,12 @@ fn squash(
 							PackSquasherWarning::PredictableSystemTimeSanitizationKey => warn!(
 								"Used predictable system IDs to build encryption keys. The dates embedded in the result ZIP file, \
 									which reveal when it was generated, may be easier to decrypt. For more information \
-									about the topic, check out <https://packsquash.page.link/Low-entropy-system-ID-help>"
+									about the topic, check out <https://packsquash.aylas.org/links/Low-entropy-system-ID-help>"
 							),
 							PackSquasherWarning::VolatileSystemTimeSanitizationKey => warn!(
 								"Used a volatile system IDs to build encryption keys. You maybe should not reuse the result ZIP file, \
 									as unexpected results can occur after you use your device as usual. For more information \
-									about the topic, check out <https://packsquash.page.link/Volatile-system-ID-help>"
+									about the topic, check out <https://packsquash.aylas.org/links/Volatile-system-ID-help>"
 							),
 							#[cfg(unix)]
 							PackSquasherWarning::ConcurrencyLimitedDueToOpenFdLimits => warn!(

@@ -100,7 +100,7 @@ pub fn strip_unnecessary_chunks(
 				if width > maximum_dimension.get() as u32 || height > maximum_dimension.get() as u32 {
 					return Err(ImageProcessingError::StripValidateError(
 						"The texture width or height exceeds the configured maximum size. \
-						More information: <https://packsquash.page.link/Too-big-PNG-help>"
+						More information: <https://packsquash.aylas.org/links/Too-big-PNG-help>"
 					));
 				}
 			}

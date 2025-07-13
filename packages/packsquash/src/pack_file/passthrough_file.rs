@@ -81,7 +81,7 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for Passthrou
 				file_read_producer().map(|(read, _)| Self {
 					read,
 					optimization_strategy_message: "Copied, but might be optimized manually. \
-					More information: <https://packsquash.page.link/Optimizing-TTF-fonts>",
+					More information: <https://packsquash.aylas.org/links/Optimizing-TTF-fonts>",
 					is_compressed: false,
 					is_force_included: false
 				})
