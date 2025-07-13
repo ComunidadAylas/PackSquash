@@ -12,11 +12,11 @@ edition.workspace = true
 [dependencies]
 packsquash = { path = "../packsquash", version = "0.4.0" }
 
-getopts = "0.2.21"
-toml = { version = "0.8.22", default-features = false, features = ["parse"] }
+getopts = "0.2.23"
+toml = { version = "0.8.23", default-features = false, features = ["parse"] }
 tz-rs = { version = "0.7.0", default-features = false }
 
-tokio = { version = "1.45.0", default-features = false, features = ["time"] }
+tokio = { version = "1.46.1", default-features = false, features = ["time"] }
 
 serde_path_to_error = "0.1.17"
 
@@ -24,7 +24,7 @@ log = "0.4.27"
 env_logger = { version = "0.11.8", default-features = false, features = [
   "color",
 ] }
-anstyle = "1.0.10"
+anstyle = "1.0.11"
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.59.0", features = ["Win32_System_Console"] }
@@ -37,12 +37,12 @@ winapi-util = "0.1.9"
 # We are interested in overriding malloc because we depend on C libraries, and doing
 # so buys us a safety net against mismatching memory managed by different allocators,
 # in addition to keep binary sizes down
-mimalloc = { version = "0.1.46", default-features = false, features = [
+mimalloc = { version = "0.1.47", default-features = false, features = [
   "override",
 ] }
 
 [build-dependencies]
-winresource = "0.1.20"
+winresource = "0.1.23"
 
 [[bin]]
 name = "packsquash"
