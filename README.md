@@ -6,7 +6,7 @@
 <a
 href="https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3ACI"><img
 alt="CI workflow status"
-src="https://github.com/ComunidadAylas/PackSquash/workflows/CI/badge.svg"></a>
+src="https://github.com/ComunidadAylas/PackSquash/actions/workflows/ci.yml/badge.svg"></a>
 <a href="https://github.com/ComunidadAylas/PackSquash/releases/latest"><img
 alt="Latest version"
 src="https://img.shields.io/github/v/release/ComunidadAylas/PackSquash?label=Latest%20version"></a>
