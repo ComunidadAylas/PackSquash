@@ -1,6 +1,5 @@
 <div align="center">
-<img src="https://user-images.githubusercontent.com/7822554/243825966-500faa74-de2f-462a-8f76-3a122b69856e.png" alt="PackSquash logo" width="300" height="300">
-<h1>PackSquash</h1>
+<img src="https://packsquash.aylas.org/logo/kawaii.png" alt="PackSquash" width="600">
 
 <i>Create more. Worry less about distribution and storage intricacies.</i>
 
@@ -173,7 +172,7 @@ Thanks goes to these wonderful people and projects ([emoji key](https://allcontr
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Joshinn-io"><img src="https://avatars.githubusercontent.com/u/39896452?v=4?s=75" width="75px;" alt="Joshua"/><br /><sub><b>Joshua</b></sub></a><br /><a href="https://github.com/ComunidadAylas/PackSquash/issues?q=author%3AJoshinn-io" title="Bug reports">🐛</a> <a href="#financial-Joshinn-io" title="Financial">💵</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://lx862.com/"><img src="https://avatars.githubusercontent.com/u/28094366?v=4?s=75" width="75px;" alt="LX862"/><br /><sub><b>LX862</b></sub></a><br /><a href="#ideas-Kenny-Hui" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://lx862.com/"><img src="https://avatars.githubusercontent.com/u/28094366?v=4?s=75" width="75px;" alt="LX862"/><br /><sub><b>LX862</b></sub></a><br /><a href="#ideas-Kenny-Hui" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://packsquash.aylas.org/logo/kawaii.png" title="Design">🎨</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.planetminecraft.com/member/luish54/"><img src="https://avatars.githubusercontent.com/u/103937012?v=4?s=75" width="75px;" alt="Luis"/><br /><sub><b>Luis</b></sub></a><br /><a href="https://github.com/ComunidadAylas/PackSquash/issues?q=author%3ALuishMC" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/MKMakroM"><img src="https://avatars.githubusercontent.com/u/45736418?v=4?s=75" width="75px;" alt="MKMakroM"/><br /><sub><b>MKMakroM</b></sub></a><br /><a href="#financial-MKMakroM" title="Financial">💵</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://manacube.com/"><img src="https://i.imgur.com/D9gJEr6.png?s=75" width="75px;" alt="ManaCube"/><br /><sub><b>ManaCube</b></sub></a><br /><a href="#financial" title="Financial">💵</a> <a href="https://github.com/ComunidadAylas/PackSquash/issues?q=author%3A" title="Bug reports">🐛</a></td>

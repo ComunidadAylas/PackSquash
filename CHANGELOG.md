@@ -222,6 +222,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   candidate system IDs, potentially bringing the entropy of the derived
   encryption keys to parity with Windows.
 
+#### Documentation
+
+- The PackSquash logo has been updated with a [KawaiiLogos-style
+  design](https://github.com/SAWARATSUKI/KawaiiLogos/blob/main/README_EN.md).
+  (Thanks to _@Kenny-Hui_ for your beautiful original artwork!)
+
 ### Removed
 
 #### Internal
