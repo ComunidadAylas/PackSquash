@@ -17,12 +17,14 @@ src="https://img.shields.io/github/downloads/ComunidadAylas/PackSquash/total?lab
 src="https://img.shields.io/discord/85364538328768512?label=Discord&logo=discord"></a>
 </div>
 
-A Minecraft: Java Edition resource and data pack optimizer which aims to achieve
-the best possible compression, performance, and protection, improving pack
-distribution, storage, and in-game load times. Anecdotal evidence shows that,
-with the default options, version v0.2.1 was capable of reducing the size of the
-_Witchcraft & Wizardary_ resource pack ZIP file by Floo Network (version 1.6.2)
-from 118 MiB to 57 MiB, a 51.69% size reduction, and it got better over time.
+PackSquash is a Minecraft: Java Edition resource and data pack optimizer which
+aims to achieve the best possible compression, performance, and protection,
+improving pack distribution, storage, and in-game load times.
+
+Anecdotal evidence shows that, with the default options, version v0.2.1 was
+capable of reducing the size of the _Witchcraft & Wizardary_ resource pack ZIP
+file by Floo Network (version 1.6.2) from 118 MiB to 57 MiB, a 51.69% size
+reduction, and it got better over time.
 
 ## 🔎 Overview
 
@@ -106,14 +108,11 @@ systems and environments. Check out the [getting started
 guide](https://github.com/ComunidadAylas/PackSquash/wiki/Getting-started) for
 details on how to begin your journey with PackSquash.
 
-Alternatively, you might be interested in third-party frontends for PackSquash,
-such as:
+Alternatively, you might be interested in third-party tools that integrate with
+PackSquash, such as:
 
-- [Quiver](https://github.com/DeflatedPickle/Quiver), a resource pack creator
-  and manager. At the time of writing, Quiver is using an older, unsupported
-  version of PackSquash, so it may not be representative of the experience with
-  current versions. If you have the time, will, and know-how, you might want to
-  help this project update its integration!
+- [Nexo](https://docs.nexomc.com/configuration/resourcepack#packsquash-integration),
+  a Minecraft server plugin for creating custom items, blocks, armor, and more.
 
 ## ✉️ Contact and support
 
