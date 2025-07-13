@@ -2,3 +2,6 @@ theme: jekyll-theme-slate
 
 plugins:
   - jekyll-mentions
+
+exclude:
+  - README.md
