@@ -22,7 +22,7 @@ patricia_tree = "0.9.0"
 tinyvec = "1.9.0"
 memchr = "2.7.5"
 
-sysinfo = { version = "0.35.2", default-features = false, features = [
+sysinfo = { version = "0.36.0", default-features = false, features = [
 	"system",
 ] }
 walkdir = "2.5.0"
@@ -54,7 +54,7 @@ jsonpath_lib = "0.3.0"
 spng = { version = "0.2.0-alpha.3", default-features = false, features = [
 	"zlib-ng",
 ] }
-rgb = "0.8.51"
+rgb = "0.8.52"
 imagequant = { version = "4.4.1", default-features = false }
 oxipng = { version = "9.1.5", default-features = false, features = ["zopfli"] }
 
@@ -75,9 +75,9 @@ dasp_sample = "0.11.0"
 rubato = "0.16.2"
 optivorbis = "0.3.0"
 
-glsl-lang = { version = "0.7.2", features = ["lexer-v2-full", "lexer-v2-min"] }
-glsl-lang-lexer = "0.7.2"
-glsl-lang-pp = "0.7.2"
+glsl-lang = { version = "0.8.0", features = ["lexer-full"] }
+glsl-lang-lexer = "0.8.0"
+glsl-lang-pp = "0.8.0"
 
 java-properties = { version = "2.0.0", optional = true }
 
@@ -85,7 +85,7 @@ fastnbt = "2.5.0"
 flate2 = { version = "1.1.2", features = ["zlib-ng-compat"] }
 
 tempfile = "3.20.0"
-crc32fast = { version = "1.4.2", features = ["nightly"] }
+crc32fast = { version = "1.5.0", features = ["nightly"] }
 zopfli = { version = "0.8.2", default-features = false, features = [
 	"std",
 	"nightly",

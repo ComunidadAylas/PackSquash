@@ -8,8 +8,8 @@ use glsl_lang::ast::{
 use glsl_lang::parse::{Extractable, Parse};
 use glsl_lang::transpiler::glsl::{FormattingSettings, FormattingState};
 use glsl_lang_lexer::ParseOptions;
-use glsl_lang_lexer::v2_full::LexicalError;
-use glsl_lang_lexer::v2_full::fs::PreprocessorExt;
+use glsl_lang_lexer::full::LexicalError;
+use glsl_lang_lexer::full::fs::PreprocessorExt;
 use glsl_lang_pp::processor::fs::{FileSystem, Processor};
 use regex::Regex;
 use std::any::TypeId;
@@ -29,7 +29,7 @@ use thiserror::Error;
 /// This lexer retains the preprocessor directives in the AST it produces, but it
 /// doesn't support inputs that contain preprocessor directives out of external
 /// declaration position.
-type NonPreprocessingLexer<'i> = glsl_lang_lexer::v2_min::str::Lexer<'i>;
+type NonPreprocessingLexer<'i> = glsl_lang_lexer::min::str::Lexer<'i>;
 /// A preprocessing GLSL lexer that preprocesses its input before parsing, expanding
 /// preprocessor directives and resolving imports. This lexer does not retain preprocessor
 /// directive information in the produced AST, but it supports inputs that use preprocessor
@@ -37,7 +37,7 @@ type NonPreprocessingLexer<'i> = glsl_lang_lexer::v2_min::str::Lexer<'i>;
 /// back into the AST in external declaration position after parsing, but this is only guaranteed
 /// to yield correct results if such directives originally were in such position.
 type PreprocessingLexer<'r, 'p, 'flag> =
-	glsl_lang_lexer::v2_full::fs::Lexer<'r, 'p, ImportFileSystem<'flag>>;
+	glsl_lang_lexer::full::fs::Lexer<'r, 'p, ImportFileSystem<'flag>>;
 
 /// An error that may happen while parsing a GLSL grammar symbol.
 #[derive(Error, Debug)]

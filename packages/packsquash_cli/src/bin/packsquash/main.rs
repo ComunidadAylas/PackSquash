@@ -3,9 +3,7 @@
 use anstyle::{AnsiColor, Color, Effects};
 use std::{
 	borrow::Cow,
-	env,
-	fmt::Display,
-	fs,
+	env, fs,
 	io::{self, IsTerminal, Read, Stderr},
 	process,
 	time::{Duration, Instant}
@@ -186,14 +184,11 @@ fn read_options_file_and_squash(
 	};
 
 	// Deserialize the options struct contained in the string
-	let squash_options = match serde_path_to_error::deserialize::<_, SquashOptions>(
-		toml::de::Deserializer::new(&options_string)
-	) {
+	let squash_options = match toml::from_str::<SquashOptions>(&options_string) {
 		Ok(squash_options) => squash_options,
 		Err(deserialize_error) => {
 			error!(
-				"An error occurred while parsing the options file from {user_friendly_options_path}: {}",
-				PrettyPathDeserializeErrorDisplay(deserialize_error)
+				"An error occurred while parsing the options file from {user_friendly_options_path}: {deserialize_error}"
 			);
 
 			return 3;
@@ -508,25 +503,4 @@ fn init_logger(enable_emoji: bool, enable_colors: bool) {
 	}
 
 	logger_builder.init();
-}
-
-/// Newtype wrapper struct to prettify how serde errors with path information
-/// are displayed.
-#[repr(transparent)]
-struct PrettyPathDeserializeErrorDisplay<E>(serde_path_to_error::Error<E>);
-
-impl<E: Display> Display for PrettyPathDeserializeErrorDisplay<E> {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let path = self.0.path();
-		let inner = self.0.inner();
-
-		// When the path is empty, its Display implementation writes a dot ("."),
-		// which looks ugly and is somewhat confusing. Show the inner error
-		// directly instead
-		if path.iter().next().is_some() {
-			write!(f, "{path}: {inner}")
-		} else {
-			inner.fmt(f)
-		}
-	}
 }

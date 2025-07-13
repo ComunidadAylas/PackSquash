@@ -13,12 +13,10 @@ edition.workspace = true
 packsquash = { path = "../packsquash", version = "0.4.0" }
 
 getopts = "0.2.23"
-toml = { version = "0.8.23", default-features = false, features = ["parse"] }
+toml = { version = "0.9.2", default-features = false, features = ["parse", "serde"] }
 tz-rs = { version = "0.7.0", default-features = false }
 
 tokio = { version = "1.46.1", default-features = false, features = ["time"] }
-
-serde_path_to_error = "0.1.17"
 
 log = "0.4.27"
 env_logger = { version = "0.11.8", default-features = false, features = [
@@ -27,7 +25,7 @@ env_logger = { version = "0.11.8", default-features = false, features = [
 anstyle = "1.0.11"
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.59.0", features = ["Win32_System_Console"] }
+windows-sys = { version = "0.60.2", features = ["Win32_System_Console"] }
 winapi-util = "0.1.9"
 
 [target.'cfg(all(target_os = "linux", target_env = "musl"))'.dependencies]

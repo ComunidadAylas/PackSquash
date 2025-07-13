@@ -98,9 +98,6 @@ skip-tree = [
 	{ name = "perfcnt" },
 	# Criterion itself also pulls some older dependencies
 	{ name = "criterion" },
-	# The build-time winresource dependency pulls slightly older toml
-	# crate versions. They don't affect final executables
-	{ name = "winresource" },
 ]
 
 [sources]
@@ -109,4 +106,4 @@ unknown-git = "deny"
 allow-git = ["https://github.com/aloucks/spng-rs"]
 
 [sources.allow-org]
-github = ["ComunidadAylas", "zopfli-rs"]
+github = ["ComunidadAylas"]
