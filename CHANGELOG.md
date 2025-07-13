@@ -226,7 +226,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The PackSquash logo has been updated with a [KawaiiLogos-style
   design](https://github.com/SAWARATSUKI/KawaiiLogos/blob/main/README_EN.md).
-  (Thanks to _@Kenny-Hui_ for your beautiful original artwork!)
+  (Thanks to _@amberisfrozen_ for your beautiful original artwork!)
 
 ### Removed
 
