@@ -22,12 +22,12 @@ patricia_tree = "0.9.0"
 tinyvec = "1.9.0"
 memchr = "2.7.5"
 
-sysinfo = { version = "0.36.0", default-features = false, features = [
+sysinfo = { version = "0.36.1", default-features = false, features = [
 	"system",
 ] }
 walkdir = "2.5.0"
 
-tokio = { version = "1.46.1", default-features = false, features = [
+tokio = { version = "1.47.0", default-features = false, features = [
 	"rt-multi-thread",
 	"macros",
 	"io-util",
@@ -45,7 +45,7 @@ futures = { version = "0.3.31", default-features = false }
 
 serde = { version = "1.0.219", features = ["derive"] }
 
-serde_json = { version = "1.0.140", features = ["preserve_order", "unbounded_depth"] }
+serde_json = { version = "1.0.141", features = ["preserve_order", "unbounded_depth"] }
 serde_stacker = "0.1.12"
 stacker = "0.1.21"
 json_comments = "0.2.2"
@@ -118,7 +118,7 @@ futures = { version = "0.3.31", default-features = false, features = ["std"] }
 tokio-test = "0.4.4"
 pretty_assertions = "1.4.1"
 
-criterion = { version = "0.5.1", features = ["html_reports"] }
+criterion = { version = "=0.5.1", features = ["html_reports"] }
 tar = { version = "0.4.44", default-features = false }
 xz2 = "0.1.7"
 

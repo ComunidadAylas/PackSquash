@@ -16,7 +16,7 @@ getopts = "0.2.23"
 toml = { version = "0.9.2", default-features = false, features = ["parse", "serde"] }
 tz-rs = { version = "0.7.0", default-features = false }
 
-tokio = { version = "1.46.1", default-features = false, features = ["time"] }
+tokio = { version = "1.47.0", default-features = false, features = ["time"] }
 
 log = "0.4.27"
 env_logger = { version = "0.11.8", default-features = false, features = [
