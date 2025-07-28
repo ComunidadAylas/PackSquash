@@ -197,6 +197,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - While such deeply nested JSON structures pose interoperability problems,
     they have valid uses when creatively scaling certain vanilla resource pack
     features, as some game distributions support them.
+- Function files in data packs with filenames consisting only of their extension
+  are no longer incorrectly ignored. (Thanks _@ChenCMD_ for reporting this issue
+  and providing a fix!)
 
 #### User experience
 
