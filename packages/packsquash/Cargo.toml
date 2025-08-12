@@ -22,7 +22,7 @@ patricia_tree = "0.9.0"
 tinyvec = "1.9.0"
 memchr = "2.7.5"
 
-sysinfo = { version = "0.36.1", default-features = false, features = [
+sysinfo = { version = "0.37.0", default-features = false, features = [
 	"system",
 ] }
 walkdir = "2.5.0"
@@ -111,14 +111,14 @@ wmi = { version = "0.17.2", default-features = false }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.10.1"
-mach2 = "0.4.3"
+mach2 = "0.5.0"
 
 [dev-dependencies]
 futures = { version = "0.3.31", default-features = false, features = ["std"] }
 tokio-test = "0.4.4"
 pretty_assertions = "1.4.1"
 
-criterion = { version = "=0.5.1", features = ["html_reports"] }
+criterion = { version = "=0.7.0", features = ["html_reports"] }
 tar = { version = "0.4.44", default-features = false }
 xz2 = "0.1.7"
 
