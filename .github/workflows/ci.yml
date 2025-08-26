@@ -352,6 +352,12 @@ jobs:
       - name: ⚙️ Generate Docker image metadata
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
+        env:
+          # GitHub Packages requires annotations metadata in at least the index descriptor to show them
+          # up properly in its UI it seems, but it's not clear about it, because the docs refer to the
+          # image manifest only. See:
+          # https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#adding-a-description-to-multi-arch-images
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # Tag the image as "edge" for every commit on master.
@@ -362,8 +368,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=ref,event=branch
-          labels: |
-            org.opencontainers.image.description=Docker image for PackSquash, the Minecraft resource and data pack optimizer.
 
       - name: 📥 Download PackSquash CLI x64 musl executable
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -408,11 +412,11 @@ jobs:
       - name: 🔨 Build and push Docker image
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
-          context: .
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' && steps.check_write_permission.outputs.result == '1' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
 
   benchmark:
     name: Run and upload benchmarks
