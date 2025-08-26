@@ -13,10 +13,10 @@ edition.workspace = true
 packsquash = { path = "../packsquash", version = "0.4.0" }
 
 getopts = "0.2.23"
-toml = { version = "0.9.2", default-features = false, features = ["parse", "serde"] }
+toml = { version = "0.9.5", default-features = false, features = ["parse", "serde"] }
 tz-rs = { version = "0.7.0", default-features = false }
 
-tokio = { version = "1.47.0", default-features = false, features = ["time"] }
+tokio = { version = "1.47.1", default-features = false, features = ["time"] }
 
 log = "0.4.27"
 env_logger = { version = "0.11.8", default-features = false, features = [
@@ -26,7 +26,7 @@ anstyle = "1.0.11"
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.60.2", features = ["Win32_System_Console"] }
-winapi-util = "0.1.9"
+winapi-util = "0.1.10"
 
 [target.'cfg(all(target_os = "linux", target_env = "musl"))'.dependencies]
 # The mimalloc C malloc override feature is troublesome on macOS and Windows, but
@@ -35,7 +35,7 @@ winapi-util = "0.1.9"
 # We are interested in overriding malloc because we depend on C libraries, and doing
 # so buys us a safety net against mismatching memory managed by different allocators,
 # in addition to keep binary sizes down
-mimalloc = { version = "0.1.47", default-features = false, features = [
+mimalloc = { version = "0.1.48", default-features = false, features = [
   "override",
 ] }
 
