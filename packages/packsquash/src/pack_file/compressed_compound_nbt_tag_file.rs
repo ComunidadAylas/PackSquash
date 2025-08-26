@@ -1,23 +1,18 @@
-use bytes::Bytes;
-use flate2::bufread::DeflateDecoder;
-use flate2::read::MultiGzDecoder;
-use futures::TryStreamExt;
+use bytes::BytesMut;
+use flate2::bufread::{DeflateDecoder, MultiGzDecoder};
 use std::borrow::Cow;
+use std::cmp;
 use std::collections::HashMap;
-use std::io::{self, BufRead, BufReader, Read, Seek, Write};
+use std::io::{self, BufRead, Cursor, Read, Seek, Write};
 use std::num::NonZeroU64;
-use std::thread;
 use thiserror::Error;
 use tokio::io::AsyncRead;
-use tokio_stream::Stream;
-use tokio_util::either::Either;
-use tokio_util::io::ReaderStream;
+use tokio_util::codec::{Decoder, FramedRead};
 
 #[cfg(test)]
 mod tests;
 
-use super::{AsyncReadAndSizeHint, OptimizedBytesChunk, PackFile, PackFileConstructor};
-use crate::buffered_async_spooled_temp_file::BufferedAsyncSpooledTempFile;
+use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor};
 use crate::config::CompressedCompoundNbtTagFileOptions;
 use crate::pack_file::asset_type::PackFileAssetType;
 use crate::pack_file::util::AccountingRead;
@@ -38,6 +33,12 @@ pub struct CompressedCompoundNbtTagFile<T: AsyncRead + Send + Unpin + 'static> {
 	optimization_settings: CompressedCompoundNbtTagFileOptions
 }
 
+pub struct OptimizerDecoder {
+	optimization_settings: CompressedCompoundNbtTagFileOptions,
+	file_length_hint: usize,
+	reached_eof: bool
+}
+
 /// Represents an error that may happen while optimizing compressed compound NBT tag files.
 #[derive(Error, Debug)]
 pub enum OptimizationError {
@@ -47,55 +48,38 @@ pub enum OptimizationError {
 	Io(#[from] io::Error)
 }
 
-impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CompressedCompoundNbtTagFile<T> {
-	type ByteChunkType = Bytes;
-	type OptimizationError = OptimizationError;
-	type OptimizedByteChunksStream =
-		impl Stream<Item = OptimizedBytesChunk<Self::ByteChunkType, Self::OptimizationError>>;
+// FIXME: actual framing?
+// (i.e. do not hold the entire file in memory before decoding, so that frame != file)
+impl Decoder for OptimizerDecoder {
+	type Item = (Cow<'static, str>, Vec<u8>);
+	type Error = OptimizationError;
 
-	fn process(mut self) -> Self::OptimizedByteChunksStream {
+	fn decode(&mut self, _: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+		Ok(None)
+	}
+
+	fn decode_eof(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
 		const NBT_FILE_BUFFER_SIZE: usize = 2 * 1024 * 1024; // 2 MiB
 
-		macro_rules! bail {
-			($op:expr) => {
-				match $op {
-					Ok(val) => val,
-					Err(err) => return Either::Left(tokio_stream::once(Err(err.into())))
-				}
-			};
+		// This method will be called when EOF is reached until it returns None. Because we
+		// will only ever output a single item in the stream, always return None if we have
+		// executed once already
+		if self.reached_eof {
+			return Ok(None);
 		}
+		self.reached_eof = true;
 
-		// The scope below is ugly, but AsyncIoBridge or blocking the current thread in place do
-		// not work well. Looking back, we probably overengineered our async usage quite a lot...
-		let mut input_nbt_gzip =
-			BufferedAsyncSpooledTempFile::with_capacity(self.file_length_hint, NBT_FILE_BUFFER_SIZE);
-		bail!(thread::scope(|scope| {
-			scope
-				.spawn(|| {
-					tokio::runtime::Builder::new_current_thread()
-						.thread_name("nbt-copy")
-						.build()
-						.map_err(io::Error::other)
-						.and_then(|runtime| {
-							runtime.block_on(tokio::io::copy(&mut self.read, &mut input_nbt_gzip))
-						})
-				})
-				.join()
-				.unwrap()
-		}));
-		let input_nbt_gzip_size = bail!(input_nbt_gzip.stream_position());
+		let input_nbt_gzip_size = src.len() as u64;
 
 		// Read the input gzipped NBT data, ensuring it parses as a valid NBT compound tag.
 		// MultiGzEncoder is used to handle gzip streams with several members (i.e., files) by
 		// concatenating them into a single stream of bytes, like Java's `GZIPInputStream` does
 		let mut decompressed_nbt_size = 0;
-		let nbt_compound_tag: HashMap<String, fastnbt::Value, ahash::RandomState> = {
-			bail!(input_nbt_gzip.rewind());
-			bail!(fastnbt::from_reader(AccountingRead::new(
-				MultiGzDecoder::new(&mut input_nbt_gzip),
+		let nbt_compound_tag: HashMap<String, fastnbt::Value, ahash::RandomState> =
+			fastnbt::from_reader(AccountingRead::new(
+				MultiGzDecoder::new(&**src),
 				&mut decompressed_nbt_size
-			)))
-		};
+			))?;
 
 		let zopfli_iteration_count = ZopfliIterationsTimeModel::new(
 			self.optimization_settings.nbt_compression_iterations,
@@ -107,80 +91,76 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CompressedCompoundNbtTa
 		// compress it using Zopfli or, if the Zopfli iteration count falls to zero, the best flate2
 		// compression
 		let mut recompressed_nbt_gzip =
-			BufferedAsyncSpooledTempFile::with_capacity(self.file_length_hint, NBT_FILE_BUFFER_SIZE);
+			Vec::with_capacity(cmp::min(self.file_length_hint, NBT_FILE_BUFFER_SIZE));
 		match NonZeroU64::new(zopfli_iteration_count as u64) {
-			Some(zopfli_iteration_count) => {
-				bail!(fastnbt::to_writer(
-					bail!(zopfli::GzipEncoder::new_buffered(
-						zopfli::Options {
-							iteration_count: zopfli_iteration_count,
-							..zopfli::Options::default()
-						},
-						zopfli::BlockType::Dynamic,
-						&mut recompressed_nbt_gzip
-					)),
-					&nbt_compound_tag
-				))
-			}
-			None => {
-				bail!(fastnbt::to_writer(
-					flate2::write::GzEncoder::new(
-						&mut recompressed_nbt_gzip,
-						flate2::Compression::best()
-					),
-					&nbt_compound_tag
-				))
-			}
-		};
-		let recompressed_nbt_gzip_size = bail!(recompressed_nbt_gzip.stream_position());
-
-		Either::Right(
-			if input_nbt_gzip_size >= recompressed_nbt_gzip_size {
-				// The most likely case: recompressing the NBT data serialization yielded a smaller
-				// file, so rewind it for consumption by the caller
-
-				bail!(recompressed_nbt_gzip.rewind());
-
-				Either::Right(
-					ReaderStream::new(recompressed_nbt_gzip).map_ok(|processed_bytes| {
-						(Cow::Borrowed("Validated and optimized"), processed_bytes)
-					})
-				)
-			} else {
-				// Recompressing the NBT data serialization yielded a file that's larger than the
-				// input, which may happen if the input was already compressed better than we
-				// could, so fall back to a minimal, anonymizing gzip reencapsulation optimization
-				// that never increases the file size. Eagerly drop the recompressed NBT data to save
-				// on memory, as we won't use it anymore
-
-				drop(recompressed_nbt_gzip);
-
-				let mut reencapsulated_file = BufferedAsyncSpooledTempFile::with_capacity(
-					self.file_length_hint,
-					NBT_FILE_BUFFER_SIZE
-				);
-				bail!(reencapsulate_gzip_members(
-					{
-						bail!(input_nbt_gzip.rewind());
-						BufReader::new(input_nbt_gzip)
+			Some(zopfli_iteration_count) => fastnbt::to_writer(
+				zopfli::GzipEncoder::new_buffered(
+					zopfli::Options {
+						iteration_count: zopfli_iteration_count,
+						..zopfli::Options::default()
 					},
-					&mut reencapsulated_file
-				));
-				bail!(reencapsulated_file.rewind());
+					zopfli::BlockType::Dynamic,
+					&mut recompressed_nbt_gzip
+				)?,
+				&nbt_compound_tag
+			)?,
+			None => fastnbt::to_writer(
+				flate2::write::GzEncoder::new(
+					&mut recompressed_nbt_gzip,
+					flate2::Compression::best()
+				),
+				&nbt_compound_tag
+			)?
+		};
+		let recompressed_nbt_gzip_size = recompressed_nbt_gzip.len() as u64;
 
-				Either::Left(
-					ReaderStream::new(reencapsulated_file).map_ok(|processed_bytes| {
-						(
-							Cow::Borrowed(
-								"Validated, but barely optimized. \
-								If not optimized externally, try tweaking options for extra savings"
-							),
-							processed_bytes
-						)
-					})
-				)
-			}
-			.map_err(OptimizationError::from)
+		if input_nbt_gzip_size >= recompressed_nbt_gzip_size {
+			// The most likely case: recompressing the NBT data serialization yielded a smaller
+			// file, so rewind it for consumption by the caller
+
+			Ok(Some((
+				Cow::Borrowed("Validated and optimized"),
+				recompressed_nbt_gzip
+			)))
+		} else {
+			// Recompressing the NBT data serialization yielded a file that's larger than the
+			// input, which may happen if the input was already compressed better than we
+			// could, so fall back to a minimal, anonymizing gzip reencapsulation optimization
+			// that never increases the file size. Eagerly drop the recompressed NBT data to save
+			// on memory, as we won't use it anymore
+
+			drop(recompressed_nbt_gzip);
+
+			let mut reencapsulated_file =
+				Vec::with_capacity(cmp::min(self.file_length_hint, NBT_FILE_BUFFER_SIZE));
+			reencapsulate_gzip_members(Cursor::new(&**src), &mut reencapsulated_file)?;
+
+			Ok(Some((
+				Cow::Borrowed(
+					"Validated, but barely optimized. \
+					If not optimized externally, try tweaking options for extra savings"
+				),
+				reencapsulated_file
+			)))
+		}
+	}
+}
+
+impl<T: AsyncRead + Send + Unpin + 'static> PackFile for CompressedCompoundNbtTagFile<T> {
+	type ByteChunkType = Vec<u8>;
+	type OptimizationError = OptimizationError;
+	type OptimizedByteChunksStream = FramedRead<T, OptimizerDecoder>;
+
+	fn process(self) -> Self::OptimizedByteChunksStream {
+		FramedRead::with_capacity(
+			self.read,
+			OptimizerDecoder {
+				optimization_settings: self.optimization_settings,
+				file_length_hint: self.file_length_hint,
+				reached_eof: false
+			},
+			// FIXME consider refactoring this when we have a global memory budget
+			self.file_length_hint
 		)
 	}
 
