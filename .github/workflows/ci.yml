@@ -412,6 +412,7 @@ jobs:
       - name: 🔨 Build and push Docker image
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
+          context: .
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' && steps.check_write_permission.outputs.result == '1' }}
           tags: ${{ steps.meta.outputs.tags }}
