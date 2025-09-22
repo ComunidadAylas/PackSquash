@@ -14,11 +14,11 @@ bytes = "1.10.1"
 bytemuck = "1.23.2"
 globset = { version = "0.4.16", default-features = false }
 enumset = { version = "1.1.10", features = ["serde"] }
-indexmap = { version = "2.11.0", features = ["serde"] }
+indexmap = { version = "2.11.4", features = ["serde"] }
 itertools = "0.14.0"
 thiserror = "2.0.16"
 ahash = "0.8.12"
-patricia_tree = "0.9.0"
+patricia_tree = "0.10.1"
 tinyvec = "1.10.0"
 memchr = "2.7.5"
 
@@ -43,10 +43,10 @@ tokio-util = { version = "0.7.16", default-features = false, features = [
 tokio-stream = { version = "0.1.17", default-features = false }
 futures = { version = "0.3.31", default-features = false }
 
-serde = { version = "1.0.219", features = ["derive"] }
+serde = { version = "1.0.226", features = ["derive"] }
 
-serde_json = { version = "1.0.143", features = ["preserve_order", "unbounded_depth"] }
-serde_stacker = "0.1.12"
+serde_json = { version = "1.0.145", features = ["preserve_order", "unbounded_depth"] }
+serde_stacker = "0.1.14"
 stacker = "0.1.21"
 json_comments = "0.2.2"
 jsonpath_lib = "0.3.0"
@@ -75,16 +75,16 @@ dasp_sample = "0.11.0"
 rubato = "0.16.2"
 optivorbis = "0.3.0"
 
-glsl-lang = { version = "0.8.0", features = ["lexer-full"] }
-glsl-lang-lexer = "0.8.0"
-glsl-lang-pp = "0.8.0"
+glsl-lang = { version = "0.8.1", features = ["lexer-full"] }
+glsl-lang-lexer = "0.8.1"
+glsl-lang-pp = "0.8.1"
 
 java-properties = { version = "2.0.0", optional = true }
 
 fastnbt = "2.6.0"
 flate2 = { version = "1.1.2", features = ["zlib-ng-compat"] }
 
-tempfile = "3.21.0"
+tempfile = "3.22.0"
 crc32fast = { version = "1.5.0", features = ["nightly"] }
 zopfli = { version = "0.8.2", default-features = false, features = [
 	"std",
@@ -97,7 +97,7 @@ aes = "0.8.4"
 hkdf = "0.12.4"
 sha2 = "0.10.9"
 fpe = "0.6.1"
-uuid = "1.18.0"
+uuid = "1.18.1"
 rand_xoshiro = "0.7.0"
 regex = "1.11.2"
 aho-corasick = "1.1.3"
