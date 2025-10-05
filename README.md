@@ -1,8 +1,6 @@
 <div align="center">
 <img src="https://packsquash.aylas.org/logo/kawaii.png" alt="PackSquash" width="600">
 
-<i>Create more. Worry less about distribution and storage intricacies.</i>
-
 <a
 href="https://github.com/ComunidadAylas/PackSquash/actions?query=workflow%3ACI"><img
 alt="CI workflow status"
@@ -143,7 +141,7 @@ some money would be a great way to do so! You can choose any of the platforms
 shown below:
 
 <p align="center"><a href="https://ko-fi.com/K3K758Q08"><img src="https://cdn.ko-fi.com/cdn/kofi2.png?v=2" alt="Buy me a coffee at ko-fi.com" height="36"/></a></p>
-<p align="center"><a href="https://www.paypal.me/alejandrogonzalezg98"><img src="https://icon-library.com/images/paypal-donate-icon/paypal-donate-icon-7.jpg" alt="Donate via PayPal.me" height="64"/></a></p>
+<p align="center"><a href="https://www.paypal.me/alejandrogonzalezg98"><img src="https://www.bathtownshippubliclibrary.org/site-assets/images/paypal-donate-button-high-quality-png.png/@@images/image.png" alt="Donate via PayPal.me" height="64"/></a></p>
 
 In principle, I will use any funds I receive for personal spending. However, I
 may decide to introduce sponsor tiers and perks (retroactively, benefiting those
