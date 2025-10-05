@@ -39,9 +39,9 @@ pub fn decode_hex(hex_str: &str) -> Option<Vec<u8>> {
 	}
 
 	let mut decoded_bytes = vec![0; hex_digit_pairs.len()];
-	for (i, [high_nibble, low_nibble]) in hex_digit_pairs.into_iter().enumerate() {
-		let high_nibble = HEX_DIGIT_TO_NIBBLE[*high_nibble as usize];
-		let low_nibble = HEX_DIGIT_TO_NIBBLE[*low_nibble as usize];
+	for (i, &[high_nibble, low_nibble]) in hex_digit_pairs.iter().enumerate() {
+		let high_nibble = HEX_DIGIT_TO_NIBBLE[high_nibble as usize];
+		let low_nibble = HEX_DIGIT_TO_NIBBLE[low_nibble as usize];
 
 		// Using a single lookup table and shifting one of the nibbles leads to slightly less assembly
 		// code being generated on x86_64
