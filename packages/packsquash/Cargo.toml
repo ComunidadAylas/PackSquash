@@ -85,12 +85,8 @@ fastnbt = "2.6.0"
 flate2 = { version = "1.1.2", features = ["zlib-ng-compat"] }
 
 tempfile = "3.22.0"
-crc32fast = { version = "1.5.0", features = ["nightly"] }
-zopfli = { version = "0.8.2", default-features = false, features = [
-	"std",
-	"nightly",
-	"gzip",
-] }
+crc32fast = "1.5.0"
+zopfli = { version = "0.8.2", default-features = false, features = ["std", "gzip"] }
 
 obfstr = "0.4.4"
 aes = "0.8.4"
