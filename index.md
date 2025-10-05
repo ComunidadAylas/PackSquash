@@ -5,7 +5,6 @@ show_download: true
 ---
 
 <p align="center"><img src="https://packsquash.aylas.org/logo/kawaii.png" alt="PackSquash logo" width="600"></p>
-<p align="center"><i>Create more. Worry less about distribution and storage intricacies.</i></p>
 
 PackSquash is a Minecraft: Java Edition resource and data pack optimizer which
 aims to achieve the best possible compression, performance, and protection,
@@ -134,7 +133,7 @@ some money would be a great way to do so! You can choose any of the platforms
 shown below:
 
 <p align="center"><a href="https://ko-fi.com/K3K758Q08"><img src="https://cdn.ko-fi.com/cdn/kofi2.png?v=2" alt="Buy me a coffee at ko-fi.com" height="36"/></a></p>
-<p align="center"><a href="https://www.paypal.me/alejandrogonzalezg98"><img src="https://icon-library.com/images/paypal-donate-icon/paypal-donate-icon-7.jpg" alt="Donate via PayPal.me" height="64"/></a></p>
+<p align="center"><a href="https://www.paypal.me/alejandrogonzalezg98"><img src="https://www.bathtownshippubliclibrary.org/site-assets/images/paypal-donate-button-high-quality-png.png/@@images/image.png" alt="Donate via PayPal.me" height="64"/></a></p>
 
 In principle, I will use any funds I receive for personal spending. However, I
 may decide to introduce sponsor tiers and perks (retroactively, benefiting those
