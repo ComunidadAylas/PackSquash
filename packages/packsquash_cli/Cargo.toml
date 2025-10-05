@@ -22,10 +22,10 @@ log = "0.4.28"
 env_logger = { version = "0.11.8", default-features = false, features = [
   "color",
 ] }
-anstyle = "1.0.11"
+anstyle = "1.0.13"
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.61.0", features = ["Win32_System_Console"] }
+windows-sys = { version = "0.61.1", features = ["Win32_System_Console"] }
 winapi-util = "0.1.11"
 
 [target.'cfg(all(target_os = "linux", target_env = "musl"))'.dependencies]
