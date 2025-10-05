@@ -221,6 +221,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   available, the key is derived from those instead. This updated scheme aligns
   more closely with documented modern best practices for entropy-based key
   derivation.
+  - In addition to UUIDs, the `PACKSQUASH_SYSTEM_ID` environment variable now
+    accepts hexadecimal strings of any length. This allows explicitly set system
+    IDs to have an arbitrary emount of entropy, which PackSquash can utilize as
+    needed.
 - On Linux targets, DMI product UUIDs and serial numbers are now included in the
   candidate system IDs, potentially bringing the entropy of the derived
   encryption keys to parity with Windows.

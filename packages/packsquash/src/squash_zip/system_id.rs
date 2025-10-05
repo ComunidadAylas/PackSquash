@@ -15,20 +15,19 @@
 // https://docs.rs/crate/machine-uid/0.2.0
 // https://github.com/tilda/rust-hwid
 
-use bytemuck::NoUninit;
-use std::{env, sync::OnceLock};
+use std::{env, iter, sync::OnceLock};
 use tinyvec::TinyVec;
 use tokio::task;
 use uuid::Uuid;
 
 mod os;
+mod util;
 
 #[cfg(test)]
 mod tests;
 
-/// The type of the internal system ID list used. Up to 4 system IDs are stored inline,
-/// which is enough for our target systems.
-type SystemIdVec = TinyVec<[SystemId; 4]>;
+/// The type of the internal system ID list used.
+type SystemIdVec = TinyVec<[SystemId; 5]>;
 
 /// A struct that contains a system ID and some of its most relevant characteristics.
 #[derive(Debug, Default)]
@@ -39,9 +38,9 @@ pub(super) struct SystemId {
 
 impl SystemId {
 	/// Creates a new system identifier from the specified identifier and characteristics.
-	fn new(id: impl NoUninit, is_volatile: bool) -> Self {
+	fn new(id: impl AsRef<[u8]>, is_volatile: bool) -> Self {
 		Self {
-			id: bytemuck::bytes_of(&id).into(),
+			id: id.as_ref().into(),
 			is_volatile
 		}
 	}
@@ -61,7 +60,7 @@ pub(super) fn get_or_compute_system_ids() -> &'static [SystemId] {
 	SYSTEM_IDS.get_or_init(|| {
 		task::block_in_place(|| {
 			read_system_id_from_env().map_or_else(compute_system_ids, |system_id| {
-				[system_id].into_iter().collect()
+				iter::once(system_id).collect()
 			})
 		})
 	})
@@ -71,9 +70,10 @@ pub(super) fn get_or_compute_system_ids() -> &'static [SystemId] {
 /// may not exist or be valid, in which case `None` is returned.
 fn read_system_id_from_env() -> Option<SystemId> {
 	env::var("PACKSQUASH_SYSTEM_ID").ok().and_then(|system_id| {
-		Uuid::parse_str(&system_id)
-			.ok()
+		Uuid::try_parse(&system_id)
 			.map(|uuid| SystemId::new(uuid.into_bytes(), false))
+			.ok()
+			.or_else(|| util::decode_hex(&system_id).map(|id| SystemId::new(id, false)))
 	})
 }
 

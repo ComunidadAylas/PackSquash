@@ -1688,7 +1688,6 @@ dependencies = [
  "aes",
  "ahash",
  "aho-corasick",
- "bytemuck",
  "bytes",
  "core-foundation",
  "crc32fast",
