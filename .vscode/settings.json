@@ -1,9 +1,8 @@
 {
-	"evenBetterToml.semanticTokens": true,
 	"editor.formatOnSave": true,
 	"editor.formatOnPaste": true,
 	"[toml]": {
-		"editor.defaultFormatter": "tamasfe.even-better-toml"
+		"editor.defaultFormatter": "tombi-toml.tombi"
 	},
 	"rust-analyzer.check.command": "clippy"
 }
