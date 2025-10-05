@@ -1,13 +1,27 @@
 [workspace]
-members = ["packages/*"]
 resolver = "3"
+members = ["packages/*"]
 
 [workspace.package]
 version = "0.4.0"
+edition = "2024"
 repository = "https://github.com/ComunidadAylas/PackSquash"
 license = "AGPL-3.0-or-later"
-edition = "2024"
 publish = false
+
+[workspace.lints.clippy]
+# pedantic = "warn" # TODO too pedantic for now, fix the warnings and re-enable this sooner than later
+cargo = { level = "warn", priority = -1 }
+multiple_crate_versions = "allow"  # Introduces much noise, not better than cargo deny
+
+[workspace.lints.rust]
+missing_docs = "deny"
+unsafe_code = "deny"
+
+[workspace.lints.rustdoc]
+broken_intra_doc_links = "deny"
+invalid_html_tags = "deny"
+private_intra_doc_links = "deny"
 
 [patch.crates-io]
 # Use our fork of glsl-lang that allows it to parse #moj_import directives
@@ -15,38 +29,22 @@ glsl-lang = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-lexer = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-pp = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-types = { git = "https://github.com/ComunidadAylas/glsl-lang" }
-
 # Use our fork of mmap, pulled by development dependencies for benchmarking, to fix its
 # dependency on unmaintained crates and reduce duplicate dependency versions. Some of
 # the changes were authored by jbreitbart.
 # Related PR: https://github.com/rbranson/rust-mmap/pull/13
 mmap = { git = "https://github.com/ComunidadAylas/rust-mmap" }
-
 # Use a newer spng commit with our PR to add a high-level API for customizing the decoder chunk CRC
 # mismatch action merged. Related PR: https://github.com/aloucks/spng-rs/pull/16
 spng = { git = "https://github.com/aloucks/spng-rs", rev = "d3f69ff" }
-
-[profile.release]
-opt-level = 3
-lto = "fat"
-codegen-units = 1
-strip = "symbols"
 
 [profile.bench]
 inherits = "release"
 debug = true
 strip = "none"
 
-[workspace.lints.rust]
-unsafe_code = "deny"
-missing_docs = "deny"
-
-[workspace.lints.clippy]
-#pedantic = "warn" # TODO too pedantic for now, fix the warnings and re-enable this sooner than later
-cargo = { level = "warn", priority = -1 }
-multiple_crate_versions = "allow"         # Introduces much noise, not better than cargo deny
-
-[workspace.lints.rustdoc]
-invalid_html_tags = "deny"
-broken_intra_doc_links = "deny"
-private_intra_doc_links = "deny"
+[profile.release]
+opt-level = 3
+strip = "symbols"
+lto = "fat"
+codegen-units = 1
