@@ -30,26 +30,26 @@ jobs:
 
     steps:
       - name: 📥 Checkout source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: 🧰 Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@fb51252c7ba57d633bc668f941da052e410add48 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@1780873c7b576612439a134613cc4cc74ce5538c # v1
         with:
           components: rustfmt,clippy
           rustflags: ""
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@e8c1cf74a696e981aec979a6703471e61b400895 # v2
+        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@e8c1cf74a696e981aec979a6703471e61b400895 # v2
+        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@e8c1cf74a696e981aec979a6703471e61b400895 # v2
+        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
         with:
           tool: cargo-deny
 
@@ -69,7 +69,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@51f77329afa6477de8c49fc9c7046c15b9a4e79d # v3
+        uses: github/codeql-action/upload-sarif@64d10c13136e1c5bce3e5fbde8d4906eeaafc885 # v3
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
@@ -156,12 +156,12 @@ jobs:
 
       # This must go after the previous step so that a Git repository is checked out
       - name: 📥 Checkout source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           fetch-depth: 0 # Keep the commit history for proper version information
 
       - name: 🧰 Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@fb51252c7ba57d633bc668f941da052e410add48 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@1780873c7b576612439a134613cc4cc74ce5538c # v1
         with:
           toolchain: ${{ env.RUSTUP_TOOLCHAIN }}
           target: ${{ matrix.target == 'universal2-apple-darwin' && 'x86_64-apple-darwin,aarch64-apple-darwin' || matrix.target }}
@@ -169,13 +169,13 @@ jobs:
           rustflags: ""
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@e8c1cf74a696e981aec979a6703471e61b400895 # v2
+        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@e8c1cf74a696e981aec979a6703471e61b400895 # v2
+        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
         with:
           tool: cargo-deb
 
@@ -249,7 +249,7 @@ jobs:
           npm install archiver@'>=7.0.0 <8.0.0'
 
       - name: 📤 Upload release assets
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         if: github.event_name == 'release'
         continue-on-error: true
         with:
@@ -344,14 +344,14 @@ jobs:
 
     steps:
       - name: 📥 Checkout source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: 🧰 Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
 
       - name: ⚙️ Generate Docker image metadata
         id: meta
-        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5
         env:
           # GitHub Packages requires annotations metadata in at least the index descriptor to show them
           # up properly in its UI it seems, but it's not clear about it, because the docs refer to the
@@ -387,7 +387,7 @@ jobs:
 
       - name: 🔍 Check workflow package write permission
         id: check_write_permission
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           result-encoding: string
           script: |
@@ -402,7 +402,7 @@ jobs:
       # This permission is not given to PRs from forked repositories to external contributors.
       # See: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
       - name: ⚙️ Login to ${{ env.REGISTRY }}
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         if: steps.check_write_permission.outputs.result
         with:
           registry: ${{ env.REGISTRY }}
@@ -424,7 +424,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bookworm-slim@sha256:2424c1850714a4d94666ec928e24d86de958646737b1d113f5b2207be44d37d8
+    container: debian:bookworm-slim@sha256:7e490910eea2861b9664577a96b54ce68ea3e02ce7f51d89cb0103a6f9c386e0
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
@@ -457,7 +457,7 @@ jobs:
                               python3-venv gpg
 
       - name: 📥 Checkout source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       # Necessary for steps that invoke Git commands to work properly on workflows run on containers.
       # See: https://github.com/actions/checkout/issues/766
@@ -465,7 +465,7 @@ jobs:
         run: chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
 
       - name: 🧰 Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@fb51252c7ba57d633bc668f941da052e410add48 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@1780873c7b576612439a134613cc4cc74ce5538c # v1
 
       - name: 📥 Download test packs dataset
         run: scripts/test-packs/download.sh
