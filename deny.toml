@@ -20,6 +20,7 @@ allow = [
   # Free software licenses compatible with (A)GPL.
   # List extracted from: https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses
   "GPL-3.0",
+  "GPL-3.0-or-later",
   "GPL-2.0",
   "LGPL-3.0",
   "LGPL-2.1",
