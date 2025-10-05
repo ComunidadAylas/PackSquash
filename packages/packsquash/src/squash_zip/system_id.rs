@@ -77,64 +77,65 @@ fn read_system_id_from_env() -> Option<SystemId> {
 	})
 }
 
-// What follows are target specific definitions of the function that computes the system IDs.
-// Obviously, it can't be defined twice for the same target.
-//
-// Not all targets implemented here are tested.
-
-#[cfg(target_os = "linux")]
 fn compute_system_ids() -> SystemIdVec {
-	use self::os::{
-		get_aggregated_dmi_serial_numbers_id, get_boot_id, get_dbus_machine_id, get_dmi_product_id,
-		get_host_id
-	};
+	// Not all targets implemented here are tested
 
-	get_dbus_machine_id()
-		.into_iter()
-		.chain(get_dmi_product_id())
-		.chain(get_aggregated_dmi_serial_numbers_id())
-		.chain(get_boot_id())
-		.chain(get_host_id())
-		.collect()
-}
+	#[cfg(target_os = "linux")]
+	{
+		use self::os::{
+			get_aggregated_dmi_serial_numbers_id, get_boot_id, get_dbus_machine_id,
+			get_dmi_product_id, get_host_id
+		};
 
-#[cfg(target_os = "android")]
-fn compute_system_ids() -> SystemIdVec {
-	use self::os::{get_boot_id, get_host_id};
+		get_dbus_machine_id()
+			.into_iter()
+			.chain(get_dmi_product_id())
+			.chain(get_aggregated_dmi_serial_numbers_id())
+			.chain(get_boot_id())
+			.chain(get_host_id())
+			.collect()
+	}
 
-	get_boot_id().into_iter().chain(get_host_id()).collect()
-}
+	#[cfg(target_os = "android")]
+	{
+		use self::os::{get_boot_id, get_host_id};
 
-#[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
-fn compute_system_ids() -> SystemIdVec {
-	use self::os::{get_dbus_machine_id, get_dmi_product_id, get_host_id, get_kernel_host_id};
+		get_boot_id().into_iter().chain(get_host_id()).collect()
+	}
 
-	get_dbus_machine_id()
-		.into_iter()
-		.chain(get_kernel_host_id())
-		.chain(get_dmi_product_id())
-		.chain(get_host_id())
-		.collect()
-}
+	#[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
+	{
+		use self::os::{get_dbus_machine_id, get_dmi_product_id, get_host_id, get_kernel_host_id};
 
-#[cfg(target_os = "macos")]
-fn compute_system_ids() -> SystemIdVec {
-	use self::os::{get_host_id, get_platform_serial_number};
+		get_dbus_machine_id()
+			.into_iter()
+			.chain(get_kernel_host_id())
+			.chain(get_dmi_product_id())
+			.chain(get_host_id())
+			.collect()
+	}
 
-	get_platform_serial_number()
-		.into_iter()
-		.chain(get_host_id())
-		.collect()
-}
+	#[cfg(target_os = "macos")]
+	{
+		use self::os::{get_host_id, get_platform_serial_number};
 
-#[cfg(target_os = "windows")]
-fn compute_system_ids() -> SystemIdVec {
-	use self::os::{get_dmi_product_id, get_install_date, get_machine_id, get_system_root_volume_id};
+		get_platform_serial_number()
+			.into_iter()
+			.chain(get_host_id())
+			.collect()
+	}
 
-	get_machine_id()
-		.into_iter()
-		.chain(get_dmi_product_id())
-		.chain(get_system_root_volume_id())
-		.chain(get_install_date())
-		.collect()
+	#[cfg(target_os = "windows")]
+	{
+		use self::os::{
+			get_dmi_product_id, get_install_date, get_machine_id, get_system_root_volume_id
+		};
+
+		get_machine_id()
+			.into_iter()
+			.chain(get_dmi_product_id())
+			.chain(get_system_root_volume_id())
+			.chain(get_install_date())
+			.collect()
+	}
 }
