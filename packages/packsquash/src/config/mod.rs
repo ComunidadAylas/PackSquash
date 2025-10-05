@@ -658,7 +658,7 @@ pub struct AudioFileOptions {
 	///
 	/// **Default value**: constant quality factor (CQF)
 	pub bitrate_control_mode: AudioBitrateControlMode,
-	/// The metric to use as a target for the specified bitrate control mode when trancoding.
+	/// The metric to use as a target for the specified bitrate control mode when transcoding.
 	/// Depending on the selected bitrate control mode, this will be interpreted as a quality
 	/// factor, average bitrate, approximate bitrate, or maximum bitrate.
 	///

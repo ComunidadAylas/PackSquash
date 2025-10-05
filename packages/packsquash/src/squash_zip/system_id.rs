@@ -28,7 +28,7 @@ mod tests;
 
 /// The type of the internal system ID list used. Up to 4 system IDs are stored inline,
 /// which is enough for our target systems.
-type SytemIdVec = TinyVec<[SystemId; 4]>;
+type SystemIdVec = TinyVec<[SystemId; 4]>;
 
 /// A struct that contains a system ID and some of its most relevant characteristics.
 #[derive(Debug, Default)]
@@ -49,7 +49,7 @@ impl SystemId {
 
 /// The cell that will be used to memoize the result of computing the system ID, so
 /// it's done only once in the lifetime of the process.
-static SYSTEM_IDS: OnceLock<SytemIdVec> = OnceLock::new();
+static SYSTEM_IDS: OnceLock<SystemIdVec> = OnceLock::new();
 
 /// Returns identifiers for this system, calculating them if that was not done yet.
 ///
@@ -83,7 +83,7 @@ fn read_system_id_from_env() -> Option<SystemId> {
 // Not all targets implemented here are tested.
 
 #[cfg(target_os = "linux")]
-fn compute_system_ids() -> SytemIdVec {
+fn compute_system_ids() -> SystemIdVec {
 	use self::os::{
 		get_aggregated_dmi_serial_numbers_id, get_boot_id, get_dbus_machine_id, get_dmi_product_id,
 		get_host_id
@@ -99,14 +99,14 @@ fn compute_system_ids() -> SytemIdVec {
 }
 
 #[cfg(target_os = "android")]
-fn compute_system_ids() -> SytemIdVec {
+fn compute_system_ids() -> SystemIdVec {
 	use self::os::{get_boot_id, get_host_id};
 
 	get_boot_id().into_iter().chain(get_host_id()).collect()
 }
 
 #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
-fn compute_system_ids() -> SytemIdVec {
+fn compute_system_ids() -> SystemIdVec {
 	use self::os::{get_dbus_machine_id, get_dmi_product_id, get_host_id, get_kernel_host_id};
 
 	get_dbus_machine_id()
@@ -118,7 +118,7 @@ fn compute_system_ids() -> SytemIdVec {
 }
 
 #[cfg(target_os = "macos")]
-fn compute_system_ids() -> SytemIdVec {
+fn compute_system_ids() -> SystemIdVec {
 	use self::os::{get_host_id, get_platform_serial_number};
 
 	get_platform_serial_number()
@@ -128,7 +128,7 @@ fn compute_system_ids() -> SytemIdVec {
 }
 
 #[cfg(target_os = "windows")]
-fn compute_system_ids() -> SytemIdVec {
+fn compute_system_ids() -> SystemIdVec {
 	use self::os::{get_dmi_product_id, get_install_date, get_machine_id, get_system_root_volume_id};
 
 	get_machine_id()
