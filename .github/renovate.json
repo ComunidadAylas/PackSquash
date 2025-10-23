@@ -12,6 +12,7 @@
 	"automergeType": "branch",
 	"minimumReleaseAge": "2 days",
 	"schedule": ["* 0-3 1 * *"],
+	"ignoreDeps": ["criterion"],
 	"packageRules": [
 		{
 			"matchUpdateTypes": ["major"],
