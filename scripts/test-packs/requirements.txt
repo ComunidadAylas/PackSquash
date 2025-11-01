@@ -1,9 +1,9 @@
 beautifulsoup4==4.14.2
 certifi==2024.12.14
-charset-normalizer==3.4.3
-filelock==3.19.1
+charset-normalizer==3.4.4
+filelock==3.20.0
 gdown==5.2.0
-idna==3.10
+idna==3.11
 PySocks==1.7.1
 requests==2.32.5
 six==1.17.0
