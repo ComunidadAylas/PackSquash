@@ -39,17 +39,17 @@ jobs:
           rustflags: ""
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
+        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
+        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
+        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
         with:
           tool: cargo-deny
 
@@ -69,7 +69,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@64d10c13136e1c5bce3e5fbde8d4906eeaafc885 # v3
+        uses: github/codeql-action/upload-sarif@5d5cd550d3e189c569da8f16ea8de2d821c9bf7a # v3
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
@@ -169,13 +169,13 @@ jobs:
           rustflags: ""
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
+        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@f355b1dcaf1a1c56ccead97cc540a259faf4bd5a # v2
+        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
         with:
           tool: cargo-deb
 
@@ -424,7 +424,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bookworm-slim@sha256:7e490910eea2861b9664577a96b54ce68ea3e02ce7f51d89cb0103a6f9c386e0
+    container: debian:bookworm-slim@sha256:78d2f66e0fec9e5a39fb2c72ea5e052b548df75602b5215ed01a17171529f706
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
