@@ -43,7 +43,7 @@ static KNOWN_LISTED_RESOURCE_PATTERNS: &[&str] = &[
 	// "data/*/tags/**/*.json"
 	"data/*/**/*.json",
 	"data/*/{structure,structures}/**/*.nbt",
-	"data/*/functions/**/*.mcfunction"
+	"data/*/{function,functions}/**/*.mcfunction"
 ];
 
 #[derive(Copy, Clone)]
