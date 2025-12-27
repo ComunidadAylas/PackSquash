@@ -268,9 +268,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 #### Distribution
 
 - macOS binaries are now universal, containing native code for both Intel and
-  Apple Sillicon based devices.
+  Apple Silicon based devices.
   ([#41](https://github.com/ComunidadAylas/PackSquash/issues/41))
-  - As a result, newer macOS devices with Apple Sillicon (e.g., ARM) CPUs should
+  - As a result, newer macOS devices with Apple Silicon (e.g., ARM) CPUs should
     run PackSquash faster.
   - The performance on Intel-based devices should not be affected by this
     change, as the universal binaries still contain optimized x86 code.
