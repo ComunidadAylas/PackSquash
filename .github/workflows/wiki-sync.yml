@@ -35,7 +35,7 @@ jobs:
           path: wiki
 
       - name: 🔄 Sync wiki files
-        run: rsync -av --delete src/docs/wiki/ wiki
+        run: rsync -av --delete --exclude=.git src/docs/wiki/ wiki
 
       - name: 📝 Extract source commit metadata
         working-directory: src
@@ -48,7 +48,6 @@ jobs:
       - name: 💾 Commit wiki file changes to wiki repository
         working-directory: wiki
         run: |
-          pwd; ls -laR
           git add .
           git commit \
             --author="$WIKI_SYNC_REF_AUTHOR" --date="$WIKI_SYNC_REF_AUTHOR_DATE" \
