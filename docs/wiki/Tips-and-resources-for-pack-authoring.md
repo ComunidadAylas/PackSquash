@@ -8,19 +8,16 @@ information that are meant to improve your already existing pack authoring
 workflows and, in general, help you get the most out of your resources, your
 ideas, Minecraft and PackSquash.
 
+<!-- omit from toc -->
 ## Table of contents
 
-- [💡 Educate yourself about how packs
-  work](#-educate-yourself-about-how-packs-work)
+- [💡 Educate yourself about how packs work](#-educate-yourself-about-how-packs-work)
 - [🗒️ Keep an eye on the Minecraft logs](#️-keep-an-eye-on-the-minecraft-logs)
-- [🗂️ Use a version control system, even if you work
-  alone](#️-use-a-version-control-system-even-if-you-work-alone)
-- [🌎 If you need to add or replace language strings for every Minecraft
-  language, use a script like this
-  one](#-if-you-need-to-add-or-replace-language-strings-for-every-minecraft-language-use-a-script-like-this-one)
-- [🔁 Big item model files due to lots of overrides? Use this `jq` filter to
-  merge smaller override files into an item model
-  file!](#-big-item-model-files-due-to-lots-of-overrides-use-this-jq-filter-to-merge-smaller-override-files-into-an-item-model-file)
+- [🗂️ Use a version control system, even if you work alone](#️-use-a-version-control-system-even-if-you-work-alone)
+- [🌎 If you need to add or replace language strings for every Minecraft language, use a script like this one](#-if-you-need-to-add-or-replace-language-strings-for-every-minecraft-language-use-a-script-like-this-one)
+- [🔁 Big item model files due to lots of overrides? Use this `jq` filter to merge smaller override files into an item model file!](#-big-item-model-files-due-to-lots-of-overrides-use-this-jq-filter-to-merge-smaller-override-files-into-an-item-model-file)
+  - [`paper.json` file contents](#paperjson-file-contents)
+  - [`*_paper_part.json` files contents](#_paper_partjson-files-contents)
 
 ## 💡 Educate yourself about how packs work
 

@@ -11,9 +11,9 @@
 > are not considered a public contract in any way. They could change in any
 > version in a breaking way without any notice.
 
+<!-- omit from toc -->
 ## Table of contents
 
-- [Table of contents](#table-of-contents)
 - [Introduction and software requirements](#introduction-and-software-requirements)
 - [Design overview](#design-overview)
 - [Description of key design elements](#description-of-key-design-elements)

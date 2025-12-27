@@ -8,6 +8,7 @@
 > - [v0.3.0](https://github.com/ComunidadAylas/PackSquash/wiki/Options-files/1bf83590c971446817ca4a1ba718c98036a9f1b8).
 > - [v0.2.1](https://github.com/ComunidadAylas/PackSquash/wiki/Options-files/ba9eb71a23ba0e446f8aec7ba0e2aa092641b6b0).
 
+<!-- omit from toc -->
 ## Table of contents
 
 - [Introduction](#introduction)

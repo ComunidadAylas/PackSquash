@@ -2,6 +2,7 @@ PackSquash is officially available for a variety of platforms and is distributed
 in several ways. This document explains how to get started with PackSquash on
 the supported platforms.
 
+<!-- omit from toc -->
 ## Table of contents
 
 - [▶️ GitHub action](#️-github-action)

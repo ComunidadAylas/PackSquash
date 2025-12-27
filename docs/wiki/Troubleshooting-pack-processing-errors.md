@@ -9,9 +9,9 @@ Of course, if you find an error that you believe to be common and is not in this
 list or a defect in how PackSquash deals with valid packs, please open an issue,
 so this list may be updated or the bug fixed.
 
+<!-- omit from toc -->
 ## Table of contents
 
-- [Table of contents](#table-of-contents)
 - [Types and characteristics of pack processing errors](#types-and-characteristics-of-pack-processing-errors)
 - [Common pack processing errors](#common-pack-processing-errors)
   - [`PNG decode error: invalid signature`](#png-decode-error-invalid-signature)
