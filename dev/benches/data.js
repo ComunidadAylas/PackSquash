@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1762695752073,
+  "lastUpdate": 1766865670062,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "9fdf89ace8c0448131aa932da9e0b0266059fc0e",
-          "message": "fix(json_file): support arrays and objects nested >128 levels deep\n\nic22487's Hypixel Plus resource pack is creatively (ab)using model\noverrides in a way that works with the game, can't be refactored, and is\nnecessary to achieve the functional goals is wants, so let's support it.\nThanks for getting in touch over Discord!",
-          "timestamp": "2025-05-10T21:04:07+02:00",
-          "tree_id": "569f561d677203abcb0fbf86f7ed0012e3115462",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/9fdf89ace8c0448131aa932da9e0b0266059fc0e"
-        },
-        "date": 1746905344952,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10207038,
-            "range": "± 449655",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 138966304,
-            "range": "± 2300733",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 889949266,
-            "range": "± 17230667",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 693838210,
-            "range": "± 2660557",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 693830314,
             "range": "± 3387718",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "36ee88e57ae16fadd0d8c1c5972d0919db5ed50d",
+          "message": "chore: fix new compilation warning due to stabilization of `lazy_get`",
+          "timestamp": "2025-12-27T20:42:47+01:00",
+          "tree_id": "4f6b0cd42b9f3ee364ab900fb3bfef35b5973345",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/36ee88e57ae16fadd0d8c1c5972d0919db5ed50d"
+        },
+        "date": 1766865669423,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9544542,
+            "range": "± 974935",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 144038786,
+            "range": "± 4740706",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 784566314,
+            "range": "± 12909514",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 589197048,
+            "range": "± 3872163",
             "unit": "ns/iter"
           }
         ]
