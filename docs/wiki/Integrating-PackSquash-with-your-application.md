@@ -1,13 +1,14 @@
-You're welcome to integrate PackSquash with your applications and scripts,
-providing that you comply with the terms of its
+You're welcome to integrate PackSquash with your applications and scripts, as
+long as you comply with the terms of its
 [license](https://github.com/ComunidadAylas/PackSquash/blob/master/LICENSE). In
-short, the license requires your application to disclose PackSquash source code
-(even if it is used over a network), and license your application under a
-compatible open source license (this only matters if you distribute it to the
-public; for private use you don't have to worry about this). If in doubt, please
-ask us whether we are fine with your intended usage of PackSquash. And, even if
-you do not have any doubt, we will also appreciate hearing what kind of great
-things you do!
+short, if you distribute your application alongside PackSquash, the license
+requires disclosing PackSquash source code (even when used over a network) and
+licensing your application under a compatible open source license. If in doubt,
+please check out [this previous discussion about the
+matter](https://github.com/ComunidadAylas/PackSquash/discussions/371), the [GNU
+GPL licenses FAQ](http://www.gnu.org/licenses/gpl-faq.en.html), or ask us about
+your intended usage of PackSquash. Even if you have no doubts, we'd love to hear
+what kind of great things you're building, though!
 
 With that disclaimer out of the way, there are several ways to integrate with
 PackSquash.
