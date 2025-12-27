@@ -127,10 +127,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   `size_increasing_zip_obfuscation` is enabled on a small subset of pack files,
   as far as it safe to do so due to the inner workings of Minecraft. (Thanks to
   a Discord user for bringing this idea to my attention)
-  - Select textures may optionally be more protected by changing the new
-    `may_be_atlas_texture` PNG-specific option, but it is advised that you only
-    do this if you have detailed knowledge of how the game processes textures,
-    as otherwise the game may not load the pack correctly.
 - The `ogg_obfuscation_incompatibility` quirk now applies by default to resource
   packs targeting all Minecraft versions from snapshot 24w13a (1.20.5) onward.
   This is due to an internal change introduced in Minecraft 1.20.5-pre1 which
