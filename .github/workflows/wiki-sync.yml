@@ -1,0 +1,59 @@
+name: Wiki sync
+
+on:
+  push:
+    paths:
+      - docs/wiki/**
+      - .github/workflows/wiki-sync.yml
+    branches:
+      - master
+
+env:
+  GIT_AUTHOR_NAME: github-actions[bot]
+  GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+
+jobs:
+  run:
+    name: Run
+
+    runs-on: ubuntu-slim
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout source
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          sparse-checkout: docs
+          path: src
+
+      - name: 📥 Checkout ancillary wiki repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: 🔄 Sync wiki files
+        run: rsync -a --delete src/docs/wiki/ wiki
+
+      - name: 📝 Extract source commit metadata
+        working-directory: src
+        shell: bash
+        run: |
+          echo "WIKI_SYNC_REF_AUTHOR=$(git show -s --format='%an <%ae>' HEAD)" >> "$GITHUB_ENV"
+          echo "WIKI_SYNC_REF_AUTHOR_DATE=$(git show -s --format='%ad' HEAD)" >> "$GITHUB_ENV"
+          git show -s --format='${{ github.repository }}@%h (%s, %ad)%n%n%b' HEAD > /tmp/wiki_sync_commit_message
+
+      - name: 💾 Commit wiki file changes to wiki repository
+        working-directory: wiki
+        run: |
+          git add .
+          git commit \
+            --author="$WIKI_SYNC_REF_AUTHOR" --date="$WIKI_SYNC_REF_AUTHOR_DATE" \
+            --message="$(cat /tmp/wiki_sync_commit_message)" \
+            --allow-empty \
+            --trailer="Produced-For:${{ github.sha }}" \
+            --trailer="Workflow-Run-Id:${{ github.run_id }}" \
+            --trailer="Workflow-Run-Url:https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          git push

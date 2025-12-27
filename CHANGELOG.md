@@ -142,6 +142,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
     1.20.5-pre1 or later should be reprocessed to remove this protection, as the
     latest game versions can no longer play these files.
 
+#### Documentation
+
+- Moved wiki source files to the `docs/wiki` directory, enabling external pull
+  requests and overall better change tracking for wiki contributions.
+
 #### Fixed
 
 - Packs generated with the `zip_spec_conformance_level` option set to
