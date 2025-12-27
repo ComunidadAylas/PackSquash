@@ -72,7 +72,7 @@ The following flowchart shows how these items relate to each other in a
 high-level overview of the pack file processing algorithm, focusing on the
 aspects relevant to the feature at hand.
 
-<p align="center"><img src="https://github.com/user-attachments/assets/2364edda-ef3b-4644-9808-e808fb230b22" alt="Flowchart for the pack file processing algorithm"></p>
+<p align="center"><img src="./assets/PackSquash design outline.svg" alt="Flowchart for the pack file processing algorithm"></p>
 
 This design satisfies the requirements stated above for the following reasons:
 
@@ -86,10 +86,9 @@ This design satisfies the requirements stated above for the following reasons:
   compare and compute, unlike hashes, which require looking at the file
   contents.
 - Modification timestamps are the bare minimum amount of data needed to check
-  whether a file has plausibly changed or not. Also, we believe in good faith,
-  albeit without formal proof or review by a recognized cryptography expert,
-  that the designed cryptosystem is effective to maintain timestamp and system
-  ID confidentiality under ciphertext-only attacks and chosen-plaintext attacks.
+  whether a file has plausibly changed or not. Also, we believe that the
+  designed cryptosystem is effective to maintain timestamp and system ID
+  confidentiality under ciphertext-only attacks and chosen-plaintext attacks.
   This claim is at least plausible due to the guarantees provided by the
   cryptographic primitives used, which are discussed in [NIST Special
   Publication 800-38G § Appendix
@@ -115,64 +114,59 @@ for a thorough understanding of the design.
 
 ### System identifiers
 
-System identifiers are unsigned 128-bit integers that are guaranteed to be more
+System identifiers are unsigned integers that are guaranteed to be more
 repeatable across PackSquash executions than a randomly generated number, fairly
-unpredictable, and unique. In practice, the way to get a 128-bit integer that is
+unpredictable, and unique. In practice, the way to get an integer that is
 somewhat unique, unpredictable, and repeatable is to query the computer for
-specific hardware or software data that is expected to be long-lived, so that is
-why the system identifiers are named as such. The reader may be more familiar
-with other terms that refer to a similar (albeit not identical) concept, like
-HWID, hardware ID, or machine ID.
+machine-specific hardware or software data that is expected to be long-lived, so
+that is why the system identifiers are named as such. The reader may be more
+familiar with other terms that refer to a similar (albeit not identical) concept,
+like hardware ID (HWID), or machine ID.
 
-The definition above is so generic because the ways to get a system identifier
-change across operating systems and hardware platforms. They may also change
-within the same environment (i.e., operating system install and hardware
-combination) due to user intervention or other usually atypical factors. The
-user may also spoof a system identifier, but this is not a concern in typical
-scenarios because it is reasonable to assume that no malicious party is in
-control of the computer that is used to generate ZIP files and that the end-user
-has no interest in spoofing identifiers in a way that undermines the suitability
-of the system identifier for the cryptosystem. Social engineering attacks are
-excluded from the threat model because they can compromise every conceivable
+The definition above is so generic because the ways to get system identifiers
+vary across operating systems and hardware platforms. They may also vary within
+the same environment (i.e., operating system install and hardware combination)
+due to user intervention or other usually atypical factors. The user may also
+spoof a system identifier, but this is not a concern in typical scenarios
+because it is reasonable to assume that no malicious party is in control of the
+computer that is used to generate ZIP files and that the end-user has no
+interest in spoofing identifiers in a way that undermines the suitability of the
+system identifier for the cryptosystem. Social engineering attacks are excluded
+from the threat model because they can compromise every conceivable
 cryptosystem. In this vein, it should be noted that **if any party succeeds in
 making PackSquash use a weak (i.e., predictable, non-unique) system identifier,
 the security of the whole cryptosystem would be compromised**.
 
 Another consequence of the facts stated above is that system identifiers may be
 of varying suitability for long-term cryptographic key generation. The impact
-that this consequence has on information security and usability is addressed
-with the system identifier selection and checking algorithm described in the
-following steps:
+that this has on information security and usability is addressed by deriving the
+required cryptographic key with the following algorithm:
 
 1. Every candidate system identifier for the running environment is retrieved.
-2. The candidate system identifiers are sorted in descending order by their
-   _suitability score_. The _suitability score_ is the [metric Shannon
-   entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) of the
-   system identifier, minus a constant number if the system identifier is
-   believed to be _volatile_ (i.e., that may change without any user
+2. _Volatile_ system identifiers (i.e., that may change without any user
    intervention that may be reasonably expected to be targeted at changing the
-   identifier). If a tie happens, non-volatile identifiers are considered to
-   have a higher score. If both candidate identifiers have the same volatility,
-   the candidate considered to have a higher score is the one who has a higher
-   _priority_. The _priority_ is a hardcoded integer that reflects how suitable
-   the PackSquash authors think that the candidate system identifiers provided
-   by some method are. In addition, priority values are chosen so that no two
-   candidate identifiers can share the same priority value.
-3. The candidate system identifier with the most _suitability score_ is used as
-   the system identifier.
-4. If the chosen system identifier is volatile or does not meet a hardcoded
-   minimum entropy threshold, warnings are emitted, so the user is notified of
-   the fact that the identifier may not be suitable enough and can take
-   corrective measures.
+   identifier) are excluded. If at least one non-volatile candidate system
+   identifier remains, their concatenation is used as input to a [key derivation
+   function (KDF)](https://en.wikipedia.org/wiki/Key_derivation_function) that
+   produces a 256-bit, uniformly random key. If only volatile candidate system
+   identifiers are available, their concatenation is used instead as input to
+   the such KDF.
+3. If the KDF had volatile candidate system identifiers as input, or the input
+   candidate system identifiers provided a total of less than 14 bytes of data,
+   warnings are emitted, so the user is notified of the fact that the identifier
+   may not be suitable enough and can take corrective measures.
 
 On Windows, PackSquash retrieves candidate system identifiers from the following
 sources:
 
 - The `MachineGuid` registry key located at
   `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography`.
-- The SMBIOS system UUID, read through the [`Win32_ComputerSystemProduct` WMI
+- The SMBIOS DMI product UUID, read through the [`Win32_ComputerSystemProduct`
+  WMI
   class](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-computersystemproduct),
   that is provided by the motherboard firmware on x86 hardware platforms.
+- The serial number of the volume containing the system root directory, i.e.
+  where Windows was installed.
 - The last Windows service or feature pack installation date, stored in the
   registry at `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows
   NT\CurrentVersion\InstallDate`.
@@ -182,6 +176,11 @@ sources:
 
 - [The D-Bus/systemd machine
   ID](https://www.freedesktop.org/software/systemd/man/machine-id.html).
+- The SMBIOS DMI product UUID, read from the `/sys/class/dmi/id/product_uuid`
+  file exposed by the DMI firmware driver.
+- SMBIOS DMI serial numbers, as collected by the udev database. Unlike the
+  sysfs-based method above, this usually does not require root access and offers
+  more serial numbers.
 - [The boot ID provided by the kernel via
   sysctl](https://www.kernel.org/doc/html/latest/admin-guide/sysctl/kernel.html#random).
 - The
@@ -199,15 +198,15 @@ sources:
   C function, defined by POSIX.1-2017 as an extension to the ISO C standard.
 
 On every platform, the `PACKSQUASH_SYSTEM_ID` environment variable can be set to
-a [RFC4122 UUID string](https://www.ietf.org/rfc/rfc4122.txt) that will be
-parsed as the system identifier, ignoring any other candidates. This is meant to
-support use cases where it is necessary to use a fixed system identifier, be it
-because PackSquash is not capable of getting a suitable one or because it is
-expected to be used across environments that may have different identifiers.
-Suitable values for this environment variable can be generated [in this web
+an arbitrarily-long hexadecimal string (recommended) or [RFC4122 UUID
+string](https://www.ietf.org/rfc/rfc4122.txt) that will be parsed as the system
+identifier, ignoring any other candidates. This is meant to support use cases
+where it is necessary to use a fixed system identifier, be it because PackSquash
+is not capable of getting a suitable one or because it is expected to be used
+across environments that may have different identifiers. Suitable values for
+this environment variable can be generated [in this web
 page](https://packsquash.aylas.org/tools/system-id-generator), which is provided
-by the PackSquash authors as an example of a good and convenient way to generate
-such UUIDs.
+by the PackSquash authors as a convenient way to generate them.
 
 Finally, it should be noted that PackSquash will not attempt to get a system ID
 unless it is necessary. So, if the storage of Squash Times is disabled, no
@@ -215,7 +214,7 @@ system ID will ever be computed and used for anything.
 
 ### Application salt
 
-The application salt is a hardcoded 128-bit number generated at build time using
+The application salt is a hardcoded 256-bit number generated at build time using
 a CSPRNG. Because it is hardcoded, it is guaranteed to remain constant for every
 execution of a given PackSquash executable. Different builds may have a
 different application salt.
@@ -270,5 +269,5 @@ over standard second precision POSIX times are:
 
 Explaining the details of FPE is out of scope for this document. However, it is
 interesting to note that the CRC32 of a pack file is used as a tweak for the FF1
-mode of operation of the AES-128 block cipher, so two files with different CRC32
+mode of operation of the AES-256 block cipher, so two files with different CRC32
 will have different ciphertexts for the same plaintext.
