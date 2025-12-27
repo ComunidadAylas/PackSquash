@@ -8,6 +8,9 @@ on:
     branches:
       - master
 
+env:
+  CLICOLOR: 1 # Enables pretty color output for typos
+
 jobs:
   run:
     name: Run
@@ -32,6 +35,11 @@ jobs:
 
       - name: 🔄 Sync wiki files
         run: rsync -av --delete --exclude=.git src/docs/wiki/ wiki
+
+      - name: "🔍 Lint: check typos"
+        uses: crate-ci/typos@v1
+        with:
+          files: wiki
 
       - name: 📝 Extract source commit metadata
         working-directory: src
