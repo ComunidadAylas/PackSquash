@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "WIKI_SYNC_REF_AUTHOR=$(git show -s --format='%an <%ae>' HEAD)" >> "$GITHUB_ENV"
           echo "WIKI_SYNC_REF_AUTHOR_DATE=$(git show -s --format='%ad' HEAD)" >> "$GITHUB_ENV"
-          git show -s --format='${{ github.repository }}@%h (%s, %ad)%n%n%b' HEAD > /tmp/wiki_sync_commit_message
+          git show -s --format='${{ github.repository }}@%h: %s%n%n%b' HEAD > /tmp/wiki_sync_commit_message
 
       - name: 💾 Commit wiki file changes to wiki repository
         working-directory: wiki
