@@ -2,10 +2,14 @@ name: CI
 
 on:
   push:
+    paths-ignore:
+      - docs/wiki/**
   pull_request:
     types:
       - opened
       - synchronize
+    paths-ignore:
+      - docs/wiki/**
   merge_group:
     types:
       - checks_requested
