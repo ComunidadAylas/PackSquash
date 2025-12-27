@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout source
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: 🧰 Install Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@1780873c7b576612439a134613cc4cc74ce5538c # v1
@@ -39,17 +39,17 @@ jobs:
           rustflags: ""
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
+        uses: taiki-e/install-action@3d30e7d625f7c928dccd48823053b03bb2f6ed05 # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
+        uses: taiki-e/install-action@3d30e7d625f7c928dccd48823053b03bb2f6ed05 # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
+        uses: taiki-e/install-action@3d30e7d625f7c928dccd48823053b03bb2f6ed05 # v2
         with:
           tool: cargo-deny
 
@@ -69,7 +69,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@5d5cd550d3e189c569da8f16ea8de2d821c9bf7a # v3
+        uses: github/codeql-action/upload-sarif@45c373516f557556c15d420e3f5e0aa3d64366bc # v3
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
@@ -156,7 +156,7 @@ jobs:
 
       # This must go after the previous step so that a Git repository is checked out
       - name: 📥 Checkout source
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0 # Keep the commit history for proper version information
 
@@ -169,13 +169,13 @@ jobs:
           rustflags: ""
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
+        uses: taiki-e/install-action@3d30e7d625f7c928dccd48823053b03bb2f6ed05 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@47be02f2de8a32619316956f6117e150bdc6763f # v2
+        uses: taiki-e/install-action@3d30e7d625f7c928dccd48823053b03bb2f6ed05 # v2
         with:
           tool: cargo-deb
 
@@ -348,14 +348,14 @@ jobs:
 
     steps:
       - name: 📥 Checkout source
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: 🧰 Set up Docker Buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: ⚙️ Generate Docker image metadata
         id: meta
-        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         env:
           # GitHub Packages requires annotations metadata in at least the index descriptor to show them
           # up properly in its UI it seems, but it's not clear about it, because the docs refer to the
@@ -428,7 +428,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bookworm-slim@sha256:78d2f66e0fec9e5a39fb2c72ea5e052b548df75602b5215ed01a17171529f706
+    container: debian:bookworm-slim@sha256:e899040a73d36e2b36fa33216943539d9957cba8172b858097c2cabcdb20a3e2
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
@@ -461,7 +461,7 @@ jobs:
                               python3-venv gpg
 
       - name: 📥 Checkout source
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # Necessary for steps that invoke Git commands to work properly on workflows run on containers.
       # See: https://github.com/actions/checkout/issues/766
