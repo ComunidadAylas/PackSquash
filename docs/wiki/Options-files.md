@@ -1017,7 +1017,7 @@ interpreted, if specified. The available bitrate control modes are:
     - Performance is significantly worse than when using CQF or VBR due to the
       bitrate management engine being engaged.
 - `CABR` (Constrained Average BitRate): the encoder will interpret the target
-  metric as a hard maximum bitrate and internally selected a slightly lower
+  metric as a hard maximum bitrate and internally select a slightly lower
   average bitrate than the maximum to maintain. This mode is similar to ABR, but
   with the addition of a maximum bitrate.
   - Some advantages of this bitrate control mode over ABR include:
@@ -1046,7 +1046,7 @@ bitrate_control_mode = 'VBR'
 audio, `0.0` (quality factor) for mono audio
 
 The metric to use as a target for the specified bitrate control mode when
-trancoding. Depending on the [selected bitrate control
+transcoding. Depending on the [selected bitrate control
 mode](#bitrate_control_mode), this will be interpreted as a quality factor,
 average bitrate, approximate bitrate, or maximum bitrate.
 
