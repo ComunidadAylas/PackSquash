@@ -433,7 +433,7 @@ pub(super) fn get_machine_id() -> Option<SystemId> {
 pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 	use serde::Deserialize;
 	use uuid::Uuid;
-	use wmi::{COMLibrary, WMIConnection};
+	use wmi::WMIConnection;
 
 	#[derive(Deserialize)]
 	#[serde(rename = "Win32_ComputerSystemProduct")]
@@ -442,11 +442,10 @@ pub(super) fn get_dmi_product_id() -> Option<SystemId> {
 		uuid: String
 	}
 
-	let product_info: ComputerSystemProduct =
-		WMIConnection::with_namespace_path("ROOT\\CIMV2", COMLibrary::new().ok()?.into())
-			.ok()?
-			.get()
-			.ok()?;
+	let product_info: ComputerSystemProduct = WMIConnection::with_namespace_path("ROOT\\CIMV2")
+		.ok()?
+		.get()
+		.ok()?;
 
 	Some(SystemId::new(
 		Uuid::try_parse(&product_info.uuid).ok()?.into_bytes(),

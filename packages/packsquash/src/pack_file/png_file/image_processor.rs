@@ -6,12 +6,14 @@ use bytes::BytesMut;
 use imagequant::{Attributes, liq_error};
 use itertools::Itertools;
 use obfstr::random;
-use oxipng::{BitDepth, ColorType, Deflaters, Options, RowFilter, StripChunks, indexset};
+use oxipng::{
+	BitDepth, ColorType, Deflater, FilterStrategy, Options, StripChunks, ZopfliOptions, indexset
+};
 use rgb::{AsPixels, RGBA8};
 use spng::{ContextFlags, DecodeFlags, Format};
 use std::cmp;
 use std::io::Read;
-use std::num::{NonZeroU8, NonZeroU16};
+use std::num::{NonZeroU16, NonZeroU64};
 use std::time::Duration;
 use thiserror::Error;
 
@@ -442,11 +444,14 @@ impl<R: Read> ProcessedImage<R> {
 		let filter_strategies = indexset! {
 			// The usually most promising filters. Only a single Zopfli run with
 			// the estimated best filter will be attempted
-			RowFilter::None,
-			RowFilter::Bigrams,
-			RowFilter::BigEnt,
-			RowFilter::MinSum,
-			RowFilter::Brute
+			FilterStrategy::NONE,
+			FilterStrategy::Bigrams,
+			FilterStrategy::BigEnt,
+			FilterStrategy::MinSum,
+			FilterStrategy::Brute {
+				num_lines: 8,
+				level: 1
+			}
 		};
 
 		let optimization_options = Options {
@@ -459,8 +464,8 @@ impl<R: Read> ProcessedImage<R> {
 			// a run per filter with a faster compressor than Zopfli to evaluate the best
 			// filtering strategy per image, but that still takes a significant amount of
 			// time
-			deflate: match zopfli_iterations_model.iterations_for_data_size(pixel_count, -1, 15) {
-				libdeflater_iterations @ ..=0 => Deflaters::Libdeflater {
+			deflater: match zopfli_iterations_model.iterations_for_data_size(pixel_count, -1, 15) {
+				libdeflater_iterations @ ..=0 => Deflater::Libdeflater {
 					// Use libdeflate's near-optimal compressor (compression levels 10 to 12), which
 					// is acceptably fast for bigger images of realistic sizes, but let its aggressiveness
 					// be determined by how much we miss the Zopfli usage threshold. This may provide a
@@ -473,11 +478,12 @@ impl<R: Read> ProcessedImage<R> {
 					// precise details about the difference between libdeflate compression levels
 					compression: 12 - (-libdeflater_iterations as u8)
 				},
-				zopfli_iterations => Deflaters::Zopfli {
-					iterations: NonZeroU8::new(zopfli_iterations as u8).unwrap()
-				}
+				zopfli_iterations => Deflater::Zopfli(ZopfliOptions {
+					iteration_count: NonZeroU64::new(zopfli_iterations as u64).unwrap(),
+					..zopfli::Options::default()
+				})
 			},
-			filter: filter_strategies,
+			filters: filter_strategies,
 			fix_errors: true, // Ignore CRC for speed. We assume a reliable data source
 			force: false,
 			idat_recoding: true,
@@ -487,7 +493,8 @@ impl<R: Read> ProcessedImage<R> {
 			scale_16: can_change_color_type,
 			strip: StripChunks::All,
 			timeout: Some(Duration::from_secs(600)), // Bail out if the optimization takes too long
-			fast_evaluation: true
+			fast_evaluation: true,
+			max_decompressed_size: None
 		};
 
 		let oxipng_image = match self {
