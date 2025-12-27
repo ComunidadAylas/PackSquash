@@ -47,7 +47,7 @@ jobs:
         run: |
           echo "WIKI_SYNC_REF_AUTHOR=$(git show -s --format='%an <%ae>' HEAD)" >> "$GITHUB_ENV"
           echo "WIKI_SYNC_REF_AUTHOR_DATE=$(git show -s --format='%ad' HEAD)" >> "$GITHUB_ENV"
-          git show -s --format='${{ github.repository }}@%h: %s%n%n%b' HEAD > /tmp/wiki_sync_commit_message
+          git show -s --format='${{ github.repository }}@%h: %s' HEAD > /tmp/wiki_sync_commit_message
 
       - name: 💾 Commit wiki file changes to wiki repository
         working-directory: wiki
@@ -59,8 +59,5 @@ jobs:
           git commit \
             --author="$WIKI_SYNC_REF_AUTHOR" --date="$WIKI_SYNC_REF_AUTHOR_DATE" \
             --message="$(cat /tmp/wiki_sync_commit_message)" \
-            --allow-empty \
-            --trailer="Produced-For:${{ github.sha }}" \
-            --trailer="Workflow-Run-Id:${{ github.run_id }}" \
-            --trailer="Workflow-Run-Url:https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --allow-empty
           git push
