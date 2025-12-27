@@ -182,7 +182,7 @@ following lines to the `[runners.docker]` section of your GitLab runner
 configuration file:
 
 ```toml
-priveleged = true
+privileged = true
 volumes = ["/certs/client", "/cache"]
 ```
 
@@ -199,7 +199,7 @@ build-job:
     DOCKER_TLS_CERTDIR: ""
   services:
     - docker:20.10.16-dind
-  before_script: 
+  before_script:
     - docker info
   script: |
     docker run -v "$(pwd)":"$(pwd)" --workdir "$(pwd)" \
