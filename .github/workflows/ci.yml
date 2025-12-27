@@ -261,7 +261,11 @@ jobs:
             const archiver = require("archiver");
 
             const target = "${{ matrix.target }}";
-            const targetAptArch = "${{ matrix.apt-arch }}";
+            const targetAptArch = (
+              await exec.getExecOutput("dpkg-architecture", ["-q", "DEB_BUILD_ARCH"], {
+                silent: true,
+              })
+            ).stdout;
 
             const firstGlobMatch = async (expr) =>
               (await (await glob.create(expr)).glob())[0];
