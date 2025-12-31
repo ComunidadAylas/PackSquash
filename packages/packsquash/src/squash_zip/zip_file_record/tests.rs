@@ -604,7 +604,7 @@ async fn end_of_central_directory_location_with_big_zip_and_comment_works() {
 
 #[tokio::test]
 async fn end_of_central_directory_location_with_partial_reads_works() {
-	/// A [`Mock`] that can returns an error when seeking for the first time
+	/// A [`Mock`] that can return an error when seeking for the first time
 	/// to a position relative to the end of the file, success when seeking
 	/// to the file start a second time, and panics for any other seek
 	/// operation that locating an end of central directory record should
