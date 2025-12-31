@@ -20,8 +20,8 @@ Authorized maintainers must complete the following steps when making a new relea
 - [ ] [Manually run the APT repository update workflow](https://github.com/ComunidadAylas/PackSquash-apt-repo/blob/master/.github/workflows/update_apt_repository.yml) to update the APT repository.
 - [ ] Release the necessary GitHub action update and/or changes to its binary manifests.
 ***
-- [ ] Announce the update on the Discord PackSquash updates channel.
+- [ ] Announce the update on the Discord PackSquash updates channel, tagging the PackSquash updates role.
 - [ ] Announce the update on PlanetMinecraft.
-- [ ] Announce the update to other stakeholders: Quiver, interested users, etc.
+- [ ] Announce the update to other stakeholders: Nexo, interested users, etc.
 ***
 - [ ] Bump the versions in the source code to the next release.

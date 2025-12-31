@@ -15,7 +15,7 @@ use crate::squash_zip::{SquashZipSettings, ZipArchiveCommentString};
 /// Contains all the options that configure a `PackSquasher` operation.
 ///
 /// This is the root level configuration struct for PackSquash, so it is a
-/// good starting point  to read the API documentation, after the `PackSquasher`
+/// good starting point to read the API documentation, after the `PackSquasher`
 /// struct.
 #[derive(Clone, Deserialize)]
 pub struct SquashOptions {
