@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1766874204211,
+  "lastUpdate": 1767204135468,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "29139614+renovate[bot]@users.noreply.github.com",
-            "name": "renovate[bot]",
-            "username": "renovate[bot]"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "8311b594961f80698c43f060975491f6b96c66d5",
-          "message": "chore(deps): update ci dependencies",
-          "timestamp": "2025-05-25T00:04:50Z",
-          "tree_id": "14d20766332841a3dd7bea0ff202b9a87356fcce",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/8311b594961f80698c43f060975491f6b96c66d5"
-        },
-        "date": 1748144112074,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9714375,
-            "range": "± 897461",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 126911410,
-            "range": "± 3246220",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 799224281,
-            "range": "± 10127551",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 749448718,
-            "range": "± 2003159",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 584860418,
             "range": "± 2260051",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "d6964d40b8f2f2ffe4d269fb2d0c9a1e5523476d",
+          "message": "tweak(ci): improve maintainability of Debian package desc generation code\n\n`html2text` is a tool whose maintenance status is quite uncertain, and\nhas introduced breaking changes in its interface that will bite us as\nsoon as we dare to update the Debian container distribution version.\n\nSo, instead of stitching together sed scripts with obsolete CLI tools,\nlet's just converge on using the `markdown-it` Python port from a small\nPython script, which should be much more robust and flexible moving\nforward, as the Markdown is now parsed and rendered directly to plain\ntext by a proper and well-maintained library to the effect. Providing\nPython 3 is already available on the environment, this even slightly\nreduces the total size of Debian dependency packages needed for the\nscript to work.",
+          "timestamp": "2025-12-31T18:39:35+01:00",
+          "tree_id": "408345856981e4eaccffdc84c8344ea73eb0fd5a",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/d6964d40b8f2f2ffe4d269fb2d0c9a1e5523476d"
+        },
+        "date": 1767204134702,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9641538,
+            "range": "± 83880",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 145473531,
+            "range": "± 3806950",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 770625930,
+            "range": "± 10232668",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 588241030,
+            "range": "± 1604592",
             "unit": "ns/iter"
           }
         ]
