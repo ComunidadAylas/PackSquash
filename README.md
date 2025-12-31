@@ -137,8 +137,7 @@ companies get paid for doing these kinds of things. If you want to say "thank
 you" in a way that words can't describe or motivate me to stay committed to the
 project and advance in the
 [roadmap](https://github.com/ComunidadAylas/PackSquash/projects/1), sending me
-some money would be a great way to do so! You can choose any of the platforms
-shown below:
+some money would be a great way to do so!
 
 <p align="center"><a href="https://ko-fi.com/K3K758Q08"><img src="https://cdn.ko-fi.com/cdn/kofi2.png?v=2" alt="Buy me a coffee at ko-fi.com" height="36"/></a></p>
 <p align="center"><a href="https://www.paypal.me/alejandrogonzalezg98"><img src="https://www.bathtownshippubliclibrary.org/site-assets/images/paypal-donate-button-high-quality-png.png/@@images/image.png" alt="Donate via PayPal.me" height="64"/></a></p>

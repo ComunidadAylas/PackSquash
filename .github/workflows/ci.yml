@@ -153,10 +153,10 @@ jobs:
           apt-get update
           # curl is required by rustup.
           # musl-tools is required to build musl binaries for the native architecture
-          # markdown and html2text are required to generate the Debian package only
+          # python3-markdown-it is required to generate the Debian package only
           apt-get install -yq build-essential cmake git curl \
                               musl-tools \
-                              markdown html2text
+                              python3-markdown-it
 
       # This must go after the previous step so that a Git repository is checked out
       - name: 📥 Checkout source

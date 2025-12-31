@@ -1,6 +1,0 @@
-A.attributes.internal_link = NONE
-A.attributes.external_link = NONE
-
-P.vspace.before = 1
-UL.vspace.after = 0
-H2.vspace.after = 0
