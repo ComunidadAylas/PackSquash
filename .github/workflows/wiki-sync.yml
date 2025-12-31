@@ -56,8 +56,11 @@ jobs:
           git config --global user.name 'github-actions[bot]'
 
           git add .
-          git commit \
-            --author="$WIKI_SYNC_REF_AUTHOR" --date="$WIKI_SYNC_REF_AUTHOR_DATE" \
-            --message="$(cat /tmp/wiki_sync_commit_message)" \
-            --allow-empty
-          git push
+          if git diff --cached --quiet; then
+            echo 'No changes staged, skipping commit'
+          else
+            git commit \
+              --author="$WIKI_SYNC_REF_AUTHOR" --date="$WIKI_SYNC_REF_AUTHOR_DATE" \
+              --message="$(cat /tmp/wiki_sync_commit_message)"
+            git push
+          fi
