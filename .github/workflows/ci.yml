@@ -251,7 +251,6 @@ jobs:
       - name: 📤 Upload release assets
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         if: github.event_name == 'release'
-        continue-on-error: true
         with:
           retries: 3
           script: |
@@ -314,11 +313,13 @@ jobs:
             const archiver = require("archiver");
 
             const target = "${{ matrix.target }}";
-            const targetAptArch = (
-              await exec.getExecOutput("dpkg-architecture", ["-q", "DEB_BUILD_ARCH"], {
-                silent: true,
-              })
-            ).stdout.trim();
+            const targetAptArch = target.includes("-linux-")
+              ? (
+                  await exec.getExecOutput("dpkg-architecture", ["-q", "DEB_BUILD_ARCH"], {
+                    silent: true,
+                  })
+                ).stdout.trim()
+              : null;
 
             const firstGlobMatch = async (expr) =>
               (await (await glob.create(expr)).glob())[0];
