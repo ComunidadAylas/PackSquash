@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    tags-ignore:
+      - "*"
     paths-ignore:
       - docs/wiki/**
   pull_request:
