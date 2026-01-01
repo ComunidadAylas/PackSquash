@@ -273,7 +273,7 @@ jobs:
               await exec.getExecOutput("dpkg-architecture", ["-q", "DEB_BUILD_ARCH"], {
                 silent: true,
               })
-            ).stdout;
+            ).stdout.trim();
 
             const firstGlobMatch = async (expr) =>
               (await (await glob.create(expr)).glob())[0];
