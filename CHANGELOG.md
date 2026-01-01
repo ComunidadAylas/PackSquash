@@ -8,6 +8,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+No changes yet.
+
+## [0.4.1] - 2025-01-01
+
 ### Added
 
 #### Compression
@@ -469,5 +473,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   panics should be much less likely to happen, so the significant binary size
   taken by this logic was no longer warranted.
 
-[Unreleased]: https://github.com/ComunidadAylas/PackSquash/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/ComunidadAylas/PackSquash/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/ComunidadAylas/PackSquash/compare/v0.4.1...v0.4.0
 [0.4.0]: https://github.com/ComunidadAylas/PackSquash/compare/v0.3.1...v0.4.0
