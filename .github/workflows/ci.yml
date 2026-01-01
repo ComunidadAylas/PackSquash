@@ -18,7 +18,6 @@ on:
   release:
     types:
       - published
-      - edited
 
 env:
   DEBIAN_FRONTEND: noninteractive
