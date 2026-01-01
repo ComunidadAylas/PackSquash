@@ -248,10 +248,12 @@ jobs:
             target/${{ matrix.target }}/debian/packsquash_*.deb
 
       - name: 🧰 Install release asset upload dependencies
-        if: github.event_name == 'release' && matrix.container
+        if: github.event_name == 'release'
         continue-on-error: true
         run: |
-          apt-get install -yq npm
+          if ! command npm >/dev/null 2>&1; then
+            apt-get install -yq npm
+          fi
           npm install archiver@'>=7.0.0 <8.0.0'
 
       - name: 📤 Upload release assets
