@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1767294167682,
+  "lastUpdate": 1767297161444,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "c217b36a673308db48390a29cb631054fb040421",
-          "message": "fix(ci): do not run attestation generation step on PRs from forks\n\nSuch workflow runs lack permission to upload attestations anyway, and we\ndon't want them to be attested as coming from the project.",
-          "timestamp": "2025-07-13T18:01:05+02:00",
-          "tree_id": "8e1fa12f724e76329c8b4712939b83952a934ebf",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c217b36a673308db48390a29cb631054fb040421"
-        },
-        "date": 1752423472140,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9866427,
-            "range": "± 95921",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 115618249,
-            "range": "± 1606231",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 773280632,
-            "range": "± 18689280",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 761763962,
-            "range": "± 4376170",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2399,6 +2351,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 591633019,
             "range": "± 3375424",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "12fb4061b9c229d23aa98b591a47f3b5ce59fdaa",
+          "message": "docs(CHANGELOG): fix typo",
+          "timestamp": "2026-01-01T20:12:32+01:00",
+          "tree_id": "cbd775994fcd12de2d5f7c2f73e63c4a3f0bf84b",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/12fb4061b9c229d23aa98b591a47f3b5ce59fdaa"
+        },
+        "date": 1767297160543,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10151010,
+            "range": "± 447676",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 142504865,
+            "range": "± 1941297",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 768242559,
+            "range": "± 8421114",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 590277379,
+            "range": "± 2525104",
             "unit": "ns/iter"
           }
         ]
