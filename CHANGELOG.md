@@ -10,7 +10,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 No changes yet.
 
-## [0.4.1] - 2025-01-01
+## [0.4.1] - 2026-01-01
 
 ### Added
 
