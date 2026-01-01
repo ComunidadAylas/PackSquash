@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1767297197736,
+  "lastUpdate": 1767305023670,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "f73a83a391722ec44bd7e4a6e3691e42503ac70c",
-          "message": "fix(ci): do not push Docker images for fork PRs where the actor is a maintainer\n\nExternal contributors usually lack permission to push Docker images\nanyway, so not pushing the built Docker images in case they turn out to\nhave such permissions is more consistent. Maintainers can just push to a\nfeature branch instead.",
-          "timestamp": "2025-07-13T18:21:29+02:00",
-          "tree_id": "3bf6a204c029687ade27e1a1c8526dd130ee913c",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/f73a83a391722ec44bd7e4a6e3691e42503ac70c"
-        },
-        "date": 1752424653003,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10253524,
-            "range": "± 367957",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 113030538,
-            "range": "± 859898",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 786560374,
-            "range": "± 15008072",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 762500351,
-            "range": "± 4044196",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2397,6 +2349,52 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 591358023,
             "range": "± 2293513",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Alejandro González",
+            "username": "AlexTMjugador",
+            "email": "me@alegon.dev"
+          },
+          "committer": {
+            "name": "Alejandro González",
+            "username": "AlexTMjugador",
+            "email": "me@alegon.dev"
+          },
+          "id": "7fcd681e89e61f6914e7a0eb3baea15ef22ed4e1",
+          "message": "ci: do not get target APT arch for non-Linux targets",
+          "timestamp": "2026-01-01T21:44:50Z",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7fcd681e89e61f6914e7a0eb3baea15ef22ed4e1"
+        },
+        "date": 1767305023075,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9636928,
+            "range": "± 455757",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 143379840,
+            "range": "± 4016063",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 778172236,
+            "range": "± 12731423",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 592833171,
+            "range": "± 3601481",
             "unit": "ns/iter"
           }
         ]
