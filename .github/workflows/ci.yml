@@ -248,15 +248,6 @@ jobs:
             target/${{ matrix.target }}/release/packsquash.exe
             target/${{ matrix.target }}/debian/packsquash_*.deb
 
-      - name: 🧰 Install release asset upload dependencies
-        if: github.event_name == 'release'
-        continue-on-error: true
-        run: |
-          if ! command npm >/dev/null 2>&1; then
-            apt-get install -yq npm
-          fi
-          npm install archiver@'>=7.0.0 <8.0.0'
-
       - name: 📤 Upload release assets
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         if: github.event_name == 'release'
@@ -264,9 +255,62 @@ jobs:
         with:
           retries: 3
           script: |
+            const { execFileSync } = require("node:child_process");
             const { readFile } = require("node:fs/promises");
-            const { createWriteStream } = require("node:fs");
-            const { basename } = require("node:path");
+            const { createWriteStream, existsSync, readdirSync } = require("node:fs");
+            const { basename, dirname, join } = require("node:path");
+
+            // Portably install npm packages by invoking the `npm` CLI directly with the Node
+            // binary that's running this script, bypassing any shell wrappers or need to set
+            // up the runner environment beforehand.
+            function npmInstall(packageSpecs) {
+              const nodeDir = dirname(process.execPath);
+              let npmCliPath;
+              if (process.platform === "win32") {
+                // Windows, as usual, is more annoying, and for some reason GitHub puts the npm script in the
+                // tool cache, e.g., C:\hostedtoolcache\windows\node\24.x.x\x64\node_modules\npm\...
+
+                const nodeToolDir = join(process.env.RUNNER_TOOL_CACHE, "node");
+                const versions = readdirSync(nodeToolDir)
+                  .filter((v) => /^\d+\./.test(v))
+                  .sort((a, b) => {
+                    const [aMaj] = a.split(".").map(Number),
+                      [bMaj] = b.split(".").map(Number);
+
+                    // Choose the latest major version.
+                    // It's not guaranteed that the running Node version has a folder here
+                    return bMaj - aMaj;
+                  });
+
+                npmCliPath = join(
+                  nodeToolDir,
+                  versions[0], // We can assume there is always at least one version here
+                  "x64",
+                  "node_modules",
+                  "npm",
+                  "bin",
+                  "npm-cli.js"
+                );
+              } else {
+                // Linux/macOS: npm is simply bundled alongside node
+
+                npmCliPath = join(
+                  nodeDir,
+                  "..",
+                  "lib",
+                  "node_modules",
+                  "npm",
+                  "bin",
+                  "npm-cli.js"
+                );
+              }
+
+              execFileSync(process.execPath, [npmCliPath, "install", ...packageSpecs], {
+                stdio: "inherit",
+              });
+            }
+
+            npmInstall(["archiver@>=7.0.0 <8.0.0"]);
             const archiver = require("archiver");
 
             const target = "${{ matrix.target }}";
