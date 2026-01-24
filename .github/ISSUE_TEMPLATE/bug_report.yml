@@ -40,7 +40,7 @@ body:
     attributes:
       label: Set up and observed behavior
       description:
-        What happened, exactly? Tell us a step by step story about what you did, from download or setup
+        What happened and how, exactly? Tell us a step by step story about what you did, from download or setup
         to the moment you noticed the problem.
       placeholder: |
         1. I downloaded PackSquash from '...'
