@@ -63,7 +63,7 @@ body:
     attributes:
       label: Technical observations
       description: >-
-        If you have any insights, ideas, or proposal about what might be going on or how it
+        If you have any insights, ideas, or proposals about what might be going on or how it
         could be addressed, feel free to share them here.
       placeholder: >-
         It looks like PackSquash does not support feature X introduced in Minecraft A.B.C.
