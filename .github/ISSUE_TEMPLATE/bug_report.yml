@@ -1,5 +1,5 @@
 name: Bug report
-description: Create a report to help us improve
+description: Let us know about a problem or unexpected behavior to help us improve
 labels: ['bug']
 body:
   - type: markdown
@@ -29,29 +29,24 @@ body:
         - Linux ARM64/AArch64 APT package
         - Universal macOS executable
         - GitHub action
-        - Unstable or custom build (please describe in the "Additional context" section)
-        - Other (please describe in the "Additional context" section)
+        - Unstable or custom build (please describe in the "Set up and observed behavior section)
+        - Other (please describe in the "Set up and observed behavior" section)
         - N/A (the distribution does not matter; please explain why if it's not obvious)
     validations:
       required: true
 
   - type: textarea
-    id: description
+    id: set-up-and-observed-behavior
     attributes:
-      label: Bug description
-      description: A clear and concise description of what the bug is.
-    validations:
-      required: true
-
-  - type: textarea
-    id: reproduction-steps
-    attributes:
-      label: Reproduction steps
-      description: Steps to reproduce the behavior.
+      label: Set up and observed behavior
+      description:
+        What happened, exactly? Tell us a step by step story about what you did, from download or setup
+        to the moment you noticed the problem.
       placeholder: |
-        1. Go to '...'
-        2. Type '....'
-        3. See error
+        1. I downloaded PackSquash from '...'
+        2. I configured it with options X and Y (value Z)
+        3. I ran PackSquash with the attached options file on a pack containing files A and B
+        4. PackSquash showed error X/Minecraft showed error Y on the console when trying to open the pack
     validations:
       required: true
 
@@ -59,18 +54,34 @@ body:
     id: expected-behavior
     attributes:
       label: Expected behavior
-      description: A clear and concise description of what you expected to happen.
+      description: Why was the behavior you saw a problem to you? What would you have expected to happen?
     validations:
       required: true
+
+  - type: textarea
+    id: technical-observations
+    attributes:
+      label: Technical observations
+      description: >-
+        If you have any insights, ideas, or proposal about what might be going on or how it
+        could be addressed, feel free to share them here.
+      placeholder: >-
+        It looks like PackSquash does not support feature X introduced in Minecraft A.B.C.
+        Adding support for that feature would resolve the issue
 
   - type: textarea
     id: attached-files
     attributes:
       label: Attached files
-      description: If applicable, add pack files that help reproduce your problem.
+      description: >-
+        If applicable, attach files that help reproduce the problem.
+        PackSquash options files and small example packs that demonstrate the issue are
+        especially helpful for a wide range of problems.
 
   - type: textarea
     id: additional-context
     attributes:
       label: Additional context
-      description: Add any other information that might be relevant to resolving the problem here.
+      description: >-
+        Add any other information that you think that might be relevant for resolving the issue here:
+        PackSquash output, Minecraft output, screenshots, logs...
