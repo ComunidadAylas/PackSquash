@@ -71,7 +71,7 @@ symphonia = { version = "0.5.5", default-features = false, features = [
   "pcm",
   "wav",
 ] }
-sysinfo = { version = "0.37.2", default-features = false, features = [
+sysinfo = { version = "0.38.0", default-features = false, features = [
   "system",
 ] }
 tempfile = "3.24.0"
