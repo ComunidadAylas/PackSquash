@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout source
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: 🧰 Install Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@1780873c7b576612439a134613cc4cc74ce5538c # v1
@@ -45,17 +45,17 @@ jobs:
           rustflags: ""
 
       - name: 🧰 Install clippy-sarif
-        uses: taiki-e/install-action@45a93d9c71692daf99a53feb97366fb6f4c3757f # v2
+        uses: taiki-e/install-action@f176c07a0a40cbfdd08ee9aa8bf1655701d11e69 # v2
         with:
           tool: clippy-sarif
 
       - name: 🧰 Install sarif-fmt
-        uses: taiki-e/install-action@45a93d9c71692daf99a53feb97366fb6f4c3757f # v2
+        uses: taiki-e/install-action@f176c07a0a40cbfdd08ee9aa8bf1655701d11e69 # v2
         with:
           tool: sarif-fmt
 
       - name: 🧰 Install cargo-deny
-        uses: taiki-e/install-action@45a93d9c71692daf99a53feb97366fb6f4c3757f # v2
+        uses: taiki-e/install-action@f176c07a0a40cbfdd08ee9aa8bf1655701d11e69 # v2
         with:
           tool: cargo-deny
 
@@ -75,7 +75,7 @@ jobs:
 
       - name: 📤 Upload analysis results to GitHub
         if: always()
-        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/upload-sarif@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # v4
         continue-on-error: true
         with:
           sarif_file: clippy-results.sarif
@@ -162,7 +162,7 @@ jobs:
 
       # This must go after the previous step so that a Git repository is checked out
       - name: 📥 Checkout source
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0 # Keep the commit history for proper version information
 
@@ -175,13 +175,13 @@ jobs:
           rustflags: ""
 
       - name: 🧰 Install nextest
-        uses: taiki-e/install-action@45a93d9c71692daf99a53feb97366fb6f4c3757f # v2
+        uses: taiki-e/install-action@f176c07a0a40cbfdd08ee9aa8bf1655701d11e69 # v2
         with:
           tool: nextest
 
       - name: 🧰 Install cargo-deb
         if: endsWith(matrix.target, '-linux-gnu')
-        uses: taiki-e/install-action@45a93d9c71692daf99a53feb97366fb6f4c3757f # v2
+        uses: taiki-e/install-action@f176c07a0a40cbfdd08ee9aa8bf1655701d11e69 # v2
         with:
           tool: cargo-deb
 
@@ -401,7 +401,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout source
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: 🧰 Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
@@ -459,7 +459,7 @@ jobs:
       # This permission is not given to PRs from forked repositories to external contributors.
       # See: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
       - name: ⚙️ Login to ${{ env.REGISTRY }}
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         if: steps.check_write_permission.outputs.result
         with:
           registry: ${{ env.REGISTRY }}
@@ -481,7 +481,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: debian:bookworm-slim@sha256:e899040a73d36e2b36fa33216943539d9957cba8172b858097c2cabcdb20a3e2
+    container: debian:bookworm-slim@sha256:98f4b71de414932439ac6ac690d7060df1f27161073c5036a7553723881bffbe
 
     # Benchmark failure is not critical enough to fail the whole workflow.
     # We will keep an eye on them anyway, though
@@ -514,7 +514,7 @@ jobs:
                               python3-venv gpg
 
       - name: 📥 Checkout source
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       # Necessary for steps that invoke Git commands to work properly on workflows run on containers.
       # See: https://github.com/actions/checkout/issues/766
