@@ -110,6 +110,8 @@ PackSquash, such as:
 
 - [Nexo](https://docs.nexomc.com/configuration/resourcepack#packsquash-integration),
   a Minecraft server plugin for creating custom items, blocks, armor, and more.
+- [Git Pack Manager](https://git-pack-manager.docs.offsetmonkey538.top/guides/packsquash),
+  a Minecraft server mod/plugin for managing the server's resource pack using git.
 
 ## ✉️ Contact and support
 
