@@ -6,17 +6,27 @@
 		"helpers:pinGitHubActionDigests",
 		":configMigration"
 	],
-	"addLabels": ["dependencies"],
-	"reviewers": ["team:packsquash-developers"],
+	"addLabels": [
+		"dependencies"
+	],
+	"reviewers": [
+		"team:packsquash-developers"
+	],
 	"automerge": true,
 	"automergeType": "branch",
 	"minimumReleaseAge": "2 days",
-	"schedule": ["* 0-3 1 * *"],
-	"ignoreDeps": ["criterion"],
+	"schedule": [
+		"* 0-3 1 * *"
+	],
+	"ignoreDeps": [
+		"criterion"
+	],
 	"customManagers": [
 		{
 			"customType": "regex",
-			"fileMatch": ["^\\.github/workflows/[^/]+\\.ya?ml$"],
+			"managerFilePatterns": [
+				"/^\\.github/workflows/[^/]+\\.ya?ml$/"
+			],
 			"matchStrings": [
 				"# renovate: datasource=docker\\s+container: (?<depName>[^:\\s]+):(?<currentValue>[^\\s@]+)@(?<currentDigest>sha256:[a-f0-9]+)"
 			],
@@ -25,19 +35,27 @@
 	],
 	"packageRules": [
 		{
-			"matchUpdateTypes": ["major"],
+			"matchUpdateTypes": [
+				"major"
+			],
 			"dependencyDashboardApproval": true
 		},
 		{
-			"matchCategories": ["python"],
+			"matchCategories": [
+				"python"
+			],
 			"groupName": "Helper Python scripts"
 		},
 		{
-			"matchCategories": ["rust"],
+			"matchCategories": [
+				"rust"
+			],
 			"groupName": "Rust dependencies"
 		},
 		{
-			"matchCategories": ["ci"],
+			"matchCategories": [
+				"ci"
+			],
 			"groupName": "CI dependencies"
 		}
 	]
