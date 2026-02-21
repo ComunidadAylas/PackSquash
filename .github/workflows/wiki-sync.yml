@@ -22,13 +22,13 @@ jobs:
 
     steps:
       - name: 📥 Checkout source
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           sparse-checkout: docs
           path: src
 
       - name: 📥 Checkout ancillary wiki repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: ${{ github.repository }}.wiki
           path: wiki
@@ -37,7 +37,7 @@ jobs:
         run: rsync -av --delete --exclude=.git src/docs/wiki/ wiki
 
       - name: "🔍 Lint: check typos"
-        uses: crate-ci/typos@2d0ce569feab1f8752f1dde43cc2f2aa53236e06 # v1
+        uses: crate-ci/typos@57b11c6b7e54c402ccd9cda953f1072ec4f78e33 # v1
         with:
           files: wiki
 
