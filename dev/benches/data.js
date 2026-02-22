@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1771719683485,
+  "lastUpdate": 1771720299927,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "89dee4d14f9a647850b86865d1359d5f76ba8d4a",
-          "message": "chore: migrate embedded links away from Firebase Dynamic Links\n\nAs it'd be expected with almost every nice Google product, Firebase\nDynamic Links is being discontinued for good on August 25, 2025, the\ntime when its links will finally stop working.\n\nLuckily, things have changed since I originally set up those\nredirections in 2021, and the PackSquash project now controls its own\ndomain. Thus, we can just migrate to the already existing GitHub\nPages website, which can be used for redirections.\n\nThe only thing I may miss from Firebase are its analytics of how many\nhits the redirects receive over time, but frankly, I've barely looked at\nthem during these years, and if they are ever really necessary, we can\njust migrate to a more featureful static pages host, like Cloudflare\nPages.",
-          "timestamp": "2025-07-13T22:00:15+02:00",
-          "tree_id": "8b5f414eb5cb574e8a446f12f5c768fe97c550fd",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/89dee4d14f9a647850b86865d1359d5f76ba8d4a"
-        },
-        "date": 1752437786143,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 10107651,
-            "range": "± 133266",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 114686419,
-            "range": "± 1745547",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 776882009,
-            "range": "± 22264464",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 759752334,
-            "range": "± 4070663",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 588034659,
             "range": "± 2853724",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "4377d8390a1e2144106ac85572038d52ee019059",
+          "message": "ci: limit blast radius of ARM64 Alpine CI workaround\n\nIt's documented to not have any effect on non-ARM64 architectures, but\nlet's not run it on any other architecture, just in case and to improve\nimplicit documentation.",
+          "timestamp": "2026-02-22T01:12:56+01:00",
+          "tree_id": "0b4c20c747416b4dab3137dc430ef77298dbd032",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/4377d8390a1e2144106ac85572038d52ee019059"
+        },
+        "date": 1771720299152,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 9759558,
+            "range": "± 487101",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 147453992,
+            "range": "± 2181284",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 787395068,
+            "range": "± 11773513",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 587820207,
+            "range": "± 1353209",
             "unit": "ns/iter"
           }
         ]
