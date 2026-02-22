@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1771720299927,
+  "lastUpdate": 1771721850045,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "27db99653520d064e14abe3df8d51e194954050e",
-          "message": "chore: migrate embedded links away from Firebase Dynamic Links\n\nAs it'd be expected with almost every nice Google product, Firebase\nDynamic Links is being discontinued for good on August 25, 2025, the\ntime when its links will finally stop working.\n\nLuckily, things have changed since I originally set up those\nredirections in 2021, and the PackSquash project now controls its own\ndomain. Thus, we can just migrate to the already existing GitHub\nPages website, which can be used for redirections.\n\nThe only thing I may miss from Firebase are its analytics of how many\nhits the redirects receive over time, but frankly, I've barely looked at\nthem during these years, and if they are ever really necessary, we can\njust migrate to a more featureful static pages host, like Cloudflare\nPages.",
-          "timestamp": "2025-07-13T22:07:08+02:00",
-          "tree_id": "b95af46834a4392b817d0250325a4cfc1af73d31",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/27db99653520d064e14abe3df8d51e194954050e"
-        },
-        "date": 1752438201793,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9638182,
-            "range": "± 342593",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 112836164,
-            "range": "± 1896838",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 784267569,
-            "range": "± 10218036",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 759686548,
-            "range": "± 2680929",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 587820207,
             "range": "± 1353209",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "offsetmonkey538@proton.me",
+            "name": "OffsetMonkey538",
+            "username": "OffsetMonkey538"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7d0bcebf25eaddaee4c643118fef1750ca30dfe6",
+          "message": "Add Git Pack Manager to README.md (#382)",
+          "timestamp": "2026-02-22T00:24:59Z",
+          "tree_id": "b3abff19792af9f8429ad407a7dad77faf4a408b",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/7d0bcebf25eaddaee4c643118fef1750ca30dfe6"
+        },
+        "date": 1771721849225,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 10010362,
+            "range": "± 327682",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 145887157,
+            "range": "± 3152966",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 775048684,
+            "range": "± 9249536",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 586195392,
+            "range": "± 2053495",
             "unit": "ns/iter"
           }
         ]
