@@ -145,6 +145,42 @@ async fn pack_mcmeta_with_missing_description() {
 }
 
 #[tokio::test]
+async fn well_formed_pack_mcmeta_with_float_pack_format_works() {
+	PackMeta::new(
+		&MockVfs(
+			r#"
+				{
+					"pack": {
+						"pack_format": 69.0,
+						"description": "My pack"
+					}
+				}"#
+		),
+		""
+	)
+	.await
+	.expect("Unexpected failure reading pack metadata");
+}
+
+#[tokio::test]
+async fn well_formed_pack_mcmeta_with_decimal_pack_format_works() {
+	PackMeta::new(
+		&MockVfs(
+			r#"
+				{
+					"pack": {
+						"pack_format": 69.5,
+						"description": "My pack"
+					}
+				}"#
+		),
+		""
+	)
+	.await
+	.expect("Unexpected failure reading pack metadata");
+}
+
+#[tokio::test]
 async fn pack_mcmeta_with_bad_pack_format() {
 	assert!(
 		PackMeta::new(
@@ -152,7 +188,7 @@ async fn pack_mcmeta_with_bad_pack_format() {
 				r#"
 					{
 						"pack": {
-							"pack_format": -0.5,
+							"pack_format": "69.5",
 							"description": "My bad pack"
 						}
 					}"#
