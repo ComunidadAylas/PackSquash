@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1777725985477,
+  "lastUpdate": 1778422676776,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "scnmed.g@gmail.com",
-            "name": "Chen",
-            "username": "ChenCMD"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "1bdfd6367694ff160c25a21d2d9792ac6ce0338c",
-          "message": "fix: ensure `.mcfunction` files named only with extension are not omitted (#366)",
-          "timestamp": "2025-07-13T21:50:17Z",
-          "tree_id": "be0279dfc6c3f066bc4fc61e27ac0cc191823b20",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/1bdfd6367694ff160c25a21d2d9792ac6ce0338c"
-        },
-        "date": 1752444857636,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9707961,
-            "range": "± 82462",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 113122954,
-            "range": "± 832427",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 753844034,
-            "range": "± 16501522",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 752444356,
-            "range": "± 2270074",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 576764001,
             "range": "± 2149139",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "5dbba583267a7bb81e1556373ca6ffaf6d086911",
+          "message": "chore: bump build environment to Debian Trixie (13)\n\nThis should fix `cargo deb` no longer working on CI due to the old glibc\nversion shipped by Debian Bookworm.",
+          "timestamp": "2026-05-10T15:57:33+02:00",
+          "tree_id": "fc042d938621f25c455688800b8ec1bb72d341a3",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/5dbba583267a7bb81e1556373ca6ffaf6d086911"
+        },
+        "date": 1778422675514,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 4907494,
+            "range": "± 277523",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 109699193,
+            "range": "± 1178105",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 729364540,
+            "range": "± 12609979",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 580470126,
+            "range": "± 2706233",
             "unit": "ns/iter"
           }
         ]
