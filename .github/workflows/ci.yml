@@ -102,7 +102,7 @@ jobs:
             host-target: x86_64-unknown-linux-gnu
             runner: blacksmith-4vcpu-ubuntu-2404
             # renovate: datasource=docker
-            container: debian:bookworm-slim@sha256:e899040a73d36e2b36fa33216943539d9957cba8172b858097c2cabcdb20a3e2
+            container: debian:trixie-slim@sha256:109e2c65005bf160609e4ba6acf7783752f8502ad218e298253428690b9eaa4b
 
           - target: x86_64-unknown-linux-musl
             host-target: x86_64-unknown-linux-musl
@@ -114,7 +114,7 @@ jobs:
             host-target: aarch64-unknown-linux-gnu
             runner: ubuntu-24.04-arm
             # renovate: datasource=docker
-            container: debian:bookworm-slim@sha256:e899040a73d36e2b36fa33216943539d9957cba8172b858097c2cabcdb20a3e2
+            container: debian:trixie-slim@sha256:109e2c65005bf160609e4ba6acf7783752f8502ad218e298253428690b9eaa4b
 
           - target: aarch64-unknown-linux-musl
             host-target: aarch64-unknown-linux-musl
