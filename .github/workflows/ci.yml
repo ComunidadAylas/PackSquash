@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - "*"
-    tags-ignore:
-      - "*"
+    tags:
+      - v*
     paths-ignore:
       - docs/wiki/**
   pull_request:
@@ -17,9 +17,6 @@ on:
   merge_group:
     types:
       - checks_requested
-  release:
-    types:
-      - published
 
 env:
   DEBIAN_FRONTEND: noninteractive
@@ -268,9 +265,9 @@ jobs:
             target/${{ matrix.target }}/release/packsquash.exe
             target/${{ matrix.target }}/debian/packsquash_*.deb
 
-      - name: 📤 Upload release assets
+      - name: 📤 Create draft release and upload release assets
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
-        if: github.event_name == 'release'
+        if: github.ref_type == 'tag'
         with:
           retries: 3
           script: |
@@ -363,6 +360,34 @@ jobs:
               ],
             ]);
 
+            // Get or create a draft release for the pushed tag. We use draft tags to
+            // allow the final release to be immutable, and provide maintainers with a way
+            // to finish up the release notes and testing before it goes live
+
+            let releaseId;
+            const tagName = context.ref.replace(/^refs\/tags\//, "");
+
+            const existingDraftRelease = (
+              await github.paginate(github.rest.repos.listReleases, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+              })
+            ).find((r) => r.draft && r.tag_name === tagName);
+
+            if (existingDraftRelease) {
+              releaseId = existingDraft.id;
+            } else {
+              const newRelease = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tagName,
+                draft: true,
+                generate_release_notes: true,
+              });
+              releaseId = newRelease.id;
+            }
+
             for (const [artifactLabel, wrapInZip, artifactPath] of artifacts) {
               if (!artifactPath) {
                 continue;
@@ -388,13 +413,7 @@ jobs:
               await github.rest.repos.uploadReleaseAsset({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                release_id: (
-                  await github.rest.repos.getReleaseByTag({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    tag: context.ref.replace(/^refs\/tags\//, ""),
-                  })
-                ).data.id,
+                release_id: releaseId,
                 // The name must be unique among assets within a release, and sets the file name of the asset
                 // when downloaded (the unique name requirement is why we wrap executables in ZIP files, as
                 // otherwise we'd have several assets named "packsquash", which is not possible)
