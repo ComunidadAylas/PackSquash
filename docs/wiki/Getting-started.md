@@ -140,10 +140,8 @@ environments with a recent enough kernel, such as:
 - Android.
 
 These binaries can be downloaded from the [releases
-page](https://github.com/ComunidadAylas/PackSquash/releases). Note that on
-Linux, you must explicitly give binaries permission to execute, which you can do
-with the `chmod +x` command. Other than that, they behave the same as those
-installed by the [APT packages](#apt-packages).
+page](https://github.com/ComunidadAylas/PackSquash/releases). Other than that,
+they behave the same as those installed by the [APT packages](#apt-packages).
 
 If you are interested in a package for a non-Debian-based distro and have the
 required knowledge and time, feel free to package it and contact us. We can
