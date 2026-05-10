@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1778422676776,
+  "lastUpdate": 1778425035495,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "committer": {
-            "email": "me@alegon.dev",
-            "name": "Alejandro González",
-            "username": "AlexTMjugador"
-          },
-          "distinct": true,
-          "id": "991c589fc4666a5ed15556eb3222963d6e6f7112",
-          "message": "docs(README): fix CI status badge",
-          "timestamp": "2025-07-14T00:01:12+02:00",
-          "tree_id": "eec46bc6f838cf06eb70be45603c68de2120f0eb",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/991c589fc4666a5ed15556eb3222963d6e6f7112"
-        },
-        "date": 1752445037107,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9715811,
-            "range": "± 309975",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 115464818,
-            "range": "± 1564668",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 773250197,
-            "range": "± 12997282",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 760418690,
-            "range": "± 3711845",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 580470126,
             "range": "± 2706233",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "49f397f9c0eea573256a49ac3f749b83e96b15ac",
+          "message": "ci: tag-based workflow for releases\n\nIt is better to create releases from tags than tags from releases, since\nthe latter should be immutable. Doing so also lets us better leverage\nGitHub features such as draft and immutable releases.",
+          "timestamp": "2026-05-10T16:40:18+02:00",
+          "tree_id": "6fb992634d4e4088c0d9ad35b23042d01bb042f6",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/49f397f9c0eea573256a49ac3f749b83e96b15ac"
+        },
+        "date": 1778425034185,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 4760020,
+            "range": "± 27527",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 108022502,
+            "range": "± 1185280",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 729181235,
+            "range": "± 16413062",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 577124271,
+            "range": "± 1626783",
             "unit": "ns/iter"
           }
         ]
