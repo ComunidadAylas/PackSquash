@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/static-debian11@sha256:1dbe426d60caed5d19597532a2d74c8056cd7b1674042b88f7328690b5ead8ed
+FROM gcr.io/distroless/static-debian13@sha256:6f3f2123de90d2e7998b8161a2838433ec32560a827d07bcab339dacbf0cf16f
 
 ARG TARGETARCH
 COPY --chmod=755 packsquash-${TARGETARCH} /usr/bin/packsquash

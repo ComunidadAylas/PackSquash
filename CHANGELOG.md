@@ -15,6 +15,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Third-party dependency updates.
   - Some dependency changes addressed minor public security advisories.
 
+#### Distribution
+
+- Updated Debian builder containers used in CI to Debian Trixie.
+  - This change may result in the dynamically linked PackSquash binaries
+    requiring glibc 2.41.
+
 ## [0.4.1] - 2026-01-01
 
 ### Added
