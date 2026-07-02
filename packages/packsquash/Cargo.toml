@@ -39,7 +39,7 @@ glsl-lang-pp = "0.8.1"
 hkdf = "0.13.0"
 imagequant = { version = "4.4.1", default-features = false }
 indexmap = { version = "2.14.0", features = ["serde"] }
-itertools = "0.14.0"
+itertools = "0.15.0"
 java-properties = { version = "2.0.0", optional = true }
 json_comments = "0.2.2"
 jsonpath_lib = "0.3.0"
@@ -63,7 +63,7 @@ spng = { version = "0.2.0-alpha.3", default-features = false, features = [
   "zlib-ng",
 ] }
 stacker = "0.1.24"
-symphonia = { version = "0.5.5", default-features = false, features = [
+symphonia = { version = "0.6.0", default-features = false, features = [
   "aac",
   "flac",
   "isomp4",
@@ -71,7 +71,7 @@ symphonia = { version = "0.5.5", default-features = false, features = [
   "pcm",
   "wav",
 ] }
-sysinfo = { version = "0.38.4", default-features = false, features = [
+sysinfo = { version = "0.39.0", default-features = false, features = [
   "system",
 ] }
 tempfile = "3.27.0"
