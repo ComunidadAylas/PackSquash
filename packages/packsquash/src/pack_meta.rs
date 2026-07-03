@@ -45,7 +45,7 @@ pub const PACK_FORMAT_DATA_PACK_VERSION_24W_21A: i32 = 45;
 /// - <https://minecraft.wiki/w/Data_Pack#pack.mcmeta>
 /// - Minecraft class `net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer`
 pub struct PackMeta {
-	pack_format_version: i32
+	pack_format_version: f64
 }
 
 /// Represents an error that may happen while parsing pack metadata files.
@@ -65,8 +65,8 @@ impl PackMeta {
 		vfs: &impl VirtualFileSystem,
 		root_path: impl AsRef<Path>
 	) -> Result<Self, PackMetaError> {
-		const PACK_FORMAT_VERSION_IS_NOT_INTEGER: &str =
-			"\"pack_format\" version is not a Java integer";
+		const PACK_FORMAT_VERSION_IS_NOT_NUMBER: &str =
+			"\"pack_format\" version is not an integer or integer.integer number";
 
 		let pack_format_version;
 
@@ -94,22 +94,13 @@ impl PackMeta {
 							)
 						)? {
 							Value::Number(pack_format_version_number) => {
-								// Minecraft always reads this field as a Java integer,
-								// so a conversion to an i32 should be successful
-								pack_format_version = i32::try_from(
-									pack_format_version_number.as_i64().ok_or(
-										PackMetaError::MalformedMeta(
-											PACK_FORMAT_VERSION_IS_NOT_INTEGER
-										)
-									)?
-								)
-								.map_err(|_| {
-									PackMetaError::MalformedMeta(PACK_FORMAT_VERSION_IS_NOT_INTEGER)
-								})?;
+								pack_format_version = pack_format_version_number.as_f64().ok_or(
+									PackMetaError::MalformedMeta(PACK_FORMAT_VERSION_IS_NOT_NUMBER)
+								)?;
 							}
 							_ => {
 								return Err(PackMetaError::MalformedMeta(
-									PACK_FORMAT_VERSION_IS_NOT_INTEGER
+									PACK_FORMAT_VERSION_IS_NOT_NUMBER
 								));
 							}
 						};
@@ -166,14 +157,14 @@ impl PackMeta {
 	pub fn target_minecraft_versions_quirks(&self) -> EnumSet<MinecraftQuirk> {
 		let mut quirks = EnumSet::empty();
 
-		if self.pack_format_version < PACK_FORMAT_VERSION_1_13 {
+		if self.pack_format_version < f64::from(PACK_FORMAT_VERSION_1_13) {
 			quirks |= MinecraftQuirk::GrayscaleImagesGammaMiscorrection;
 			quirks |= MinecraftQuirk::RestrictiveBannerLayerTextureFormatCheck;
 			quirks |= MinecraftQuirk::PngObfuscationIncompatibility;
 		}
 
-		if self.pack_format_version < PACK_FORMAT_VERSION_1_15
-			|| self.pack_format_version >= PACK_FORMAT_RESOURCE_PACK_VERSION_24W_13A
+		if self.pack_format_version < f64::from(PACK_FORMAT_VERSION_1_15)
+			|| self.pack_format_version >= f64::from(PACK_FORMAT_RESOURCE_PACK_VERSION_24W_13A)
 		{
 			// Minecraft 1.14 is compatible with this feature, but we can't tell
 			// it apart from 1.13 due to it sharing the same version number, so
@@ -182,11 +173,11 @@ impl PackMeta {
 			quirks |= MinecraftQuirk::OggObfuscationIncompatibility;
 		}
 
-		if self.pack_format_version < PACK_FORMAT_VERSION_1_17 {
+		if self.pack_format_version < f64::from(PACK_FORMAT_VERSION_1_17) {
 			quirks |= MinecraftQuirk::Java8ZipParsing;
 		}
 
-		if self.pack_format_version < PACK_FORMAT_RESOURCE_PACK_VERSION_24W_40A {
+		if self.pack_format_version < f64::from(PACK_FORMAT_RESOURCE_PACK_VERSION_24W_40A) {
 			// 24w39a is the first snapshot to have this fixed, but we can't tell it
 			// apart from 24w38a due to it sharing the same pack format version number,
 			// so err on the safe side
@@ -209,26 +200,26 @@ impl PackMeta {
 	pub fn target_minecraft_version_asset_type_mask(&self) -> EnumSet<PackFileAssetType> {
 		let mut asset_type_mask = EnumSet::all();
 
-		if self.pack_format_version >= PACK_FORMAT_VERSION_1_13 {
+		if self.pack_format_version >= f64::from(PACK_FORMAT_VERSION_1_13) {
 			asset_type_mask -= PackFileAssetType::LegacyLanguageFile;
 			asset_type_mask -= PackFileAssetType::TrueTypeFont;
 		}
 
-		if self.pack_format_version >= PACK_FORMAT_VERSION_1_17 {
+		if self.pack_format_version >= f64::from(PACK_FORMAT_VERSION_1_17) {
 			asset_type_mask -= PackFileAssetType::LegacyTextCredits;
 		} else {
 			asset_type_mask -= PackFileAssetType::TranslationUnitSegment;
 		}
 
-		if self.pack_format_version < PACK_FORMAT_RESOURCE_PACK_VERSION_1_18 {
+		if self.pack_format_version < f64::from(PACK_FORMAT_RESOURCE_PACK_VERSION_1_18) {
 			asset_type_mask -= PackFileAssetType::ClosingCreditsText;
 		}
 
-		if self.pack_format_version >= PACK_FORMAT_RESOURCE_PACK_VERSION_23W_17A {
+		if self.pack_format_version >= f64::from(PACK_FORMAT_RESOURCE_PACK_VERSION_23W_17A) {
 			asset_type_mask -= PackFileAssetType::LegacyUnicodeFontCharacterSizes;
 		}
 
-		if self.pack_format_version >= PACK_FORMAT_DATA_PACK_VERSION_24W_21A {
+		if self.pack_format_version >= f64::from(PACK_FORMAT_DATA_PACK_VERSION_24W_21A) {
 			asset_type_mask -= PackFileAssetType::LegacyNbtStructure;
 			asset_type_mask -= PackFileAssetType::LegacyCommandFunction;
 		}
