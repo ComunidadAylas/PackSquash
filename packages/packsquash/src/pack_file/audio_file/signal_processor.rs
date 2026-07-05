@@ -7,15 +7,14 @@ use dasp_frame::Frame;
 use dasp_interpolate::sinc::Sinc;
 use dasp_signal::Signal;
 use rubato::{FftFixedIn, Resampler};
-use std::io::{ErrorKind, Read};
+use std::io::Read;
 use std::num::{NonZeroU8, NonZeroU32};
-use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{CODEC_TYPE_NULL, Decoder, DecoderOptions};
-use symphonia::core::formats::{FormatOptions, FormatReader};
+use symphonia::core::codecs::audio::{AudioDecoder, AudioDecoderOptions};
+use symphonia::core::common::Limit;
+use symphonia::core::formats::probe::Hint;
+use symphonia::core::formats::{FormatOptions, FormatReader, TrackType};
 use symphonia::core::io::{MediaSourceStream, MediaSourceStreamOptions, ReadOnlySource};
-use symphonia::core::meta::{Limit, MetadataOptions};
-use symphonia::core::probe::Hint;
-use symphonia::core::units::Duration;
+use symphonia::core::meta::MetadataOptions;
 use vorbis_rs::{VorbisDecoder, VorbisError, VorbisLibraryErrorKind};
 
 /// The count of frames (i.e. an audio sample for each channel) that will be accumulated
@@ -428,7 +427,7 @@ impl<R: Read> SignalDecoder<R> {
 /// signal from it.
 struct SymphoniaDecoder {
 	format_reader: Box<dyn FormatReader>,
-	decoder: Box<dyn Decoder>,
+	decoder: Box<dyn AudioDecoder>,
 	main_track_id: u32,
 	channels: NonZeroU8,
 	sampling_frequency: NonZeroU32
@@ -438,35 +437,35 @@ impl SymphoniaDecoder {
 	/// Constructs a new [SymphoniaDecoder] from the specified data source.
 	fn new(source: impl Read + Send + Sync + 'static) -> Result<Self, OptimizationError> {
 		// Probe the audio container format
-		let format_reader = symphonia::default::get_probe()
-			.format(
-				&Hint::new(),
-				MediaSourceStream::new(
-					Box::new(ReadOnlySource::new(source)),
-					MediaSourceStreamOptions::default()
-				),
-				&FormatOptions::default(),
-				&MetadataOptions {
-					limit_metadata_bytes: Limit::Maximum(0),
-					limit_visual_bytes: Limit::Maximum(0)
-				}
-			)?
-			.format;
+		let format_reader = symphonia::default::get_probe().probe(
+			&Hint::new(),
+			MediaSourceStream::new(
+				Box::new(ReadOnlySource::new(source)),
+				MediaSourceStreamOptions::default()
+			),
+			FormatOptions::default(),
+			MetadataOptions::default()
+				.limit_tag_bytes(Limit::Maximum(0))
+				.limit_visual_bytes(Limit::Maximum(0))
+		)?;
 
 		let main_track = format_reader
-			.tracks()
-			.iter()
-			// Find the first track with a codec Symphonia can decode
-			.find(|track| track.codec_params.codec != CODEC_TYPE_NULL)
+			.default_track(TrackType::Audio)
 			.ok_or(OptimizationError::NoAudioTrack)?;
 		let main_track_id = main_track.id;
+		let codec_params = main_track
+			.codec_params
+			.as_ref()
+			.ok_or(OptimizationError::MissingCodecParameters)?
+			.audio()
+			.unwrap();
 
 		let decoder = symphonia::default::get_codecs()
-			.make(&main_track.codec_params, &DecoderOptions::default())?;
+			.make_audio_decoder(codec_params, &AudioDecoderOptions::default())?;
 
-		let channels = match main_track
-			.codec_params
+		let channels = match codec_params
 			.channels
+			.as_ref()
 			.map(|channels| channels.count())
 		{
 			None | Some(0) => return Err(OptimizationError::UnsupportedChannelCount),
@@ -474,8 +473,7 @@ impl SymphoniaDecoder {
 		};
 
 		let sampling_frequency = NonZeroU32::new(
-			main_track
-				.codec_params
+			codec_params
 				.sample_rate
 				.ok_or(OptimizationError::UnknownSamplingFrequency)?
 		)
@@ -618,7 +616,7 @@ where
 struct SymphoniaSignal<'error, const CHANNELS: usize> {
 	symphonia_decoder: SymphoniaDecoder,
 	last_error: &'error mut Option<symphonia::core::errors::Error>,
-	current_sample_buffer: Option<SampleBuffer<f32>>,
+	current_sample_buffer: Vec<f32>,
 	current_sample_buffer_position: usize,
 	end_of_stream: bool
 }
@@ -631,7 +629,7 @@ impl<'error, const CHANNELS: usize> SymphoniaSignal<'error, CHANNELS> {
 		Self {
 			symphonia_decoder,
 			last_error,
-			current_sample_buffer: None,
+			current_sample_buffer: vec![],
 			current_sample_buffer_position: 0,
 			end_of_stream: false
 		}
@@ -647,10 +645,10 @@ where
 	fn next(&mut self) -> Self::Frame {
 		loop {
 			match &self.current_sample_buffer {
-				Some(sample_buffer) if self.current_sample_buffer_position < sample_buffer.len() => {
+				sample_buffer if self.current_sample_buffer_position < sample_buffer.len() => {
 					// We read an audio packet before and have pending frames to yield
 
-					let frame = sample_buffer.samples()[self.current_sample_buffer_position
+					let frame = sample_buffer[self.current_sample_buffer_position
 						..self.current_sample_buffer_position + CHANNELS]
 						.try_into()
 						.unwrap();
@@ -659,23 +657,20 @@ where
 
 					return frame;
 				}
-				None | Some(_) => {
+				_ => {
 					// We have never read an audio packet, or we have consumed all of its samples
 
 					let mut current_packet = None;
 					while let (None, false) = (&current_packet, self.end_of_stream) {
 						match self.symphonia_decoder.format_reader.next_packet() {
-							Ok(packet) => {
-								// Ignore packets from secondary audio tracks
-								if packet.track_id() == self.symphonia_decoder.main_track_id {
-									current_packet = Some(packet);
-								}
-							}
-							Err(symphonia::core::errors::Error::IoError(err))
-								if err.kind() == ErrorKind::UnexpectedEof =>
+							Ok(Some(packet))
+								if packet.track_id == self.symphonia_decoder.main_track_id =>
 							{
-								// Symphonia signals normal, expected EOF/EOS conditions as
-								// errors
+								current_packet = Some(packet);
+							}
+							Ok(Some(_)) => {} // Ignore packets from secondary audio tracks
+							Ok(None) => {
+								// Expected EOF/EOS
 								self.end_of_stream = true;
 							}
 							Err(symphonia::core::errors::Error::ResetRequired) => {
@@ -696,20 +691,11 @@ where
 					if let Some(current_packet) = current_packet {
 						match self.symphonia_decoder.decoder.decode(&current_packet) {
 							Ok(buffer) => {
-								let sample_buffer =
-									self.current_sample_buffer.get_or_insert_with(|| {
-										SampleBuffer::<f32>::new(
-											buffer.capacity() as Duration,
-											*buffer.spec()
-										)
-									});
+								self.current_sample_buffer.clear();
 
-								// The channel order matches the Channels iterator order. Symphonia
-								// is supposed to abstract us away from whatever order the codec is
-								// actually using, which may vary in surround signals. See:
-								// https://github.com/pdeljanov/Symphonia/commit/4e40f9dbccae5200939fdfc1f3dab750bd92d7a8
-								// For stereo signals, this matches the conventional left-right layout
-								sample_buffer.copy_interleaved_ref(buffer);
+								// The channel order used here matches the expected left-right layout
+								// for stereo signals. For mono signals, channel order is not relevant
+								buffer.copy_to_vec_interleaved(&mut self.current_sample_buffer);
 								self.current_sample_buffer_position = 0;
 
 								// Yield the first frame from the replenished sample buffer

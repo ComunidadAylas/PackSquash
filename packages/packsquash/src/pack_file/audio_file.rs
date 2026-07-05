@@ -84,6 +84,8 @@ pub enum OptimizationError {
 		"Could not find a decodable audio track. Is this file in a supported format, and its extension correct?"
 	)]
 	NoAudioTrack,
+	#[error("Could not retrieve the codec parameters for the audio track")]
+	MissingCodecParameters,
 	#[error("Unknown or invalid channel count. Minecraft only supports mono and stereo sounds")]
 	UnsupportedChannelCount,
 	#[error("Unknown sampling frequency. Is this file corrupt?")]
