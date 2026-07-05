@@ -1,56 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1778425035495,
+  "lastUpdate": 1783259130677,
   "repoUrl": "https://github.com/ComunidadAylas/PackSquash",
   "entries": {
     "PackSquash library quick benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "email": "scnmed.g@gmail.com",
-            "name": "Chen",
-            "username": "ChenCMD"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "c3578dc3e8f3f12cab46bc6e2a844d6fd95ef26f",
-          "message": "fix: ensure `.mcfunction` files named only with extension are not omitted (#366)",
-          "timestamp": "2025-07-13T21:50:17Z",
-          "tree_id": "8375b58f3ff2c9e63b6aef8e735124ed8ef47085",
-          "url": "https://github.com/ComunidadAylas/PackSquash/commit/c3578dc3e8f3f12cab46bc6e2a844d6fd95ef26f"
-        },
-        "date": 1752445189249,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "tiny_benches_wall_time/empty_pack",
-            "value": 9562336,
-            "range": "± 59173",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aylas_khron_micro_pack",
-            "value": 112407790,
-            "range": "± 1269167",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
-            "value": 760864514,
-            "range": "± 20002305",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
-            "value": 753123287,
-            "range": "± 2651554",
-            "unit": "ns/iter"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -2395,6 +2347,54 @@ window.BENCHMARK_DATA = {
             "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
             "value": 577124271,
             "range": "± 1626783",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "committer": {
+            "email": "me@alegon.dev",
+            "name": "Alejandro González",
+            "username": "AlexTMjugador"
+          },
+          "distinct": true,
+          "id": "fed576e000cc736e03cfe00b1aa02ba8214d0ad2",
+          "message": "fix(pack_file/audio_file): make it build after breaking `symphonia` Renovate bump\n\nThis should not have passed CI checks at all. The underlying cause of\nthe CI failures is suspected to have been fixed in commit\n26e332b6657c6d9f2da37a8770248149d1391ee4.",
+          "timestamp": "2026-07-05T15:24:05+02:00",
+          "tree_id": "7d12a402d16e7e3b94cc8332cdb7a2d659d55ef3",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/fed576e000cc736e03cfe00b1aa02ba8214d0ad2"
+        },
+        "date": 1783259130136,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "tiny_benches_wall_time/empty_pack",
+            "value": 3624862,
+            "range": "± 127915",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aylas_khron_micro_pack",
+            "value": 91685894,
+            "range": "± 792793",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/jilchu_chronos_micro_pack",
+            "value": 483450299,
+            "range": "± 17051371",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "small_benches_wall_time/aiamded_breadstick_micro_pack",
+            "value": 439333910,
+            "range": "± 1243398",
             "unit": "ns/iter"
           }
         ]
