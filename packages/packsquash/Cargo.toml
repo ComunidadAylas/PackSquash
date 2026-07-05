@@ -17,17 +17,17 @@ harness = false
 name = "benches"
 
 [dependencies]
-aes = "0.9.0"
+aes = "0.9.1"
 ahash = "0.8.12"
 aho-corasick = "1.1.4"
-bytes = "1.11.1"
+bytes = "1.12.0"
 crc32fast = "1.5.0"
 dasp_frame = "0.11.0"
 dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
 dasp_ring_buffer = "0.11.0"
 dasp_sample = "0.11.0"
 dasp_signal = { version = "0.11.0", default-features = false }
-enumset = { version = "1.1.10", features = ["serde"] }
+enumset = { version = "1.1.13", features = ["serde"] }
 fastnbt = "2.6.1"
 flate2 = { version = "1.1.9", features = ["zlib-ng-compat"] }
 fpe = "0.6.1"
@@ -43,17 +43,17 @@ itertools = "0.15.0"
 java-properties = { version = "2.0.0", optional = true }
 json_comments = "0.2.2"
 jsonpath_lib = "0.3.0"
-memchr = "2.8.0"
-obfstr = "0.4.4"
+memchr = "2.8.2"
+obfstr = "0.4.5"
 optivorbis = "0.3.0"
 oxipng = { version = "10.1.1", default-features = false, features = ["zopfli"] }
 patricia_tree = "0.10.1"
-rand_xoshiro = "0.8.0"
-regex = "1.12.3"
+rand_xoshiro = "0.8.1"
+regex = "1.12.4"
 rgb = "0.8.53"
 rubato = "0.16.2"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = { version = "1.0.149", features = [
+serde_json = { version = "1.0.150", features = [
   "preserve_order",
   "unbounded_depth",
 ] }
@@ -72,13 +72,13 @@ symphonia = { version = "0.6.0", default-features = false, features = [
   "wav",
   "opt-simd"
 ] }
-sysinfo = { version = "0.39.0", default-features = false, features = [
+sysinfo = { version = "0.39.5", default-features = false, features = [
   "system",
 ] }
 tempfile = "3.27.0"
 thiserror = "2.0.18"
 tinyvec = "1.11.0"
-tokio = { version = "1.52.1", default-features = false, features = [
+tokio = { version = "1.52.3", default-features = false, features = [
   "fs",
   "io-util",
   "macros",
@@ -92,7 +92,7 @@ tokio-util = { version = "0.7.18", default-features = false, features = [
   "io",
   "io-util",
 ] }
-uuid = "1.23.1"
+uuid = "1.23.4"
 vorbis_rs = { version = "0.5.5", default-features = false }
 walkdir = "2.5.0"
 zopfli = { version = "0.8.3", default-features = false, features = [
@@ -104,7 +104,7 @@ zopfli = { version = "0.8.3", default-features = false, features = [
 criterion = { version = "=0.5.1", features = ["html_reports"] }
 futures = { version = "0.3.32", default-features = false, features = ["std"] }
 pretty_assertions = "1.4.1"
-tar = { version = "0.4.45", default-features = false }
+tar = { version = "0.4.46", default-features = false }
 tokio-test = "0.4.5"
 xz2 = "0.1.7"
 

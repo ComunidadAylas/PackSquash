@@ -44,13 +44,13 @@ name = "packsquash"
 
 [dependencies]
 anstyle = "1.0.14"
-env_logger = { version = "0.11.10", default-features = false, features = [
+env_logger = { version = "0.11.11", default-features = false, features = [
   "color",
 ] }
 getopts = "0.2.24"
-log = "0.4.29"
+log = "0.4.33"
 packsquash = { path = "../packsquash", version = "0.4.1" }
-tokio = { version = "1.52.1", default-features = false, features = ["time"] }
+tokio = { version = "1.52.3", default-features = false, features = ["time"] }
 toml = { version = "1.1.2", default-features = false, features = [
   "parse",
   "serde",
@@ -67,7 +67,7 @@ winresource = "0.1.31"
 # We are interested in overriding malloc because we depend on C libraries, and doing
 # so buys us a safety net against mismatching memory managed by different allocators,
 # in addition to keep binary sizes down
-mimalloc = { version = "0.1.50", default-features = false, features = [
+mimalloc = { version = "0.1.52", default-features = false, features = [
   "override",
 ] }
 
