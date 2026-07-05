@@ -23,7 +23,7 @@ use crate::pack_file::shader_file::ShaderFile;
 use crate::squash_zip::FileListingCircumstances;
 use crate::{
 	RelativePath,
-	config::{CustomFileOptions, FileOptions, compile_pack_file_glob_pattern}
+	config::{CustomFileOptions, FileOptions, PassthroughFileOptions, compile_pack_file_glob_pattern}
 };
 
 /// Represents a relevant pack file asset type, stored in a pack file. A [`PackFile`] can
@@ -843,6 +843,13 @@ impl PackFileAssetTypeMatches {
 						optimization_settings
 					)
 				}
+				_ if let Some(FileOptions::PassthroughFileOptions(PassthroughFileOptions {
+					passthrough: true,
+					..
+				})) = file_options =>
+				{
+					return_pack_file_to_process_data!(PassthroughFile, true)
+				}
 				PackFileAssetType::TrueTypeOrOpenTypeFont
 				| PackFileAssetType::TrueTypeFont
 				| PackFileAssetType::ZippedUnifontHex
@@ -852,7 +859,7 @@ impl PackFileAssetTypeMatches {
 				| PackFileAssetType::LegacyTextCredits
 					if file_options.is_none() =>
 				{
-					return_pack_file_to_process_data!(PassthroughFile, ())
+					return_pack_file_to_process_data!(PassthroughFile, false)
 				}
 				PackFileAssetType::Custom
 					if let Some(FileOptions::CustomFileOptions(CustomFileOptions {
@@ -860,7 +867,7 @@ impl PackFileAssetTypeMatches {
 						..
 					})) = file_options =>
 				{
-					return_pack_file_to_process_data!(PassthroughFile, ())
+					return_pack_file_to_process_data!(PassthroughFile, false)
 				}
 				_ => {
 					// The file options do not match the asset type, but maybe we have more asset types to try
@@ -950,9 +957,18 @@ fn pack_file_to_process_data(
 /// Any validity error is discarded and turned into a panic, as modification of hardcoded data is not
 /// to be handled as an error.
 ///
+/// Patterns rooted at the `assets/` or `data/` namespaces are automatically extended to also match
+/// the same path nested inside any overlay directory declared in `pack.mcmeta`, so that files
+/// targeting a specific Minecraft version under an overlay are classified by the same rules as the
+/// base pack.
+///
 /// Please note that, even though this function requires a static string slice in an effort to prevent
 /// accidental misuse, it is possible to get string slices that live indefinitely by leaking a heap
 /// allocation.
 fn compile_hardcoded_pack_file_glob_pattern(glob_pattern: &'static str) -> Glob {
+	if glob_pattern.starts_with("assets/") || glob_pattern.starts_with("data/") {
+		let with_overlay_prefix = format!("**/{glob_pattern}");
+		return compile_pack_file_glob_pattern(&with_overlay_prefix).unwrap();
+	}
 	compile_pack_file_glob_pattern(glob_pattern).unwrap()
 }

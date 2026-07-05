@@ -71,6 +71,8 @@
     - [`nbt_compression_iterations`](#nbt_compression_iterations)
   - [Custom files](#custom-files)
     - [`force_include`](#force_include)
+  - [Passthrough files](#passthrough-files)
+    - [`passthrough`](#passthrough)
 - [Examples](#examples)
   - [Basic options file](#basic-options-file)
   - [Basic options file but tuned for extreme compression](#basic-options-file-but-tuned-for-extreme-compression)
@@ -1681,6 +1683,45 @@ Example:
 
 ```toml
 force_include = true
+```
+
+### Passthrough files
+
+Any pack file matched by a glob pattern can be marked as **passthrough**: its
+bytes are copied into the generated pack as-is, with no optimizations,
+validation, or transformations applied. This works for files of any recognized
+asset type — textures, shaders, JSON, audio, NBT, and so on.
+
+Use this when you need a specific file to ship untouched: for example, a
+shader that PackSquash's transformer would otherwise minify, or an asset whose
+exact byte sequence carries semantic meaning.
+
+> [!NOTE]
+> Unlike [`force_include`](#force_include), which only applies to files of an
+> unknown type, passthrough overrides processing for files that PackSquash
+> *does* know how to optimize.
+
+#### `passthrough`
+
+**Type**: [Boolean](https://toml.io/en/v1.0.0#boolean)
+
+**Default value**: `true`
+
+If `true`, every file that the enclosing glob pattern matches is copied to the
+generated pack as-is. Set to `false` to disable passthrough for that entry and
+restore the default optimization behavior.
+
+Example:
+
+```toml
+["assets/minecraft/shaders/core/rendertype_entity_translucent.fsh"]
+passthrough = true
+
+["assets/minecraft/shaders/post/*"]
+passthrough = true
+
+["assets/lodestone/textures/item/test.png"]
+passthrough = true
 ```
 
 ## Examples

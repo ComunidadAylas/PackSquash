@@ -69,13 +69,25 @@ impl<T: AsyncRead + Send + Unpin + 'static> PackFile for PassthroughFile<T> {
 }
 
 impl<T: AsyncRead + Send + Unpin + 'static> PackFileConstructor<T> for PassthroughFile<T> {
-	type OptimizationSettings = ();
+	/// If `true`, the user explicitly asked to passthrough this file via
+	/// [`PassthroughFileOptions`]. The file is then copied for any asset type,
+	/// not only the ones for which passthrough is the natural default.
+	type OptimizationSettings = bool;
 
 	fn new(
 		file_read_producer: impl FnOnce() -> Option<AsyncReadAndSizeHint<T>>,
 		asset_type: PackFileAssetType,
-		_: Self::OptimizationSettings
+		is_explicit_passthrough: Self::OptimizationSettings
 	) -> Option<Self> {
+		if is_explicit_passthrough {
+			return file_read_producer().map(|(read, _)| Self {
+				read,
+				optimization_strategy_message: "Copied (passthrough)",
+				is_compressed: false,
+				is_force_included: true
+			});
+		}
+
 		match asset_type {
 			PackFileAssetType::TrueTypeOrOpenTypeFont | PackFileAssetType::TrueTypeFont => {
 				file_read_producer().map(|(read, _)| Self {

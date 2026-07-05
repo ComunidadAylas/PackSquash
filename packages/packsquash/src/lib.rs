@@ -35,7 +35,8 @@ use squash_zip::{SquashZip, SquashZipError};
 use crate::config::PropertiesFileOptions;
 use crate::config::{
 	AudioFileOptions, CommandFunctionFileOptions, CompressedCompoundNbtTagFileOptions, FileOptions,
-	JsonFileOptions, LegacyLanguageFileOptions, PngFileOptions, ShaderFileOptions, SquashOptions
+	JsonFileOptions, LegacyLanguageFileOptions, PassthroughFileOptions, PngFileOptions,
+	ShaderFileOptions, SquashOptions
 };
 use crate::pack_file::PackFileProcessData;
 use crate::pack_file::asset_type::{
@@ -425,12 +426,30 @@ impl PackSquasher {
 
 					// Try to match configuration-provided file settings and process the pack file
 					// with those. The first match that contains settings for this pack file type
-					// "wins"
-					for i in options_holder
+					// "wins" — except passthrough, which is intent-explicit and must override any
+					// other matching glob regardless of declaration order, so that authoring a
+					// passthrough rule isn't silently shadowed by a more general typed rule.
+					let matched_indices = options_holder
 						.file_options_globs
-						.matches(&*pack_file_data.relative_path)
-					{
+						.matches(&*pack_file_data.relative_path);
+
+					if let Some(&i) = matched_indices.iter().find(|&&i| {
+						matches!(
+							options_holder.options.file_options[i],
+							FileOptions::PassthroughFileOptions(PassthroughFileOptions {
+								passthrough: true,
+								..
+							})
+						)
+					}) {
 						let file_options = options_holder.options.file_options[i];
+						if try_process_with_file_options!(Some(file_options)) {
+							return;
+						}
+					}
+
+					for i in &matched_indices {
+						let file_options = options_holder.options.file_options[*i];
 
 						if try_process_with_file_options!(Some(file_options)) {
 							return;

@@ -574,6 +574,10 @@ pub enum FileOptions {
 	/// Options that influence how compressed compound NBT tag files are converted to a more
 	/// distribution-friendly representation.
 	CompressedCompoundNbtTagFileOptions(CompressedCompoundNbtTagFileOptions),
+	/// Options that mark a file as passthrough: PackSquash will copy the file to the
+	/// generated pack as-is, without applying any optimizations or validation, regardless
+	/// of its detected asset type.
+	PassthroughFileOptions(PassthroughFileOptions),
 	/// Options that influence how custom files that the user explicitly wants to include in the
 	/// pack are processed.
 	// For better style, keep this variant last
@@ -1284,6 +1288,32 @@ pub struct CustomFileOptions {
 	/// without any specific optimizations. A `false` value explicitly asks for
 	/// the default behavior of skipping the file.
 	pub force_include: bool
+}
+
+/// Parameters that mark a pack file for passthrough copying, bypassing all
+/// optimizations and validations that PackSquash would otherwise perform on
+/// it.
+///
+/// Unlike [`CustomFileOptions`], this works for files of any recognized asset
+/// type (textures, shaders, JSON, audio, etc.). Use this when a specific file
+/// must ship in the generated pack untouched — for example, a shader that
+/// PackSquash's transformer would otherwise alter, or an asset whose exact
+/// bytes carry semantic meaning.
+#[derive(Deserialize, Clone, Copy)]
+#[serde(deny_unknown_fields)]
+#[non_exhaustive]
+pub struct PassthroughFileOptions {
+	/// If `true`, files matching this entry are copied to the generated pack
+	/// as-is. A `false` value disables passthrough for this entry, restoring
+	/// the default optimization behavior.
+	///
+	/// **Default value**: `true`
+	#[serde(default = "default_passthrough")]
+	pub passthrough: bool
+}
+
+fn default_passthrough() -> bool {
+	true
 }
 
 /// Compiles the specified glob pattern to a matcher that is ready to consume
