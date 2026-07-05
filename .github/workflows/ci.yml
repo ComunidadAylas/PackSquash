@@ -30,9 +30,6 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 15
 
-    # Exclude in-repo PRs from running this job
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
-
     steps:
       - name: 📥 Checkout source
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -149,9 +146,6 @@ jobs:
       # https://doc.rust-lang.org/cargo/reference/unstable.html#build-std-features
       # https://github.com/rust-lang/rust/blob/4c8bb79d9f565115637cc6da739f8389e79f3a29/library/std/Cargo.toml#L54-L79
       OPTIMIZED_RELEASE_BUILD_FLAGS: -Z build-std -Z build-std-features=panic-unwind
-
-    # Exclude in-repo PRs from running this job
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork
 
     steps:
       - name: 🩹 Work around https://github.com/actions/runner/issues/801
