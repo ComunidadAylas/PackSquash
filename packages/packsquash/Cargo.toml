@@ -70,6 +70,7 @@ symphonia = { version = "0.6.0", default-features = false, features = [
   "mp3",
   "pcm",
   "wav",
+  "opt-simd"
 ] }
 sysinfo = { version = "0.39.0", default-features = false, features = [
   "system",
