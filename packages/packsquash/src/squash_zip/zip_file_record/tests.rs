@@ -644,8 +644,8 @@ async fn end_of_central_directory_location_with_partial_reads_works() {
 
 	let mock_file = {
 		let mut mock_file_builder = tokio_test::io::Builder::new();
-		for byte in TINY_PACK_ZIP.chunks_exact(1) {
-			mock_file_builder.read(byte); // Yield ZIP file bytes one at a time
+		for byte in TINY_PACK_ZIP {
+			mock_file_builder.read(&[*byte]); // Yield ZIP file bytes one at a time
 		}
 
 		ScriptedSeekMock {
