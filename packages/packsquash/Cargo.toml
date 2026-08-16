@@ -17,23 +17,23 @@ harness = false
 name = "benches"
 
 [dependencies]
-aes = "0.9.1"
+aes = "0.9.2"
 ahash = "0.8.12"
-aho-corasick = "1.1.4"
+aho-corasick = "1.1.5"
 arcstr = { version = "1.2.0", features = ["serde"] }
-bytes = "1.12.0"
+bytes = "1.12.1"
 crc32fast = "1.5.0"
 dasp_frame = "0.11.0"
 dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
 dasp_ring_buffer = "0.11.0"
 dasp_sample = "0.11.0"
 dasp_signal = { version = "0.11.0", default-features = false }
-enumset = { version = "1.1.13", features = ["serde"] }
-fastnbt = "2.6.1"
+enumset = { version = "1.1.14", features = ["serde"] }
+fastnbt = "2.6.3"
 flate2 = { version = "1.1.9", features = ["zlib-ng-compat"] }
 fpe = "0.6.1"
-futures = { version = "0.3.32", default-features = false }
-globset = { version = "0.4.18", default-features = false }
+futures = { version = "0.3.34", default-features = false }
+globset = { version = "0.4.20", default-features = false }
 glsl-lang = { version = "0.8.1", features = ["lexer-full"] }
 glsl-lang-lexer = "0.8.1"
 glsl-lang-pp = "0.8.1"
@@ -44,17 +44,17 @@ itertools = "0.15.0"
 java-properties = { version = "2.0.0", optional = true }
 json_comments = "0.2.2"
 jsonpath_lib = "0.3.0"
-memchr = "2.8.2"
-obfstr = "0.4.5"
-optivorbis = "0.3.0"
-oxipng = { version = "10.1.1", default-features = false, features = ["zopfli"] }
+memchr = "2.8.3"
+obfstr = "0.4.6"
+optivorbis = "0.3.2"
+oxipng = { version = "10.2.0", default-features = false, features = ["zopfli"] }
 patricia_tree = "0.10.1"
 rand_xoshiro = "0.8.1"
-regex = "1.12.4"
+regex = "1.13.1"
 rgb = "0.8.53"
 rubato = "0.16.2"
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = { version = "1.0.150", features = [
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.151", features = [
   "preserve_order",
   "unbounded_depth",
 ] }
@@ -63,9 +63,9 @@ sha2 = "0.11.0"
 spng = { version = "0.2.0-alpha.3", default-features = false, features = [
   "zlib-ng",
 ] }
-stacker = "0.1.24"
+stacker = "0.1.25"
 strum = { version = "0.28.0", features = ["derive"] }
-symphonia = { version = "0.6.0", default-features = false, features = [
+symphonia = { version = "0.6.1", default-features = false, features = [
   "aac",
   "flac",
   "isomp4",
@@ -74,13 +74,13 @@ symphonia = { version = "0.6.0", default-features = false, features = [
   "wav",
   "opt-simd"
 ] }
-sysinfo = { version = "0.39.5", default-features = false, features = [
+sysinfo = { version = "0.39.6", default-features = false, features = [
   "system",
 ] }
 tempfile = "3.27.0"
-thiserror = "2.0.18"
-tinyvec = "1.11.0"
-tokio = { version = "1.52.3", default-features = false, features = [
+thiserror = "2.0.20"
+tinyvec = "1.12.0"
+tokio = { version = "1.53.1", default-features = false, features = [
   "fs",
   "io-util",
   "macros",
@@ -88,14 +88,14 @@ tokio = { version = "1.52.3", default-features = false, features = [
   "rt-multi-thread",
   "sync",
 ] }
-tokio-stream = { version = "0.1.18", default-features = false }
-tokio-util = { version = "0.7.18", default-features = false, features = [
+tokio-stream = { version = "0.1.19", default-features = false }
+tokio-util = { version = "0.7.19", default-features = false, features = [
   "codec",
   "io",
   "io-util",
 ] }
-uuid = "1.23.4"
-vorbis_rs = { version = "0.5.5", default-features = false }
+uuid = "1.24.1"
+vorbis_rs = { version = "0.5.6", default-features = false }
 walkdir = "2.5.0"
 zopfli = { version = "0.8.3", default-features = false, features = [
   "gzip",
@@ -104,7 +104,7 @@ zopfli = { version = "0.8.3", default-features = false, features = [
 
 [dev-dependencies]
 criterion = { version = "=0.5.1", features = ["html_reports"] }
-futures = { version = "0.3.32", default-features = false, features = ["std"] }
+futures = { version = "0.3.34", default-features = false, features = ["std"] }
 pretty_assertions = "1.4.1"
 tar = { version = "0.4.46", default-features = false }
 tokio-test = "0.4.5"
