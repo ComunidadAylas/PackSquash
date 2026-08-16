@@ -1,0 +1,115 @@
+// Downloaded from https://modrinth.com/resourcepack/bare-bones/version/1.4.12.
+// Reproduced in this repository after explicitly asking for permission from
+// its author, RobotPants, via Discord on 2026-08-16 (UTC+2)
+{
+	"pack": {
+		"pack_format": 34,
+		"supported_formats": [
+			34,
+			75
+		],
+		"min_format": [
+			34,
+			0
+		],
+		"max_format": [
+			75,
+			0
+		],
+		"description": "Just like the trailers!"
+	},
+	"overlays": {
+		"entries": [
+			{
+				"directory": "overlay_1_21_2",
+				"formats": [
+					42,
+					75
+				],
+				"min_format": [
+					42,
+					0
+				],
+				"max_format": [
+					75,
+					0
+				]
+			},
+			{
+				"directory": "overlay_1_21_4",
+				"formats": [
+					46,
+					75
+				],
+				"min_format": [
+					46,
+					0
+				],
+				"max_format": [
+					75,
+					0
+				]
+			},
+			{
+				"directory": "overlay_1_21_5",
+				"formats": [
+					55,
+					75
+				],
+				"min_format": [
+					55,
+					0
+				],
+				"max_format": [
+					75,
+					0
+				]
+			},
+			{
+				"directory": "overlay_1_21_6",
+				"formats": [
+					55,
+					75
+				],
+				"min_format": [
+					55,
+					0
+				],
+				"max_format": [
+					75,
+					0
+				]
+			},
+			{
+				"directory": "overlay_1_21_9",
+				"formats": [
+					65,
+					75
+				],
+				"min_format": [
+					65,
+					0
+				],
+				"max_format": [
+					75,
+					0
+				]
+			},
+			{
+				"directory": "overlay_1_21_11",
+				"formats": [
+					70,
+					75
+				],
+				"min_format": [
+					70,
+					0
+				],
+				"max_format": [
+					75,
+					0
+				]
+			}
+		]
+	}
+}

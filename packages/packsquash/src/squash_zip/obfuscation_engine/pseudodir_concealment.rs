@@ -60,7 +60,8 @@ impl PseudodirConcealer {
 	pub fn new() -> Self {
 		let mut globset_builder = GlobSetBuilder::new();
 		for pattern in KNOWN_LISTED_RESOURCE_PATTERNS {
-			globset_builder.add(compile_pack_file_glob_pattern(pattern).unwrap());
+			globset_builder
+				.add(compile_pack_file_glob_pattern(&format!("{{,?*/}}{pattern}")).unwrap());
 		}
 		Self {
 			known_listed_resources: globset_builder.build().unwrap()

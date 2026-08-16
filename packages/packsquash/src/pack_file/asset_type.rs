@@ -1,15 +1,16 @@
-//! Contains code to identify a pack file's asset type, which is used to define and enhance the
-//! optimizations that can be done to a file.
+//! Contains code to identify a pack file's asset type, which is used to define the optimizations
+//! that can be done to a file.
 
 use std::{borrow::Cow, fmt::Debug};
 
 use enumset::{EnumSet, EnumSetType};
 use futures::StreamExt;
-use globset::{Glob, GlobSet, GlobSetBuilder};
+use globset::{GlobSet, GlobSetBuilder};
+use itertools::Itertools;
 use tokio::io::AsyncRead;
 
 use super::{AsyncReadAndSizeHint, PackFile, PackFileConstructor, PackFileProcessData};
-use crate::config::GlobalOptions;
+use crate::config::{GlobalOptions, compile_pack_file_glob_pattern};
 use crate::pack_file::audio_file::AudioFile;
 use crate::pack_file::command_function_file::CommandFunctionFile;
 use crate::pack_file::compressed_compound_nbt_tag_file::CompressedCompoundNbtTagFile;
@@ -20,10 +21,11 @@ use crate::pack_file::png_file::PngFile;
 #[cfg(feature = "optifine")]
 use crate::pack_file::properties_file::PropertiesFile;
 use crate::pack_file::shader_file::ShaderFile;
+use crate::pack_metadata::PackLayerDirectoryName;
 use crate::squash_zip::FileListingCircumstances;
 use crate::{
 	RelativePath,
-	config::{CustomFileOptions, FileOptions, compile_pack_file_glob_pattern}
+	config::{CustomFileOptions, FileOptions}
 };
 
 /// Represents a relevant pack file asset type, stored in a pack file. A [`PackFile`] can
@@ -203,20 +205,15 @@ pub enum PackFileAssetType {
 }
 
 impl PackFileAssetType {
-	/// Compiles a glob pattern that matches [`RelativePath`]s and can be used to identify the
-	/// [`PackFileConstructor`] belonging to this pack file asset type.
-	fn to_glob_pattern(self) -> Glob {
+	/// Returns a partial glob pattern string that matches [`RelativePath`]s within a pack layer,
+	/// and can be used to identify the [`PackFileConstructor`] belonging to this pack file asset
+	/// type.
+	fn to_glob_pattern(self) -> &'static str {
 		match self {
-			Self::MinecraftTextureMetadata => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/textures/**/?*.mcmeta")
-			}
-			Self::MinecraftTextureMetadataWithComments => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/textures/**/?*.mcmetac")
-			}
-			Self::MinecraftMetadata => compile_hardcoded_pack_file_glob_pattern("pack.mcmeta"),
-			Self::MinecraftMetadataWithComments => {
-				compile_hardcoded_pack_file_glob_pattern("pack.mcmetac")
-			}
+			Self::MinecraftTextureMetadata => "assets/*/textures/**/?*.mcmeta",
+			Self::MinecraftTextureMetadataWithComments => "assets/*/textures/**/?*.mcmetac",
+			Self::MinecraftMetadata => "pack.mcmeta",
+			Self::MinecraftMetadataWithComments => "pack.mcmetac",
 			Self::MinecraftModel => {
 				// It is technically possible in vanilla resource packs to have a model file
 				// in folders other than "block" and "item", and in namespaces other than
@@ -227,114 +224,90 @@ impl PackFileAssetType {
 				// vanilla block and item models as such, with few false positives. Mods can
 				// define a subfolder like "modname_block" to signal that their models are
 				// not to be parsed as vanilla models
-				compile_hardcoded_pack_file_glob_pattern("assets/*/models/{block,item}/**/?*.json")
+				"assets/*/models/{block,item}/**/?*.json"
 			}
-			Self::MinecraftModelWithComments => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/models/{block,item}/**/?*.jsonc")
-			}
+			Self::MinecraftModelWithComments => "assets/*/models/{block,item}/**/?*.jsonc",
 			#[cfg(feature = "optifine")]
-			Self::OptifineCustomEntityModel => compile_hardcoded_pack_file_glob_pattern(
-				"assets/minecraft/{mcpatcher,optifine}/cem/?*.jem"
-			),
+			Self::OptifineCustomEntityModel => "assets/minecraft/{mcpatcher,optifine}/cem/?*.jem",
 			#[cfg(feature = "optifine")]
-			Self::OptifineCustomEntityModelWithComments => compile_hardcoded_pack_file_glob_pattern(
-				"assets/minecraft/{mcpatcher,optifine}/cem/?*.jemc"
-			),
+			Self::OptifineCustomEntityModelWithComments => "assets/minecraft/{mcpatcher,optifine}/cem/?*.jemc",
 			#[cfg(feature = "optifine")]
-			Self::OptifineCustomEntityModelPart => compile_hardcoded_pack_file_glob_pattern(
-				"assets/minecraft/{mcpatcher,optifine}/cem/?*.jpm"
-			),
+			Self::OptifineCustomEntityModelPart => "assets/minecraft/{mcpatcher,optifine}/cem/?*.jpm",
 			#[cfg(feature = "optifine")]
-			Self::OptifineCustomEntityModelPartWithComments => compile_hardcoded_pack_file_glob_pattern(
+			Self::OptifineCustomEntityModelPartWithComments => {
 				"assets/minecraft/{mcpatcher,optifine}/cem/?*.jpmc"
-			),
+			}
 			#[cfg(feature = "optifine")]
 			Self::OptifineVanillaItemModel => {
 				// These models may be put in vanilla paths, or within the cit subdirectory
 				// of the OptiFine folder: the documentation states that relative paths from
 				// the corresponding properties file are accepted
-				compile_hardcoded_pack_file_glob_pattern(
-					"assets/*/{mcpatcher,optifine}/cit/**/?*.json"
-				)
+				"assets/*/{mcpatcher,optifine}/cit/**/?*.json"
 			}
 			#[cfg(feature = "optifine")]
-			Self::OptifineVanillaItemModelWithComments => compile_hardcoded_pack_file_glob_pattern(
-				"assets/*/{mcpatcher,optifine}/cit/**/?*.jsonc"
-			),
+			Self::OptifineVanillaItemModelWithComments => "assets/*/{mcpatcher,optifine}/cit/**/?*.jsonc",
 			#[cfg(feature = "optifine")]
 			Self::OptifineVanillaTextureMetadata => {
 				// Textures matched by the OptifineTexture asset type may have animation data
 				// alongside them in vanilla format (the custom item and connected textures
 				// features expressly document support for this)
-				compile_hardcoded_pack_file_glob_pattern(
-					"assets/*/{mcpatcher,optifine}/**/?*.png.mcmeta"
-				)
+				"assets/*/{mcpatcher,optifine}/**/?*.png.mcmeta"
 			}
 			#[cfg(feature = "optifine")]
-			Self::OptifineVanillaTextureMetadataWithComments => compile_hardcoded_pack_file_glob_pattern(
+			Self::OptifineVanillaTextureMetadataWithComments => {
 				"assets/*/{mcpatcher,optifine}/**/?*.png.mcmetac"
-			),
+			}
 			#[cfg(feature = "mtr3")]
 			Self::Mtr3CustomTrainModel => {
 				// MTR can read train models from any resource location, but to keep things tidy and
 				// ensure that no conflicts with other mods can happen, confine them to the MTR
 				// namespace
-				compile_hardcoded_pack_file_glob_pattern("assets/mtr/**/?*.bbmodel")
+				"assets/mtr/**/?*.bbmodel"
 			}
 			#[cfg(feature = "mtr3")]
-			Self::Mtr3CustomTrainModelWithComments => {
-				compile_hardcoded_pack_file_glob_pattern("assets/mtr/**/?*.bbmodelc")
-			}
+			Self::Mtr3CustomTrainModelWithComments => "assets/mtr/**/?*.bbmodelc",
 			Self::GenericJson => {
 				// This is really generic on purpose, as exhaustively matching all the JSON
 				// files a Minecraft resource pack can contain, even if we limit ourselves
 				// to vanilla, is a recipe for extreme maintenance effort
-				compile_hardcoded_pack_file_glob_pattern("{assets,data}/*/**/?*.json")
+				"{assets,data}/*/**/?*.json"
 			}
-			Self::GenericJsonWithComments => {
-				compile_hardcoded_pack_file_glob_pattern("{assets,data}/*/**/?*.jsonc")
-			}
+			Self::GenericJsonWithComments => "{assets,data}/*/**/?*.jsonc",
 
-			Self::GenericOggVorbisAudio => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/sounds/**/?*.{ogg,oga}")
-			}
-			Self::GenericAudio => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/sounds/**/?*.{mp3,flac,wav,m4a}")
-			}
+			Self::GenericOggVorbisAudio => "assets/*/sounds/**/?*.{ogg,oga}",
+			Self::GenericAudio => "assets/*/sounds/**/?*.{mp3,flac,wav,m4a}",
 
-			Self::PackIcon => compile_hardcoded_pack_file_glob_pattern("pack.png"),
-			Self::BannerLayer => compile_hardcoded_pack_file_glob_pattern(
+			Self::PackIcon => "pack.png",
+			Self::BannerLayer => {
 				"assets/minecraft/textures/entity/{\
 					banner/?*.png,\
 					banner_base.png,\
 					shield/?*.png,\
 					shield_base.png,\
 					shield_base_nopattern.png}"
-			),
-			Self::EyeLayer => compile_hardcoded_pack_file_glob_pattern(
+			}
+			Self::EyeLayer => {
 				"assets/minecraft/textures/entity/{\
 					enderman/enderman_eyes.png,\
 					enderdragon/dragon_eyes.png,\
 					spider_eyes.png,\
 					phantom_eyes.png}"
-			),
-			Self::AuxiliaryShaderTargetTexture => {
-				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/textures/effect/**/?*.png")
 			}
+			Self::AuxiliaryShaderTargetTexture => "assets/minecraft/textures/effect/**/?*.png",
 			#[cfg(feature = "optifine")]
 			Self::OptifineTexture => {
 				// OptiFine looks for PNGs in specific locations within its folder, but users can
 				// define paths to files in different folders in OptiFine files. As a compromise,
 				// let any PNG file within OptiFine go through
-				compile_hardcoded_pack_file_glob_pattern("assets/*/{mcpatcher,optifine}/**/?*.png")
+				"assets/*/{mcpatcher,optifine}/**/?*.png"
 			}
 			#[cfg(feature = "mtr3")]
-			Self::Mtr3CustomGenericTexture => compile_hardcoded_pack_file_glob_pattern("assets/?*/**/?*.png"),
+			Self::Mtr3CustomGenericTexture => "assets/?*/**/?*.png",
 			Self::GenericTexture => {
 				// Some mods might accept textures in any resource location, but to keep things tidier
 				// and do some potentially unwanted PNG file cleanup, enforce them to be within a
 				// "textures" directory
-				compile_hardcoded_pack_file_glob_pattern("assets/*/textures/**/?*.png")
+				"assets/*/textures/**/?*.png"
 			}
 
 			// Whitelist of OptiFine properties files. The following features are supported:
@@ -365,7 +338,7 @@ impl PackFileAssetType {
 			//
 			// In old OptiFine versions (pre-1.13), OptiFine put its assets on the "mcpatcher" subfolder instead
 			#[cfg(feature = "optifine")]
-			Self::GenericProperties => compile_hardcoded_pack_file_glob_pattern(
+			Self::GenericProperties => {
 				"assets/*/{mcpatcher,optifine}/{\
 					gui/background.properties,\
 					bettergrass.properties,\
@@ -387,7 +360,7 @@ impl PackFileAssetType {
 					sky/world[0-9]*/sky[0-9]*.properties,\
 					sky/world[0-9]*/sun.properties,\
 					sky/world[0-9]*/moon_phases.properties}"
-			),
+			}
 
 			// Older Minecraft versions were only able to read shaders from the Minecraft namespace,
 			// but versions since 24w34a (1.21.2) can read shaders from any namespace. That version
@@ -395,12 +368,8 @@ impl PackFileAssetType {
 			// older Minecraft versions didn't have this flexibility, we're not enforcing that here
 			// to extend compatibility with hypothetical mods that might have added this feature before
 			// it was officially supported
-			Self::VertexShader => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/**/?*.vsh")
-			}
-			Self::FragmentShader => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/**/?*.fsh")
-			}
+			Self::VertexShader => "assets/*/shaders/**/?*.vsh",
+			Self::FragmentShader => "assets/*/shaders/**/?*.fsh",
 			Self::TranslationUnitSegment => {
 				// Even though such possibility is not used in the vanilla resource pack,
 				// core shaders can use C-style relative imports which are resolved from the
@@ -415,47 +384,29 @@ impl PackFileAssetType {
 				// preprocessor code looks generic enough to handle both types just fine.
 				// This stopped being a quirk in 24w34a at the latest, the snapshot when the
 				// same GLSL preprocessor code for resolving imports was used for all shaders
-				compile_hardcoded_pack_file_glob_pattern("assets/*/shaders/**/?*.glsl")
+				"assets/*/shaders/**/?*.glsl"
 			}
 
-			Self::LegacyLanguageFile => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/lang/**/?*.lang")
-			}
+			Self::LegacyLanguageFile => "assets/*/lang/**/?*.lang",
 
-			Self::TrueTypeOrOpenTypeFont => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.{ttf,otf,otc,ttc}")
-			}
-			Self::TrueTypeFont => compile_hardcoded_pack_file_glob_pattern("assets/*/font/**/?*.ttf"),
-			Self::ZippedUnifontHex => compile_hardcoded_pack_file_glob_pattern("assets/*/**/?*.zip"),
-			Self::LegacyUnicodeFontCharacterSizes => {
-				compile_hardcoded_pack_file_glob_pattern("assets/*/**/?*.bin")
-			}
+			Self::TrueTypeOrOpenTypeFont => "assets/*/font/**/?*.{ttf,otf,otc,ttc}",
+			Self::TrueTypeFont => "assets/*/font/**/?*.ttf",
+			Self::ZippedUnifontHex => "assets/*/**/?*.zip",
+			Self::LegacyUnicodeFontCharacterSizes => "assets/*/**/?*.bin",
 			Self::Text => {
 				// Be restrictive in the text files pattern as plain text files are somewhat
 				// deprecated for this purpose: it's not likely that Minecraft adds more of
 				// them in the future, and in fact the credits text file was replaced by a
 				// JSON file. After all, we live in a post "XML fever" world, where JSON is
 				// the new plain text data exchange format adequate for any purpose ;)
-				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/texts/{end,splashes}.txt")
+				"assets/minecraft/texts/{end,splashes}.txt"
 			}
-			Self::ClosingCreditsText => {
-				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/texts/postcredits.txt")
-			}
-			Self::LegacyTextCredits => {
-				compile_hardcoded_pack_file_glob_pattern("assets/minecraft/texts/credits.txt")
-			}
-			Self::LegacyNbtStructure => {
-				compile_hardcoded_pack_file_glob_pattern("data/*/structures/**/?*.nbt")
-			}
-			Self::NbtStructure => {
-				compile_hardcoded_pack_file_glob_pattern("data/*/structure/**/?*.nbt")
-			}
-			Self::LegacyCommandFunction => {
-				compile_hardcoded_pack_file_glob_pattern("data/*/functions/**/*.mcfunction")
-			}
-			Self::CommandFunction => {
-				compile_hardcoded_pack_file_glob_pattern("data/*/function/**/*.mcfunction")
-			}
+			Self::ClosingCreditsText => "assets/minecraft/texts/postcredits.txt",
+			Self::LegacyTextCredits => "assets/minecraft/texts/credits.txt",
+			Self::LegacyNbtStructure => "data/*/structures/**/?*.nbt",
+			Self::NbtStructure => "data/*/structure/**/?*.nbt",
+			Self::LegacyCommandFunction => "data/*/functions/**/*.mcfunction",
+			Self::CommandFunction => "data/*/function/**/*.mcfunction",
 
 			Self::Custom => unreachable!()
 		}
@@ -524,6 +475,17 @@ impl PackFileAssetType {
 			Self::Custom => None
 		}
 	}
+
+	/// Checks whether this asset type can only be found in the base layer of a pack (i.e., not
+	/// within pack overlays).
+	const fn is_base_layer_only(&self) -> bool {
+		matches!(
+			self,
+			PackFileAssetType::MinecraftMetadata
+				| PackFileAssetType::MinecraftMetadataWithComments
+				| PackFileAssetType::PackIcon
+		)
+	}
 }
 
 /// A matcher that can be used to determine pack file's asset type, given its [`RelativePath`].
@@ -531,25 +493,59 @@ impl PackFileAssetType {
 /// settings.
 pub struct PackFileAssetTypeMatcher {
 	asset_type_globset: GlobSet,
-	asset_types_mask: EnumSet<PackFileAssetType>
+	base_layer_only_asset_types_mask: EnumSet<PackFileAssetType>,
+	any_layer_asset_types_mask: EnumSet<PackFileAssetType>
 }
 
 impl PackFileAssetTypeMatcher {
 	/// Returns a new matcher that can be used to determine the pack file's asset type, given its
-	/// [`RelativePath`]. A mask is used to limit what asset types can match. If the mask contains
-	/// the custom asset type, [PackFileAssetType::Custom], it will be silently excluded from the mask.
-	pub fn new(asset_types_mask: EnumSet<PackFileAssetType>) -> Self {
+	/// [`RelativePath`]. A mask is used to limit what asset types can match, and an iterator over
+	/// pack layers to root the matches in the defined layers. If the mask contains the custom asset
+	/// type, [PackFileAssetType::Custom], it will be silently excluded from the mask.
+	pub fn new<'layers>(
+		asset_types_mask: EnumSet<PackFileAssetType>,
+		pack_layer_directory_names: impl Iterator<Item = &'layers PackLayerDirectoryName> + Clone
+	) -> Self {
 		let mut globset_builder = GlobSetBuilder::new();
 		let asset_types_mask = asset_types_mask - PackFileAssetType::Custom;
 
-		// The iteration is done in ascending discriminant order
-		for asset_type in asset_types_mask.iter() {
-			globset_builder.add(asset_type.to_glob_pattern());
+		// Base layer only asset types go first in the globset, so we can tell them apart during
+		// glob matching for efficiently linking the match back to its asset type
+		let mut base_layer_only_asset_types_mask = EnumSet::empty();
+		for asset_type in asset_types_mask
+			.iter()
+			.filter(PackFileAssetType::is_base_layer_only)
+		{
+			globset_builder
+				.add(compile_pack_file_glob_pattern(asset_type.to_glob_pattern()).unwrap());
+
+			base_layer_only_asset_types_mask |= asset_type;
+		}
+
+		let mut any_layer_asset_types_mask = EnumSet::empty();
+		for (layer_directory_name, asset_type) in pack_layer_directory_names.cartesian_product(
+			asset_types_mask
+				.iter()
+				.filter(|asset_type| !asset_type.is_base_layer_only())
+		) {
+			let glob_pattern = if layer_directory_name.is_empty() {
+				Cow::Borrowed(asset_type.to_glob_pattern())
+			} else {
+				Cow::Owned(format!(
+					"{layer_directory_name}/{}",
+					asset_type.to_glob_pattern()
+				))
+			};
+
+			globset_builder.add(compile_pack_file_glob_pattern(&glob_pattern).unwrap());
+
+			any_layer_asset_types_mask |= asset_type;
 		}
 
 		Self {
 			asset_type_globset: globset_builder.build().unwrap(),
-			asset_types_mask
+			base_layer_only_asset_types_mask,
+			any_layer_asset_types_mask
 		}
 	}
 
@@ -562,8 +558,18 @@ impl PackFileAssetTypeMatcher {
 				self.asset_type_globset
 					.matches(path) // Calls matches_candidate_into, which returns indices in ascending order
 					.into_iter()
-					.map(|asset_type_index| {
-						self.asset_types_mask.iter().nth(asset_type_index).unwrap()
+					.map(|glob_match_index| {
+						if glob_match_index < self.base_layer_only_asset_types_mask.len() {
+							self.base_layer_only_asset_types_mask
+								.iter()
+								.nth(glob_match_index)
+						} else {
+							self.any_layer_asset_types_mask.iter().nth(
+								(glob_match_index - self.base_layer_only_asset_types_mask.len())
+									% self.any_layer_asset_types_mask.len()
+							)
+						}
+						.unwrap()
 					})
 					.collect()
 			)
@@ -944,15 +950,4 @@ fn pack_file_to_process_data(
 			}
 		}))
 	})
-}
-
-/// Compiles the specified pack file glob pattern, assuming it was hardcoded in the application binary.
-/// Any validity error is discarded and turned into a panic, as modification of hardcoded data is not
-/// to be handled as an error.
-///
-/// Please note that, even though this function requires a static string slice in an effort to prevent
-/// accidental misuse, it is possible to get string slices that live indefinitely by leaking a heap
-/// allocation.
-fn compile_hardcoded_pack_file_glob_pattern(glob_pattern: &'static str) -> Glob {
-	compile_pack_file_glob_pattern(glob_pattern).unwrap()
 }

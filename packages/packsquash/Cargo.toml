@@ -20,6 +20,7 @@ name = "benches"
 aes = "0.9.1"
 ahash = "0.8.12"
 aho-corasick = "1.1.4"
+arcstr = { version = "1.2.0", features = ["serde"] }
 bytes = "1.12.0"
 crc32fast = "1.5.0"
 dasp_frame = "0.11.0"
@@ -63,6 +64,7 @@ spng = { version = "0.2.0-alpha.3", default-features = false, features = [
   "zlib-ng",
 ] }
 stacker = "0.1.24"
+strum = { version = "0.28.0", features = ["derive"] }
 symphonia = { version = "0.6.0", default-features = false, features = [
   "aac",
   "flac",

@@ -8,6 +8,51 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+#### Conformance
+
+- PackSquash can now parse `pack.mcmeta` files more thoroughly and in
+conformance with the expectations of the latest game versions. This includes
+support for pack format versions with major and minor components,
+`min_format`/`max_format` pairs, and legacy `supported_formats` declarations,
+instead of always requiring a single integer `pack_format` version.
+  - As a consequence of this more thorough parsing, invalid combinations of
+  format declarations that would cause the game to emit warnings now result in
+  errors.
+- The specific pack type being processed, either a resource pack or a data
+pack, is now automatically detected when validating the `pack.mcmeta` file by
+checking for the `assets` and `data` marker directories at the root of the
+pack.
+  - If both marker directories are present, an error is thrown: a pack cannot
+  be both a resource pack and a data pack, and Minecraft will pick one
+  depending on the load context anyway.
+  - If neither marker directory is present, an error is thrown: while Minecraft
+  can successfully load packs without a top-level `assets` or `data` directory,
+  such packs are hardly useful and a code smell, since they do not override or
+  add any files outside overlays.
+- Pack overlays are now supported when validating the `pack.mcmeta` file. Using
+the `force_include` option with pack files in overlay directories declared in
+the `pack.mcmeta` file is no longer needed.
+  - However, packs that declare overlays spanning many format versions force
+  PackSquash to be less aggressive with the optimizations and protections it
+  can apply, since the resulting pack must work with all of them. In addition,
+  overlays that are not used by a specific game version are effectively dead
+  weight for players on that version, increasing the time they need to download
+  the pack without providing any benefit.
+  - Whenever possible, the PackSquash authors recommend avoiding pack overlays
+  and instead generating multiple separate packs for different game versions.
+  If ease of pack installation is a concern, we recommend instructing players
+  to use a launcher with a user-friendly GUI to identify game versions and
+  locate the appropriate packs folder. For more details, please see
+  [#254](https://github.com/ComunidadAylas/PackSquash/issues/254).
+
+#### Compression
+
+- When automatically detecting the mask of asset types to process, only asset
+types belonging to the specific pack type being processed are now considered.
+This means that resource packs now skip data- pack-only files, and vice versa.
+
 ### Changed
 
 #### Internal

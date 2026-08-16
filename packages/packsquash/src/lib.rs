@@ -7,6 +7,7 @@
 #![feature(generic_const_exprs)]
 #![cfg_attr(windows, feature(windows_by_handle))]
 
+use ahash::{HashMap, HashSet};
 use itertools::Itertools;
 use std::borrow::Cow;
 use std::convert::Infallible;
@@ -28,7 +29,7 @@ use tokio::sync::mpsc::Sender;
 use tokio::{fs::File, io::AsyncRead, runtime::Builder};
 
 use config::ProcessedSquashOptions;
-use pack_meta::{PackMeta, PackMetaError};
+use pack_metadata::{PackMetadata, PackMetadataError};
 use squash_zip::{SquashZip, SquashZipError};
 
 #[cfg(feature = "optifine")]
@@ -50,7 +51,7 @@ pub mod vfs;
 
 mod buffered_async_spooled_temp_file;
 mod pack_file;
-mod pack_meta;
+mod pack_metadata;
 mod squash_zip;
 mod zopfli_iterations_time_model;
 
@@ -171,47 +172,55 @@ impl PackSquasher {
 		// Transparently modify the options before doing the actual processing we want to read the
 		// pack metadata, either to validate it, use automatic quirk detection or detect an asset
 		// type mask
-		if read_pack_meta {
-			runtime.block_on(async {
-				let pack_meta = PackMeta::new(&vfs, &options_holder.options.pack_directory).await?;
+		let pack_layers = read_pack_meta
+			.then(|| {
+				runtime.block_on(async {
+					let pack_meta =
+						PackMetadata::read(&vfs, &options_holder.options.pack_directory).await?;
 
-				if automatic_quirk_detection {
-					let quirks = pack_meta.target_minecraft_versions_quirks();
+					if automatic_quirk_detection {
+						let quirks = pack_meta.applicable_minecraft_quirks();
 
-					options_holder
-						.options
-						.global_options
-						.work_around_minecraft_quirks = quirks;
+						options_holder
+							.options
+							.global_options
+							.work_around_minecraft_quirks = quirks;
 
-					if let Some(pack_file_status_sender) = &pack_file_status_sender
-						&& !quirks.is_empty()
-					{
-						let notice_message = format!(
-							"Working around automatically detected Minecraft quirks: {}",
-							quirks.iter().map(|quirk| quirk.as_str()).join(", ")
-						);
+						if let Some(pack_file_status_sender) = &pack_file_status_sender
+							&& !quirks.is_empty()
+						{
+							let notice_message = format!(
+								"Working around automatically detected Minecraft quirks: {}",
+								quirks.iter().map(|quirk| quirk.as_str()).join(", ")
+							);
 
-						pack_file_status_sender
-							.send(PackSquasherStatus::Notice(Cow::Owned(notice_message)))
-							.await
-							.ok();
+							pack_file_status_sender
+								.send(PackSquasherStatus::Notice(Cow::Owned(notice_message)))
+								.await
+								.ok();
+						}
 					}
-				}
 
-				if automatic_asset_type_mask_detection {
-					asset_types_mask = pack_meta.target_minecraft_version_asset_type_mask();
-				}
+					if automatic_asset_type_mask_detection {
+						asset_types_mask = pack_meta.applicable_asset_type_mask();
+					}
 
-				Ok::<_, PackSquasherError>(())
-			})?;
-		}
+					Ok::<_, PackSquasherError>(pack_meta.layers)
+				})
+			})
+			.transpose()?
+			.unwrap_or_else(|| {
+				// Default to no overlays (a single base layer) for matching asset types below
+				HashMap::from_iter([(arcstr::literal!(""), HashSet::default())])
+			});
 
 		let vfs = Arc::new(vfs);
 		let asset_type_matcher = Arc::new(PackFileAssetTypeMatcher::new(
 			tweak_asset_types_mask_from_global_options(
 				asset_types_mask,
 				&options_holder.options.global_options
-			)
+			),
+			pack_layers.keys()
 		));
 		let options_holder = Arc::new(options_holder);
 
@@ -576,10 +585,10 @@ pub enum PackSquasherError {
 	/// update.
 	#[error("An error occurred while processing a pack file")]
 	PackFileError,
-	/// Thrown when an error happened while parsing the pack metadata file,
+	/// Thrown when an error happened while parsing the pack metadata manifest,
 	/// which defines some basic characteristics of a pack.
 	#[error("Pack metadata file error: {0}")]
-	PackMetaError(#[from] PackMetaError)
+	PackMetadataError(#[from] PackMetadataError)
 }
 
 impl From<Infallible> for PackSquasherError {
