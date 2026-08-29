@@ -6,10 +6,12 @@
 
 while getopts v:d: option; do
 	case $option in
-		v)	readonly PACK_FORMAT="$OPTARG";;
-		d)	PACK_DIRECTORY="$OPTARG";;
-		*)	echo "Syntax: $0 [-v <pack format version>] [-d <pack directory>]" >&2
-			exit 1;;
+	v) readonly PACK_FORMAT="$OPTARG" ;;
+	d) PACK_DIRECTORY="$OPTARG" ;;
+	*)
+		echo "Syntax: $0 [-v <pack format version>] [-d <pack directory>]" >&2
+		exit 1
+		;;
 	esac
 done
 readonly PACK_DIRECTORY="${PACK_DIRECTORY:-test_pack}"
@@ -19,13 +21,13 @@ mkdir -p "$PACK_DIRECTORY"
 
 # Create the pack metadata file if it does not exist
 if ! [ -f "$PACK_DIRECTORY/pack.mcmeta" ]; then
-	cat <<-MCMETA > "$PACK_DIRECTORY/pack.mcmeta"
-	{
-		"pack": {
-			"pack_format": ${PACK_FORMAT:-22},
-			"description": "Test pack"
+	cat <<-MCMETA >"$PACK_DIRECTORY/pack.mcmeta"
+		{
+			"pack": {
+				"pack_format": ${PACK_FORMAT:-22},
+				"description": "Test pack"
+			}
 		}
-	}
 	MCMETA
 fi
 
