@@ -46,7 +46,8 @@ json_comments = "0.2.2"
 jsonpath_lib = "0.3.0"
 memchr = "2.8.3"
 obfstr = "0.4.6"
-optivorbis = "0.3.2"
+# Temporarily pinned to v0.3.0 to buy us time for a proper zero-entry codebook generation fix
+optivorbis = "=0.3.0"
 oxipng = { version = "10.2.0", default-features = false, features = ["zopfli"] }
 patricia_tree = "0.10.1"
 rand_xoshiro = "0.8.1"
