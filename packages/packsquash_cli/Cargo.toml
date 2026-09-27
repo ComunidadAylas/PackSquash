@@ -52,11 +52,11 @@ env_logger = {
   ]
 }
 getopts = "0.2.24"
-log = "0.4.33"
+log = "0.4.34"
 packsquash = { path = "../packsquash", version = "0.4.1" }
 tokio = { version = "1.53.1", default-features = false, features = ["time"] }
 toml = {
-  version = "1.1.4",
+  version = "1.1.6",
   default-features = false,
   features = [
     "parse",

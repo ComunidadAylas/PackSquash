@@ -85,7 +85,11 @@ impl Decoder for OptimizerDecoder {
 			self.optimization_settings.nbt_compression_iterations,
 			2.0
 		)
-		.iterations_for_data_size(decompressed_nbt_size.try_into().unwrap_or(u32::MAX), 0, 20);
+		.iterations_for_data_size(
+			decompressed_nbt_size.try_into().unwrap_or(u32::MAX),
+			0,
+			20
+		);
 
 		// Now serialize the root compound tag again, setting its name to the empty string, and
 		// compress it using Zopfli or, if the Zopfli iteration count falls to zero, the best flate2

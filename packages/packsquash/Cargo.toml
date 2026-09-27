@@ -17,20 +17,20 @@ harness = false
 name = "benches"
 
 [dependencies]
-aes = "0.9.2"
+aes = "0.9.3"
 ahash = "0.8.12"
 aho-corasick = "1.1.5"
 arcstr = { version = "1.2.0", features = ["serde"] }
 bytes = "1.12.1"
-crc32fast = "1.5.0"
+crc32fast = "1.5.2"
 dasp_frame = "0.11.0"
 dasp_interpolate = { version = "0.11.0", features = ["sinc"] }
 dasp_ring_buffer = "0.11.0"
 dasp_sample = "0.11.0"
-dasp_signal = { version = "0.11.0", default-features = false }
+dasp_signal = "0.11.0"
 enumset = { version = "1.1.14", features = ["serde"] }
 fastnbt = "2.6.3"
-flate2 = { version = "1.1.9", features = ["zlib-ng-compat"] }
+flate2 = { version = "1.1.10", features = ["zlib-ng-compat"] }
 fpe = "0.6.1"
 futures = { version = "0.3.34", default-features = false }
 globset = { version = "0.4.20", default-features = false }
@@ -39,7 +39,7 @@ glsl-lang-lexer = "0.8.1"
 glsl-lang-pp = "0.8.1"
 hkdf = "0.13.0"
 imagequant = { version = "4.4.1", default-features = false }
-indexmap = { version = "2.14.0", features = ["serde"] }
+indexmap = { version = "2.14.2", features = ["serde"] }
 itertools = "0.15.0"
 java-properties = { version = "2.0.0", optional = true }
 json_comments = "0.2.2"
@@ -48,8 +48,8 @@ memchr = "2.8.3"
 obfstr = "0.4.6"
 # Temporarily pinned to v0.3.0 to buy us time for a proper zero-entry codebook generation fix
 optivorbis = "=0.3.0"
-oxipng = { version = "10.2.0", default-features = false, features = ["zopfli"] }
-patricia_tree = "0.10.1"
+oxipng = { version = "10.2.1", default-features = false, features = ["zopfli"] }
+patricia_tree = "0.10.2"
 rand_xoshiro = "0.8.1"
 regex = "1.13.1"
 rgb = "0.8.53"
@@ -73,11 +73,7 @@ spng = {
 }
 stacker = "0.1.25"
 strum = { version = "0.28.0", features = ["derive"] }
-symphonia = {
-  version = "0.6.1",
-  default-features = false,
-  features = ["aac", "flac", "isomp4", "mp3", "opt-simd", "pcm", "wav"]
-}
+symphonia = { version = "0.6.1", default-features = false, features = ["aac", "flac", "isomp4", "mp3", "opt-simd", "pcm", "wav"] }
 sysinfo = {
   version = "0.39.6",
   default-features = false,
@@ -86,8 +82,8 @@ sysinfo = {
   ]
 }
 tempfile = "3.27.0"
-thiserror = "2.0.20"
-tinyvec = "1.12.0"
+thiserror = "2.0.21"
+tinyvec = "1.13.3"
 tokio = {
   version = "1.53.1",
   default-features = false,
@@ -110,7 +106,7 @@ tokio-util = {
     "io-util",
   ]
 }
-uuid = "1.24.1"
+uuid = "1.26.1"
 vorbis_rs = { version = "0.5.6", default-features = false }
 walkdir = "2.5.0"
 zopfli = {
@@ -127,7 +123,7 @@ criterion = { version = "=0.5.1", features = ["html_reports"] }
 futures = { version = "0.3.34", default-features = false, features = ["std"] }
 pretty_assertions = "1.4.1"
 tar = { version = "0.4.46", default-features = false }
-tokio-test = "0.4.5"
+tokio-test = "0.4.6"
 xz2 = "0.1.7"
 
 # criterion-perf-events depends on perfcnt, and perfcnt is so tightly coupled with
@@ -140,7 +136,7 @@ perfcnt = "0.8.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.10.1"
-mach2 = "0.6.0"
+mach2 = "0.7.0"
 
 [target."cfg(unix)".dependencies]
 rlimit = "0.11.0"
