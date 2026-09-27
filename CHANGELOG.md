@@ -203,6 +203,11 @@ This means that resource packs now skip data- pack-only files, and vice versa.
 - Moved wiki source files to the `docs/wiki` directory, enabling external pull
   requests and overall better change tracking for wiki contributions.
 
+#### User experience
+
+- Options files are now parsed according to the TOML 1.1 specification, adding
+  support for additional TOML syntax.
+
 #### Fixed
 
 - Packs generated with the `zip_spec_conformance_level` option set to
