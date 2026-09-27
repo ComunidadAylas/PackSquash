@@ -47,7 +47,7 @@ jsonpath_lib = "0.3.0"
 memchr = "2.8.3"
 obfstr = "0.4.6"
 # Temporarily pinned to v0.3.0 to buy us time for a proper zero-entry codebook generation fix
-optivorbis = "=0.3.0"
+optivorbis = "=0.3.2"
 oxipng = { version = "10.2.1", default-features = false, features = ["zopfli"] }
 patricia_tree = "0.10.2"
 rand_xoshiro = "0.8.1"
