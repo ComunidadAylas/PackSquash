@@ -587,7 +587,7 @@ pub enum PackSquasherError {
 	PackFileError,
 	/// Thrown when an error happened while parsing the pack metadata manifest,
 	/// which defines some basic characteristics of a pack.
-	#[error("Pack metadata file error: {0}")]
+	#[error("Pack metadata error: {0}")]
 	PackMetadataError(#[from] PackMetadataError)
 }
 
