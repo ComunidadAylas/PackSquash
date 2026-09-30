@@ -31,7 +31,7 @@ dasp_signal = "0.11.0"
 enumset = { version = "1.1.14", features = ["serde"] }
 fastnbt = "2.6.3"
 flate2 = { version = "1.1.10", features = ["zlib-ng-compat"] }
-fpe = "0.6.1"
+fpe = "0.7.0"
 futures = { version = "0.3.34", default-features = false }
 globset = { version = "0.4.20", default-features = false }
 glsl-lang = { version = "0.8.1", features = ["lexer-full"] }

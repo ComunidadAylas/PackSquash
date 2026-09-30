@@ -24,8 +24,6 @@ invalid_html_tags = "deny"
 private_intra_doc_links = "deny"
 
 [patch.crates-io]
-# Use a pull request of ours for compatibility with aes 0.9
-fpe = { git = "https://github.com/str4d/fpe", rev = "refs/pull/49/head" }
 # Use our fork of glsl-lang that allows it to parse #moj_import directives
 glsl-lang = { git = "https://github.com/ComunidadAylas/glsl-lang" }
 glsl-lang-lexer = { git = "https://github.com/ComunidadAylas/glsl-lang" }

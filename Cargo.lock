@@ -946,8 +946,9 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "fpe"
-version = "0.6.1"
-source = "git+https://github.com/str4d/fpe?rev=refs%2Fpull%2F49%2Fhead#71c0882bd3490a5ab6a93e54d49b1536f9136f13"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5045d51a6a5e85e0a18d909eedd270c4d82ad634fee57ba707692fb3b1add5a7"
 dependencies = [
  "cbc",
  "cipher",
@@ -1594,9 +1595,9 @@ dependencies = [
 
 [[package]]
 name = "num-bigint"
-version = "0.4.8"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c89e69e7e0f03bea5ef08013795c25018e101932225a656383bd384495ecc367"
+checksum = "93e7820bc0a80a0238e650327316f929ba18d5be054b647490a3a6a339f3e7c0"
 dependencies = [
  "num-integer",
  "num-traits",
