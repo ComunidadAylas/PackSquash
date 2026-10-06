@@ -153,7 +153,7 @@ about this, communicating them in public announcements.
 
 ## ✨ Contributors
 
-Thanks goes to these wonderful people and projects ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks goes to these wonderful people and projects ([emoji key](https://allcontributors.org/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
