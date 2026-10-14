@@ -46,6 +46,13 @@ the `pack.mcmeta` file is no longer needed.
   to use a launcher with a user-friendly GUI to identify game versions and
   locate the appropriate packs folder. For more details, please see
   [#254](https://github.com/ComunidadAylas/PackSquash/issues/254).
+- Shaders that use the `#include` directive, which Minecraft 26.3 (since
+snapshot 5) uses instead of `#moj_import`, are no longer rejected with a
+syntax error. They are handled like shaders with `#moj_import` directives:
+copied as-is without source transformations, with any parsing error reported
+as tentative, because PackSquash does not resolve the included files. For more
+details, please see
+[#397](https://github.com/ComunidadAylas/PackSquash/issues/397).
 
 #### Compression
 
