@@ -54,9 +54,9 @@ env_logger = {
 getopts = "0.2.24"
 log = "0.4.34"
 packsquash = { path = "../packsquash", version = "0.4.1" }
-tokio = { version = "1.53.1", default-features = false, features = ["time"] }
+tokio = { version = "1.54.0", default-features = false, features = ["time"] }
 toml = {
-  version = "1.1.6",
+  version = "1.1.8",
   default-features = false,
   features = [
     "parse",
@@ -66,7 +66,7 @@ toml = {
 tz-rs = { version = "0.7.3", default-features = false }
 
 [build-dependencies]
-winresource = "0.1.31"
+winresource = "0.1.34"
 
 [target.'cfg(all(target_os = "linux", target_env = "musl"))'.dependencies]
 # The mimalloc C malloc override feature is troublesome on macOS and Windows, but
