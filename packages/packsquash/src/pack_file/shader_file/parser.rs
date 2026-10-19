@@ -46,23 +46,30 @@ pub enum ParseError {
 	Syntax {
 		error: glsl_lang::parse::ParseError<LexicalError<Infallible>>,
 		/// Represents whether this syntax error happened when the source file contained
-		/// an unresolvable `#moj_import` directive. This indicates that the syntax error
-		/// might be a false positive, as it can be caused due to preprocessor directives
-		/// being inappropriately expanded or masked: imported shaders can change the
-		/// outcome of the preprocessing stage.
+		/// an unresolvable `#moj_import` or `#include` directive. This indicates that the
+		/// syntax error might be a false positive, as it can be caused due to preprocessor
+		/// directives being inappropriately expanded or masked: imported shaders can change
+		/// the outcome of the preprocessing stage.
 		found_unresolvable_moj_import: bool
 	},
 	#[error("Non-included shaders must define a main function, but it was not defined")]
 	MissingMainFunction {
 		/// Represents whether this error happened when the source file contained an
-		/// unresolvable `#moj_import` directive. This indicates that the error might
-		/// be a false positive, as it can be caused due to changes in the outcome of
-		/// the preprocessing stage compared to during runtime.
+		/// unresolvable `#moj_import` or `#include` directive. This indicates that the
+		/// error might be a false positive, as it can be caused due to changes in the
+		/// outcome of the preprocessing stage compared to during runtime.
 		found_unresolvable_moj_import: bool
 	},
 	#[error("Invalid encoding: {0}")]
 	InvalidEncoding(#[from] Utf8Error)
 }
+
+/// Matches `#include` directives, capturing the text that precedes the directive name. Since
+/// Minecraft 26.3 snapshot 5, shaders are compiled with ShaderC and import other shaders with
+/// `#include` (`GL_GOOGLE_include_directive`) instead of `#moj_import`, which is the only import
+/// directive our GLSL preprocessor knows. See issue #397.
+static INCLUDE_DIRECTIVE_MATCHER: LazyLock<Regex> =
+	LazyLock::new(|| Regex::new(r"(?m)^([ \t]*#[ \t]*)include\b").unwrap());
 
 /// A GLSL parser capable of parsing a GLSL grammar symbol.
 pub struct Parser {
@@ -99,10 +106,20 @@ impl Parser {
 		source: &[u8],
 		is_top_level_translation_unit: bool
 	) -> Result<Option<ParsedSymbol<T>>, ParseError> {
-		// Wrap the input GLSL symbol into something that parses as a translation unit
-		let source = T::wrap(std::str::from_utf8(strip_utf8_bom(source))?);
+		// Rewrite #include directives to #moj_import in the copy of the source that gets parsed,
+		// so that the preprocessor handles them as the unresolvable imports they are
+		let source = INCLUDE_DIRECTIVE_MATCHER.replace_all(
+			std::str::from_utf8(strip_utf8_bom(source))?,
+			"${1}moj_import"
+		);
 
-		let found_unresolvable_moj_import = Cell::new(false);
+		// The preprocessor never reads imports in inactive conditional groups, so flag any rewritten
+		// #include up front: otherwise, transforming the shader would drop such a group even though
+		// the game may define the macros that make it active
+		let found_unresolvable_moj_import = Cell::new(matches!(source, Cow::Owned(_)));
+
+		// Wrap the input GLSL symbol into something that parses as a translation unit
+		let source = T::wrap(&source);
 
 		let mut preprocessor =
 			Processor::new_with_fs(ImportFileSystem::new(&found_unresolvable_moj_import));

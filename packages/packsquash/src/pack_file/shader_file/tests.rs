@@ -10,6 +10,9 @@ static FRAGMENT_SHADER_DATA: &[u8] = include_bytes!("example.fsh");
 static NON_TRANSFORMABLE_SHADER_DATA: &[u8] = include_bytes!("example_non_transformable.glsl");
 static FALSE_POSITIVE_SYNTAX_ERROR: &[u8] = include_bytes!("example_false_positive_parse_error.glsl");
 static FALSE_POSITIVE_MISSING_MAIN: &[u8] = include_bytes!("example_false_positive_missing_main.fsh");
+static INCLUDE_DIRECTIVE_SHADER_DATA: &[u8] = include_bytes!("example_include.fsh");
+static INCLUDE_DIRECTIVE_FALSE_POSITIVE_SYNTAX_ERROR: &[u8] =
+	include_bytes!("example_include_false_positive_parse_error.fsh");
 
 /// Processes the given input data as a [ShaderFile], using the provided settings,
 /// expecting a successful result that equals the expected string.
@@ -227,6 +230,21 @@ async fn tentative_parsing_errors_are_not_fatal() {
 		true   // Same output text
 	)
 	.await;
+
+	successful_process_test::<TranslationUnit>(
+		INCLUDE_DIRECTIVE_FALSE_POSITIVE_SYNTAX_ERROR,
+		false, // No BOM
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
+			..Default::default()
+		},
+		true,  // Fragment shader
+		true,  // Top-level TU
+		false, // The input AST cannot be constructed
+		false, // Same size
+		true   // Same output text
+	)
+	.await;
 }
 
 #[tokio::test]
@@ -263,4 +281,98 @@ async fn include_shaders_with_preprocessor_directives_are_passed_through() {
 		true   // Same output text
 	)
 	.await
+}
+
+#[tokio::test]
+async fn minifying_is_averted_when_include_directives_are_used() {
+	successful_process_test::<TranslationUnit>(
+		INCLUDE_DIRECTIVE_SHADER_DATA,
+		false, // No BOM
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
+			..Default::default()
+		},
+		true,  // Fragment shader
+		true,  // Top-level TU
+		true,  // The output AST should match the input AST
+		false, // Same size
+		true   // Same output text
+	)
+	.await
+}
+
+#[tokio::test]
+async fn include_shaders_with_include_directives_are_passed_through() {
+	successful_process_test::<TranslationUnit>(
+		b"#include <minecraft:fog.glsl>\nfloat fog_factor(float distance) { return distance * 0.5; }",
+		false, // No BOM
+		ShaderFileOptions {
+			source_transformation_strategy: ShaderSourceTransformationStrategy::Minify,
+			..Default::default()
+		},
+		false, // Include shader
+		false, // Not top-level
+		true,  // The output AST should match the input AST
+		false, // Same size
+		true   // Same output text
+	)
+	.await
+}
+
+#[test]
+fn include_directives_are_handled_like_unresolvable_imports() {
+	let shader_parser = Parser::new();
+
+	// Valid, but not safe to transform, as the included files are not resolved
+	assert!(matches!(
+		shader_parser.parse::<TranslationUnit>(INCLUDE_DIRECTIVE_SHADER_DATA, true),
+		Ok(None)
+	));
+	// Also when every include is in a conditional group that is not active, which the
+	// preprocessor never reads
+	assert!(matches!(
+		shader_parser.parse::<TranslationUnit>(
+			b"#version 330\n#ifdef NEVER\n#include <a:b.glsl>\n#endif\nvoid main() {}",
+			true
+		),
+		Ok(None)
+	));
+
+	// Errors that may be false positives are flagged as such
+	assert!(matches!(
+		shader_parser.parse::<TranslationUnit>(INCLUDE_DIRECTIVE_FALSE_POSITIVE_SYNTAX_ERROR, true),
+		Err(ParseError::Syntax {
+			found_unresolvable_moj_import: true,
+			..
+		})
+	));
+	assert!(matches!(
+		shader_parser.parse::<TranslationUnit>(b"#version 330\n#include <a:b.glsl>\n", true),
+		Err(ParseError::MissingMainFunction {
+			found_unresolvable_moj_import: true
+		})
+	));
+
+	// Text that merely looks like an include directive is left alone
+	for source in [
+		&b"// #include <a:b.glsl>\nvoid main() {}"[..],
+		b"#define include_path 1\nvoid main() {}",
+		b"#pragma include <a:b.glsl>\nvoid main() {}"
+	] {
+		assert!(
+			matches!(
+				shader_parser.parse::<TranslationUnit>(source, true),
+				Ok(Some(_))
+			),
+			"{:?} should be transformable",
+			std::str::from_utf8(source)
+		);
+	}
+	assert!(matches!(
+		shader_parser.parse::<TranslationUnit>(b"#include_next <a:b.glsl>\nvoid main() {}", true),
+		Err(ParseError::Syntax {
+			found_unresolvable_moj_import: false,
+			..
+		})
+	));
 }
