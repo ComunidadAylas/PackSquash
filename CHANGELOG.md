@@ -55,6 +55,11 @@ This means that resource packs now skip data- pack-only files, and vice versa.
 
 ### Changed
 
+#### Fixed
+
+- PackSquash now processes `.properties` files used to define randomized model
+selection for OptiFine Custom Entity Models (CEM). ([#404](https://github.com/ComunidadAylas/PackSquash/issues/404))
+
 #### Internal
 
 - Third-party dependency updates.

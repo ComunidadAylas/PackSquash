@@ -321,6 +321,7 @@ impl PackFileAssetType {
 			// - Custom Items (cit.properties, properties files in "cit")
 			// - Connected Textures (files in "ctm")
 			// - Custom Animations (files in "anim")
+			// - Custom Entity Models (files in "cem")
 			// - Custom GUIs (files in "gui/container")
 			// - Dynamic Lights (dynamic_lights.properties)
 			// - Emissive Textures (emissive.properties)
@@ -345,6 +346,7 @@ impl PackFileAssetType {
 					color.properties,\
 					colormap/blocks/**/?*.properties,\
 					block.properties,\
+					cem/**/?*.properties,\
 					cit/**/?*.properties,\
 					ctm/**/?*.properties,\
 					anim/**/?*.properties,\
